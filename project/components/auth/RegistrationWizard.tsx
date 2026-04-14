@@ -1,0 +1,510 @@
+"use client";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import {
+  PatientStep1,
+  PatientAnthropometricStep,
+  PatientPaymentStep,
+  PatientEmergencyStep,
+  POPIAConsentStep,
+} from "./steps/PatientWizardSteps";
+import {
+  PractitionerStep1,
+  PractitionerStep2,
+  PractitionerStep3,
+  PractitionerStep4,
+} from "./steps/PractitionerWizardSteps";
+import {
+  HospitalStep1,
+  HospitalStep2,
+  HospitalStep3,
+  HospitalStep4,
+} from "./steps/HospitalWizardSteps";
+import { EMTStep1, EMTStep2, EMTStep3, EMTStep4 } from "./steps/EMTWizardSteps";
+import Button from "@/components/ui/Button";
+import ProgressBar from "@/components/ui/ProgressBar";
+
+// ─── Role config ─────────────────────────────────────────────────────────────
+const roleConfig: Record<
+  string,
+  { label: string; color: string; steps: string[] }
+> = {
+  patient: {
+    label: "Patient",
+    color: "#4493b8",
+    steps: [
+      "Identity",
+      "Privacy Consent",
+      "Health Profile",
+      "Payment Setup",
+      "Emergency & Photo",
+    ],
+  },
+  practitioner: {
+    label: "Practitioner",
+    color: "#4493b8",
+    steps: ["Credentials", "Identity & Contact", "Documents", "Banking & Tax"],
+  },
+  hospital: {
+    label: "Hospital Admin",
+    color: "#4493b8",
+    steps: [
+      "Facility Details",
+      "Address & Admin",
+      "B2B Agreement",
+      "Facility Media",
+    ],
+  },
+  emt: {
+    label: "First Responder (EMT)",
+    color: "#dc2626",
+    steps: ["Credentials", "Contact & Coverage", "Documents", "POPIA Consent"],
+  },
+};
+
+// ─── Skippable steps (no validation required) ────────────────────────────────
+// patient step 3 (Health Profile) and step 5 (Emergency & Photo) are optional
+const skippableSteps: Record<string, number[]> = {
+  patient: [3, 5],
+};
+
+// ─── Step renderer ────────────────────────────────────────────────────────────
+function renderStep(
+  role: string,
+  step: number,
+  formData: any,
+  updateData: (k: string, v: any) => void,
+  errors: any,
+  onSkip: () => void,
+) {
+  if (role === "patient") {
+    if (step === 1)
+      return (
+        <PatientStep1
+          formData={formData}
+          updateData={updateData}
+          errors={errors}
+        />
+      );
+    if (step === 2)
+      return <POPIAConsentStep formData={formData} updateData={updateData} />;
+    if (step === 3)
+      return (
+        <PatientAnthropometricStep
+          formData={formData}
+          updateData={updateData}
+          onSkip={onSkip}
+        />
+      );
+    if (step === 4)
+      return <PatientPaymentStep formData={formData} updateData={updateData} />;
+    if (step === 5)
+      return (
+        <PatientEmergencyStep
+          formData={formData}
+          updateData={updateData}
+          onSkip={onSkip}
+        />
+      );
+  }
+  if (role === "practitioner") {
+    if (step === 1)
+      return (
+        <PractitionerStep1
+          formData={formData}
+          updateData={updateData}
+          errors={errors}
+        />
+      );
+    if (step === 2)
+      return (
+        <PractitionerStep2
+          formData={formData}
+          updateData={updateData}
+          errors={errors}
+        />
+      );
+    if (step === 3)
+      return <PractitionerStep3 formData={formData} updateData={updateData} />;
+    if (step === 4)
+      return <PractitionerStep4 formData={formData} updateData={updateData} />;
+  }
+  if (role === "hospital") {
+    if (step === 1)
+      return (
+        <HospitalStep1
+          formData={formData}
+          updateData={updateData}
+          errors={errors}
+        />
+      );
+    if (step === 2)
+      return <HospitalStep2 formData={formData} updateData={updateData} />;
+    if (step === 3)
+      return <HospitalStep3 formData={formData} updateData={updateData} />;
+    if (step === 4)
+      return <HospitalStep4 formData={formData} updateData={updateData} />;
+  }
+  if (role === "emt") {
+    if (step === 1)
+      return (
+        <EMTStep1 formData={formData} updateData={updateData} errors={errors} />
+      );
+    if (step === 2)
+      return <EMTStep2 formData={formData} updateData={updateData} />;
+    if (step === 3)
+      return <EMTStep3 formData={formData} updateData={updateData} />;
+    if (step === 4)
+      return <EMTStep4 formData={formData} updateData={updateData} />;
+  }
+  return null;
+}
+
+// ─── Validation ──────────────────────────────────────────────────────────────
+function validateStep(
+  role: string,
+  step: number,
+  formData: any,
+): Record<string, string> {
+  const err: Record<string, string> = {};
+  if (role === "patient" && step === 1) {
+    if (!formData.firstName?.trim()) err.firstName = "First name is required.";
+    if (!formData.saId || formData.saId.length !== 13)
+      err.saId = "SA ID must be exactly 13 digits.";
+    const cleanMobile = formData.mobile?.replace(/\s+/g, "");
+    if (!cleanMobile?.match(/^(\+27|0)[6-8][0-9]{8}$/))
+      err.mobile = "Enter a valid SA mobile number.";
+  }
+  if (role === "practitioner" && step === 1) {
+    if (!formData.hpcsaNumber?.match(/^[A-Z]{2}\d{5,7}$/))
+      err.hpcsaNumber = "Format: 2 letters + 5–7 digits (e.g. MP123456).";
+    if (!formData.specialization)
+      err.specialization = "Please select a specialisation.";
+    if (!formData.practiceNumber?.trim())
+      err.practiceNumber = "Practice number is required.";
+  }
+  if (role === "hospital" && step === 1) {
+    if (!formData.facilityName?.trim())
+      err.facilityName = "Facility name is required.";
+    if (!formData.dohRegNumber?.trim())
+      err.dohRegNumber = "DoH Registration number is required.";
+  }
+  if (role === "emt" && step === 1) {
+    if (!formData.emtRegNumber?.trim())
+      err.emtRegNumber = "EMT Registration number is required.";
+  }
+  if (role === "practitioner" && step === 2) {
+    const cleanMobile = formData.mobile?.replace(/\s+/g, "");
+    if (!cleanMobile?.match(/^(\+27|0)[6-8][0-9]{8}$/))
+      err.mobile = "Enter a valid SA mobile number.";
+  }
+  // POPIA step: patient step 2, EMT step 4
+  if ((role === "patient" && step === 2) || (role === "emt" && step === 4)) {
+    if (!formData.consent) err.consent = "POPIA consent is required.";
+  }
+  return err;
+}
+
+// ─── Main Wizard ──────────────────────────────────────────────────────────────
+export default function RegistrationWizard({ role }: { role: string }) {
+  const router = useRouter();
+  // Ensure we always use the correct role – never fall back silently
+  const safeRole = Object.keys(roleConfig).includes(role) ? role : "patient";
+  const config = roleConfig[safeRole];
+  const totalSteps = config.steps.length;
+
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isOnline, setIsOnline] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showDraftBanner, setShowDraftBanner] = useState(false); // non-blocking banner
+  const [globalError, setGlobalError] = useState<string | null>(null);
+
+  // Role-scoped draft key so patient/emt/etc never share drafts
+  const DRAFT_KEY = `reg_draft_v2_${safeRole}`;
+
+  // Online status
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
+
+  // Load draft on mount – show as banner, never block the form
+  useEffect(() => {
+    const loadDraft = async () => {
+      try {
+        const lf = (await import("localforage")).default;
+        const draft: any = await lf.getItem(DRAFT_KEY);
+        if (draft?.formData && Object.keys(draft.formData).length > 0) {
+          setShowDraftBanner(true);
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    loadDraft();
+  }, [DRAFT_KEY]);
+
+  // Auto-save on every data change (debounced 500ms)
+  useEffect(() => {
+    const saveDraft = async () => {
+      try {
+        const lf = (await import("localforage")).default;
+        await lf.setItem(DRAFT_KEY, { formData, step, ts: Date.now() });
+      } catch {}
+    };
+    const t = setTimeout(saveDraft, 500);
+    return () => clearTimeout(t);
+  }, [formData, step, DRAFT_KEY]);
+
+  const restoreDraft = useCallback(async () => {
+    const lf = (await import("localforage")).default;
+    const draft: any = await lf.getItem(DRAFT_KEY);
+    if (draft) {
+      setFormData(draft.formData ?? {});
+      setStep(draft.step ?? 1);
+    }
+    setShowDraftBanner(false);
+  }, [DRAFT_KEY]);
+
+  const clearDraft = useCallback(async () => {
+    const lf = (await import("localforage")).default;
+    await lf.removeItem(DRAFT_KEY);
+    setShowDraftBanner(false);
+    setFormData({});
+    setStep(1);
+  }, [DRAFT_KEY]);
+
+  const updateData = useCallback(
+    (field: string, value: any) => {
+      setFormData((prev: any) => ({ ...prev, [field]: value }));
+      setErrors((prev) => {
+        const n = { ...prev };
+        delete n[field];
+        return n;
+      });
+      // Auto-save on change
+      import("localforage").then(({ default: lf }) => {
+        lf.setItem(DRAFT_KEY, {
+          formData: { ...formData, [field]: value },
+          step,
+          ts: Date.now(),
+        });
+      });
+    },
+    [formData, step, DRAFT_KEY],
+  );
+
+  const handleNext = () => {
+    const errs = validateStep(safeRole, step, formData);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+    setErrors({});
+    setStep(step + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Skip: advance without validation (only allowed for skippable steps)
+  const handleSkip = () => {
+    setErrors({});
+    setStep(step + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const isSkippable = (skippableSteps[safeRole] ?? []).includes(step);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs = validateStep(safeRole, step, formData);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+    setSubmitting(true);
+    setGlobalError(null);
+    try {
+      await new Promise((r) => setTimeout(r, 1500));
+      await clearDraft();
+      router.push("/login?registered=true");
+    } catch (err: any) {
+      setGlobalError(err.message ?? "Submission failed. Please try again.");
+      setSubmitting(false);
+    }
+  };
+
+  const progress = ((step - 1) / Math.max(totalSteps - 1, 1)) * 100;
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "1300px",
+      }}
+      className="bg-white h-[90vh] px-10 rounded-lg shadow-2xl w-full max-w-4xl mx-auto relative overflow-hidden animate-in fade-in duration-700"
+    >
+      {/* Offline banner */}
+      {!isOnline && (
+        <div className="bg-amber-500 text-white text-center text-xs font-black uppercase tracking-[0.2em] py-3 px-6">
+          You are offline — progress saved locally. Go online to submit.
+        </div>
+      )}
+
+      {/* Non-blocking draft restore banner */}
+      {showDraftBanner && (
+        <div className="bg-primary/5 border-b-2 border-primary/10 px-8 py-4 flex items-center justify-between gap-4">
+          <p className="text-sm font-bold text-primary">
+            We found a saved {config.label} draft. Resume where you left off?
+          </p>
+          <div className="flex gap-2 shrink-0">
+            <Button onClick={restoreDraft} size="sm">
+              Resume
+            </Button>
+            <Button onClick={clearDraft} variant="white" size="sm">
+              Dismiss
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Top accent line */}
+      <ProgressBar progress={progress} height={6} className="rounded-none" />
+
+      <div className=" py-10 w-full">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-14">
+          <div className="py-5 flex flex-col gap-[10px]">
+            <div className="inline-flex items-center gap-2 px-[10px] py-[5px] rounded-full  mb-[15px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              <span className="text-xs  text-primary uppercase tracking-widest">
+                {config.label} Registry
+              </span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-medium text-slate-900 tracking-tight leading-tight">
+              {config.steps[step - 1]} <br />
+              <span className="font-bold text-primary">
+                {config.label} Application
+              </span>
+            </h2>
+          </div>
+          <div className="text-right shrink-0 ml-6">
+            <p className="text-xs text-slate-300 uppercase tracking-widest mb-[5px]">
+              Progress
+            </p>
+            <p className="text-3xl font-semibold text-primary leading-none">
+              {String(step).padStart(2, "0")}
+              <span className="text-slate-200 font-light">
+                {" "}
+                / {String(totalSteps).padStart(2, "0")}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* Step dots */}
+        <div className="flex items-center gap-2 mb-8">
+          {config.steps.map((label, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-2">
+              <div
+                className={`h-1 w-full rounded-full transition-all duration-500 ${i < step ? "bg-primary" : "bg-slate-100"}`}
+              />
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wider hidden md:block transition-colors ${i + 1 === step ? "text-primary" : "text-slate-300"}`}
+              >
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Global error banner */}
+        {globalError && (
+          <div className="mb-10 p-5 bg-red-50 border-2 border-red-200 rounded-2xl flex items-center gap-4 text-red-600">
+            <span className="text-2xl">⚠</span>
+            <p className="text-sm font-bold">{globalError}</p>
+          </div>
+        )}
+
+        {/* Step content — always renders the CORRECT role form */}
+        <form
+          onSubmit={
+            step === totalSteps
+              ? handleSubmit
+              : (e) => {
+                  e.preventDefault();
+                  handleNext();
+                }
+          }
+          noValidate
+        >
+          <div className="max-h-[50vh] overflow-y-auto custom-scrollbar">
+            {renderStep(
+              safeRole,
+              step,
+              formData,
+              updateData,
+              errors,
+              handleSkip,
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div className="flex flex-col md:flex-row gap-4 pt-16 mt-10 border-t border-slate-100 py-5">
+            {step > 1 && (
+              <Button
+                type="button"
+                variant="white"
+                onClick={() => {
+                  setStep(step - 1);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                Back
+              </Button>
+            )}
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              disabled={submitting || (!isOnline && step === totalSteps)}
+            >
+              {submitting ? (
+                <>Processing…</>
+              ) : step === totalSteps ? (
+                "Complete Registration"
+              ) : isSkippable ? (
+                `Save & Continue`
+              ) : (
+                `Continue to ${config.steps[step]}`
+              )}
+            </Button>
+          </div>
+
+          {/* Footer links */}
+          <div className="flex items-center justify-between  border-t border-slate-50 py-5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/register")}
+            >
+              Cancel
+            </Button>
+            <span className="text-xs text-slate-300 ">
+              POPIA Compliant • Encrypted
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

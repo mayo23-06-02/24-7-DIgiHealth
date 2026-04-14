@@ -1,0 +1,39 @@
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+
+export interface IConsultation extends Document {
+  patientId: Types.ObjectId;
+  practitionerId: Types.ObjectId;
+  facilityId?: Types.ObjectId;
+  type: 'video' | 'chat' | 'in_person';
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  scheduledStartTime: Date;
+  scheduledEndTime: Date;
+  chiefComplaint?: string;
+  clinicalRisk?: { score: number; color: 'green' | 'amber' | 'red'; factors: string[] };
+  soapNotes?: { subjective?: string; objective?: string; assessment?: string; plan?: string; signedAt?: Date };
+  callMinutesUsed: number;
+}
+
+const ConsultationSchema = new Schema<IConsultation>({
+  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  facilityId: { type: Schema.Types.ObjectId, ref: 'Facility' },
+  type: { type: String, enum: ['video', 'chat', 'in_person'], required: true },
+  status: { type: String, enum: ['scheduled', 'in_progress', 'completed', 'cancelled', 'pending'], default: 'scheduled' },
+  scheduledStartTime: { type: Date, required: true },
+  scheduledEndTime: { type: Date, required: true },
+  chiefComplaint: { type: String },
+  clinicalRisk: {
+    score: Number,
+    color: { type: String, enum: ['green', 'amber', 'red'] },
+    factors: [{ type: String }]
+  },
+  soapNotes: { subjective: String, objective: String, assessment: String, plan: String, signedAt: Date },
+  callMinutesUsed: { type: Number, default: 0 }
+}, { timestamps: true });
+
+ConsultationSchema.index({ patientId: 1, scheduledStartTime: -1 });
+ConsultationSchema.index({ practitionerId: 1, scheduledStartTime: -1 });
+
+export const Consultation: Model<IConsultation> = mongoose.models.Consultation || mongoose.model<IConsultation>('Consultation', ConsultationSchema);
+export default Consultation;

@@ -1,0 +1,648 @@
+"use client";
+import React, { useState } from "react";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import {
+  BiBulb,
+  BiCheckCircle,
+  BiCreditCard,
+  BiShieldQuarter,
+  BiLockAlt,
+  BiCalendar,
+  BiUser,
+  BiSolidCheckCircle,
+  BiSolidUserPlus,
+} from "react-icons/bi";
+import Image from "next/image";
+
+// ─────────────────────────────────────────────
+// Step 1 – Identity
+// ─────────────────────────────────────────────
+export function PatientStep1({ formData, updateData, errors }: any) {
+  return (
+    <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
+      <div className="inline-flex items-center gap-2  rounded-full ">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+        <span className="text-xs  text-primary uppercase tracking-widest">
+          Patient Identity
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+        <Input
+          label="First Name *"
+          value={formData.firstName || ""}
+          placeholder="e.g. Thabo"
+          error={errors?.firstName}
+          onChange={(e) => updateData("firstName", e.target.value)}
+        />
+        <Input
+          label="Last Name *"
+          value={formData.lastName || ""}
+          placeholder="e.g. Mokoena"
+          onChange={(e) => updateData("lastName", e.target.value)}
+        />
+        <Input
+          label="SA Identity Number *"
+          maxLength={13}
+          value={formData.saId || ""}
+          placeholder="13-digit national ID number"
+          error={errors?.saId}
+          onChange={(e) =>
+            updateData("saId", e.target.value.replace(/\D/g, ""))
+          }
+          className="md:col-span-2"
+        />
+        <Input
+          label="Mobile Number *"
+          type="tel"
+          value={formData.mobile || ""}
+          placeholder="+27 71 000 0000"
+          error={errors?.mobile}
+          onChange={(e) => updateData("mobile", e.target.value)}
+        />
+        <Input
+          label="Date of Birth *"
+          type="date"
+          value={formData.dob || ""}
+          onChange={(e) => updateData("dob", e.target.value)}
+        />
+        <Input
+          label="Email Address (recommended)"
+          type="email"
+          value={formData.email || ""}
+          placeholder="your@email.co.za"
+          onChange={(e) => updateData("email", e.target.value)}
+          className="md:col-span-2"
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Step 2 – POPIA Consent
+// ─────────────────────────────────────────
+export function POPIAConsentStep({ formData, updateData }: any) {
+  return (
+    <div className="space-y-8 animate-in slide-in-from-right-6 duration-500  flex flex-col">
+      <div className="bg-primary rounded-md p-8 text-white relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-2xl" />
+        <h3 className="text-xs  text-white/60 mb-4">Legal Compliance</h3>
+        <h2 className="text-3xl font-black mb-5 leading-tight">
+          Privacy Declaration
+        </h2>
+        <p className="text-white/80 text-sm  mb-8">
+          Under the Protection of Personal Information Act (POPIA), 24/7
+          TeleHealth is required to obtain your express consent before
+          processing any personal or health data.
+        </p>
+        <ul className="space-y-3 mt-[20px]">
+          {[
+            "Your data is encrypted at rest and in transit",
+            "You can withdraw consent at any time",
+            "Data is never sold to third parties",
+            "Access logs are kept for your security",
+          ].map((item) => (
+            <li
+              key={item}
+              className="flex items-center gap-3 text-sm font-semibold my-[10px]"
+            >
+              <span className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center text-xs">
+                ✓
+              </span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <label
+        htmlFor="popia-consent"
+        className={`flex items-start gap-5 p-8 rounded-md  cursor-pointer transition-all duration-300 ${formData.consent ? "border-primary bg-primary/5" : "border-slate-100 bg-slate-50 hover:border-primary/30"}`}
+      >
+        <input
+          id="popia-consent"
+          type="checkbox"
+          checked={formData.consent || false}
+          onChange={(e) => updateData("consent", e.target.checked)}
+          className="mt-0.5 w-6 h-6 rounded text-primary focus:ring-primary border-slate-300 accent-primary shrink-0"
+        />
+        <span className="text-sm font-bold text-slate-700 leading-relaxed">
+          I consent to 24/7 TeleHealth storing and processing my health data as
+          per POPIA. I understand I can{" "}
+          <span className="text-primary underline decoration-2 underline-offset-4">
+            withdraw this consent
+          </span>{" "}
+          at any time by contacting support@24-7telehealth.co.za.
+        </span>
+      </label>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Step 3 – Anthropometric Step
+// ─────────────────────────────────────────
+const bloodTypes = [
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+  "Unknown",
+];
+const genders = ["Male", "Female", "Non-binary / Other", "Prefer not to say"];
+const activityLevels = [
+  "Sedentary (little or no exercise)",
+  "Lightly active (1–3×/week)",
+  "Moderately active (3-5×/week)",
+  "Very active (6-7×/week)",
+  "Athlete / Highly active",
+];
+
+const commonAllergies = [
+  "Peanuts",
+  "Tree Nuts",
+  "Milk / Dairy",
+  "Eggs",
+  "Wheat / Gluten",
+  "Soy",
+  "Fish",
+  "Shellfish",
+  "Penicillin",
+  "Sulfa Drugs",
+  "Aspirin / NSAIDs",
+  "Latex",
+  "Pollen",
+  "Dust Mites",
+  "Pet Dander",
+  "Bee Stings",
+  "Mold",
+  "Strawberries",
+  "Fragrance / Perfume",
+  "Cockroaches",
+];
+
+const commonConditions = [
+  "Hypertension",
+  "Diabetes (Type 2)",
+  "Diabetes (Type 1)",
+  "Asthma",
+  "Arthritis",
+  "Heart Disease",
+  "High Cholesterol",
+  "HIV/AIDS",
+  "Tuberculosis (TB)",
+  "Depression",
+  "Anxiety",
+  "Obesity",
+  "Cancer",
+  "Kidney Disease",
+  "Liver Disease",
+  "Stroke Survivor",
+  "Epilepsy",
+  "Alzheimer's",
+  "COPD",
+  "Thyroid Disorder",
+];
+
+export function PatientAnthropometricStep({
+  formData,
+  updateData,
+  onSkip,
+}: any) {
+  const [unit, setUnit] = useState<"metric" | "imperial">("metric");
+
+  const heightCm = parseFloat(formData.heightCm) || 0;
+  const weightKg = parseFloat(formData.weightKg) || 0;
+  const bmi =
+    heightCm > 0 && weightKg > 0
+      ? (weightKg / (heightCm / 100) ** 2).toFixed(1)
+      : null;
+
+  const bmiCategory = bmi
+    ? parseFloat(bmi) < 18.5
+      ? { label: "Underweight", color: "text-blue-600 bg-blue-50" }
+      : parseFloat(bmi) < 25
+        ? { label: "Healthy Weight", color: "text-green-600 bg-green-50" }
+        : parseFloat(bmi) < 30
+          ? { label: "Overweight", color: "text-amber-600 bg-amber-50" }
+          : { label: "Obese", color: "text-red-600 bg-red-50" }
+    : null;
+
+  return (
+    <div className="space-y-8 animate-in slide-in-from-right-6 duration-500 py-[60px] mb-[30px]">
+      <div className="flex items-start gap-2 p-5 rounded-lg mb-[10px]">
+        <span className="text-2xl">
+          <BiBulb className="text-primary" />{" "}
+        </span>
+        <div className="flex-1">
+          <p className="text-sm font-black text-slate-700">Optional Section</p>
+          <p className="text-xs text-slate-400 mt-0.5">
+            You can skip this and add it later in your dashboard.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={onSkip}>
+          Skip now
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-3 mb-[20px] mt-[10px]">
+        <span className="text-sm font-bold text-slate-500">Units:</span>
+        <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
+          {["metric", "imperial"].map((u) => (
+            <button
+              key={u}
+              type="button"
+              onClick={() => setUnit(u as any)}
+              className={`px-4 py-1.5 rounded text-xs font-black uppercase transition-all ${unit === u ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}
+            >
+              {u === "metric" ? "cm / kg" : "in / lbs"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Input
+          label={`Height (${unit === "metric" ? "cm" : "in"})`}
+          type="number"
+          value={formData.heightCm || ""}
+          placeholder="e.g. 175"
+          onChange={(e) => updateData("heightCm", e.target.value)}
+        />
+        <Input
+          label={`Weight (${unit === "metric" ? "kg" : "lb"})`}
+          type="number"
+          value={formData.weightKg || ""}
+          placeholder="e.g. 70"
+          onChange={(e) => updateData("weightKg", e.target.value)}
+        />
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-slate-700">
+            BMI (auto)
+          </label>
+          <div
+            className={`px-5 py-4 rounded-xl flex items-center justify-between transition-all duration-500 min-h-[54px] ${bmiCategory ? bmiCategory.color + " shadow-inner" : "bg-slate-50 border-2 border-slate-100"}`}
+          >
+            <div className="flex flex-col">
+              <span className="text-3xl font-black tracking-tighter leading-none">
+                {bmi || "—"}
+              </span>
+            </div>
+            {bmiCategory && (
+              <div className="px-4 py-2  border border-white/40">
+                <span className="text-xs font-black uppercase tracking-widest">
+                  {bmiCategory.label}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Gender & Blood Type */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+        <div className="space-y-4">
+          <label className="block text-sm font-bold text-slate-700">
+            Biological Gender
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {genders.map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => updateData("gender", g)}
+                className={`px-6 py-3 rounded-full text-sm font-semibold transition-all border-2 ${
+                  formData.gender === g
+                    ? "bg-primary border-primary text-white "
+                    : "bg-white border-slate-100 text-slate-500 "
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <label className="block text-sm font-bold text-slate-700">
+            Blood Type
+          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {bloodTypes.map((bt) => (
+              <button
+                key={bt}
+                type="button"
+                onClick={() => updateData("bloodType", bt)}
+                className={`h-10 rounded-lg text-sm font-semibold transition-all border-2 flex items-center justify-center ${
+                  formData.bloodType === bt
+                    ? "bg-rose-500 border-rose-500 text-white "
+                    : "bg-white border-slate-100 text-slate-500 "
+                }`}
+              >
+                {bt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Activity Level */}
+      <div className="space-y-4 py-4">
+        <label className="block text-sm font-bold text-slate-700">
+          Typical Activity Level
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {activityLevels.map((level) => (
+            <button
+              key={level}
+              type="button"
+              onClick={() => updateData("activityLevel", level)}
+              className={`px-4 py-4 rounded-xl text-left text-sm font-semibold transition-all border-2 flex items-center justify-between group ${
+                formData.activityLevel === level
+                  ? "bg-primary border-primary text-white "
+                  : "bg-white border-slate-100 text-slate-400 "
+              }`}
+            >
+              <span className="flex-1">{level}</span>
+              <div
+                className={`w-2 h-2 rounded-full ${formData.activityLevel === level ? "bg-white" : "bg-slate-200 group-hover:bg-emerald-200"}`}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-4 py-5">
+        <label
+          style={{ marginBottom: "20px" }}
+          className="block text-sm font-bold text-slate-700"
+        >
+          Known Allergies{" "}
+          <span className="text-slate-400 font-normal ml-1">
+            (Select all that apply)
+          </span>
+        </label>
+        <div className="flex flex-wrap gap-2.5">
+          {commonAllergies.map((allergy) => {
+            const isSelected = (formData.allergies || []).includes(allergy);
+            return (
+              <button
+                key={allergy}
+                type="button"
+                onClick={() => {
+                  const current = formData.allergies || [];
+                  const next = isSelected
+                    ? current.filter((a: string) => a !== allergy)
+                    : [...current, allergy];
+                  updateData("allergies", next);
+                }}
+                className={`px-8 py-3 rounded-full text-sm font-medium transition-all duration-300 border-2 ${
+                  isSelected
+                    ? "bg-primary border-primary text-white "
+                    : "bg-white border-slate-100 text-slate-400 "
+                }`}
+              >
+                {allergy}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="space-y-4 mb-[20px]">
+        <label className="block text-sm font-bold text-slate-700 mb-[20px]">
+          Chronic Conditions{" "}
+          <span className="text-slate-400 font-normal ml-1">
+            (Select all that apply)
+          </span>
+        </label>
+        <div className="flex flex-wrap gap-2.5">
+          {commonConditions.map((condition) => {
+            const isSelected = (formData.chronicConditions || []).includes(
+              condition,
+            );
+            return (
+              <button
+                key={condition}
+                type="button"
+                onClick={() => {
+                  const current = formData.chronicConditions || [];
+                  const next = isSelected
+                    ? current.filter((c: string) => c !== condition)
+                    : [...current, condition];
+                  updateData("chronicConditions", next);
+                }}
+                className={`px-8 py-3 rounded-full text-sm font-bold transition-all duration-300 border-2 ${
+                  isSelected
+                    ? "bg-primary border-primary text-white "
+                    : "bg-white border-slate-100 text-slate-400 "
+                }`}
+              >
+                {condition}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <Button variant="dashed" fullWidth onClick={onSkip}>
+        Complete Health Profile Later
+      </Button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Step 4 – Payment Setup
+// ─────────────────────────────────────────
+export function PatientPaymentStep({ formData, updateData }: any) {
+  const benefits = [
+    "24/7 Unlimited Virtual Consultations",
+    "Digital Prescriptions & Sick Notes",
+    "AI-Powered Symptom Triage",
+    "Secure PHI Health Vault Storage",
+    "Direct Specialist Referral Access",
+  ];
+
+  return (
+    <div className="space-y-10 animate-in slide-in-from-right-6 duration-500">
+      {/* Premium Subscription Card */}
+      <div className="relative overflow-hidden bg-primary text-white rounded-lg p-8 mb-[20px] border border-white/10 group transition-all">
+        <div className="absolute top-[10%] right-[5%] p-8 opacity-100 group-hover:rotate-3 transition-transform duration-1000 pointer-events-none">
+          <Image
+            src="/auth-doctor.png"
+            alt="Doctor"
+            width={150}
+            height={150}
+            className="w-[150px] h-auto object-contain"
+          />
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex justify-between items-start mb-8">
+            <div className="mb-[20px]">
+              <span className="text-lg font-semibold text-tertiary flex-wrap text-white mb-[20px] block">
+                DigiHealth Pro
+              </span>
+              <div className="text-right flex items-end">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-bold text-secondary">R</span>
+                  <span className="text-5xl font-black tracking-tighter">
+                    250
+                  </span>
+                </div>
+                <span className="text-[20px] font-semibold  text-white/50">
+                  /month
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {benefits.map((benefit) => (
+              <div key={benefit} className="flex items-center gap-3">
+                <BiSolidCheckCircle className="text-secondary shrink-0" />
+                <span className="text-xs font-semibold text-white/90">
+                  {benefit}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Card Payment Form */}
+      <div className="bg-white rounded-sm gap-6  py-5 flex flex-col">
+        <div className="flex items-center justify-between mb-[20px]">
+          <h3 className="text-sm font-black text-slate-800   flex items-center gap-2">
+            <BiCreditCard className="text-primary" /> Credit or Debit Card
+          </h3>
+          <div className="flex gap-2">
+            <div className="w-8 h-5 bg-slate-100 rounded-sm opacity-50" />
+            <div className="w-8 h-5 bg-slate-200 rounded-sm opacity-50" />
+          </div>
+        </div>
+
+        <div className="">
+          <div className="grid grid-cols-2 gap-6 mb-[10px]">
+            <Input
+              label="Name on Card"
+              placeholder="e.g. THABO MOKOENA"
+              value={formData.cardName || ""}
+              onChange={(e: any) =>
+                updateData("cardName", e.target.value.toUpperCase())
+              }
+            />
+
+            <Input
+              label="Card Number"
+              placeholder="0000 0000 0000 0000"
+              maxLength={19}
+              value={formData.cardNumber || ""}
+              onChange={(e: any) => {
+                const val = e.target.value
+                  .replace(/\W/gi, "")
+                  .replace(/(.{4})/g, "$1 ")
+                  .trim();
+                updateData("cardNumber", val);
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <Input
+              label="Expiry Date"
+              placeholder="MM/YY"
+              maxLength={5}
+              value={formData.cardExpiry || ""}
+              onChange={(e: any) => {
+                let val = e.target.value.replace(/\D/g, "");
+                if (val.length > 2)
+                  val = val.substring(0, 2) + "/" + val.substring(2);
+                updateData("cardExpiry", val);
+              }}
+            />
+            <Input
+              label="CVV / CVC"
+              placeholder="000"
+              maxLength={3}
+              type="password"
+              value={formData.cardCvv || ""}
+              onChange={(e: any) =>
+                updateData("cardCvv", e.target.value.replace(/\D/g, ""))
+              }
+            />
+          </div>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-slate-50 py-5">
+          <p className="text-[10px] font-semibold text-slate-400 leading-relaxed flex items-center gap-2">
+            <BiShieldQuarter className="text-green-500" />
+            Your payment info is secured via 256-bit AES encryption. We do not
+            store your full card number on our servers.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Step 5 – Emergency & Photo
+// ─────────────────────────────────────────
+export function PatientEmergencyStep({ formData, updateData, onSkip }: any) {
+  return (
+    <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
+      <div className="flex items-start gap-4 p-5 rounded-lg py-5">
+        <span className="text-2xl text-primary">
+          <BiSolidUserPlus />
+        </span>
+        <div className="flex-1">
+          <p className="text-sm font-black text-slate-700">Emergency & Photo</p>
+          <p className="text-xs text-slate-400 mt-0.5">
+            This information is vital for your safety.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={onSkip}>
+          Skip now
+        </Button>
+      </div>
+
+      <div className="p-5 mb-[20px] rounded-lg border border-slate-100 space-y-6">
+        <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest">
+          Contact Details
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Input
+            label="Emergency Contact Name"
+            value={formData.emergencyName || ""}
+            onChange={(e) => updateData("emergencyName", e.target.value)}
+            placeholder="Name & Surname"
+          />
+          <Input
+            label="Emergency Contact Phone"
+            value={formData.emergencyPhone || ""}
+            onChange={(e) => updateData("emergencyPhone", e.target.value)}
+            placeholder="+27 00 000 0000"
+          />
+        </div>
+      </div>
+      <div className="p-5 mb-[20px] bg-primary/5 rounded-lg">
+        <p className="text-sm font-bold text-primary leading-relaxed">
+          By clicking finish, you confirm all provided information is accurate
+          to the best of your knowledge. Your registration will be processed
+          immediately.
+        </p>
+      </div>
+
+      <Button variant="dashed" fullWidth onClick={onSkip}>
+        Complete Emergency Info Later
+      </Button>
+    </div>
+  );
+}

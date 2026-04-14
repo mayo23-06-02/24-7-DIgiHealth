@@ -1,0 +1,41 @@
+import { NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb';
+import { Notification } from '@/lib/models/Communications';
+
+export async function GET(req: Request) {
+  try {
+    await connectToDatabase();
+    const userId = req.headers.get('x-user-id');
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const notifications = await Notification.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    return NextResponse.json(notifications);
+  } catch (error) {
+    console.error('Notifications API Error:', error);
+    return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    await connectToDatabase();
+    const userId = req.headers.get('x-user-id');
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { id, readAll } = await req.json();
+
+    if (readAll) {
+      await Notification.updateMany({ userId }, { isRead: true });
+    } else if (id) {
+      await Notification.updateOne({ _id: id, userId }, { isRead: true });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Notifications API Error:', error);
+    return NextResponse.json({ error: 'Failed to update notifications' }, { status: 500 });
+  }
+}

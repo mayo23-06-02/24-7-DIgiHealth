@@ -1,0 +1,120 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb';
+import { Consultation } from '@/lib/models/Consultation';
+import User from '@/lib/models/User';
+import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
+
+async function getPractitionerId(req: NextRequest): Promise<string> {
+  // 1. Try JWT token from cookie
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    if (token) {
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
+      const { payload } = await jwtVerify(token, secret);
+      const user = await User.findById(payload.userId as string).lean();
+      if (user && (user as any).role === 'practitioner') return (user as any)._id.toString();
+    }
+  } catch {}
+
+  // 2. Header override (dev)
+  const header = req.headers.get('x-practitioner-id');
+  if (header) return header;
+
+  // 3. Env fallback
+  return process.env.MOCK_PRACTITIONER_ID || '000000000000000000000000';
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    await connectToDatabase();
+    const practitionerId = await getPractitionerId(req);
+    const { searchParams } = new URL(req.url);
+
+    const tab = searchParams.get('tab') || 'upcoming';
+    const search = searchParams.get('search') || '';
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
+
+    const now = new Date();
+    const filter: any = { practitionerId };
+
+    switch (tab) {
+      case 'upcoming':
+        filter.scheduledStartTime = { $gte: now };
+        filter.status = { $in: ['scheduled', 'in_progress'] };
+        break;
+      case 'past':
+        filter.scheduledStartTime = { $lt: now };
+        filter.status = { $in: ['completed', 'cancelled'] };
+        break;
+      case 'cancelled':
+        filter.status = 'cancelled';
+        break;
+      case 'requests':
+        filter.status = 'pending';
+        break;
+    }
+
+    if (from) filter.scheduledStartTime = { ...filter.scheduledStartTime, $gte: new Date(from) };
+    if (to) filter.scheduledStartTime = { ...filter.scheduledStartTime, $lte: new Date(to) };
+
+    const consultations = await Consultation.find(filter)
+      .sort({ scheduledStartTime: tab === 'upcoming' || tab === 'requests' ? 1 : -1 })
+      .lean();
+
+    // Enrich with patient info
+    const enriched = await Promise.all(
+      consultations.map(async (c) => {
+        const patient = await User.findById(c.patientId, 'firstName lastName').lean() as any;
+        const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown Patient';
+
+        if (search && !patientName.toLowerCase().includes(search.toLowerCase())) return null;
+
+        return {
+          id: c._id.toString(),
+          consultationId: c._id.toString(),
+          patientId: c.patientId.toString(),
+          patientName,
+          scheduledStart: (c as any).scheduledStartTime,
+          scheduledEnd: (c as any).scheduledEndTime,
+          status: c.status,
+          type: c.type,
+          reason: c.chiefComplaint,
+          riskScore: c.clinicalRisk?.score || 0,
+          riskColor: c.clinicalRisk?.color || 'green',
+          riskFactors: c.clinicalRisk?.factors || [],
+          soapNotes: c.soapNotes,
+        };
+      })
+    );
+
+    return NextResponse.json({ success: true, data: enriched.filter(Boolean) });
+  } catch (err: any) {
+    console.error('[GET /api/practitioner/appointments]', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    await connectToDatabase();
+    const body = await req.json();
+    const practitionerId = await getPractitionerId(req);
+
+    const consultation = await Consultation.create({
+      practitionerId,
+      patientId: body.patientId,
+      type: body.type || 'video',
+      status: 'scheduled',
+      scheduledStartTime: new Date(body.scheduledStart),
+      scheduledEndTime: new Date(body.scheduledEnd),
+      chiefComplaint: body.reason || body.chiefComplaint,
+    });
+
+    return NextResponse.json({ success: true, data: consultation });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
