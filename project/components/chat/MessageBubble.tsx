@@ -70,7 +70,7 @@ export default function MessageBubble({
 
         {/* Quick phrase badge styling */}
         {message.type === "quick_phrase" && (
-          <span className="text-xs uppercase font-bold opacity-50 block mb-1">
+          <span className="text-xs  font-bold opacity-50 block mb-1">
             Quick Phrase
           </span>
         )}

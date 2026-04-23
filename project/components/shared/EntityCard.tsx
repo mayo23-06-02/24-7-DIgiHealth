@@ -71,7 +71,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
 
           <div className="space-y-1 mb-4">
             <div className="flex items-center gap-2">
-              <h4 className="text-xl font-medium text-slate-900 tracking-tight">
+              <h4 className="text-xl font-medium text-slate-900 tracking-tight font-grotesk">
                 {data.name}
               </h4>
               {data.rating && (
@@ -81,7 +81,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
                 </div>
               )}
             </div>
-            <p className="text-xs text-primary uppercase tracking-normal">
+            <p className="text-xs text-primary  tracking-normal">
               {data.subtitle}
             </p>
           </div>
@@ -95,7 +95,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
             {data.tags?.slice(0, 3).map((tag, i) => (
               <span
                 key={i}
-                className="px-2 py-1 rounded bg-slate-50 text-slate-400 text-[9px] font-bold uppercase tracking-normal"
+                className="px-2 py-1 rounded bg-slate-50 text-slate-400 text-[9px] font-bold  tracking-normal"
               >
                 {tag}
               </span>
@@ -103,7 +103,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-normal">
+            <span className="text-xs font-bold text-slate-300  tracking-normal">
               {actionLabel}
             </span>
             <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-primary group-hover:text-white flex items-center justify-center text-slate-400 transition-all">

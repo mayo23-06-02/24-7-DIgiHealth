@@ -133,14 +133,14 @@ export default function TelehealthConsultModal({
         <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none">
           <div className="flex items-center gap-3 bg-slate-900/40 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 ">
             <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <span className="text-white text-xs font-bold uppercase tracking-normal">
+            <span className="text-white text-xs font-bold  tracking-normal">
               Live • {formatTime(callTime)}
             </span>
           </div>
 
           <div className="flex items-center gap-2 bg-slate-900/40 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 ">
             <BiShieldQuarter className="text-emerald-500" />
-            <span className="text-white/60 text-[9px] font-bold uppercase tracking-normal">
+            <span className="text-white/60 text-[9px] font-bold  tracking-normal">
               End-to-End Encrypted
             </span>
           </div>
@@ -163,10 +163,10 @@ export default function TelehealthConsultModal({
                 <span className="text-primary text-6xl font-bold">Dr.</span>
               </div>
               <div className="text-center">
-                <h2 className="text-white text-2xl font-bold tracking-tight">
+                <h2 className="text-white text-2xl font-bold tracking-tight font-grotesk">
                   {doctor.name}
                 </h2>
-                <p className="text-white/40 text-xs uppercase font-bold tracking-normal mt-2">
+                <p className="text-white/40 text-xs  font-bold tracking-normal mt-2">
                   Connecting camera signal...
                 </p>
               </div>
@@ -175,10 +175,10 @@ export default function TelehealthConsultModal({
 
           {/* Doctor Overlay Info */}
           <div className="absolute bottom-10 left-10 p-6 bg-slate-900/40 backdrop-blur-3xl rounded-[32px] border border-white/10  max-w-[280px] pointer-events-none transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-            <h3 className="text-white text-lg font-bold tracking-tight">
+            <h3 className="text-white text-lg font-bold tracking-tight font-grotesk">
               {doctor.name}
             </h3>
-            <p className="text-primary-light text-xs font-bold uppercase tracking-normal">
+            <p className="text-primary-light text-xs font-bold  tracking-normal">
               {doctor.specialisation}
             </p>
             <div className="mt-4 flex items-center gap-3">
@@ -201,7 +201,7 @@ export default function TelehealthConsultModal({
             alt="Patient View"
           />
           <div className="absolute inset-0 bg-primary/10" />
-          <div className="absolute top-4 left-4 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-lg text-white text-[8px] font-bold uppercase tracking-normal">
+          <div className="absolute top-4 left-4 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-lg text-white text-[8px] font-bold  tracking-normal">
             You (Patient)
           </div>
 
@@ -214,7 +214,7 @@ export default function TelehealthConsultModal({
             alt="Patient View"
           />
           <div className="absolute inset-0 bg-primary/10" />
-          <div className="absolute top-4 left-4 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-lg text-white text-[8px] font-bold uppercase tracking-normal">
+          <div className="absolute top-4 left-4 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-lg text-white text-[8px] font-bold  tracking-normal">
             You (Patient)
           </div>
 
@@ -293,10 +293,10 @@ export default function TelehealthConsultModal({
                 <BiMessageDetail size={24} />
               </div>
               <div>
-                <h4 className="text-base font-bold text-slate-800 tracking-tight leading-none mb-1">
+                <h4 className="text-base font-bold text-slate-800 tracking-tight leading-none mb-1 font-grotesk">
                   Session Chat
                 </h4>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                <p className="text-xs font-bold text-slate-400  tracking-normal">
                   Dr. {doctor.name.split(" ")[1]}
                 </p>
               </div>
@@ -321,7 +321,7 @@ export default function TelehealthConsultModal({
                 >
                   {msg.text}
                 </div>
-                <span className="text-[9px] font-bold text-slate-300 mt-2 uppercase tracking-normal">
+                <span className="text-[9px] font-bold text-slate-300 mt-2  tracking-normal">
                   {msg.timestamp}
                 </span>
               </div>
@@ -363,7 +363,7 @@ export default function TelehealthConsultModal({
       {/* Floating Session Info Sidebar (Left) */}
       <div className="hidden lg:flex absolute top-1/2 -translate-y-1/2 left-6 z-40 flex-col gap-4">
         <div className="bg-slate-900/60 backdrop-blur-3xl p-5 rounded-[32px] border border-white/10  space-y-6 w-72 transform -translate-x-full opacity-0 hover:translate-x-0 hover:opacity-100 transition-all duration-700 delay-500">
-          <h5 className="text-xs font-bold text-white/40 uppercase tracking-normal mb-4">
+          <h5 className="text-xs font-bold text-white/40  tracking-normal mb-4 font-grotesk">
             Patient Intelligence
           </h5>
           <div className="space-y-4">
@@ -379,7 +379,7 @@ export default function TelehealthConsultModal({
             </div>
           </div>
           <div className="pt-4 border-t border-white/10">
-            <h6 className="text-xs font-bold text-primary-light uppercase tracking-normal mb-2">
+            <h6 className="text-xs font-bold text-primary-light  tracking-normal mb-2 font-grotesk">
               Prescription Sync
             </h6>
             <div className="flex items-center gap-3">

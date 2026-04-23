@@ -68,7 +68,7 @@ export default function ConsultationsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Consultations</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Consultations</h1>
           <p className="text-sm text-slate-500">
             History of completed consultations with SOAP notes and clinical data
           </p>
@@ -191,7 +191,7 @@ export default function ConsultationsPage() {
                               className="bg-white rounded-xl p-4 border border-slate-100 shadow-none"
                             >
                               <p
-                                className={`text-xs font-bold uppercase tracking-wide mb-1.5 ${color}`}
+                                className={`text-xs font-bold  tracking-wide mb-1.5 ${color}`}
                               >
                                 {label}
                               </p>
@@ -223,7 +223,7 @@ export default function ConsultationsPage() {
                     {/* AI Recommendations */}
                     {c.aiRecommendations?.length > 0 && (
                       <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
-                        <p className="text-xs font-bold text-primary uppercase tracking-wide mb-2">
+                        <p className="text-xs font-bold text-primary  tracking-wide mb-2">
                           AI Recommendations
                         </p>
                         <ul className="space-y-1">

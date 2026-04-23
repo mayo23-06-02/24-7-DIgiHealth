@@ -42,13 +42,13 @@ export default function Blog() {
         <div className="flex flex-col gap-6 mb-16">
           <div className="flex items-center gap-2">
             <span className="text-[#36b1d4] font-extrabold text-xl">✦</span>
-            <span className="text-[#36b1d4] font-medium tracking-normal uppercase text-sm">
+            <span className="text-[#36b1d4] font-medium tracking-normal  text-sm">
               Blog
             </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-16 items-start py-10">
-            <h2 className="text-3xl md:text-4xl font-medium text-[#005A9C] leading-[1.15] tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-medium text-[#005A9C] leading-[1.15] tracking-tight font-grotesk">
               Explore Expert Insights for a <br className="hidden lg:block" />{" "}
               Healthier, Happier Life
             </h2>
@@ -79,7 +79,7 @@ export default function Blog() {
               </div>
 
               {/* Title & Excerpt */}
-              <h3 className="text-[1.6rem] md:text-xl font-medium text-[#005A9C] mb-4 leading-[1.3] group-hover:text-[#36b1d4] transition-colors pr-2 pt-5 pb-2.5">
+              <h3 className="text-[1.6rem] md:text-xl font-medium text-[#005A9C] mb-4 leading-[1.3] group-hover:text-[#36b1d4] transition-colors pr-2 pt-5 pb-2.5 font-grotesk">
                 {post.title}
               </h3>
               <p className="text-slate-600 leading-relaxed mb-6 grow text-[0.95rem] md:text-base pr-4">

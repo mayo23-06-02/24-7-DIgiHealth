@@ -12,7 +12,7 @@ export default function EmergencyBanner() {
             ⚠️
           </div>
           <div>
-            <h4 className="font-bold text-lg">Life‑threatening emergency?</h4>
+            <h4 className="font-bold text-lg font-grotesk">Life‑threatening emergency?</h4>
             <p className="text-white/90">
               Please do not wait. Use the emergency resources immediately.
             </p>

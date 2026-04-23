@@ -115,7 +115,7 @@ export default function RiskScoreCard({
             origin-bottom
           "
         >
-          <p className="font-bold text-slate-300 mb-2 uppercase tracking-wide text-xs">
+          <p className="font-bold text-slate-300 mb-2  tracking-wide text-xs">
             Risk Factors
           </p>
           <ul className="space-y-1">

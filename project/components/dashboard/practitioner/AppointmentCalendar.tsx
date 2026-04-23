@@ -220,11 +220,11 @@ export default function AppointmentCalendar() {
         {/* Calendar Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-normal leading-none mb-2">
+            <h3 className="text-[10px] font-bold text-slate-400  tracking-normal leading-none mb-2 font-grotesk">
               Clinical Schedule
             </h3>
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-bold text-slate-800">
+              <h4 className="text-sm font-bold text-slate-800 font-grotesk">
                 {weekDays[0]?.toLocaleDateString("en-ZA", {
                   month: "short",
                   day: "numeric",
@@ -243,7 +243,7 @@ export default function AppointmentCalendar() {
             <Button
               variant="ghost"
               onClick={() => setCurrentDate(new Date())}
-              className="text-[10px] font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-full transition-all border-none bg-transparent h-auto !min-w-0 uppercase tracking-normal"
+              className="text-[10px] font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-full transition-all border-none bg-transparent h-auto !min-w-0  tracking-normal"
             >
               Today
             </Button>
@@ -276,7 +276,7 @@ export default function AppointmentCalendar() {
                 className={`py-3 text-center border-l border-slate-100 transition-colors ${isToday ? "bg-primary/5" : ""}`}
               >
                 <p
-                  className={`text-[9px] font-bold uppercase tracking-[0.25em] ${isToday ? "text-primary" : "text-slate-400"}`}
+                  className={`text-[9px] font-bold  tracking-[0.25em] ${isToday ? "text-primary" : "text-slate-400"}`}
                 >
                   {DAYS[i]}
                 </p>
@@ -354,7 +354,7 @@ export default function AppointmentCalendar() {
                             <span
                               className={`w-2 h-2 rounded-full shrink-0 shadow-none ${col.dot}`}
                             />
-                            <span className="text-[10px] font-bold truncate leading-tight uppercase tracking-tight">
+                            <span className="text-[10px] font-bold truncate leading-tight  tracking-tight">
                               {evt.patientName.split(" ")[0]}
                             </span>
                           </div>
@@ -390,10 +390,10 @@ export default function AppointmentCalendar() {
                   {typeIcon(selectedEvent.type, 20)}
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-800 leading-tight">
+                  <h4 className="text-sm font-bold text-slate-800 leading-tight font-grotesk">
                     {selectedEvent.patientName}
                   </h4>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mt-1">
+                  <p className="text-[10px] font-bold text-slate-400  tracking-normal mt-1">
                     {selectedEvent.reason}
                   </p>
                 </div>
@@ -409,7 +409,7 @@ export default function AppointmentCalendar() {
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-normal mb-1">
+                  <p className="text-[9px] text-slate-400 font-bold  tracking-normal mb-1">
                     Time Window
                   </p>
                   <p className="text-xs font-bold text-slate-700 tabular-nums">
@@ -425,20 +425,20 @@ export default function AppointmentCalendar() {
                   </p>
                 </div>
                 <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-normal mb-1">
+                  <p className="text-[9px] text-slate-400 font-bold  tracking-normal mb-1">
                     Session Type
                   </p>
-                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-tight">
+                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5  tracking-tight">
                     {typeIcon(selectedEvent.type, 12)} {selectedEvent.type}
                   </p>
                 </div>
               </div>
               <div className="flex items-center justify-between px-1">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-normal">
+                  <p className="text-[10px] text-slate-400 font-bold  tracking-normal">
                     Clinical Risk
                   </p>
-                  <p className="text-[9px] text-slate-300 font-bold uppercase tracking-normal mt-0.5">
+                  <p className="text-[9px] text-slate-300 font-bold  tracking-normal mt-0.5">
                     Automated Score
                   </p>
                 </div>
@@ -451,7 +451,7 @@ export default function AppointmentCalendar() {
               </div>
               {selectedEvent.aiRecommendations.length > 0 && (
                 <div className="bg-emerald-50/50 border border-emerald-100 rounded-[1.5rem] p-4">
-                  <p className="text-[10px] font-bold text-emerald-600 mb-2 uppercase tracking-normal">
+                  <p className="text-[10px] font-bold text-emerald-600 mb-2  tracking-normal">
                     AI Triage Insights
                   </p>
                   <ul className="space-y-2">
@@ -476,7 +476,7 @@ export default function AppointmentCalendar() {
                   <Button
                     onClick={() => handleApprove(selectedEvent.consultationId)}
                     fullWidth
-                    className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold uppercase tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-200"
+                    className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-200"
                     icon={<BiCheckCircle size={14} />}
                   >
                     Approve Clinical Session
@@ -484,7 +484,7 @@ export default function AppointmentCalendar() {
                 ) : (
                   <Button
                     fullWidth
-                    className="py-4 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold uppercase tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-primary/20"
+                    className="py-4 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-primary/20"
                     icon={typeIcon(selectedEvent.type, 14)}
                   >
                     Join Session
@@ -501,7 +501,7 @@ export default function AppointmentCalendar() {
                   }}
                   variant="outline"
                   fullWidth
-                  className="py-4 bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-bold uppercase tracking-normal rounded-2xl transition-all h-auto border-slate-200"
+                  className="py-4 bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto border-slate-200"
                   icon={<BiNote size={14} />}
                 >
                   Document SOAP Note

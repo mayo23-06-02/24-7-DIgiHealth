@@ -39,10 +39,10 @@ export default function VideoCallMockup({
             <BiVideo className="text-primary text-2xl" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-lg leading-none tracking-tight">
+            <h2 className="text-white font-bold text-lg leading-none tracking-tight font-grotesk">
               Secure Clinical Consultation
             </h2>
-            <p className="text-emerald-400 text-xs font-bold uppercase tracking-normal mt-1.5 flex items-center gap-1.5">
+            <p className="text-emerald-400 text-xs font-bold  tracking-normal mt-1.5 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Encrypted Connection Active
             </p>
@@ -96,7 +96,7 @@ export default function VideoCallMockup({
               {/* Doctor Identity Tag */}
               <div className="absolute bottom-10 left-10 py-3 px-6 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10">
                 <p className="text-white font-bold text-sm">{doctorName}</p>
-                <p className="text-primary text-[9px] font-bold uppercase tracking-normal mt-1">
+                <p className="text-primary text-[9px] font-bold  tracking-normal mt-1">
                   Specialist Practitioner
                 </p>
               </div>
@@ -106,9 +106,7 @@ export default function VideoCallMockup({
             <div className="absolute top-10 right-10 w-48 h-64 md:w-64 md:h-80 rounded-3xl overflow-hidden bg-slate-800 border-2 border-white/20  z-40">
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
                 <BiUser size={48} />
-                <p className="text-xs font-bold uppercase mt-2 tracking-normal">
-                  You
-                </p>
+                <p className="text-xs font-bold  mt-2 tracking-normal">You</p>
               </div>
               <div className="absolute bottom-4 left-4 flex gap-2">
                 <div className="w-8 h-8 rounded-lg bg-black/40 backdrop-blur-md flex items-center justify-center text-white">

@@ -250,7 +250,7 @@ export default function ProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
         <BiLoaderAlt className="animate-spin text-primary" size={48} />
-        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+        <p className="text-slate-400 font-bold  tracking-widest text-[10px]">
           Loading Profile…
         </p>
       </div>
@@ -328,17 +328,17 @@ export default function ProfilePage() {
                   <BiCamera size={18} />
                 </button>
               </div>
-              <h3 className="mt-6 text-xl font-bold text-slate-800 tracking-tight leading-none">
+              <h3 className="mt-6 text-xl font-bold text-slate-800 tracking-tight leading-none font-grotesk">
                 {fullName}
               </h3>
-              <p className="text-[10px] font-bold text-primary uppercase tracking-widest mt-2 opacity-80">
+              <p className="text-[10px] font-bold text-primary  tracking-widest mt-2 opacity-80">
                 {user.role.replace("_", " ")}
               </p>
               <div className="mt-3">
                 <Badge
                   label={user.status}
                   variant={user.status === "active" ? "success" : "warning"}
-                  className="rounded-full px-4 text-[9px] font-bold uppercase tracking-widest"
+                  className="rounded-full px-4 text-[9px] font-bold  tracking-widest"
                 />
               </div>
             </div>
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-[11px] font-bold uppercase tracking-wider transition-all ${
+                  className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-[11px] font-bold  tracking-wider transition-all ${
                     activeTab === tab.id
                       ? "bg-primary text-white shadow-lg shadow-primary/20"
                       : "text-slate-500 hover:bg-slate-50 hover:text-primary"
@@ -413,7 +413,7 @@ export default function ProfilePage() {
                     className={`w-3 h-3 rounded-full ${user.mfaEnabled ? "bg-emerald-500 shadow-lg shadow-emerald-500/50" : "bg-slate-300"}`}
                   />
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <p className="text-[10px] font-bold text-slate-400  tracking-widest">
                       MFA Status
                     </p>
                     <p className="text-sm font-bold text-slate-700">
@@ -442,7 +442,7 @@ export default function ProfilePage() {
                 </div>
                 <Button
                   variant="outline"
-                  className="h-12 rounded-2xl border-rose-100 text-rose-500 hover:bg-rose-50 text-[11px] font-bold uppercase tracking-widest"
+                  className="h-12 rounded-2xl border-rose-100 text-rose-500 hover:bg-rose-50 text-[11px] font-bold  tracking-widest"
                 >
                   Rotate Credentials
                 </Button>
@@ -452,7 +452,7 @@ export default function ProfilePage() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between relative z-10">
                   <div>
-                    <h5 className="text-lg font-bold">
+                    <h5 className="text-lg font-bold font-grotesk">
                       Multi-Factor Authentication
                     </h5>
                     <p className="text-xs text-slate-400 mt-1 max-w-sm">
@@ -465,7 +465,7 @@ export default function ProfilePage() {
                     onClick={() =>
                       setUser({ ...user, mfaEnabled: !user.mfaEnabled })
                     }
-                    className="rounded-2xl h-14 px-8 text-[10px] font-bold uppercase tracking-widest shrink-0"
+                    className="rounded-2xl h-14 px-8 text-[10px] font-bold  tracking-widest shrink-0"
                   >
                     {user.mfaEnabled
                       ? "Enabled — Click to Disable"
@@ -499,7 +499,7 @@ export default function ProfilePage() {
                           <p className="text-sm font-bold text-slate-800">
                             {device.name}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">
+                          <p className="text-[10px] text-slate-400 font-bold ">
                             {device.lastUsed}
                           </p>
                         </div>
@@ -563,7 +563,7 @@ export default function ProfilePage() {
                       <p className="text-sm font-bold text-slate-700">
                         {notif.label}
                       </p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+                      <p className="text-[10px] text-slate-400 font-bold  tracking-wide">
                         {notif.sub}
                       </p>
                     </div>
@@ -698,10 +698,10 @@ export default function ProfilePage() {
 
                 <Card className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between px-8">
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                    <p className="text-[10px] font-bold text-slate-400  tracking-widest mb-1">
                       Subscription Tier
                     </p>
-                    <p className="text-sm font-bold text-slate-800 uppercase">
+                    <p className="text-sm font-bold text-slate-800 ">
                       {patientData.subscriptionTier} Access
                     </p>
                   </div>
@@ -716,7 +716,7 @@ export default function ProfilePage() {
                         ? "success"
                         : "soft"
                     }
-                    className="rounded-full px-4 text-[9px] font-bold uppercase"
+                    className="rounded-full px-4 text-[9px] font-bold "
                   />
                 </Card>
               </div>
@@ -811,7 +811,7 @@ export default function ProfilePage() {
                   />
                   <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      <p className="text-[10px] font-bold text-slate-400  tracking-widest mb-1">
                         HPCSA No.
                       </p>
                       <p className="text-sm font-bold text-slate-700 font-mono">
@@ -853,7 +853,7 @@ export default function ProfilePage() {
                 <div className="mt-6 bg-slate-50 p-8 rounded-3xl border border-dashed border-slate-300 text-center">
                   <p className="text-sm font-bold text-slate-500">
                     Role-specific configuration for{" "}
-                    <span className="text-primary uppercase">
+                    <span className="text-primary ">
                       {currentRole.replace("_", " ")}
                     </span>{" "}
                     is managed by a system administrator.
@@ -869,25 +869,25 @@ export default function ProfilePage() {
                 <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
                 <div className="relative z-10 space-y-6">
                   <div>
-                    <p className="text-[10px] text-primary font-bold uppercase tracking-normalmb-2">
+                    <p className="text-[10px] text-primary font-bold  tracking-normalmb-2">
                       Subscription
                     </p>
                     <p className="text-3xl font-bold tracking-tight">
                       {currentRole === "patient" && patientData
-                        ? `${patientData.subscriptionTier.toUpperCase()} Clinical Access`
+                        ? `${patientData.subscriptionTier.to()} Clinical Access`
                         : "Premium Access"}
                     </p>
                   </div>
                   <div className="flex gap-4">
                     <Button
                       variant="white"
-                      className="h-14 rounded-2xl px-8 text-[10px] font-bold uppercase tracking-widest text-slate-900"
+                      className="h-14 rounded-2xl px-8 text-[10px] font-bold  tracking-widest text-slate-900"
                     >
                       Upgrade Plan
                     </Button>
                     <Button
                       variant="ghost"
-                      className="h-14 rounded-2xl px-8 text-[10px] font-bold uppercase tracking-widest text-white/60 border-none hover:text-white"
+                      className="h-14 rounded-2xl px-8 text-[10px] font-bold  tracking-widest text-white/60 border-none hover:text-white"
                     >
                       Manage Methods
                     </Button>
@@ -912,14 +912,14 @@ export default function ProfilePage() {
                     <p className="text-sm font-bold text-slate-800 leading-none mb-1">
                       Active Consent — Version 2.4.1
                     </p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">
+                    <p className="text-[10px] text-slate-400 font-bold ">
                       Signed April 2026
                     </p>
                   </div>
                   <Badge
                     label="Compliant"
                     variant="success"
-                    className="px-4 py-2 rounded-xl text-[9px] font-bold uppercase"
+                    className="px-4 py-2 rounded-xl text-[9px] font-bold "
                   />
                 </div>
                 <p className="text-xs text-slate-500 font-bold leading-relaxed italic">
@@ -931,13 +931,13 @@ export default function ProfilePage() {
               <div className="flex gap-4">
                 <Button
                   variant="outline"
-                  className="h-12 rounded-2xl text-[10px] font-bold uppercase tracking-widest"
+                  className="h-12 rounded-2xl text-[10px] font-bold  tracking-widest"
                 >
                   Review Policy
                 </Button>
                 <Button
                   variant="ghost"
-                  className="h-12 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-primary border-none bg-transparent"
+                  className="h-12 rounded-2xl text-[10px] font-bold  tracking-widest text-primary border-none bg-transparent"
                 >
                   Who Accessed My Data?
                 </Button>
@@ -985,10 +985,10 @@ function SectionHead({
         {icon}
       </div>
       <div>
-        <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+        <h4 className="text-sm font-bold text-slate-800  tracking-wide font-grotesk">
           {title}
         </h4>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest opacity-60">
+        <p className="text-[10px] text-slate-400 font-bold  tracking-widest opacity-60">
           {sub}
         </p>
       </div>

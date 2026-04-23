@@ -14,7 +14,7 @@ export default function TypingIndicator({
         <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
         <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" />
       </div>
-      <span className="text-xs uppercase font-bold tracking-normal text-slate-400">
+      <span className="text-xs  font-bold tracking-normal text-slate-400">
         {typingUsers.length === 1
           ? "Typing..."
           : "Several people are typing..."}

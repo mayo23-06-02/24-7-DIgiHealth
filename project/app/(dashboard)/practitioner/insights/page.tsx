@@ -71,7 +71,7 @@ export default function ClinicalInsightsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
             Clinical Insights
           </h1>
           <p className="text-sm text-slate-500">
@@ -125,7 +125,7 @@ export default function ClinicalInsightsPage() {
             {/* Risk Distribution */}
             <Card className="flex flex-col min-h-[300px]">
               <div className="mb-4">
-                <h3 className="font-bold text-slate-800">
+                <h3 className="font-bold text-slate-800 font-grotesk">
                   Risk Score Distribution
                 </h3>
                 <p className="text-xs text-slate-500">Patients by risk level</p>
@@ -168,7 +168,7 @@ export default function ClinicalInsightsPage() {
             {/* Consultation Trend */}
             <Card className="flex flex-col min-h-[300px]">
               <div className="mb-4">
-                <h3 className="font-bold text-slate-800">
+                <h3 className="font-bold text-slate-800 font-grotesk">
                   Consultation Volume
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -217,7 +217,7 @@ export default function ClinicalInsightsPage() {
             {/* Chronic Conditions */}
             <Card className="flex flex-col min-h-[300px]">
               <div className="mb-4">
-                <h3 className="font-bold text-slate-800">
+                <h3 className="font-bold text-slate-800 font-grotesk">
                   Chronic Condition Prevalence
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -269,7 +269,7 @@ export default function ClinicalInsightsPage() {
             {/* Top Diagnoses/Reasons */}
             <Card className="flex flex-col min-h-[300px]">
               <div className="mb-4">
-                <h3 className="font-bold text-slate-800">
+                <h3 className="font-bold text-slate-800 font-grotesk">
                   Top Consultation Reasons
                 </h3>
                 <p className="text-xs text-slate-500">

@@ -98,7 +98,7 @@ export default function VideoCallModal({
                   <BiShieldQuarter size={20} />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-white/50 uppercase tracking-normal block leading-none mb-1">
+                  <span className="text-xs font-bold text-white/50  tracking-normal block leading-none mb-1">
                     Encrypted Room
                   </span>
                   <span className="text-white text-xs font-bold tracking-tighter block leading-none">
@@ -110,7 +110,7 @@ export default function VideoCallModal({
 
             <div className="flex items-center gap-3 bg-slate-900/60 backdrop-blur-3xl px-5 py-3 rounded-full border border-white/10  shadow-slate-900/50 pointer-events-auto">
               <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-              <span className="text-white text-xs font-bold uppercase tracking-normal tabular-nums">
+              <span className="text-white text-xs font-bold  tracking-normal tabular-nums">
                 {formatTime(callDuration)} Live
               </span>
             </div>
@@ -119,10 +119,10 @@ export default function VideoCallModal({
           <div className="flex items-center gap-3 bg-slate-900/60 backdrop-blur-3xl p-2 rounded-[32px] border border-white/10  shadow-slate-900/50 pointer-events-auto">
             <div className="flex items-center gap-4 pl-4 pr-2">
               <div className="text-right">
-                <h4 className="text-white text-sm font-bold tracking-tight leading-none mb-1">
+                <h4 className="text-white text-sm font-bold tracking-tight leading-none mb-1 font-grotesk">
                   Dr. {practitionerName}
                 </h4>
-                <p className="text-primary-light text-[9px] font-bold uppercase tracking-normal leading-none">
+                <p className="text-primary-light text-[9px] font-bold  tracking-normal leading-none">
                   {specialisation}
                 </p>
               </div>
@@ -150,7 +150,7 @@ export default function VideoCallModal({
             />
             <div className="absolute inset-0 bg-slate-900/10" />
             <div className="absolute bottom-4 left-4 right-4 flex justify-center">
-              <div className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-[8px] font-bold text-white uppercase tracking-normal border border-white/10">
+              <div className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-[8px] font-bold text-white  tracking-normal border border-white/10">
                 You (Verified)
               </div>
             </div>

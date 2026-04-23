@@ -201,7 +201,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-xs  text-slate-400 ">{formattedDate}</span>
           <span className="w-1 h-1 bg-slate-200 rounded-full" />
-          <span className="text-xs font-bold text-primary uppercase">
+          <span className="text-xs font-bold text-primary ">
             {formattedTime}
           </span>
         </div>
@@ -218,8 +218,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           <BiSearch className="text-slate-400 text-xl group-focus-within:text-primary transition-colors" />
           <input
             type="text"
-            placeholder="Search tasks, appointments or records..."
-            className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder:text-slate-300"
+            placeholder="Search doctors, clinical labs, or patient records..."
+            className="bg-transparent border-none outline-none w-[350px] text-sm text-slate-800 placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -243,7 +243,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           {isNotificationOpen && (
             <div className="absolute top-[56px] right-0 w-[350px] bg-white border border-slate-200 rounded-lg shadow-none shadow-primary/10 p-6 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
               <div className="flex items-center justify-between mb-6">
-                <h4 className="text-lg font-bold text-slate-800 ">
+                <h4 className="text-lg font-bold text-slate-800  font-grotesk">
                   Activity Center
                 </h4>
                 <button
@@ -326,10 +326,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
             className="group-hover:scale-105"
           />
           <div className="hidden lg:flex flex-col">
-            <span className="text-xs uppercase   font-bold text-slate-800 truncate leading-none mb-1">
+            <span className="text-xs    font-bold text-slate-800 truncate leading-none mb-1">
               {user?.name || "User"}
             </span>
-            <span className="text-[9px] font-bold text-primary uppercase  leading-none">
+            <span className="text-[9px] font-bold text-primary   leading-none">
               {user?.role?.replace("_", " ") || "Member"}
             </span>
           </div>

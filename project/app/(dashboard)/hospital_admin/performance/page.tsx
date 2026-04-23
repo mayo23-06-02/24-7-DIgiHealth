@@ -66,7 +66,7 @@ export default function HospitalPerformancePage() {
     <div className="w-full pb-10 flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Performance</h1>
+        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Performance</h1>
         <p className="text-sm text-slate-500 mt-1">
           Key performance indicators and operational analytics
         </p>
@@ -113,7 +113,7 @@ export default function HospitalPerformancePage() {
         {/* Consultation Volume - Line */}
         <Card className="lg:col-span-2 flex flex-col">
           <div className="mb-4">
-            <h3 className="font-bold text-slate-800">Consultation Volume</h3>
+            <h3 className="font-bold text-slate-800 font-grotesk">Consultation Volume</h3>
             <p className="text-xs text-slate-500">Last 6 months</p>
           </div>
           <div className="flex-1 min-h-[250px]">
@@ -145,7 +145,7 @@ export default function HospitalPerformancePage() {
         {/* Appointment Types - Pie */}
         <Card className="flex flex-col">
           <div className="mb-4">
-            <h3 className="font-bold text-slate-800">Appointment Types</h3>
+            <h3 className="font-bold text-slate-800 font-grotesk">Appointment Types</h3>
             <p className="text-xs text-slate-500">Distribution (this month)</p>
           </div>
           <div className="flex-1 min-h-[200px]">
@@ -185,7 +185,7 @@ export default function HospitalPerformancePage() {
       {/* Satisfaction Trend Chart */}
       <Card className="flex flex-col">
         <div className="mb-4">
-          <h3 className="font-bold text-slate-800">Patient Satisfaction Trend</h3>
+          <h3 className="font-bold text-slate-800 font-grotesk">Patient Satisfaction Trend</h3>
           <p className="text-xs text-slate-500">Average rating over last 6 months</p>
         </div>
         <div className="min-h-[200px]">

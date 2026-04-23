@@ -129,13 +129,13 @@ export default function BookingModal({
             )}
           </div>
           <div className="flex-1 min-w-0 relative z-10">
-            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mb-1.5 px-0.5">
+            <h4 className="text-[10px] font-bold text-slate-400  tracking-normal mb-1.5 px-0.5 font-grotesk">
               Primary Practitioner
             </h4>
-            <h4 className="font-bold text-slate-800 text-lg leading-tight tracking-tight uppercase">
+            <h4 className="font-bold text-slate-800 text-lg leading-tight tracking-tight  font-grotesk">
               Dr. {doctor.name}
             </h4>
-            <p className="text-[10px] font-bold text-primary uppercase tracking-normal opacity-80 mt-1">
+            <p className="text-[10px] font-bold text-primary  tracking-normal opacity-80 mt-1">
               {doctor.specialisation}
             </p>
           </div>
@@ -143,7 +143,7 @@ export default function BookingModal({
 
         {/* Clinical Date Selection */}
         <div className="space-y-4">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal flex items-center gap-2 px-1">
+          <label className="text-[10px] font-bold text-slate-400  tracking-normal flex items-center gap-2 px-1">
             <BiCalendar size={14} className="text-primary" /> Selection Period:
             April 2026
           </label>
@@ -169,7 +169,7 @@ export default function BookingModal({
                   }`}
                 >
                   <span
-                    className={`text-[9px] font-bold uppercase tracking-normal ${isSelected ? "text-white/70" : "text-slate-400 opacity-60"}`}
+                    className={`text-[9px] font-bold  tracking-normal ${isSelected ? "text-white/70" : "text-slate-400 opacity-60"}`}
                   >
                     {dayName}
                   </span>
@@ -186,7 +186,7 @@ export default function BookingModal({
 
         {/* Time Slot Selection */}
         <div className="space-y-4">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal flex items-center gap-2 px-1">
+          <label className="text-[10px] font-bold text-slate-400  tracking-normal flex items-center gap-2 px-1">
             <BiTime size={14} className="text-primary" /> Available Clinical
             Intelligence Windows
           </label>
@@ -196,7 +196,7 @@ export default function BookingModal({
                 key={time}
                 variant={selectedTime === time ? "primary" : "ghost"}
                 onClick={() => setSelectedTime(time)}
-                className={`py-4 h-auto rounded-2xl text-[11px] font-bold tracking-normal uppercase transition-all duration-300 !min-w-0 border-none ${
+                className={`py-4 h-auto rounded-2xl text-[11px] font-bold tracking-normal  transition-all duration-300 !min-w-0 border-none ${
                   selectedTime === time
                     ? "shadow-none shadow-primary/30 scale-105"
                     : "bg-slate-50 text-slate-500 hover:text-primary hover:bg-white hover:shadow-none"
@@ -210,7 +210,7 @@ export default function BookingModal({
 
         {/* clinical Concern */}
         <div className="space-y-4">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal flex items-center gap-2 px-1">
+          <label className="text-[10px] font-bold text-slate-400  tracking-normal flex items-center gap-2 px-1">
             <BiCheckCircle size={14} className="text-primary" /> Clinical
             Concern / Chief Complaint
           </label>
@@ -230,7 +230,7 @@ export default function BookingModal({
             variant="ghost"
             onClick={onClose}
             fullWidth
-            className="h-16 rounded-[1.5rem] bg-slate-50 text-slate-400 text-[11px] font-bold uppercase tracking-normal hover:bg-rose-50 hover:text-rose-500 transition-all border-none"
+            className="h-16 rounded-[1.5rem] bg-slate-50 text-slate-400 text-[11px] font-bold  tracking-normal hover:bg-rose-50 hover:text-rose-500 transition-all border-none"
           >
             Abort Booking
           </Button>
@@ -246,7 +246,7 @@ export default function BookingModal({
             }
             iconPosition="right"
             fullWidth
-            className={`h-16 rounded-[1.5rem] text-[11px] font-bold uppercase tracking-normal shadow-none transition-all ${!selectedTime || !concern.trim() ? "bg-slate-100 text-slate-400" : "bg-primary text-white shadow-primary/30"}`}
+            className={`h-16 rounded-[1.5rem] text-[11px] font-bold  tracking-normal shadow-none transition-all ${!selectedTime || !concern.trim() ? "bg-slate-100 text-slate-400" : "bg-primary text-white shadow-primary/30"}`}
           >
             {isSubmitting ? "Syncing Clinical Data..." : "Finalize Appointment"}
           </Button>

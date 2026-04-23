@@ -33,7 +33,7 @@ export default function AboutUs() {
           <div className="flex flex-col col-span-2 justify-between h-full gap-8">
             <div className="flex items-center gap-2">
               <span className="text-secondary font-extrabold text-xl">+</span>
-              <span className="text-secondary font-semibold tracking-normal uppercase text-sm">
+              <span className="text-secondary font-semibold tracking-normal  text-sm">
                 About Us
               </span>
             </div>
@@ -85,7 +85,7 @@ export default function AboutUs() {
                   className="w-full h-full rounded-lg object-cover"
                 />
               </div>
-              <h2 className="text-lg md:text-2xl font-normal text-slate-600 ">
+              <h2 className="text-lg md:text-2xl font-normal text-slate-600  font-grotesk">
                 <span className="font-bold text-primary">24/7 DigiHealth</span>{" "}
                 connects doctors and patients effortlessly, providing smarter,
                 safer, and compassionate healthcare from diagnosis to full
@@ -115,7 +115,7 @@ export default function AboutUs() {
                       Connected Care
                     </div>
                   </div>
-                  <h4 className="text-xl font-semibold text-primary mb-3.75">
+                  <h4 className="text-xl font-semibold text-primary mb-3.75 font-grotesk">
                     Smart Care
                   </h4>
                   <div className="p- rounded-lg text-[0.95rem] text-primary leading-relaxed ">
@@ -146,7 +146,7 @@ export default function AboutUs() {
                       Connected Care
                     </div>
                   </div>
-                  <h4 className="text-xl font-semibold text-primary mb-3.75">
+                  <h4 className="text-xl font-semibold text-primary mb-3.75 font-grotesk">
                     Secure Data
                   </h4>
                   <div className="p- rounded-lg text-[0.95rem] text-primary leading-relaxed ">

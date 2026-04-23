@@ -72,10 +72,10 @@ export default function AITriageAssistant() {
             <BiShieldQuarter size={28} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tighter leading-none mb-1">
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tighter leading-none mb-1 font-grotesk">
               Medius AI Diagnoser
             </h2>
-            <p className="text-[12px] font-bold text-slate-400 uppercase tracking-normal">
+            <p className="text-[12px] font-bold text-slate-400  tracking-normal">
               Rapid Differential Diagnostics
             </p>
           </div>
@@ -134,7 +134,7 @@ export default function AITriageAssistant() {
           <button
             onClick={handleDiagnose}
             disabled={isLoading}
-            className="w-full bg-primary text-white py-4 rounded-2xl font-bold uppercase tracking-normal hover:bg-[#0041a3] hover:shadow-none hover:shadow-primary/30 disabled:opacity-50 disabled:shadow-none transition-all flex items-center justify-center gap-3 active:scale-95"
+            className="w-full bg-primary text-white py-4 rounded-2xl font-bold  tracking-normal hover:bg-[#0041a3] hover:shadow-none hover:shadow-primary/30 disabled:opacity-50 disabled:shadow-none transition-all flex items-center justify-center gap-3 active:scale-95"
           >
             {isLoading ? (
               <BiLoaderCircle className="animate-spin text-xl" />
@@ -148,7 +148,7 @@ export default function AITriageAssistant() {
 
           {diagnoses.length > 0 && (
             <div className="mt-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h3 className="font-bold text-lg mb-4 text-slate-800 flex items-center gap-2">
+              <h3 className="font-bold text-lg mb-4 text-slate-800 flex items-center gap-2 font-grotesk">
                 <BiPulse className="text-primary" /> Possible Differential
                 Conditions
               </h3>
@@ -163,7 +163,7 @@ export default function AITriageAssistant() {
                       <span className="font-bold text-slate-800 block text-sm mb-1">
                         {dx.disease}
                       </span>
-                      <p className="text-xs font-bold text-slate-400 bg-white px-2 py-1 rounded inline-block uppercase tracking-wider shadow-none">
+                      <p className="text-xs font-bold text-slate-400 bg-white px-2 py-1 rounded inline-block  tracking-wider shadow-none">
                         SNOMED CT: {dx.snomedId}
                       </p>
                     </div>

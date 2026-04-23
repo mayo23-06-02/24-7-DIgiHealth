@@ -71,7 +71,7 @@ export default function HospitalDashboard() {
     <div className="w-full pb-10 flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Facility Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Facility Dashboard</h1>
         <p className="text-sm text-slate-500 mt-1">Overview of today's operations</p>
       </div>
 
@@ -110,7 +110,7 @@ export default function HospitalDashboard() {
         {/* Consultation Volume Chart */}
         <Card className="lg:col-span-4 min-h-[350px] flex flex-col">
           <div className="mb-4">
-            <h3 className="font-bold text-slate-800">Consultation Volume</h3>
+            <h3 className="font-bold text-slate-800 font-grotesk">Consultation Volume</h3>
             <p className="text-xs text-slate-500">Last 6 months</p>
           </div>
           <div className="flex-1 w-full relative min-h-[250px]">
@@ -153,7 +153,7 @@ export default function HospitalDashboard() {
 
         {/* Upcoming Appointments */}
         <Card className="lg:col-span-2 flex flex-col">
-          <h3 className="font-bold text-slate-800 mb-4">Upcoming Appointments</h3>
+          <h3 className="font-bold text-slate-800 mb-4 font-grotesk">Upcoming Appointments</h3>
           {upcomingAppointments?.length > 0 ? (
             <div className="space-y-3">
               {upcomingAppointments.map((app: any, i: number) => (

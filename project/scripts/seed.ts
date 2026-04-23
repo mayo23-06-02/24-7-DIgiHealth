@@ -168,7 +168,7 @@ async function seed() {
         phone: faker.phone.number({ style: 'international' }),
         relationship: pickOne(["Spouse", "Parent", "Child", "Sibling"])
       },
-      medicalAid: faker.datatype.boolean() ? { provider: pickOne(["Discovery Health", "Bonitas", "GEMS", "Bestmed"]), planName: pickOne(["Classic", "Smart", "Comprehensive"]), memberNumber: faker.string.alphanumeric(10).toUpperCase() } : undefined,
+      medicalAid: faker.datatype.boolean() ? { provider: pickOne(["Discovery Health", "Bonitas", "GEMS", "Bestmed"]), planName: pickOne(["Classic", "Smart", "Comprehensive"]), memberNumber: faker.string.alphanumeric(10).to() } : undefined,
       subscriptionTier: pickOne(['free', 'pro']),
       popiaConsentDate: subDays(new Date(), randInt(1, 365))
     });
@@ -411,7 +411,7 @@ async function seed() {
         type: 'medical_aid',
         isDefault: false,
         medicalAidProvider: pickOne(['Discovery Health', 'Bonitas', 'GEMS']),
-        medicalAidNumber: faker.string.alphanumeric(10).toUpperCase()
+        medicalAidNumber: faker.string.alphanumeric(10).to()
       });
     }
 

@@ -35,7 +35,7 @@ const WeekCalendar: React.FC<WeekCalendarProps> = ({
   return (
     <Card className="flex flex-col gap-4 overflow-visible" variant="glass">
       <div className="flex items-center justify-between px-2">
-        <h3 className="text-lg font-medium text-slate-900 tracking-tight">
+        <h3 className="text-lg font-medium text-slate-900 tracking-tight font-grotesk">
           {viewDate.toLocaleString("default", {
             month: "long",
             year: "numeric",
@@ -75,7 +75,7 @@ const WeekCalendar: React.FC<WeekCalendarProps> = ({
               ${isSelected(day) ? "bg-primary text-white shadow-none shadow-primary/30 scale-105" : "hover:bg-slate-50 text-slate-400"}
             `}
           >
-            <span className="text-xs font-bold uppercase tracking-normal mb-1 opacity-60">
+            <span className="text-xs font-bold  tracking-normal mb-1 opacity-60">
               {day.toLocaleString("default", { weekday: "short" })}
             </span>
             <span className="text-lg font-bold tracking-tighter leading-none">

@@ -111,11 +111,11 @@ export default function Testimonials() {
         <div className="flex flex-col items-center gap-4 mb-10 relative z-10">
           <div className="flex items-center gap-2">
             <span className="text-primary font-extrabold text-xl">✦</span>
-            <span className="text-primary font-semibold tracking-normal uppercase text-sm">
+            <span className="text-primary font-semibold tracking-normal  text-sm">
               Testimonials
             </span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-medium text-primary tracking-tight max-w-4xl leading-tight">
+          <h2 className="text-3xl md:text-4xl font-medium text-primary tracking-tight max-w-4xl leading-tight font-grotesk">
             Real Stories, Real Healing — From Our Community
           </h2>
           <p className="text-lg text-slate-600 max-w-3xl mt-4 ">
@@ -192,7 +192,7 @@ export default function Testimonials() {
                       }`}
                     >
                       <div>
-                        <h3 className="text-xl font-semibold text-primary mb-10">
+                        <h3 className="text-xl font-semibold text-primary mb-10 font-grotesk">
                           {item.title}
                         </h3>
                         <p className="text-slate-500 text-[1.05rem] leading-relaxed">
@@ -208,7 +208,7 @@ export default function Testimonials() {
                             className="w-12 h-12 rounded-lg object-cover border-2 border-slate-50"
                           />
                           <div>
-                            <h4 className="text-primary font-semibold text-sm">
+                            <h4 className="text-primary font-semibold text-sm font-grotesk">
                               {item.name}
                             </h4>
                             <p className="text-slate-400 text-xs">
@@ -256,7 +256,7 @@ export default function Testimonials() {
 
                       <div className="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end">
                         <div className="text-left">
-                          <h4 className="text-white font-semibold text-lg">
+                          <h4 className="text-white font-semibold text-lg font-grotesk">
                             {item.name}
                           </h4>
                           <p className="text-white/80 text-sm font-medium">

@@ -55,7 +55,6 @@ const roleConfig: Record<
       "Facility Media",
     ],
   },
-
 };
 
 // ─── Skippable steps (no validation required) ────────────────────────────────
@@ -159,6 +158,8 @@ function validateStep(
     const cleanMobile = formData.mobile?.replace(/\s+/g, "");
     if (!cleanMobile?.match(/^(\+27|0)[6-8][0-9]{8}$/))
       err.mobile = "Enter a valid SA mobile number.";
+    if (!formData.email?.trim() || !formData.email.includes("@"))
+      err.email = "A valid email address is required.";
   }
   if (role === "practitioner" && step === 1) {
     if (!formData.hpcsaNumber?.match(/^[A-Z]{2}\d{5,7}$/))
@@ -179,6 +180,12 @@ function validateStep(
     const cleanMobile = formData.mobile?.replace(/\s+/g, "");
     if (!cleanMobile?.match(/^(\+27|0)[6-8][0-9]{8}$/))
       err.mobile = "Enter a valid SA mobile number.";
+    if (!formData.email?.trim() || !formData.email.includes("@"))
+      err.email = "A valid email address is required.";
+  }
+  if (role === "hospital" && step === 2) {
+    if (!formData.adminEmail?.trim() || !formData.adminEmail.includes("@"))
+      err.adminEmail = "A valid work email address is required.";
   }
   // POPIA step: patient step 2
   if (role === "patient" && step === 2) {
@@ -336,7 +343,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
     >
       {/* Offline banner */}
       {!isOnline && (
-        <div className="bg-amber-500 text-white text-center text-xs font-bold uppercase tracking-normal py-3 px-6">
+        <div className="bg-amber-500 text-white text-center text-xs font-bold  tracking-normal py-3 px-6">
           You are offline — progress saved locally. Go online to submit.
         </div>
       )}
@@ -367,11 +374,11 @@ export default function RegistrationWizard({ role }: { role: string }) {
           <div className="py-5 flex flex-col gap-[10px]">
             <div className="inline-flex items-center gap-2 px-[10px] py-[5px] rounded-full  mb-[15px]">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              <span className="text-xs  text-primary uppercase tracking-normal">
+              <span className="text-xs  text-primary  tracking-normal">
                 {config.label} Registry
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-medium text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-2xl md:text-3xl font-medium text-slate-900 tracking-tight leading-tight font-grotesk">
               {config.steps[step - 1]} <br />
               <span className="font-bold text-primary">
                 {config.label} Application
@@ -379,7 +386,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
             </h2>
           </div>
           <div className="text-right shrink-0 ml-6">
-            <p className="text-xs text-slate-300 uppercase tracking-normal mb-[5px]">
+            <p className="text-xs text-slate-300  tracking-normal mb-[5px]">
               Progress
             </p>
             <p className="text-3xl font-semibold text-primary leading-none">
@@ -400,7 +407,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
                 className={`h-1 w-full rounded-full transition-all duration-500 ${i < step ? "bg-primary" : "bg-slate-100"}`}
               />
               <span
-                className={`text-xs font-bold uppercase tracking-wider hidden md:block transition-colors ${i + 1 === step ? "text-primary" : "text-slate-300"}`}
+                className={`text-xs font-bold  tracking-wider hidden md:block transition-colors ${i + 1 === step ? "text-primary" : "text-slate-300"}`}
               >
                 {label}
               </span>

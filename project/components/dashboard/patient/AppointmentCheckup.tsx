@@ -39,7 +39,7 @@ export default function AppointmentCheckup() {
     <div className="space-y-8 flex-1">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h2 className="text-3xl font-bold text-slate-800 tracking-tighter leading-none">
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tighter leading-none font-grotesk">
             Regular Checkup Schedule
           </h2>
           <div className="flex items-center gap-2 text-primary font-bold text-sm cursor-pointer hover:underline bg-primary/5 px-4 py-2 rounded-lg">
@@ -64,7 +64,7 @@ export default function AppointmentCheckup() {
             className={`min-w-[120px] p-6 text-center rounded-lg border transition-all cursor-pointer group ${i === 4 ? "bg-primary border-primary text-white" : "bg-white border-slate-50 text-slate-400 hover:border-primary/30 hover:text-slate-800"}`}
           >
             <p
-              className={`text-xs font-bold uppercase mb-3 tracking-normal ${i === 4 ? "text-white/60" : "text-slate-300 group-hover:text-primary/50"}`}
+              className={`text-xs font-bold  mb-3 tracking-normal ${i === 4 ? "text-white/60" : "text-slate-300 group-hover:text-primary/50"}`}
             >
               {
                 [
@@ -111,12 +111,12 @@ export default function AppointmentCheckup() {
                 </div>
               </div>
               <div>
-                <h4 className="text-lg font-bold text-slate-800 leading-tight mb-1 group-hover:text-primary transition-colors">
+                <h4 className="text-lg font-bold text-slate-800 leading-tight mb-1 group-hover:text-primary transition-colors font-grotesk">
                   {appt.dr}
                 </h4>
                 <div className="flex items-center gap-2 mb-2">
                   <BiPulse className="text-rose-500 animate-pulse" />
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <span className="text-xs font-bold text-slate-400  tracking-normal">
                     {appt.field}
                   </span>
                 </div>
@@ -130,7 +130,7 @@ export default function AppointmentCheckup() {
               "{appt.concern}"
             </p>
 
-            <button className="w-full py-5 bg-primary/5 text-primary border-2 border-primary/10 rounded-lg font-bold text-xs uppercase tracking-normal flex items-center justify-center gap-4 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300 active:scale-95">
+            <button className="w-full py-5 bg-primary/5 text-primary border-2 border-primary/10 rounded-lg font-bold text-xs  tracking-normal flex items-center justify-center gap-4 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300 active:scale-95">
               <img
                 src="https://www.gstatic.com/images/branding/product/1x/meet_2020q4_48dp.png"
                 className="w-6 h-6 opacity-80 group-hover:brightness-0 group-hover:invert transition-all"

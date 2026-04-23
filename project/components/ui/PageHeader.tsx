@@ -28,7 +28,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     className={`flex flex-col md:flex-row md:items-center justify-between gap-4 ${className}`}
   >
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+      <h2 className="text-2xl font-bold text-slate-800 tracking-tight font-grotesk">
         {title}
       </h2>
       {subtitle && (

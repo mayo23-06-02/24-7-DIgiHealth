@@ -85,7 +85,7 @@ export const ImageUploader: React.FC<UploaderProps> = ({
               alt="Preview"
               className="w-[120px] h-[120px] rounded-2xl object-cover shadow-none mx-auto ring-4 ring-white"
             />
-            <div className="text-sm font-bold text-primary mt-6 tracking-normal uppercase">
+            <div className="text-sm font-bold text-primary mt-6 tracking-normal ">
               Image Selected ✓
             </div>
           </div>
@@ -113,7 +113,7 @@ export const ImageUploader: React.FC<UploaderProps> = ({
       </div>
 
       {error && (
-        <p className="text-red-500 text-xs font-bold uppercase tracking-normal">
+        <p className="text-red-500 text-xs font-bold  tracking-normal">
           {error}
         </p>
       )}
@@ -175,7 +175,7 @@ export const PDFUploader: React.FC<UploaderProps> = ({
           <div className="flex items-center gap-4 text-primary font-bold">
             <div className="text-2xl">📄</div>
             <div className="flex flex-col">
-              <span className="text-xs opacity-50 uppercase tracking-normal">
+              <span className="text-xs opacity-50  tracking-normal">
                 Selected PDF
               </span>
               <span className="truncate max-w-[200px]">{fileName}</span>
@@ -184,13 +184,13 @@ export const PDFUploader: React.FC<UploaderProps> = ({
         ) : (
           <div className="text-center opacity-40">
             <span className="text-2xl mb-1 block">📑</span>
-            <span className="text-sm font-bold uppercase tracking-normal">
+            <span className="text-sm font-bold  tracking-normal">
               Add PDF Document
             </span>
           </div>
         )}
         {isUploading && (
-          <span className="mt-4 animate-pulse text-xs text-primary font-bold uppercase">
+          <span className="mt-4 animate-pulse text-xs text-primary font-bold ">
             Uploading...
           </span>
         )}

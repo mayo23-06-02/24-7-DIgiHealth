@@ -35,11 +35,11 @@ export default function AboutPage() {
 
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10 flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
           <div className="lg:w-1/2 flex flex-col items-start text-left">
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#005A9C]/5 text-[#005A9C] font-semibold text-sm tracking-normal uppercase mb-8 border border-[#005A9C]/10">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#005A9C]/5 text-[#005A9C] font-semibold text-sm tracking-normal  mb-8 border border-[#005A9C]/10">
               <span className="w-2 h-2 rounded-lg bg-[#36b1d4] animate-pulse"></span>
               Our Identity
             </div>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.1] mb-8 tracking-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[1.1] mb-8 tracking-tight font-grotesk">
               We Are Here to Make Healthcare Work for{" "}
               <span className="text-transparent bg-clip-text bg-linear-to-r from-[#005A9C] to-[#36b1d4]">
                 Every South African.
@@ -87,7 +87,7 @@ export default function AboutPage() {
             <div className="absolute bottom-8 left-8 right-8 p-8 rounded-lg bg-white/10 backdrop-blur-xl border border-white/30 z-20 transition-transform duration-500 group-hover:-translate-y-2">
               <p className="text-white font-medium text-2xl italic leading-snug">
                 "I am because we are." <br />
-                <span className="text-[0.85rem] font-bold opacity-100 not-italic mt-4 inline-flex items-center gap-2 uppercase tracking-normal text-[#005A9C] bg-white px-4 py-2 rounded-lg">
+                <span className="text-[0.85rem] font-bold opacity-100 not-italic mt-4 inline-flex items-center gap-2  tracking-normal text-[#005A9C] bg-white px-4 py-2 rounded-lg">
                   <span className="w-1.5 h-1.5 rounded-lg bg-[#36b1d4]"></span>
                   The spirit of Ubuntu
                 </span>
@@ -104,7 +104,7 @@ export default function AboutPage() {
             <span className="text-[#36b1d4] font-bold text-2xl mb-4 block animate-bounce">
               ✦
             </span>
-            <h2 className="text-4xl md:text-[3.5rem] font-bold text-slate-900 mb-6 tracking-tight">
+            <h2 className="text-4xl md:text-[3.5rem] font-bold text-slate-900 mb-6 tracking-tight font-grotesk">
               Our Story & Why We Exist
             </h2>
             <div className="w-24 h-1.5 bg-linear-to-r from-[#005A9C] to-[#36b1d4] mx-auto rounded-full"></div>
@@ -181,7 +181,7 @@ export default function AboutPage() {
                 <div className="w-16 h-16 rounded-lg bg-[#36b1d4]/20 border border-[#36b1d4]/30 flex items-center justify-center text-[#36b1d4] text-3xl group-hover:scale-110 group-hover:bg-[#36b1d4] group-hover:text-white transition-all">
                   <FiTarget />
                 </div>
-                <h3 className="text-4xl font-bold">Our Mission</h3>
+                <h3 className="text-4xl font-bold font-grotesk">Our Mission</h3>
               </div>
               <p className="text-xl md:text-[1.35rem] leading-relaxed text-white/80 font-light">
                 To democratize healthcare in South Africa by providing every
@@ -200,7 +200,7 @@ export default function AboutPage() {
                 <div className="w-16 h-16 rounded-lg bg-white/20 border border-white/30 flex items-center justify-center text-white text-3xl group-hover:scale-110 group-hover:bg-white group-hover:text-[#005A9C] transition-all">
                   <FiEye />
                 </div>
-                <h3 className="text-4xl font-bold">Our Vision</h3>
+                <h3 className="text-4xl font-bold font-grotesk">Our Vision</h3>
               </div>
               <p className="text-xl md:text-[1.35rem] leading-relaxed text-white/90 font-light">
                 A South Africa where the first step to better health is not a
@@ -221,7 +221,7 @@ export default function AboutPage() {
       <section className="py-32 bg-white border-b border-slate-100">
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
           <div className="max-w-4xl mx-auto text-center mb-24">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-8 tracking-tight">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-8 tracking-tight font-grotesk">
               The 24/7 TeleHealth Difference
             </h2>
             <p className="text-xl text-slate-600 font-medium leading-relaxed">
@@ -278,7 +278,7 @@ export default function AboutPage() {
                 >
                   <feature.icon />
                 </div>
-                <h4 className="text-2xl font-bold text-slate-900 mb-4">
+                <h4 className="text-2xl font-bold text-slate-900 mb-4 font-grotesk">
                   {feature.title}
                 </h4>
                 <p className="text-slate-600 text-[1.1rem] leading-relaxed font-medium">
@@ -300,10 +300,10 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10">
           <div className="flex flex-col lg:flex-row gap-20 items-center">
             <div className="lg:w-5/12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#36b1d4]/10 border border-[#36b1d4]/20 text-[#36b1d4] font-semibold text-sm tracking-normal uppercase mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#36b1d4]/10 border border-[#36b1d4]/20 text-[#36b1d4] font-semibold text-sm tracking-normal  mb-8">
                 Built for Everyone
               </div>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-[1.1] tracking-tight">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-[1.1] tracking-tight font-grotesk">
                 Our Technology <br /> & Infrastructure
               </h2>
               <p className="text-xl text-slate-300 mb-12 leading-relaxed font-light">
@@ -353,7 +353,7 @@ export default function AboutPage() {
                   <div className="text-5xl text-[#36b1d4] mb-6 group-hover:scale-110 transition-transform origin-left">
                     <tech.icon />
                   </div>
-                  <h4 className="text-2xl font-bold mb-4 text-white">
+                  <h4 className="text-2xl font-bold mb-4 text-white font-grotesk">
                     {tech.title}
                   </h4>
                   <p className="text-slate-400 text-lg leading-relaxed font-light">
@@ -372,7 +372,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] bg-[size:30px_30px]"></div>
 
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-20 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-20 tracking-tight font-grotesk">
             Our Projected Impact (2026)
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
@@ -389,7 +389,7 @@ export default function AboutPage() {
                 <span className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-linear-to-b from-white to-white/70 mb-4">
                   {stat.val}
                 </span>
-                <span className="text-lg text-[#36b1d4] font-bold uppercase tracking-normal">
+                <span className="text-lg text-[#36b1d4] font-bold  tracking-normal">
                   {stat.label}
                 </span>
               </div>
@@ -402,7 +402,7 @@ export default function AboutPage() {
       <section className="py-32 bg-slate-50">
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-4xl md:text-[3.5rem] font-bold text-slate-900 mb-6 tracking-tight">
+            <h2 className="text-4xl md:text-[3.5rem] font-bold text-slate-900 mb-6 tracking-tight font-grotesk">
               Meet the Team Behind the Mission
             </h2>
             <p className="text-xl text-slate-600 font-medium leading-relaxed">
@@ -443,10 +443,10 @@ export default function AboutPage() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                 </div>
-                <h3 className="text-3xl font-bold text-slate-900 mb-2">
+                <h3 className="text-3xl font-bold text-slate-900 mb-2 font-grotesk">
                   {member.name}
                 </h3>
-                <h4 className="text-[#36b1d4] font-bold tracking-normal uppercase text-sm mb-6">
+                <h4 className="text-[#36b1d4] font-bold tracking-normal  text-sm mb-6 font-grotesk">
                   {member.role}
                 </h4>
                 <p className="text-slate-600 text-lg leading-relaxed font-medium">
@@ -464,7 +464,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-20 xl:gap-32 items-center">
             {/* Regulatory */}
             <div className="bg-slate-50 p-10 md:p-14 rounded-lg border border-slate-100">
-              <h3 className="text-4xl font-bold text-slate-900 mb-6 tracking-tight">
+              <h3 className="text-4xl font-bold text-slate-900 mb-6 tracking-tight font-grotesk">
                 Regulatory Compliance
               </h3>
               <p className="text-slate-600 text-xl mb-10 leading-relaxed font-medium">
@@ -491,10 +491,10 @@ export default function AboutPage() {
             </div>
             {/* Partners */}
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#005A9C]/10 text-[#005A9C] font-semibold text-sm tracking-normal uppercase mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#005A9C]/10 text-[#005A9C] font-semibold text-sm tracking-normal  mb-6">
                 Collaboration
               </div>
-              <h3 className="text-4xl font-bold text-slate-900 mb-6 tracking-tight">
+              <h3 className="text-4xl font-bold text-slate-900 mb-6 tracking-tight font-grotesk">
                 Our Partners
               </h3>
               <p className="text-slate-600 text-xl mb-12 leading-relaxed font-medium">
@@ -524,7 +524,7 @@ export default function AboutPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#005A9C]/10 blur-[150px] opacity-80 pointer-events-none"></div>
 
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10">
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight font-grotesk">
             Join Us on Our Journey
           </h2>
           <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto mb-20 font-light">
@@ -563,7 +563,7 @@ export default function AboutPage() {
                 className="p-10 rounded-lg bg-white/5 backdrop-blur-sm text-left border border-white/10 hover:bg-white/10 hover:border-[#36b1d4]/50 hover:-translate-y-2 transition-all duration-300 group flex flex-col justify-between h-full min-h-[300px]"
               >
                 <div>
-                  <h4 className="text-3xl font-bold text-white mb-4">
+                  <h4 className="text-3xl font-bold text-white mb-4 font-grotesk">
                     {box.title}
                   </h4>
                   <p className="text-slate-400 text-lg leading-relaxed mb-8">

@@ -102,7 +102,7 @@ export default function AITriageChat({
           isTyping={isTyping}
         />
         <div className="text-center mt-6">
-          <p className="text-xs font-bold text-slate-300 uppercase tracking-normal">
+          <p className="text-xs font-bold text-slate-300  tracking-normal">
             Emergency? Call <span className="text-red-500">112</span> or{" "}
             <span className="text-red-500">10177</span> immediately.
           </p>

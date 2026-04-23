@@ -98,13 +98,13 @@ function LoginFormComponent() {
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-primary font-extrabold text-xl">+</span>
           </div>
-          <span className="text-primary font-bold tracking-normal uppercase text-xs">
+          <span className="text-primary font-bold tracking-normal  text-xs">
             Secure Portal Access
           </span>
         </div>
 
         <div className="mb-12 my-5 gap-2.5">
-          <h2 className="text-4xl md:text-4xl font-medium text-slate-900 leading-[0.95] tracking-tighter mb-2.5">
+          <h2 className="text-4xl md:text-4xl font-medium text-slate-900 leading-[0.95] tracking-tighter mb-2.5 font-grotesk">
             Welcome back to{" "}
             <span className="text-primary font-bold">24/7 Care</span>
           </h2>
@@ -150,7 +150,7 @@ function LoginFormComponent() {
               type="submit"
               fullWidth
               disabled={loading}
-              className="py-5 text-base tracking-normal uppercase font-bold"
+              className="py-5 text-base tracking-normal  font-bold"
             >
               {loading ? "Verifying..." : "Verify & Login"}
             </Button>
@@ -217,7 +217,7 @@ function LoginFormComponent() {
                 type="submit"
                 fullWidth
                 disabled={loading}
-                className="py-5 text-base tracking-normal uppercase font-bold"
+                className="py-5 text-base tracking-normal  font-bold"
               >
                 {loading ? "Authenticating..." : "Login"}
               </Button>
@@ -277,7 +277,7 @@ function LoginFormComponent() {
         <div className="absolute inset-x-0 bottom-16 px-16 text-white space-y-6 p-10">
           <div className="w-16 h-px bg-white/40 mb-5"></div>
 
-          <h3 className="text-4xl font-bold  tracking-tighter">
+          <h3 className="text-4xl font-bold  tracking-tighter font-grotesk">
             Smart Healthcare <br /> for a Digital World
           </h3>
           <p className="text-white/80 font-light leading-relaxed max-w-md mb-2.5">
@@ -287,14 +287,14 @@ function LoginFormComponent() {
           <div className="flex items-center gap-6 mt-12 pt-8 border-t border-white/10">
             <div className="flex flex-col">
               <span className="text-2xl font-bold">20k+</span>
-              <span className="text-xs uppercase font-bold tracking-normal opacity-60">
+              <span className="text-xs  font-bold tracking-normal opacity-60">
                 Patients Joined
               </span>
             </div>
             <div className="w-px h-8 bg-white/10"></div>
             <div className="flex flex-col">
               <span className="text-2xl font-bold">9 Provinces</span>
-              <span className="text-xs uppercase font-bold tracking-normal opacity-60">
+              <span className="text-xs  font-bold tracking-normal opacity-60">
                 Country Coverage
               </span>
             </div>

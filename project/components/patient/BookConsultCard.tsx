@@ -30,7 +30,7 @@ export default function BookConsultCard({ isOnline, pushToQueue }: { isOnline: b
          <div className="w-12 h-12 rounded-full bg-supportive-teal/10 text-supportive-teal flex items-center justify-center text-2xl">
            <FiVideo />
          </div>
-         <h3 className="text-2xl font-bold text-slate-800">Virtual Care</h3>
+         <h3 className="text-2xl font-bold text-slate-800 font-grotesk">Virtual Care</h3>
       </div>
       
       <p className="text-slate-600 font-medium mb-8">Connect with an HPCSA registered doctor immediately via secure video call.</p>

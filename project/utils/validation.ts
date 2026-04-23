@@ -35,7 +35,7 @@ export function validateSaId(idNumber: string): boolean {
  */
 export function validateHpcsa(number: string): boolean {
   const hpcsaRegex = /^[A-Z]{2}\d{6}$/;
-  return hpcsaRegex.test(number.toUpperCase());
+  return hpcsaRegex.test(number.to());
 }
 
 /**

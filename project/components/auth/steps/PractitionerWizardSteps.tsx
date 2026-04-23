@@ -27,7 +27,7 @@ export function PractitionerStep1({ formData, updateData, errors }: any) {
         className="inline-flex items-center gap-2 px-4 py-2  mb-2"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-        <span className="text-xs text-primary uppercase tracking-normal">
+        <span className="text-xs text-primary  tracking-normal">
           Medical Credentials
         </span>
       </div>
@@ -37,9 +37,7 @@ export function PractitionerStep1({ formData, updateData, errors }: any) {
           label="HPCSA Registration Number *"
           value={formData.hpcsaNumber || ""}
           error={errors?.hpcsaNumber}
-          onChange={(e) =>
-            updateData("hpcsaNumber", e.target.value.toUpperCase())
-          }
+          onChange={(e) => updateData("hpcsaNumber", e.target.value.to())}
           placeholder="e.g. MP123456"
           className="md:col-span-2"
         />
@@ -239,7 +237,7 @@ export function PractitionerStep4({ formData, updateData }: any) {
   ];
   return (
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
-      <h3 className=" font-semibold text-slate-900  ">Earnings Account *</h3>
+      <h3 className=" font-semibold text-slate-900   font-grotesk">Earnings Account *</h3>
       <div className="bg-slate-200 rounded-lg p-10 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="md:col-span-2 space-y-2">

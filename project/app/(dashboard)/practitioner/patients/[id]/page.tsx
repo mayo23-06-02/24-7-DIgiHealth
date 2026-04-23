@@ -216,7 +216,7 @@ export default function PatientProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 gap-4">
         <BiLoader className="animate-spin text-primary" size={40} />
-        <p className="text-sm font-bold text-slate-400 uppercase tracking-normal">
+        <p className="text-sm font-bold text-slate-400  tracking-normal">
           Retrieving Health Record...
         </p>
       </div>
@@ -232,7 +232,7 @@ export default function PatientProfilePage() {
         <div className="space-y-4">
           <Link
             href="/practitioner"
-            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-normal text-slate-400 hover:text-primary transition-all group"
+            className="inline-flex items-center gap-2 text-xs font-bold  tracking-normal text-slate-400 hover:text-primary transition-all group"
           >
             <BiArrowBack
               className="group-hover:-translate-x-1 transition-transform"
@@ -244,7 +244,7 @@ export default function PatientProfilePage() {
             <Avatar name={patient.fullName} size="xl" />
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight font-grotesk">
                   {patient.fullName}
                 </h1>
                 <Badge
@@ -255,9 +255,8 @@ export default function PatientProfilePage() {
                 </Badge>
               </div>
               <p className="text-slate-500 font-medium mt-1">
-                {patient.gender.charAt(0).toUpperCase() +
-                  patient.gender.slice(1)}{" "}
-                · {age} Years Old · Ref: #{patient.id.slice(-6)}
+                {patient.gender.charAt(0).to() + patient.gender.slice(1)} ·{" "}
+                {age} Years Old · Ref: #{patient.id.slice(-6)}
               </p>
             </div>
           </div>
@@ -272,7 +271,7 @@ export default function PatientProfilePage() {
             <BiChat className="text-primary" size={20} />
             {actionLoading ? "Loading..." : "Messenger"}
           </button>
-          <button className="px-5 py-3 rounded-2xl bg-primary text-white font-bold text-xs uppercase tracking-normal flex items-center gap-2 hover:bg-primary/90 transition-all shadow-none shadow-primary/20 active:scale-95">
+          <button className="px-5 py-3 rounded-2xl bg-primary text-white font-bold text-xs  tracking-normal flex items-center gap-2 hover:bg-primary/90 transition-all shadow-none shadow-primary/20 active:scale-95">
             <BiVideo size={18} />
             Telehealth Session
           </button>
@@ -295,13 +294,13 @@ export default function PatientProfilePage() {
           {/* 3D Body Mapping - Primary focus */}
           <Card className="p-0 overflow-hidden h-[600px] relative">
             <div className="absolute top-8 left-8 z-10">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-normal flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-800  tracking-normal flex items-center gap-2 font-grotesk">
                 <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <BiPulse size={18} />
                 </div>
                 Anatomical Inspection
               </h3>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-normal mt-2 ml-10">
+              <p className="text-xs text-slate-400 font-bold  tracking-normal mt-2 ml-10">
                 Patient Symptom Annotations
               </p>
             </div>
@@ -318,10 +317,10 @@ export default function PatientProfilePage() {
           <Card noPadding>
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-800">
+                <h3 className="text-base font-bold text-slate-800 font-grotesk">
                   Clinical Timeline
                 </h3>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-normal mt-0.5">
+                <p className="text-xs text-slate-400 font-bold  tracking-normal mt-0.5">
                   Historical Consultations & Outcomes
                 </p>
               </div>
@@ -356,29 +355,29 @@ export default function PatientProfilePage() {
                             { day: "2-digit", month: "short" },
                           )}
                         </p>
-                        <p className="text-xs font-bold text-slate-400 uppercase">
+                        <p className="text-xs font-bold text-slate-400 ">
                           {new Date(c.scheduledStart).getFullYear()}
                         </p>
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-slate-800 text-sm truncate">
+                          <h4 className="font-bold text-slate-800 text-sm truncate font-grotesk">
                             {c.reason}
                           </h4>
                           <span
-                            className={`px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-tighter ${c.status === "completed" ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}
+                            className={`px-2 py-1 rounded-lg text-xs font-bold  tracking-tighter ${c.status === "completed" ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}
                           >
                             {c.status}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 mt-1.5">
-                          <div className="flex items-center gap-1 text-xs font-bold text-slate-400 uppercase">
+                          <div className="flex items-center gap-1 text-xs font-bold text-slate-400 ">
                             <BiVideo className="text-primary" />
                             {c.type} Session
                           </div>
                           <div className="w-1 h-1 rounded-full bg-slate-200" />
-                          <div className="flex items-center gap-1 text-xs font-bold text-slate-400 uppercase">
+                          <div className="flex items-center gap-1 text-xs font-bold text-slate-400 ">
                             <BiTime />
                             30 Minutes
                           </div>
@@ -411,7 +410,7 @@ export default function PatientProfilePage() {
                     {expandedConsult === c.id && c.soapNotes && (
                       <div className="px-6 pb-6 bg-slate-50/50 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2">
                         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-none">
-                          <p className="text-xs font-bold uppercase text-primary tracking-normal mb-2">
+                          <p className="text-xs font-bold  text-primary tracking-normal mb-2">
                             Subjective
                           </p>
                           <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -419,7 +418,7 @@ export default function PatientProfilePage() {
                           </p>
                         </div>
                         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-none">
-                          <p className="text-xs font-bold uppercase text-cyan-600 tracking-normal mb-2">
+                          <p className="text-xs font-bold  text-cyan-600 tracking-normal mb-2">
                             Objective
                           </p>
                           <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -427,7 +426,7 @@ export default function PatientProfilePage() {
                           </p>
                         </div>
                         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-none">
-                          <p className="text-xs font-bold uppercase text-purple-600 tracking-normal mb-2">
+                          <p className="text-xs font-bold  text-purple-600 tracking-normal mb-2">
                             Assessment
                           </p>
                           <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -435,7 +434,7 @@ export default function PatientProfilePage() {
                           </p>
                         </div>
                         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-none">
-                          <p className="text-xs font-bold uppercase text-emerald-600 tracking-normal mb-2">
+                          <p className="text-xs font-bold  text-emerald-600 tracking-normal mb-2">
                             Plan
                           </p>
                           <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -455,7 +454,7 @@ export default function PatientProfilePage() {
         <div className="lg:col-span-4 space-y-8">
           {/* Summary Stats */}
           <Card className="bg-slate-900 border-none">
-            <h3 className="text-blue-400 text-xs font-bold uppercase tracking-normal mb-4">
+            <h3 className="text-blue-400 text-xs font-bold  tracking-normal mb-4 font-grotesk">
               Vitals Summary
             </h3>
             <div className="space-y-4">
@@ -494,7 +493,7 @@ export default function PatientProfilePage() {
                   </div>
                   <p className="text-xs font-bold text-white/70">Risk Status</p>
                 </div>
-                <span className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
+                <span className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold ">
                   Normal
                 </span>
               </div>
@@ -504,12 +503,12 @@ export default function PatientProfilePage() {
           {/* Medical History */}
           <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
-              <h3 className="text-xs font-bold uppercase text-slate-400 tracking-normal leading-none">
+              <h3 className="text-xs font-bold  text-slate-400 tracking-normal leading-none font-grotesk">
                 Clinical Background
               </h3>
               <button
                 onClick={() => setIsUpdateModalOpen(true)}
-                className="flex items-center gap-1 text-xs font-bold uppercase text-primary hover:underline"
+                className="flex items-center gap-1 text-xs font-bold  text-primary hover:underline"
               >
                 <BiEditAlt size={12} /> Update
               </button>
@@ -519,7 +518,7 @@ export default function PatientProfilePage() {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <BiPulse className="text-primary" size={18} />
-                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-normal">
+                  <h4 className="text-xs font-bold text-slate-800  tracking-normal font-grotesk">
                     Chronic Conditions
                   </h4>
                 </div>
@@ -543,7 +542,7 @@ export default function PatientProfilePage() {
               <div className="pt-6 border-t border-slate-50">
                 <div className="flex items-center gap-2 mb-3">
                   <BiError className="text-rose-500" size={18} />
-                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-normal">
+                  <h4 className="text-xs font-bold text-slate-800  tracking-normal font-grotesk">
                     Allergies
                   </h4>
                 </div>
@@ -567,7 +566,7 @@ export default function PatientProfilePage() {
               <div className="pt-6 border-t border-slate-50">
                 <div className="flex items-center gap-2 mb-3">
                   <BiCapsule className="text-purple-500" size={18} />
-                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-normal">
+                  <h4 className="text-xs font-bold text-slate-800  tracking-normal font-grotesk">
                     Active Medications
                   </h4>
                 </div>
@@ -592,7 +591,7 @@ export default function PatientProfilePage() {
               <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center">
                 <BiPhone size={18} />
               </div>
-              <h4 className="text-xs font-bold text-rose-900 uppercase tracking-normal">
+              <h4 className="text-xs font-bold text-rose-900  tracking-normal font-grotesk">
                 Emergency Line
               </h4>
             </div>
@@ -600,7 +599,7 @@ export default function PatientProfilePage() {
               <p className="text-sm font-bold text-slate-800">
                 {patient.emergencyContact.name}
               </p>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+              <p className="text-xs font-bold text-slate-400  tracking-normal">
                 {patient.emergencyContact.relationship}
               </p>
               <p className="text-base font-bold text-primary mt-2">
@@ -633,10 +632,10 @@ export default function PatientProfilePage() {
                 <BiCloudUpload size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight font-grotesk">
                   Update Clinical Records
                 </h3>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-normal">
+                <p className="text-xs text-slate-400 font-bold  tracking-normal">
                   {patient.fullName}
                 </p>
               </div>
@@ -644,7 +643,7 @@ export default function PatientProfilePage() {
 
             <div className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-normal mb-2 px-1">
+                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2 px-1">
                   Chronic Conditions (comma separated)
                 </label>
                 <textarea
@@ -660,7 +659,7 @@ export default function PatientProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-normal mb-2 px-1">
+                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2 px-1">
                   Allergies (comma separated)
                 </label>
                 <input
@@ -677,7 +676,7 @@ export default function PatientProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-normal mb-2 px-1">
+                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2 px-1">
                   Active Medications (comma separated)
                 </label>
                 <textarea
@@ -704,7 +703,7 @@ export default function PatientProfilePage() {
               <button
                 onClick={handleUpdateClinicalData}
                 disabled={actionLoading}
-                className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-normal hover:bg-primary/90 transition-all shadow-none shadow-primary/20 disabled:opacity-50"
+                className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/90 transition-all shadow-none shadow-primary/20 disabled:opacity-50"
               >
                 {actionLoading ? "Saving..." : "Securely Update"}
               </button>

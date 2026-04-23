@@ -143,13 +143,13 @@ export function ArticleModal({
               {article.tags?.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs font-bold uppercase tracking-normal bg-primary text-white px-4 py-2 rounded-full shadow-none border border-white/20"
+                  className="text-xs font-bold  tracking-normal bg-primary text-white px-4 py-2 rounded-full shadow-none border border-white/20"
                 >
                   {tag}
                 </span>
               ))}
             </div>
-            <h2 className="text-xl md:text-3xl font-bold text-white leading-tight tracking-tight drop-shadow-md">
+            <h2 className="text-xl md:text-3xl font-bold text-white leading-tight tracking-tight drop-shadow-md font-grotesk">
               {article.title}
             </h2>
           </div>
@@ -159,7 +159,7 @@ export function ArticleModal({
         <div className="overflow-y-auto custom-scrollbar flex-1 px-8 py-8 space-y-8">
           <div className="flex items-center justify-between py-4 border-b border-slate-50">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-xs font-bold text-white uppercase ">
+              <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-xs font-bold text-white  ">
                 <Avatar name={article.author} size="sm" />
               </div>
               <div className="space-y-1">
@@ -223,7 +223,7 @@ export function ArticleModal({
         </div>
 
         {shareToast && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-normal px-6 py-3 rounded-full  animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-xl text-white text-xs font-bold  tracking-normal px-6 py-3 rounded-full  animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300">
             {shareToast}
           </div>
         )}
@@ -269,7 +269,7 @@ function ArticleCard({
 
           {article.tags?.[0] && (
             <div className="absolute top-4 left-4">
-              <span className="text-[9px] font-bold uppercase tracking-normal bg-primary/90 backdrop-blur-md text-white px-3 py-1 rounded-full shadow-none ">
+              <span className="text-[9px] font-bold  tracking-normal bg-primary/90 backdrop-blur-md text-white px-3 py-1 rounded-full shadow-none ">
                 {article.tags[0]}
               </span>
             </div>
@@ -290,7 +290,7 @@ function ArticleCard({
 
         <div className="p-6 flex flex-col ">
           <div className="flex flex-col items-start">
-            <h4 className="text-[15px] font-bold text-slate-800 leading-tight mb-3 tracking-tight group-hover:text-primary transition-colors line-clamp-2">
+            <h4 className="text-[15px] font-bold text-slate-800 leading-tight mb-3 tracking-tight group-hover:text-primary transition-colors line-clamp-2 font-grotesk">
               {article.title}
             </h4>
             <p className="text-xs text-slate-500 text-start  line-clamp-2 mb-6 opacity-80">
@@ -300,7 +300,7 @@ function ArticleCard({
 
           <div className="mt-auto pt-5 flex items-center justify-between border-t border-slate-50/50">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-xs font-bold text-white uppercase shadow-none shadow-primary/20">
+              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-xs font-bold text-white  shadow-none shadow-primary/20">
                 {article.author
                   .split(" ")
                   .map((n) => n[0])
@@ -311,7 +311,7 @@ function ArticleCard({
                 <p className="text-xs font-bold text-slate-700 leading-none">
                   {article.author}
                 </p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-normal mt-1">
+                <p className="text-[9px] font-bold text-slate-400  tracking-normal mt-1">
                   {new Date(article.publishedAt).toLocaleDateString("en-ZA", {
                     month: "short",
                     day: "numeric",
@@ -321,7 +321,7 @@ function ArticleCard({
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg border border-slate-100">
               <BiTime size={14} className="text-primary" />
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+              <span className="text-xs font-bold text-slate-400  tracking-normal">
                 {article.readTimeMinutes} MIN
               </span>
             </div>
@@ -409,7 +409,7 @@ export default function HealthBlog() {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6 px-2">
         <div className="mb-4 px-2">
-          <h3 className="font-bold text-xl text-slate-800">Health Insights</h3>
+          <h3 className="font-bold text-xl text-slate-800 font-grotesk">Health Insights</h3>
           <p className="text-sm text-slate-500">
             Latest medical news and wellness articles
           </p>

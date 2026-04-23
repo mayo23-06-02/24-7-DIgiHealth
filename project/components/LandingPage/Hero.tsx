@@ -90,7 +90,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="heading-hero text-white mb-10 min-h-[220px] flex flex-col justify-center text-[clamp(2rem,3.5vw,3.5rem)]">
+          <h1 className="heading-hero text-white mb-10 min-h-[220px] flex flex-col justify-center text-[clamp(2rem,3.5vw,3.5rem)] font-grotesk">
             <span className="block">{slide.titleLine1}</span>
             <span className="block">{slide.titleLine2}</span>
             <span className="block">{slide.titleLine3}</span>
@@ -109,7 +109,7 @@ export default function Hero() {
       {/* Hero Bottom Bar */}
       <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] grid grid-cols-[1.2fr_0.8fr] pb-[6rem] items-end relative z-10">
         <div className="reveal-hidden reveal-visible max-w-[550px] text-white">
-          <h3 className="text-2xl font-bold mb-4">Comprehensive Care</h3>
+          <h3 className="text-2xl font-bold mb-4 font-grotesk">Comprehensive Care</h3>
           <p className="text-base opacity-85 leading-relaxed">
             Accessible, modern medical care — where technology meets compassion.
             Get Started, view reports, and stay healthy from anywhere.

@@ -160,12 +160,12 @@ export default function PractitionerHeader({
       {/* Date, Time & Weather */}
       <div className="hidden lg:flex items-center gap-4 min-w-0 pr-4 border-r border-slate-100/50">
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-normal leading-none mb-1">
+          <span className="text-[10px] font-bold text-slate-400  tracking-normal leading-none mb-1">
             System Clock
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-tight">
-               {formattedDate}
+            <span className="text-xs font-bold text-slate-800  tracking-tight">
+              {formattedDate}
             </span>
             <span className="text-xs font-bold text-primary tabular-nums">
               {formattedTime}
@@ -173,7 +173,7 @@ export default function PractitionerHeader({
           </div>
         </div>
         <div className="flex flex-col border-l border-slate-100 pl-4">
-           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-normal leading-none mb-1">
+          <span className="text-[10px] font-bold text-slate-400  tracking-normal leading-none mb-1">
             Local Weather
           </span>
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
@@ -195,25 +195,25 @@ export default function PractitionerHeader({
           <input
             type="text"
             placeholder="Search clinical registry…"
-            className="bg-transparent outline-none border-none w-full text-xs font-bold text-slate-700 placeholder:text-slate-300 uppercase tracking-tight"
+            className="bg-transparent outline-none border-none w-full text-xs font-bold text-slate-700 placeholder:text-slate-300  tracking-tight"
           />
         </div>
       </div>
 
       {/* Actions & Alerts */}
       <div className="flex items-center gap-3 ml-auto shrink-0">
-         {/* Live Stats */}
+        {/* Live Stats */}
         <div className="hidden xl:flex items-center gap-2 pr-4 mr-4 border-r border-slate-100">
           <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100 shadow-none animate-in fade-in duration-500">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-normal leading-none">
+            <span className="text-[10px] font-bold  tracking-normal leading-none">
               {upcomingCount} SESSIONS
             </span>
           </div>
           {riskAlertCount > 0 && (
             <div className="flex items-center gap-2 bg-rose-50 text-rose-600 px-4 py-2 rounded-2xl border border-rose-100 shadow-none">
-               <BiPulse size={14} className="animate-pulse" />
-               <span className="text-[10px] font-bold uppercase tracking-normal leading-none">
+              <BiPulse size={14} className="animate-pulse" />
+              <span className="text-[10px] font-bold  tracking-normal leading-none">
                 {riskAlertCount} ALERTS
               </span>
             </div>
@@ -241,10 +241,13 @@ export default function PractitionerHeader({
           {isNotifOpen && (
             <div className="absolute top-14 right-0 w-85 bg-white border border-slate-100 rounded-[2rem] shadow-none shadow-slate-900/10 p-5 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-[100]">
               <div className="flex items-center justify-between mb-5 px-1">
-                <h4 className="text-[11px] font-bold text-slate-800 uppercase tracking-normal">
+                <h4 className="text-[11px] font-bold text-slate-800  tracking-normal font-grotesk">
                   Clinical Inbox
                 </h4>
-                <Button variant="ghost" className="text-[10px] font-bold text-primary hover:bg-primary/5 border-none h-auto p-0 !min-w-0 uppercase tracking-normal">
+                <Button
+                  variant="ghost"
+                  className="text-[10px] font-bold text-primary hover:bg-primary/5 border-none h-auto p-0 !min-w-0  tracking-normal"
+                >
                   Clear All
                 </Button>
               </div>
@@ -261,15 +264,15 @@ export default function PractitionerHeader({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-1">
-                        <p className="text-[11px] font-bold text-slate-800 uppercase tracking-tight">
+                        <p className="text-[11px] font-bold text-slate-800  tracking-tight">
                           {n.title}
                         </p>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-normal tabular-nums">
+                        <span className="text-[9px] font-bold text-slate-400  tracking-normal tabular-nums">
                           {n.time}
                         </span>
                       </div>
                       <p className="text-[10px] font-medium text-slate-500 leading-relaxed italic opacity-80">
-                         {n.desc}
+                        {n.desc}
                       </p>
                     </div>
                   </div>
@@ -303,46 +306,50 @@ export default function PractitionerHeader({
                   .map((w) => w[0])
                   .join("")
                   .slice(0, 2)
-                  .toUpperCase()
+                  .to()
               )}
             </div>
             <div className="hidden lg:flex flex-col items-start min-w-0">
-              <span className="text-[11px] font-bold text-slate-800 leading-none uppercase tracking-tight truncate w-32 text-left">
+              <span className="text-[11px] font-bold text-slate-800 leading-none  tracking-tight truncate w-32 text-left">
                 {name}
               </span>
-              <span className="text-[9px] text-primary font-bold uppercase tracking-normal mt-1.5">
+              <span className="text-[9px] text-primary font-bold  tracking-normal mt-1.5">
                 {specialisation || "Licensed Provider"}
               </span>
             </div>
-            <BiChevronDown size={14} className={`text-slate-400 hidden lg:block transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+            <BiChevronDown
+              size={14}
+              className={`text-slate-400 hidden lg:block transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`}
+            />
           </Button>
 
           {isProfileOpen && (
             <div className="absolute top-14 right-0 w-56 bg-white border border-slate-100 rounded-[1.5rem] shadow-none p-2 animate-in zoom-in-95 duration-300 z-[100]">
               <div className="px-4 py-3 mb-2 border-b border-slate-50">
-                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-normal mb-1">Signed in as</p>
-                 <p className="text-[11px] font-bold text-slate-800 truncate">{name}</p>
+                <p className="text-[9px] font-bold text-slate-400  tracking-normal mb-1">
+                  Signed in as
+                </p>
+                <p className="text-[11px] font-bold text-slate-800 truncate">
+                  {name}
+                </p>
               </div>
-              {["My Profile", "Availability", "Clinical Settings"].map((item) => (
-                <button
-                  key={item}
-                  className="w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-normal text-slate-600 hover:bg-slate-50 hover:text-primary transition-all"
-                >
-                  {item}
-                </button>
-              ))}
+              {["My Profile", "Availability", "Clinical Settings"].map(
+                (item) => (
+                  <button
+                    key={item}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-bold  tracking-normal text-slate-600 hover:bg-slate-50 hover:text-primary transition-all"
+                  >
+                    {item}
+                  </button>
+                ),
+              )}
               <div className="h-px bg-slate-50 my-2" />
-              <button className="w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-normal text-rose-500 hover:bg-rose-50 transition-all flex items-center gap-2">
-                 Sign Out Clinical Portal
+              <button className="w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-bold  tracking-normal text-rose-500 hover:bg-rose-50 transition-all flex items-center gap-2">
+                Sign Out Clinical Portal
               </button>
             </div>
           )}
         </div>
-      </div>
-    </header>
-  );
-}
-
       </div>
     </header>
   );

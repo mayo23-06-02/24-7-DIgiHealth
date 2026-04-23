@@ -70,7 +70,7 @@ export default function HospitalSLAPage() {
     <div className="w-full pb-10 flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Service Level Agreements</h1>
+        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Service Level Agreements</h1>
         <p className="text-sm text-slate-500 mt-1">Monitor and manage operational performance targets</p>
       </div>
 
@@ -91,7 +91,7 @@ export default function HospitalSLAPage() {
       {/* SLA Table */}
       <Card className="overflow-hidden p-0">
         <div className="px-6 py-4 border-b border-slate-100">
-          <h2 className="font-bold text-slate-800">All SLA Targets</h2>
+          <h2 className="font-bold text-slate-800 font-grotesk">All SLA Targets</h2>
         </div>
         <div className="divide-y divide-slate-100">
           {slas.map((sla) => (

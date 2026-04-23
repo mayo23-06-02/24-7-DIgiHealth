@@ -183,7 +183,7 @@ export default function SoapNoteModal({
 
         {/* Footer */}
         <div className="pt-8 border-t border-slate-50 flex items-center justify-between gap-4">
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-normal px-1">
+          <p className="text-[10px] text-slate-400 font-bold  tracking-normal px-1">
             <kbd className="bg-slate-100 px-2 py-1 rounded text-slate-500 font-mono">
               Ctrl+S
             </kbd>{" "}

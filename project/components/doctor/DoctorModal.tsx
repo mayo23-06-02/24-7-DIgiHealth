@@ -83,7 +83,7 @@ export default function DoctorModal({
           </div>
           <div className="flex-1">
             <h2
-              className="text-xl font-bold text-slate-800 leading-tight cursor-pointer hover:text-primary transition-all"
+              className="text-xl font-bold text-slate-800 leading-tight cursor-pointer hover:text-primary transition-all font-grotesk"
               onClick={() => onMessage(doctor.id)}
             >
               {doctor.name}
@@ -115,7 +115,7 @@ export default function DoctorModal({
           </div>
 
           <div className="text-right space-y-4">
-            <p className="text-xs text-slate-400 uppercase ">Consultation</p>
+            <p className="text-xs text-slate-400  ">Consultation</p>
             <p className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl inline-block mt-1">
               INCLUDED IN PLAN
             </p>
@@ -126,7 +126,7 @@ export default function DoctorModal({
 
         {/* Bio */}
         <div>
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-normal mb-2">
+          <h3 className="text-sm font-bold text-slate-800  tracking-normal mb-2 font-grotesk">
             About
           </h3>
           <p className="text-slate-600 leading-relaxed text-sm">
@@ -137,7 +137,7 @@ export default function DoctorModal({
         {/* Achievements */}
         {doctor.achievements && doctor.achievements.length > 0 && (
           <div>
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-normal mb-3">
+            <h3 className="text-sm font-bold text-slate-800  tracking-normal mb-3 font-grotesk">
               Professional Achievements
             </h3>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -157,7 +157,7 @@ export default function DoctorModal({
         {/* Schedule Preview */}
         {doctor.schedule && doctor.schedule.length > 0 && (
           <div>
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-normal mb-3">
+            <h3 className="text-sm font-bold text-slate-800  tracking-normal mb-3 font-grotesk">
               Next Available Slots Today
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -204,7 +204,7 @@ export default function DoctorModal({
         {/* Reviews Section */}
         {doctor.reviews && doctor.reviews.length > 0 && (
           <div className="pt-6 border-t border-slate-100">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-normal mb-4">
+            <h3 className="text-sm font-bold text-slate-800  tracking-normal mb-4 font-grotesk">
               Patient Feedback
             </h3>
             <div className="space-y-4">
@@ -223,7 +223,7 @@ export default function DoctorModal({
                           {review.reviewer}{" "}
                           <BiCheckCircle className="text-emerald-500" />
                         </p>
-                        <span className="text-xs text-slate-400 font-bold uppercase">
+                        <span className="text-xs text-slate-400 font-bold ">
                           {new Date(review.date).toLocaleDateString()}
                         </span>
                       </div>

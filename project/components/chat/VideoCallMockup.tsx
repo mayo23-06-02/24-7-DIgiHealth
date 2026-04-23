@@ -37,10 +37,10 @@ export default function VideoCallMockup({
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
           <div>
-            <h3 className="text-white font-bold text-sm tracking-tight">
+            <h3 className="text-white font-bold text-sm tracking-tight font-grotesk">
               Active Clinical Session
             </h3>
-            <p className="text-emerald-400 text-xs font-bold uppercase tracking-normal">
+            <p className="text-emerald-400 text-xs font-bold  tracking-normal">
               End-to-End Encrypted
             </p>
           </div>
@@ -66,7 +66,7 @@ export default function VideoCallMockup({
                 <div className="w-full h-full bg-gradient-to-tr from-slate-900 to-slate-700 flex items-center justify-center">
                   <div className="text-white/10 flex flex-col items-center">
                     <BiVideo size={120} />
-                    <span className="text-xs font-bold mt-4 uppercase tracking-normal">
+                    <span className="text-xs font-bold mt-4  tracking-normal">
                       Self View (Full)
                     </span>
                   </div>
@@ -98,12 +98,12 @@ export default function VideoCallMockup({
                     name={participantName}
                   />
                   <div>
-                    <h4 className="text-white font-bold text-sm">
+                    <h4 className="text-white font-bold text-sm font-grotesk">
                       {participantName}
                     </h4>
                     <div className="flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span className="text-xs text-emerald-400 font-bold uppercase tracking-normal">
+                      <span className="text-xs text-emerald-400 font-bold  tracking-normal">
                         Practitioner
                       </span>
                     </div>
@@ -139,7 +139,7 @@ export default function VideoCallMockup({
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all" />
               <div className="absolute bottom-4 left-4 right-4 text-center">
-                <span className="text-xs text-white font-bold uppercase tracking-normal drop-shadow-none">
+                <span className="text-xs text-white font-bold  tracking-normal drop-shadow-none">
                   {participantName}
                 </span>
               </div>
@@ -155,7 +155,7 @@ export default function VideoCallMockup({
                 <div className="text-slate-600 font-bold text-4xl">?</div>
               )}
               <div className="absolute bottom-4 left-4 right-4 text-center">
-                <span className="text-xs text-white font-bold uppercase tracking-normal drop-shadow-none">
+                <span className="text-xs text-white font-bold  tracking-normal drop-shadow-none">
                   You
                 </span>
               </div>

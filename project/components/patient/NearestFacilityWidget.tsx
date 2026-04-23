@@ -69,7 +69,7 @@ export default function NearestFacilityWidget({
       >
         <div className="flex justify-between items-end mb-6 relative z-10">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 font-grotesk">
               <FiMapPin className="text-trust-blue" /> Nearest ER & Clinics
             </h3>
             <p className="text-sm font-medium text-slate-500 mt-1">
@@ -104,7 +104,7 @@ export default function NearestFacilityWidget({
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h4 className="font-bold text-slate-800 text-lg leading-tight group-hover:text-trust-blue transition-colors">
+                    <h4 className="font-bold text-slate-800 text-lg leading-tight group-hover:text-trust-blue transition-colors font-grotesk">
                       {fac.name}
                     </h4>
                     <div className="flex gap-2 mt-1">
@@ -133,7 +133,7 @@ export default function NearestFacilityWidget({
                     {fac.distance} km away
                   </div>
                   <div className="text-right">
-                    <span className="block text-xs uppercase font-bold tracking-normal text-slate-400 mb-0.5">
+                    <span className="block text-xs  font-bold tracking-normal text-slate-400 mb-0.5">
                       Live Wait Time
                     </span>
                     <span

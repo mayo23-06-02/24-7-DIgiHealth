@@ -193,7 +193,7 @@ function HighlightMarker({
             style={{ padding: "10px" }}
             className="bg-primary text-white text-xs px-3 py-2 rounded-lg whitespace-normal min-w-[140px] max-w-[200px] shadow-none"
           >
-            <div className="text-[9px] font-bold uppercase text-amber-400 tracking-normal mb-1.5 border-b border-white/10 pb-1">
+            <div className="text-[9px] font-bold  text-amber-400 tracking-normal mb-1.5 border-b border-white/10 pb-1">
               {note.part || "Surface Mapping"}
             </div>
             <div className="font-medium text-slate-50 leading-relaxed break-words">
@@ -424,18 +424,18 @@ export default function MedicalManikin({
         <div className="absolute top-3 left-3 z-30 pointer-events-none">
           <div className="space-y-4">
             <div className="flex items-baseline gap-2">
-              <h4 className="text-4xl font-bold text-primary tracking-tighter leading-none">
+              <h4 className="text-4xl font-bold text-primary tracking-tighter leading-none font-grotesk">
                 87%
               </h4>
-              <span className="text-xs font-bold text-slate-400 uppercase">
+              <span className="text-xs font-bold text-slate-400 ">
                 Medical Accuracy
               </span>
             </div>
             <div className="flex gap-2">
-              <div className="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold uppercase tracking-normal">
+              <div className="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold  tracking-normal">
                 BMI: {bmi.toFixed(1)}
               </div>
-              <div className="bg-primary text-white px-3 py-2 rounded-full text-xs font-bold uppercase tracking-normal">
+              <div className="bg-primary text-white px-3 py-2 rounded-full text-xs font-bold  tracking-normal">
                 {heightCm}cm / {weightKg}kg
               </div>
             </div>
@@ -473,7 +473,7 @@ export default function MedicalManikin({
               <Html center>
                 <div className="flex flex-col items-center gap-6">
                   <div className="w-16 h-16 border-[6px] border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <p className="text-xs font-bold text-slate-400  tracking-normal">
                     Syncing Neural Data...
                   </p>
                 </div>
@@ -532,7 +532,7 @@ export default function MedicalManikin({
                 <div className="flex justify-between items-center mb-8">
                   <div className="flex items-center gap-3 px-4 py-2 rounded-full">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="text-xs text-primary uppercase tracking-normal">
+                    <span className="text-xs text-primary  tracking-normal">
                       Neural Mapping Node
                     </span>
                   </div>
@@ -568,7 +568,7 @@ export default function MedicalManikin({
                       onChange={(e) => setCustomPartName(e.target.value)}
                       placeholder="Select or type body part"
                       disabled={readOnly}
-                      className="text-xl font-bold text-slate-500 tracking-tighter uppercase block w-full bg-transparent border-b-2 border-slate-200 focus:border-primary outline-none pb-1"
+                      className="text-xl font-bold text-slate-500 tracking-tighter  block w-full bg-transparent border-b-2 border-slate-200 focus:border-primary outline-none pb-1"
                     />
                     <datalist id="anatomy-parts">
                       {ANATOMY_PARTS.map((part) => (

@@ -21,7 +21,7 @@ export function HospitalStep1({ formData, updateData, errors }: any) {
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
       <div className="inline-flex items-center gap-2 px-4 py-2  mb-2">
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-        <span className="text-xs text-primary uppercase tracking-normal">
+        <span className="text-xs text-primary  tracking-normal">
           Facility Details
         </span>
       </div>
@@ -111,7 +111,7 @@ export function HospitalStep2({ formData, updateData }: any) {
           </select>
         </div>
         <div className="md:col-span-2 border-t border-slate-100 pt-6">
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-normal mb-4">
+          <h3 className="text-sm font-bold text-slate-700  tracking-normal mb-4 font-grotesk">
             Admin Representative
           </h3>
         </div>

@@ -129,7 +129,7 @@ export default function PatientVisits() {
 
       <div className="max-w-5xl mx-auto">
         <header className="mb-12">
-          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 mb-2">
+          <h1 className="text-4xl font-bold tracking-tighter text-slate-900 mb-2 font-grotesk">
             Visits Mission Control
           </h1>
           <p className="text-sm text-slate-400 font-medium tracking-tight">
@@ -140,7 +140,7 @@ export default function PatientVisits() {
         {/* Tabs */}
         <div className="flex gap-2 bg-white p-1 rounded-lg w-fit mb-10 border border-slate-100">
           <button
-            className={`px-6 py-3 rounded-lg text-xs font-extra-bold uppercase tracking-normal transition-all ${
+            className={`px-6 py-3 rounded-lg text-xs font-extra-bold  tracking-normal transition-all ${
               activeTab === "upcoming"
                 ? "bg-primary text-white"
                 : "text-slate-400 hover:text-primary"
@@ -150,7 +150,7 @@ export default function PatientVisits() {
             Upcoming
           </button>
           <button
-            className={`px-6 py-3 rounded-lg text-xs font-extra-bold uppercase tracking-normal transition-all ${
+            className={`px-6 py-3 rounded-lg text-xs font-extra-bold  tracking-normal transition-all ${
               activeTab === "past"
                 ? "bg-primary text-white"
                 : "text-slate-400 hover:text-primary"
@@ -180,7 +180,7 @@ export default function PatientVisits() {
           ) : filteredVisits.length === 0 ? (
             <div className="text-center py-20 bg-white/50 rounded-lg border-2 border-dashed border-slate-200">
               <BiCalendar size={64} className="mx-auto text-slate-200 mb-6" />
-              <p className="font-bold text-slate-400 uppercase tracking-normal text-sm">
+              <p className="font-bold text-slate-400  tracking-normal text-sm">
                 No {activeTab} visits found
               </p>
             </div>
@@ -195,10 +195,10 @@ export default function PatientVisits() {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-bold text-slate-900 font-grotesk">
                     Dr. {visit.doctor}
                   </h3>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <p className="text-xs font-bold text-slate-400  tracking-normal">
                     {visit.specialisation}
                   </p>
                   <div className="flex flex-wrap items-center gap-4 mt-3 text-sm font-semibold text-slate-500">
@@ -215,13 +215,13 @@ export default function PatientVisits() {
                   {activeTab === "upcoming" ? (
                     <>
                       <button
-                        className="bg-transparent text-red-500 border border-red-500/20 px-7 py-3 rounded-lg font-extra-bold uppercase text-xs hover:bg-red-50 transition-all"
+                        className="bg-transparent text-red-500 border border-red-500/20 px-7 py-3 rounded-lg font-extra-bold  text-xs hover:bg-red-50 transition-all"
                         onClick={() => handleCancelVisit(visit.id)}
                       >
                         Cancel
                       </button>
                       <button
-                        className="bg-supportive-teal text-white px-8 py-3 rounded-lg font-extra-bold uppercase text-xs hover:bg-[#008ba3] transition-all"
+                        className="bg-supportive-teal text-white px-8 py-3 rounded-lg font-extra-bold  text-xs hover:bg-[#008ba3] transition-all"
                         onClick={() => setIsVideoModalOpen(true)}
                       >
                         Join Call
@@ -231,7 +231,7 @@ export default function PatientVisits() {
                     <div className="text-right space-y-3">
                       {visit.rating === 0 ? (
                         <button
-                          className="text-xs font-bold text-primary uppercase tracking-normal bg-primary/5 px-6 py-3 rounded-lg hover:bg-primary/10 transition-all"
+                          className="text-xs font-bold text-primary  tracking-normal bg-primary/5 px-6 py-3 rounded-lg hover:bg-primary/10 transition-all"
                           onClick={() => handleRateVisit(visit)}
                         >
                           Rate Session
@@ -243,7 +243,7 @@ export default function PatientVisits() {
                           ))}
                         </div>
                       )}
-                      <button className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-normal hover:text-primary transition-all">
+                      <button className="flex items-center gap-2 text-xs font-bold text-slate-300  tracking-normal hover:text-primary transition-all">
                         <BiDownload /> Prescription PDF
                       </button>
                     </div>
@@ -268,7 +268,7 @@ export default function PatientVisits() {
             <div className="p-8 border-b border-slate-100 flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <span className="w-3 h-3 rounded-lg bg-red-500 animate-pulse" />
-                <h2 className="text-xl font-bold">
+                <h2 className="text-xl font-bold font-grotesk">
                   Live Consultation \u2014 Secure Tunnel
                 </h2>
               </div>
@@ -282,7 +282,7 @@ export default function PatientVisits() {
             <div className="w-full aspect-video bg-[#101828] flex items-center justify-center text-white/40">
               <div className="flex flex-col items-center gap-6">
                 <BiVideo size={80} className="text-white/5" />
-                <p className="font-bold text-white/40 uppercase tracking-[0.4em] text-xs">
+                <p className="font-bold text-white/40  tracking-[0.4em] text-xs">
                   Waiting for practitioner to connect...
                 </p>
                 <div className="flex gap-4">
@@ -297,7 +297,7 @@ export default function PatientVisits() {
             </div>
             <div className="p-8 bg-slate-50 flex items-center justify-between border-t border-slate-100">
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                <p className="text-xs font-bold text-slate-400  tracking-normal">
                   Connection Health
                 </p>
                 <p className="text-sm font-bold text-primary">
@@ -305,7 +305,7 @@ export default function PatientVisits() {
                 </p>
               </div>
               <button
-                className="px-8 py-3 bg-slate-900 text-white rounded-lg font-bold text-xs uppercase tracking-normal hover:bg-slate-800 transition-all"
+                className="px-8 py-3 bg-slate-900 text-white rounded-lg font-bold text-xs  tracking-normal hover:bg-slate-800 transition-all"
                 onClick={() => setIsVideoModalOpen(false)}
               >
                 End Session
@@ -326,7 +326,7 @@ export default function PatientVisits() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold text-slate-900 font-grotesk">
                 Rate Your Session
               </h2>
               <p className="text-sm text-slate-400 font-medium">
@@ -350,7 +350,7 @@ export default function PatientVisits() {
               rows={4}
             />
             <button
-              className="w-full py-4 bg-primary text-white rounded-lg font-bold text-xs uppercase tracking-normal hover:bg-primary-dark transition-all"
+              className="w-full py-4 bg-primary text-white rounded-lg font-bold text-xs  tracking-normal hover:bg-primary-dark transition-all"
               onClick={() => setIsRatingModalOpen(false)}
             >
               Submit Anonymous Feedback

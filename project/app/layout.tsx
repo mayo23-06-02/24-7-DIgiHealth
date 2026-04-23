@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Space_Grotesk, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+
+const grotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-grotesk",
+});
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -19,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} antialiased`}>
-      <body className="font-sans">
+    <html lang="en" className={`${grotesk.variable} ${outfit.variable} antialiased`}>
+      <body className="font-outfit">
         {children}
         <Toaster position="top-right" />
       </body>

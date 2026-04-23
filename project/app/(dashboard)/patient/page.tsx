@@ -30,7 +30,6 @@ import Modal from "@/components/ui/Modal";
 
 export default function PatientDashboard() {
   const { user } = useAuthContext();
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -107,11 +106,11 @@ export default function PatientDashboard() {
       {/* WELCOME HEADER */}
       <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
-          <h2 className="text-2xl  text-slate-800 tracking-tight">
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight font-grotesk">
             How are you doing today,{" "}
             <span className="text-primary font-bold">{user.firstName}</span>?
           </h2>
-          <p className="text-slate-500  tracking-tight mt-1">
+          <p className="text-slate-600 text-lg tracking-tight mt-1">
             Here is your personalized health snapshot for today — a clear view
             of your wellbeing at a glance.
           </p>
@@ -123,21 +122,11 @@ export default function PatientDashboard() {
               size="sm"
               className="bg-white hover:bg-slate-50"
             >
-              <span className="text-slate-600 mr-2 flex items-center gap-1 font-bold">
-                <BiCapsule className="text-xl" /> Refill
+              <span className="text-slate-700 mr-2 flex items-center gap-1 font-bold">
+                <BiCapsule className="text-xl" /> Prescriptions
               </span>
             </Button>
           </Link>
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-white hover:bg-slate-50"
-            onClick={() => setIsChatOpen(true)}
-          >
-            <span className="text-slate-600 mr-3 flex items-center gap-1 font-bold">
-              <BiBot className="text-xl" /> AI Doctor
-            </span>
-          </Button>
           <Link href="/patient/appointments">
             <Button size="sm" className="shadow-none shadow-primary/20">
               <span className="mr-3 flex items-center gap-1 font-bold">
@@ -217,24 +206,6 @@ export default function PatientDashboard() {
         <HealthBlog />
       </section>
 
-      {/* GLOBAL FLOATING ACTIONS */}
-      <div className="fixed bottom-10 right-10 z-50">
-        <button
-          onClick={() => setIsChatOpen(true)}
-          className="w-16 h-16 bg-primary text-white rounded-2xl  shadow-primary/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all group"
-        >
-          <span className="text-2xl group-hover:rotate-12 transition-transform">
-            <BiMessage />
-          </span>
-        </button>
-      </div>
-
-      <AITriageChat
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        patientName={`${user.firstName} ${user.lastName}`}
-      />
-
       <Modal
         isOpen={updateModalOpen}
         onClose={() => setUpdateModalOpen(false)}
@@ -246,7 +217,7 @@ export default function PatientDashboard() {
             your health record and track your progress.
           </p>
           <div>
-            <label className="block text-sm font-bold text-slate-700 uppercase tracking-normal mb-2">
+            <label className="block text-sm font-bold text-slate-700  tracking-normal mb-2">
               New {updateVitalTitle} Value
             </label>
             <input

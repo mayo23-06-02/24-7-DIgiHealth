@@ -104,11 +104,11 @@ export default function FacilityCard({
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start mb-1">
             <div className="flex items-center gap-2 min-w-0">
-              <h3 className="text-lg font-bold text-slate-800 tracking-tight truncate group-hover:text-primary transition-colors">
+              <h3 className="text-lg font-bold text-slate-800 tracking-tight truncate group-hover:text-primary transition-colors font-grotesk">
                 {facility.name}
               </h3>
               <span
-                className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-normal shrink-0 ${getTypeColor()}`}
+                className={`px-2 py-1 rounded-full text-[9px] font-bold  tracking-normal shrink-0 ${getTypeColor()}`}
               >
                 {facility.type}
               </span>
@@ -153,7 +153,7 @@ export default function FacilityCard({
             className="w-full h-full object-cover"
           />
           <div
-            className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-normal shadow-none ${getTypeColor()}`}
+            className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold  tracking-normal shadow-none ${getTypeColor()}`}
           >
             {facility.type}
           </div>
@@ -166,7 +166,7 @@ export default function FacilityCard({
         </div>
 
         <div className="space-y-1">
-          <h3 className="text-lg font-bold text-slate-800 tracking-tight leading-tight">
+          <h3 className="text-lg font-bold text-slate-800 tracking-tight leading-tight font-grotesk">
             {facility.name}
           </h3>
           <p className="text-[13px] text-slate-500 truncate">
@@ -199,7 +199,7 @@ export default function FacilityCard({
               e.stopPropagation();
               onBook?.(facility.id);
             }}
-            className="flex-1 py-3 text-xs font-bold uppercase tracking-normal bg-primary hover:bg-primary-dark shadow-none shadow-primary/20"
+            className="flex-1 py-3 text-xs font-bold  tracking-normal bg-primary hover:bg-primary-dark shadow-none shadow-primary/20"
           >
             Book
           </Button>
@@ -209,7 +209,7 @@ export default function FacilityCard({
               e.stopPropagation();
               onDirections?.(facility.id);
             }}
-            className="flex-1 py-3 text-xs font-bold uppercase tracking-normal text-slate-500 border-slate-200"
+            className="flex-1 py-3 text-xs font-bold  tracking-normal text-slate-500 border-slate-200"
           >
             Directions
           </Button>
@@ -217,7 +217,7 @@ export default function FacilityCard({
       </div>
 
       {/* Hover Disclosure Badge */}
-      <div className="absolute right-0 bottom-0 px-4 py-2 bg-primary/5 text-primary text-xs font-bold uppercase tracking-normal transform translate-y-full translate-x-1/2 group-hover:translate-y-0 group-hover:translate-x-0 transition-transform duration-500 rounded-tl-2xl border-l border-t border-primary/10">
+      <div className="absolute right-0 bottom-0 px-4 py-2 bg-primary/5 text-primary text-xs font-bold  tracking-normal transform translate-y-full translate-x-1/2 group-hover:translate-y-0 group-hover:translate-x-0 transition-transform duration-500 rounded-tl-2xl border-l border-t border-primary/10">
         {facility.bedAvailability.general !== "N/A"
           ? `${facility.bedAvailability.general} Gen Beds`
           : "Modern Clinical Center"}

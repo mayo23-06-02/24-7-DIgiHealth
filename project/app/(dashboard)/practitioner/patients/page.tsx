@@ -111,7 +111,7 @@ export default function PractitionerPatientsPage() {
 
   const SortTh = ({ field, label }: { field: string; label: string }) => (
     <th
-      className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-primary select-none"
+      className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider cursor-pointer hover:text-primary select-none"
       onClick={() => toggleSort(field)}
     >
       {label} {sortField === field ? (sortDir === "asc" ? "↑" : "↓") : ""}
@@ -140,7 +140,7 @@ export default function PractitionerPatientsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Patients</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Patients</h1>
           <p className="text-sm text-slate-500">
             {patients.length} patients under your care
           </p>
@@ -194,15 +194,15 @@ export default function PractitionerPatientsPage() {
                 <tr className="bg-slate-50 border-b border-slate-100">
                   <SortTh field="fullName" label="Patient" />
                   <SortTh field="age" label="Age" />
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Conditions
                   </th>
                   <SortTh field="lastVisit" label="Last Visit" />
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Next Appt
                   </th>
                   <SortTh field="riskScore" label="Risk" />
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider text-right">
                     Actions
                   </th>
                 </tr>

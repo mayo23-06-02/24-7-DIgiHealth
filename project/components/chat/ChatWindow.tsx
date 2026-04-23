@@ -104,7 +104,7 @@ export default function ChatWindow({
       {/* Header */}
       <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white shrink-0">
         <div>
-          <h2 className="font-bold text-slate-800 text-base hover:text-primary transition-colors cursor-pointer leading-tight">
+          <h2 className="font-bold text-slate-800 text-base hover:text-primary transition-colors cursor-pointer leading-tight font-grotesk">
             {user.role === "patient" ? (
               <Link href={`/patient/doctors/${opponentId}`}>
                 {opponentName}

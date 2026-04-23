@@ -82,7 +82,7 @@ export default function DoctorCard({
             e.stopPropagation();
             onBook(doctor.id);
           }}
-          className="text-primary text-xs font-bold uppercase tracking-normal hover:underline ml-2"
+          className="text-primary text-xs font-bold  tracking-normal hover:underline ml-2"
         >
           Book
         </button>
@@ -116,10 +116,10 @@ export default function DoctorCard({
         </div>
 
         <div className="mt-4 space-y-1">
-          <h3 className="font-bold text-slate-800 tracking-tight group-hover:text-primary transition-colors">
+          <h3 className="font-bold text-slate-800 tracking-tight group-hover:text-primary transition-colors font-grotesk">
             Dr. {doctor.name}
           </h3>
-          <p className="text-xs text-primary font-bold uppercase tracking-normal">
+          <p className="text-xs text-primary font-bold  tracking-normal">
             {doctor.specialisation}
           </p>
         </div>
@@ -131,7 +131,7 @@ export default function DoctorCard({
               {doctor.rating}
             </span>
           </div>
-          <span className="text-xs text-slate-400 font-bold uppercase tracking-tighter">
+          <span className="text-xs text-slate-400 font-bold  tracking-tighter">
             ({doctor.reviewCount} reviews)
           </span>
         </div>
@@ -152,7 +152,7 @@ export default function DoctorCard({
             e.stopPropagation();
             onBook(doctor.id);
           }}
-          className="w-full mt-5 bg-primary text-white py-3 rounded-lg font-bold text-xs uppercase tracking-normal hover:bg-primary-dark transition-all active:scale-95"
+          className="w-full mt-5 bg-primary text-white py-3 rounded-lg font-bold text-xs  tracking-normal hover:bg-primary-dark transition-all active:scale-95"
         >
           Book in {doctor.nextAvailableMinutes ?? "now"} min
         </button>
@@ -189,10 +189,10 @@ export default function DoctorCard({
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start gap-2">
             <div className="min-w-0">
-              <h3 className="font-bold text-slate-800 text-lg tracking-tight truncate group-hover:text-primary transition-colors">
+              <h3 className="font-bold text-slate-800 text-lg tracking-tight truncate group-hover:text-primary transition-colors font-grotesk">
                 Dr. {doctor.name}
               </h3>
-              <p className="text-xs text-primary font-bold uppercase tracking-normal mb-2">
+              <p className="text-xs text-primary font-bold  tracking-normal mb-2">
                 {doctor.specialisation}
               </p>
 
@@ -218,7 +218,7 @@ export default function DoctorCard({
                 <span className="text-xs font-bold text-slate-700">
                   {doctor.rating}
                 </span>
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-tight">
+                <span className="text-xs text-slate-400 font-bold  tracking-tight">
                   ({doctor.reviewCount})
                 </span>
               </div>
@@ -236,7 +236,7 @@ export default function DoctorCard({
             <div className="flex items-center gap-2">
               {doctor.consultationFee && (
                 <div className="px-3 py-2 bg-slate-900 text-white rounded-lg">
-                  <p className="text-[9px] font-bold text-white/50 uppercase tracking-normal leading-none mb-0.5">
+                  <p className="text-[9px] font-bold text-white/50  tracking-normal leading-none mb-0.5">
                     Consultation Fee
                   </p>
                   <p className="text-xs font-bold tracking-tight leading-none">
@@ -253,7 +253,7 @@ export default function DoctorCard({
                     e.stopPropagation();
                     onViewProfile(doctor.id);
                   }}
-                  className="text-slate-400 text-xs font-bold uppercase tracking-normal hover:text-primary transition-all active:scale-95"
+                  className="text-slate-400 text-xs font-bold  tracking-normal hover:text-primary transition-all active:scale-95"
                 >
                   View Profile
                 </button>
@@ -263,7 +263,7 @@ export default function DoctorCard({
                   e.stopPropagation();
                   onBook(doctor.id);
                 }}
-                className="bg-primary text-white px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-normal hover:bg-primary-dark transition-all active:scale-95"
+                className="bg-primary text-white px-6 py-3 rounded-lg text-xs font-bold  tracking-normal hover:bg-primary-dark transition-all active:scale-95"
               >
                 Book Now
               </button>
@@ -307,7 +307,7 @@ export default function DoctorCard({
               e.stopPropagation();
               onBook(doctor.id);
             }}
-            className="w-full flex items-center gap-3 px-3 py-3 mt-1 rounded-lg bg-primary text-white transition-all text-xs font-bold uppercase tracking-normal"
+            className="w-full flex items-center gap-3 px-3 py-3 mt-1 rounded-lg bg-primary text-white transition-all text-xs font-bold  tracking-normal"
           >
             <BiCalendarCheck size={18} />
             <span>Quick Book</span>

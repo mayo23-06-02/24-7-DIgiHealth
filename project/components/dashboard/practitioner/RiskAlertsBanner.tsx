@@ -34,11 +34,11 @@ export default function RiskAlertsBanner({
             <BiError className="text-white" size={16} />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-800 uppercase tracking-normal">
+            <p className="text-xs font-bold text-slate-800  tracking-normal">
               {alerts.length} High-Risk{" "}
               {alerts.length === 1 ? "Patient" : "Patients"}
             </p>
-            <p className="text-[10px] text-rose-500 font-bold uppercase tracking-normal mt-0.5 animate-pulse">
+            <p className="text-[10px] text-rose-500 font-bold  tracking-normal mt-0.5 animate-pulse">
               Clinical attention Required
             </p>
           </div>
@@ -47,7 +47,7 @@ export default function RiskAlertsBanner({
           <Button
             variant="ghost"
             onClick={onViewQueue}
-            className="flex items-center gap-1 text-[10px] font-bold text-rose-600 hover:bg-rose-100/50 rounded-full py-1.5 px-3 h-auto !min-w-0 border-none bg-transparent uppercase tracking-normal shadow-none"
+            className="flex items-center gap-1 text-[10px] font-bold text-rose-600 hover:bg-rose-100/50 rounded-full py-1.5 px-3 h-auto !min-w-0 border-none bg-transparent  tracking-normal shadow-none"
           >
             View Queue <BiChevronRight size={14} />
           </Button>

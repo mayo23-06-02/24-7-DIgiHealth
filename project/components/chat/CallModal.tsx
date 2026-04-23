@@ -24,7 +24,7 @@ export default function CallModal({
         <div className="flex items-center justify-between p-4 bg-slate-800 shadow-none z-10 border-b border-slate-700">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full animate-pulse bg-emerald-500" />
-            <span className="text-white font-bold uppercase tracking-normal text-xs">
+            <span className="text-white font-bold  tracking-normal text-xs">
               Live Secure Voice Call
             </span>
           </div>
@@ -42,7 +42,7 @@ export default function CallModal({
             </div>
           </div>
           <div className="text-center">
-            <h3 className="text-white text-xl font-bold">Voice Consultation</h3>
+            <h3 className="text-white text-xl font-bold font-grotesk">Voice Consultation</h3>
             <p className="text-slate-400 text-sm mt-1">
               Connecting to secure clinical channel...
             </p>

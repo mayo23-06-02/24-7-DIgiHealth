@@ -75,11 +75,11 @@ export default function VoiceCallModal({
         <div className="p-8 pb-0 flex justify-between items-center relative z-10">
           <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-full border border-slate-100 shadow-none">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-normal">
+            <span className="text-xs font-bold text-slate-800  tracking-normal">
               Ongoing Consultation
             </span>
           </div>
-          <div className="flex items-center gap-2 text-emerald-500 font-extrabold text-xs uppercase tracking-normal">
+          <div className="flex items-center gap-2 text-emerald-500 font-extrabold text-xs  tracking-normal">
             <BiCheckShield size={16} /> Encrypted
           </div>
         </div>
@@ -104,11 +104,11 @@ export default function VoiceCallModal({
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-3xl font-bold text-slate-800 tracking-tighter shadow-none">
+            <h3 className="text-3xl font-bold text-slate-800 tracking-tighter shadow-none font-grotesk">
               Dr. {practitionerName}
             </h3>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-xs font-bold text-primary uppercase tracking-normal">
+              <span className="text-xs font-bold text-primary  tracking-normal">
                 Senior Practitioner
               </span>
               <span className="text-slate-200">|</span>
@@ -120,7 +120,7 @@ export default function VoiceCallModal({
 
           {/* TIMER */}
           <div className="text-5xl font-bold text-slate-800 tracking-tighter tabular-nums bg-slate-50 py-8 rounded-[40px] border border-slate-100 shadow-inner group">
-            <p className="text-xs font-bold text-slate-300 uppercase tracking-[0.4em] mb-4 group-hover:text-primary transition-colors">
+            <p className="text-xs font-bold text-slate-300  tracking-[0.4em] mb-4 group-hover:text-primary transition-colors">
               Call Duration
             </p>
             {formatTime(callDuration)}
@@ -163,7 +163,7 @@ export default function VoiceCallModal({
                 <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiPlus />
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-normal group-hover:text-primary transition-colors">
+                <span className="text-[9px] font-bold text-slate-400  tracking-normal group-hover:text-primary transition-colors">
                   Add Person
                 </span>
               </Button>
@@ -174,7 +174,7 @@ export default function VoiceCallModal({
                 <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiUser />
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-normal group-hover:text-primary transition-colors">
+                <span className="text-[9px] font-bold text-slate-400  tracking-normal group-hover:text-primary transition-colors">
                   Patient Info
                 </span>
               </Button>
@@ -185,7 +185,7 @@ export default function VoiceCallModal({
                 <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiDotsVerticalRounded size={20} />
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-normal group-hover:text-primary transition-colors">
+                <span className="text-[9px] font-bold text-slate-400  tracking-normal group-hover:text-primary transition-colors">
                   Actions
                 </span>
               </Button>
@@ -196,7 +196,7 @@ export default function VoiceCallModal({
         {/* BOTTOM DRAG INDICATOR (Mobile Hint) */}
         <div className="pb-6 flex flex-col items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
-          <p className="text-[9px] font-bold text-slate-200 uppercase tracking-[0.4em]">
+          <p className="text-[9px] font-bold text-slate-200  tracking-[0.4em]">
             End Session to Record Notes
           </p>
         </div>

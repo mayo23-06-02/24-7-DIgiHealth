@@ -66,7 +66,7 @@ export default function HospitalReviewsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Patient Reviews</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Patient Reviews</h1>
           <p className="text-sm text-slate-500 mt-1">Moderate and view all patient feedback</p>
         </div>
         <div className="flex items-center gap-2 bg-primary/10 text-primary font-bold px-4 py-2 rounded-xl">

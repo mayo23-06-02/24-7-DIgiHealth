@@ -141,7 +141,7 @@ const PractitionerDiscovery: React.FC = () => {
       {/* FILTER SIDEBAR */}
       <aside className="lg:w-80 shrink-0 space-y-8 animate-in slide-in-from-left duration-700">
         <div className="space-y-2 mb-8">
-          <h2 className="text-3xl font-bold text-slate-800 tracking-tight leading-none">
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight leading-none font-grotesk">
             Find a Doctor
           </h2>
           <p className="text-slate-500 font-medium">
@@ -151,7 +151,7 @@ const PractitionerDiscovery: React.FC = () => {
 
         <div className="bg-white p-8 rounded-lg border border-slate-100 shadow-none space-y-8">
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Global Search
             </label>
             <div className="relative">
@@ -167,7 +167,7 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Specialisation
             </label>
             <div className="space-y-2">
@@ -186,7 +186,7 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Price Range (R{activeFilters.maxPrice})
             </label>
             <input
@@ -210,7 +210,7 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Language Spoken
             </label>
             <select
@@ -230,7 +230,7 @@ const PractitionerDiscovery: React.FC = () => {
 
           <Button
             variant="outline"
-            className="w-full h-12 border-slate-100 text-xs uppercase tracking-normal font-bold"
+            className="w-full h-12 border-slate-100 text-xs  tracking-normal font-bold"
             onClick={() =>
               setFilters({
                 specialisation: "All",
@@ -248,15 +248,13 @@ const PractitionerDiscovery: React.FC = () => {
       {/* DOCTORS GRID */}
       <div className="flex-1 space-y-8 animate-in fade-in duration-1000">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+          <h4 className="text-xs font-bold text-slate-400  tracking-normal font-grotesk">
             Showing {doctors.length} Verified Practitioners
           </h4>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-400 uppercase">
-              Sort by:
-            </span>
+            <span className="text-xs font-bold text-slate-400 ">Sort by:</span>
             <select
-              className="bg-transparent border-none text-xs font-bold text-primary uppercase tracking-normal focus:ring-0 cursor-pointer"
+              className="bg-transparent border-none text-xs font-bold text-primary  tracking-normal focus:ring-0 cursor-pointer"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -275,7 +273,7 @@ const PractitionerDiscovery: React.FC = () => {
               <div className="w-32 h-32 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300">
                 <BiUser size={64} />
               </div>
-              <h3 className="text-2xl font-bold text-slate-800">
+              <h3 className="text-2xl font-bold text-slate-800 font-grotesk">
                 No Match Found
               </h3>
               <p className="text-slate-500 max-w-xs mx-auto">
@@ -318,24 +316,24 @@ const PractitionerDiscovery: React.FC = () => {
                           {doc.rating?.toFixed(1) || "4.9"}
                         </span>
                       </div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-tight">
+                      <p className="text-xs font-bold text-slate-400  tracking-tight">
                         {doc.reviewCount || 0} Reviews
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <h5 className="text-xl font-bold text-slate-800 leading-tight mb-1">
+                    <h5 className="text-xl font-bold text-slate-800 leading-tight mb-1 font-grotesk">
                       {doc.name}
                     </h5>
-                    <p className="text-xs font-bold text-primary uppercase tracking-normal bg-primary/5 inline-block px-2 py-1 rounded-lg">
+                    <p className="text-xs font-bold text-primary  tracking-normal bg-primary/5 inline-block px-2 py-1 rounded-lg">
                       {doc.specialisation}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-4 bg-slate-50 rounded-2xl">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
                         Fee
                       </p>
                       <p className="text-sm font-bold text-slate-800 leading-none">
@@ -343,10 +341,10 @@ const PractitionerDiscovery: React.FC = () => {
                       </p>
                     </div>
                     <div className="p-4 bg-slate-50 rounded-2xl">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
                         Status
                       </p>
-                      <p className="text-xs font-bold text-emerald-600 uppercase tracking-tight leading-none truncate">
+                      <p className="text-xs font-bold text-emerald-600  tracking-tight leading-none truncate">
                         {doc.availabilityBadge || "Available"}
                       </p>
                     </div>
@@ -359,7 +357,7 @@ const PractitionerDiscovery: React.FC = () => {
                         label={l}
                         variant="soft"
                         status="info"
-                        className="text-[9px] uppercase font-bold"
+                        className="text-[9px]  font-bold"
                       />
                     ))}
                   </div>
@@ -368,13 +366,13 @@ const PractitionerDiscovery: React.FC = () => {
                 <div className="p-6 bg-slate-50/50 flex gap-3">
                   <Button
                     variant="white"
-                    className="flex-1 border-slate-200 text-xs font-bold uppercase tracking-normal h-12"
+                    className="flex-1 border-slate-200 text-xs font-bold  tracking-normal h-12"
                     onClick={() => router.push(`/patient/doctors/${doc.id}`)}
                   >
                     View Profile
                   </Button>
                   <Button
-                    className="flex-1 shadow-none shadow-primary/10 text-xs font-bold uppercase tracking-normal h-12"
+                    className="flex-1 shadow-none shadow-primary/10 text-xs font-bold  tracking-normal h-12"
                     onClick={() => {
                       setSelectedDoc(doc);
                       setShowBooking(true);
@@ -405,10 +403,10 @@ const PractitionerDiscovery: React.FC = () => {
                 size="lg"
               />
               <div>
-                <h6 className="font-bold text-slate-800 leading-none mb-1">
+                <h6 className="font-bold text-slate-800 leading-none mb-1 font-grotesk">
                   {selectedDoc.name}
                 </h6>
-                <p className="text-xs font-bold text-primary uppercase">
+                <p className="text-xs font-bold text-primary ">
                   {selectedDoc.specialisation}
                 </p>
               </div>
@@ -416,7 +414,7 @@ const PractitionerDiscovery: React.FC = () => {
 
             <div className="space-y-6">
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-normal block mb-3">
+                <label className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
                   Select Date
                 </label>
                 <input
@@ -430,7 +428,7 @@ const PractitionerDiscovery: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-normal block mb-3">
+                <label className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
                   Available Time Slots
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -449,7 +447,7 @@ const PractitionerDiscovery: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-normal block mb-3">
+                <label className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
                   Reason for Visit
                 </label>
                 <textarea

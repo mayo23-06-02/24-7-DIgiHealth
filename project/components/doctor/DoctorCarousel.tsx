@@ -115,9 +115,9 @@ export default function DoctorCarousel() {
       <div className="flex justify-between items-center  px-2">
         <div className="flex items-center justify-between w-full gap-2">
           <div className="mb-4 px-2">
-            <h3 className="font-bold text-xl text-slate-800">Top Doctors</h3>
-            <p className="text-sm text-slate-500">
-              Connect with our top-rated doctors for expert medical advice and
+            <h3 className="font-bold text-2xl text-slate-900 font-grotesk">Available Doctors</h3>
+            <p className="text-base text-slate-600">
+              Connect with our medical professionals for expert advice and
               care.
             </p>
           </div>

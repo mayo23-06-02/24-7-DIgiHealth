@@ -218,7 +218,7 @@ export default function PractitionerDashboard() {
             {/* Patients Overview Chart */}
             <Card className="lg:col-span-5 flex flex-col min-h-full">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-slate-800">
+                <h3 className="text-sm font-bold text-slate-800 font-grotesk">
                   Patients Overview
                 </h3>
                 <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
@@ -298,7 +298,7 @@ export default function PractitionerDashboard() {
             {/* Calendar Carousel */}
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-slate-800">
+                <h3 className="text-sm font-bold text-slate-800 font-grotesk">
                   Upcoming Appointments
                 </h3>
                 <div className="relative">
@@ -360,7 +360,7 @@ export default function PractitionerDashboard() {
                       }`}
                     >
                       <span
-                        className={`text-[9px] uppercase tracking-normal font-bold ${
+                        className={`text-[9px]  tracking-normal font-bold ${
                           isActive
                             ? "text-primary"
                             : isToday
@@ -385,7 +385,7 @@ export default function PractitionerDashboard() {
             {/* Schedule List */}
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-slate-800">
+                <h3 className="text-sm font-bold text-slate-800 font-grotesk">
                   Schedule List (
                   {selectedDate.toLocaleDateString("en-ZA", {
                     day: "numeric",
@@ -407,16 +407,16 @@ export default function PractitionerDashboard() {
                 <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
                     <tr className="bg-slate-50/80">
-                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal first:rounded-tl-lg">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500  tracking-normal first:rounded-tl-lg">
                         Appoint for
                       </th>
-                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500  tracking-normal">
                         Name
                       </th>
-                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500  tracking-normal">
                         Time
                       </th>
-                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal text-center">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500  tracking-normal text-center">
                         Method
                       </th>
                       <th className="py-4 px-6 last:rounded-tr-lg"></th>
@@ -530,7 +530,7 @@ export default function PractitionerDashboard() {
         {/* RIGHT COLUMN (Appoint Request) */}
         <Card className="xl:col-span-4 min-h-full">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
               Pending Requests
             </h3>
           </div>
@@ -554,7 +554,7 @@ export default function PractitionerDashboard() {
                     <div className="flex items-start gap-4 mb-4">
                       <Avatar name={req.patientName} size="md" />
                       <div className="flex-1">
-                        <h4 className="text-sm font-bold text-slate-800 mb-1 leading-none">
+                        <h4 className="text-sm font-bold text-slate-800 mb-1 leading-none font-grotesk">
                           {req.patientName}
                         </h4>
                         <p className="text-xs font-medium text-slate-500 mb-1">

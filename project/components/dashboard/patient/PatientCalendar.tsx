@@ -509,7 +509,7 @@ export default function PatientCalendar() {
                       </span>
                     </div>
                     {day.isToday && (
-                      <div className="text-[8px] font-bold uppercase bg-primary px-2 py-1 rounded-full text-white">
+                      <div className="text-[8px] font-bold  bg-primary px-2 py-1 rounded-full text-white">
                         Today
                       </div>
                     )}
@@ -568,7 +568,7 @@ export default function PatientCalendar() {
         <section className="space-y-6 h-full">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-lg font-bold text-slate-800">
+              <h4 className="text-lg font-bold text-slate-800 font-grotesk">
                 Live Schedule Overview
               </h4>
               <p className="text-xs font-thin text-slate-400">
@@ -643,7 +643,7 @@ export default function PatientCalendar() {
                             )}
                           </div>
                           <div>
-                            <h5 className="text-base font-bold text-slate-800 leading-none mb-1 truncate max-w-[150px]">
+                            <h5 className="text-base font-bold text-slate-800 leading-none mb-1 truncate max-w-[150px] font-grotesk">
                               {appt.dr ||
                                 appt.title ||
                                 (appt.type === "refill"
@@ -651,11 +651,11 @@ export default function PatientCalendar() {
                                   : "Event")}
                             </h5>
                             <div className="flex items-center gap-2">
-                              <p className="text-xs font-bold text-slate-400 uppercase tracking-normal flex items-center gap-1">
+                              <p className="text-xs font-bold text-slate-400  tracking-normal flex items-center gap-1">
                                 <BiTime className="text-primary" /> {appt.time}
                               </p>
                               <span className="text-xs text-slate-300">•</span>
-                              <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                              <p className="text-xs font-bold text-slate-400  tracking-normal">
                                 {appt.status}
                               </p>
                             </div>
@@ -682,7 +682,7 @@ export default function PatientCalendar() {
                                 e.stopPropagation();
                                 window.location.href = `/patient/messages?autoStart=true&consultationId=${appt.id}`;
                               }}
-                              className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-normal flex items-center gap-1 shadow-none"
+                              className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all px-3 py-2 rounded-lg text-xs font-bold  tracking-normal flex items-center gap-1 shadow-none"
                             >
                               <BiVideo size={14} /> Join Room
                               {getJoinCountdown(appt) &&
@@ -708,7 +708,7 @@ export default function PatientCalendar() {
                         </div>
 
                         <div className="flex flex-col gap-1 justify-start items-start">
-                          <p className="text-xs font-bold text-slate-300 uppercase tracking-normal leading-none">
+                          <p className="text-xs font-bold text-slate-300  tracking-normal leading-none">
                             {appt.type === "refill"
                               ? "Refill Details"
                               : "Appointment Details"}
@@ -778,7 +778,7 @@ export default function PatientCalendar() {
           {/* Existing events for this day (when adding) */}
           {!editingId && showAddModal && (
             <div className="space-y-3">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+              <p className="text-xs font-bold text-slate-400  tracking-normal">
                 Scheduled for this day
               </p>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
@@ -835,7 +835,7 @@ export default function PatientCalendar() {
           )}
 
           <div className="space-y-4">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <p className="text-xs font-bold text-slate-400  tracking-normal">
               {editingId ? "Modify Selection" : "Add New Event"}
             </p>
 
@@ -982,7 +982,7 @@ export default function PatientCalendar() {
             {addForm.type === "refill" && (
               <>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <label className="text-xs font-bold text-slate-400  tracking-normal">
                     Select Prescription
                   </label>
                   {loadingPrescriptions ? (
@@ -1022,7 +1022,7 @@ export default function PatientCalendar() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                    <label className="text-xs font-bold text-slate-400  tracking-normal">
                       Delivery Method
                     </label>
                     <div className="flex gap-3">
@@ -1074,7 +1074,7 @@ export default function PatientCalendar() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <label className="text-xs font-bold text-slate-400  tracking-normal">
                     Payment Method
                   </label>
                   <div className="flex flex-wrap gap-3">
@@ -1116,7 +1116,7 @@ export default function PatientCalendar() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <label className="text-xs font-bold text-slate-400  tracking-normal">
                     Remind me in (days)
                   </label>
                   <select
@@ -1206,7 +1206,7 @@ export default function PatientCalendar() {
                 )}
               </div>
               <div>
-                <h4 className="text-xl font-bold text-slate-800">
+                <h4 className="text-xl font-bold text-slate-800 font-grotesk">
                   {selectedAppointment.dr ||
                     selectedAppointment.title ||
                     (selectedAppointment.type === "refill"

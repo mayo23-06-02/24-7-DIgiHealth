@@ -33,7 +33,9 @@ export default function CallButton({
   const searchParams = useSearchParams();
   const [callActive, setCallActive] = useState(false);
   const [autoJoinAvailable, setAutoJoinAvailable] = useState(false);
-  const [pendingRoomInfo, setPendingRoomInfo] = useState<ActiveCallInfo | null>(null);
+  const [pendingRoomInfo, setPendingRoomInfo] = useState<ActiveCallInfo | null>(
+    null,
+  );
   const [statusLoading, setStatusLoading] = useState(false);
 
   useEffect(() => {
@@ -126,7 +128,7 @@ export default function CallButton({
             setAutoJoinAvailable(false);
             onCallStart?.(pendingRoomInfo);
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white font-bold text-xs uppercase tracking-normal rounded-xl hover:bg-rose-600 transition-all animate-pulse"
+          className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white font-bold text-xs  tracking-normal rounded-xl hover:bg-rose-600 transition-all animate-pulse"
         >
           JOIN ACTIVE CALL
         </button>

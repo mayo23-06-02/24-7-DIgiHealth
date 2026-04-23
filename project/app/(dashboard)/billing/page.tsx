@@ -93,7 +93,7 @@ const STATUS_STYLES: Record<string, string> = {
 function StatusPill({ status }: { status: string }) {
   return (
     <span
-      className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-normal border ${STATUS_STYLES[status] ?? "bg-slate-100 text-slate-400 border-slate-200"}`}
+      className={`px-3 py-1 rounded-lg text-xs font-bold  tracking-normal border ${STATUS_STYLES[status] ?? "bg-slate-100 text-slate-400 border-slate-200"}`}
     >
       {status}
     </span>
@@ -129,7 +129,7 @@ function SummaryCard({
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-normal truncate">
+        <p className="text-xs font-bold text-slate-400  tracking-normal truncate">
           {label}
         </p>
         <p className="text-xl font-bold text-slate-800 leading-tight truncate">
@@ -175,7 +175,7 @@ function TransactionTable({
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
-        <h3 className="text-sm font-bold text-slate-800">{title}</h3>
+        <h3 className="text-sm font-bold text-slate-800 font-grotesk">{title}</h3>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative">
             <BiSearch
@@ -203,7 +203,7 @@ function TransactionTable({
             <option value="">All Statuses</option>
             {["completed", "pending", "failed", "refunded"].map((s) => (
               <option key={s} value={s}>
-                {s.charAt(0).toUpperCase() + s.slice(1)}
+                {s.charAt(0).to() + s.slice(1)}
               </option>
             ))}
           </select>
@@ -238,7 +238,7 @@ function TransactionTable({
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-normal hover:bg-primary/80 transition-all shadow-none active:scale-95"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all shadow-none active:scale-95"
             >
               <BiDownload size={14} /> Export CSV
             </button>
@@ -261,7 +261,7 @@ function TransactionTable({
               ].map((h) => (
                 <th
                   key={h}
-                  className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-normal"
+                  className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
                 >
                   {h}
                 </th>
@@ -383,7 +383,7 @@ function MiniBarChart({
   const max = Math.max(...entries.map(([, v]) => v), 1);
   return (
     <Card>
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-4">
+      <p className="text-xs font-bold text-slate-400  tracking-normal mb-4">
         {label}
       </p>
       <div className="flex items-end gap-2 h-24">
@@ -430,7 +430,7 @@ function OrderTable({ orders }: { orders: any[] }) {
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-800">
+        <h3 className="text-sm font-bold text-slate-800 font-grotesk">
           My Orders & Refills
         </h3>
         <div className="relative">
@@ -453,7 +453,7 @@ function OrderTable({ orders }: { orders: any[] }) {
               {["Order ID", "Item", "Category", "Date", "Status"].map((h) => (
                 <th
                   key={h}
-                  className="px-6 py-3 text-xs font-bold text-slate-400 uppercase tracking-normal"
+                  className="px-6 py-3 text-xs font-bold text-slate-400  tracking-normal"
                 >
                   {h}
                 </th>
@@ -486,7 +486,7 @@ function OrderTable({ orders }: { orders: any[] }) {
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md uppercase">
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md ">
                       {o.category}
                     </span>
                   </td>
@@ -595,7 +595,7 @@ function PatientBillingView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
               Subscription Plan
             </h3>
             <StatusPill status={subscription?.status || "free"} />
@@ -637,7 +637,7 @@ function PatientBillingView({
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={() => setUpgradeModal(true)}
-                  className="flex-1 py-3 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-normal hover:bg-primary/80 transition-all shadow-md shadow-primary/20 active:scale-95"
+                  className="flex-1 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all shadow-md shadow-primary/20 active:scale-95"
                 >
                   Upgrade Plan
                 </button>
@@ -648,7 +648,7 @@ function PatientBillingView({
                       onAction("cancel_subscription")
                     }
                     disabled={actionLoading}
-                    className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-normal hover:bg-red-50 hover:text-red-500 transition-all"
+                    className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold  tracking-normal hover:bg-red-50 hover:text-red-500 transition-all"
                   >
                     Cancel
                   </button>
@@ -662,7 +662,7 @@ function PatientBillingView({
               </p>
               <button
                 onClick={() => setUpgradeModal(true)}
-                className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-normal shadow-md shadow-primary/20 hover:bg-primary/80 transition-all"
+                className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal shadow-md shadow-primary/20 hover:bg-primary/80 transition-all"
               >
                 Get Started
               </button>
@@ -673,7 +673,7 @@ function PatientBillingView({
         {/* Payment Methods */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
               Payment Methods
             </h3>
             <button className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
@@ -730,13 +730,13 @@ function PatientBillingView({
                       </>
                     )}
                     {pm.medicalAidNumber && pm.insuranceProvider && (
-                      <p className="text-[9px] text-slate-300 font-bold uppercase tracking-wide mt-0.5">
+                      <p className="text-[9px] text-slate-300 font-bold  tracking-wide mt-0.5">
                         {pm.insuranceProvider} • {pm.coverageType}
                       </p>
                     )}
                   </div>
                   {pm.isDefault && (
-                    <span className="text-[9px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg uppercase tracking-normal shrink-0">
+                    <span className="text-[9px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg  tracking-normal shrink-0">
                       Default
                     </span>
                   )}
@@ -800,7 +800,7 @@ function PatientBillingView({
           />
           <div className="relative w-full max-w-2xl bg-white rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 ">
             <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-800">
+              <h3 className="text-xl font-bold text-slate-800 font-grotesk">
                 Choose Your Plan
               </h3>
               <button
@@ -821,7 +821,7 @@ function PatientBillingView({
                       : "border-slate-100 hover:border-slate-200"
                   }`}
                 >
-                  <p className="text-xs font-bold uppercase tracking-normal text-slate-400 mb-1">
+                  <p className="text-xs font-bold  tracking-normal text-slate-400 mb-1">
                     {t.label}
                   </p>
                   <p className="text-2xl font-bold text-slate-800 mb-3">
@@ -851,11 +851,11 @@ function PatientBillingView({
                   setUpgradeModal(false);
                 }}
                 disabled={actionLoading}
-                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-normal shadow-none shadow-primary/20 hover:bg-primary/80 transition-all disabled:opacity-50"
+                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-none shadow-primary/20 hover:bg-primary/80 transition-all disabled:opacity-50"
               >
                 {actionLoading
                   ? "Processing..."
-                  : `Upgrade to ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`}
+                  : `Upgrade to ${selectedTier.charAt(0).to() + selectedTier.slice(1)}`}
               </button>
             </div>
           </div>
@@ -925,19 +925,19 @@ function PractitionerBillingView({
           />
         </div>
         <Card>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-4">
+          <p className="text-xs font-bold text-slate-400  tracking-normal mb-4">
             Quick Actions
           </p>
           <div className="space-y-3">
             <button
               onClick={() => setRequestModal(true)}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-normal hover:bg-primary/80 transition-all shadow-md shadow-primary/20 active:scale-95"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/80 transition-all shadow-md shadow-primary/20 active:scale-95"
             >
               <BiTransfer size={18} /> Request Payout
             </button>
             <button
               onClick={() => setBankModal(true)}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-normal hover:bg-slate-200 transition-all"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
             >
               <BiBank size={18} /> Update Bank Account
             </button>
@@ -960,7 +960,7 @@ function PractitionerBillingView({
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-normal hover:bg-slate-200 transition-all"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
             >
               <BiDownload size={18} /> Download Payout Report
             </button>
@@ -971,7 +971,7 @@ function PractitionerBillingView({
       {/* Payout History */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100">
-          <h3 className="text-sm font-bold text-slate-800">Payout History</h3>
+          <h3 className="text-sm font-bold text-slate-800 font-grotesk">Payout History</h3>
         </div>
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left min-w-[700px]">
@@ -988,7 +988,7 @@ function PractitionerBillingView({
                 ].map((h) => (
                   <th
                     key={h}
-                    className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-normal"
+                    className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
                   >
                     {h}
                   </th>
@@ -1055,12 +1055,12 @@ function PractitionerBillingView({
             onClick={() => setRequestModal(false)}
           />
           <div className="relative w-full max-w-md bg-white rounded-2xl p-8  animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">
+            <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
               Request Payout
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-normal mb-2">
+                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2">
                   Amount (ZAR)
                 </label>
                 <input
@@ -1072,7 +1072,7 @@ function PractitionerBillingView({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-normal mb-2">
+                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2">
                   Notes (optional)
                 </label>
                 <input
@@ -1111,7 +1111,7 @@ function PractitionerBillingView({
                   setRequestModal(false);
                 }}
                 disabled={!requestAmount || actionLoading}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-normal shadow-md disabled:opacity-50 hover:bg-primary/80 transition-all"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-md disabled:opacity-50 hover:bg-primary/80 transition-all"
               >
                 {actionLoading ? "Submitting..." : "Submit Request"}
               </button>
@@ -1128,7 +1128,7 @@ function PractitionerBillingView({
             onClick={() => setBankModal(false)}
           />
           <div className="relative w-full max-w-md bg-white rounded-2xl p-8  animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">
+            <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
               Bank Account Details
             </h3>
             <div className="space-y-4">
@@ -1140,7 +1140,7 @@ function PractitionerBillingView({
                 "Tax Number",
               ].map((field) => (
                 <div key={field}>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-normal mb-1.5">
+                  <label className="block text-xs font-bold text-slate-400  tracking-normal mb-1.5">
                     {field}
                   </label>
                   <input
@@ -1159,7 +1159,7 @@ function PractitionerBillingView({
               </button>
               <button
                 onClick={() => setBankModal(false)}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-normal shadow-md hover:bg-primary/80 transition-all"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-md hover:bg-primary/80 transition-all"
               >
                 Save Account
               </button>
@@ -1228,7 +1228,7 @@ function HospitalAdminBillingView({
 
         <Card noPadding>
           <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
               Revenue by Department
             </h3>
           </div>
@@ -1262,7 +1262,7 @@ function HospitalAdminBillingView({
       {/* Practitioner Payout Management */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-800">
+          <h3 className="text-sm font-bold text-slate-800 font-grotesk">
             Practitioner Payouts
           </h3>
           <button
@@ -1307,7 +1307,7 @@ function HospitalAdminBillingView({
                 ].map((h) => (
                   <th
                     key={h}
-                    className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-normal"
+                    className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
                   >
                     {h}
                   </th>
@@ -1475,7 +1475,7 @@ function AdminBillingView({
 
         <Card>
           <div className="flex items-center justify-between mb-5">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <p className="text-xs font-bold text-slate-400  tracking-normal">
               Platform Fee Config
             </p>
             <button
@@ -1527,7 +1527,7 @@ function AdminBillingView({
             <button
               key={tab}
               onClick={() => setActiveSubTab(tab)}
-              className={`flex-1 py-4 text-xs font-bold uppercase tracking-normal transition-all ${
+              className={`flex-1 py-4 text-xs font-bold  tracking-normal transition-all ${
                 activeSubTab === tab
                   ? "bg-primary/5 text-primary border-b-2 border-primary"
                   : "text-slate-400 hover:text-slate-600"
@@ -1565,7 +1565,7 @@ function AdminBillingView({
                   ].map((h) => (
                     <th
                       key={h}
-                      className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-normal"
+                      className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
                     >
                       {h}
                     </th>
@@ -1690,7 +1690,7 @@ function AdminBillingView({
             onClick={() => setFeeModal(false)}
           />
           <div className="relative w-full max-w-sm bg-white rounded-2xl p-8  animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">
+            <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
               Adjust Platform Fees
             </h3>
             <div className="space-y-4">
@@ -1702,7 +1702,7 @@ function AdminBillingView({
                 ] as const
               ).map(([label, key]) => (
                 <div key={key}>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-normal mb-1.5">
+                  <label className="block text-xs font-bold text-slate-400  tracking-normal mb-1.5">
                     {label}
                   </label>
                   <input
@@ -1737,7 +1737,7 @@ function AdminBillingView({
                   setFeeModal(false);
                 }}
                 disabled={actionLoading}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-normal shadow-md hover:bg-primary/80 transition-all disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-md hover:bg-primary/80 transition-all disabled:opacity-50"
               >
                 {actionLoading ? "Saving..." : "Save Config"}
               </button>
@@ -1853,7 +1853,7 @@ export default function BillingPage() {
             )}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight font-grotesk">
               {data ? (roleLabel[data.role] ?? "Billing") : "Billing"}
             </h2>
             <p className="text-sm text-slate-500 font-medium mt-0.5">
@@ -1873,7 +1873,7 @@ export default function BillingPage() {
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-xs uppercase tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
+          className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-xs  tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
         >
           <BiRefresh size={16} className={loading ? "animate-spin" : ""} />{" "}
           Refresh
@@ -1884,7 +1884,7 @@ export default function BillingPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-32 gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-primary animate-spin" />
-          <p className="text-sm font-bold text-slate-400 uppercase tracking-normal">
+          <p className="text-sm font-bold text-slate-400  tracking-normal">
             Loading Financial Data...
           </p>
         </div>

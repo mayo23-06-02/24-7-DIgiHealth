@@ -51,14 +51,14 @@ const Modal: React.FC<ModalProps> = ({
       {/* Content */}
       <div
         className={`
-        relative w-full ${widths[width]} bg-white rounded-lg overflow-hidden
+        relative w-full ${widths[width]} max-h-[85vh] bg-white rounded-lg overflow-hidden
         animate-in zoom-in-95 fade-in duration-500 transition-all shadow-none
       `}
       >
         {/* Header */}
         {!hideHeader && (
           <div className="flex items-center justify-between px-10 py-8 border-b border-slate-50">
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+            <h3 className="text-xl font-bold text-slate-900 tracking-tight  font-grotesk">
               {title ? (
                 <>
                   {title.split(" ").slice(0, -1).join(" ")}{" "}

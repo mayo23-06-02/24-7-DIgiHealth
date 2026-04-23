@@ -287,7 +287,7 @@ export default function WellnessHub() {
         {/* LEFT COLUMN: SCORE & STREAK */}
         <div className="lg:col-span-3 space-y-6">
           <Card className="text-center p-8 bg-gradient-to-br from-primary to-blue-600 text-white border-none shadow-none shadow-primary/20">
-            <h3 className="text-sm font-bold uppercase tracking-normal opacity-80 mb-6">
+            <h3 className="text-sm font-bold  tracking-normal opacity-80 mb-6 font-grotesk">
               Wellness Index
             </h3>
 
@@ -318,7 +318,7 @@ export default function WellnessHub() {
                 <span className="text-4xl font-bold">
                   {wellnessData.score}%
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-normal opacity-60">
+                <span className="text-[10px]  font-bold tracking-normal opacity-60">
                   Optimal
                 </span>
               </div>
@@ -339,7 +339,7 @@ export default function WellnessHub() {
                 <HiFire size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-normal">
+                <p className="text-[10px] font-bold text-amber-500  tracking-normal">
                   Consistency
                 </p>
                 <p className="text-xl font-bold text-slate-800">
@@ -361,7 +361,7 @@ export default function WellnessHub() {
                     className="w-full bg-primary/20 rounded-t-lg transition-all hover:bg-primary"
                     style={{ height: `${h.score}%` }}
                   />
-                  <span className="text-[8px] font-bold text-slate-400 uppercase">
+                  <span className="text-[8px] font-bold text-slate-400 ">
                     {h.date.split("-")[2]}
                   </span>
                 </div>
@@ -381,7 +381,7 @@ export default function WellnessHub() {
             <div className="space-y-8 mt-6">
               {/* MOOD */}
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mb-4 block px-1">
+                <label className="text-[10px] font-bold text-slate-400  tracking-normal mb-4 block px-1">
                   Current Sentiment
                 </label>
                 <div className="flex justify-between gap-2">
@@ -396,7 +396,7 @@ export default function WellnessHub() {
                       }`}
                     >
                       {m.icon}
-                      <span className="text-[10px] font-bold uppercase tracking-tight">
+                      <span className="text-[10px] font-bold  tracking-tight">
                         {m.label}
                       </span>
                     </button>
@@ -409,7 +409,7 @@ export default function WellnessHub() {
                 <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
                   <div className="flex items-center gap-3 mb-4">
                     <BiMoon className="text-blue-500" size={20} />
-                    <span className="text-xs font-bold text-slate-700 uppercase tracking-tight">
+                    <span className="text-xs font-bold text-slate-700  tracking-tight">
                       Sleep Restoration
                     </span>
                   </div>
@@ -426,7 +426,7 @@ export default function WellnessHub() {
                     }
                     className="w-full bg-transparent text-3xl font-bold text-slate-800 outline-none"
                   />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  <span className="text-[10px] font-bold text-slate-400 ">
                     Hours
                   </span>
                 </div>
@@ -434,7 +434,7 @@ export default function WellnessHub() {
                 <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
                   <div className="flex items-center gap-3 mb-4">
                     <BiWalk className="text-emerald-500" size={20} />
-                    <span className="text-xs font-bold text-slate-700 uppercase tracking-tight">
+                    <span className="text-xs font-bold text-slate-700  tracking-tight">
                       Active Mobility
                     </span>
                   </div>
@@ -448,7 +448,7 @@ export default function WellnessHub() {
                     }
                     className="w-full bg-transparent text-3xl font-bold text-slate-800 outline-none"
                   />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  <span className="text-[10px] font-bold text-slate-400 ">
                     Steps
                   </span>
                 </div>
@@ -459,7 +459,7 @@ export default function WellnessHub() {
                 size="lg"
                 disabled={checkin.mood === 0 || isSubmitting}
                 onClick={handleCheckin}
-                className="h-16 rounded-[1.5rem] text-[12px] font-bold uppercase tracking-normal shadow-none shadow-primary/20"
+                className="h-16 rounded-[1.5rem] text-[12px] font-bold  tracking-normal shadow-none shadow-primary/20"
               >
                 {isSubmitting
                   ? "Syncing Intelligence..."
@@ -480,7 +480,7 @@ export default function WellnessHub() {
                     {tip.icon}
                   </div>
                   <div>
-                    <h5 className="font-bold text-slate-800 text-sm mb-1 uppercase tracking-tight">
+                    <h5 className="font-bold text-slate-800 text-sm mb-1  tracking-tight font-grotesk">
                       {tip.title}
                     </h5>
                     <p className="text-xs text-slate-500 font-bold leading-relaxed">
@@ -513,7 +513,7 @@ export default function WellnessHub() {
               </div>
             </div>
             <div className="p-6">
-              <h4 className="text-lg font-bold text-slate-800 leading-tight mb-3 line-clamp-2">
+              <h4 className="text-lg font-bold text-slate-800 leading-tight mb-3 line-clamp-2 font-grotesk">
                 {articles[0]?.title}
               </h4>
               <p className="text-xs text-slate-500 font-bold leading-relaxed mb-6 line-clamp-3">
@@ -522,7 +522,7 @@ export default function WellnessHub() {
               <Button
                 variant="ghost"
                 onClick={() => setSelectedArticle(articles[0])}
-                className="w-full bg-slate-50 text-[10px] font-bold uppercase tracking-normal text-primary hover:bg-primary hover:text-white transition-all rounded-xl py-3 border-none"
+                className="w-full bg-slate-50 text-[10px] font-bold  tracking-normal text-primary hover:bg-primary hover:text-white transition-all rounded-xl py-3 border-none"
               >
                 Review Full Analysis
               </Button>
@@ -537,7 +537,7 @@ export default function WellnessHub() {
             </p>
             <div className="flex items-center gap-3">
               <div className="h-0.5 w-6 bg-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-normal">
+              <span className="text-[10px] font-bold  tracking-normal">
                 {quote?.author}
               </span>
             </div>
@@ -574,14 +574,14 @@ export default function WellnessHub() {
                 </div>
                 <div className="p-5">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[9px] font-bold text-primary uppercase tracking-normal">
+                    <span className="text-[9px] font-bold text-primary  tracking-normal">
                       {art.tags?.[0]}
                     </span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-normal flex items-center gap-1">
+                    <span className="text-[9px] font-bold text-slate-400  tracking-normal flex items-center gap-1">
                       <BiBookOpen /> {art.readTimeMinutes} Mins
                     </span>
                   </div>
-                  <h5 className="font-bold text-slate-800 text-sm leading-tight line-clamp-1">
+                  <h5 className="font-bold text-slate-800 text-sm leading-tight line-clamp-1 font-grotesk">
                     {art.title}
                   </h5>
                 </div>

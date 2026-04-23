@@ -106,7 +106,7 @@ export default function AttachRecordModal({
           <BiX size={20} />
         </button>
 
-        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3 font-grotesk">
           <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
             <BiUpload size={22} />
           </div>
@@ -115,7 +115,7 @@ export default function AttachRecordModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 px-1">
+            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               Record Type
             </label>
             <select
@@ -132,7 +132,7 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 px-1">
+            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               Title
             </label>
             <input
@@ -146,7 +146,7 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 px-1">
+            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               Notes / Description (Optional)
             </label>
             <textarea
@@ -158,7 +158,7 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 px-1">
+            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               File Attachment
             </label>
             <div
@@ -214,7 +214,7 @@ export default function AttachRecordModal({
             <button
               type="submit"
               disabled={isUploading || !file || !title}
-              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold uppercase tracking-normal text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-none shadow-primary/20 disabled:opacity-50 disabled:shadow-none"
+              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold  tracking-normal text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-none shadow-primary/20 disabled:opacity-50 disabled:shadow-none"
             >
               {isUploading ? (
                 <>

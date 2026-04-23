@@ -27,7 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center text-xs uppercase py-3 px-4 justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
+    "inline-flex items-center text-sm font-grotesk  tracking-wider py-3 px-4 justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
 
   const variants = {
     primary: "bg-[#4493b8] text-white hover:bg-primary/90 ",

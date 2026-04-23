@@ -110,7 +110,7 @@ function InlineCallPanel({
               {videoOn ? (
                 <div className="text-white/10 flex flex-col items-center gap-3">
                   <BiVideo size={80} />
-                  <span className="text-xs font-bold uppercase tracking-widest">
+                  <span className="text-xs font-bold  tracking-widest">
                     Your Camera
                   </span>
                 </div>
@@ -313,10 +313,10 @@ export default function MessagesView({
               <BiMessageDetail size={16} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800 leading-none">
+              <h3 className="text-sm font-bold text-slate-800 leading-none font-grotesk">
                 Chat
               </h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+              <p className="text-[10px] text-slate-400 font-bold  tracking-widest mt-0.5">
                 {activeCall.participantName || "Participant"}
               </p>
             </div>
@@ -338,7 +338,7 @@ export default function MessagesView({
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] overflow-hidden -m-4 lg:-m-8 animate-in fade-in duration-700">
       {isOffline && (
-        <div className="bg-amber-500 text-white p-2 text-center text-xs font-bold uppercase tracking-normal flex items-center justify-center gap-2">
+        <div className="bg-amber-500 text-white p-2 text-center text-xs font-bold  tracking-normal flex items-center justify-center gap-2">
           <BiWifiOff size={16} /> Connection lost. Messages will queue and send
           when online.
         </div>
@@ -352,7 +352,7 @@ export default function MessagesView({
           <div className="p-6 border-b border-slate-100 bg-slate-50/50">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                <h2 className="text-2xl font-bold text-slate-800 tracking-tight font-grotesk">
                   {pageTitle}
                 </h2>
                 <p className="text-slate-500 font-medium text-xs">
@@ -375,7 +375,7 @@ export default function MessagesView({
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-2 text-xs uppercase tracking-normal font-bold rounded-lg transition-all capitalize ${activeTab === tab ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}
+                  className={`flex-1 py-2 text-xs  tracking-normal font-bold rounded-lg transition-all capitalize ${activeTab === tab ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}
                 >
                   {tab}
                 </button>
@@ -439,7 +439,7 @@ export default function MessagesView({
                     />
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <div className="flex justify-between items-center mb-0.5">
-                        <h4 className="font-bold text-slate-800 text-sm truncate pr-2">
+                        <h4 className="font-bold text-slate-800 text-sm truncate pr-2 font-grotesk">
                           {conv.contactName}
                         </h4>
                         <span className="text-xs text-slate-400 font-bold whitespace-nowrap">

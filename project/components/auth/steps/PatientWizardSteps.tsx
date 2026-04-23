@@ -23,7 +23,7 @@ export function PatientStep1({ formData, updateData, errors }: any) {
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
       <div className="inline-flex items-center gap-2  rounded-full ">
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-        <span className="text-xs  text-primary uppercase tracking-normal">
+        <span className="text-xs  text-primary  tracking-normal">
           Patient Identity
         </span>
       </div>
@@ -68,9 +68,10 @@ export function PatientStep1({ formData, updateData, errors }: any) {
           onChange={(e) => updateData("dob", e.target.value)}
         />
         <Input
-          label="Email Address (recommended)"
+          label="Email Address *"
           type="email"
           value={formData.email || ""}
+          error={errors?.email}
           placeholder="your@email.co.za"
           onChange={(e) => updateData("email", e.target.value)}
           className="md:col-span-2"
@@ -88,8 +89,8 @@ export function POPIAConsentStep({ formData, updateData }: any) {
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500  flex flex-col">
       <div className="bg-primary rounded-md p-8 text-white relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-2xl" />
-        <h3 className="text-xs  text-white/60 mb-4">Legal Compliance</h3>
-        <h2 className="text-3xl font-bold mb-5 leading-tight">
+        <h3 className="text-xs  text-white/60 mb-4 font-grotesk">Legal Compliance</h3>
+        <h2 className="text-3xl font-bold mb-5 leading-tight font-grotesk">
           Privacy Declaration
         </h2>
         <p className="text-white/80 text-sm  mb-8">
@@ -258,7 +259,7 @@ export function PatientAnthropometricStep({
               key={u}
               type="button"
               onClick={() => setUnit(u as any)}
-              className={`px-4 py-2 rounded text-xs font-bold uppercase transition-all ${unit === u ? "bg-white text-primary shadow-none" : "text-slate-400"}`}
+              className={`px-4 py-2 rounded text-xs font-bold  transition-all ${unit === u ? "bg-white text-primary shadow-none" : "text-slate-400"}`}
             >
               {u === "metric" ? "cm / kg" : "in / lbs"}
             </button>
@@ -295,7 +296,7 @@ export function PatientAnthropometricStep({
             </div>
             {bmiCategory && (
               <div className="px-4 py-2  border border-white/40">
-                <span className="text-xs font-bold uppercase tracking-normal">
+                <span className="text-xs font-bold  tracking-normal">
                   {bmiCategory.label}
                 </span>
               </div>
@@ -518,7 +519,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
       {/* Card Payment Form */}
       <div className="bg-white rounded-sm gap-6  py-5 flex flex-col">
         <div className="flex items-center justify-between mb-[20px]">
-          <h3 className="text-sm font-bold text-slate-800   flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-800   flex items-center gap-2 font-grotesk">
             <BiCreditCard className="text-primary" /> Credit or Debit Card
           </h3>
           <div className="flex gap-2">
@@ -533,9 +534,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
               label="Name on Card"
               placeholder="e.g. THABO MOKOENA"
               value={formData.cardName || ""}
-              onChange={(e: any) =>
-                updateData("cardName", e.target.value.toUpperCase())
-              }
+              onChange={(e: any) => updateData("cardName", e.target.value.to())}
             />
 
             <Input
@@ -613,7 +612,7 @@ export function PatientEmergencyStep({ formData, updateData, onSkip }: any) {
       </div>
 
       <div className="p-5 mb-[20px] rounded-lg border border-slate-100 space-y-6">
-        <h3 className="text-sm font-bold text-slate-700 uppercase tracking-normal">
+        <h3 className="text-sm font-bold text-slate-700  tracking-normal font-grotesk">
           Contact Details
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

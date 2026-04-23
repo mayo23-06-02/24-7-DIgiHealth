@@ -31,11 +31,11 @@ export default function DashboardLayout({
               <FiMenu />
             </button>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-slate-800">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-800 font-grotesk">
                 {user ? `Sawubona, ${user.name.split(" ")[0]}` : "Sawubona"}
               </h1>
               {!isOnline && (
-                <span className="flex items-center gap-1.5 text-xs font-bold text-orange-500 uppercase tracking-normal mt-0.5">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-orange-500  tracking-normal mt-0.5">
                   <FiCloudOff /> Offline Mode
                 </span>
               )}

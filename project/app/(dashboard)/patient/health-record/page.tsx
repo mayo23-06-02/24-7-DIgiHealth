@@ -495,7 +495,7 @@ export default function HealthRecordPage() {
                         {getIcon(event.type)}
                       </p>
                       <div className="bg-slate-100 px-3 py-1 rounded-full  text-slate-500 ">
-                        <p className="whitespace-nowrap font-bold text-xs uppercase tracking-normal">
+                        <p className="whitespace-nowrap font-bold text-xs  tracking-normal">
                           {event.type.replace("_", " ")}
                         </p>
                       </div>
@@ -509,7 +509,7 @@ export default function HealthRecordPage() {
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-bold text-slate-800 mb-1">
+                      <h3 className="text-lg font-bold text-slate-800 mb-1 font-grotesk">
                         {event.title}
                       </h3>
                       <p className="text-sm text-slate-500 leading-relaxed mb-4">
@@ -560,7 +560,7 @@ export default function HealthRecordPage() {
               <div className="bg-white border border-slate-200 rounded-lg p-8 animate-dissolve">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                   <div>
-                    <h3 className="text-xl font-bold text-slate-800">
+                    <h3 className="text-xl font-bold text-slate-800 font-grotesk">
                       Biometric Trends
                     </h3>
                     <p className="text-sm text-slate-500">
@@ -674,7 +674,7 @@ export default function HealthRecordPage() {
                   <Card key={lab.id}>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                       <div>
-                        <h3 className="text-xl font-bold text-slate-800">
+                        <h3 className="text-xl font-bold text-slate-800 font-grotesk">
                           {lab.name}
                         </h3>
                         <p className="text-sm text-slate-500">
@@ -697,7 +697,7 @@ export default function HealthRecordPage() {
                           className="bg-slate-50/50 border border-slate-100 p-4 rounded-lg"
                         >
                           <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-normal">
+                            <span className="text-xs font-semibold text-slate-400  tracking-normal">
                               {v.parameter}
                             </span>
                             {v.status === "normal" ? (
@@ -741,7 +741,7 @@ export default function HealthRecordPage() {
                         <Pill size={24} />
                       </div>
                       <span
-                        className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-tighter ${
+                        className={`text-xs font-bold px-3 py-1 rounded-full  tracking-tighter ${
                           med.status === "active"
                             ? "bg-teal-100 text-teal-700"
                             : "bg-slate-100 text-slate-600"
@@ -750,7 +750,7 @@ export default function HealthRecordPage() {
                         {med.status}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800">
+                    <h3 className="text-lg font-bold text-slate-800 font-grotesk">
                       {med.name}
                     </h3>
                     <p className="text-sm font-semibold text-primary mb-2">
@@ -800,7 +800,7 @@ export default function HealthRecordPage() {
                         <FilterIcon size={28} />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-slate-800 group">
+                        <h3 className="text-lg font-bold text-slate-800 group font-grotesk">
                           {allergy.allergen}
                         </h3>
                         <p className="text-sm text-slate-500">
@@ -816,7 +816,7 @@ export default function HealthRecordPage() {
                             : "border-amber-100 bg-amber-50 text-amber-600"
                         }`}
                       >
-                        {allergy.severity.toUpperCase()}
+                        {allergy.severity.to()}
                       </span>
                       <span className="text-xs font-bold text-slate-400">
                         Source: {allergy.source}
@@ -837,7 +837,7 @@ export default function HealthRecordPage() {
               <Card className="overflow-x-auto custom-scrollbar animate-dissolve">
                 <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
-                    <tr className="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-normal">
+                    <tr className="bg-slate-50 text-slate-400 text-xs font-bold  tracking-normal">
                       <th className="px-8 py-5">Vaccine</th>
                       <th className="px-8 py-5">Status</th>
                       <th className="px-8 py-5">Date</th>
@@ -885,7 +885,7 @@ export default function HealthRecordPage() {
             <div className="absolute top-8 right-6 z-40">
               <div className="bg-primary/10 backdrop-blur-md px-4 py-2 rounded-2xl flex items-center gap-2 border border-primary/20">
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-xs font-bold text-primary uppercase ">
+                <span className="text-xs font-bold text-primary  ">
                   Live 3D Anatomy
                 </span>
               </div>
@@ -905,7 +905,7 @@ export default function HealthRecordPage() {
             {/* Context Tooltip */}
             <div className="absolute bottom-10 inset-x-10 z-40 pointer-events-none">
               <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-100 shadow-none">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-1">
+                <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
                   Health Tip
                 </p>
                 <p className="text-xs font-bold text-slate-700 leading-tight">
@@ -965,7 +965,7 @@ export default function HealthRecordPage() {
                 }`}
               >
                 <BiStore size={24} />
-                <span className="text-xs font-bold uppercase tracking-normal">
+                <span className="text-xs font-bold  tracking-normal">
                   Pharmacy Pickup
                 </span>
               </Button>
@@ -986,7 +986,7 @@ export default function HealthRecordPage() {
                 }`}
               >
                 <BiSolidTruck size={24} />
-                <span className="text-xs font-bold uppercase tracking-normal">
+                <span className="text-xs font-bold  tracking-normal">
                   Courier Delivery
                 </span>
               </Button>
@@ -1024,7 +1024,7 @@ export default function HealthRecordPage() {
             )}
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+              <label className="text-xs font-bold text-slate-400  tracking-normal">
                 Additional Notes
               </label>
               <textarea

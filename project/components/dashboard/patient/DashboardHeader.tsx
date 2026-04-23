@@ -222,10 +222,10 @@ export default function DashboardHeader({
             {isNotificationOpen && (
               <div className="absolute top-[50px] right-0 w-[380px] bg-white border border-slate-200 rounded-lg p-6 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
                 <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-lg font-bold text-slate-800 tracking-tight">
+                  <h4 className="text-lg font-bold text-slate-800 tracking-tight font-grotesk">
                     Health Notifications
                   </h4>
-                  <button className="text-xs font-bold text-primary uppercase tracking-normal hover:underline">
+                  <button className="text-xs font-bold text-primary  tracking-normal hover:underline">
                     Mark all read
                   </button>
                 </div>
@@ -292,7 +292,7 @@ export default function DashboardHeader({
 
                 <button
                   onClick={onNotificationClick}
-                  className="w-full mt-6 bg-slate-100 hover:bg-primary hover:text-white py-3 rounded-lg text-xs font-bold text-slate-500 uppercase tracking-normal transition-all active:scale-95"
+                  className="w-full mt-6 bg-slate-100 hover:bg-primary hover:text-white py-3 rounded-lg text-xs font-bold text-slate-500  tracking-normal transition-all active:scale-95"
                 >
                   Enter Action Center
                 </button>
@@ -336,10 +336,10 @@ export default function DashboardHeader({
                 {selectedNotification.icon}
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2">
+                <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 font-grotesk">
                   {selectedNotification.title}
                 </h3>
-                <span className="text-xs font-bold uppercase tracking-normal text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold  tracking-normal text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
                   {selectedNotification.time}
                 </span>
               </div>

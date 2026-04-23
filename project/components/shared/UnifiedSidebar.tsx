@@ -418,12 +418,17 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
               href={`/${user.role}/profile`}
               className="flex items-center gap-3 mb-4 p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-slate-100 hover:border-primary/20 transition-all group"
             >
-              <Avatar name={user.name} src={user.avatarUrl} size="sm" className="group-hover:scale-105" />
+              <Avatar
+                name={user.name}
+                src={user.avatarUrl}
+                size="sm"
+                className="group-hover:scale-105"
+              />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-700 truncate group-hover:text-primary transition-colors">
                   {user.name}
                 </p>
-                <p className="text-xs text-slate-400 truncate uppercase tracking-normal font-bold">
+                <p className="text-xs text-slate-400 truncate  tracking-normal font-bold">
                   {user.role.replace("_", " ")}
                 </p>
               </div>
@@ -431,12 +436,17 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
           )}
 
           {isCollapsed && (
-            <Link 
+            <Link
               href={`/${user.role}/profile`}
               className="flex justify-center mb-4 p-2 rounded-lg hover:bg-slate-50 transition-all group"
               title="View Profile"
             >
-              <Avatar name={user.name} src={user.avatarUrl} size="sm" className="group-hover:scale-110" />
+              <Avatar
+                name={user.name}
+                src={user.avatarUrl}
+                size="sm"
+                className="group-hover:scale-110"
+              />
             </Link>
           )}
 
@@ -451,7 +461,7 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
           `}
           >
             {!isCollapsed && (
-              <span className="text-sm font-bold uppercase tracking-normal">
+              <span className="text-sm font-bold  tracking-normal">
                 Sign Out
               </span>
             )}

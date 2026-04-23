@@ -48,7 +48,7 @@ export default function DoctorCard({
       {doctor.isOnline && (
         <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10 bg-emerald-50/80 backdrop-blur-md px-2 py-1 rounded-full border border-emerald-100">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-normal">
+          <span className="text-[9px] font-bold text-emerald-600  tracking-normal">
             Online
           </span>
         </div>
@@ -84,18 +84,9 @@ export default function DoctorCard({
               {doctor.name}
             </div>
           )}
-          <p className="text-xs text-primary font-semibold  tracking-normal mt-1 opacity-80">
+          <p className="text-sm text-primary font-semibold tracking-normal mt-1 opacity-90">
             {doctor.specialisation}
           </p>
-          <div className="flex items-center gap-1.5 mt-2 bg-slate-50 w-fit px-4 py-2 rounded-full">
-            <BiStar size={12} className="fill-amber-400 text-amber-400" />
-            <span className="text-xs font-bold text-slate-700">
-              {doctor.rating}{" "}
-              <span className="text-slate-400 font-bold ml-0.5">
-                ({doctor.reviewCount})
-              </span>
-            </span>
-          </div>
         </div>
       </div>
 
@@ -112,10 +103,10 @@ export default function DoctorCard({
 
       <div className="mt-auto space-y-4">
         <div className="flex justify-between items-center py-3 border-t border-slate-50/50">
-          <span className="text-xs font-bold text-slate-400 uppercase ">
+          <span className="text-xs font-bold text-slate-400  ">
             Clinical Access
           </span>
-          <span className="text-xs uppercase font-bold text-emerald-100 bg-emerald-500 px-3 py-1 rounded-full  border border-emerald-100 ">
+          <span className="text-xs  font-bold text-emerald-100 bg-emerald-500 px-3 py-1 rounded-full  border border-emerald-100 ">
             Premium
           </span>
         </div>
@@ -146,7 +137,7 @@ export default function DoctorCard({
       {/* Quick Schedule Preview */}
       {doctor.schedule && doctor.schedule.length > 0 && (
         <div className="mt-5 pt-4 border-t border-slate-50/50 flex items-center justify-between">
-          <span className="text-[9px] font-bold text-slate-400 uppercase t flex items-center gap-1">
+          <span className="text-[9px] font-bold text-slate-400  t flex items-center gap-1">
             <span className="w-1 h-1 rounded-full bg-primary/40"></span>
             Availability Today
           </span>

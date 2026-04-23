@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Operational Analytics</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Operational Analytics</h1>
           <p className="text-sm text-slate-500">Charts update based on selected date range</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -78,7 +78,7 @@ export default function AnalyticsPage() {
           <Card className="flex flex-col min-h-[300px]">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="font-bold text-slate-800">Bed Occupancy Trend</h3>
+                <h3 className="font-bold text-slate-800 font-grotesk">Bed Occupancy Trend</h3>
                 <p className="text-xs text-slate-500">Last 30 days (%)</p>
               </div>
               <button onClick={() => exportCSV('occupancy')} className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-colors">
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
           <Card className="flex flex-col min-h-[300px]">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="font-bold text-slate-800">Revenue by Day</h3>
+                <h3 className="font-bold text-slate-800 font-grotesk">Revenue by Day</h3>
                 <p className="text-xs text-slate-500">Paid transactions (ZAR)</p>
               </div>
               <button onClick={() => exportCSV('financial')} className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-colors">
@@ -125,7 +125,7 @@ export default function AnalyticsPage() {
           {/* Wait Time by Hour */}
           <Card className="flex flex-col min-h-[300px]">
             <div className="mb-4">
-              <h3 className="font-bold text-slate-800">Average Wait Time by Hour</h3>
+              <h3 className="font-bold text-slate-800 font-grotesk">Average Wait Time by Hour</h3>
               <p className="text-xs text-slate-500">Minutes per time slot</p>
             </div>
             <div className="flex-1 min-h-[200px]">
@@ -144,7 +144,7 @@ export default function AnalyticsPage() {
           {/* Appointment Types Pie */}
           <Card className="flex flex-col min-h-[300px]">
             <div className="mb-4">
-              <h3 className="font-bold text-slate-800">Appointment Types</h3>
+              <h3 className="font-bold text-slate-800 font-grotesk">Appointment Types</h3>
               <p className="text-xs text-slate-500">Breakdown by category</p>
             </div>
             <div className="flex-1 min-h-[200px] flex items-center justify-center">

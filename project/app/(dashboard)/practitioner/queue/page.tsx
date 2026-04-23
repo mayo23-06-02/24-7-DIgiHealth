@@ -148,7 +148,7 @@ export default function FullQueuePage() {
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-xl font-bold text-slate-800">
+              <h1 className="text-xl font-bold text-slate-800 font-grotesk">
                 Patient Queue
               </h1>
               <p className="text-sm text-slate-400 mt-0.5">
@@ -200,7 +200,7 @@ export default function FullQueuePage() {
           {/* Table */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-none overflow-hidden">
             {/* Table Header */}
-            <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-400  tracking-normal">
               <div className="col-span-3">Patient</div>
               <div className="col-span-2">Time</div>
               <div className="col-span-3">Reason</div>

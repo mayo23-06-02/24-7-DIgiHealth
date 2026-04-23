@@ -61,7 +61,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
             {title}
           </h3>
           {subtitle && (
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mt-1.5">
+            <p className="text-xs font-bold text-slate-400  tracking-normal mt-1.5">
               {subtitle}
             </p>
           )}

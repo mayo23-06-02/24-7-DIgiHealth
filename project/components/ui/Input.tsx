@@ -32,7 +32,7 @@ const Input: React.FC<InputProps> = ({
   const commonStyles = `
     w-full bg-slate-50 ${isTextArea ? "rounded-xl" : "rounded-full"} outline-none 
     focus:ring-4 focus:ring-primary/10 focus:border-primary 
-    transition-all text-slate-900 font-medium placeholder-slate-300
+    transition-all text-slate-900  placeholder-slate-400
     ${error ? "border-red-400 bg-red-50 border" : "border border-slate-100 bg-slate-50"}
     ${icon ? "pl-14 pr-6" : "px-6"}
     ${className}

@@ -92,14 +92,14 @@ export default function BillingPage() {
       pending: "bg-amber-50 text-amber-700 border-amber-200",
       refunded: "bg-slate-100 text-slate-600 border-slate-200",
     };
-    return `px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border ${styles[status] || styles.pending}`;
+    return `px-2 py-1 rounded-lg text-xs font-bold  tracking-wider border ${styles[status] || styles.pending}`;
   };
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
             Billing & Transactions
           </h1>
           <p className="text-sm text-slate-500">
@@ -185,14 +185,14 @@ export default function BillingPage() {
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-white border-b border-slate-100">
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Patient
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Type
                   </th>
                   <th
-                    className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-primary"
+                    className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider cursor-pointer hover:text-primary"
                     onClick={() => toggleSort("amount")}
                   >
                     Amount{" "}
@@ -202,14 +202,14 @@ export default function BillingPage() {
                         : "↓"
                       : ""}
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Status
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Method
                   </th>
                   <th
-                    className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-primary"
+                    className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider cursor-pointer hover:text-primary"
                     onClick={() => toggleSort("timestamp")}
                   >
                     Date{" "}

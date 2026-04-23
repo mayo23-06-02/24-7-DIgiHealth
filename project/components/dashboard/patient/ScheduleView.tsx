@@ -313,7 +313,7 @@ const ScheduleView: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight font-grotesk">
             Clinical Scheduler
           </h2>
           <p className="text-slate-500 font-medium">
@@ -327,7 +327,7 @@ const ScheduleView: React.FC = () => {
               <button
                 key={m}
                 onClick={() => setViewMode(m)}
-                className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-normal transition-all ${viewMode === m ? "bg-primary text-white" : "text-slate-400 hover:bg-slate-50"}`}
+                className={`px-6 py-2 rounded-lg text-xs font-bold  tracking-normal transition-all ${viewMode === m ? "bg-primary text-white" : "text-slate-400 hover:bg-slate-50"}`}
               >
                 {m}
               </button>
@@ -338,7 +338,7 @@ const ScheduleView: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 bg-transparent border-none text-xs font-bold uppercase tracking-normal text-primary focus:ring-0 cursor-pointer"
+              className="px-4 py-2 bg-transparent border-none text-xs font-bold  tracking-normal text-primary focus:ring-0 cursor-pointer"
             >
               <option value="rating">Sort: Rating</option>
               <option value="price_asc">Sort: Price (Low)</option>
@@ -383,7 +383,7 @@ const ScheduleView: React.FC = () => {
           className="flex items-center gap-2 px-6 py-3 bg-slate-50 rounded-lg border border-slate-100 hover:border-primary transition-all"
         >
           <BiFilterAlt className="text-primary" />
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-normal">
+          <span className="text-xs font-bold text-slate-600  tracking-normal">
             Filters
           </span>
           {(filters.specialisations.length > 0 ||
@@ -407,7 +407,7 @@ const ScheduleView: React.FC = () => {
       {showFilters && (
         <div className="bg-white p-6 rounded-lg border border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Specialisation
             </label>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -430,7 +430,7 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Language
             </label>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -453,7 +453,7 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Max Fee (ZAR)
             </label>
             <input
@@ -477,7 +477,7 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+            <label className="text-xs font-bold text-slate-400  tracking-normal">
               Gender
             </label>
             <div className="flex gap-4 mt-2">
@@ -527,7 +527,7 @@ const ScheduleView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
         {/* Practitioner Sidebar */}
         <div className="space-y-4">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-normal px-2">
+          <h4 className="text-xs font-bold text-slate-400  tracking-normal px-2 font-grotesk">
             Clinical Providers
           </h4>
           <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-300px)] pr-2 custom-scrollbar">
@@ -555,7 +555,7 @@ const ScheduleView: React.FC = () => {
                     >
                       {doc.name}
                     </p>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                    <p className="text-xs font-bold text-slate-400  tracking-normal">
                       {doc.specialisation}
                     </p>
                   </div>
@@ -577,7 +577,7 @@ const ScheduleView: React.FC = () => {
                       ({doc.reviewCount})
                     </span>
                   </div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">
+                  <p className="text-xs font-bold text-slate-400 ">
                     R{doc.consultationFee}
                   </p>
                 </div>
@@ -612,7 +612,7 @@ const ScheduleView: React.FC = () => {
                       key={i}
                       className={`p-6 border-b border-r border-slate-100 text-center min-w-[140px] ${day.toDateString() === new Date().toDateString() ? "bg-primary/5" : ""}`}
                     >
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
                         {day.toLocaleDateString("en-US", { weekday: "short" })}
                       </p>
                       <p className="text-lg font-bold text-slate-800">
@@ -628,7 +628,7 @@ const ScheduleView: React.FC = () => {
               <tbody>
                 {timeSlots.map((slot) => (
                   <tr key={slot}>
-                    <td className="p-4 border-b border-r border-slate-100 text-xs font-bold text-slate-400 uppercase text-center bg-slate-50/20">
+                    <td className="p-4 border-b border-r border-slate-100 text-xs font-bold text-slate-400  text-center bg-slate-50/20">
                       {slot}
                     </td>
                     {days.map((day, i) => {
@@ -656,7 +656,7 @@ const ScheduleView: React.FC = () => {
                                   type: "video",
                                 })
                               }
-                              className="w-full h-12 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold uppercase tracking-normal opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-600 hover:text-white flex items-center justify-center gap-2"
+                              className="w-full h-12 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold  tracking-normal opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-600 hover:text-white flex items-center justify-center gap-2"
                             >
                               Book Now
                             </button>
@@ -692,10 +692,10 @@ const ScheduleView: React.FC = () => {
                 size="xl"
               />
               <div>
-                <h4 className="text-xl font-bold text-slate-800">
+                <h4 className="text-xl font-bold text-slate-800 font-grotesk">
                   {selectedDoc.name}
                 </h4>
-                <p className="text-xs font-bold text-primary uppercase tracking-normal">
+                <p className="text-xs font-bold text-primary  tracking-normal">
                   {selectedDoc.specialisation}
                 </p>
                 <div className="flex items-center gap-1 mt-1">
@@ -719,7 +719,7 @@ const ScheduleView: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-5 bg-slate-50 rounded-lg">
-                <p className="text-xs font-bold text-slate-400 uppercase mb-1">
+                <p className="text-xs font-bold text-slate-400  mb-1">
                   Appointment Date
                 </p>
                 <p className="font-bold text-slate-800">
@@ -729,7 +729,7 @@ const ScheduleView: React.FC = () => {
                 </p>
               </div>
               <div className="p-5 bg-slate-50 rounded-lg">
-                <p className="text-xs font-bold text-slate-400 uppercase mb-1">
+                <p className="text-xs font-bold text-slate-400  mb-1">
                   Session Time
                 </p>
                 <p className="font-bold text-slate-800">
@@ -771,7 +771,7 @@ const ScheduleView: React.FC = () => {
 
             <div className="p-4 bg-emerald-50 rounded-lg flex items-start gap-4 text-emerald-700">
               <BiCheckCircle className="shrink-0 mt-1" size={18} />
-              <p className="text-xs font-bold uppercase leading-relaxed">
+              <p className="text-xs font-bold  leading-relaxed">
                 Confirmation will be sent to your verified email. Video link
                 becomes active 5 minutes prior.
               </p>

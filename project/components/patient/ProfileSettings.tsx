@@ -28,7 +28,7 @@ export default function ProfileSettings({
       <div className="space-y-8">
         {/* Identity */}
         <div>
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-4">
+          <h3 className="text-xs font-bold text-slate-400  tracking-normal mb-4 font-grotesk">
             Identity Details
           </h3>
           <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
@@ -74,7 +74,7 @@ export default function ProfileSettings({
 
         {/* Security */}
         <div>
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-4">
+          <h3 className="text-xs font-bold text-slate-400  tracking-normal mb-4 font-grotesk">
             Security & Privacy
           </h3>
           <div className="space-y-3">
@@ -87,7 +87,7 @@ export default function ProfileSettings({
                 <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   <FiLock />
                 </div>
-                <span className="font-bold text-slate-800 uppercase tracking-normal text-[10px]">
+                <span className="font-bold text-slate-800  tracking-normal text-[10px]">
                   Change Password
                 </span>
               </div>
@@ -102,10 +102,10 @@ export default function ProfileSettings({
                   <FiShield />
                 </div>
                 <div>
-                  <span className="font-bold text-slate-800 block uppercase tracking-normal text-[10px]">
+                  <span className="font-bold text-slate-800 block  tracking-normal text-[10px]">
                     Two-Factor Auth (MFA)
                   </span>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-normal">
+                  <span className="text-[10px] font-bold text-slate-400  tracking-normal">
                     Protect your clinical data
                   </span>
                 </div>
@@ -124,7 +124,7 @@ export default function ProfileSettings({
 
         {/* POPIA */}
         <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-100">
-          <h4 className="font-bold text-emerald-600 flex items-center gap-2 mb-2 uppercase tracking-wide text-xs">
+          <h4 className="font-bold text-emerald-600 flex items-center gap-2 mb-2  tracking-wide text-xs font-grotesk">
             <FiCheck /> POPIA Compliant
           </h4>
           <p className="text-xs font-medium text-slate-600 leading-relaxed mb-4 italic opacity-80">
@@ -142,7 +142,7 @@ export default function ProfileSettings({
         <Button
           variant="ghost"
           fullWidth
-          className="flex justify-center items-center gap-2 p-4 rounded-xl text-rose-500 font-bold hover:bg-rose-50 transition-colors border-none bg-transparent h-auto text-xs uppercase tracking-normal"
+          className="flex justify-center items-center gap-2 p-4 rounded-xl text-rose-500 font-bold hover:bg-rose-50 transition-colors border-none bg-transparent h-auto text-xs  tracking-normal"
         >
           <FiLogOut /> Sign Out Securely
         </Button>

@@ -33,12 +33,12 @@ export default function SubscriptionCard({
 
       <div className="flex justify-between items-start mb-8 relative z-10">
         <div>
-          <h3 className="text-xl font-bold mb-1 opacity-90 uppercase tracking-normal text-xs">
+          <h3 className="text-xl font-bold mb-1 opacity-90  tracking-normal text-xs font-grotesk">
             Digital Care Plan
           </h3>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-400 border-2 border-primary"></div>
-            <span className="font-bold tracking-normal uppercase text-[10px]">
+            <span className="font-bold tracking-normal  text-[10px]">
               {subscription.status}
             </span>
           </div>
@@ -49,7 +49,7 @@ export default function SubscriptionCard({
       </div>
 
       <div className="space-y-1 mb-8 relative z-10">
-        <p className="text-white/70 text-[10px] font-bold uppercase tracking-normal">
+        <p className="text-white/70 text-[10px] font-bold  tracking-normal">
           Next Billing Date
         </p>
         <p className="text-2xl font-bold">
@@ -59,7 +59,7 @@ export default function SubscriptionCard({
             year: "numeric",
           })}
         </p>
-        <p className="text-white/80 font-bold uppercase tracking-normal text-[10px]">
+        <p className="text-white/80 font-bold  tracking-normal text-[10px]">
           ZAR {subscription.amount}.00 / month
         </p>
       </div>

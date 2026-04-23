@@ -273,7 +273,7 @@ export default function PractitionerAppointmentsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Appointments</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Appointments</h1>
           <p className="text-sm text-slate-500">
             Manage your consultation schedule
           </p>
@@ -372,22 +372,22 @@ export default function PractitionerAppointmentsPage() {
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Patient
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Date & Time
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Method
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Risk
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Status
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider text-right">
                     Actions
                   </th>
                 </tr>
@@ -443,7 +443,7 @@ export default function PractitionerAppointmentsPage() {
                     </td>
                     <td className="py-4 px-5">
                       <span
-                        className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-lg border ${STATUS_BADGE[a.status] || STATUS_BADGE.scheduled}`}
+                        className={`text-xs font-bold  tracking-wider px-2 py-1 rounded-lg border ${STATUS_BADGE[a.status] || STATUS_BADGE.scheduled}`}
                       >
                         {a.status}
                       </span>
@@ -586,7 +586,7 @@ export default function PractitionerAppointmentsPage() {
           <div className="space-y-4">
             {/* Patient Search */}
             <div ref={dropdownRef}>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+              <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                 Patient
               </label>
               <div className="relative">
@@ -688,7 +688,7 @@ export default function PractitionerAppointmentsPage() {
             {/* Date & Time */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Date
                 </label>
                 <input
@@ -702,7 +702,7 @@ export default function PractitionerAppointmentsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Time
                 </label>
                 <input
@@ -719,7 +719,7 @@ export default function PractitionerAppointmentsPage() {
             {/* Duration & Method */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Duration
                 </label>
                 <select
@@ -740,7 +740,7 @@ export default function PractitionerAppointmentsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Method
                 </label>
                 <select
@@ -759,7 +759,7 @@ export default function PractitionerAppointmentsPage() {
 
             {/* Reason */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+              <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                 Reason / Notes
               </label>
               <textarea

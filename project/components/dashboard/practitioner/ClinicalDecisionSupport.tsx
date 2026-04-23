@@ -203,10 +203,10 @@ export default function ClinicalDecisionSupport() {
           <BiShield className="text-white text-lg" />
         </div>
         <div>
-          <h3 className="font-bold text-slate-800 text-sm leading-tight uppercase tracking-normal">
+          <h3 className="font-bold text-slate-800 text-sm leading-tight  tracking-normal font-grotesk">
             Clinical Decision Support
           </h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-normal mt-0.5">
+          <p className="text-[10px] text-slate-400 font-bold  tracking-normal mt-0.5">
             Drug checker · Guidelines · Protocols
           </p>
         </div>
@@ -218,7 +218,7 @@ export default function ClinicalDecisionSupport() {
           <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
             <BiPulse size={20} />
           </div>
-          <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-normal">
+          <h4 className="text-[10px] font-bold text-slate-400  tracking-normal font-grotesk">
             Precision Drug Interaction Analytics
           </h4>
         </div>
@@ -242,7 +242,7 @@ export default function ClinicalDecisionSupport() {
           <Button
             onClick={handleCheckInteraction}
             fullWidth
-            className="h-14 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold uppercase tracking-normal rounded-2xl transition-all shadow-none shadow-primary/20"
+            className="h-14 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all shadow-none shadow-primary/20"
             icon={<BiSearch size={16} />}
           >
             Execute Intelligence Check
@@ -251,7 +251,7 @@ export default function ClinicalDecisionSupport() {
 
         {/* Result */}
         {interactionResult === "empty" && (
-          <p className="text-[10px] text-slate-400 text-center font-bold uppercase tracking-normal">
+          <p className="text-[10px] text-slate-400 text-center font-bold  tracking-normal">
             Enter both drug names to check.
           </p>
         )}
@@ -259,7 +259,7 @@ export default function ClinicalDecisionSupport() {
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
             <BiCheckCircle className="text-emerald-600 text-base shrink-0" />
             <div>
-              <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-normal">
+              <p className="text-[10px] font-bold text-emerald-700  tracking-normal">
                 No known interactions found
               </p>
               <p className="text-[9px] text-emerald-600 font-medium italic opacity-70">
@@ -276,13 +276,13 @@ export default function ClinicalDecisionSupport() {
             >
               <div className="flex items-center justify-between mb-1">
                 <span
-                  className={`text-[9px] font-bold uppercase tracking-normal ${severityConfig[interactionResult.severity].text}`}
+                  className={`text-[9px] font-bold  tracking-normal ${severityConfig[interactionResult.severity].text}`}
                 >
                   {severityConfig[interactionResult.severity].label}
                 </span>
               </div>
               <p
-                className={`text-xs font-bold uppercase tracking-normal ${severityConfig[interactionResult.severity].text}`}
+                className={`text-xs font-bold  tracking-normal ${severityConfig[interactionResult.severity].text}`}
               >
                 {interactionResult.drug1} + {interactionResult.drug2}
               </p>
@@ -293,7 +293,7 @@ export default function ClinicalDecisionSupport() {
           )}
 
         {/* Quick checks */}
-        <p className="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-normal">
+        <p className="text-[10px] text-slate-400 mt-4 font-bold  tracking-normal">
           Quick checks:
         </p>
         <div className="flex flex-wrap gap-1.5 mt-2">
@@ -311,7 +311,7 @@ export default function ClinicalDecisionSupport() {
                 setDrug2(d2);
                 setInteractionResult(checkInteraction(d1, d2) || "none");
               }}
-              className="text-[9px] px-3 py-1 bg-slate-100 hover:bg-primary/10 text-slate-500 hover:text-primary rounded-full transition-colors h-auto p-0 border-none !min-w-0 font-bold uppercase tracking-normal"
+              className="text-[9px] px-3 py-1 bg-slate-100 hover:bg-primary/10 text-slate-500 hover:text-primary rounded-full transition-colors h-auto p-0 border-none !min-w-0 font-bold  tracking-normal"
             >
               {pair}
             </Button>
@@ -323,7 +323,7 @@ export default function ClinicalDecisionSupport() {
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-3 mt-2">
           <BiInfoCircle className="text-secondary text-base" />
-          <h4 className="text-sm font-bold text-slate-700 uppercase tracking-normal">
+          <h4 className="text-sm font-bold text-slate-700  tracking-normal font-grotesk">
             Clinical Guidelines
           </h4>
         </div>
@@ -342,10 +342,10 @@ export default function ClinicalDecisionSupport() {
                   className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 transition-colors h-auto border-none bg-transparent"
                 >
                   <div className="min-w-0 pr-4">
-                    <p className="text-[11px] font-bold text-slate-800 leading-tight uppercase tracking-normal truncate">
+                    <p className="text-[11px] font-bold text-slate-800 leading-tight  tracking-normal truncate">
                       {g.title}
                     </p>
-                    <span className="text-[9px] text-primary/80 font-bold uppercase tracking-normal mt-1 block">
+                    <span className="text-[9px] text-primary/80 font-bold  tracking-normal mt-1 block">
                       {g.category}
                     </span>
                   </div>
@@ -376,7 +376,7 @@ export default function ClinicalDecisionSupport() {
                     </ul>
                     <Button
                       variant="ghost"
-                      className="mt-4 inline-flex items-center gap-1 text-[10px] text-primary font-bold hover:underline p-0 !min-w-0 border-none bg-transparent uppercase tracking-normal h-auto"
+                      className="mt-4 inline-flex items-center gap-1 text-[10px] text-primary font-bold hover:underline p-0 !min-w-0 border-none bg-transparent  tracking-normal h-auto"
                       onClick={() => window.open(g.link, "_blank")}
                     >
                       Full Guidelines <BiLinkExternal size={11} />

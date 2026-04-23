@@ -80,7 +80,7 @@ export default function AppointmentsPage() {
     <div className="w-full pb-10 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Appointments</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Appointments</h1>
           <p className="text-sm text-slate-500">
             All consultations, procedures, and lab referrals
           </p>
@@ -145,25 +145,25 @@ export default function AppointmentsPage() {
             <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Patient
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Practitioner
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Type
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Room
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Time
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Status
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider text-right">
                     Actions
                   </th>
                 </tr>
@@ -205,7 +205,7 @@ export default function AppointmentsPage() {
                     </td>
                     <td className="py-4 px-5">
                       <span
-                        className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-lg border ${STATUS_STYLES[a.status] || STATUS_STYLES.scheduled}`}
+                        className={`text-xs font-bold  tracking-wider px-2 py-1 rounded-lg border ${STATUS_STYLES[a.status] || STATUS_STYLES.scheduled}`}
                       >
                         {a.status?.replace("_", " ")}
                       </span>
@@ -270,7 +270,7 @@ export default function AppointmentsPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-none p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">New Appointment</h2>
+              <h2 className="text-xl font-bold font-grotesk">New Appointment</h2>
               <button
                 onClick={() => setModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600"
@@ -280,7 +280,7 @@ export default function AppointmentsPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                   Type
                 </label>
                 <select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
@@ -290,7 +290,7 @@ export default function AppointmentsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">
+                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                   Room
                 </label>
                 <input
@@ -301,7 +301,7 @@ export default function AppointmentsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                     Start
                   </label>
                   <input
@@ -310,7 +310,7 @@ export default function AppointmentsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">
+                  <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                     End
                   </label>
                   <input

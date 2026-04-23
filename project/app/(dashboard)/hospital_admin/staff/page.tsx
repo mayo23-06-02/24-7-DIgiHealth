@@ -224,7 +224,7 @@ export default function StaffManagement() {
     <div className="w-full pb-10 flex flex-col gap-6 relative">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
             Staff Management
           </h1>
           <p className="text-sm text-slate-500">
@@ -289,25 +289,25 @@ export default function StaffManagement() {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-white border-b border-slate-100">
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
                     Name/User
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
                     Role
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
                     Department
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
                     Shift
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
                     On Duty
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
                     Rate
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider text-right">
                     Actions
                   </th>
                 </tr>
@@ -330,7 +330,7 @@ export default function StaffManagement() {
                     </td>
                     <td className="py-4 px-6">
                       <span
-                        className={`px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
+                        className={`px-2 py-1 rounded-lg text-xs font-bold  tracking-wider ${
                           item.role === "doctor"
                             ? "bg-blue-50 text-blue-700 border-blue-100"
                             : item.role === "nurse"
@@ -413,7 +413,7 @@ export default function StaffManagement() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-none overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6 flex flex-col gap-4">
             <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-bold font-grotesk">
                 {editingStaff ? "Edit Staff" : "Add Staff Member"}
               </h2>
               <button
@@ -431,7 +431,7 @@ export default function StaffManagement() {
               {/* Doctor Search Dropdown */}
               {!editingStaff && (
                 <div className="relative">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-500  tracking-wider">
                     Select Registered Practitioner
                   </label>
                   <div className="relative mt-1">
@@ -493,7 +493,7 @@ export default function StaffManagement() {
 
               {editingStaff && (
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-500  tracking-wider">
                     Staff Member
                   </label>
                   <div className="mt-1 p-2 bg-slate-50 rounded-lg border border-slate-100 text-sm font-bold text-slate-700">
@@ -505,7 +505,7 @@ export default function StaffManagement() {
               )}
 
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <label className="text-xs font-bold text-slate-500  tracking-wider">
                   Role
                 </label>
                 <select
@@ -522,7 +522,7 @@ export default function StaffManagement() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <label className="text-xs font-bold text-slate-500  tracking-wider">
                   Department
                 </label>
                 <input
@@ -537,7 +537,7 @@ export default function StaffManagement() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-500  tracking-wider">
                     Shift Start
                   </label>
                   <input
@@ -550,7 +550,7 @@ export default function StaffManagement() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-500  tracking-wider">
                     Shift End
                   </label>
                   <input
@@ -564,7 +564,7 @@ export default function StaffManagement() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <label className="text-xs font-bold text-slate-500  tracking-wider">
                   Hourly Rate (ZAR)
                 </label>
                 <input

@@ -8,10 +8,10 @@ export default function OfflineBanner() {
         <BiWifiOff className="text-amber-600" />
       </div>
       <div>
-        <p className="text-xs font-bold text-amber-800 uppercase tracking-normal">
+        <p className="text-xs font-bold text-amber-800  tracking-normal">
           You are offline
         </p>
-        <p className="text-xs text-amber-600 font-bold uppercase flex items-center gap-1">
+        <p className="text-xs text-amber-600 font-bold  flex items-center gap-1">
           <BiCloudUpload /> Messages will be sent when connection is restored
         </p>
       </div>

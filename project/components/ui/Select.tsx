@@ -35,7 +35,7 @@ const Select: React.FC<SelectProps> = ({
   const commonStyles = `
     w-full bg-slate-50 rounded-[1rem] outline-none appearance-none
     focus:ring-4 focus:ring-primary/10 focus:border-primary 
-    transition-all text-slate-900 font-bold placeholder-slate-300 border border-slate-100
+    transition-all text-slate-900 placeholder-slate-400 border border-slate-100
     ${error ? "border-red-400 bg-red-50 text-red-900" : ""}
     ${icon ? "pl-14 pr-12" : "px-6 pr-12"}
     ${className}

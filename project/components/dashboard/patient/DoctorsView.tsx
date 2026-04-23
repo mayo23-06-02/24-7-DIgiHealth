@@ -170,7 +170,7 @@ export default function DoctorsView() {
         <div className="w-full lg:w-72 shrink-0 space-y-6">
           <Card className="sticky top-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2 font-grotesk">
                 <BiFilterAlt className="text-primary" /> Filters
               </h3>
               <Button
@@ -237,7 +237,7 @@ export default function DoctorsView() {
           {!searchQuery && !filters.specialization && myDoctors.length > 0 && (
             <section className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
               <div className="flex items-center justify-between">
-                <h3 className=" font-bold text-slate-800  flex items-center gap-2">
+                <h3 className=" font-bold text-slate-800  flex items-center gap-2 font-grotesk">
                   My Doctors
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -248,8 +248,8 @@ export default function DoctorsView() {
                 {myDoctors.map((doc) => (
                   <Card
                     key={doc.id}
-                    className="hover:border-primary/20 transition-all border-slate-100"
-                    onClick={() => setSelectedDoctor(doc)}
+                    className="hover:border-primary/20 transition-all border-slate-100 cursor-pointer"
+                    onClick={() => router.push(`/patient/doctors/${doc.id}`)}
                   >
                     <div className="flex items-center gap-3">
                       <Avatar
@@ -300,7 +300,7 @@ export default function DoctorsView() {
           )}
 
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-normal">
+            <h3 className="text-sm font-bold text-slate-400  tracking-normal font-grotesk">
               Available Practitioners
             </h3>
             {searchQuery && (
@@ -342,7 +342,7 @@ export default function DoctorsView() {
                       e.stopPropagation();
                       handleStartMessage(doc);
                     }}
-                    onClick={() => setSelectedDoctor(doc)}
+                    onClick={() => router.push(`/patient/doctors/${doc.id}`)}
                   />
                 </div>
               ))}
@@ -365,7 +365,10 @@ export default function DoctorsView() {
       {/* BOOKING FLOW MODAL */}
       <BookingModal
         isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
+        onClose={() => {
+          setIsBookingModalOpen(false);
+          setSelectedDoctor(null);
+        }}
         doctor={selectedDoctor}
         onSuccess={handleConfirmBooking}
       />

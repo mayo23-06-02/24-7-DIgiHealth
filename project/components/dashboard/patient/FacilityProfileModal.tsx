@@ -125,7 +125,7 @@ export default function FacilityProfileModal({
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <span
-                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-normal ${
+                  className={`px-4 py-2 rounded-lg text-xs font-bold  tracking-normal ${
                     facility.type === "Public"
                       ? "bg-blue-600"
                       : facility.type === "Private"
@@ -146,14 +146,14 @@ export default function FacilityProfileModal({
                   </span>
                 </div>
               </div>
-              <h2 className="text-5xl font-bold text-white tracking-tighter leading-none mb-1">
+              <h2 className="text-5xl font-bold text-white tracking-tighter leading-none mb-1 font-grotesk">
                 {facility.name}
               </h2>
               <div className="flex flex-wrap gap-2">
                 {facility.accreditations.map((acc, i) => (
                   <span
                     key={i}
-                    className="flex items-center gap-1.5 text-white/70 text-xs uppercase font-bold tracking-normal bg-white/5 px-2 py-1 rounded-lg border border-white/10"
+                    className="flex items-center gap-1.5 text-white/70 text-xs  font-bold tracking-normal bg-white/5 px-2 py-1 rounded-lg border border-white/10"
                   >
                     <BiShieldQuarter className="text-primary-light" />
                     {acc}
@@ -165,7 +165,7 @@ export default function FacilityProfileModal({
               <Button
                 variant="primary"
                 onClick={() => onBook(facility.id)}
-                className="px-8 py-5 h-auto rounded-lg font-bold uppercase tracking-normal text-xs active:scale-95"
+                className="px-8 py-5 h-auto rounded-lg font-bold  tracking-normal text-xs active:scale-95"
               >
                 Book Virtual Consult
               </Button>
@@ -193,7 +193,7 @@ export default function FacilityProfileModal({
                   <BiTime size={28} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <p className="text-xs font-bold text-slate-400  tracking-normal">
                     Wait Time
                   </p>
                   <p
@@ -208,7 +208,7 @@ export default function FacilityProfileModal({
                   <BiPlusMedical size={28} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <p className="text-xs font-bold text-slate-400  tracking-normal">
                     General Beds
                   </p>
                   <p className="text-xl font-bold tracking-tight leading-none mt-1">
@@ -221,7 +221,7 @@ export default function FacilityProfileModal({
                   <BiTrendingUp size={28} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                  <p className="text-xs font-bold text-slate-400  tracking-normal">
                     Occupancy
                   </p>
                   <p className="text-xl font-bold tracking-tight leading-none mt-1">
@@ -236,7 +236,7 @@ export default function FacilityProfileModal({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <BiMapPin className="text-primary" size={24} />
-                  <h4 className="text-xl font-bold text-slate-800 tracking-tight">
+                  <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
                     Location & Directions
                   </h4>
                 </div>
@@ -244,7 +244,7 @@ export default function FacilityProfileModal({
                   variant="outline"
                   size="sm"
                   onClick={() => onDirections?.(facility.id)}
-                  className="rounded-lg text-[10px] uppercase font-bold tracking-normal border-slate-200"
+                  className="rounded-lg text-[10px]  font-bold tracking-normal border-slate-200"
                 >
                   Get Directions
                 </Button>
@@ -252,7 +252,7 @@ export default function FacilityProfileModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white border border-slate-100 p-8 rounded-lg">
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                    <p className="text-xs font-bold text-slate-400  tracking-normal">
                       Street Address
                     </p>
                     <p className="text-base font-bold text-slate-800 leading-relaxed">
@@ -269,7 +269,7 @@ export default function FacilityProfileModal({
                         <BiPhoneCall size={20} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase">
+                        <p className="text-[9px] font-bold text-slate-400 ">
                           Main Practice
                         </p>
                         <p className="text-sm font-bold text-slate-700">
@@ -285,7 +285,7 @@ export default function FacilityProfileModal({
                         <BiPlusMedical size={20} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold text-rose-400 uppercase">
+                        <p className="text-[9px] font-bold text-rose-400 ">
                           Emergency Line
                         </p>
                         <p className="text-sm font-bold text-rose-600">
@@ -333,11 +333,11 @@ export default function FacilityProfileModal({
                   <BiTime size={32} />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-slate-800 tracking-tight leading-none mb-2">
+                  <h4 className="text-lg font-bold text-slate-800 tracking-tight leading-none mb-2 font-grotesk">
                     Operating Status
                   </h4>
                   <span
-                    className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-normal ${facility.isOpen ? "text-emerald-500" : "text-rose-500"}`}
+                    className={`inline-flex items-center gap-2 text-sm font-bold  tracking-normal ${facility.isOpen ? "text-emerald-500" : "text-rose-500"}`}
                   >
                     <span
                       className={`w-2 h-2 rounded-lg bg-current ${facility.isOpen ? "animate-pulse" : ""}`}
@@ -347,11 +347,11 @@ export default function FacilityProfileModal({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm font-bold text-slate-600">
-                <span className="uppercase text-[9px] tracking-normal text-slate-400">
+                <span className=" text-[9px] tracking-normal text-slate-400">
                   Weekdays
                 </span>
                 <span>08:00 – 18:00</span>
-                <span className="uppercase text-[9px] tracking-normal text-slate-400">
+                <span className=" text-[9px] tracking-normal text-slate-400">
                   Weekends
                 </span>
                 <span>09:00 – 13:00</span>
@@ -360,7 +360,7 @@ export default function FacilityProfileModal({
 
             {/* CLINICAL SERVICES */}
             <section className="space-y-6">
-              <h4 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+              <h4 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-3 font-grotesk">
                 <BiBuildingHouse size={24} className="text-primary" />{" "}
                 Specialized Departments
               </h4>
@@ -371,7 +371,7 @@ export default function FacilityProfileModal({
                     className="px-6 py-4 bg-white border border-slate-100 rounded-lg transition-all flex items-center gap-3 active:scale-95"
                   >
                     <div className="w-2 h-2 bg-primary rounded-lg shrink-0" />
-                    <span className="text-xs font-bold text-slate-700 uppercase tracking-tight truncate">
+                    <span className="text-xs font-bold text-slate-700  tracking-tight truncate">
                       {dep}
                     </span>
                   </div>
@@ -381,7 +381,7 @@ export default function FacilityProfileModal({
 
             {/* SPECIALISTS ON-CALL */}
             <section className="space-y-6">
-              <h4 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+              <h4 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-3 font-grotesk">
                 <BiBody size={24} className="text-primary" /> On-Call
                 Specialists
               </h4>
@@ -402,12 +402,12 @@ export default function FacilityProfileModal({
                       <p className="text-base font-bold text-slate-800 tracking-tight truncate group-hover:text-primary transition-colors">
                         {spec.name}
                       </p>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                      <p className="text-xs font-bold text-slate-400  tracking-normal">
                         {spec.specialty}
                       </p>
                       <div className="mt-2 flex items-center gap-2 text-emerald-500">
                         <BiCheckCircle size={14} />
-                        <span className="text-[9px] font-bold uppercase tracking-normal">
+                        <span className="text-[9px] font-bold  tracking-normal">
                           Available Now
                         </span>
                       </div>
@@ -430,7 +430,7 @@ export default function FacilityProfileModal({
 
               <div className="relative z-10 space-y-8">
                 <div>
-                  <h5 className="text-xs font-bold text-white/40 uppercase tracking-normal mb-6">
+                  <h5 className="text-xs font-bold text-white/40  tracking-normal mb-6 font-grotesk">
                     Facility Amenities
                   </h5>
                   <div className="space-y-5">
@@ -497,7 +497,7 @@ export default function FacilityProfileModal({
                           Multiple Languages
                         </span>
                       </div>
-                      <span className="text-xs font-bold text-white/30 uppercase tracking-tighter">
+                      <span className="text-xs font-bold text-white/30  tracking-tighter">
                         {facility.languages.length} Types
                       </span>
                     </div>
@@ -505,7 +505,7 @@ export default function FacilityProfileModal({
                 </div>
 
                 <div className="pt-8 border-t border-white/5">
-                  <h5 className="text-xs font-bold text-white/40 uppercase tracking-normal mb-4">
+                  <h5 className="text-xs font-bold text-white/40  tracking-normal mb-4 font-grotesk">
                     Accepted Insurance
                   </h5>
                   <div className="flex flex-wrap gap-2">
@@ -525,12 +525,12 @@ export default function FacilityProfileModal({
             {/* REAL-TIME OCCUPANCY CARD */}
             <div className="bg-slate-50 border border-slate-100 rounded-lg p-8 space-y-8">
               <div>
-                <h5 className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-6">
+                <h5 className="text-xs font-bold text-slate-400  tracking-normal mb-6 font-grotesk">
                   Real-Time Operations
                 </h5>
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold uppercase tracking-normal text-slate-500">
+                    <div className="flex justify-between text-xs font-bold  tracking-normal text-slate-500">
                       <span>Occupancy Rate</span>
                       <span
                         className={
@@ -556,7 +556,7 @@ export default function FacilityProfileModal({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-white rounded-lg border border-slate-100 text-center">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
                         Queue Size
                       </p>
                       <p className="text-lg font-bold text-slate-800">
@@ -564,7 +564,7 @@ export default function FacilityProfileModal({
                       </p>
                     </div>
                     <div className="p-4 bg-white rounded-lg border border-slate-100 text-center">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
                         Ambulance
                       </p>
                       <p
@@ -590,7 +590,7 @@ export default function FacilityProfileModal({
                       className="text-slate-400 group-hover:text-primary transition-colors"
                       size={24}
                     />
-                    <span className="text-xs font-bold uppercase tracking-normal text-slate-400">
+                    <span className="text-xs font-bold  tracking-normal text-slate-400">
                       Share
                     </span>
                   </Button>
@@ -603,7 +603,7 @@ export default function FacilityProfileModal({
                       className="text-slate-400 group-hover:text-rose-500 transition-colors"
                       size={24}
                     />
-                    <span className="text-xs font-bold uppercase tracking-normal text-slate-400">
+                    <span className="text-xs font-bold  tracking-normal text-slate-400">
                       Report
                     </span>
                   </Button>
@@ -614,7 +614,7 @@ export default function FacilityProfileModal({
             {/* SECONDARY ACTION */}
             <Button
               variant="accent"
-              className="w-full py-5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-xs font-bold uppercase tracking-normal hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 h-auto"
+              className="w-full py-5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-xs font-bold  tracking-normal hover:bg-emerald-500 hover:text-white transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 h-auto"
             >
               <BiGlobe size={20} />
               Official Health Database
@@ -626,13 +626,13 @@ export default function FacilityProfileModal({
         <div className="lg:hidden sticky bottom-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 p-6 flex gap-4 shrink-0">
           <Button
             variant="primary"
-            className="flex-1 rounded-lg py-4 font-bold uppercase tracking-normal text-xs h-auto"
+            className="flex-1 rounded-lg py-4 font-bold  tracking-normal text-xs h-auto"
           >
             Book Consult
           </Button>
           <Button
             variant="outline"
-            className="flex-1 rounded-lg py-4 font-bold uppercase tracking-normal text-xs border-slate-200 h-auto"
+            className="flex-1 rounded-lg py-4 font-bold  tracking-normal text-xs border-slate-200 h-auto"
           >
             Get Directions
           </Button>

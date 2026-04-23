@@ -90,7 +90,7 @@ export default function PractitionerBillingPage() {
     <div className="w-full pb-10 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
             Billing & Earnings
           </h1>
           <p className="text-sm text-slate-500">
@@ -184,22 +184,22 @@ export default function PractitionerBillingPage() {
             <table className="w-full text-left border-collapse min-w-[650px]">
               <thead>
                 <tr className="bg-white border-b border-slate-100">
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Patient
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Type
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Date
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Amount
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
                     Status
                   </th>
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider text-right">
                     Actions
                   </th>
                 </tr>
@@ -231,7 +231,7 @@ export default function PractitionerBillingPage() {
                     </td>
                     <td className="py-4 px-5">
                       <span
-                        className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-lg border ${STATUS_BADGE[t.status] || STATUS_BADGE.pending}`}
+                        className={`text-xs font-bold  tracking-wider px-2 py-1 rounded-lg border ${STATUS_BADGE[t.status] || STATUS_BADGE.pending}`}
                       >
                         {t.status || "pending"}
                       </span>

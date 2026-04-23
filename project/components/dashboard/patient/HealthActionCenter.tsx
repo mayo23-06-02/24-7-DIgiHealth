@@ -102,7 +102,7 @@ export default function HealthActionCenter() {
               dot
               className="mb-1"
             />
-            <h3 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">
+            <h3 className="text-2xl font-bold text-slate-800 tracking-tight leading-none font-grotesk">
               Health Hub
             </h3>
           </div>
@@ -121,7 +121,7 @@ export default function HealthActionCenter() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(0,82,204,0.4)]" />
-              <h4 className="text-sm font-bold text-slate-700 uppercase tracking-normal">
+              <h4 className="text-sm font-bold text-slate-700  tracking-normal font-grotesk">
                 Medical Specialists
               </h4>
             </div>
@@ -190,7 +190,7 @@ export default function HealthActionCenter() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-6 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-              <h4 className="text-sm font-bold text-slate-700 uppercase tracking-normal">
+              <h4 className="text-sm font-bold text-slate-700  tracking-normal font-grotesk">
                 Nearest Facilities
               </h4>
             </div>
@@ -259,7 +259,7 @@ export default function HealthActionCenter() {
         {/* INSIGHTS CTA */}
         <Button
           variant="ghost"
-          className="w-full !h-auto bg-linear-to-r from-primary/5 to-transparent border border-primary/10 rounded-2xl p-6 text-xs font-bold text-primary uppercase tracking-normal hover:bg-primary hover:text-white transition-all duration-700 flex items-center justify-center gap-3 active:scale-95 shadow-none group"
+          className="w-full !h-auto bg-linear-to-r from-primary/5 to-transparent border border-primary/10 rounded-2xl p-6 text-xs font-bold text-primary  tracking-normal hover:bg-primary hover:text-white transition-all duration-700 flex items-center justify-center gap-3 active:scale-95 shadow-none group"
         >
           <BiTrendingUp
             size={20}

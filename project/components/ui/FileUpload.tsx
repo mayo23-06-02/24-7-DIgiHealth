@@ -51,7 +51,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {/* Header */}
       <div className="flex justify-between items-start">
         <div className="space-y-1 mb-4">
-          <h3 className=" font-semibold text-slate-800 tracking-tight">
+          <h3 className=" font-semibold text-slate-800 tracking-tight font-grotesk">
             {label}
           </h3>
           <p className="text-xs text-slate-400 tracking-wide">{description}</p>
@@ -112,7 +112,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {/* File List */}
       {value.length > 0 && (
         <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-normal px-1">
+          <h4 className="text-xs font-bold text-slate-400  tracking-normal px-1 font-grotesk">
             Uploaded {label}
           </h4>
           <div className="space-y-3">
@@ -143,18 +143,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
                       <div className="h-1.5 w-full bg-slate-100 rounded-lg overflow-hidden">
                         <div className="h-full w-2/3 bg-primary rounded-lg animate-pulse"></div>
                       </div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                      <p className="text-xs font-bold text-slate-400  tracking-normal">
                         102 KB of 32.5 MB • 4 sec left...
                       </p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-300 uppercase tracking-normal">
+                      <span className="text-xs font-bold text-slate-300  tracking-normal">
                         24.1 MB •{" "}
                       </span>
                       <div className="flex items-center gap-1 text-green-500">
                         <BiCheckCircle size={14} />
-                        <span className="text-xs font-bold uppercase tracking-normal">
+                        <span className="text-xs font-bold  tracking-normal">
                           Completed
                         </span>
                       </div>

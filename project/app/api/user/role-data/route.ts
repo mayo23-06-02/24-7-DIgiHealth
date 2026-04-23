@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
-import { PatientProfile, PractitionerProfile, EMTProfile } from '@/lib/models/RoleProfiles';
+import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
 
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get('x-user-id') || null;
@@ -77,15 +77,7 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    else if (user.role === 'emt') {
-      let profile = await EMTProfile.findOne({ userId }).lean();
-      roleData = {
-        licenseLevel: profile?.licenseLevel || 'BLS',
-        hpcsaNumber: profile?.hpcsaNumber || '',
-        assignedVehicle: profile?.assignedVehicle || '',
-        currentStatus: profile?.currentStatus || 'offline',
-      };
-    }
+
 
     else {
       // hospital_admin, inspector, super_admin, mega_admin – base info only

@@ -50,10 +50,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <BiBot size={20} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-800 leading-none">
+              <h4 className="text-sm font-bold text-slate-800 leading-none font-grotesk">
                 {title}
               </h4>
-              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-normal mt-1 flex items-center gap-1">
+              <p className="text-[10px] font-bold text-emerald-500  tracking-normal mt-1 flex items-center gap-1">
                 <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                 Active Session
               </p>
@@ -86,7 +86,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             >
               {m.text}
               <div
-                className={`mt-2 text-[9px] font-bold uppercase tracking-normal opacity-40 ${m.sender === "user" ? "text-right" : ""}`}
+                className={`mt-2 text-[9px] font-bold  tracking-normal opacity-40 ${m.sender === "user" ? "text-right" : ""}`}
               >
                 {m.timestamp.toLocaleTimeString([], {
                   hour: "2-digit",

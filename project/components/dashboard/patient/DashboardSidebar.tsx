@@ -188,7 +188,7 @@ export default function DashboardSidebar({
                 <p className="text-sm font-semibold text-slate-700 truncate">
                   {user?.name || "Member"}
                 </p>
-                <p className="text-xs text-primary font-bold uppercase tracking-normal truncate">
+                <p className="text-xs text-primary font-bold  tracking-normal truncate">
                   {user?.role?.replace("_", " ") || "Patient"}
                 </p>
               </div>

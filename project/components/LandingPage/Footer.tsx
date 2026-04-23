@@ -34,7 +34,7 @@ export default function Footer() {
         <div className="flex flex-col lg:flex-row justify-between mb-16 gap-16 lg:gap-8">
           {/* Newsletter Section */}
           <div className="lg:w-5/12 flex flex-col">
-            <h2 className="text-4xl md:text-4xl font-medium tracking-tight mb-4 leading-tight">
+            <h2 className="text-4xl md:text-4xl font-medium tracking-tight mb-4 leading-tight font-grotesk">
               Stay ahead of your <br className="hidden md:block" /> health
               journey
             </h2>
@@ -70,7 +70,7 @@ export default function Footer() {
           >
             {/* Quick Links */}
             <div className="flex flex-col col-span-1 gap-4">
-              <h4 className="font-semibold text-[1.05rem] text-white mb-3">
+              <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
                 Quick Links
               </h4>
               <ul className="flex flex-col gap-4">
@@ -89,7 +89,7 @@ export default function Footer() {
 
             {/* Our Services */}
             <div className="flex flex-col col-span-1 gap-4">
-              <h4 className="font-semibold text-[1.05rem] text-white mb-3">
+              <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
                 Our Services
               </h4>
               <ul className="flex flex-col gap-4">
@@ -108,7 +108,7 @@ export default function Footer() {
 
             {/* Doctors */}
             <div className="flex flex-col col-span-1 gap-4 col-span-2 md:col-span-1 mt-6 md:mt-0">
-              <h4 className="font-semibold text-[1.05rem] text-white mb-3">
+              <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
                 Doctors
               </h4>
               <ul className="flex flex-col gap-4">

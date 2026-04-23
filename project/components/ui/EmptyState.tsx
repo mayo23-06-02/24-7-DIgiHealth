@@ -26,7 +26,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-6">
         {icon || <BiArchive size={32} />}
       </div>
-      <h4 className="text-lg font-semibold text-slate-700 mb-2 tracking-tight">
+      <h4 className="text-lg font-semibold text-slate-700 mb-2 tracking-tight font-grotesk">
         {title}
       </h4>
       <p className="text-sm text-slate-400  max-w-sm mb-8 leading-relaxed">

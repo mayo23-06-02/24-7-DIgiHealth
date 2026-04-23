@@ -55,7 +55,7 @@ const KPICard: React.FC<KPICardProps> = ({
 
       <div className="space-y-1 py-4 px-6">
         <div className="flex items-baseline gap-1">
-          <h4 className="text-4xl font-medium text-slate-900 tracking-tight">
+          <h4 className="text-4xl font-medium text-slate-900 tracking-tight font-grotesk">
             {value}
           </h4>
           {unit && (

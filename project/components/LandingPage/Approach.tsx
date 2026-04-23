@@ -10,12 +10,12 @@ export default function Approach() {
       <div className="container flex items-center flex-col mx-auto px-6 sm:px-10 xl:px-16 2xl:px-24 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
         <div className="flex justify-center items-center gap-3 mb-6">
           <span className="text-secondary text-3xl font-bold">✦</span>
-          <span className="text-secondary font-bold tracking-normal uppercase text-sm">
+          <span className="text-secondary font-bold tracking-normal  text-sm">
             Approach
           </span>
         </div>
 
-        <h2 className="text-4xl md:text-4xl font-medium text-slate-900 mb-8 tracking-tight">
+        <h2 className="text-4xl md:text-4xl font-medium text-slate-900 mb-8 tracking-tight font-grotesk">
           The{" "}
           <span className="text-primary font-bold">
             24/7 DigiHealth Total Care™
