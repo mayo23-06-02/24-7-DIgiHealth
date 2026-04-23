@@ -47,7 +47,7 @@ const Carousel: React.FC<CarouselProps> = ({
           hasPrev && (
             <button
               onClick={onClickHandler}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white flex items-center justify-center text-slate-400 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-none border border-white flex items-center justify-center text-slate-400 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
             >
               <BiChevronLeft size={24} />
             </button>
@@ -58,7 +58,7 @@ const Carousel: React.FC<CarouselProps> = ({
           hasNext && (
             <button
               onClick={onClickHandler}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white flex items-center justify-center text-slate-400 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-none border border-white flex items-center justify-center text-slate-400 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
             >
               <BiChevronRight size={24} />
             </button>

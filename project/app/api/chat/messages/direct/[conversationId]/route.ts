@@ -16,11 +16,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ conversa
     }
 
     const messages = await Message.find(query)
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
 
-    return NextResponse.json(messages);
+    return NextResponse.json(messages.reverse());
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

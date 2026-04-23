@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import { HealthTip } from '@/lib/models/HealthTip';
+import { Article } from '@/lib/models/Article';
 
 export async function GET(request: Request) {
   try {
@@ -8,10 +8,14 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
 
-    const query = category ? { category } : {};
-    const tips = await HealthTip.find(query).sort({ createdAt: -1 }).lean();
+    let query: any = { isPublished: true };
+    if (category) {
+      query.tags = { $in: [category] }; // Maps category to tags
+    }
 
-    return NextResponse.json(tips);
+    const articles = await Article.find(query).sort({ publishedAt: -1 }).lean();
+
+    return NextResponse.json({ success: true, data: articles });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -23,6 +23,7 @@ import { toast } from "react-hot-toast";
 import KPICard from "@/components/ui/KPICard";
 import Link from "next/link";
 import Carousel from "@/components/ui/Carousel";
+import Button from "@/components/ui/Button";
 
 export default function PractitionerDashboard() {
   const [dashboardData, setDashboardData] = React.useState<any>({
@@ -85,7 +86,9 @@ export default function PractitionerDashboard() {
       viewDate.getMonth() === today.getMonth() &&
       viewDate.getFullYear() === today.getFullYear();
     setSelectedDate(
-      isCurrentMonth ? today : new Date(viewDate.getFullYear(), viewDate.getMonth(), 1)
+      isCurrentMonth
+        ? today
+        : new Date(viewDate.getFullYear(), viewDate.getMonth(), 1),
     );
   }, [viewDate]);
 
@@ -107,7 +110,7 @@ export default function PractitionerDashboard() {
 
     // Initial fetch
     fetchDashboard();
-    
+
     // Live feed polling
     const interval = setInterval(fetchDashboard, 5000);
     return () => {
@@ -116,26 +119,38 @@ export default function PractitionerDashboard() {
     };
   }, []);
 
-  const handleRequestAction = async (id: string, newStatus: 'scheduled' | 'cancelled') => {
+  const handleRequestAction = async (
+    id: string,
+    newStatus: "scheduled" | "cancelled",
+  ) => {
     setActionLoading(id);
-    const toastId = toast.loading(newStatus === 'scheduled' ? "Accepting request..." : "Declining request...");
-    
+    const toastId = toast.loading(
+      newStatus === "scheduled"
+        ? "Accepting request..."
+        : "Declining request...",
+    );
+
     try {
       const res = await fetch(`/api/practitioner/consultations/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
       });
-      
+
       const data = await res.json();
       if (data.success) {
-        toast.success(`Request ${newStatus === 'scheduled' ? 'Accepted' : 'Declined'}! Patient notified.`, { id: toastId });
-        
+        toast.success(
+          `Request ${newStatus === "scheduled" ? "Accepted" : "Declined"}! Patient notified.`,
+          { id: toastId },
+        );
+
         // Optimistically update live feed to feel instantaneous without reload
         setDashboardData((prev: any) => ({
-           ...prev,
-           pendingRequests: prev.pendingRequests.filter((req: any) => req.consultationId !== id),
-           // if accepted, we could theoretically push it into queue array immediately, but polling catches it in <5s anyway
+          ...prev,
+          pendingRequests: prev.pendingRequests.filter(
+            (req: any) => req.consultationId !== id,
+          ),
+          // if accepted, we could theoretically push it into queue array immediately, but polling catches it in <5s anyway
         }));
       } else {
         toast.error(data.error || "Failed to process request", { id: toastId });
@@ -206,14 +221,14 @@ export default function PractitionerDashboard() {
                 <h3 className="text-sm font-bold text-slate-800">
                   Patients Overview
                 </h3>
-                <button className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
                   This Month <BiChevronDown />
                 </button>
               </div>
 
               <div className="flex-1 flex w-full relative min-h-[180px]">
                 {/* Y Axis */}
-                <div className="flex flex-col justify-between items-end pr-4 text-[10px] font-bold text-slate-400 h-[150px]">
+                <div className="flex flex-col justify-between items-end pr-4 text-xs font-bold text-slate-400 h-[150px]">
                   {[10, 8, 6, 4, 2, 0].map((l, i) => (
                     <span key={i}>{l}</span>
                   ))}
@@ -230,40 +245,49 @@ export default function PractitionerDashboard() {
                     ))}
                   </div>
 
-                  {(dashboardData.chartData || []).map((item: any, i: number) => {
-                    const maxVal = Math.max(...(dashboardData.chartData || []).map((d: any) => d.value), 1);
-                    const isActive = item.value === maxVal && item.value > 0;
-                    
-                    return (
-                      <div
-                        key={i}
-                        className="flex flex-col items-center justify-end gap-2 group w-full h-full relative z-10 px-1 xl:px-2"
-                      >
-                        <span className="text-[10px] font-bold text-slate-500 border border-slate-200 bg-white rounded-lg px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 shadow-sm">
-                          {item.value} patients
-                        </span>
-                        <div className="w-full h-full max-w-[40px] bg-slate-100 rounded-t flex flex-col justify-end group-hover:bg-slate-200 transition-colors">
-                          <div
-                            className={`w-full rounded-t transition-all duration-500 ${isActive ? "bg-primary shadow-[0_4px_15px_rgba(46,49,146,0.4)]" : "bg-primary/20"}`}
-                            style={{
-                              height: `${(item.value / item.max) * 100}%`,
-                            }}
-                          ></div>
+                  {(dashboardData.chartData || []).map(
+                    (item: any, i: number) => {
+                      const maxVal = Math.max(
+                        ...(dashboardData.chartData || []).map(
+                          (d: any) => d.value,
+                        ),
+                        1,
+                      );
+                      const isActive = item.value === maxVal && item.value > 0;
+
+                      return (
+                        <div
+                          key={i}
+                          className="flex flex-col items-center justify-end gap-2 group w-full h-full relative z-10 px-1 xl:px-2"
+                        >
+                          <span className="text-xs font-bold text-slate-500 border border-slate-200 bg-white rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 shadow-none">
+                            {item.value} patients
+                          </span>
+                          <div className="w-full h-full max-w-[40px] bg-slate-100 rounded-t flex flex-col justify-end group-hover:bg-slate-200 transition-colors">
+                            <div
+                              className={`w-full rounded-t transition-all duration-500 ${isActive ? "bg-primary shadow-[0_4px_15px_rgba(46,49,146,0.4)]" : "bg-primary/20"}`}
+                              style={{
+                                height: `${(item.value / item.max) * 100}%`,
+                              }}
+                            ></div>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    },
+                  )}
                 </div>
 
                 <div className="absolute bottom-0 right-0 left-[35px] flex justify-between transform translate-y-full pt-3">
-                  {(dashboardData.chartData || []).map((item: any, i: number) => (
-                    <div
-                      key={i}
-                      className="w-full text-center text-[10px] font-bold text-slate-400"
-                    >
-                      {item.label}
-                    </div>
-                  ))}
+                  {(dashboardData.chartData || []).map(
+                    (item: any, i: number) => (
+                      <div
+                        key={i}
+                        className="w-full text-center text-xs font-bold text-slate-400"
+                      >
+                        {item.label}
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             </Card>
@@ -278,19 +302,21 @@ export default function PractitionerDashboard() {
                   Upcoming Appointments
                 </h3>
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setIsMonthOpen(!isMonthOpen)}
-                    className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors"
                   >
                     {viewDate.toLocaleDateString("en-US", {
                       month: "long",
                       year: "numeric",
                     })}
-                    <BiChevronDown className={`transition-transform duration-200 ${isMonthOpen ? 'rotate-180' : ''}`} />
+                    <BiChevronDown
+                      className={`transition-transform duration-200 ${isMonthOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
 
                   {isMonthOpen && (
-                    <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-slate-100 rounded-xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-slate-100 rounded-xl shadow-none z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
                       {monthOptions.map((m, idx) => (
                         <button
                           key={idx}
@@ -298,13 +324,17 @@ export default function PractitionerDashboard() {
                             setViewDate(m);
                             setIsMonthOpen(false);
                           }}
-                          className={`w-full text-left px-4 py-2 text-[10px] font-bold transition-colors ${
-                            m.getMonth() === viewDate.getMonth() && m.getFullYear() === viewDate.getFullYear()
+                          className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
+                            m.getMonth() === viewDate.getMonth() &&
+                            m.getFullYear() === viewDate.getFullYear()
                               ? "text-primary bg-primary/5"
                               : "text-slate-500 hover:bg-slate-50"
                           }`}
                         >
-                          {m.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                          {m.toLocaleDateString("en-US", {
+                            month: "long",
+                            year: "numeric",
+                          })}
                         </button>
                       ))}
                     </div>
@@ -325,16 +355,24 @@ export default function PractitionerDashboard() {
                       onClick={() => setSelectedDate(new Date(date))}
                       className={`flex flex-col items-center gap-1 shrink-0 w-14 py-3 rounded-xl border font-bold transition-all duration-200 ${
                         isActive
-                          ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                          ? "border-primary bg-primary/5 text-primary shadow-none ring-1 ring-primary/20"
                           : "border-slate-100 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                       }`}
                     >
-                      <span className={`text-[9px] uppercase tracking-widest font-black ${
-                        isActive ? "text-primary" : isToday ? "text-primary/60" : "text-slate-400"
-                      }`}>
+                      <span
+                        className={`text-[9px] uppercase tracking-normal font-bold ${
+                          isActive
+                            ? "text-primary"
+                            : isToday
+                              ? "text-primary/60"
+                              : "text-slate-400"
+                        }`}
+                      >
                         {date.toLocaleDateString("en-US", { weekday: "short" })}
                       </span>
-                      <span className="text-base leading-none">{date.getDate()}</span>
+                      <span className="text-base leading-none">
+                        {date.getDate()}
+                      </span>
                       {isToday && !isActive && (
                         <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
                       )}
@@ -348,12 +386,20 @@ export default function PractitionerDashboard() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-bold text-slate-800">
-                  Schedule List ({selectedDate.toLocaleDateString("en-ZA", { day: 'numeric', month: 'short' })})
+                  Schedule List (
+                  {selectedDate.toLocaleDateString("en-ZA", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                  )
                 </h3>
                 <div className="flex gap-3">
-                  <button className="flex items-center gap-2 text-xs font-bold text-slate-600 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-50 transition-all">
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 text-xs"
+                  >
                     <BiFilter size={16} /> Filter
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -361,16 +407,16 @@ export default function PractitionerDashboard() {
                 <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
                     <tr className="bg-slate-50/80">
-                      <th className="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider first:rounded-tl-lg">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal first:rounded-tl-lg">
                         Appoint for
                       </th>
-                      <th className="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal">
                         Name
                       </th>
-                      <th className="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal">
                         Time
                       </th>
-                      <th className="py-4 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
+                      <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-normal text-center">
                         Method
                       </th>
                       <th className="py-4 px-6 last:rounded-tr-lg"></th>
@@ -411,39 +457,64 @@ export default function PractitionerDashboard() {
                             </div>
                           </td>
                           <td className="py-4 px-6 border-b border-transparent">
-                             <span className="text-xs font-bold text-slate-500">
-                               {new Date(item.scheduledStart).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
-                               {" - "}
-                               {new Date(item.scheduledEnd).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
-                             </span>
+                            <span className="text-xs font-bold text-slate-500">
+                              {new Date(item.scheduledStart).toLocaleTimeString(
+                                "en-ZA",
+                                { hour: "2-digit", minute: "2-digit" },
+                              )}
+                              {" - "}
+                              {new Date(item.scheduledEnd).toLocaleTimeString(
+                                "en-ZA",
+                                { hour: "2-digit", minute: "2-digit" },
+                              )}
+                            </span>
                           </td>
                           <td className="py-4 px-6 border-b border-transparent">
                             <div className="flex items-center justify-center">
-                              <div className="w-8 h-8 rounded-lg bg-slate-50 shadow-sm border border-slate-100 flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-lg bg-slate-50 shadow-none border border-slate-100 flex items-center justify-center">
                                 {item.type === "video" ? (
-                                  <BiVideo className="text-emerald-500" size={16} />
+                                  <BiVideo
+                                    className="text-emerald-500"
+                                    size={16}
+                                  />
                                 ) : (
-                                  <BiPhone className="text-amber-500" size={16} />
+                                  <BiPhone
+                                    className="text-amber-500"
+                                    size={16}
+                                  />
                                 )}
                               </div>
                             </div>
                           </td>
                           <td className="py-4 px-6 border-b border-transparent text-right relative">
-                            <button 
-                              onClick={() => setMenuOpenRow(menuOpenRow === item.consultationId ? null : item.consultationId)}
-                              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors ml-auto"
+                            <Button
+                              variant="ghost"
+                              onClick={() =>
+                                setMenuOpenRow(
+                                  menuOpenRow === item.consultationId
+                                    ? null
+                                    : item.consultationId,
+                                )
+                              }
+                              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors ml-auto p-0"
                             >
                               <BiDotsVerticalRounded size={20} />
-                            </button>
+                            </Button>
                             {menuOpenRow === item.consultationId && (
-                                <div className="absolute right-12 top-10 bg-white border border-slate-200 rounded-lg shadow-xl shadow-slate-200/50 flex flex-col py-2 w-40 z-50 animate-in fade-in zoom-in-95 duration-100">
-                                   <Link href={`/practitioner/messages?patient=${item.patientId}`} className="text-left px-4 py-2 text-xs font-bold text-slate-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2">
-                                     Message Patient
-                                   </Link>
-                                   <Link href={`/practitioner/patients/${item.patientId}`} className="text-left px-4 py-2 text-xs font-bold text-slate-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2">
-                                     View Profile
-                                   </Link>
-                                </div>
+                              <div className="absolute right-12 top-10 bg-white border border-slate-200 rounded-lg shadow-none shadow-slate-200/50 flex flex-col py-2 w-40 z-50 animate-in fade-in zoom-in-95 duration-100">
+                                <Link
+                                  href={`/practitioner/messages?patient=${item.patientId}`}
+                                  className="text-left px-4 py-2 text-xs font-bold text-slate-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2"
+                                >
+                                  Message Patient
+                                </Link>
+                                <Link
+                                  href={`/practitioner/patients/${item.patientId}`}
+                                  className="text-left px-4 py-2 text-xs font-bold text-slate-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2"
+                                >
+                                  View Profile
+                                </Link>
+                              </div>
                             )}
                           </td>
                         </tr>
@@ -465,52 +536,64 @@ export default function PractitionerDashboard() {
           </div>
 
           <div className="flex flex-col gap-4">
-            {dashboardData.pendingRequests && dashboardData.pendingRequests.length === 0 ? (
-               <div className="p-8 text-center text-slate-400 font-medium text-sm bg-slate-50/50 rounded-xl border border-slate-100 border-dashed">
-                 No pending requests
-               </div>
+            {dashboardData.pendingRequests &&
+            dashboardData.pendingRequests.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 font-medium text-sm bg-slate-50/50 rounded-xl border border-slate-100 border-dashed">
+                No pending requests
+              </div>
             ) : (
-              (dashboardData.pendingRequests || []).map((req: any, i: number) => (
-                <div
-                  key={req.consultationId || i}
-                  onClick={() => window.location.href = `/practitioner/patients/${req.patientId}`}
-                  className="p-5 rounded-lg border border-slate-100 bg-white hover:border-slate-200 transition-colors shadow-sm shadow-slate-100/50 cursor-pointer"
-                >
-                  <div className="flex items-start gap-4 mb-4">
-                    <Avatar name={req.patientName} size="md" />
-                    <div className="flex-1">
-                      <h4 className="text-sm font-bold text-slate-800 mb-1 leading-none">
-                        {req.patientName}
-                      </h4>
-                      <p className="text-[11px] font-medium text-slate-500 mb-1">
-                        {new Date(req.scheduledStart).toLocaleDateString()}
-                      </p>
-                      <div className="flex items-center gap-2">
-                         <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                         <p className="text-[10px] font-bold text-slate-400 capitalize">
-                           {req.type} Consultation
-                         </p>
+              (dashboardData.pendingRequests || []).map(
+                (req: any, i: number) => (
+                  <div
+                    key={req.consultationId || i}
+                    onClick={() =>
+                      (window.location.href = `/practitioner/patients/${req.patientId}`)
+                    }
+                    className="p-5 rounded-lg border border-slate-100 bg-white hover:border-slate-200 transition-colors shadow-none shadow-slate-100/50 cursor-pointer"
+                  >
+                    <div className="flex items-start gap-4 mb-4">
+                      <Avatar name={req.patientName} size="md" />
+                      <div className="flex-1">
+                        <h4 className="text-sm font-bold text-slate-800 mb-1 leading-none">
+                          {req.patientName}
+                        </h4>
+                        <p className="text-xs font-medium text-slate-500 mb-1">
+                          {new Date(req.scheduledStart).toLocaleDateString()}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                          <p className="text-xs font-bold text-slate-400 capitalize">
+                            {req.type} Consultation
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <div className="flex gap-3">
+                      <Button
+                        variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRequestAction(req.consultationId, "cancelled");
+                        }}
+                        isLoading={actionLoading === req.consultationId}
+                        className="flex-1 text-rose-500 bg-rose-50 hover:bg-rose-100"
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRequestAction(req.consultationId, "scheduled");
+                        }}
+                        isLoading={actionLoading === req.consultationId}
+                        className="flex-1"
+                      >
+                        Accept
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleRequestAction(req.consultationId, 'cancelled'); }}
-                      disabled={actionLoading === req.consultationId}
-                      className="flex-1 py-2.5 rounded-lg text-xs font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors disabled:opacity-50"
-                    >
-                      Reject
-                    </button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleRequestAction(req.consultationId, 'scheduled'); }}
-                      disabled={actionLoading === req.consultationId}
-                      className="flex-1 py-2.5 rounded-lg text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors disabled:opacity-50"
-                    >
-                      Accept
-                    </button>
-                  </div>
-                </div>
-              ))
+                ),
+              )
             )}
           </div>
         </Card>

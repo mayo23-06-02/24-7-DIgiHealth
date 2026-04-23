@@ -6,7 +6,6 @@ const DASHBOARD_ROLES = [
   'patient',
   'practitioner',
   'hospital_admin',
-  'emt',
   'inspector',
   'super_admin',
   'mega_admin'

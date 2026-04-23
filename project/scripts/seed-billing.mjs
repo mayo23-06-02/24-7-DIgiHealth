@@ -94,7 +94,6 @@ const PaymentMethodSchema = new mongoose.Schema({
 
 const PlatformFeeConfigSchema = new mongoose.Schema({
   platformFeePercent:     { type: Number, default: 15 },
-  consultationFeePercent: { type: Number, default: 12 },
   subscriptionFeePercent: { type: Number, default: 10 },
   updatedBy:              { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   notes:                  String,
@@ -151,7 +150,7 @@ const CARD_BRANDS      = ['Visa', 'Mastercard', 'American Express'];
 const MEDICAL_AIDS     = ['Discovery Health', 'Bonitas', 'Momentum Health', 'GEMS', 'Fedhealth'];
 const INSURANCE        = ['Sanlam', 'Old Mutual', 'Liberty Life', 'Momentum Insure'];
 const DEPARTMENTS      = ['Emergency', 'Cardiology', 'Radiology', 'Pharmacy', 'General Ward', 'ICU', 'Paediatrics', 'Gynaecology'];
-const CATEGORIES       = ['consultation', 'subscription', 'procedure', 'pharmacy', 'lab'];
+const CATEGORIES       = ['service_booking', 'subscription', 'procedure', 'pharmacy', 'lab'];
 const PROVIDERS        = ['medical_aid', 'card', 'eft', 'cash', 'wallet'];
 const STATUSES         = ['completed', 'completed', 'completed', 'pending', 'failed', 'refunded'];
 const PAYOUT_STATUSES  = ['pending', 'approved', 'paid', 'rejected', 'pending'];
@@ -355,7 +354,6 @@ async function seedBilling() {
     const adminActor = superAdmins[0] || hospitalAdmins[0] || patients[0];
     await PlatformFeeConfig.create({
       platformFeePercent:     15,
-      consultationFeePercent: 12,
       subscriptionFeePercent: 10,
       updatedBy:              adminActor?._id,
       notes:                  'Standard SA market fee structure. Revenue share applied at payment processing.',

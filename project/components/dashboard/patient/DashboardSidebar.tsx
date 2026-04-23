@@ -65,63 +65,61 @@ export default function DashboardSidebar({
 
   return (
     <>
-    {/* Mobile Overlay */}
-    {isOpen && (
-      <div 
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99] lg:hidden"
-        onClick={onClose}
-      />
-    )}
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99] lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
-    <aside
-      className={`
+      <aside
+        className={`
         fixed inset-y-4 left-4 lg:sticky lg:top-0 lg:left-0 lg:h-screen bg-white lg:bg-white/90 lg:backdrop-blur-md border-r border-slate-200/50 
         transition-all duration-500 ease-out flex flex-col z-[100] rounded-lg lg:rounded-none
         ${isCollapsed ? "w-24" : "w-72"}
         ${isOpen ? "translate-x-0" : "-translate-x-[110%] lg:translate-x-0"}
       `}
-    >
-      {/* Mobile Close Button */}
-      <button 
-        onClick={onClose}
-        className="absolute -right-12 top-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-400 lg:hidden"
       >
-        ×
-      </button>
-      {/* Toggle Button */}
-
-      {/* Brand Section */}
-      <div
-        className={`pt-8 pb-6 px-2.5 transition-all border-b  border-slate-200/50 duration-500 ${isCollapsed ? "px-4" : "px-6"}`}
-      >
-        <div
-          className={`flex items-center gap-3 ${isCollapsed ? "justify-center" : ""}`}
+        {/* Mobile Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute -right-12 top-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-400 lg:hidden"
         >
-          {/* Brand Icon – 24/7 TeleHealth style */}
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center ">
-            <span className="text-white font-black text-xl">24</span>
-          </div>
-          {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="font-bold text-slate-800 text-lg tracking-tight">
-                24/7 TeleHealth
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+          ×
+        </button>
+        {/* Toggle Button */}
 
-      {/* Navigation */}
-      <nav
-        className="flex-1 px-3 py-5 overflow-y-auto custom-scrollbar space-y-1"
-      >
-        {mainNav.map((item) => {
-          const isActive = activeNav === item.name;
-          return (
-            <button
-              key={item.name}
-              onClick={() => onTabChange(item.name)}
-              className={`
+        {/* Brand Section */}
+        <div
+          className={`pt-8 pb-6 px-3 transition-all border-b  border-slate-200/50 duration-500 ${isCollapsed ? "px-4" : "px-6"}`}
+        >
+          <div
+            className={`flex items-center gap-3 ${isCollapsed ? "justify-center" : ""}`}
+          >
+            {/* Brand Icon – 24/7 TeleHealth style */}
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center ">
+              <span className="text-white font-bold text-xl">24</span>
+            </div>
+            {!isCollapsed && (
+              <div className="flex flex-col">
+                <span className="font-bold text-slate-800 text-lg tracking-tight">
+                  24/7 TeleHealth
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-5 overflow-y-auto custom-scrollbar space-y-1">
+          {mainNav.map((item) => {
+            const isActive = activeNav === item.name;
+            return (
+              <button
+                key={item.name}
+                onClick={() => onTabChange(item.name)}
+                className={`
                 w-full flex items-center gap-4 py-3 rounded-lg font-semibold text-sm
                 transition-all duration-200 group
                 ${
@@ -131,37 +129,33 @@ export default function DashboardSidebar({
                 }
                 ${isCollapsed ? "justify-center" : "px-4"}
               `}
-              title={isCollapsed ? item.name : ""}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <span
-                className={`text-xl transition-transform duration-200 ${isActive ? "scale-105" : "group-hover:scale-105"}`}
+                title={isCollapsed ? item.name : ""}
+                aria-current={isActive ? "page" : undefined}
               >
-                {item.icon}
-              </span>
-              {!isCollapsed && (
-                <span className="animate-in fade-in slide-in-from-left-2 duration-300">
-                  {item.name}
+                <span
+                  className={`text-xl transition-transform duration-200 ${isActive ? "scale-105" : "group-hover:scale-105"}`}
+                >
+                  {item.icon}
                 </span>
-              )}
-            </button>
-          );
-        })}
+                {!isCollapsed && (
+                  <span className="animate-in fade-in slide-in-from-left-2 duration-300">
+                    {item.name}
+                  </span>
+                )}
+              </button>
+            );
+          })}
 
-        {/* Divider */}
-        {!isCollapsed && (
-          <div
-            className="h-px bg-slate-200 my-3 mx-2"
-          />
-        )}
+          {/* Divider */}
+          {!isCollapsed && <div className="h-px bg-slate-200 my-3 mx-2" />}
 
-        {secondaryNav.map((item) => {
-          const isActive = activeNav === item.name;
-          return (
-            <button
-              key={item.name}
-              onClick={() => onTabChange(item.name)}
-              className={`
+          {secondaryNav.map((item) => {
+            const isActive = activeNav === item.name;
+            return (
+              <button
+                key={item.name}
+                onClick={() => onTabChange(item.name)}
+                className={`
                 w-full flex items-center gap-4 py-3 rounded-lg font-semibold text-sm
                 transition-all duration-200 group
                 ${
@@ -171,50 +165,50 @@ export default function DashboardSidebar({
                 }
                 ${isCollapsed ? "justify-center" : "px-4"}
               `}
-              title={isCollapsed ? item.name : ""}
-            >
-              <span className="text-xl">{item.icon}</span>
-              {!isCollapsed && <span>{item.name}</span>}
-            </button>
-          );
-        })}
-      </nav>
+                title={isCollapsed ? item.name : ""}
+              >
+                <span className="text-xl">{item.icon}</span>
+                {!isCollapsed && <span>{item.name}</span>}
+              </button>
+            );
+          })}
+        </nav>
 
-      {/* Footer Actions */}
-      <div className="p-4 border-t border-slate-100 mt-auto">
-        {/* Profile Preview (optional) – shows when expanded */}
-        {!isCollapsed && (
-          <div className="flex items-center gap-3 mb-4 p-2 rounded-lg bg-slate-50">
-            <Avatar 
-              name={user?.name || "User"} 
-              size="sm" 
-              className="rounded-lg shadow-sm"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-700 truncate">
-                {user?.name || "Member"}
-              </p>
-              <p className="text-[10px] text-primary font-black uppercase tracking-widest truncate">
-                {user?.role?.replace("_", " ") || "Patient"}
-              </p>
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-slate-100 mt-auto">
+          {/* Profile Preview (optional) – shows when expanded */}
+          {!isCollapsed && (
+            <div className="flex items-center gap-3 mb-4 p-2 rounded-lg bg-slate-50">
+              <Avatar
+                name={user?.name || "User"}
+                size="sm"
+                className="rounded-lg shadow-none"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-700 truncate">
+                  {user?.name || "Member"}
+                </p>
+                <p className="text-xs text-primary font-bold uppercase tracking-normal truncate">
+                  {user?.role?.replace("_", " ") || "Patient"}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Sign Out Button */}
-        <Button
-          variant="outline"
-          onClick={logout}
-          className="w-full"
-          aria-label="Sign out"
-        >
-          <BiLogOut size={20} />
-          {!isCollapsed && <span>Sign Out</span>}
-        </Button>
-      </div>
+          {/* Sign Out Button */}
+          <Button
+            variant="outline"
+            onClick={logout}
+            className="w-full"
+            aria-label="Sign out"
+          >
+            <BiLogOut size={20} />
+            {!isCollapsed && <span>Sign Out</span>}
+          </Button>
+        </div>
 
-      {/* Custom scrollbar styles – add to global CSS or here via style tag */}
-    </aside>
+        {/* Custom scrollbar styles – add to global CSS or here via style tag */}
+      </aside>
     </>
   );
 }

@@ -6,15 +6,10 @@ import { usePathname } from "next/navigation";
 import {
   BiHomeAlt,
   BiCalendar,
-  BiTime,
   BiUser,
-  BiPulse,
-  BiCapsule,
-  BiHistory,
   BiGlobe,
   BiCheckCircle,
   BiBuildingHouse,
-  BiFirstAid,
   BiShieldQuarter,
   BiBarChartAlt2,
   BiMessageDetail,
@@ -22,8 +17,6 @@ import {
   BiSupport,
   BiGroup,
   BiDollarCircle,
-  BiBed,
-  BiMap,
   BiClipboard,
   BiFile,
   BiStats,
@@ -34,9 +27,12 @@ import {
   BiLogOut,
   BiChevronRight,
   BiChevronLeft,
+  BiStar,
+  BiLineChart,
 } from "react-icons/bi";
 import { useAuthContext } from "../auth/AuthProvider";
 import Avatar from "../ui/Avatar";
+import Button from "../ui/Button";
 
 interface SidebarItem {
   icon: any;
@@ -55,7 +51,6 @@ const MAIN_NAV: SidebarItem[] = [
       "patient",
       "practitioner",
       "hospital_admin",
-      "emt",
       "inspector",
       "super_admin",
       "mega_admin",
@@ -110,60 +105,34 @@ const MAIN_NAV: SidebarItem[] = [
     roles: ["hospital_admin"],
   },
   {
-    icon: BiBed,
-    label: "Bed Management",
-    href: "/[role]/beds",
-    roles: ["hospital_admin"],
-  },
-  {
     icon: BiUserPlus,
     label: "Staff",
     href: "/[role]/staff",
     roles: ["hospital_admin"],
   },
   {
-    icon: BiBarChartAlt2,
-    label: "Operational Analytics",
-    href: "/[role]/analytics",
+    icon: BiDollarCircle,
+    label: "Billing",
+    href: "/[role]/billing",
     roles: ["hospital_admin"],
   },
-
-  // ----- EMT PAGES -----
   {
-    icon: BiFirstAid,
-    label: "Active Dispatches",
-    href: "/[role]",
-    roles: ["emt"],
-  },
-  {
-    icon: BiHistory,
-    label: "Dispatch History",
-    href: "/[role]/dispatch/history",
-    roles: ["emt"],
-  },
-  {
-    icon: BiMap,
-    label: "Incident Map",
-    href: "/[role]/map",
-    roles: ["emt"],
-  },
-  {
-    icon: BiBuildingHouse,
-    label: "Nearby Facilities",
-    href: "/[role]/facilities",
-    roles: ["emt"],
+    icon: BiStar,
+    label: "Reviews",
+    href: "/[role]/reviews",
+    roles: ["hospital_admin"],
   },
   {
     icon: BiClipboard,
-    label: "Equipment Check",
-    href: "/[role]/equipment",
-    roles: ["emt"],
+    label: "SLA",
+    href: "/[role]/sla",
+    roles: ["hospital_admin"],
   },
   {
-    icon: BiFile,
-    label: "Shift Reports",
-    href: "/[role]/reports",
-    roles: ["emt"],
+    icon: BiLineChart,
+    label: "Performance",
+    href: "/[role]/performance",
+    roles: ["hospital_admin"],
   },
 
   // ----- INSPECTOR PAGES -----
@@ -229,13 +198,32 @@ const MAIN_NAV: SidebarItem[] = [
     icon: BiWallet,
     label: "Billing",
     href: "/[role]/billing",
-    roles: ["patient", "practitioner", "hospital_admin", "super_admin", "mega_admin", "inspector"],
+    roles: [
+      "patient",
+      "practitioner",
+      "super_admin",
+      "mega_admin",
+      "inspector",
+    ],
   },
   {
     icon: BiHeart,
     label: "Wellness",
     href: "/[role]/wellness",
     roles: ["patient"],
+  },
+  {
+    icon: BiUser,
+    label: "Profile",
+    href: "/[role]/profile",
+    roles: [
+      "patient",
+      "practitioner",
+      "hospital_admin",
+      "inspector",
+      "super_admin",
+      "mega_admin",
+    ],
   },
 ];
 
@@ -249,7 +237,6 @@ const SECONDARY_NAV: SidebarItem[] = [
       "patient",
       "practitioner",
       "hospital_admin",
-      "emt",
       "inspector",
       "super_admin",
       "mega_admin",
@@ -263,7 +250,6 @@ const SECONDARY_NAV: SidebarItem[] = [
       "patient",
       "practitioner",
       "hospital_admin",
-      "emt",
       "inspector",
       "super_admin",
       "mega_admin",
@@ -277,7 +263,6 @@ const SECONDARY_NAV: SidebarItem[] = [
       "patient",
       "practitioner",
       "hospital_admin",
-      "emt",
       "inspector",
       "super_admin",
       "mega_admin",
@@ -291,7 +276,6 @@ const SECONDARY_NAV: SidebarItem[] = [
       "patient",
       "practitioner",
       "hospital_admin",
-      "emt",
       "inspector",
       "super_admin",
       "mega_admin",
@@ -331,7 +315,7 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
       <aside
         className={`
         flex-col transition-all duration-500 z-[100] shrink-0
-        fixed inset-y-0 left-0 bg-white shadow-2xl lg:shadow-none
+        fixed inset-y-0 left-0 bg-white  lg:shadow-none
         lg:relative lg:inset-auto lg:translate-x-0 lg:border-r lg:border-slate-200/50
         ${isCollapsed ? "w-24" : "w-72"}
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
@@ -354,7 +338,7 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
       `}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-black">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-bold">
               24
             </div>
             {!isCollapsed && (
@@ -430,39 +414,54 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
         {/* Profile/Footer */}
         <div className="p-4 border-t border-slate-100 mt-auto">
           {!isCollapsed && (
-            <div className="flex items-center gap-3 mb-4 p-2 rounded-lg bg-slate-50 border border-slate-100">
-              <Avatar name={user.name} src={user.avatarUrl} size="sm" />
+            <Link
+              href={`/${user.role}/profile`}
+              className="flex items-center gap-3 mb-4 p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-slate-100 hover:border-primary/20 transition-all group"
+            >
+              <Avatar name={user.name} src={user.avatarUrl} size="sm" className="group-hover:scale-105" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-700 truncate">
+                <p className="text-sm font-semibold text-slate-700 truncate group-hover:text-primary transition-colors">
                   {user.name}
                 </p>
-                <p className="text-[10px] text-slate-400 truncate uppercase tracking-widest font-black">
+                <p className="text-xs text-slate-400 truncate uppercase tracking-normal font-bold">
                   {user.role.replace("_", " ")}
                 </p>
               </div>
-            </div>
+            </Link>
           )}
 
-          <button
+          {isCollapsed && (
+            <Link 
+              href={`/${user.role}/profile`}
+              className="flex justify-center mb-4 p-2 rounded-lg hover:bg-slate-50 transition-all group"
+              title="View Profile"
+            >
+              <Avatar name={user.name} src={user.avatarUrl} size="sm" className="group-hover:scale-110" />
+            </Link>
+          )}
+
+          <Button
             onClick={logout}
+            variant="white"
+            icon={<BiLogOut size={20} />}
+            iconPosition="left"
             className={`
-            w-full flex items-center transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-500 rounded-lg py-3
-            ${isCollapsed ? "justify-center" : "px-4 gap-3"}
+            !w-full flex items-center transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-500 rounded-lg py-3 !min-w-0
+            ${isCollapsed ? "!justify-center" : "!px-4 !gap-3"}
           `}
           >
-            <BiLogOut size={20} />
             {!isCollapsed && (
-              <span className="text-sm font-bold uppercase tracking-wider">
+              <span className="text-sm font-bold uppercase tracking-normal">
                 Sign Out
               </span>
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Toggle Button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-10 w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary transition-all z-50"
+          className="absolute -right-3 top-10 w-6 h-6 p-0 min-w-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary transition-all z-50"
         >
           {isCollapsed ? (
             <BiChevronRight size={14} />

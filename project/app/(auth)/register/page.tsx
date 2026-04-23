@@ -12,7 +12,7 @@ export default function RegisterRoleSelection() {
     {
       id: "patient",
       title: "Patient Account",
-      badge: "01/04",
+      badge: "01/03",
       description:
         "Get Started, access AI telemedicine, and manage your health records in South Africa.",
       icon: "👩‍⚕️",
@@ -22,7 +22,7 @@ export default function RegisterRoleSelection() {
     {
       id: "practitioner",
       title: "Medical Professional",
-      badge: "02/04",
+      badge: "02/03",
       description:
         "Manage your practice, access AI diagnostic tools, and provide care via our secure telehealth bridge.",
       icon: "🩺",
@@ -32,22 +32,12 @@ export default function RegisterRoleSelection() {
     {
       id: "hospital",
       title: "Healthcare Facility",
-      badge: "03/04",
+      badge: "03/03",
       description:
-        "Register your hospital or clinic for B2B portal access, dispatch networks, and facility management.",
+        "Register your hospital or clinic for B2B portal access and facility management.",
       icon: "🏥",
       image:
         "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=80&w=2070&auto=format&fit=crop",
-    },
-    {
-      id: "emt",
-      title: "First Responder (EMT)",
-      badge: "04/04",
-      description:
-        "Emergency Medical Technicians and first responders. Access real-time dispatch and patient triage.",
-      icon: "🚑",
-      image:
-        "https://images.unsplash.com/photo-1581056771107-24ca5f033842?q=80&w=2070&auto=format&fit=crop",
     },
   ];
 
@@ -55,8 +45,8 @@ export default function RegisterRoleSelection() {
     <div className="w-full max-w-[1300px] py-30 px-10">
       <div className="group ring-1 ring-slate-200/5 bg-white border border-slate-200 p-12 pb-5 rounded-lg relative overflow-hidden">
         <div className="flex items-center gap-3 mb-10">
-          <span className="text-secondary font-black text-3xl">+</span>
-          <span className="text-secondary font-bold tracking-widest uppercase text-sm">
+          <span className="text-secondary font-bold text-3xl">+</span>
+          <span className="text-secondary font-bold tracking-normal uppercase text-sm">
             Join the Network
           </span>
         </div>
@@ -65,7 +55,7 @@ export default function RegisterRoleSelection() {
           <div className="py-5">
             <h2 className="text-3xl md:text-4xl font-medium text-slate-900 leading-[1.05] tracking-tight mb-2.5 mb-10">
               The Right Path to <br />{" "}
-              <span className="text-primary font-black">Better Health</span>
+              <span className="text-primary font-bold">Better Health</span>
             </h2>
             <p className="text-sm text-slate-500 max-w-lg">
               We simplify modern healthcare by connecting you with top medical
@@ -82,7 +72,7 @@ export default function RegisterRoleSelection() {
               {["24/7 Connectivity"].map((pill) => (
                 <div
                   key={pill}
-                  className="bg-white/10 rounded-lg text-[10px] font-bold border border-white/20 uppercase tracking-widest py-1.25 px-2.5"
+                  className="bg-white/10 rounded-lg text-xs font-bold border border-white/20 uppercase tracking-normal py-1.25 px-3"
                 >
                   {pill}
                 </div>

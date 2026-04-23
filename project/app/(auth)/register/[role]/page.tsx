@@ -5,7 +5,7 @@ import { jwtVerify } from "jose";
 import RegistrationWizard from "@/components/auth/RegistrationWizard";
 
 // In Next.js 15, params must be awaited — it is now a Promise
-const validRoles = ["patient", "practitioner", "hospital", "emt"];
+const validRoles = ["patient", "practitioner", "hospital"];
 
 export default async function RegistrationPage({
   params,

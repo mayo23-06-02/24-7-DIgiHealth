@@ -31,15 +31,15 @@ const Badge: React.FC<BadgeProps> = ({
       dot: "bg-red-500",
     },
     info: {
-      base: "bg-blue-100 text-blue-700 border-blue-200",
+      base: "bg-blue-100 text-blue-700 ",
       dot: "bg-blue-500",
     },
     premium: {
-      base: "bg-primary text-white border-primary/20",
+      base: "bg-primary text-white ",
       dot: "bg-primary",
     },
     neutral: {
-      base: "bg-slate-100 text-slate-600 border-slate-200",
+      base: "bg-slate-100 text-slate-600 ",
       dot: "bg-slate-400",
     },
   };
@@ -49,7 +49,7 @@ const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       className={`
-      inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold tracking-wide border
+      inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide
       ${style.base} ${className}
     `}
     >

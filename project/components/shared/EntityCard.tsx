@@ -32,7 +32,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
     <Card
       variant="solid"
       noPadding
-      className="group cursor-pointer hover:shadow-2xl hover:shadow-primary/5 border-transparent hover:border-primary/10 transition-all duration-500"
+      className="group cursor-pointer hover: hover:shadow-primary/5 border-transparent hover:border-primary/10 transition-all duration-500"
     >
       <div onClick={() => onClick(data)}>
         {/* Cover Image/Header */}
@@ -81,7 +81,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
                 </div>
               )}
             </div>
-            <p className="text-xs text-primary uppercase tracking-widest">
+            <p className="text-xs text-primary uppercase tracking-normal">
               {data.subtitle}
             </p>
           </div>
@@ -95,7 +95,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
             {data.tags?.slice(0, 3).map((tag, i) => (
               <span
                 key={i}
-                className="px-2 py-1 rounded bg-slate-50 text-slate-400 text-[9px] font-black uppercase tracking-widest"
+                className="px-2 py-1 rounded bg-slate-50 text-slate-400 text-[9px] font-bold uppercase tracking-normal"
               >
                 {tag}
               </span>
@@ -103,7 +103,7 @@ const EntityCard: React.FC<EntityCardProps> = ({
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-            <span className="text-xs font-black text-slate-300 uppercase tracking-widest">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-normal">
               {actionLabel}
             </span>
             <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-primary group-hover:text-white flex items-center justify-center text-slate-400 transition-all">

@@ -27,7 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center min-w-[150px] py-3 px-4 justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
+    "inline-flex items-center text-xs uppercase py-3 px-4 justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
 
   const variants = {
     primary: "bg-[#4493b8] text-white hover:bg-primary/90 ",
@@ -39,6 +39,7 @@ const Button: React.FC<ButtonProps> = ({
     dashed:
       "bg-transparent border- border-dashed border-slate-200 text-slate-400 hover:border-primary hover:text-primary",
     ghost: "bg-transparent text-slate-500 hover:bg-slate-100",
+    danger: "bg-red-400 text-white hover:bg-red-600",
   };
 
   const sizes = {
@@ -57,13 +58,13 @@ const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {icon && iconPosition === "left" && (
-        <span className="mr-3 transition-transform group-hover:-translate-x-1 ">
+        <span className="px-1 transition-transform group-hover:-translate-x-1 ">
           {icon}
         </span>
       )}
       {children}
       {icon && iconPosition === "right" && (
-        <span className="ml-3 transition-transform group-hover:translate-x-1">
+        <span className="px-1 text-opacity-70 transition-transform group-hover:translate-x-1">
           {icon}
         </span>
       )}

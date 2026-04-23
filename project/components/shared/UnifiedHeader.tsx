@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import {
   BiSearch,
   BiBell,
@@ -18,6 +19,7 @@ import {
 import { useAuthContext } from "../auth/AuthProvider";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
+import Avatar from "../ui/Avatar";
 
 interface WeatherData {
   temp: number;
@@ -212,7 +214,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       </div>
 
       <div className="flex-2 max-w-[600px] px-2 lg:px-10 hidden md:block">
-        <div className="bg-slate-100/50 border border-slate-100 rounded-full px-6 py-1 flex items-center gap-4 group focus-within:bg-white focus-within:border-primary/30 focus-within:shadow-xl focus-within:shadow-primary/5 transition-all duration-500">
+        <div className="bg-slate-100/50 border border-slate-100 rounded-full px-6 py-1 flex items-center gap-4 group focus-within:bg-white focus-within:border-primary/30 focus-within:shadow-none focus-within:shadow-primary/5 transition-all duration-500">
           <BiSearch className="text-slate-400 text-xl group-focus-within:text-primary transition-colors" />
           <input
             type="text"
@@ -228,7 +230,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
             className={`w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center cursor-pointer transition-all relative ${
               isNotificationOpen
-                ? "bg-primary text-white shadow-lg shadow-primary/20"
+                ? "bg-primary text-white shadow-none shadow-primary/20"
                 : "bg-white text-slate-400 hover:text-primary hover:bg-primary/5"
             }`}
           >
@@ -239,7 +241,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           </button>
 
           {isNotificationOpen && (
-            <div className="absolute top-[56px] right-0 w-[350px] bg-white border border-slate-200 rounded-lg shadow-lg shadow-primary/10 p-6 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
+            <div className="absolute top-[56px] right-0 w-[350px] bg-white border border-slate-200 rounded-lg shadow-none shadow-primary/10 p-6 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
               <div className="flex items-center justify-between mb-6">
                 <h4 className="text-lg font-bold text-slate-800 ">
                   Activity Center
@@ -286,7 +288,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                             })}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 truncate">
+                        <p className="text-xs text-slate-500 truncate">
                           {notif.body}
                         </p>
                       </div>
@@ -313,22 +315,25 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           <BiBookmark size={20} />
         </button>
 
-        <div className="group flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 pr-4 lg:pr-6 rounded-full transition-all ml-2">
-          <Avatar 
-            name={user?.name || "User"} 
-            src={user?.avatarUrl} 
-            size="sm" 
+        <Link
+          href={`/${user?.role}/profile`}
+          className="group flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 pr-4 lg:pr-6 rounded-full transition-all ml-2"
+        >
+          <Avatar
+            name={user?.name || "User"}
+            src={user?.avatarUrl}
+            size="sm"
             className="group-hover:scale-105"
           />
           <div className="hidden lg:flex flex-col">
-            <span className="text-[11px] font-bold text-slate-800 truncate leading-none mb-1">
+            <span className="text-xs uppercase   font-bold text-slate-800 truncate leading-none mb-1">
               {user?.name || "User"}
             </span>
-            <span className="text-[9px] font-black text-primary uppercase tracking-widest leading-none">
+            <span className="text-[9px] font-bold text-primary uppercase  leading-none">
               {user?.role?.replace("_", " ") || "Member"}
             </span>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

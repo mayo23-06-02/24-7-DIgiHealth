@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   BiChevronLeft,
   BiChevronRight,
@@ -10,9 +10,10 @@ import {
   BiX,
   BiNote,
   BiLoader,
-} from 'react-icons/bi';
-import RiskScoreCard from './RiskScoreCard';
-import SoapNoteModal from './SoapNoteModal';
+  BiCheckCircle,
+} from "react-icons/bi";
+import RiskScoreCard from "./RiskScoreCard";
+import SoapNoteModal from "./SoapNoteModal";
 
 interface CalendarEvent {
   id: string;
@@ -24,7 +25,7 @@ interface CalendarEvent {
   type: string;
   reason: string;
   riskScore: number;
-  riskColor: 'green' | 'amber' | 'red';
+  riskColor: "green" | "amber" | "red";
   riskFactors: string[];
   aiRecommendations: string[];
   patientId: string;
@@ -38,7 +39,7 @@ interface CalendarEvent {
 }
 
 const HOURS = Array.from({ length: 13 }, (_, i) => i + 8); // 08:00 – 20:00
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function getWeekDays(referenceDate: Date): Date[] {
   const d = new Date(referenceDate);
@@ -58,31 +59,114 @@ function toMinutes(dt: string) {
 }
 
 const eventColor = (status: string, riskColor: string) => {
-  if (riskColor === 'red') return { bg: 'bg-red-100 border-red-300 hover:bg-red-200', text: 'text-red-800', dot: 'bg-red-500' };
-  if (status === 'ongoing') return { bg: 'bg-emerald-100 border-emerald-300 hover:bg-emerald-200', text: 'text-emerald-800', dot: 'bg-emerald-500' };
-  if (status === 'completed') return { bg: 'bg-slate-100 border-slate-200 hover:bg-slate-200', text: 'text-slate-500', dot: 'bg-slate-400' };
-  if (riskColor === 'amber') return { bg: 'bg-amber-100 border-amber-300 hover:bg-amber-200', text: 'text-amber-800', dot: 'bg-amber-500' };
-  return { bg: 'bg-blue-100 border-blue-200 hover:bg-blue-200', text: 'text-blue-800', dot: 'bg-blue-500' };
+  if (riskColor === "red")
+    return {
+      bg: "bg-red-100 border-red-300 hover:bg-red-200",
+      text: "text-red-800",
+      dot: "bg-red-500",
+    };
+  if (status === "ongoing")
+    return {
+      bg: "bg-emerald-100 border-emerald-300 hover:bg-emerald-200",
+      text: "text-emerald-800",
+      dot: "bg-emerald-500",
+    };
+  if (status === "completed")
+    return {
+      bg: "bg-slate-100 border-slate-200 hover:bg-slate-200",
+      text: "text-slate-500",
+      dot: "bg-slate-400",
+    };
+  if (status === "requested")
+    return {
+      bg: "bg-amber-50 border-amber-200 hover:bg-amber-100",
+      text: "text-amber-700",
+      dot: "bg-amber-500",
+    };
+  if (riskColor === "amber")
+    return {
+      bg: "bg-orange-50 border-orange-200 hover:bg-orange-100",
+      text: "text-orange-700",
+      dot: "bg-orange-500",
+    };
+  return {
+    bg: "bg-blue-50 border-blue-200 hover:bg-blue-100",
+    text: "text-blue-700",
+    dot: "bg-blue-500",
+  };
 };
 
 const MOCK_EVENTS: CalendarEvent[] = [
-  { id: '1', title: 'Consultation', patientName: 'Thandiwe Mokoena', start: new Date(Date.now() + 18 * 60000).toISOString(), end: new Date(Date.now() + 48 * 60000).toISOString(), status: 'scheduled', type: 'video', reason: 'Persistent headache', riskScore: 82, riskColor: 'red', riskFactors: ['Hypertension', 'Diabetic'], aiRecommendations: ['Monitor BP'], patientId: 'p1', consultationId: 'c1' },
-  { id: '2', title: 'Consultation', patientName: 'John Dlamini', start: new Date(Date.now() + 60 * 60000).toISOString(), end: new Date(Date.now() + 90 * 60000).toISOString(), status: 'ongoing', type: 'video', reason: 'Chest pain', riskScore: 92, riskColor: 'red', riskFactors: ['CAD'], aiRecommendations: ['Urgent ECG'], patientId: 'p2', consultationId: 'c2' },
-  { id: '3', title: 'Consultation', patientName: 'Amira Khan', start: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(), end: new Date(new Date().setHours(14, 30, 0, 0)).toISOString(), status: 'scheduled', type: 'chat', reason: 'Asthma follow-up', riskScore: 45, riskColor: 'amber', riskFactors: ['Chronic asthma'], aiRecommendations: [], patientId: 'p3', consultationId: 'c3' },
+  {
+    id: "1",
+    title: "Consultation",
+    patientName: "Thandiwe Mokoena",
+    start: new Date(Date.now() + 18 * 60000).toISOString(),
+    end: new Date(Date.now() + 48 * 60000).toISOString(),
+    status: "scheduled",
+    type: "video",
+    reason: "Persistent headache",
+    riskScore: 82,
+    riskColor: "red",
+    riskFactors: ["Hypertension", "Diabetic"],
+    aiRecommendations: ["Monitor BP"],
+    patientId: "p1",
+    consultationId: "c1",
+  },
+  {
+    id: "2",
+    title: "Consultation",
+    patientName: "John Dlamini",
+    start: new Date(Date.now() + 60 * 60000).toISOString(),
+    end: new Date(Date.now() + 90 * 60000).toISOString(),
+    status: "ongoing",
+    type: "video",
+    reason: "Chest pain",
+    riskScore: 92,
+    riskColor: "red",
+    riskFactors: ["CAD"],
+    aiRecommendations: ["Urgent ECG"],
+    patientId: "p2",
+    consultationId: "c2",
+  },
+  {
+    id: "3",
+    title: "Consultation",
+    patientName: "Amira Khan",
+    start: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
+    end: new Date(new Date().setHours(14, 30, 0, 0)).toISOString(),
+    status: "scheduled",
+    type: "chat",
+    reason: "Asthma follow-up",
+    riskScore: 45,
+    riskColor: "amber",
+    riskFactors: ["Chronic asthma"],
+    aiRecommendations: [],
+    patientId: "p3",
+    consultationId: "c3",
+  },
 ];
 
 const typeIcon = (type: string, size = 11) => {
-  if (type === 'video') return <BiVideo size={size} />;
-  if (type === 'chat') return <BiChat size={size} />;
+  if (type === "video") return <BiVideo size={size} />;
+  if (type === "chat") return <BiChat size={size} />;
   return <BiClinic size={size} />;
 };
+
+import Button from "@/components/ui/Button";
 
 export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [soapModal, setSoapModal] = useState({ isOpen: false, consultationId: '', patientName: '' });
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  );
+  const [soapModal, setSoapModal] = useState({
+    isOpen: false,
+    consultationId: "",
+    patientName: "",
+  });
 
   const weekDays = getWeekDays(currentDate);
   const today = new Date();
@@ -92,19 +176,37 @@ export default function AppointmentCalendar() {
     try {
       const from = weekDays[0].toISOString();
       const to = weekDays[6].toISOString();
-      const res = await fetch(`/api/practitioner/consultations?from=${from}&to=${to}`);
+      const res = await fetch(
+        `/api/practitioner/consultations?from=${from}&to=${to}`,
+      );
       const data = await res.json();
       if (data.success) setEvents(data.data.events);
       else setEvents(MOCK_EVENTS);
     } catch (err) {
-      console.error('Calendar fetch error', err);
+      console.error("Calendar fetch error", err);
       setEvents(MOCK_EVENTS);
     } finally {
       setLoading(false);
     }
   }, [currentDate]);
 
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
+  const handleApprove = async (id: string) => {
+    try {
+      const res = await fetch(`/api/consultations/${id}/approve`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        fetchEvents();
+        setSelectedEvent(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const navigateWeek = (dir: number) => {
     const d = new Date(currentDate);
@@ -114,49 +216,73 @@ export default function AppointmentCalendar() {
 
   return (
     <>
-      <div className="h-full flex flex-col bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+      <div className="h-full flex flex-col bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-none">
         {/* Calendar Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h3 className="text-sm font-black text-slate-800">
-              {weekDays[0]?.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })}
-              {' — '}
-              {weekDays[6]?.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: 'numeric' })}
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-normal leading-none mb-2">
+              Clinical Schedule
             </h3>
-            <p className="text-[10px] text-slate-400 font-medium">Week view · Click a slot to view details</p>
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-bold text-slate-800">
+                {weekDays[0]?.toLocaleDateString("en-ZA", {
+                  month: "short",
+                  day: "numeric",
+                })}
+                {" — "}
+                {weekDays[6]?.toLocaleDateString("en-ZA", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </h4>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <button
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
               onClick={() => setCurrentDate(new Date())}
-              className="text-[10px] font-bold text-[#0052CC] hover:bg-blue-50 px-2 py-1 rounded-lg transition-colors"
+              className="text-[10px] font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-full transition-all border-none bg-transparent h-auto !min-w-0 uppercase tracking-normal"
             >
               Today
-            </button>
-            <button
-              onClick={() => navigateWeek(-1)}
-              className="w-7 h-7 rounded-full bg-slate-100 hover:bg-[#0052CC]/10 text-slate-500 hover:text-[#0052CC] flex items-center justify-center transition-all"
-            >
-              <BiChevronLeft size={16} />
-            </button>
-            <button
-              onClick={() => navigateWeek(1)}
-              className="w-7 h-7 rounded-full bg-slate-100 hover:bg-[#0052CC]/10 text-slate-500 hover:text-[#0052CC] flex items-center justify-center transition-all"
-            >
-              <BiChevronRight size={16} />
-            </button>
+            </Button>
+            <div className="flex items-center bg-slate-50 p-1 rounded-full border border-slate-100">
+              <Button
+                variant="ghost"
+                onClick={() => navigateWeek(-1)}
+                className="w-8 h-8 p-0 rounded-full bg-white hover:bg-primary/5 text-slate-500 hover:text-primary flex items-center justify-center transition-all border-none shadow-none !min-w-0"
+              >
+                <BiChevronLeft size={18} />
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigateWeek(1)}
+                className="w-8 h-8 p-0 rounded-full bg-white hover:bg-primary/5 text-slate-500 hover:text-primary flex items-center justify-center transition-all border-none shadow-none !min-w-0 ml-1"
+              >
+                <BiChevronRight size={18} />
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Day Headers */}
-        <div className="grid grid-cols-8 border-b border-slate-100 shrink-0 pl-10">
+        <div className="grid grid-cols-8 border-b border-slate-50 shrink-0 pl-12 bg-slate-50/30">
           {weekDays.map((day, i) => {
             const isToday = day.toDateString() === today.toDateString();
             return (
-              <div key={i} className="py-2 text-center border-l border-slate-100">
-                <p className={`text-[10px] font-bold uppercase tracking-wide ${isToday ? 'text-[#0052CC]' : 'text-slate-400'}`}>
+              <div
+                key={i}
+                className={`py-3 text-center border-l border-slate-100 transition-colors ${isToday ? "bg-primary/5" : ""}`}
+              >
+                <p
+                  className={`text-[9px] font-bold uppercase tracking-[0.25em] ${isToday ? "text-primary" : "text-slate-400"}`}
+                >
                   {DAYS[i]}
                 </p>
-                <p className={`text-sm font-black mt-0.5 ${isToday ? 'text-white bg-[#0052CC] w-6 h-6 rounded-full flex items-center justify-center mx-auto text-xs' : 'text-slate-600'}`}>
+                <p
+                  className={`text-sm font-bold mt-1 ${isToday ? "text-white bg-primary w-6 h-6 rounded-full flex items-center justify-center mx-auto text-[10px] shadow-none shadow-primary/30" : "text-slate-600"}`}
+                >
                   {day.getDate()}
                 </p>
               </div>
@@ -167,16 +293,21 @@ export default function AppointmentCalendar() {
         {/* Grid Body */}
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
-            <BiLoader className="text-[#0052CC] text-2xl animate-spin" />
+            <BiLoader className="text-primary text-2xl animate-spin" />
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             <div className="relative grid grid-cols-8 min-h-[728px]">
               {/* Hour labels */}
-              <div className="col-span-1">
+              <div className="col-span-1 bg-slate-50/20">
                 {HOURS.map((h) => (
-                  <div key={h} className="h-14 flex items-start justify-end pr-2 pt-1">
-                    <span className="text-[10px] text-slate-300 font-bold">{String(h).padStart(2, '0')}:00</span>
+                  <div
+                    key={h}
+                    className="h-14 flex items-start justify-end pr-3 pt-1"
+                  >
+                    <span className="text-[10px] text-slate-300 font-bold tabular-nums">
+                      {String(h).padStart(2, "0")}:00
+                    </span>
                   </div>
                 ))}
               </div>
@@ -189,37 +320,56 @@ export default function AppointmentCalendar() {
                 });
 
                 return (
-                  <div key={dayIdx} className="col-span-1 border-l border-slate-100 relative">
+                  <div
+                    key={dayIdx}
+                    className="col-span-1 border-l border-slate-100 relative"
+                  >
                     {HOURS.map((h) => (
-                      <div key={h} className="h-14 border-b border-slate-50" />
+                      <div
+                        key={h}
+                        className="h-14 border-b border-slate-50/50"
+                      />
                     ))}
                     {/* Events overlay */}
                     {dayEvents.map((evt) => {
                       const startMins = toMinutes(evt.start) - 8 * 60;
                       const endMins = toMinutes(evt.end) - 8 * 60;
                       const top = (startMins / 60) * 56;
-                      const height = Math.max(((endMins - startMins) / 60) * 56, 28);
+                      const height = Math.max(
+                        ((endMins - startMins) / 60) * 56,
+                        28,
+                      );
                       const col = eventColor(evt.status, evt.riskColor);
 
                       return (
-                        <button
+                        <Button
                           key={evt.id}
+                          variant="ghost"
                           onClick={() => setSelectedEvent(evt)}
-                          className={`absolute inset-x-0.5 rounded-lg border px-1 py-0.5 text-left overflow-hidden transition-all hover:z-10 hover:shadow-md ${col.bg} ${col.text}`}
+                          className={`absolute inset-x-0.5 rounded-xl border px-2 py-1.5 text-left overflow-hidden transition-all hover:z-10 hover:shadow-none hover:scale-[1.02] active:scale-[0.98] ${col.bg} ${col.text} flex flex-col items-start !justify-start normal-case !min-w-0 h-auto`}
                           style={{ top: `${top}px`, height: `${height}px` }}
                           title={`${evt.patientName} — ${evt.reason}`}
                         >
-                          <div className="flex items-center gap-1">
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${col.dot}`} />
-                            <span className="text-[9px] font-black truncate leading-tight">{evt.patientName.split(' ')[0]}</span>
+                          <div className="flex items-center gap-1.5 w-full">
+                            <span
+                              className={`w-2 h-2 rounded-full shrink-0 shadow-none ${col.dot}`}
+                            />
+                            <span className="text-[10px] font-bold truncate leading-tight uppercase tracking-tight">
+                              {evt.patientName.split(" ")[0]}
+                            </span>
                           </div>
                           {height > 40 && (
-                            <div className="flex items-center gap-0.5 mt-0.5 opacity-70">
-                              {typeIcon(evt.type, 9)}
-                              <span className="text-[8px]">{new Date(evt.start).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}</span>
+                            <div className="flex items-center gap-1 mt-1 opacity-70">
+                              {typeIcon(evt.type, 10)}
+                              <span className="text-[9px] font-bold tabular-nums">
+                                {new Date(evt.start).toLocaleTimeString(
+                                  "en-ZA",
+                                  { hour: "2-digit", minute: "2-digit" },
+                                )}
+                              </span>
                             </div>
                           )}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -232,66 +382,130 @@ export default function AppointmentCalendar() {
 
       {/* Event Detail Sidebar */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-end p-4 pointer-events-none">
-          <div className="pointer-events-auto w-full max-w-xs bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in slide-in-from-right duration-400">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-[#0052CC]/5 to-[#00A3BF]/5">
-              <div>
-                <h4 className="text-sm font-black text-slate-800">{selectedEvent.patientName}</h4>
-                <p className="text-[10px] text-slate-400">{selectedEvent.reason}</p>
-              </div>
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                <BiX size={16} />
-              </button>
-            </div>
-            <div className="p-5 space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-slate-50 rounded-xl p-2.5">
-                  <p className="text-[10px] text-slate-400 font-medium">Time</p>
-                  <p className="text-xs font-bold text-slate-700">
-                    {new Date(selectedEvent.start).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
-                    {' – '}
-                    {new Date(selectedEvent.end).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
+        <div className="fixed inset-0 z-[120] flex items-center justify-end p-6 pointer-events-none bg-slate-900/10 backdrop-blur-[2px]">
+          <div className="pointer-events-auto w-full max-w-sm bg-white rounded-lg shadow-none border border-slate-100 overflow-hidden animate-in slide-in-from-right-8 duration-500">
+            <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between bg-gradient-to-r from-primary/5 to-primary/0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                  {typeIcon(selectedEvent.type, 20)}
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800 leading-tight">
+                    {selectedEvent.patientName}
+                  </h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mt-1">
+                    {selectedEvent.reason}
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-2.5">
-                  <p className="text-[10px] text-slate-400 font-medium">Type</p>
-                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1">
+              </div>
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedEvent(null)}
+                className="w-8 h-8 p-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors border-none !min-w-0"
+              >
+                <BiX size={18} />
+              </Button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-normal mb-1">
+                    Time Window
+                  </p>
+                  <p className="text-xs font-bold text-slate-700 tabular-nums">
+                    {new Date(selectedEvent.start).toLocaleTimeString("en-ZA", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {" – "}
+                    {new Date(selectedEvent.end).toLocaleTimeString("en-ZA", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-normal mb-1">
+                    Session Type
+                  </p>
+                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-tight">
                     {typeIcon(selectedEvent.type, 12)} {selectedEvent.type}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] text-slate-400 font-medium">Risk Score</p>
-                <RiskScoreCard score={selectedEvent.riskScore} color={selectedEvent.riskColor} factors={selectedEvent.riskFactors} size="sm" />
+              <div className="flex items-center justify-between px-1">
+                <div>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-normal">
+                    Clinical Risk
+                  </p>
+                  <p className="text-[9px] text-slate-300 font-bold uppercase tracking-normal mt-0.5">
+                    Automated Score
+                  </p>
+                </div>
+                <RiskScoreCard
+                  score={selectedEvent.riskScore}
+                  color={selectedEvent.riskColor}
+                  factors={selectedEvent.riskFactors}
+                  size="sm"
+                />
               </div>
               {selectedEvent.aiRecommendations.length > 0 && (
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
-                  <p className="text-[10px] font-black text-[#0052CC] mb-1 uppercase tracking-wide">AI Recommendations</p>
-                  <ul className="space-y-1">
-                    {selectedEvent.aiRecommendations.slice(0, 3).map((rec, i) => (
-                      <li key={i} className="text-[10px] text-blue-700 flex items-start gap-1">
-                        <span className="text-[#0052CC] shrink-0">→</span> {rec}
-                      </li>
-                    ))}
+                <div className="bg-emerald-50/50 border border-emerald-100 rounded-[1.5rem] p-4">
+                  <p className="text-[10px] font-bold text-emerald-600 mb-2 uppercase tracking-normal">
+                    AI Triage Insights
+                  </p>
+                  <ul className="space-y-2">
+                    {selectedEvent.aiRecommendations
+                      .slice(0, 3)
+                      .map((rec, i) => (
+                        <li
+                          key={i}
+                          className="text-[11px] font-medium text-slate-600 flex items-start gap-2 leading-relaxed"
+                        >
+                          <span className="text-emerald-500 font-bold shrink-0">
+                            ·
+                          </span>{" "}
+                          {rec}
+                        </li>
+                      ))}
                   </ul>
                 </div>
               )}
-              <div className="flex gap-2 pt-1">
-                <button className="flex-1 py-2 bg-[#0052CC] hover:bg-[#0047B3] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
-                  {typeIcon(selectedEvent.type, 13)} Join
-                </button>
-                <button
+              <div className="flex flex-col gap-3 pt-2">
+                {selectedEvent.status === "requested" ? (
+                  <Button
+                    onClick={() => handleApprove(selectedEvent.consultationId)}
+                    fullWidth
+                    className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold uppercase tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-200"
+                    icon={<BiCheckCircle size={14} />}
+                  >
+                    Approve Clinical Session
+                  </Button>
+                ) : (
+                  <Button
+                    fullWidth
+                    className="py-4 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold uppercase tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-primary/20"
+                    icon={typeIcon(selectedEvent.type, 14)}
+                  >
+                    Join Session
+                  </Button>
+                )}
+                <Button
                   onClick={() => {
-                    setSoapModal({ isOpen: true, consultationId: selectedEvent.consultationId, patientName: selectedEvent.patientName });
+                    setSoapModal({
+                      isOpen: true,
+                      consultationId: selectedEvent.consultationId,
+                      patientName: selectedEvent.patientName,
+                    });
                     setSelectedEvent(null);
                   }}
-                  className="flex-1 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 border border-purple-100"
+                  variant="outline"
+                  fullWidth
+                  className="py-4 bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-bold uppercase tracking-normal rounded-2xl transition-all h-auto border-slate-200"
+                  icon={<BiNote size={14} />}
                 >
-                  <BiNote size={13} /> SOAP
-                </button>
+                  Document SOAP Note
+                </Button>
               </div>
             </div>
           </div>
@@ -300,7 +514,9 @@ export default function AppointmentCalendar() {
 
       <SoapNoteModal
         isOpen={soapModal.isOpen}
-        onClose={() => setSoapModal({ isOpen: false, consultationId: '', patientName: '' })}
+        onClose={() =>
+          setSoapModal({ isOpen: false, consultationId: "", patientName: "" })
+        }
         consultationId={soapModal.consultationId}
         patientName={soapModal.patientName}
       />

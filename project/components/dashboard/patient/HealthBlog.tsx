@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   BiTime,
   BiBookmark,
@@ -26,40 +26,44 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Carousel from "@/components/ui/Carousel";
 
-interface HealthTip {
+export interface ArticleType {
   _id: string;
   title: string;
+  slug: string;
   excerpt: string;
+  content: string;
   author: string;
-  date: string;
-  readTime?: string;
-  image?: string;
-  tag?: string;
-  category: "tip" | "news" | "blog";
+  publishedAt: string;
+  readTimeMinutes: number;
+  coverImage: string;
+  tags: string[];
+  likes: number;
+  saves: number;
+  shares: number;
 }
 
+// Category filters – match tags from seed data
 const CATEGORY_FILTERS = [
   { label: "All", value: "" },
-  { label: "Tips", value: "tip" },
-  { label: "News", value: "news" },
-  { label: "Blog", value: "blog" },
+  { label: "Wellness", value: "Wellness" },
+  { label: "Nutrition", value: "Nutrition" },
+  { label: "Mental Health", value: "Mental Health" },
+  { label: "Telehealth", value: "Telehealth" },
 ];
-
-const CATEGORY_COLORS: Record<string, string> = {
-  tip: "premium",
-  news: "info",
-  blog: "success",
-};
 
 // ─── Full Article Modal ────────────────────────────────────────────────────────
 
-function ArticleModal({
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Avatar from "@/components/ui/Avatar";
+
+export function ArticleModal({
   article,
   onClose,
   onBookmark,
   isBookmarked,
 }: {
-  article: HealthTip;
+  article: ArticleType;
   onClose: () => void;
   onBookmark: (id: string) => void;
   isBookmarked: boolean;
@@ -67,7 +71,6 @@ function ArticleModal({
   const [copied, setCopied] = useState(false);
   const [shareToast, setShareToast] = useState("");
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -77,13 +80,13 @@ function ArticleModal({
 
   const shareUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/health-tips/${article._id}`
-      : `https://digihealth.co.za/health-tips/${article._id}`;
+      ? `${window.location.origin}/articles/${article.slug}`
+      : `https://247digihealth.co.za/articles/${article.slug}`;
 
   const copyLink = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
-    setShareToast("Link copied!");
+    setShareToast("Link copied to clipboard");
     setTimeout(() => {
       setCopied(false);
       setShareToast("");
@@ -103,194 +106,129 @@ function ArticleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-
-      {/* Panel */}
-      <div className="relative w-full max-w-3xl bg-white rounded-lg overflow-hidden animate-in zoom-in-95 fade-in duration-400 max-h-[90vh] flex flex-col">
+    <Modal
+      isOpen={!!article}
+      onClose={onClose}
+      noPadding
+      width="lg"
+      title={article.title}
+      hideHeader
+    >
+      <div className="relative w-full bg-white flex flex-col ">
         {/* Hero Image */}
-        {article.image && (
-          <div className="relative h-56 shrink-0 overflow-hidden">
+        <div className="relative h-64 shrink-0 overflow-hidden">
+          {article.coverImage ? (
             <img
-              src={article.image}
+              src={article.coverImage}
               alt={article.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-            {/* Close button over image */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 w-10 h-10 rounded-lg bg-black/30 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/50 transition-all"
-            >
-              <BiX size={22} />
-            </button>
-            {article.tag && (
-              <div className="absolute bottom-4 left-6">
-                <span className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-3 py-1 rounded-lg">
-                  {article.tag}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Header (when no image) */}
-        {!article.image && (
-          <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              {article.tag && (
-                <span className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1 rounded-lg">
-                  {article.tag}
-                </span>
-              )}
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-6xl">
+              💡
             </div>
-            <button
-              onClick={onClose}
-              className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all"
-            >
-              <BiX size={22} />
-            </button>
-          </div>
-        )}
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-        {/* Scrollable Body */}
-        <div className="overflow-y-auto custom-scrollbar flex-1 px-8 py-7 space-y-6">
-          {/* Title */}
-          <h2 className="text-2xl font-black text-slate-800 leading-tight tracking-tight">
-            {article.title}
-          </h2>
-
-          {/* Author row */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-[10px] font-black text-white uppercase">
-                {article.author
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)}
-              </div>
-              <div>
-                <p className="text-xs font-black text-slate-700 leading-none">
-                  {article.author}
-                </p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                  {article.date}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-300 uppercase tracking-widest">
-              <BiTime size={14} className="text-primary" />
-              {article.readTime ?? "Quick read"}
-            </div>
-          </div>
-
-          {/* Excerpt / body */}
-          <div className="bg-slate-50/80 rounded-lg p-5 border border-slate-100">
-            <p className="text-sm text-slate-600 leading-relaxed">
-              {article.excerpt}
-            </p>
-          </div>
-
-          {/* Extended dummy body paragraphs for richness */}
-          <div className="space-y-4 text-sm text-slate-600 leading-relaxed">
-            <p>
-              Understanding your health starts with consistent, evidence-based
-              habits. The research behind this topic continues to evolve, with
-              new clinical studies highlighting the role of lifestyle
-              modification in long-term disease prevention and wellness
-              optimization.
-            </p>
-            <p>
-              Healthcare professionals at DigiHealth recommend integrating these
-              principles into your daily routine: tracking vitals, maintaining
-              open communication with your care team, and attending scheduled
-              follow-ups. Small, consistent steps lead to lasting results.
-            </p>
-            <p className="text-[11px] text-slate-400 italic border-l-2 border-primary/30 pl-4">
-              "The best investment you can make is in your own health." —
-              Evidenced clinical wisdom
-            </p>
-          </div>
-
-          {/* Shareable link box */}
-          <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-1.5">
-              <BiLink size={12} /> Shareable Article Link
-            </p>
-            <div className="flex gap-2">
-              <div className="flex-1 bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-xs font-bold text-slate-400 truncate">
-                {shareUrl}
-              </div>
-              <button
-                onClick={copyLink}
-                className={`px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 shrink-0 ${
-                  copied
-                    ? "bg-emerald-500 text-white"
-                    : "bg-primary text-white hover:bg-primary/80"
-                }`}
-              >
-                {copied ? <BiCheck size={14} /> : <BiCopy size={14} />}
-                {copied ? "Copied!" : "Copy"}
-              </button>
-            </div>
-          </div>
-
-          {/* Share Buttons */}
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-              Share via
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => shareVia("whatsapp")}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#25D366]/10 hover:bg-[#25D366] text-[#25D366] hover:text-white rounded-lg text-xs font-black transition-all"
-              >
-                <FaWhatsapp size={16} /> WhatsApp
-              </button>
-              <button
-                onClick={() => shareVia("twitter")}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2] text-[#1DA1F2] hover:text-white rounded-lg text-xs font-black transition-all"
-              >
-                <BiTwitter size={16} /> X / Twitter
-              </button>
-              <button
-                onClick={() => shareVia("email")}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white rounded-lg text-xs font-black transition-all"
-              >
-                <BiEnvelope size={16} /> Email
-              </button>
-            </div>
-          </div>
-
-          {/* Archive/Bookmark action */}
-          <button
-            onClick={() => onBookmark(article._id)}
-            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all border ${
-              isBookmarked
-                ? "bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100"
-                : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-primary/5 hover:text-primary hover:border-primary/30"
-            }`}
+          <Button
+            onClick={onClose}
+            variant="white"
+            className="absolute top-6 right-6 w-12 h-12 p-0 rounded-2xl bg-black/20 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-black/40 hover:scale-105 active:scale-95 transition-all shadow-none !min-w-0"
           >
-            <BiBookmark size={16} />
-            {isBookmarked
-              ? "Archived — Remove from Reading List"
-              : "Archive & Save to Reading List"}
-          </button>
+            <BiX size={28} />
+          </Button>
+
+          <div className="absolute bottom-8 left-8 right-8">
+            <div className="flex flex-wrap gap-2 mb-4">
+              {article.tags?.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs font-bold uppercase tracking-normal bg-primary text-white px-4 py-2 rounded-full shadow-none border border-white/20"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <h2 className="text-xl md:text-3xl font-bold text-white leading-tight tracking-tight drop-shadow-md">
+              {article.title}
+            </h2>
+          </div>
         </div>
 
-        {/* Toast */}
+        {/* Scrollable Body */}
+        <div className="overflow-y-auto custom-scrollbar flex-1 px-8 py-8 space-y-8">
+          <div className="flex items-center justify-between py-4 border-b border-slate-50">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-xs font-bold text-white uppercase ">
+                <Avatar name={article.author} size="sm" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800 leading-none">
+                  {article.author}
+                </p>
+                <p className="text-xs font-bold text-slate-400  mt-1.5 flex items-center gap-2">
+                  <BiTime size={14} className="text-primary" />
+                  {new Date(article.publishedAt).toLocaleDateString("en-ZA", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                  <span className="text-slate-200">|</span>
+                  {article.readTimeMinutes} MIN READ
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => onBookmark(article._id)}
+              variant="ghost"
+              className={`w-11 h-11 p-0 rounded-2xl flex items-center justify-center transition-all min-w-0 ${
+                isBookmarked
+                  ? "bg-amber-100 text-amber-600 shadow-inner"
+                  : "bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary border border-slate-100"
+              }`}
+            >
+              <BiBookmark size={22} />
+            </Button>
+          </div>
+
+          <Card className="bg-primary/5  p-6 border border-primary/10 relative overflow-hidden">
+            <p className="text-[15px] text-slate-600 leading-relaxed italic">
+              "{article.excerpt}"
+            </p>
+          </Card>
+
+          <div
+            className="article-content text-slate-600 space-y-5 text-[15px] leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
+
+          <div className="pt-8 border-t border-slate-50">
+            <p className="text-xs  text-slate-400  mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" /> Share
+              with others
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Button variant="ghost" onClick={() => shareVia("whatsapp")}>
+                <FaWhatsapp size={18} /> WhatsApp
+              </Button>
+              <Button variant="ghost" onClick={() => shareVia("twitter")}>
+                <BiLogoTwitter size={18} /> X (Twitter)
+              </Button>
+              <Button variant="ghost" onClick={copyLink}>
+                {copied ? <BiCheck size={18} /> : <BiLink size={18} />}
+                {copied ? "Copied" : "Copy Link"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {shareToast && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-lg animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-normal px-6 py-3 rounded-full  animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300">
             {shareToast}
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -302,74 +240,67 @@ function ArticleCard({
   onClick,
   onQuickBookmark,
 }: {
-  article: HealthTip;
+  article: ArticleType;
   isBookmarked: boolean;
   onClick: () => void;
   onQuickBookmark: (e: React.MouseEvent) => void;
 }) {
   return (
-    <div className="px-3 pb-4 h-full select-none">
+    <div className="px-3 pb-6 h-full select-none">
       <Card
-        className="group flex flex-col h-full cursor-pointer hover:border-primary/30 transition-all duration-300"
-        variant="solid"
+        className="group flex flex-col h-full cursor-pointer transition-all duration-500 hover: hover:shadow-primary/10 hover:-translate-y-1 relative overflow-hidden"
+        variant="gradient"
         noPadding
         onClick={onClick}
       >
-        {/* Image */}
-        <div className="relative h-44 overflow-hidden shrink-0">
-          {article.image ? (
+        <div className="relative h-48 overflow-hidden shrink-0">
+          {article.coverImage ? (
             <img
-              src={article.image}
+              src={article.coverImage}
               alt={article.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-5xl">
-              {article.category === "news"
-                ? "📰"
-                : article.category === "blog"
-                  ? "📝"
-                  : "💡"}
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-700">
+              💡
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Tag badge */}
-          {article.tag && (
-            <div className="absolute top-3 left-3">
-              <Badge
-                label={article.tag}
-                status={(CATEGORY_COLORS[article.category] as any) ?? "premium"}
-                variant="solid"
-              />
+          {article.tags?.[0] && (
+            <div className="absolute top-4 left-4">
+              <span className="text-[9px] font-bold uppercase tracking-normal bg-primary/90 backdrop-blur-md text-white px-3 py-1 rounded-full shadow-none ">
+                {article.tags[0]}
+              </span>
             </div>
           )}
 
-          {/* Quick bookmark */}
-          <button
+          <Button
             onClick={onQuickBookmark}
-            className={`absolute top-3 right-3 w-9 h-9 backdrop-blur-md rounded-lg flex items-center justify-center transition-all duration-300 ${
+            variant="ghost"
+            className={`absolute top-4 right-4 w-10 h-10 backdrop-blur-md rounded-xl flex items-center justify-center transition-all duration-300 shadow-none border border-white/20 !min-w-0 p-0 ${
               isBookmarked
-                ? "bg-amber-400 text-white opacity-100"
-                : "bg-white/20 text-white opacity-0 group-hover:opacity-100 hover:bg-primary"
+                ? "bg-amber-400 text-white scale-100 opacity-100"
+                : "bg-white/30 text-white opacity-0 group-hover:opacity-100 hover:bg-primary scale-90 group-hover:scale-100"
             }`}
           >
-            <BiBookmark size={18} />
-          </button>
+            <BiBookmark size={20} />
+          </Button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 flex flex-col p-5">
-          <h4 className="text-sm font-black text-slate-800 leading-tight mb-2 tracking-tight group-hover:text-primary transition-colors line-clamp-2">
-            {article.title}
-          </h4>
-          <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2 mb-auto">
-            {article.excerpt}
-          </p>
+        <div className="p-6 flex flex-col ">
+          <div className="flex flex-col items-start">
+            <h4 className="text-[15px] font-bold text-slate-800 leading-tight mb-3 tracking-tight group-hover:text-primary transition-colors line-clamp-2">
+              {article.title}
+            </h4>
+            <p className="text-xs text-slate-500 text-start  line-clamp-2 mb-6 opacity-80">
+              {article.excerpt}
+            </p>
+          </div>
 
-          <div className="mt-4 pt-4 flex items-center justify-between border-t border-slate-50">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-[9px] font-black text-white uppercase">
+          <div className="mt-auto pt-5 flex items-center justify-between border-t border-slate-50/50">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-xs font-bold text-white uppercase shadow-none shadow-primary/20">
                 {article.author
                   .split(" ")
                   .map((n) => n[0])
@@ -377,20 +308,23 @@ function ArticleCard({
                   .slice(0, 2)}
               </div>
               <div>
-                <p className="text-[10px] font-black text-slate-600 leading-none">
+                <p className="text-xs font-bold text-slate-700 leading-none">
                   {article.author}
                 </p>
-                <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">
-                  {article.date}
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-normal mt-1">
+                  {new Date(article.publishedAt).toLocaleDateString("en-ZA", {
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </p>
               </div>
             </div>
-            {article.readTime && (
-              <div className="flex items-center gap-1 text-[9px] font-black text-slate-300 uppercase tracking-widest">
-                <BiTime size={12} className="text-primary" />
-                {article.readTime}
-              </div>
-            )}
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg border border-slate-100">
+              <BiTime size={14} className="text-primary" />
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                {article.readTimeMinutes} MIN
+              </span>
+            </div>
           </div>
         </div>
       </Card>
@@ -401,12 +335,12 @@ function ArticleCard({
 // ─── Main HealthBlog Component ─────────────────────────────────────────────────
 
 export default function HealthBlog() {
-  const [articles, setArticles] = useState<HealthTip[]>([]);
+  const [articles, setArticles] = useState<ArticleType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeCategory, setActiveCategory] = useState("");
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [selectedArticle, setSelectedArticle] = useState<HealthTip | null>(
+  const [selectedArticle, setSelectedArticle] = useState<ArticleType | null>(
     null,
   );
   const [bookmarks, setBookmarks] = useState<Set<string>>(() => {
@@ -419,19 +353,29 @@ export default function HealthBlog() {
       return new Set();
     }
   });
-  const [isClient, setIsClient] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(3);
 
+  // Responsive slide count
   useEffect(() => {
-    setIsClient(true);
+    const updateVisibleCount = () => {
+      const width = window.innerWidth;
+      if (width >= 1200) setVisibleCount(3);
+      else if (width >= 800) setVisibleCount(2);
+      else setVisibleCount(1);
+    };
+    updateVisibleCount();
+    window.addEventListener("resize", updateVisibleCount);
+    return () => window.removeEventListener("resize", updateVisibleCount);
   }, []);
 
   const fetchArticles = useCallback(async (category: string) => {
     setLoading(true);
     setError(false);
     try {
-      const url = category
-        ? `/api/health-tips?category=${category}`
-        : "/api/health-tips";
+      let url = "/api/health-tips";
+      if (category) {
+        url += `?category=${encodeURIComponent(category)}`;
+      }
       const res = await fetch(url);
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -458,74 +402,80 @@ export default function HealthBlog() {
     });
   };
 
-  // Visible article count for carousel
-  const visibleCount = isClient
-    ? window.innerWidth >= 1280
-      ? 3
-      : window.innerWidth >= 768
-        ? 2
-        : 1
-    : 3;
-  const slidePercent = Math.round(100 / visibleCount);
+  const slidePercent = 100 / visibleCount;
 
   return (
     <div className="space-y-6">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6 px-2">
+        <div className="mb-4 px-2">
+          <h3 className="font-bold text-xl text-slate-800">Health Insights</h3>
+          <p className="text-sm text-slate-500">
+            Latest medical news and wellness articles
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => setCarouselIndex((prev) => Math.max(0, prev - 1))}
+            className="w-10 h-10 p-0 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+          >
+            <BiChevronLeft size={24} />
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              setCarouselIndex((prev) =>
+                Math.min(articles.length - 1, prev + 1),
+              )
+            }
+            className="w-10 h-10 p-0 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+          >
+            <BiChevronRight size={24} />
+          </Button>
+        </div>
+      </div>
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        {/* Category Filters */}
         <div className="flex items-center gap-2 flex-wrap">
           {CATEGORY_FILTERS.map((f) => (
-            <button
+            <Button
               key={f.value}
               onClick={() => setActiveCategory(f.value)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-black transition-all border ${
+              variant={activeCategory === f.value ? "primary" : "ghost"}
+              className={`flex items-center gap-1.5 px-4 py-2 !h-auto rounded-lg text-xs font-bold transition-all border !min-w-0 ${
                 activeCategory === f.value
-                  ? "bg-primary text-white border-primary"
+                  ? "border-primary"
                   : "bg-white text-slate-500 border-slate-200 hover:border-primary/30 hover:text-primary"
               }`}
             >
               <BiFilter size={13} />
               {f.label}
-            </button>
+            </Button>
           ))}
         </div>
 
-        {/* Nav controls + refresh */}
         <div className="flex items-center gap-2">
           {bookmarks.size > 0 && (
-            <span className="flex items-center gap-1.5 text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg">
               <BiBookmark size={12} /> {bookmarks.size} Saved
             </span>
           )}
-          <button
+          <Button
+            variant="ghost"
             onClick={() => fetchArticles(activeCategory)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-all"
+            className="w-9 h-9 p-0 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-all !min-w-0"
             title="Refresh"
           >
             <BiRefresh size={18} />
-          </button>
-          <button
-            onClick={() => setCarouselIndex((p) => Math.max(0, p - 1))}
-            disabled={carouselIndex === 0}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <BiChevronLeft size={20} />
-          </button>
-          <button
-            onClick={() =>
-              setCarouselIndex((p) => Math.min(articles.length - 1, p + 1))
-            }
-            disabled={carouselIndex >= articles.length - 1}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <BiChevronRight size={20} />
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 gap-3 text-slate-400">
+        <div className="flex items-center justify-center pt-20 gap-3 text-slate-400">
           <BiLoaderAlt size={24} className="animate-spin text-primary" />
           <span className="text-sm font-bold">Loading articles...</span>
         </div>
@@ -535,12 +485,13 @@ export default function HealthBlog() {
           <p className="text-sm font-bold text-slate-400">
             Could not load articles.
           </p>
-          <button
+          <Button
+            variant="ghost"
             onClick={() => fetchArticles(activeCategory)}
-            className="text-xs font-black text-primary hover:underline"
+            className="text-xs font-bold text-primary hover:underline bg-transparent !p-0 !min-w-0 !h-auto"
           >
             Try again
-          </button>
+          </Button>
         </div>
       ) : articles.length === 0 ? (
         <div className="text-center py-16 space-y-2">
@@ -557,40 +508,26 @@ export default function HealthBlog() {
           centerSlidePercentage={slidePercent}
           showArrows={false}
           showIndicators={false}
+          showStatus={false}
+          infiniteLoop={true}
         >
           {articles.map((article) => (
-            <ArticleCard
-              key={article._id}
-              article={article}
-              isBookmarked={bookmarks.has(article._id)}
-              onClick={() => setSelectedArticle(article)}
-              onQuickBookmark={(e) => {
-                e.stopPropagation();
-                toggleBookmark(article._id);
-              }}
-            />
+            <div key={article._id} onClick={() => setSelectedArticle(article)}>
+              <ArticleCard
+                article={article}
+                isBookmarked={bookmarks.has(article._id)}
+                onClick={() => setSelectedArticle(article)}
+                onQuickBookmark={(e) => {
+                  e.stopPropagation();
+                  toggleBookmark(article._id);
+                }}
+              />
+            </div>
           ))}
         </Carousel>
       )}
 
-      {/* Dot indicators */}
-      {articles.length > 1 && !loading && !error && (
-        <div className="flex items-center justify-center gap-2 pt-2">
-          {articles.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCarouselIndex(i)}
-              className={`transition-all duration-300 rounded-full ${
-                i === carouselIndex
-                  ? "w-5 h-2 bg-primary"
-                  : "w-2 h-2 bg-slate-200 hover:bg-slate-300"
-              }`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Full Article Modal */}
+      {/* Modal */}
       {selectedArticle && (
         <ArticleModal
           article={selectedArticle}
@@ -599,6 +536,35 @@ export default function HealthBlog() {
           isBookmarked={bookmarks.has(selectedArticle._id)}
         />
       )}
+
+      <style jsx global>{`
+        .article-content h3 {
+          font-size: 1.125rem;
+          font-weight: 800;
+          color: #1e293b;
+          margin-top: 1.5rem;
+          margin-bottom: 0.75rem;
+          letter-spacing: -0.025em;
+        }
+        .article-content h4 {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #334155;
+          margin-top: 1.25rem;
+          margin-bottom: 0.5rem;
+        }
+        .article-content p {
+          margin-bottom: 1rem;
+        }
+        .article-content ul {
+          list-style-type: disc;
+          padding-left: 1.25rem;
+          margin-bottom: 1rem;
+        }
+        .article-content li {
+          margin-bottom: 0.25rem;
+        }
+      `}</style>
     </div>
   );
 }

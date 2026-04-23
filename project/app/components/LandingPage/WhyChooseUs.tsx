@@ -13,7 +13,7 @@ export default function WhyChooseUs() {
         <div className="flex flex-col gap-4 mb-16">
           <div className="flex items-center gap-2">
             <span className="text-secondary font-extrabold text-xl">+</span>
-            <span className="text-secondary font-semibold tracking-widest uppercase text-sm">
+            <span className="text-secondary font-semibold tracking-normal uppercase text-sm">
               Why Choose Us
             </span>
           </div>
@@ -52,7 +52,7 @@ export default function WhyChooseUs() {
                   >
                     {val}
                     {activeWhyTab === val && (
-                      <div className="absolute top-1/2 right-[10%] w-[120px] h-[140px] rounded-xl overflow-hidden border-4 border-white shadow-xl z-10 animate-popIn">
+                      <div className="absolute top-1/2 right-[10%] w-[120px] h-[140px] rounded-xl overflow-hidden border-4 border-white shadow-none z-10 animate-popIn">
                         <img
                           src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=2070&auto=format&fit=crop"
                           alt={val}

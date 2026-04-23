@@ -108,12 +108,10 @@ export default function Testimonials() {
     >
       <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
         {/* Header */}
-        <div
-          className="flex flex-col items-center gap-4 mb-10 relative z-10"
-        >
+        <div className="flex flex-col items-center gap-4 mb-10 relative z-10">
           <div className="flex items-center gap-2">
             <span className="text-primary font-extrabold text-xl">✦</span>
-            <span className="text-primary font-semibold tracking-widest uppercase text-sm">
+            <span className="text-primary font-semibold tracking-normal uppercase text-sm">
               Testimonials
             </span>
           </div>
@@ -194,9 +192,7 @@ export default function Testimonials() {
                       }`}
                     >
                       <div>
-                        <h3
-                          className="text-xl font-semibold text-primary mb-10"
-                        >
+                        <h3 className="text-xl font-semibold text-primary mb-10">
                           {item.title}
                         </h3>
                         <p className="text-slate-500 text-[1.05rem] leading-relaxed">
@@ -235,7 +231,7 @@ export default function Testimonials() {
                           </button>
                           <button
                             aria-label="Play"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 bg-white hover:bg-slate-50 transition text-[10px]"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 bg-white hover:bg-slate-50 transition text-xs"
                           >
                             ▶
                           </button>
@@ -258,9 +254,7 @@ export default function Testimonials() {
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-[#1b80b7]/90 via-[#1b80b7]/20 to-transparent"></div>
 
-                      <div
-                        className="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end"
-                      >
+                      <div className="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end">
                         <div className="text-left">
                           <h4 className="text-white font-semibold text-lg">
                             {item.name}
@@ -284,7 +278,7 @@ export default function Testimonials() {
                           </button>
                           <button
                             aria-label="Play"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 transition text-[10px]"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 transition text-xs"
                           >
                             ▶
                           </button>

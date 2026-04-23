@@ -1,26 +1,32 @@
-'use client';
-import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
-import { useAuthContext } from '@/components/auth/AuthProvider';
-import MessageList from './MessageList';
-import MessageInput from './MessageInput';
-import QuickPhrases from './QuickPhrases';
-import ConsultationTimer from './ConsultationTimer';
-import CallButton from './CallButton';
-import TypingIndicator from './TypingIndicator';
-import OfflineBanner from './OfflineBanner';
-import PDFReportButton from './PDFReportButton';
-import AttachRecordModal from './AttachRecordModal';
-import { useChat } from '@/hooks/useChat';
-import { useOfflineQueue } from '@/hooks/useOfflineQueue';
-import { BiLoaderAlt, BiPlus } from 'react-icons/bi';
+"use client";
+import { useEffect, useState, useRef } from "react";
+import { useParams } from "next/navigation";
+import { useAuthContext } from "@/components/auth/AuthProvider";
+import Link from "next/link";
+import MessageList from "./MessageList";
+import MessageInput from "./MessageInput";
+import QuickPhrases from "./QuickPhrases";
+import ConsultationTimer from "./ConsultationTimer";
+import CallButton, { ActiveCallInfo } from "./CallButton";
+import TypingIndicator from "./TypingIndicator";
+import OfflineBanner from "./OfflineBanner";
+import PDFReportButton from "./PDFReportButton";
+import AttachRecordModal from "./AttachRecordModal";
+import { useChat } from "@/hooks/useChat";
+import { useOfflineQueue } from "@/hooks/useOfflineQueue";
+import { BiLoaderAlt, BiPlus } from "react-icons/bi";
+import Card from "../ui/Card";
 
-export default function ChatWindow({ 
-  consultationId: propConsultationId, 
-  conversationId: propConversationId 
-}: { 
-  consultationId?: string; 
-  conversationId?: string; 
+export default function ChatWindow({
+  consultationId: propConsultationId,
+  conversationId: propConversationId,
+  onCallStart,
+  onCallEnd,
+}: {
+  consultationId?: string;
+  conversationId?: string;
+  onCallStart?: (info: ActiveCallInfo) => void;
+  onCallEnd?: () => void;
 } = {}) {
   const params = useParams();
   const consultationId = propConsultationId || params.consultationId;
@@ -29,7 +35,7 @@ export default function ChatWindow({
   const { user } = useAuthContext();
   const { messages, sendMessage, conversation, loading, markAsRead } = useChat(
     (consultationId || conversationId) as string,
-    !!conversationId
+    !!conversationId,
   );
   const { isOffline, queueMessage } = useOfflineQueue();
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
@@ -37,32 +43,36 @@ export default function ChatWindow({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   if (loading || !conversation || !user) {
-      return (
-          <div className="flex-1 flex items-center justify-center bg-white rounded-2xl shadow-sm h-full">
-              <BiLoaderAlt className="animate-spin text-4xl text-primary" />
-          </div>
-      );
+    return (
+      <div className="flex-1 flex items-center justify-center bg-white rounded-2xl h-full">
+        <BiLoaderAlt className="animate-spin text-4xl text-primary" />
+      </div>
+    );
   }
 
-  const handleSend = async (content: string, type = 'text', fileUrl?: string, fileMime?: string) => {
+  const handleSend = async (
+    content: string,
+    type = "text",
+    fileUrl?: string,
+    fileMime?: string,
+  ) => {
     if (!content && !fileUrl) return;
-
     const msg = {
       conversationId: conversation._id,
       senderId: user.id,
-      receiverId: user.role === 'patient' 
-        ? (conversation.practitionerId?._id || conversation.practitionerId) 
-        : (conversation.patientId?._id || conversation.patientId),
-      content, 
-      type, 
+      receiverId:
+        user.role === "patient"
+          ? conversation.practitionerId?._id || conversation.practitionerId
+          : conversation.patientId?._id || conversation.patientId,
+      content,
+      type,
       fileUrl,
-      fileMime
+      fileMime,
     };
-
     if (isOffline) {
       await queueMessage(msg);
     } else {
@@ -70,70 +80,94 @@ export default function ChatWindow({
     }
   };
 
-  const opponentName = user.role === 'patient' 
-      ? (conversation.practitionerId?.lastName ? `Dr. ${conversation.practitionerId.lastName}` : "Practitioner")
-      : (conversation.patientId?.firstName ? `${conversation.patientId.firstName} ${conversation.patientId.lastName}` : "Patient");
+  const opponentName =
+    user.role === "patient"
+      ? conversation.practitionerId?.firstName
+        ? `Dr. ${conversation.practitionerId.firstName} ${conversation.practitionerId.lastName}`
+        : "Practitioner"
+      : conversation.patientId?.firstName
+        ? `${conversation.patientId.firstName} ${conversation.patientId.lastName}`
+        : "Patient";
+
+  const opponentId =
+    user.role === "patient"
+      ? conversation.practitionerId?._id || conversation.practitionerId
+      : conversation.patientId?._id || conversation.patientId;
+
+  const opponentAvatar =
+    user.role === "patient"
+      ? conversation.practitionerId?.avatarUrl
+      : conversation.patientId?.avatarUrl;
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">
+    <Card className="flex flex-col h-full overflow-hidden  rounded-none">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50/50">
+      <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white shrink-0">
         <div>
-          <h2 className="font-bold text-slate-800 text-lg">
-            {opponentName}
+          <h2 className="font-bold text-slate-800 text-base hover:text-primary transition-colors cursor-pointer leading-tight">
+            {user.role === "patient" ? (
+              <Link href={`/patient/doctors/${opponentId}`}>
+                {opponentName}
+              </Link>
+            ) : (
+              opponentName
+            )}
           </h2>
-          <ConsultationTimer
-            consultationId={consultationId as string}
-            allocated={conversation.minutesAllocated}
-            used={conversation.minutesUsed}
-            approved={conversation.minutesApproved}
-          />
         </div>
         <div className="flex items-center gap-2">
-          <PDFReportButton conversationId={conversation._id} />
-          <CallButton 
-            consultationId={consultationId as string} 
+          <CallButton
+            consultationId={consultationId as string}
             conversationId={conversationId as string}
-            role={user.role} 
+            role={user.role}
+            participantName={opponentName}
+            participantAvatar={opponentAvatar}
+            onCallStart={onCallStart}
+            onCallEnd={onCallEnd}
           />
         </div>
       </div>
 
       {isOffline && <OfflineBanner />}
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-slate-50 relative">
-        <MessageList messages={messages} currentUserId={user.id} onMessageSeen={markAsRead} />
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 relative custom-scrollbar">
+        <MessageList
+          messages={messages}
+          currentUserId={user.id}
+          onMessageSeen={markAsRead}
+        />
         <TypingIndicator typingUsers={typingUsers} />
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-slate-200 p-3 bg-white flex items-end gap-2">
-        {user.role === 'practitioner' && (
-           <button 
-              onClick={() => setIsAttachModalOpen(true)}
-              className="mb-1 w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center shrink-0"
-              title="Attach Clinical Record"
-           >
-              <BiPlus size={24} />
-           </button>
+      {/* Input */}
+      <div className="border-t border-slate-100 p-3 bg-white flex items-end gap-2 shrink-0">
+        {user.role === "practitioner" && (
+          <button
+            onClick={() => setIsAttachModalOpen(true)}
+            className="mb-1 w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center shrink-0"
+            title="Attach Clinical Record"
+          >
+            <BiPlus size={22} />
+          </button>
         )}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {user.role === 'patient' && (
+          {user.role === "patient" && (
             <div className="mb-2">
-               <QuickPhrases onSelect={(phrase) => handleSend(phrase, 'quick_phrase')} />
+              <QuickPhrases
+                onSelect={(phrase) => handleSend(phrase, "quick_phrase")}
+              />
             </div>
           )}
-          <MessageInput onSend={handleSend} onTyping={() => {/* emit typing */}} />
+          <MessageInput onSend={handleSend} onTyping={() => {}} />
         </div>
       </div>
 
       <AttachRecordModal
-         isOpen={isAttachModalOpen}
-         onClose={() => setIsAttachModalOpen(false)}
-         conversationId={conversation._id}
+        isOpen={isAttachModalOpen}
+        onClose={() => setIsAttachModalOpen(false)}
+        conversationId={conversation._id}
       />
-    </div>
+    </Card>
   );
 }

@@ -80,25 +80,42 @@ const RiskScoreSchema = new mongoose.Schema({
 });
 
 const HealthTipSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    excerpt: { type: String, required: true },
-    content: { type: String },
-    author: { type: String, required: true },
-    date: { type: String, required: true },
-    readTime: { type: String },
-    image: { type: String },
-    tag: { type: String },
-    category: { type: String, enum: ['tip', 'news', 'blog'], default: 'tip' },
-  },
-  { timestamps: true }
-);
+    {
+      title: { type: String, required: true },
+      excerpt: { type: String, required: true },
+      content: { type: String },
+      author: { type: String, required: true },
+      date: { type: String, required: true },
+      readTime: { type: String },
+      image: { type: String },
+      tag: { type: String },
+      category: { type: String, enum: ['tip', 'news', 'blog'], default: 'tip' },
+    },
+    { timestamps: true }
+  );
 
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
-const Patient = mongoose.models.Patient || mongoose.model('Patient', PatientSchema);
-const Consultation = mongoose.models.Consultation || mongoose.model('Consultation', ConsultationSchema);
-const RiskScore = mongoose.models.RiskScore || mongoose.model('RiskScore', RiskScoreSchema);
-const HealthTip = mongoose.models.HealthTip || mongoose.model('HealthTip', HealthTipSchema);
+  const ArticleSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    slug: { type: String, required: true, unique: true },
+    excerpt: { type: String, required: true },
+    content: { type: String, required: true },
+    coverImage: { type: String, required: true },
+    author: { type: String, required: true },
+    publishedAt: { type: Date, default: Date.now },
+    readTimeMinutes: { type: Number, default: 5 },
+    tags: [{ type: String }],
+    likes: { type: Number, default: 0 },
+    saves: { type: Number, default: 0 },
+    shares: { type: Number, default: 0 },
+    isPublished: { type: Boolean, default: true }
+  }, { timestamps: true });
+  
+  const User = mongoose.models.User || mongoose.model('User', UserSchema);
+  const Patient = mongoose.models.Patient || mongoose.model('Patient', PatientSchema);
+  const Consultation = mongoose.models.Consultation || mongoose.model('Consultation', ConsultationSchema);
+  const RiskScore = mongoose.models.RiskScore || mongoose.model('RiskScore', RiskScoreSchema);
+  const HealthTip = mongoose.models.HealthTip || mongoose.model('HealthTip', HealthTipSchema);
+  const Article = mongoose.models.Article || mongoose.model('Article', ArticleSchema);
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -218,6 +235,7 @@ async function seed() {
     Consultation.deleteMany({}),
     RiskScore.deleteMany({}),
     HealthTip.deleteMany({}),
+    Article.deleteMany({}),
   ]);
   console.log('🗑️  Cleared existing data.');
 
@@ -336,9 +354,41 @@ async function seed() {
   }
   console.log(`📊 Created ${createdConsultations.length} risk score records.`);
 
-  // Create health tips
   await HealthTip.insertMany(healthTips);
   console.log(`🗞️  Created ${healthTips.length} health tips and news items.`);
+
+  // Create Articles
+  const articlesSeed = [
+    {
+      title: 'Understanding Hypertension – Latest Research 2026',
+      slug: 'understanding-hypertension-2026',
+      excerpt: 'Hypertension remains the leading cause of cardiovascular complications in South Africa.',
+      content: '<h3>Clinical Overview</h3><p>Hypertension is defined as a sustained increase in blood pressure...</p><p>New guidelines suggest earlier intervention...</p>',
+      coverImage: 'https://images.unsplash.com/photo-1547517023-7ca0c162f816?q=80&w=800&auto=format&fit=crop',
+      author: 'Dr. Sipho Nkosi',
+      publishedAt: new Date(),
+      readTimeMinutes: 6,
+      tags: ['Wellness', 'Clinical'],
+      likes: 124,
+      isPublished: true
+    },
+    {
+      title: '5 Tips for Better Sleep – Enhancing Recovery',
+      slug: '5-tips-better-sleep',
+      excerpt: 'Sleep hygiene is crucial for mental clarity and physical recovery.',
+      content: '<h3>1. Consistency</h3><p>Keep a regular sleep schedule...</p><h3>2. Dark Environment</h3><p>Ensure your room is dark...</p>',
+      coverImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=800&auto=format&fit=crop',
+      author: 'Dr. Anke van Wyk',
+      publishedAt: new Date(Date.now() - 86400000 * 2),
+      readTimeMinutes: 4,
+      tags: ['Mental Health', 'Wellness'],
+      likes: 89,
+      isPublished: true
+    }
+  ];
+
+  await Article.insertMany(articlesSeed);
+  console.log(`🗞️  Created ${articlesSeed.length} premium articles.`);
 
   const mainPractitionerData = {
     id: mainPractitioner._id.toString(),

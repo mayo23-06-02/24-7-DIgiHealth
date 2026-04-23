@@ -30,7 +30,7 @@ const Input: React.FC<InputProps> = ({
 
   const containerStyle = fullWidth ? "w-full" : "w-auto";
   const commonStyles = `
-    w-full bg-slate-50 rounded-full outline-none 
+    w-full bg-slate-50 ${isTextArea ? "rounded-xl" : "rounded-full"} outline-none 
     focus:ring-4 focus:ring-primary/10 focus:border-primary 
     transition-all text-slate-900 font-medium placeholder-slate-300
     ${error ? "border-red-400 bg-red-50 border" : "border border-slate-100 bg-slate-50"}
@@ -48,7 +48,7 @@ const Input: React.FC<InputProps> = ({
 
       <div className="relative">
         {icon && (
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
             {icon}
           </div>
         )}
@@ -69,7 +69,7 @@ const Input: React.FC<InputProps> = ({
       </div>
 
       {error && (
-        <p className="mt-1.5 text-xs font-bold text-red-500 animate-in fade-in slide-in-from-top-1">
+        <p className="mt-1.5 text-xs  text-red-500 animate-in fade-in slide-in-from-top-1">
           {error}
         </p>
       )}

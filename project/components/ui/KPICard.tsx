@@ -10,6 +10,7 @@ interface KPICardProps {
   trend?: number;
   color?: string;
   description?: string;
+  onClick?: () => void;
 }
 
 const KPICard: React.FC<KPICardProps> = ({
@@ -20,11 +21,13 @@ const KPICard: React.FC<KPICardProps> = ({
   trend,
   color = "primary",
   description,
+  onClick,
 }) => {
   return (
     <Card
       noPadding
       className="hover:scale-[1.02] cursor-pointer transition-transform  group"
+      onClick={onClick}
     >
       <div className="py-4 px-6  flex items-start justify-between ">
         <div

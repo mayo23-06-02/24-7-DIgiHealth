@@ -23,7 +23,7 @@ export function PatientStep1({ formData, updateData, errors }: any) {
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
       <div className="inline-flex items-center gap-2  rounded-full ">
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-        <span className="text-xs  text-primary uppercase tracking-widest">
+        <span className="text-xs  text-primary uppercase tracking-normal">
           Patient Identity
         </span>
       </div>
@@ -89,7 +89,7 @@ export function POPIAConsentStep({ formData, updateData }: any) {
       <div className="bg-primary rounded-md p-8 text-white relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-2xl" />
         <h3 className="text-xs  text-white/60 mb-4">Legal Compliance</h3>
-        <h2 className="text-3xl font-black mb-5 leading-tight">
+        <h2 className="text-3xl font-bold mb-5 leading-tight">
           Privacy Declaration
         </h2>
         <p className="text-white/80 text-sm  mb-8">
@@ -240,7 +240,7 @@ export function PatientAnthropometricStep({
           <BiBulb className="text-primary" />{" "}
         </span>
         <div className="flex-1">
-          <p className="text-sm font-black text-slate-700">Optional Section</p>
+          <p className="text-sm font-bold text-slate-700">Optional Section</p>
           <p className="text-xs text-slate-400 mt-0.5">
             You can skip this and add it later in your dashboard.
           </p>
@@ -258,7 +258,7 @@ export function PatientAnthropometricStep({
               key={u}
               type="button"
               onClick={() => setUnit(u as any)}
-              className={`px-4 py-1.5 rounded text-xs font-black uppercase transition-all ${unit === u ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}
+              className={`px-4 py-2 rounded text-xs font-bold uppercase transition-all ${unit === u ? "bg-white text-primary shadow-none" : "text-slate-400"}`}
             >
               {u === "metric" ? "cm / kg" : "in / lbs"}
             </button>
@@ -289,13 +289,13 @@ export function PatientAnthropometricStep({
             className={`px-5 py-4 rounded-xl flex items-center justify-between transition-all duration-500 min-h-[54px] ${bmiCategory ? bmiCategory.color + " shadow-inner" : "bg-slate-50 border-2 border-slate-100"}`}
           >
             <div className="flex flex-col">
-              <span className="text-3xl font-black tracking-tighter leading-none">
+              <span className="text-3xl font-bold tracking-tighter leading-none">
                 {bmi || "—"}
               </span>
             </div>
             {bmiCategory && (
               <div className="px-4 py-2  border border-white/40">
-                <span className="text-xs font-black uppercase tracking-widest">
+                <span className="text-xs font-bold uppercase tracking-normal">
                   {bmiCategory.label}
                 </span>
               </div>
@@ -464,7 +464,6 @@ export function PatientPaymentStep({ formData, updateData }: any) {
   const benefits = [
     "24/7 Unlimited Virtual Consultations",
     "Digital Prescriptions & Sick Notes",
-    "AI-Powered Symptom Triage",
     "Secure PHI Health Vault Storage",
     "Direct Specialist Referral Access",
   ];
@@ -492,7 +491,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
               <div className="text-right flex items-end">
                 <div className="flex items-baseline gap-1">
                   <span className="text-xl font-bold text-secondary">R</span>
-                  <span className="text-5xl font-black tracking-tighter">
+                  <span className="text-5xl font-bold tracking-tighter">
                     250
                   </span>
                 </div>
@@ -519,7 +518,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
       {/* Card Payment Form */}
       <div className="bg-white rounded-sm gap-6  py-5 flex flex-col">
         <div className="flex items-center justify-between mb-[20px]">
-          <h3 className="text-sm font-black text-slate-800   flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-800   flex items-center gap-2">
             <BiCreditCard className="text-primary" /> Credit or Debit Card
           </h3>
           <div className="flex gap-2">
@@ -581,7 +580,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
         </div>
 
         <div className="mt-8 pt-8 border-t border-slate-50 py-5">
-          <p className="text-[10px] font-semibold text-slate-400 leading-relaxed flex items-center gap-2">
+          <p className="text-xs font-semibold text-slate-400 leading-relaxed flex items-center gap-2">
             <BiShieldQuarter className="text-green-500" />
             Your payment info is secured via 256-bit AES encryption. We do not
             store your full card number on our servers.
@@ -603,7 +602,7 @@ export function PatientEmergencyStep({ formData, updateData, onSkip }: any) {
           <BiSolidUserPlus />
         </span>
         <div className="flex-1">
-          <p className="text-sm font-black text-slate-700">Emergency & Photo</p>
+          <p className="text-sm font-bold text-slate-700">Emergency & Photo</p>
           <p className="text-xs text-slate-400 mt-0.5">
             This information is vital for your safety.
           </p>
@@ -614,7 +613,7 @@ export function PatientEmergencyStep({ formData, updateData, onSkip }: any) {
       </div>
 
       <div className="p-5 mb-[20px] rounded-lg border border-slate-100 space-y-6">
-        <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest">
+        <h3 className="text-sm font-bold text-slate-700 uppercase tracking-normal">
           Contact Details
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

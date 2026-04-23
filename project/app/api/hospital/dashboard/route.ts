@@ -1,52 +1,53 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import BedOccupancy from '@/lib/models/BedOccupancy';
 import HospitalTransaction from '@/lib/models/HospitalTransaction';
 import Staff from '@/lib/models/Staff';
-import EmergencyIncident from '@/lib/models/EmergencyIncident';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
-    
-    // In a real app we'd get the exact facilityId from the authenticated admin.
-    // Assuming we just fetch the aggregate for now or use a mock logic.
 
-    const bedOccupancy = await BedOccupancy.findOne().sort({ timestamp: -1 });
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Revenue today from paid transactions
     const transactions = await HospitalTransaction.find({
       timestamp: { $gte: today },
       status: 'paid'
     });
     const revenueToday = transactions.reduce((acc, curr) => acc + curr.amount, 0);
 
+    // Staff on duty
     const staffOnDuty = await Staff.countDocuments({ isOnDuty: true });
 
-    // Mock wait time since it's complex to calculate real time without checkin/checkout tracking
-    const waitTime = 15; 
+    // Total staff
+    const totalStaff = await Staff.countDocuments({});
 
-    // Additional data for real-time widgets
-    const recentEmergencies = await EmergencyIncident.find({ status: 'en_route' }).limit(5);
+    // Upcoming appointments
     const upcomingAppointments = await HospitalAppointment.find({
       scheduledStart: { $gte: new Date() },
       status: 'scheduled'
-    }).limit(5).populate('patientId', 'firstName lastName');
+    })
+      .limit(8)
+      .populate('patientId', 'firstName lastName')
+      .lean();
+
+    // Consultations today
+    const consultationsToday = await HospitalAppointment.countDocuments({
+      scheduledStart: { $gte: today },
+    });
 
     return NextResponse.json({
       success: true,
       data: {
         kpi: {
-          bedOccupancyPercent: bedOccupancy ? Math.round((bedOccupancy.occupiedBeds / bedOccupancy.totalBeds) * 100) : 0,
-          currentWaitTime: waitTime,
+          consultationsToday,
           revenueToday,
-          staffOnDuty
+          staffOnDuty,
+          totalStaff,
         },
-        bedOccupancyStats: bedOccupancy || { general: 0, icu: 0, emergency: 0 },
-        recentEmergencies,
-        upcomingAppointments
+        upcomingAppointments,
       }
     });
 

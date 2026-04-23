@@ -35,7 +35,7 @@ export default function DashboardLayout({
                 {user ? `Sawubona, ${user.name.split(" ")[0]}` : "Sawubona"}
               </h1>
               {!isOnline && (
-                <span className="flex items-center gap-1.5 text-xs font-bold text-orange-500 uppercase tracking-widest mt-0.5">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-orange-500 uppercase tracking-normal mt-0.5">
                   <FiCloudOff /> Offline Mode
                 </span>
               )}
@@ -47,7 +47,7 @@ export default function DashboardLayout({
               onClick={() => setProfileOpen(true)}
               className="flex items-center gap-3 hover:bg-slate-50 p-2 pr-4 rounded-full transition-colors border border-transparent hover:border-slate-200"
             >
-              <div className="w-10 h-10 rounded-full bg-trust-blue text-white flex items-center justify-center font-bold text-lg shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-trust-blue text-white flex items-center justify-center font-bold text-lg shadow-none">
                 {user?.name?.charAt(0) || <FiUser />}
               </div>
               <span className="hidden md:block font-bold text-slate-700 text-sm">
@@ -59,9 +59,7 @@ export default function DashboardLayout({
       </header>
 
       {/* Main Content Area */}
-      <main
-        className="container mx-auto px-4 md:px-8 xl:px-12 max-w-[1600px] py-8 md:py-12 relative z-10"
-      >
+      <main className="container mx-auto px-4 md:px-8 xl:px-12 max-w-[1600px] py-8 md:py-12 relative z-10">
         {children}
       </main>
 

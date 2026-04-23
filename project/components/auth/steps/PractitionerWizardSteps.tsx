@@ -24,10 +24,10 @@ export function PractitionerStep1({ formData, updateData, errors }: any) {
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
       <div
         style={{ padding: "10px 20px", marginBottom: "20px" }}
-        className="inline-flex items-center gap-2 px-4 py-1.5  mb-2"
+        className="inline-flex items-center gap-2 px-4 py-2  mb-2"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-        <span className="text-xs text-primary uppercase tracking-widest">
+        <span className="text-xs text-primary uppercase tracking-normal">
           Medical Credentials
         </span>
       </div>
@@ -66,7 +66,7 @@ export function PractitionerStep1({ formData, updateData, errors }: any) {
           <select
             value={formData.specialization || ""}
             onChange={(e) => updateData("specialization", e.target.value)}
-            className={`w-full px-5 py-2.5 bg-slate-50 border-2 rounded-full outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-slate-900 font-medium appearance-none cursor-pointer ${errors?.specialization ? "border-red-400" : "border-slate-100"}`}
+            className={`w-full px-5 py-3 bg-slate-50 border-2 rounded-full outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-slate-900 font-medium appearance-none cursor-pointer ${errors?.specialization ? "border-red-400" : "border-slate-100"}`}
           >
             <option value="">-- Select --</option>
             {specializations.map((s) => (
@@ -105,7 +105,7 @@ export function PractitionerStep2({ formData, updateData, errors }: any) {
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
       <div
         style={{ padding: "10px 20px", marginBottom: "20px" }}
-        className="inline-flex items-center gap-2 px-4 py-1.5  mb-2"
+        className="inline-flex items-center gap-2 px-4 py-2  mb-2"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
         <span className="text-xs font-bold text-primary ">

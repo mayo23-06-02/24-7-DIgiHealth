@@ -5,7 +5,7 @@ import User from '@/lib/models/User';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-dev-only');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 export async function GET(request: Request) {
   try {
@@ -28,8 +28,10 @@ export async function GET(request: Request) {
     const now = new Date();
 
     if (statusFilter === 'upcoming') {
-      query.status = { $in: ['scheduled', 'in_progress'] };
+      query.status = { $in: ['scheduled', 'in_progress', 'requested', 'pending'] };
       query.scheduledStartTime = { $gte: now };
+    } else if (statusFilter === 'pending') {
+      query.status = { $in: ['requested', 'pending'] };
     } else if (statusFilter === 'past') {
       query.status = 'completed';
     } else if (statusFilter === 'cancelled') {
@@ -48,6 +50,7 @@ export async function GET(request: Request) {
       color: c.type === 'video' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700',
       doctor: `Dr. ${c.practitionerId.firstName} ${c.practitionerId.lastName}`,
       doctorAvatar: `https://ui-avatars.com/api/?name=${c.practitionerId.firstName}+${c.practitionerId.lastName}&background=0052cc&color=fff`,
+      practitionerId: c.practitionerId._id.toString(),
       type: c.type,
       status: c.status,
       date: new Date(c.scheduledStartTime).toDateString(),

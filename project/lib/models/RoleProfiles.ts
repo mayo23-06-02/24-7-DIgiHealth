@@ -10,6 +10,7 @@ export interface IPatientProfile extends Document {
   subscriptionTier: 'free' | 'pro';
   popiaConsentDate?: Date;
   favoritePractitionerIds?: Types.ObjectId[];
+  myDoctorIds?: Types.ObjectId[];
 }
 
 const PatientProfileSchema = new Schema<IPatientProfile>({
@@ -28,7 +29,8 @@ const PatientProfileSchema = new Schema<IPatientProfile>({
   },
   subscriptionTier: { type: String, enum: ['free', 'pro'], default: 'free' },
   popiaConsentDate: { type: Date },
-  favoritePractitionerIds: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  favoritePractitionerIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  myDoctorIds: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
 
 // ==== Practitioner Profile ====
@@ -37,11 +39,16 @@ export interface IPractitionerProfile extends Document {
   specialisation: string;
   hpcsaNumber: string;
   experienceYears: number;
-  consultationFee: number;
+  // consultationFee removed - subscription-based model
   bio: string;
   languages: string[];
   acceptedMedicalAids: string[];
+  rating: number;
+  reviewCount: number;
+  achievements: string[];
+  reviews: { reviewer: string, rating: number, comment: string, date: Date }[];
   affiliatedFacilityIds: Types.ObjectId[];
+  assignedPatientIds?: Types.ObjectId[];
   isOnline: boolean;
   bankAccount: {
     accountHolder: string;
@@ -57,11 +64,21 @@ const PractitionerProfileSchema = new Schema<IPractitionerProfile>({
   specialisation: { type: String, required: true },
   hpcsaNumber: { type: String, required: true, unique: true },
   experienceYears: { type: Number },
-  consultationFee: { type: Number },
+  // consultationFee removed - subscription-based model
   bio: { type: String },
   languages: [{ type: String }],
   acceptedMedicalAids: [{ type: String }],
+  rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
+  achievements: [{ type: String }],
+  reviews: [{
+     reviewer: String,
+     rating: Number,
+     comment: String,
+     date: { type: Date, default: Date.now }
+  }],
   affiliatedFacilityIds: [{ type: Schema.Types.ObjectId, ref: 'Facility' }],
+  assignedPatientIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   isOnline: { type: Boolean, default: false },
   bankAccount: {
     accountHolder: String,
@@ -72,43 +89,5 @@ const PractitionerProfileSchema = new Schema<IPractitionerProfile>({
   }
 });
 
-// ==== EMT Profile ====
-export interface IEMTProfile extends Document {
-  userId: Types.ObjectId;
-  licenseLevel: 'BLS' | 'ILS' | 'ALS';
-  hpcsaNumber: string;
-  assignedVehicle: string;
-  assignedFacilityId?: Types.ObjectId;
-  shiftSchedule?: { start: string, end: string, days: number[] };
-  currentStatus: 'available' | 'dispatched' | 'en_route' | 'at_scene' | 'transporting' | 'at_facility' | 'completed' | 'offline';
-  offlineMapsRegion?: string;
-  equipmentChecklist?: { item: string, status: boolean, updatedAt?: Date }[];
-}
-
-const EMTProfileSchema = new Schema<IEMTProfile>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  licenseLevel: { type: String, enum: ['BLS', 'ILS', 'ALS'], required: true },
-  hpcsaNumber: { type: String, required: true },
-  assignedVehicle: { type: String },
-  assignedFacilityId: { type: Schema.Types.ObjectId, ref: 'Facility' },
-  shiftSchedule: { 
-    start: String, 
-    end: String, 
-    days: [Number] 
-  },
-  currentStatus: { 
-    type: String, 
-    enum: ['available', 'dispatched', 'en_route', 'at_scene', 'transporting', 'at_facility', 'completed', 'offline'],
-    default: 'offline'
-  },
-  offlineMapsRegion: String,
-  equipmentChecklist: [{ 
-    item: String, 
-    status: Boolean, 
-    updatedAt: { type: Date, default: Date.now } 
-  }]
-});
-
 export const PatientProfile: Model<IPatientProfile> = mongoose.models.PatientProfile || mongoose.model<IPatientProfile>('PatientProfile', PatientProfileSchema);
 export const PractitionerProfile: Model<IPractitionerProfile> = mongoose.models.PractitionerProfile || mongoose.model<IPractitionerProfile>('PractitionerProfile', PractitionerProfileSchema);
-export const EMTProfile: Model<IEMTProfile> = mongoose.models.EMTProfile || mongoose.model<IEMTProfile>('EMTProfile', EMTProfileSchema);

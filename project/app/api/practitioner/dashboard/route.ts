@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     const consultations = await Consultation.find({
       practitionerId,
       scheduledStartTime: { $gte: now, $lte: upcomingWindow },
-      status: { $in: ['scheduled', 'in_progress', 'pending'] },
+      status: { $in: ['scheduled', 'in_progress', 'pending', 'requested'] },
     })
       .sort({ scheduledStartTime: 1 })
       .limit(10)
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     );
 
     const queue = mappedConsultations.filter(c => c.status === 'scheduled' || c.status === 'in_progress');
-    const pendingRequests = mappedConsultations.filter(c => c.status === 'pending');
+    const pendingRequests = mappedConsultations.filter(c => c.status === 'pending' || c.status === 'requested');
 
     // High-risk alerts (score > 70) from all consultations
     const riskAlerts = mappedConsultations

@@ -3,10 +3,10 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Conversation } from '@/lib/models/Conversation';
 import User from '@/lib/models/User';
 
-export async function GET(req: Request, { params }: { params: { conversationId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ conversationId: string }> }) {
   try {
     await connectToDatabase();
-    const { conversationId } = params;
+    const { conversationId } = await params;
 
     const conversation = await Conversation.findById(conversationId)
       .populate({ path: 'patientId', model: User, select: 'firstName lastName avatar' })

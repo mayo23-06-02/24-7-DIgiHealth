@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-dev-only');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 async function getPatientId() {
   const cookieStore = await cookies();

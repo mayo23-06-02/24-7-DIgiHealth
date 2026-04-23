@@ -5,7 +5,7 @@ async function testGemini() {
   const genAI = new GoogleGenerativeAI(API_KEY);
    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-  const prompt = "Hello, this is a test. Are you working correctly as a medical triage assistant named SymptomSage?";
+  const prompt = "Hello, this is a test. Are you working correctly as a medical triage assistant named SymtoSage?";
 
   try {
     console.log("Sending prompt to Gemini...");

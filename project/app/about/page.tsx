@@ -35,7 +35,7 @@ export default function AboutPage() {
 
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10 flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
           <div className="lg:w-1/2 flex flex-col items-start text-left">
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#005A9C]/5 text-[#005A9C] font-semibold text-sm tracking-widest uppercase mb-8 border border-[#005A9C]/10">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#005A9C]/5 text-[#005A9C] font-semibold text-sm tracking-normal uppercase mb-8 border border-[#005A9C]/10">
               <span className="w-2 h-2 rounded-lg bg-[#36b1d4] animate-pulse"></span>
               Our Identity
             </div>
@@ -87,7 +87,7 @@ export default function AboutPage() {
             <div className="absolute bottom-8 left-8 right-8 p-8 rounded-lg bg-white/10 backdrop-blur-xl border border-white/30 z-20 transition-transform duration-500 group-hover:-translate-y-2">
               <p className="text-white font-medium text-2xl italic leading-snug">
                 "I am because we are." <br />
-                <span className="text-[0.85rem] font-bold opacity-100 not-italic mt-4 inline-flex items-center gap-2 uppercase tracking-widest text-[#005A9C] bg-white px-4 py-2 rounded-lg">
+                <span className="text-[0.85rem] font-bold opacity-100 not-italic mt-4 inline-flex items-center gap-2 uppercase tracking-normal text-[#005A9C] bg-white px-4 py-2 rounded-lg">
                   <span className="w-1.5 h-1.5 rounded-lg bg-[#36b1d4]"></span>
                   The spirit of Ubuntu
                 </span>
@@ -169,9 +169,7 @@ export default function AboutPage() {
       {/* Section 2: Mission & Vision */}
       <section className="py-32 bg-[#002f54] text-white relative overflow-hidden">
         {/* Abstract Topographic or Net Background */}
-        <div
-          className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fill-rule=%22evenodd%22%3E%3Cg%20fill=%22%23ffffff%22%20fill-opacity=%221%22%3E%3Cpath%20d=%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"
-        ></div>
+        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fill-rule=%22evenodd%22%3E%3Cg%20fill=%22%23ffffff%22%20fill-opacity=%221%22%3E%3Cpath%20d=%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
         <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-[#36b1d4]/50 to-transparent"></div>
         <div className="absolute bottom-0 inset-x-0 h-px bg-linear-to-r from-transparent via-[#36b1d4]/50 to-transparent"></div>
 
@@ -302,7 +300,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10">
           <div className="flex flex-col lg:flex-row gap-20 items-center">
             <div className="lg:w-5/12">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-[#36b1d4]/10 border border-[#36b1d4]/20 text-[#36b1d4] font-semibold text-sm tracking-widest uppercase mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#36b1d4]/10 border border-[#36b1d4]/20 text-[#36b1d4] font-semibold text-sm tracking-normal uppercase mb-8">
                 Built for Everyone
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-[1.1] tracking-tight">
@@ -371,9 +369,7 @@ export default function AboutPage() {
       {/* Section 5: Impact & Numbers */}
       <section className="py-24 md:py-32 bg-linear-to-br from-[#00487c] to-[#005A9C] relative overflow-hidden">
         {/* Subtle decorative mesh or dots */}
-        <div
-          className="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] bg-[size:30px_30px]"
-        ></div>
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] bg-[size:30px_30px]"></div>
 
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-20 tracking-tight">
@@ -390,10 +386,10 @@ export default function AboutPage() {
                 key={i}
                 className="flex flex-col items-center justify-center p-10 bg-white/5 rounded-lg border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors"
               >
-                <span className="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-linear-to-b from-white to-white/70 mb-4">
+                <span className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-linear-to-b from-white to-white/70 mb-4">
                   {stat.val}
                 </span>
-                <span className="text-lg text-[#36b1d4] font-bold uppercase tracking-widest">
+                <span className="text-lg text-[#36b1d4] font-bold uppercase tracking-normal">
                   {stat.label}
                 </span>
               </div>
@@ -450,7 +446,7 @@ export default function AboutPage() {
                 <h3 className="text-3xl font-bold text-slate-900 mb-2">
                   {member.name}
                 </h3>
-                <h4 className="text-[#36b1d4] font-bold tracking-widest uppercase text-sm mb-6">
+                <h4 className="text-[#36b1d4] font-bold tracking-normal uppercase text-sm mb-6">
                   {member.role}
                 </h4>
                 <p className="text-slate-600 text-lg leading-relaxed font-medium">
@@ -483,7 +479,7 @@ export default function AboutPage() {
                 ].map((item, i) => (
                   <li
                     key={i}
-                    className="flex items-center gap-5 text-lg font-bold text-slate-800 bg-white p-5 rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+                    className="flex items-center gap-5 text-lg font-bold text-slate-800 bg-white p-5 rounded-lg border border-slate-100 shadow-none hover:shadow-md transition-shadow"
                   >
                     <span className="w-8 h-8 rounded-lg bg-[#36b1d4]/10 text-[#36b1d4] flex items-center justify-center shrink-0">
                       <FiCheck className="stroke-[3px]" />
@@ -495,7 +491,7 @@ export default function AboutPage() {
             </div>
             {/* Partners */}
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-[#005A9C]/10 text-[#005A9C] font-semibold text-sm tracking-widest uppercase mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#005A9C]/10 text-[#005A9C] font-semibold text-sm tracking-normal uppercase mb-6">
                 Collaboration
               </div>
               <h3 className="text-4xl font-bold text-slate-900 mb-6 tracking-tight">

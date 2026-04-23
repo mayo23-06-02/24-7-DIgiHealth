@@ -56,9 +56,7 @@ export default function Navbar() {
   return (
     <div className=" w-full">
       {/* Top Header Bar */}
-      <div
-        className=" bg- w-full text-white text-sm py-2 z-50 transition-all p-1.25"
-      >
+      <div className=" bg- w-full text-white text-sm py-2 z-50 transition-all p-1.25">
         <div className="container mx-auto max-w-[1600px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
           <div className="flex gap-4">
             <span className="flex gap-2 items-center">{weather}</span>
@@ -120,7 +118,7 @@ export default function Navbar() {
               ${scrolled ? "bg-primary" : "bg-primary"}
             `}
             >
-              <span className="font-black text-xl text-white">24</span>
+              <span className="font-bold text-xl text-white">24</span>
             </div>
             <span
               className={`
@@ -227,7 +225,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/register"
-                className="w-full text-center py-3 rounded-lg bg-gradient-to-r from-[#0052cc] to-[#00a3bf] text-white font-semibold hover:shadow-lg transition"
+                className="w-full text-center py-3 rounded-lg bg-gradient-to-r from-[#0052cc] to-[#00a3bf] text-white font-semibold hover:shadow-none transition"
               >
                 Get Started{" "}
               </Link>

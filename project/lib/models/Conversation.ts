@@ -14,7 +14,12 @@ export interface IConversation extends Document {
 }
 
 const ConversationSchema = new Schema<IConversation>({
-  consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation', required: false },
+  consultationId: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Consultation', 
+    required: false,
+    index: { unique: true, sparse: true }
+  },
   patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   status: { type: String, enum: ['active', 'ended', 'pending'], default: 'active' },

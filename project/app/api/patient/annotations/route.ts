@@ -5,7 +5,7 @@ import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-dev-only');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 async function getUserInfo() {
   const cookieStore = await cookies();

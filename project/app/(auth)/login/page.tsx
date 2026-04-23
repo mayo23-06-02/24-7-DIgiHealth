@@ -98,7 +98,7 @@ function LoginFormComponent() {
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-primary font-extrabold text-xl">+</span>
           </div>
-          <span className="text-primary font-bold tracking-widest uppercase text-[10px]">
+          <span className="text-primary font-bold tracking-normal uppercase text-xs">
             Secure Portal Access
           </span>
         </div>
@@ -106,7 +106,7 @@ function LoginFormComponent() {
         <div className="mb-12 my-5 gap-2.5">
           <h2 className="text-4xl md:text-4xl font-medium text-slate-900 leading-[0.95] tracking-tighter mb-2.5">
             Welcome back to{" "}
-            <span className="text-primary font-black">24/7 Care</span>
+            <span className="text-primary font-bold">24/7 Care</span>
           </h2>
           <p className="text-sm text-slate-400   max-w-[380px]">
             Login for 24/7 expert medical support across South Africa.
@@ -136,7 +136,7 @@ function LoginFormComponent() {
                 value={mfaToken}
                 onChange={(e) => setMfaToken(e.target.value)}
                 placeholder="6-digit code"
-                className="border-none bg-slate-50/80 focus:bg-white transition-all py-4 text-center tracking-widest text-xl"
+                className="border-none bg-slate-50/80 focus:bg-white transition-all py-4 text-center tracking-normal text-xl"
               />
             </div>
 
@@ -150,7 +150,7 @@ function LoginFormComponent() {
               type="submit"
               fullWidth
               disabled={loading}
-              className="py-5 text-base tracking-widest uppercase font-black"
+              className="py-5 text-base tracking-normal uppercase font-bold"
             >
               {loading ? "Verifying..." : "Verify & Login"}
             </Button>
@@ -186,7 +186,7 @@ function LoginFormComponent() {
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-1">
-                    <label className="block text-sm font-black text-slate-700 ">
+                    <label className="block text-sm font-bold text-slate-700 ">
                       Password
                     </label>
                     <Link
@@ -217,7 +217,7 @@ function LoginFormComponent() {
                 type="submit"
                 fullWidth
                 disabled={loading}
-                className="py-5 text-base tracking-widest uppercase font-black"
+                className="py-5 text-base tracking-normal uppercase font-bold"
               >
                 {loading ? "Authenticating..." : "Login"}
               </Button>
@@ -226,7 +226,7 @@ function LoginFormComponent() {
             <div className="mt-12 relative flex flex-col items-center gap-6 px-2 py-5">
               <div className="w-full flex items-center gap-4">
                 <div className="h-px bg-slate-100 grow"></div>
-                <span className="text-[10px] font-semibold tracking-widest text-slate-300  whitespace-nowrap">
+                <span className="text-xs font-semibold tracking-normal text-slate-300  whitespace-nowrap">
                   OR LOGIN VIA
                 </span>
                 <div className="h-px bg-slate-100 grow"></div>
@@ -239,7 +239,7 @@ function LoginFormComponent() {
                 type="button"
               >
                 <BiLogoGoogle className="text-primary" />
-                <span className="text-xs font-black text-slate-600 ">
+                <span className="text-xs font-bold text-slate-600 ">
                   Google
                 </span>
               </button>
@@ -248,7 +248,7 @@ function LoginFormComponent() {
                 type="button"
               >
                 <BiLogoFacebook className="text-primary" />
-                <span className="text-xs font-black text-slate-600 ">
+                <span className="text-xs font-bold text-slate-600 ">
                   Facebook
                 </span>
               </button>
@@ -258,7 +258,7 @@ function LoginFormComponent() {
               Don't have a record yet?{" "}
               <Link
                 href="/register"
-                className="font-black text-primary hover:text-secondary border-b-2 border-primary/20 transition-all ml-1 pb-1"
+                className="font-bold text-primary hover:text-secondary border-b-2 border-primary/20 transition-all ml-1 pb-1"
               >
                 Apply Now
               </Link>
@@ -286,15 +286,15 @@ function LoginFormComponent() {
           </p>
           <div className="flex items-center gap-6 mt-12 pt-8 border-t border-white/10">
             <div className="flex flex-col">
-              <span className="text-2xl font-black">20k+</span>
-              <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">
+              <span className="text-2xl font-bold">20k+</span>
+              <span className="text-xs uppercase font-bold tracking-normal opacity-60">
                 Patients Joined
               </span>
             </div>
             <div className="w-px h-8 bg-white/10"></div>
             <div className="flex flex-col">
-              <span className="text-2xl font-black">9 Provinces</span>
-              <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">
+              <span className="text-2xl font-bold">9 Provinces</span>
+              <span className="text-xs uppercase font-bold tracking-normal opacity-60">
                 Country Coverage
               </span>
             </div>

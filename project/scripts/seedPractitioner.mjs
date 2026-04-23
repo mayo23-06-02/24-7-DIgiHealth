@@ -45,7 +45,7 @@ const PractitionerProfileSchema = new mongoose.Schema({
   specialisation: String,
   hpcsaNumber: String,
   experienceYears: Number,
-  consultationFee: Number,
+  // consultationFee removed - subscription-based model
   bio: String,
   languages: [String],
   acceptedMedicalAids: [String],
@@ -223,7 +223,7 @@ async function seed() {
       specialisation: 'General Practitioner',
       hpcsaNumber: 'MP0123456',
       experienceYears: 12,
-      consultationFee: 650,
+      // consultationFee removed
       bio: 'Experienced GP specialising in chronic disease management and preventive care in telehealth environments.',
       languages: ['English', 'Afrikaans'],
       acceptedMedicalAids: ['Discovery', 'Momentum'],

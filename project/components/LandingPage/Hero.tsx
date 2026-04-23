@@ -78,31 +78,19 @@ export default function Hero() {
           />
         ))}
         {/* Gradient Overlay to ensure text readability */}
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/40 to-accent/20"
-        />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/40 to-accent/20" />
       </div>
 
       {/* Content Container */}
-      <div
-        className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] flex-1 flex flex-col justify-center relative z-10 mt-[20vh]"
-      >
-        <div
-          className="max-w-[1600px] transition-opacity duration-600 ease-in-out"
-        >
-          <div
-            className="trusted-badge text-white mb-4"
-          >
-            <span
-              className="text-white font-normal ml-2"
-            >
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] flex-1 flex flex-col justify-center relative z-10 mt-[20vh]">
+        <div className="max-w-[1600px] transition-opacity duration-600 ease-in-out">
+          <div className="trusted-badge text-white mb-4">
+            <span className="text-white font-normal ml-2">
               Trusted by 135k+ people
             </span>
           </div>
 
-          <h1
-            className="heading-hero text-white mb-10 min-h-[220px] flex flex-col justify-center text-[clamp(2rem,3.5vw,3.5rem)]"
-          >
+          <h1 className="heading-hero text-white mb-10 min-h-[220px] flex flex-col justify-center text-[clamp(2rem,3.5vw,3.5rem)]">
             <span className="block">{slide.titleLine1}</span>
             <span className="block">{slide.titleLine2}</span>
             <span className="block">{slide.titleLine3}</span>
@@ -119,77 +107,43 @@ export default function Hero() {
       </div>
 
       {/* Hero Bottom Bar */}
-      <div
-        className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] grid grid-cols-[1.2fr_0.8fr] pb-[6rem] items-end relative z-10"
-      >
-        <div
-          className="reveal-hidden reveal-visible max-w-[550px] text-white"
-        >
-          <h3
-            className="text-2xl font-bold mb-4"
-          >
-            Comprehensive Care
-          </h3>
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] grid grid-cols-[1.2fr_0.8fr] pb-[6rem] items-end relative z-10">
+        <div className="reveal-hidden reveal-visible max-w-[550px] text-white">
+          <h3 className="text-2xl font-bold mb-4">Comprehensive Care</h3>
           <p className="text-base opacity-85 leading-relaxed">
             Accessible, modern medical care — where technology meets compassion.
             Get Started, view reports, and stay healthy from anywhere.
           </p>
         </div>
 
-        <div
-          className="flex gap-6 justify-end"
-        >
+        <div className="flex gap-6 justify-end">
           {/* Dynamic Stats Card */}
-          <div
-            className="bg-primary card w-[240px] text-white flex flex-col justify-center rounded-lg p-6"
-          >
-            <p
-              className="text-[0.9rem] opacity-70 mb-6"
-            >
-              {slide.boxLabel}
-            </p>
-            <div className="text-[3.8rem] font-black leading-none">
+          <div className="bg-primary card w-[240px] text-white flex flex-col justify-center rounded-lg p-6">
+            <p className="text-[0.9rem] opacity-70 mb-6">{slide.boxLabel}</p>
+            <div className="text-[3.8rem] font-bold leading-none">
               {slide.boxValue}
             </div>
-            <p className="text-[0.85rem] opacity-80 mt-4">
-              {slide.boxDesc}
-            </p>
+            <p className="text-[0.85rem] opacity-80 mt-4">{slide.boxDesc}</p>
           </div>
 
           {/* Dynamic Grid Card */}
-          <div
-            className="card w-[240px] bg-white/15 border border-white/25 text-white flex flex-col gap-4 p-6 rounded-lg"
-          >
-            <div
-              className="grid grid-cols-2 gap-3"
-            >
-              <div
-                className="h-[55px] border border-white/30 rounded-lg grid place-items-center"
-              >
+          <div className="card w-[240px] bg-white/15 border border-white/25 text-white flex flex-col gap-4 p-6 rounded-lg">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-[55px] border border-white/30 rounded-lg grid place-items-center">
                 ✕
               </div>
-              <div
-                className="h-[55px] bg-white/10 rounded-lg grid place-items-center font-semibold"
-              >
+              <div className="h-[55px] bg-white/10 rounded-lg grid place-items-center font-semibold">
                 {slide.gridItems[0]}
               </div>
             </div>
-            <div
-              className="h-[50px] bg-white text-primary rounded-lg grid place-items-center font-black"
-            >
+            <div className="h-[50px] bg-white text-primary rounded-lg grid place-items-center font-bold">
               {slide.gridItems[1]}
             </div>
-            <div
-              className="grid grid-cols-2 gap-3"
-            >
-              <div
-                className="h-[55px] border border-white/30 rounded-lg grid place-items-center"
-              >
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-[55px] border border-white/30 rounded-lg grid place-items-center">
                 ✕
               </div>
-              <div
-                className="h-[55px] bg-white/10 rounded-lg grid place-items-center font-semibold"
-              >
+              <div className="h-[55px] bg-white/10 rounded-lg grid place-items-center font-semibold">
                 {slide.gridItems[2]}
               </div>
             </div>
@@ -198,9 +152,7 @@ export default function Hero() {
       </div>
 
       {/* Progress Slide Indicators */}
-      <div
-        className="absolute bottom-[2rem] left-1/2 -translate-x-1/2 flex gap-2 z-10"
-      >
+      <div className="absolute bottom-[2rem] left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {slides.map((_, i) => (
           <div
             key={i}

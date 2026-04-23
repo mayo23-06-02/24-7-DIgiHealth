@@ -19,9 +19,9 @@ const provinces = [
 export function HospitalStep1({ formData, updateData, errors }: any) {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
-      <div className="inline-flex items-center gap-2 px-4 py-1.5  mb-2">
+      <div className="inline-flex items-center gap-2 px-4 py-2  mb-2">
         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-        <span className="text-xs text-primary uppercase tracking-widest">
+        <span className="text-xs text-primary uppercase tracking-normal">
           Facility Details
         </span>
       </div>
@@ -111,7 +111,7 @@ export function HospitalStep2({ formData, updateData }: any) {
           </select>
         </div>
         <div className="md:col-span-2 border-t border-slate-100 pt-6">
-          <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest mb-4">
+          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-normal mb-4">
             Admin Representative
           </h3>
         </div>
@@ -157,7 +157,7 @@ export function HospitalStep3({ formData, updateData }: any) {
           className="mt-0.5 w-6 h-6 accent-primary shrink-0"
         />
         <div>
-          <p className="font-black text-slate-800 mb-1">
+          <p className="font-bold text-slate-800 mb-1">
             Accept B2B Emergency Dispatch Agreement *
           </p>
           <p className="text-sm text-slate-500 leading-relaxed">

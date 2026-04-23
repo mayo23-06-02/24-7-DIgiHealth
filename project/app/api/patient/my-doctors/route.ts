@@ -14,12 +14,13 @@ export async function GET(req: Request) {
     const consultations = await Consultation.find({ patientId: userId }).select('practitionerId');
     const consultedDoctorIds = consultations.map(c => c.practitionerId.toString());
 
-    // 2. Get favorite doctors from patient profile
+    // 2. Get favorite and explicitly added myDoctors from patient profile
     const profile = await PatientProfile.findOne({ userId });
     const favoriteDoctorIds = profile?.favoritePractitionerIds?.map(id => id.toString()) || [];
+    const explicitlyAddedDoctorIds = profile?.myDoctorIds?.map(id => id.toString()) || [];
 
     // Combine and unique
-    const uniqueDoctorIds = [...new Set([...consultedDoctorIds, ...favoriteDoctorIds])];
+    const uniqueDoctorIds = [...new Set([...consultedDoctorIds, ...favoriteDoctorIds, ...explicitlyAddedDoctorIds])];
 
     if (uniqueDoctorIds.length === 0) return NextResponse.json([]);
 

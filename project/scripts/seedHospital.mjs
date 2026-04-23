@@ -295,7 +295,7 @@ async function seed() {
             facilityId: facility._id,
             patientId: assignedPatient._id,
             amount: Math.floor(Math.random() * 5000) + 500,
-            type: ['consultation_fee', 'procedure', 'pharmacy'][Math.floor(Math.random() * 3)],
+            type: ['service_booking', 'procedure', 'pharmacy'][Math.floor(Math.random() * 3)],
             status: Math.random() > 0.2 ? 'paid' : 'pending',
             paymentMethod: ['cash', 'card', 'medical_aid'][Math.floor(Math.random() * 3)],
             timestamp: d

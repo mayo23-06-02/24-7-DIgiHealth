@@ -1,12 +1,28 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { 
-  BiCalendar, BiTime, BiVideo, BiMessageDetail, BiMap, 
-  BiDotsVerticalRounded, BiSearch, BiFilterAlt, BiGridAlt, 
-  BiListUl, BiChevronRight, BiDownload, BiStar, BiTrash,
-  BiCalendarEdit, BiCheckShield, BiMicrophone, BiPlus,
-  BiCheckCircle, BiXCircle, BiFile
+import {
+  BiCalendar,
+  BiTime,
+  BiVideo,
+  BiMessageDetail,
+  BiMap,
+  BiDotsVerticalRounded,
+  BiSearch,
+  BiFilterAlt,
+  BiGridAlt,
+  BiListUl,
+  BiChevronRight,
+  BiDownload,
+  BiStar,
+  BiTrash,
+  BiCalendarEdit,
+  BiCheckShield,
+  BiMicrophone,
+  BiPlus,
+  BiCheckCircle,
+  BiXCircle,
+  BiFile,
 } from "react-icons/bi";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
@@ -18,9 +34,10 @@ import Select from "@/components/ui/Select";
 import EmptyState from "@/components/ui/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
 import PatientCalendar from "./PatientCalendar";
+import DoctorProfileModal from "./DoctorProfileModal";
 
-type AppointmentStatus = 'upcoming' | 'past' | 'cancelled';
-type ViewType = 'list' | 'calendar';
+type AppointmentStatus = "upcoming" | "past" | "cancelled";
+type ViewType = "list" | "calendar";
 
 interface Appointment {
   id: string;
@@ -29,9 +46,10 @@ interface Appointment {
   duration: string;
   color: string;
   doctor: string;
+  practitionerId?: string;
   doctorAvatar?: string;
   specialization?: string;
-  type: 'video' | 'chat' | 'in_person';
+  type: "video" | "chat" | "in_person";
   status: string;
   date: string;
   scheduledStartTime: string;
@@ -41,19 +59,27 @@ interface Appointment {
 }
 
 const AppointmentsView: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<AppointmentStatus>('upcoming');
-  const [viewType, setViewType] = useState<ViewType>('list');
+  const [activeTab, setActiveTab] = useState<AppointmentStatus>("upcoming");
+  const [viewType, setViewType] = useState<ViewType>("list");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
+  const [selectedPractitioner, setSelectedPractitioner] = useState<any | null>(
+    null,
+  );
   const [showBookingWizard, setShowBookingWizard] = useState(false);
-  
+
   // Booking Wizard State
   const [bookingStep, setBookingStep] = useState(1);
   const [availableDocs, setAvailableDocs] = useState<any[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
-  const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', type: 'video', reason: '' });
+  const [bookingData, setBookingData] = useState({
+    date: new Date().toISOString().split("T")[0],
+    time: "",
+    type: "video",
+    reason: "",
+  });
 
   // Stats for tabs
   const [counts, setCounts] = useState({ upcoming: 0, past: 0, cancelled: 0 });
@@ -64,21 +90,21 @@ const AppointmentsView: React.FC = () => {
 
   useEffect(() => {
     if (showBookingWizard) {
-      fetch('/api/practitioners/available')
-        .then(res => res.json())
+      fetch("/api/practitioners/available")
+        .then((res) => res.json())
         .then(setAvailableDocs);
     }
   }, [showBookingWizard]);
 
   const handleBookAppointment = async () => {
     try {
-      const res = await fetch('/api/consultations/book', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/consultations/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           practitionerId: selectedDoc.id,
-          ...bookingData
-        })
+          ...bookingData,
+        }),
       });
       if (res.ok) {
         setShowBookingWizard(false);
@@ -93,48 +119,70 @@ const AppointmentsView: React.FC = () => {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-       const res = await fetch(`/api/patient/appointments?status=${activeTab}`);
-       const data = await res.json();
-       if (Array.isArray(data)) {
-         setAppointments(data);
-         // Enforce count logic (this could be optimized)
-         setCounts(prev => ({ ...prev, [activeTab]: data.length }));
-       } else {
-         setAppointments([]);
-       }
+      const res = await fetch(`/api/patient/appointments?status=${activeTab}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setAppointments(data);
+        // Enforce count logic (this could be optimized)
+        setCounts((prev) => ({ ...prev, [activeTab]: data.length }));
+      } else {
+        setAppointments([]);
+      }
     } catch (err) {
-       console.error("Fetch Error:", err);
-       setAppointments([]);
+      console.error("Fetch Error:", err);
+      setAppointments([]);
     } finally {
-       setLoading(false);
+      setLoading(false);
     }
   };
 
   const [sortBy, setSortBy] = useState("newest");
 
   const filteredAppointments = useMemo(() => {
-    let list = appointments.filter(a => 
-      a.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.title.toLowerCase().includes(searchQuery.toLowerCase())
+    let list = appointments.filter(
+      (a) =>
+        a.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.title.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-    
-    if (sortBy === 'newest') {
-      list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    } else if (sortBy === 'oldest') {
-      list.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    if (sortBy === "newest") {
+      list.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      );
+    } else if (sortBy === "oldest") {
+      list.sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      );
     }
-    
+
     return list;
   }, [appointments, searchQuery, sortBy]);
 
   // Actions
-  const handleJoinCell = (appt: Appointment) => { 
-    console.log("Joining consultation..."); 
+  const handleJoinCell = (appt: Appointment) => {
+    console.log("Joining consultation...");
     // In real app: open VideoCallModal or ChatModal
   };
-  
-  const handleReschedule = (appt: Appointment) => { console.log("Rescheduling..."); };
-  const handleCancel = (appt: Appointment) => { console.log("Cancelling..."); };
+
+  const handleReschedule = (appt: Appointment) => {
+    console.log("Rescheduling...");
+  };
+  const handleCancel = (appt: Appointment) => {
+    console.log("Cancelling...");
+  };
+
+  const handleDoctorClick = async (practitionerId: string) => {
+    if (!practitionerId) return;
+    try {
+      const res = await fetch(`/api/patient/practitioners/${practitionerId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedPractitioner(data);
+      }
+    } catch (err) {
+      console.error("Fetch Doctor Error:", err);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -144,163 +192,220 @@ const AppointmentsView: React.FC = () => {
         subtitle="Manage your scheduled consultations and medical history."
         right={
           <>
-            <Button variant="outline" className="h-12 border-slate-200">
-              <BiDownload className="mr-2" /> Export History
+            <Button
+              variant="outline"
+              className=""
+              icon={<BiDownload />}
+              iconPosition="left"
+            >
+              Export History
             </Button>
             <Button
-              className="h-12 shadow-xl shadow-primary/20"
+              className=""
               onClick={() => setShowBookingWizard(true)}
+              icon={<BiPlus />}
+              iconPosition="left"
             >
-              <BiPlus className="mr-2" /> Book New
+              Book New
             </Button>
           </>
         }
       />
 
       {/* TABS & TOOLS */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-2 rounded-[2rem] border border-slate-100 shadow-sm sticky top-0 z-30">
-        <div className="flex p-1 gap-1">
-          {(['upcoming', 'past', 'cancelled'] as const).map((tab) => (
-            <button
+      <Card className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-slate-100 sticky top-0 z-30 p-2">
+        <div className="flex p-1 gap-1.5 bg-slate-50 rounded-2xl">
+          {(["upcoming", "past", "cancelled"] as const).map((tab) => (
+            <Button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`
-                px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all
-                ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:bg-slate-50'}
-              `}
+              variant={activeTab === tab ? "primary" : "ghost"}
+              className={`px-6 py-2 h-auto text-[11px] font-bold uppercase tracking-normal rounded-xl transition-all ${activeTab === tab ? "shadow-md shadow-primary/20" : "text-slate-400 hover:text-slate-600"}`}
             >
               {tab}
-              <span className={`ml-2 px-2 py-0.5 rounded-lg text-[10px] ${activeTab === tab ? 'bg-white/20' : 'bg-slate-100'}`}>
+              <span
+                className={`ml-2.5 px-2 py-0.5 rounded-lg text-[9px] font-bold border ${activeTab === tab ? "bg-white/20 border-white/20 text-white" : "bg-white border-slate-100 text-slate-400"}`}
+              >
                 {counts[tab]}
               </span>
-            </button>
+            </Button>
           ))}
         </div>
 
-        <div className="flex items-center gap-4 px-4">
-          <div className="flex p-1 bg-slate-50 rounded-xl border border-slate-100">
-             <select 
-               value={sortBy}
-               onChange={(e) => setSortBy(e.target.value)}
-               className="px-4 py-2 bg-transparent border-none text-[10px] font-black uppercase tracking-widest text-primary focus:ring-0 cursor-pointer"
-             >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-             </select>
+        <div className="flex items-center gap-3 px-2">
+          <Select
+            value={sortBy}
+            onChange={(v) => setSortBy(v)}
+            options={[
+              { value: "newest", label: "NEWEST FIRST" },
+              { value: "oldest", label: "OLDEST FIRST" },
+            ]}
+            className="w-40"
+          />
+          <Input type="date" className="w-44" />
+          <div className="w-56">
+            <Input
+              type="text"
+              placeholder="SEARCH REGISTRY..."
+              icon={<BiSearch size={18} />}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <div className="relative border border-slate-100 rounded-xl bg-slate-50 flex items-center">
-             <input type="date" className="h-[40px] px-4 rounded-xl bg-transparent border-none text-xs font-black uppercase tracking-widest text-primary focus:ring-0" />
-          </div>
-          <div className="w-48">
-             <Input 
-               type="text" 
-               placeholder="Search..."
-               icon={<BiSearch size={20} />}
-               value={searchQuery}
-               onChange={(e) => setSearchQuery(e.target.value)}
-             />
-          </div>
-          <div className="flex p-1 bg-slate-50 rounded-xl border border-slate-100">
-            <button 
-              onClick={() => setViewType('list')}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${viewType === 'list' ? 'bg-white shadow text-primary' : 'text-slate-400'}`}
+          <div className="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200/50">
+            <Button
+              variant="ghost"
+              onClick={() => setViewType("list")}
+              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${viewType === "list" ? "bg-white shadow-none text-primary" : "text-slate-400 hover:text-slate-600"}`}
             >
               <BiListUl size={20} />
-            </button>
-            <button 
-              onClick={() => setViewType('calendar')}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${viewType === 'calendar' ? 'bg-white shadow text-primary' : 'text-slate-400'}`}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setViewType("calendar")}
+              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${viewType === "calendar" ? "bg-white shadow-none text-primary" : "text-slate-400 hover:text-slate-600"}`}
             >
               <BiCalendar size={20} />
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* APPOINTMENTS LIST/GRID */}
       {loading ? (
         <div className="h-96 flex flex-col items-center justify-center gap-4">
-           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-           <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest">Synchronizing Encrypted Data...</p>
+          <div className="w-14 h-14 border-[5px] border-primary/10 border-t-primary rounded-full animate-spin" />
+          <p className="text-slate-400 font-bold uppercase text-[10px] tracking-normal">
+            Syncing Encrypted Clinical Data...
+          </p>
         </div>
       ) : filteredAppointments.length === 0 ? (
-        <Card className="p-8">
-           <EmptyState 
-             title={`No ${activeTab} Appointments`}
-             description="Every clinical session scheduled via 24/7 DIgiHealth will appear here."
-             icon={<BiCalendar size={32} />}
-           />
+        <Card className="p-12 border-dashed border-2 border-slate-100 bg-slate-50/30">
+          <EmptyState
+            title={`No ${activeTab} Consultations`}
+            description="All verified clinical sessions scheduled via 24/7 DigiHealth will be organized here."
+            icon={<BiCalendar size={48} className="text-slate-200" />}
+          />
         </Card>
-      ) : viewType === 'calendar' ? (
-        <div className="h-[800px] w-full mt-4">
-            <PatientCalendar />
+      ) : viewType === "calendar" ? (
+        <div className="h-[800px] w-full mt-4 bg-white rounded-lg border border-slate-100 shadow-none shadow-slate-900/5 overflow-hidden">
+          <PatientCalendar />
         </div>
       ) : (
-        <Card className="p-0 overflow-hidden" variant="solid">
-           <div className="overflow-x-auto">
-             <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <th className="px-8 py-6">Medical Provider</th>
-                    <th className="px-8 py-6">Schedule Details</th>
-                    <th className="px-8 py-6">Session Type</th>
-                    <th className="px-8 py-6">Status</th>
-                    <th className="px-8 py-6 text-right">Actions</th>
+        <Card
+          className="p-0 overflow-hidden border border-slate-100 shadow-none shadow-slate-900/5 rounded-lg"
+          variant="solid"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/50 border-b font-semibold border-slate-100 text-sm text-slate-400 uppercase tracking-normal">
+                  <th className="px-10 py-6">Medical Specialist</th>
+                  <th className="px-10 py-6">Timeline Details</th>
+                  <th className="px-10 py-6">Consultation Type</th>
+                  <th className="px-10 py-6">Clinical Status</th>
+                  <th className="px-10 py-6 text-right">Reference</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredAppointments.map((appt) => (
+                  <tr
+                    key={appt.id}
+                    className="hover:bg-primary/[0.02] transition-colors group cursor-default"
+                  >
+                    <td className="px-10 py-7">
+                      <div className="flex items-center gap-5">
+                        <Avatar
+                          name={appt.doctor}
+                          size="md"
+                          className="shadow-none shadow-slate-200"
+                        />
+                        <div>
+                          <p
+                            className="font-bold text-slate-800 text-sm leading-none mb-2 cursor-pointer hover:text-primary transition-all underline-offset-4 decoration-2"
+                            onClick={() =>
+                              appt.practitionerId &&
+                              handleDoctorClick(appt.practitionerId)
+                            }
+                          >
+                            {appt.doctor}
+                          </p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal opacity-80">
+                            {appt.specialization || "Clinical specialist"}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-10 py-7">
+                      <div className="space-y-1.5">
+                        <p className="text-sm font-bold text-slate-700 tracking-tight">
+                          {appt.date}
+                        </p>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-normal">
+                          <BiTime size={14} className="text-slate-300" />
+                          {appt.time} <span className="opacity-50">·</span>{" "}
+                          {appt.duration}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-10 py-7">
+                      <Badge
+                        label={appt.type.replace("_", " ")}
+                        icon={
+                          appt.type === "video" ? (
+                            <BiVideo />
+                          ) : appt.type === "chat" ? (
+                            <BiMessageDetail />
+                          ) : (
+                            <BiMap />
+                          )
+                        }
+                        status="info"
+                        variant="soft"
+                        className="uppercase text-[10px] font-bold tracking-normal px-3 py-1"
+                      />
+                    </td>
+                    <td className="px-10 py-7">
+                      <Badge
+                        label={appt.status}
+                        status={
+                          appt.status === "scheduled"
+                            ? "warning"
+                            : appt.status === "completed"
+                              ? "success"
+                              : "danger"
+                        }
+                        variant="solid"
+                        size="sm"
+                        className="uppercase text-[9px] font-bold tracking-normal"
+                      />
+                    </td>
+                    <td className="px-10 py-7 text-right">
+                      <div className="flex justify-end gap-3">
+                        {activeTab === "upcoming" && (
+                          <Button
+                            size="sm"
+                            className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-normal bg-emerald-500 hover:bg-emerald-600 shadow-none shadow-emerald-100"
+                            onClick={() => handleJoinCell(appt)}
+                            icon={<BiVideo size={14} />}
+                          >
+                            Join Room
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          onClick={() => setSelectedAppt(appt)}
+                          className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-400 hover:text-primary transition-all border-none !min-w-0"
+                        >
+                          <BiChevronRight size={22} />
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredAppointments.map((appt) => (
-                    <tr key={appt.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                          <Avatar src={appt.doctorAvatar} name={appt.doctor} size="sm" />
-                          <div>
-                            <p className="font-black text-slate-800 leading-none mb-1">{appt.doctor}</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{appt.specialization || 'Clinical Specialist'}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="space-y-1">
-                          <p className="text-sm font-bold text-slate-700">{appt.date}</p>
-                          <p className="text-xs text-slate-400 font-medium">{appt.time} ({appt.duration})</p>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <Badge 
-                          label={appt.type.replace('_', ' ')} 
-                          icon={appt.type === 'video' ? <BiVideo /> : appt.type === 'chat' ? <BiMessageDetail /> : <BiMap />}
-                          status="info"
-                          variant="soft"
-                          className="uppercase text-[10px]"
-                        />
-                      </td>
-                      <td className="px-8 py-6">
-                        <Badge 
-                          label={appt.status} 
-                          status={appt.status === 'scheduled' ? 'warning' : appt.status === 'completed' ? 'success' : 'danger'} 
-                          variant="solid"
-                          size="sm"
-                        />
-                      </td>
-                      <td className="px-8 py-6 text-right">
-                         <div className="flex justify-end gap-2">
-                            {activeTab === 'upcoming' && (
-                               <Button size="sm" className="h-9 px-4" onClick={() => handleJoinCell(appt)}>Join</Button>
-                            )}
-                            <button 
-                              onClick={() => setSelectedAppt(appt)}
-                              className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-all"
-                            >
-                               <BiChevronRight size={20} />
-                            </button>
-                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-             </table>
-           </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
       )}
 
@@ -308,85 +413,173 @@ const AppointmentsView: React.FC = () => {
       <Modal
         isOpen={!!selectedAppt}
         onClose={() => setSelectedAppt(null)}
-        title={activeTab === 'upcoming' ? 'Manage Appointment' : 'Clinical Summary'}
+        title={
+          activeTab === "upcoming"
+            ? "Consultation Management"
+            : "Clinical Session Summary"
+        }
         width="md"
       >
         {selectedAppt && (
-          <div className="space-y-8">
-             <div className="flex gap-6 items-start">
-               <Avatar src={selectedAppt.doctorAvatar} name={selectedAppt.doctor} size="xl" />
-               <div className="flex-1">
-                 <h4 className="text-2xl font-black text-slate-800 tracking-tight">{selectedAppt.doctor}</h4>
-                 <p className="text-primary font-black uppercase tracking-widest text-[10px] mb-4">{selectedAppt.specialization || 'Clinical Specialist'}</p>
-                 <div className="flex gap-2">
-                   <Badge label={selectedAppt.date} status="info" variant="soft" />
-                   <Badge label={selectedAppt.time} status="premium" variant="soft" />
-                 </div>
-               </div>
-             </div>
-
-             <div className="bg-slate-50 p-6 rounded-[2rem] space-y-4 shadow-inner">
-                <div>
-                   <h6 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Chief Complaint</h6>
-                   <p className="text-sm font-medium text-slate-600 italic leading-relaxed">"{selectedAppt.description || 'Routine Checkup'}"</p>
-                </div>
-                {activeTab === 'cancelled' && (
-                  <div className="pt-4 border-t border-slate-200">
-                    <h6 className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-2">Cancellation Reason</h6>
-                    <p className="text-sm font-bold text-red-600">{selectedAppt.reason || 'Patient Conflict'}</p>
-                    <p className="text-[10px] text-red-400 font-bold mt-1">Cancelled by: {selectedAppt.cancelledBy || 'Patient'}</p>
-                  </div>
-                )}
-             </div>
-
-             <div className="grid grid-cols-1 gap-3">
-                {activeTab === 'upcoming' ? (
-                  <>
-                    <Button className="h-14 justify-between" onClick={() => handleJoinCell(selectedAppt)}>
-                      <span>Launch Video Consulting Room</span>
-                      <BiVideo size={20} />
-                    </Button>
-                    <div className="grid grid-cols-2 gap-3">
-                       <Button variant="white" className="h-14 border-slate-100" onClick={() => handleReschedule(selectedAppt)}>
-                          <BiCalendarEdit className="mr-2" size={20} /> Reschedule
-                       </Button>
-                       <Button variant="danger" className="h-14 bg-red-50 text-red-600 border-none" onClick={() => handleCancel(selectedAppt)}>
-                          <BiTrash className="mr-2" size={20} /> Cancel
-                       </Button>
-                    </div>
-                  </>
-                ) : activeTab === 'past' ? (
-                  <>
-                    <Button className="h-14 justify-between bg-emerald-600 hover:bg-emerald-700">
-                      <span>Download Clinical Prescription (PDF)</span>
-                      <BiFile size={20} />
-                    </Button>
-                    <Button variant="white" className="h-14 justify-between border-slate-100">
-                      <span className="text-slate-700">View Encrypted SOAP Notes</span>
-                      <BiCheckShield size={20} className="text-primary" />
-                    </Button>
-                    <div className="pt-6 border-t border-slate-100">
-                       <h6 className="text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Rate your Experience</h6>
-                       <div className="flex justify-center gap-2">
-                          {[1,2,3,4,5].map(s => (
-                            <button key={s} className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-amber-400 hover:bg-amber-50 transition-all">
-                               <BiStar size={24} />
-                            </button>
-                          ))}
-                       </div>
-                    </div>
-                  </>
-                ) : (
-                  <Button className="h-14 shadow-xl shadow-primary/20">Book Clinical Re-appointment</Button>
-                )}
-             </div>
-
-             <div className="p-4 bg-slate-50 rounded-2xl flex items-start gap-4">
-                <BiCheckShield className="text-primary shrink-0 mt-1" />
-                <p className="text-[10px] text-slate-400 font-bold leading-relaxed uppercase">
-                  End-to-end encrypted medical data. POPI Act compliant clinical record handling.
+          <div className="space-y-8 py-2">
+            <div className="flex gap-7 items-center p-6 bg-slate-50/50 rounded-lg border border-slate-100">
+              <Avatar
+                src={selectedAppt.doctorAvatar}
+                name={selectedAppt.doctor}
+                size="xl"
+                className="shadow-none shadow-slate-200"
+              />
+              <div className="flex-1 min-w-0">
+                <h4 className="text-2xl font-bold text-slate-800 tracking-tight leading-tight mb-1 truncate">
+                  {selectedAppt.doctor}
+                </h4>
+                <p className="text-primary font-bold uppercase tracking-normal text-[10px] mb-4 opacity-80">
+                  {selectedAppt.specialization || "Clinical Specialist"}
                 </p>
-             </div>
+                <div className="flex gap-2">
+                  <Badge
+                    label={selectedAppt.date}
+                    status="info"
+                    variant="soft"
+                    className="font-bold text-[9px]"
+                  />
+                  <Badge
+                    label={selectedAppt.time}
+                    status="premium"
+                    variant="soft"
+                    className="font-bold text-[9px]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 rounded-lg space-y-5 shadow-none shadow-slate-900/5 bg-white border border-slate-100">
+              <div>
+                <h6 className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mb-3 flex items-center gap-2">
+                  <BiMessageDetail size={14} /> Chief Complaint
+                </h6>
+                <p className="text-sm font-bold text-slate-600 italic leading-relaxed pl-6 border-l-2 border-primary/20">
+                  "
+                  {selectedAppt.description ||
+                    "Routing clinical follow-up regarding treatment plan and progress."}
+                  "
+                </p>
+              </div>
+              {activeTab === "cancelled" && (
+                <div className="pt-6 border-t border-slate-100">
+                  <h6 className="text-[10px] font-bold text-rose-400 uppercase tracking-normal mb-3 flex items-center gap-2">
+                    <BiXCircle size={14} /> Cancellation Intel
+                  </h6>
+                  <p className="text-sm font-bold text-rose-600 pl-6 border-l-2 border-rose-200">
+                    {selectedAppt.reason ||
+                      "Patient scheduling conflict identified."}
+                  </p>
+                  <p className="text-[10px] text-rose-400 font-bold mt-2 pl-6 uppercase tracking-normal opacity-60">
+                    Authority: {selectedAppt.cancelledBy || "Patient"}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {activeTab === "upcoming" ? (
+                <>
+                  <Button
+                    fullWidth
+                    className="h-16 justify-between px-8 bg-primary hover:bg-primary/95 text-white shadow-none shadow-primary/20 rounded-2xl"
+                    onClick={() => handleJoinCell(selectedAppt)}
+                    icon={<BiVideo size={22} />}
+                    iconPosition="right"
+                  >
+                    <span className="text-[12px] font-bold uppercase tracking-normal">
+                      Launch Virtual Consulting Room
+                    </span>
+                  </Button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      className="h-14 border-slate-100 text-[11px] font-bold uppercase tracking-normal rounded-2xl hover:bg-slate-50"
+                      onClick={() => handleReschedule(selectedAppt)}
+                      icon={<BiCalendarEdit size={18} />}
+                    >
+                      Reschedule
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="h-14 bg-rose-50 hover:bg-rose-100 text-rose-500 text-[11px] font-bold uppercase tracking-normal rounded-2xl border-none"
+                      onClick={() => handleCancel(selectedAppt)}
+                      icon={<BiTrash size={18} />}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : activeTab === "past" ? (
+                <>
+                  <Button
+                    fullWidth
+                    className="h-16 justify-between px-8 bg-emerald-500 hover:bg-emerald-600 text-white shadow-none shadow-emerald-100 rounded-2xl"
+                    icon={<BiFile size={22} />}
+                    iconPosition="right"
+                  >
+                    <span className="text-[11px] font-bold uppercase tracking-normal">
+                      Download Clinical Briefing (PDF)
+                    </span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-14 justify-between px-8 border-slate-100 rounded-2xl hover:bg-slate-50"
+                  >
+                    <span className="text-[11px] font-bold uppercase tracking-normal text-slate-600">
+                      View Encrypted SOAP Logs
+                    </span>
+                    <BiCheckShield size={20} className="text-primary" />
+                  </Button>
+                  <div className="pt-8 border-t border-slate-100">
+                    <h6 className="text-center text-[10px] font-bold text-slate-300 uppercase tracking-normal mb-5">
+                      Practitioner Feedback Efficiency
+                    </h6>
+                    <div className="flex justify-center gap-3">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Button
+                          key={s}
+                          variant="ghost"
+                          className="w-14 h-14 p-0 bg-slate-50 hover:text-amber-400 hover:bg-amber-50 rounded-2xl border-none transition-all duration-300 transform hover:scale-110 active:scale-90"
+                        >
+                          <BiStar
+                            size={24}
+                            className={
+                              s <= 4
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-slate-300"
+                            }
+                          />
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <Button
+                  fullWidth
+                  className="h-16 shadow-none shadow-primary/20 rounded-2xl text-[12px] font-bold uppercase tracking-normal"
+                >
+                  Book Clinical Re-appointment
+                </Button>
+              )}
+            </div>
+
+            <div className="px-6 py-4 bg-primary/[0.03] border border-primary/5 rounded-[2rem] flex items-start gap-4 transition-all hover:bg-primary/[0.05]">
+              <BiCheckShield
+                className="text-primary shrink-0 mt-0.5"
+                size={18}
+              />
+              <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-tight">
+                This clinical record is end-to-end encrypted under POPI Act /
+                HIPAA protocol. Access is restricted to verified healthcare
+                providers and patient only.
+              </p>
+            </div>
           </div>
         )}
       </Modal>
@@ -395,107 +588,166 @@ const AppointmentsView: React.FC = () => {
       <Modal
         isOpen={showBookingWizard}
         onClose={() => setShowBookingWizard(false)}
-        title={`Book Clinical Appointment - Step ${bookingStep} of 2`}
+        title={
+          bookingStep === 1
+            ? "Select Clinical Provider"
+            : "Appointment Intelligence"
+        }
         width="lg"
       >
-        <div className="space-y-8">
-           {bookingStep === 1 ? (
-             <div className="space-y-6">
-                <div className="flex flex-col gap-2">
-                   <h4 className="text-xl font-black text-slate-800">Select Medical Specialist</h4>
-                   <p className="text-sm text-slate-400 font-medium">Choose from our verified clinical network.</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                   {availableDocs.map(doc => (
-                      <div 
-                        key={doc.id}
-                        onClick={() => { setSelectedDoc(doc); setBookingStep(2); }}
-                        className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all ${selectedDoc?.id === doc.id ? 'border-primary bg-primary/5' : 'border-slate-50 hover:border-primary/20 hover:bg-slate-50'}`}
-                      >
-                         <div className="flex items-center gap-4">
-                            <Avatar src={doc.avatar} name={doc.name} size="lg" />
-                            <div>
-                               <p className="font-black text-slate-800">{doc.name}</p>
-                               <p className="text-[10px] font-black text-primary uppercase tracking-widest">{doc.specialisation}</p>
-                            </div>
-                         </div>
-                      </div>
-                   ))}
-                </div>
-             </div>
-           ) : (
-             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-3xl">
-                   <Avatar src={selectedDoc.avatar} name={selectedDoc.name} size="lg" />
-                   <div>
-                      <p className="font-black text-slate-800">{selectedDoc.name}</p>
-                      <p className="text-xs font-bold text-slate-400">{selectedDoc.specialisation}</p>
-                   </div>
-                   <button onClick={() => setBookingStep(1)} className="ml-auto text-xs font-black text-primary uppercase tracking-widest">Change Doctor</button>
-                </div>
-
-                <div className="space-y-6">
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                         <Input 
-                           type="date" 
-                           label="Preferred Date"
-                           value={bookingData.date}
-                           onChange={(e) => setBookingData({...bookingData, date: e.target.value})}
-                         />
-                      </div>
-                      <div className="space-y-2">
-                         <Select 
-                           label="Consultation Type"
-                           value={bookingData.type}
-                           onChange={(v) => setBookingData({...bookingData, type: v})}
-                           options={[
-                             { label: 'Video Call', value: 'video' },
-                             { label: 'Encrypted Chat', value: 'chat' },
-                             { label: 'In-Person Facility', value: 'in_person' }
-                           ]}
-                         />
-                      </div>
-                   </div>
-
-                   <div className="space-y-4">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available Slots (Today/Selected Date)</label>
-                      <div className="grid grid-cols-4 gap-2">
-                         {selectedDoc.availableSlots.map((slot: string) => (
-                            <button 
-                              key={slot}
-                              onClick={() => setBookingData({...bookingData, time: slot})}
-                              className={`h-12 rounded-xl text-xs font-black transition-all ${bookingData.time === slot ? 'bg-primary text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-700'}`}
-                            >
-                               {slot}
-                            </button>
-                         ))}
-                      </div>
-                   </div>
-
-                   <div className="space-y-2">
-                      <Input 
-                         isTextArea
-                         label="Chief Complaint / Reason"
-                         rows={3} 
-                         placeholder="Briefly describe your systems or reason for follow-up..."
-                         value={bookingData.reason}
-                         onChange={(e) => setBookingData({...bookingData, reason: e.target.value})}
+        <div className="space-y-8 py-2">
+          {bookingStep === 1 ? (
+            <div className="space-y-6">
+              <div className="px-2">
+                <h4 className="text-xl font-bold text-slate-800 uppercase tracking-tight mb-1">
+                  Medical Network
+                </h4>
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-normal opacity-80">
+                  Chooose from our verified network of HPCSA-registered
+                  specialists.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
+                {availableDocs.map((doc) => (
+                  <Card
+                    key={doc.id}
+                    onClick={() => {
+                      setSelectedDoc(doc);
+                      setBookingStep(2);
+                    }}
+                    className={`group p-6 rounded-lg border-2 cursor-pointer transition-all duration-300 ${selectedDoc?.id === doc.id ? "border-primary bg-primary/5 shadow-none shadow-primary/10" : "border-slate-50 hover:border-primary/20 hover:bg-white hover:shadow-none hover:shadow-slate-900/5"}`}
+                  >
+                    <div className="flex items-center gap-5">
+                      <Avatar
+                        name={doc.name}
+                        size="lg"
+                        className="group-hover:scale-110 transition-transform duration-500 shadow-none shadow-slate-100"
                       />
-                   </div>
-
-                   <Button 
-                     className="w-full h-16 shadow-2xl shadow-primary/30"
-                     disabled={!bookingData.time || !bookingData.reason}
-                     onClick={handleBookAppointment}
-                   >
-                     Confirm Clinical Appointment
-                   </Button>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-800 text-sm mb-1 truncate group-hover:text-primary transition-colors">
+                          {doc.name}
+                        </p>
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-normal opacity-80">
+                          {doc.specialisation}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
+              <Card className="flex items-center justify-between gap-6 p-6 bg-slate-50/50 border border-slate-100 rounded-lg shadow-inner">
+                <div className="flex gap-5 items-center">
+                  <Avatar
+                    src={selectedDoc.avatar}
+                    name={selectedDoc.name}
+                    size="lg"
+                    className="shadow-none shadow-slate-200"
+                  />
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm uppercase tracking-tight">
+                      {selectedDoc.name}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mt-1">
+                      {selectedDoc.specialisation}
+                    </p>
+                  </div>
                 </div>
-             </div>
-           )}
+                <Button
+                  variant="ghost"
+                  onClick={() => setBookingStep(1)}
+                  className="text-[10px] font-bold text-primary uppercase tracking-normal border-none hover:bg-primary/5 transition-all px-4 rounded-xl"
+                  icon={<BiPlus className="rotate-45" size={14} />}
+                >
+                  Change
+                </Button>
+              </Card>
+
+              <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-5">
+                  <Input
+                    type="date"
+                    label="Clinical Preference Date"
+                    value={bookingData.date}
+                    onChange={(e) =>
+                      setBookingData({ ...bookingData, date: e.target.value })
+                    }
+                  />
+                  <Select
+                    label="Session Intelligence"
+                    value={bookingData.type}
+                    onChange={(v) =>
+                      setBookingData({ ...bookingData, type: v })
+                    }
+                    options={[
+                      { label: "Virtual Video Session", value: "video" },
+                      { label: "Secure Neural Chat", value: "chat" },
+                      { label: "Institutional Facility", value: "in_person" },
+                    ]}
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal px-1 flex items-center gap-2">
+                    <BiTime size={14} /> Global Availability Slots
+                  </label>
+                  <div className="grid grid-cols-4 gap-3">
+                    {selectedDoc.availableSlots.map((slot: string) => (
+                      <Button
+                        key={slot}
+                        variant={
+                          bookingData.time === slot ? "primary" : "ghost"
+                        }
+                        onClick={() =>
+                          setBookingData({ ...bookingData, time: slot })
+                        }
+                        className={`h-12 text-[10px] font-bold uppercase tracking-normal rounded-2xl transition-all duration-300 border-none ${bookingData.time === slot ? "shadow-none shadow-primary/20 scale-105" : "bg-white border border-slate-100 text-slate-400 hover:border-primary/20 hover:text-primary hover:bg-primary/5"}`}
+                      >
+                        {slot}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <Input
+                  isTextArea
+                  label="Chief Complaint Intel"
+                  rows={4}
+                  placeholder="Describe your current clinical systems, duration of symptoms, and any relevant history for the specialist to review before the session."
+                  value={bookingData.reason}
+                  onChange={(e) =>
+                    setBookingData({ ...bookingData, reason: e.target.value })
+                  }
+                  className="rounded-[1.5rem]"
+                />
+
+                <Button
+                  fullWidth
+                  className="h-16 shadow-none shadow-primary/30 rounded-[1.5rem] bg-primary hover:bg-primary/95 text-white"
+                  disabled={!bookingData.time || !bookingData.reason}
+                  onClick={handleBookAppointment}
+                  icon={<BiCheckCircle size={22} />}
+                >
+                  <span className="text-[12px] font-bold uppercase tracking-normal">
+                    Confirm Clinical Session
+                  </span>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </Modal>
+
+      {/* DOCTOR PROFILE MODAL */}
+      <DoctorProfileModal
+        isOpen={!!selectedPractitioner}
+        onClose={() => setSelectedPractitioner(null)}
+        doctor={selectedPractitioner}
+        onBook={() => {}}
+        onMessage={(id) => (window.location.href = "/patient/messages")}
+      />
     </div>
   );
 };

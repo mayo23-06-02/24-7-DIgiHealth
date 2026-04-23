@@ -5,7 +5,7 @@ export interface IConsultation extends Document {
   practitionerId: Types.ObjectId;
   facilityId?: Types.ObjectId;
   type: 'video' | 'chat' | 'in_person';
-  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'requested' | 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   scheduledStartTime: Date;
   scheduledEndTime: Date;
   chiefComplaint?: string;
@@ -19,7 +19,7 @@ const ConsultationSchema = new Schema<IConsultation>({
   practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   facilityId: { type: Schema.Types.ObjectId, ref: 'Facility' },
   type: { type: String, enum: ['video', 'chat', 'in_person'], required: true },
-  status: { type: String, enum: ['scheduled', 'in_progress', 'completed', 'cancelled', 'pending'], default: 'scheduled' },
+  status: { type: String, enum: ['requested', 'pending', 'scheduled', 'in_progress', 'completed', 'cancelled'], default: 'requested' },
   scheduledStartTime: { type: Date, required: true },
   scheduledEndTime: { type: Date, required: true },
   chiefComplaint: { type: String },
@@ -35,5 +35,8 @@ const ConsultationSchema = new Schema<IConsultation>({
 ConsultationSchema.index({ patientId: 1, scheduledStartTime: -1 });
 ConsultationSchema.index({ practitionerId: 1, scheduledStartTime: -1 });
 
-export const Consultation: Model<IConsultation> = mongoose.models.Consultation || mongoose.model<IConsultation>('Consultation', ConsultationSchema);
+if (mongoose.models.Consultation) {
+  delete mongoose.models.Consultation;
+}
+export const Consultation: Model<IConsultation> = mongoose.model<IConsultation>('Consultation', ConsultationSchema);
 export default Consultation;

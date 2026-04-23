@@ -15,7 +15,12 @@ import {
   BiUser,
   BiBuilding,
   BiPencil,
-  BiBell,
+  BiVideo,
+  BiCheckCircle,
+  BiDollar,
+  BiSolidTruck,
+  BiHome,
+  BiStore,
 } from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -27,33 +32,129 @@ import Carousel from "@/components/ui/Carousel";
 import { toast } from "react-hot-toast";
 import Avatar from "@/components/ui/Avatar";
 
+interface Appointment {
+  id: string;
+  title?: string;
+  dr?: string;
+  dr_specialty?: string;
+  time: string;
+  date: string;
+  type: "appointment" | "reminder" | "refill" | "note";
+  status: "confirmed" | "pending" | "cancelled";
+  concern?: string;
+  notes?: string;
+  location?: string;
+  institution?: string;
+  img?: string;
+  countdown?: string;
+  durationMinutes?: number;
+  // Refill specific fields
+  prescriptionId?: string;
+  prescriptionName?: string;
+  deliveryMethod?: "pickup" | "delivery";
+  deliveryAddress?: string;
+  pharmacyId?: string;
+  paymentMethod?: "insurance" | "card" | "cash";
+  reminderDays?: number;
+}
+
+interface Prescription {
+  id: string;
+  medicationName: string;
+  dosage: string;
+  refillsRemaining: number;
+  expiryDate: string;
+}
+
 export default function PatientCalendar() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [liveCarouselIndex, setLiveCarouselIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(
-    null,
-  );
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
   const [unavailableDays, setUnavailableDays] = useState<string[]>([]);
+  const [selectedDateStr, setSelectedDateStr] = useState<string>("");
 
-  // Selection lists
-  const [doctors, setDoctors] = useState<any[]>([]);
-  const [facilities, setFacilities] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<{ name: string }[]>([]);
+  const [facilities, setFacilities] = useState<{ name: string }[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
 
-  // Add event form state
-  const [showAddModal, setShowAddModal] = useState<string | null>(null); // dateStr
+  const [showAddModal, setShowAddModal] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addForm, setAddForm] = useState({
     title: "",
     time: "09:00",
-    type: "appointment",
+    type: "appointment" as Appointment["type"],
     notes: "",
     doctor: "",
     institution: "",
+    // Refill specific
+    prescriptionId: "",
+    deliveryMethod: "pickup" as "pickup" | "delivery",
+    deliveryAddress: "",
+    pharmacyId: "",
+    paymentMethod: "insurance" as "insurance" | "card" | "cash",
+    reminderDays: 3,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Fetch prescriptions when type changes to refill
+  useEffect(() => {
+    if (showAddModal && addForm.type === "refill") {
+      const fetchPrescriptions = async () => {
+        setLoadingPrescriptions(true);
+        try {
+          const res = await fetch("/api/patient/prescriptions");
+          if (res.ok) {
+            const data = await res.json();
+            setPrescriptions(data);
+          }
+        } catch {
+          // silent
+        } finally {
+          setLoadingPrescriptions(false);
+        }
+      };
+      fetchPrescriptions();
+    }
+  }, [showAddModal, addForm.type]);
+
+  // Helper: check if an appointment is joinable (5 min before start until end)
+  const isJoinable = (appt: Appointment): boolean => {
+    if (appt.type !== "appointment") return false;
+    if (appt.status !== "confirmed") return false;
+    const [month, day, year] = appt.date.split(" ");
+    const [hours, minutes] = appt.time.split(":");
+    const appointmentDate = new Date(
+      `${month} ${day}, ${year} ${hours}:${minutes}`,
+    );
+    const now = new Date();
+    const duration = appt.durationMinutes || 30;
+    const startTime = appointmentDate.getTime();
+    const endTime = startTime + duration * 60000;
+    const nowTime = now.getTime();
+    const fiveMinutesBefore = startTime - 5 * 60000;
+    return nowTime >= fiveMinutesBefore && nowTime <= endTime;
+  };
+
+  const getJoinCountdown = (appt: Appointment): string => {
+    const [month, day, year] = appt.date.split(" ");
+    const [hours, minutes] = appt.time.split(":");
+    const appointmentDate = new Date(
+      `${month} ${day}, ${year} ${hours}:${minutes}`,
+    );
+    const now = new Date();
+    const diffSeconds = Math.floor(
+      (appointmentDate.getTime() - now.getTime()) / 1000,
+    );
+    if (diffSeconds <= 0) return "Live now";
+    const minutesLeft = Math.floor(diffSeconds / 60);
+    if (minutesLeft < 5) return `Starts in ${minutesLeft} min`;
+    return "";
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -102,6 +203,15 @@ export default function PatientCalendar() {
     [facilities],
   );
 
+  const prescriptionOptions = useMemo(() => {
+    const opts = prescriptions.map((p) => ({
+      value: p.id,
+      label: `${p.medicationName} (${p.dosage}) - ${p.refillsRemaining} refills left`,
+    }));
+    opts.unshift({ value: "new", label: "+ Request new prescription" });
+    return opts;
+  }, [prescriptions]);
+
   const carouselDays = useMemo(() => {
     const days: any[] = [];
     for (let i = 0; i < 30; i++) {
@@ -109,19 +219,15 @@ export default function PatientCalendar() {
       d.setDate(d.getDate() + i);
       const dateStr = d.toDateString();
       const dayAppts = appointments.filter((a) => a.date === dateStr);
-
-      // Group markers by type and count
       const markerMap = dayAppts.reduce((acc: any, curr) => {
         const type = curr.type || "appointment";
         acc[type] = (acc[type] || 0) + 1;
         return acc;
       }, {});
-
       const markers = Object.keys(markerMap).map((type) => ({
         type,
         count: markerMap[type],
       }));
-
       days.push({
         dateStr,
         dayNum: d.getDate(),
@@ -136,6 +242,17 @@ export default function PatientCalendar() {
     return days;
   }, [appointments, unavailableDays]);
 
+  useEffect(() => {
+    if (carouselDays[carouselIndex]) {
+      setSelectedDateStr(carouselDays[carouselIndex].dateStr);
+      setLiveCarouselIndex(0);
+    }
+  }, [carouselIndex, carouselDays]);
+
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((a) => a.date === selectedDateStr);
+  }, [appointments, selectedDateStr]);
+
   const toggleUnavailable = (dateStr: string) =>
     setUnavailableDays((prev) =>
       prev.includes(dateStr)
@@ -144,31 +261,45 @@ export default function PatientCalendar() {
     );
 
   const handleAddSubmit = async () => {
-    if (!addForm.title.trim() || !showAddModal) return;
+    if (!addForm.title.trim() && addForm.type !== "refill") return;
+    if (addForm.type === "refill" && !addForm.prescriptionId) {
+      toast.error("Please select a prescription");
+      return;
+    }
     setIsSaving(true);
     try {
       const url = editingId
         ? `/api/patient/agenda/${editingId}`
         : "/api/patient/agenda";
       const method = editingId ? "PUT" : "POST";
-
+      const payload: any = {
+        date: showAddModal,
+        type: addForm.type,
+        time: addForm.time,
+        notes: addForm.notes,
+      };
+      if (addForm.type === "appointment") {
+        payload.title = addForm.title;
+        payload.doctor = addForm.doctor;
+        payload.institution = addForm.institution;
+      } else if (addForm.type === "reminder") {
+        payload.title = addForm.title;
+      } else if (addForm.type === "note") {
+        payload.title = addForm.title;
+      } else if (addForm.type === "refill") {
+        payload.prescriptionId = addForm.prescriptionId;
+        payload.deliveryMethod = addForm.deliveryMethod;
+        payload.deliveryAddress = addForm.deliveryAddress;
+        payload.pharmacyId = addForm.pharmacyId;
+        payload.paymentMethod = addForm.paymentMethod;
+        payload.reminderDays = addForm.reminderDays;
+      }
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...addForm, date: showAddModal }),
+        body: JSON.stringify(payload),
       });
-
       if (res.ok) {
-        // Notification simulation
-        if (addForm.doctor || addForm.institution) {
-          const target = addForm.doctor || addForm.institution;
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 800)), {
-            loading: `Notifying ${target}...`,
-            success: `${target} has been notified`,
-            error: "Failed to notify",
-          });
-        }
-
         await fetchAgenda();
         setShowAddModal(null);
         setEditingId(null);
@@ -179,12 +310,20 @@ export default function PatientCalendar() {
           notes: "",
           doctor: "",
           institution: "",
+          prescriptionId: "",
+          deliveryMethod: "pickup",
+          deliveryAddress: "",
+          pharmacyId: "",
+          paymentMethod: "insurance",
+          reminderDays: 3,
         });
         toast.success(
           editingId
             ? "Event updated"
             : "Event synchronised with your care team",
         );
+      } else {
+        throw new Error("Failed to save");
       }
     } catch {
       toast.error("Failed to save event");
@@ -192,7 +331,7 @@ export default function PatientCalendar() {
     setIsSaving(false);
   };
 
-  const handleDelete = async (appt: any) => {
+  const handleDelete = async (appt: Appointment) => {
     if (!appt.id) return;
     setIsDeleting(true);
     try {
@@ -202,6 +341,8 @@ export default function PatientCalendar() {
       if (res.ok) {
         await fetchAgenda();
         toast.success("Event removed");
+      } else {
+        throw new Error("Failed to delete");
       }
     } catch {
       toast.error("Failed to remove event");
@@ -210,15 +351,21 @@ export default function PatientCalendar() {
     setSelectedAppointment(null);
   };
 
-  const handleEdit = (appt: any) => {
+  const handleEdit = (appt: Appointment) => {
     setEditingId(appt.id);
     setAddForm({
       title: appt.title || appt.dr || "",
       time: appt.time || "09:00",
-      type: appt.type || "appointment",
+      type: appt.type,
       notes: appt.notes || appt.concern || "",
       doctor: appt.dr || "",
       institution: appt.institution || "",
+      prescriptionId: appt.prescriptionId || "",
+      deliveryMethod: appt.deliveryMethod || "pickup",
+      deliveryAddress: appt.deliveryAddress || "",
+      pharmacyId: appt.pharmacyId || "",
+      paymentMethod: appt.paymentMethod || "insurance",
+      reminderDays: appt.reminderDays || 3,
     });
     setShowAddModal(appt.date);
   };
@@ -231,7 +378,6 @@ export default function PatientCalendar() {
     e.preventDefault();
     const apptId = e.dataTransfer.getData("apptId");
     if (!apptId) return;
-
     try {
       const res = await fetch(`/api/patient/agenda/${apptId}`, {
         method: "PATCH",
@@ -241,14 +387,16 @@ export default function PatientCalendar() {
       if (res.ok) {
         await fetchAgenda();
         toast.success("Moved successfully");
+      } else {
+        throw new Error("Failed to move");
       }
     } catch {
       toast.error("Failed to move event");
     }
   };
 
-  const isPersonalEvent = (appt: any) =>
-    ["note", "reminder", "appointment"].includes(appt.type);
+  const isPersonalEvent = (appt: Appointment) =>
+    ["note", "reminder", "appointment", "refill"].includes(appt.type);
 
   const getMarkerColor = (type: string) => {
     switch (type) {
@@ -263,15 +411,27 @@ export default function PatientCalendar() {
     }
   };
 
+  const [visibleCount, setVisibleCount] = useState(3);
+  useEffect(() => {
+    const updateCount = () => {
+      if (window.innerWidth >= 1200) setVisibleCount(3);
+      else if (window.innerWidth >= 800) setVisibleCount(2);
+      else setVisibleCount(1);
+    };
+    updateCount();
+    window.addEventListener("resize", updateCount);
+    return () => window.removeEventListener("resize", updateCount);
+  }, []);
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* HEADER */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <p className="text-lg font-bold text-slate-800 ">
+          <p className="text-lg font-bold text-slate-800">
             Schedule at a Glance
           </p>
-          <p className="text-xs font-thin text-slate-400 ">
+          <p className="text-xs font-thin text-slate-400">
             Manage your appointments and medication reminders.
           </p>
         </div>
@@ -296,15 +456,13 @@ export default function PatientCalendar() {
       </div>
 
       <div className="flex-1 overflow-y-hidden custom-scrollbar py-4 space-y-4">
-        {/* DAY CAROUSEL */}
+        {/* DAY CAROUSEL (same as before) */}
         <section>
           <Carousel
             selectedItem={carouselIndex}
             onChange={setCarouselIndex}
             centerMode={true}
-            centerSlidePercentage={
-              isClient && window.innerWidth < 1024 ? 80 : 33.33
-            }
+            centerSlidePercentage={100 / visibleCount}
           >
             {carouselDays.map((day, idx) => (
               <div
@@ -319,11 +477,12 @@ export default function PatientCalendar() {
                     day.isUnavailable
                       ? "bg-slate-50 border-slate-100 opacity-50 grayscale pointer-events-none"
                       : day.isToday
-                        ? "border-primary bg-primary/5 shadow-xl shadow-primary/5 ring-1 ring-primary/20"
-                        : "border-slate-100 bg-white hover:border-primary/30 hover:shadow-xl hover:shadow-slate-200/50"
+                        ? "border-primary bg-primary/5 shadow-none shadow-primary/5 ring-1 ring-primary/20"
+                        : "border-slate-100 bg-white hover:border-primary/30 hover:shadow-none hover:shadow-slate-200/50"
                   }`}
                 >
-                  <div className="flex justify-between items-center ">
+                  {/* same day card content as before */}
+                  <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1.5 items-center">
                         {day.markers.map((m: any, i: number) => (
@@ -340,7 +499,11 @@ export default function PatientCalendar() {
                         ))}
                       </div>
                       <span
-                        className={`text-[10px] items-center font-bold whitespace-nowrap ${day.isToday ? "text-primary flex gap-1" : "text-slate-400"}`}
+                        className={`text-xs items-center font-bold whitespace-nowrap ${
+                          day.isToday
+                            ? "text-primary flex gap-1"
+                            : "text-slate-400"
+                        }`}
                       >
                         {day.dayName} {day.monthName}
                       </span>
@@ -370,7 +533,11 @@ export default function PatientCalendar() {
                   <div className="flex items-end justify-between">
                     <div className="flex flex-col-reverse gap-2">
                       <span
-                        className={`text-4xl font-semibold tracking-tighter ${day.isToday ? "text-primary" : "text-slate-200 group-hover:text-primary transition-colors"}`}
+                        className={`text-4xl font-semibold tracking-tighter ${
+                          day.isToday
+                            ? "text-primary"
+                            : "text-slate-200 group-hover:text-primary transition-colors"
+                        }`}
                       >
                         {day.dayNum.toString().padStart(2, "0")}
                       </span>
@@ -381,7 +548,11 @@ export default function PatientCalendar() {
                           e.stopPropagation();
                           toggleUnavailable(day.dateStr);
                         }}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${day.isUnavailable ? "bg-primary text-white" : "text-slate-300 bg-slate-50 hover:text-primary"}`}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                          day.isUnavailable
+                            ? "bg-primary text-white"
+                            : "text-slate-300 bg-slate-50 hover:text-primary"
+                        }`}
                       >
                         <BiBlock size={18} />
                       </button>
@@ -393,137 +564,186 @@ export default function PatientCalendar() {
           </Carousel>
         </section>
 
-        {/* LIVE SCHEDULE */}
-        <section className="space-y-6  h-full">
-          <div className="flex items-center  justify-between">
-            <h4 className="text-lg font-bold text-slate-800">
-              Live Schedule Overview
-            </h4>
-            <div className="flex gap-2">
-              <button
-                onClick={() =>
-                  setLiveCarouselIndex((prev) => Math.max(0, prev - 1))
-                }
-                className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-              >
-                <BiChevronLeft size={24} />
-              </button>
-              <button
-                onClick={() =>
-                  setLiveCarouselIndex((prev) =>
-                    Math.min(appointments.length - 1, prev + 1),
-                  )
-                }
-                className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-              >
-                <BiChevronRight size={24} />
-              </button>
+        {/* LIVE SCHEDULE FEED (same as before) */}
+        <section className="space-y-6 h-full">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-lg font-bold text-slate-800">
+                Live Schedule Overview
+              </h4>
+              <p className="text-xs font-thin text-slate-400">
+                {selectedDateStr
+                  ? `Events for ${new Date(selectedDateStr).toLocaleDateString(
+                      "en-ZA",
+                      {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                      },
+                    )}`
+                  : "Select a day to see events"}
+              </p>
             </div>
+            {filteredAppointments.length > 1 && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    setLiveCarouselIndex((prev) => Math.max(0, prev - 1))
+                  }
+                  className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                >
+                  <BiChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={() =>
+                    setLiveCarouselIndex((prev) =>
+                      Math.min(filteredAppointments.length - 1, prev + 1),
+                    )
+                  }
+                  className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                >
+                  <BiChevronRight size={24} />
+                </button>
+              </div>
+            )}
           </div>
 
-          {appointments.length > 0 ? (
+          {filteredAppointments.length > 0 ? (
             <Carousel
               selectedItem={liveCarouselIndex}
               onChange={setLiveCarouselIndex}
               centerMode={true}
               centerSlidePercentage={
-                isClient && window.innerWidth < 1024 ? 90 : 85
+                isClient && window.innerWidth < 600 ? 100 : 45
               }
               className="h-full"
             >
-              {appointments.map((appt, idx) => (
-                <div key={appt.id || idx} className="px-1 h-full">
-                  <div
-                    onClick={() => setSelectedAppointment(appt)}
-                    className="bg-slate-50 border border-slate-200 rounded-lg p-6 hover:shadow-2xl hover:shadow-slate-200/50 transition-all group flex flex-col h-full cursor-pointer"
-                  >
-                    <div className="flex h-full justify-between items-start mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-slate-100 overflow-hidden relative border-2 border-white shadow-sm">
-                          {appt.img ? (
-                            <Avatar name={appt.dr} src={appt.img} size="sm" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-2xl">
-                              {appt.type === "refill"
-                                ? "💊"
-                                : appt.type === "reminder"
-                                  ? "🔔"
-                                  : "📅"}
+              {filteredAppointments.map((appt, idx) => {
+                const joinable = isJoinable(appt);
+                return (
+                  <div key={appt.id || idx} className="px-2 h-full">
+                    <div
+                      onClick={() => setSelectedAppointment(appt)}
+                      className="bg-slate-50 border border-slate-200 rounded-lg p-4 hover: hover:shadow-slate-200/50 transition-all group flex flex-col h-full cursor-pointer"
+                    >
+                      {/* Same appointment card content as before */}
+                      <div className="flex h-full justify-between items-start mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 bg-slate-100 overflow-hidden relative rounded-xl">
+                            {appt.img ? (
+                              <Avatar name={appt.dr} size="md" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-2xl">
+                                {appt.type === "refill"
+                                  ? "💊"
+                                  : appt.type === "reminder"
+                                    ? "🔔"
+                                    : "📅"}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <h5 className="text-base font-bold text-slate-800 leading-none mb-1 truncate max-w-[150px]">
+                              {appt.dr ||
+                                appt.title ||
+                                (appt.type === "refill"
+                                  ? "Prescription Refill"
+                                  : "Event")}
+                            </h5>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-slate-400 uppercase tracking-normal flex items-center gap-1">
+                                <BiTime className="text-primary" /> {appt.time}
+                              </p>
+                              <span className="text-xs text-slate-300">•</span>
+                              <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                                {appt.status}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <Badge
+                            label={
+                              appt.countdown ||
+                              (appt.status === "confirmed"
+                                ? "Confirmed"
+                                : "Pending")
+                            }
+                            status={
+                              appt.status === "confirmed"
+                                ? "success"
+                                : "warning"
+                            }
+                            variant="soft"
+                          />
+                          {joinable && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.location.href = `/patient/messages?autoStart=true&consultationId=${appt.id}`;
+                              }}
+                              className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-normal flex items-center gap-1 shadow-none"
+                            >
+                              <BiVideo size={14} /> Join Room
+                              {getJoinCountdown(appt) &&
+                                ` (${getJoinCountdown(appt)})`}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {appt.location && (
+                            <div className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
+                              <BiMap className="text-primary" /> {appt.location}
+                            </div>
+                          )}
+                          {appt.dr_specialty && (
+                            <div className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
+                              <BiTrendingUp className="text-emerald-500" />{" "}
+                              {appt.dr_specialty}
                             </div>
                           )}
                         </div>
-                        <div>
-                          <h5 className="text-base font-bold  text-slate-800 leading-none mb-1 truncate max-w-[150px]">
-                            {appt.dr || appt.title}
-                          </h5>
-                          <div className="flex items-center gap-2">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                              <BiTime className="text-primary" /> {appt.time}
-                            </p>
-                            <span className="text-[10px] text-slate-300">
-                              •
-                            </span>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                              {appt.status}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge
-                        label={appt.countdown}
-                        status={
-                          appt.status === "confirmed" ? "success" : "warning"
-                        }
-                        variant="soft"
-                        size="sm"
-                      />
-                    </div>
 
-                    <div className="flex flex-col gap-3">
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {appt.location && (
-                          <div className="flex items-center gap-1 text-[10px] font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
-                            <BiMap className="text-primary" /> {appt.location}
+                        <div className="flex flex-col gap-1 justify-start items-start">
+                          <p className="text-xs font-bold text-slate-300 uppercase tracking-normal leading-none">
+                            {appt.type === "refill"
+                              ? "Refill Details"
+                              : "Appointment Details"}
+                          </p>
+                          <div className="bg-white p-4 rounded-xl border border-slate-100 w-full text-xs font-bold text-slate-500 leading-relaxed text-left italic">
+                            {appt.concern ? (
+                              `"${appt.concern}"`
+                            ) : appt.prescriptionName ? (
+                              `💊 ${appt.prescriptionName}`
+                            ) : (
+                              <span className="italic text-slate-300">
+                                No notes provided
+                              </span>
+                            )}
                           </div>
-                        )}
-                        {appt.dr_specialty && (
-                          <div className="flex items-center gap-1 text-[10px] font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
-                            <BiTrendingUp className="text-emerald-500" />{" "}
-                            {appt.dr_specialty}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-1 justify-start items-start">
-                        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest leading-none">
-                          Appoinment Details
-                        </p>
-                        <div className="bg-white p-4 rounded-xl border border-slate-100 w-full text-[11px] font-bold text-slate-500 leading-relaxed text-left italic">
-                          {appt.concern ? (
-                            `"${appt.concern}"`
-                          ) : (
-                            <span className="italic text-slate-300">
-                              No notes provided
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </Carousel>
           ) : (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
               <BiCalendar size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm font-bold">No upcoming events.</p>
+              <p className="text-sm font-bold">
+                No events scheduled for this day.
+              </p>
               <p className="text-xs mt-1">Tap a date above to add one.</p>
             </div>
           )}
         </section>
       </div>
 
-      {/* COMBINED ADD/EDIT/VIEW DAY MODAL */}
+      {/* ADD/EDIT MODAL – DYNAMIC FORM FIELDS BASED ON TYPE */}
       <Modal
         isOpen={!!showAddModal}
         onClose={() => {
@@ -536,15 +756,29 @@ export default function PatientCalendar() {
             notes: "",
             doctor: "",
             institution: "",
+            prescriptionId: "",
+            deliveryMethod: "pickup",
+            deliveryAddress: "",
+            pharmacyId: "",
+            paymentMethod: "insurance",
+            reminderDays: 3,
           });
         }}
-        title={`${editingId ? "Edit" : "Day Details"} — ${showAddModal ? new Date(showAddModal).toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long" }) : ""}`}
+        title={`${editingId ? "Edit" : "Add"} ${addForm.type === "refill" ? "Refill" : addForm.type === "reminder" ? "Reminder" : addForm.type === "note" ? "Note" : "Appointment"} — ${
+          showAddModal
+            ? new Date(showAddModal).toLocaleDateString("en-ZA", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })
+            : ""
+        }`}
       >
         <div className="space-y-6">
-          {/* Existing Appointments for the day */}
+          {/* Existing events for this day (when adding) */}
           {!editingId && showAddModal && (
             <div className="space-y-3">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
                 Scheduled for this day
               </p>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
@@ -565,9 +799,11 @@ export default function PatientCalendar() {
                           />
                           <div>
                             <p className="text-sm font-bold text-slate-800">
-                              {appt.title || appt.dr}
+                              {appt.title ||
+                                appt.dr ||
+                                (appt.type === "refill" ? "Refill" : "Event")}
                             </p>
-                            <p className="text-[10px] text-slate-400 font-medium">
+                            <p className="text-xs text-slate-400 font-medium">
                               {appt.time} • {appt.type}
                             </p>
                           </div>
@@ -599,11 +835,11 @@ export default function PatientCalendar() {
           )}
 
           <div className="space-y-4">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
               {editingId ? "Modify Selection" : "Add New Event"}
             </p>
 
-            {/* Pill Selection for Type */}
+            {/* Type Pills */}
             <div className="flex flex-wrap gap-2">
               {[
                 {
@@ -621,10 +857,15 @@ export default function PatientCalendar() {
               ].map((opt) => (
                 <button
                   key={opt.value}
-                  onClick={() => setAddForm({ ...addForm, type: opt.value })}
+                  onClick={() =>
+                    setAddForm({
+                      ...addForm,
+                      type: opt.value as Appointment["type"],
+                    })
+                  }
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
                     addForm.type === opt.value
-                      ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                      ? "bg-primary text-white border-primary shadow-none shadow-primary/20"
                       : "bg-white text-slate-500 border-slate-200 hover:border-primary/50"
                   }`}
                 >
@@ -633,51 +874,279 @@ export default function PatientCalendar() {
               ))}
             </div>
 
-            <Input
-              label="Event Title / Concern"
-              type="text"
-              placeholder="e.g. Blood pressure check"
-              value={addForm.title}
-              onChange={(e) =>
-                setAddForm({ ...addForm, title: e.target.value })
-              }
-            />
+            {/* APPOINTMENT FIELDS */}
+            {addForm.type === "appointment" && (
+              <>
+                <Input
+                  label="Concern / Title"
+                  type="text"
+                  placeholder="e.g. Blood pressure check"
+                  value={addForm.title}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, title: e.target.value })
+                  }
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Time"
+                    type="time"
+                    value={addForm.time}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, time: e.target.value })
+                    }
+                  />
+                  <Select
+                    label="Doctor"
+                    value={addForm.doctor}
+                    onChange={(v) => setAddForm({ ...addForm, doctor: v })}
+                    options={doctorOptions}
+                    icon={<BiUser />}
+                  />
+                </div>
+                <Select
+                  label="Institution / Clinic"
+                  value={addForm.institution}
+                  onChange={(v) => setAddForm({ ...addForm, institution: v })}
+                  options={facilityOptions}
+                  icon={<BiBuilding />}
+                />
+                <Input
+                  label="Notes"
+                  textarea
+                  placeholder="Any details or observations..."
+                  value={addForm.notes}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, notes: e.target.value })
+                  }
+                />
+              </>
+            )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Time"
-                type="time"
-                value={addForm.time}
-                onChange={(e) =>
-                  setAddForm({ ...addForm, time: e.target.value })
-                }
-              />
-              <Select
-                label="Doctor"
-                value={addForm.doctor}
-                onChange={(v) => setAddForm({ ...addForm, doctor: v })}
-                options={doctorOptions}
-                icon={<BiUser />}
-              />
-            </div>
+            {/* REMINDER FIELDS */}
+            {addForm.type === "reminder" && (
+              <>
+                <Input
+                  label="Reminder Title"
+                  type="text"
+                  placeholder="e.g. Take medication, Drink water"
+                  value={addForm.title}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, title: e.target.value })
+                  }
+                />
+                <Input
+                  label="Time"
+                  type="time"
+                  value={addForm.time}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, time: e.target.value })
+                  }
+                />
+                <Input
+                  label="Notes (optional)"
+                  textarea
+                  placeholder="Additional info..."
+                  value={addForm.notes}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, notes: e.target.value })
+                  }
+                />
+              </>
+            )}
 
-            <Select
-              label="Institution / Clinic"
-              value={addForm.institution}
-              onChange={(v) => setAddForm({ ...addForm, institution: v })}
-              options={facilityOptions}
-              icon={<BiBuilding />}
-            />
+            {/* NOTE FIELDS */}
+            {addForm.type === "note" && (
+              <>
+                <Input
+                  label="Note Title"
+                  type="text"
+                  placeholder="e.g. Blood pressure reading"
+                  value={addForm.title}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, title: e.target.value })
+                  }
+                />
+                <Input
+                  label="Note Content"
+                  textarea
+                  placeholder="Write your note here..."
+                  value={addForm.notes}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, notes: e.target.value })
+                  }
+                />
+              </>
+            )}
 
-            <Input
-              label="Notes"
-              textarea
-              placeholder="Any details or observations..."
-              value={addForm.notes}
-              onChange={(e) =>
-                setAddForm({ ...addForm, notes: e.target.value })
-              }
-            />
+            {/* REFILL FIELDS */}
+            {addForm.type === "refill" && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                    Select Prescription
+                  </label>
+                  {loadingPrescriptions ? (
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <BiLoaderAlt className="animate-spin" /> Loading
+                      prescriptions...
+                    </div>
+                  ) : (
+                    <select
+                      value={addForm.prescriptionId}
+                      onChange={(e) =>
+                        setAddForm({
+                          ...addForm,
+                          prescriptionId: e.target.value,
+                        })
+                      }
+                      className="w-full p-3 rounded-xl border border-slate-200 bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="">-- Select a prescription --</option>
+                      {prescriptionOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                {addForm.prescriptionId === "new" && (
+                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                    <p className="text-xs font-bold text-amber-700">
+                      Request new prescription? Please contact your doctor
+                      directly or use the "Message" feature.
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                      Delivery Method
+                    </label>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setAddForm({ ...addForm, deliveryMethod: "pickup" })
+                        }
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-bold transition ${
+                          addForm.deliveryMethod === "pickup"
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white text-slate-500 border-slate-200"
+                        }`}
+                      >
+                        <BiStore /> Pickup
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setAddForm({ ...addForm, deliveryMethod: "delivery" })
+                        }
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-bold transition ${
+                          addForm.deliveryMethod === "delivery"
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white text-slate-500 border-slate-200"
+                        }`}
+                      >
+                        <BiSolidTruck /> Delivery
+                      </button>
+                    </div>
+                  </div>
+
+                  {addForm.deliveryMethod === "delivery" && (
+                    <div className="col-span-2">
+                      <Input
+                        label="Delivery Address"
+                        type="text"
+                        placeholder="Street, city, code"
+                        value={addForm.deliveryAddress}
+                        onChange={(e) =>
+                          setAddForm({
+                            ...addForm,
+                            deliveryAddress: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                    Payment Method
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    {[
+                      {
+                        value: "insurance",
+                        label: "Medical Aid",
+                        icon: <BiCheckCircle />,
+                      },
+                      {
+                        value: "card",
+                        label: "Credit/Debit Card",
+                        icon: <BiDollar />,
+                      },
+                      {
+                        value: "cash",
+                        label: "Cash on Pickup",
+                        icon: <BiDollar />,
+                      },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() =>
+                          setAddForm({
+                            ...addForm,
+                            paymentMethod: opt.value as any,
+                          })
+                        }
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition border ${
+                          addForm.paymentMethod === opt.value
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white text-slate-500 border-slate-200"
+                        }`}
+                      >
+                        {opt.icon} {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-normal">
+                    Remind me in (days)
+                  </label>
+                  <select
+                    value={addForm.reminderDays}
+                    onChange={(e) =>
+                      setAddForm({
+                        ...addForm,
+                        reminderDays: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full p-3 rounded-xl border border-slate-200 bg-white"
+                  >
+                    <option value={1}>1 day before</option>
+                    <option value={2}>2 days before</option>
+                    <option value={3}>3 days before</option>
+                    <option value={7}>1 week before</option>
+                  </select>
+                </div>
+
+                <Input
+                  label="Additional Notes (for pharmacist)"
+                  textarea
+                  placeholder="Any special instructions..."
+                  value={addForm.notes}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, notes: e.target.value })
+                  }
+                />
+              </>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -693,7 +1162,10 @@ export default function PatientCalendar() {
             </Button>
             <Button
               className="flex-1 rounded-xl"
-              disabled={isSaving || !addForm.title.trim()}
+              disabled={
+                isSaving ||
+                (addForm.type === "appointment" && !addForm.title.trim())
+              }
               onClick={handleAddSubmit}
             >
               {isSaving ? (
@@ -709,7 +1181,7 @@ export default function PatientCalendar() {
         </div>
       </Modal>
 
-      {/* DETAIL MODAL */}
+      {/* DETAIL MODAL – enhanced to show refill details */}
       <Modal
         isOpen={!!selectedAppointment}
         onClose={() => setSelectedAppointment(null)}
@@ -734,8 +1206,12 @@ export default function PatientCalendar() {
                 )}
               </div>
               <div>
-                <h4 className="text-xl font-black text-slate-800">
-                  {selectedAppointment.dr || selectedAppointment.title}
+                <h4 className="text-xl font-bold text-slate-800">
+                  {selectedAppointment.dr ||
+                    selectedAppointment.title ||
+                    (selectedAppointment.type === "refill"
+                      ? "Prescription Refill"
+                      : "Event")}
                 </h4>
                 <p className="text-sm font-bold text-primary mb-1">
                   {selectedAppointment.dr_specialty || selectedAppointment.type}
@@ -763,18 +1239,67 @@ export default function PatientCalendar() {
               </div>
             )}
 
+            {/* Show refill specific details */}
+            {selectedAppointment.type === "refill" && (
+              <div className="bg-slate-50 p-4 rounded-xl space-y-2">
+                {selectedAppointment.prescriptionName && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Medication:</span>
+                    <span className="font-bold">
+                      {selectedAppointment.prescriptionName}
+                    </span>
+                  </div>
+                )}
+                {selectedAppointment.deliveryMethod && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Delivery:</span>
+                    <span className="font-bold capitalize">
+                      {selectedAppointment.deliveryMethod}
+                    </span>
+                  </div>
+                )}
+                {selectedAppointment.paymentMethod && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Payment:</span>
+                    <span className="font-bold capitalize">
+                      {selectedAppointment.paymentMethod}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
                 <BiMap className="text-primary text-lg" />
-                {selectedAppointment.location || "Generic Location"}
+                {selectedAppointment.location ||
+                  (selectedAppointment.type === "refill"
+                    ? selectedAppointment.deliveryMethod === "delivery"
+                      ? selectedAppointment.deliveryAddress || "To be delivered"
+                      : "Pickup at pharmacy"
+                    : "Generic Location")}
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
                 <BiBuilding className="text-primary text-lg" />
-                {selectedAppointment.institution || "Main Office"}
+                {selectedAppointment.institution ||
+                  (selectedAppointment.type === "refill"
+                    ? selectedAppointment.pharmacyId || "Your pharmacy"
+                    : "Main Office")}
               </div>
             </div>
 
             <div className="flex gap-3">
+              {selectedAppointment.status === "confirmed" &&
+                isJoinable(selectedAppointment) && (
+                  <Button
+                    className="flex-1 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-none shadow-primary/30"
+                    onClick={() => {
+                      window.location.href = `/patient/messages?autoStart=true&consultationId=${selectedAppointment.id}`;
+                    }}
+                  >
+                    <BiVideo className="mr-2" /> Join Appointment Room
+                  </Button>
+                )}
               {isPersonalEvent(selectedAppointment) && (
                 <>
                   <Button
@@ -788,7 +1313,6 @@ export default function PatientCalendar() {
                     <BiPencil className="mr-2" /> Edit
                   </Button>
                   <Button
-                    variant="danger"
                     className="flex-1 rounded-xl"
                     disabled={isDeleting}
                     onClick={() => handleDelete(selectedAppointment)}

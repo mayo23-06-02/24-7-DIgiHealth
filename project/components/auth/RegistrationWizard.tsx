@@ -20,7 +20,7 @@ import {
   HospitalStep3,
   HospitalStep4,
 } from "./steps/HospitalWizardSteps";
-import { EMTStep1, EMTStep2, EMTStep3, EMTStep4 } from "./steps/EMTWizardSteps";
+
 import Button from "@/components/ui/Button";
 import ProgressBar from "@/components/ui/ProgressBar";
 
@@ -55,11 +55,7 @@ const roleConfig: Record<
       "Facility Media",
     ],
   },
-  emt: {
-    label: "First Responder (EMT)",
-    color: "#dc2626",
-    steps: ["Credentials", "Contact & Coverage", "Documents", "POPIA Consent"],
-  },
+
 };
 
 // ─── Skippable steps (no validation required) ────────────────────────────────
@@ -145,18 +141,7 @@ function renderStep(
     if (step === 4)
       return <HospitalStep4 formData={formData} updateData={updateData} />;
   }
-  if (role === "emt") {
-    if (step === 1)
-      return (
-        <EMTStep1 formData={formData} updateData={updateData} errors={errors} />
-      );
-    if (step === 2)
-      return <EMTStep2 formData={formData} updateData={updateData} />;
-    if (step === 3)
-      return <EMTStep3 formData={formData} updateData={updateData} />;
-    if (step === 4)
-      return <EMTStep4 formData={formData} updateData={updateData} />;
-  }
+
   return null;
 }
 
@@ -189,17 +174,14 @@ function validateStep(
     if (!formData.dohRegNumber?.trim())
       err.dohRegNumber = "DoH Registration number is required.";
   }
-  if (role === "emt" && step === 1) {
-    if (!formData.emtRegNumber?.trim())
-      err.emtRegNumber = "EMT Registration number is required.";
-  }
+
   if (role === "practitioner" && step === 2) {
     const cleanMobile = formData.mobile?.replace(/\s+/g, "");
     if (!cleanMobile?.match(/^(\+27|0)[6-8][0-9]{8}$/))
       err.mobile = "Enter a valid SA mobile number.";
   }
-  // POPIA step: patient step 2, EMT step 4
-  if ((role === "patient" && step === 2) || (role === "emt" && step === 4)) {
+  // POPIA step: patient step 2
+  if (role === "patient" && step === 2) {
     if (!formData.consent) err.consent = "POPIA consent is required.";
   }
   return err;
@@ -350,11 +332,11 @@ export default function RegistrationWizard({ role }: { role: string }) {
         width: "100%",
         maxWidth: "1300px",
       }}
-      className="bg-white h-[90vh] px-10 rounded-lg shadow-2xl w-full max-w-4xl mx-auto relative overflow-hidden animate-in fade-in duration-700"
+      className="bg-white overflow-auto h-[90vh] px-10 rounded-lg  w-full max-w-4xl mx-auto relative  animate-in fade-in duration-700"
     >
       {/* Offline banner */}
       {!isOnline && (
-        <div className="bg-amber-500 text-white text-center text-xs font-black uppercase tracking-[0.2em] py-3 px-6">
+        <div className="bg-amber-500 text-white text-center text-xs font-bold uppercase tracking-normal py-3 px-6">
           You are offline — progress saved locally. Go online to submit.
         </div>
       )}
@@ -385,7 +367,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
           <div className="py-5 flex flex-col gap-[10px]">
             <div className="inline-flex items-center gap-2 px-[10px] py-[5px] rounded-full  mb-[15px]">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              <span className="text-xs  text-primary uppercase tracking-widest">
+              <span className="text-xs  text-primary uppercase tracking-normal">
                 {config.label} Registry
               </span>
             </div>
@@ -397,7 +379,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
             </h2>
           </div>
           <div className="text-right shrink-0 ml-6">
-            <p className="text-xs text-slate-300 uppercase tracking-widest mb-[5px]">
+            <p className="text-xs text-slate-300 uppercase tracking-normal mb-[5px]">
               Progress
             </p>
             <p className="text-3xl font-semibold text-primary leading-none">
@@ -418,7 +400,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
                 className={`h-1 w-full rounded-full transition-all duration-500 ${i < step ? "bg-primary" : "bg-slate-100"}`}
               />
               <span
-                className={`text-[10px] font-bold uppercase tracking-wider hidden md:block transition-colors ${i + 1 === step ? "text-primary" : "text-slate-300"}`}
+                className={`text-xs font-bold uppercase tracking-wider hidden md:block transition-colors ${i + 1 === step ? "text-primary" : "text-slate-300"}`}
               >
                 {label}
               </span>

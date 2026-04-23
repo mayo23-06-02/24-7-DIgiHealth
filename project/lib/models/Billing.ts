@@ -11,7 +11,7 @@ export interface IPaymentTransaction extends Document {
   provider: 'medical_aid' | 'card' | 'eft' | 'cash' | 'wallet';
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   description: string;
-  category: 'consultation' | 'subscription' | 'procedure' | 'pharmacy' | 'lab';
+  category: 'service_booking' | 'subscription' | 'procedure' | 'pharmacy' | 'lab';
   providerTransactionId?: string;
   receiptUrl?: string;
   medicalAidClaimRef?: string;
@@ -29,7 +29,7 @@ const PaymentTransactionSchema = new Schema<IPaymentTransaction>({
   provider:               { type: String, enum: ['medical_aid', 'card', 'eft', 'cash', 'wallet'] },
   status:                 { type: String, enum: ['pending', 'completed', 'failed', 'refunded'], default: 'pending' },
   description:            String,
-  category:               { type: String, enum: ['consultation', 'subscription', 'procedure', 'pharmacy', 'lab'] },
+  category:               { type: String, enum: ['service_booking', 'subscription', 'procedure', 'pharmacy', 'lab'] },
   providerTransactionId:  String,
   receiptUrl:             String,
   medicalAidClaimRef:     String,
@@ -148,7 +148,6 @@ const PaymentMethodSchema = new Schema<IPaymentMethod>({
 // ─── Platform Fee Configuration (Mega Admin) ──────────────────────────────────
 export interface IPlatformFeeConfig extends Document {
   platformFeePercent: number;
-  consultationFeePercent: number;
   subscriptionFeePercent: number;
   updatedBy: Types.ObjectId;
   updatedAt: Date;
@@ -156,7 +155,6 @@ export interface IPlatformFeeConfig extends Document {
 }
 const PlatformFeeConfigSchema = new Schema<IPlatformFeeConfig>({
   platformFeePercent:       { type: Number, default: 15 },
-  consultationFeePercent:   { type: Number, default: 12 },
   subscriptionFeePercent:   { type: Number, default: 10 },
   updatedBy:                { type: Schema.Types.ObjectId, ref: 'User' },
   notes:                    String,

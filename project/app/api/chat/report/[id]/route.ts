@@ -1,129 +1,142 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import mongoose from 'mongoose';
 import User from '@/lib/models/User';
 import Patient from '@/lib/models/Patient';
 import { MedicalContext, Prescription, LabResult } from '@/lib/models/ClinicalData';
 import PDFDocument from 'pdfkit';
 
-/* 
-  Creates a PDF matching the exact clinical summary format.
-*/
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
-    
-    // id could be conversationId or patientId. We'll find patientId directly from it or assume it's patientId for easy fetching
     const { id } = await params;
-    
-    // In our simplified logic, let's assume id is conversationId and we lookup the patient.
-    const Conversation = (await import('@/lib/models/Conversation')).default;
-    const conversation = await Conversation.findById(id).lean();
-    
+
+    if (!id || id === 'undefined' || id === '[id]') {
+      return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
+    }
+
+    // Validate if ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.error(`[API/Report] Invalid ID format: ${id}`);
+      return NextResponse.json({ error: 'Invalid patient/conversation ID' }, { status: 400 });
+    }
+
     let patientId = id;
-    if (conversation && conversation.patientId) {
-      patientId = conversation.patientId.toString();
-    }
-
-    const patientUser = await User.findById(patientId).lean();
-    const patientProfile = await Patient.findOne({ userId: patientId }).lean();
-    const medicalCtx = await MedicalContext.findOne({ patientId }).lean();
-    const prescriptions = await Prescription.find({ patientId }).lean();
     
-    if (!patientUser && !patientProfile) {
-       return NextResponse.json({ error: 'Patient data not found' }, { status: 404 });
+    // Proactively try to resolve conversationId -> patientId
+    try {
+      const ConversationModel = mongoose.models.Conversation || (await import('@/lib/models/Conversation')).Conversation;
+      if (ConversationModel) {
+        const conversation = await ConversationModel.findById(id).lean();
+        if (conversation && conversation.patientId) {
+          patientId = conversation.patientId.toString();
+          console.log(`[API/Report] Resolved conversation ${id} to patient ${patientId}`);
+        }
+      }
+    } catch (e) {
+      console.warn(`[API/Report] Conversation lookup failed (might be a patient ID):`, e);
     }
 
-    const fullName = patientUser?.profile?.fullName || 'Unknown Patient';
-    const dob = patientProfile?.dateOfBirth ? new Date(patientProfile.dateOfBirth).toLocaleDateString() : 'N/A';
+    const patientUser: any = await User.findById(patientId).lean();
+    const patientProfile: any = await Patient.findOne({ userId: patientId }).lean();
+    const medicalCtx: any = await MedicalContext.findOne({ patientId }).lean();
+    
+    if (!patientUser) {
+       console.error(`[API/Report] No User found for id: ${patientId}`);
+       return NextResponse.json({ error: 'Patient account not found' }, { status: 404 });
+    }
 
-    return new Promise<NextResponse>((resolve) => {
-      const doc = new PDFDocument({ margin: 50 });
-      let buffers: Buffer[] = [];
-      doc.on('data', buffers.push.bind(buffers));
-      doc.on('end', () => {
-        const pdfData = Buffer.concat(buffers);
-        const response = new NextResponse(pdfData, {
-          headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${fullName.replace(/ /g, '_')}_Clinical_Report.pdf"`
+    const fullName = `${patientUser.firstName} ${patientUser.lastName}`.trim();
+    const dob = patientProfile?.dateOfBirth ? new Date(patientProfile.dateOfBirth).toLocaleDateString('en-ZA') : 'N/A';
+
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const stream = new ReadableStream({
+      start(controller) {
+        doc.on('data', (chunk) => controller.enqueue(chunk));
+        doc.on('end', () => controller.close());
+        doc.on('error', (err) => controller.error(err));
+        
+        try {
+          doc.fontSize(24).font('Helvetica-Bold').fillColor('#0052cc').text('24/7 DigiHealth', { align: 'center' });
+          doc.fontSize(10).font('Helvetica').fillColor('gray').text('Strictly Confidential Clinical Information', { align: 'center' });
+          doc.moveDown(2);
+
+          doc.fontSize(16).fillColor('black').font('Helvetica-Bold').text('Patient Clinical Report', { underline: true });
+          doc.fontSize(10).font('Helvetica').fillColor('#666').text(`Patient ID: ${patientId.toUpperCase()}`);
+          doc.moveDown(1.5);
+
+          const addSectionHeader = (title: string) => {
+            doc.moveDown(1);
+            doc.fontSize(14).fillColor('#0052cc').font('Helvetica-Bold').text(title);
+            doc.moveTo(50, doc.y).lineTo(550, doc.y).strokeColor('#e2e8f0').lineWidth(0.5).stroke();
+            doc.moveDown(0.5);
+          };
+
+          addSectionHeader('Demographics');
+          doc.fontSize(11).font('Helvetica').fillColor('#333');
+          doc.text(`Full Name: `, { continued: true }).font('Helvetica-Bold').text(fullName);
+          doc.font('Helvetica').text(`Date of Birth: `, { continued: true }).font('Helvetica-Bold').text(dob);
+          doc.font('Helvetica').text(`Gender: `, { continued: true }).font('Helvetica-Bold').text(patientProfile?.gender || 'N/A');
+          doc.font('Helvetica').text(`Mobile: `, { continued: true }).font('Helvetica-Bold').text(patientUser.mobile || patientProfile?.mobileNumber || 'N/A');
+          doc.font('Helvetica').text(`Emergency Contact: `, { continued: true }).font('Helvetica-Bold').text(`${patientProfile?.emergencyContact?.name || 'N/A'} (${patientProfile?.emergencyContact?.phone || 'N/A'})`);
+          
+          addSectionHeader('Clinical Background');
+          doc.fontSize(12).font('Helvetica-Bold').fillColor('#333').text('Chronic Conditions:');
+          doc.fontSize(11).font('Helvetica').fillColor('#555');
+          const conditions = medicalCtx?.chronicConditions || patientProfile?.medicalHistory || [];
+          if (conditions.length > 0) {
+            conditions.forEach((c: string) => doc.text(`• ${c}`));
+          } else {
+             doc.text('No chronic conditions recorded.');
           }
-        });
-        resolve(response);
-      });
+          doc.moveDown(1);
 
-      // -- Document Header
-      doc.fontSize(24).font('Helvetica-Bold').text('24/7 DigiHealth', { align: 'center' });
-      doc.fontSize(12).font('Helvetica').fillColor('gray').text('Comprehensive Clinical Profile Report', { align: 'center' });
-      doc.moveDown(2);
+          doc.fontSize(12).font('Helvetica-Bold').fillColor('#333').text('Allergies:');
+          const allergies = medicalCtx?.allergies || patientProfile?.allergies || [];
+          if (allergies.length > 0) {
+            allergies.forEach((a: any) => {
+               const allergenName = typeof a === 'string' ? a : a.allergen;
+               const reaction = typeof a === 'string' ? '' : ` (${a.reaction})`;
+               doc.text(`• ${allergenName}${reaction}`);
+            });
+          } else {
+             doc.text('No known allergies.');
+          }
 
-      // -- Patient Demographics
-      doc.fontSize(16).fillColor('black').font('Helvetica-Bold').text('Patient Demographics');
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).strokeColor('#e2e8f0').stroke();
-      doc.moveDown(0.5);
-      
-      doc.fontSize(10).font('Helvetica').fillColor('#333');
-      doc.text(`Full Name: ${fullName}`);
-      doc.text(`Date of Birth: ${dob}`);
-      doc.text(`Gender: ${patientProfile?.gender || 'N/A'}`);
-      doc.text(`Blood Type: ${patientProfile?.bloodType || 'N/A'}`);
-      doc.text(`Emergency Contact: ${patientProfile?.emergencyContact?.name || 'N/A'} (${patientProfile?.emergencyContact?.phone || 'N/A'})`);
-      doc.moveDown(2);
+          addSectionHeader('Active Medications');
+          const meds = medicalCtx?.currentMedications || patientProfile?.currentMedications || [];
+          if (meds.length > 0) {
+            meds.forEach((m: string) => doc.text(`• ${m}`));
+          } else {
+            doc.text('No active medications on record.');
+          }
 
-      // -- Medical History
-      doc.fontSize(16).fillColor('black').font('Helvetica-Bold').text('Clinical Background');
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).strokeColor('#e2e8f0').stroke();
-      doc.moveDown(0.5);
+          const bottom = doc.page.height - 50;
+          doc.fontSize(8).fillColor('gray').text(
+            `Generated on ${new Date().toLocaleString('en-ZA')} securely via 24/7 DigiHealth Platform.`,
+            50,
+            bottom,
+            { align: 'center', width: 500 }
+          );
 
-      doc.fontSize(12).font('Helvetica-Bold').text('Chronic Conditions:');
-      doc.fontSize(10).font('Helvetica');
-      const conditions = medicalCtx?.chronicConditions || patientProfile?.medicalHistory || [];
-      if (conditions.length > 0) {
-        conditions.forEach((c: string) => doc.text(`• ${c}`));
-      } else {
-         doc.text('No chronic conditions recorded.');
+          doc.end();
+        } catch (genErr) {
+          console.error('[API/Report] Generation logic error:', genErr);
+          controller.error(genErr);
+        }
       }
-      doc.moveDown(1);
-
-      doc.fontSize(12).font('Helvetica-Bold').text('Allergies:');
-      doc.fontSize(10).font('Helvetica');
-      const allergies = medicalCtx?.allergies || patientProfile?.allergies || [];
-      if (allergies.length > 0) {
-        allergies.forEach((a: any) => {
-           const allergenName = typeof a === 'string' ? a : a.allergen;
-           doc.text(`• ${allergenName}`);
-        });
-      } else {
-         doc.text('No known allergies.');
-      }
-      doc.moveDown(2);
-
-      // -- Active Medications
-      doc.fontSize(16).fillColor('black').font('Helvetica-Bold').text('Active Medications');
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).strokeColor('#e2e8f0').stroke();
-      doc.moveDown(0.5);
-      
-      const meds = medicalCtx?.currentMedications || patientProfile?.currentMedications || [];
-      if (meds.length > 0) {
-        meds.forEach((m: string) => doc.text(`• ${m}`));
-      } else {
-        doc.text('No active medications on record.');
-      }
-      doc.moveDown(2);
-
-      // Footer
-      const bottom = doc.page.height - 50;
-      doc.page.margins.bottom = 0;
-      doc.fontSize(8).fillColor('gray').text(
-        `Generated on ${new Date().toLocaleString('en-ZA')} securely via 24/7 DigiHealth Platform.`,
-        50,
-        bottom,
-        { align: 'center', width: 500 }
-      );
-
-      doc.end();
     });
+
+    return new NextResponse(stream, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${fullName.replace(/ /g, '_')}_Clinical_Report.pdf"`,
+        'Cache-Control': 'no-cache'
+      }
+    });
+
   } catch (error) {
-    console.error('[GET /api/chat/report/[id]]', error);
-    return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 });
+    console.error('[GET /api/chat/report/[id]] Final Catch:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -6,7 +6,7 @@ import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-dev-only');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 export async function POST(request: Request) {
   try {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       patientId: userId,
       practitionerId,
       type: type || 'video',
-      status: 'scheduled',
+      status: 'requested',
       scheduledStartTime: startTime,
       scheduledEndTime: endTime,
       chiefComplaint: chiefComplaint || 'Routine Medical Consultation'

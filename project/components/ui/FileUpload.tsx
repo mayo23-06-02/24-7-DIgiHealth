@@ -47,9 +47,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   return (
-    <div
-      className="space-y-6 w-full max-w-2xl mx-auto p-6 mb-2.5 pb-5 bg-white animate-in fade-in duration-500"
-    >
+    <div className="space-y-6 w-full max-w-2xl mx-auto p-6 mb-2.5 pb-5 bg-white animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex justify-between items-start">
         <div className="space-y-1 mb-4">
@@ -74,9 +72,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       >
         <input type="file" className="hidden" ref={fileInputRef} />
 
-        <div
-          className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center mb-2.5"
-        >
+        <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center mb-2.5">
           <BiCloudUpload className="text-slate-400 text-3xl" />
         </div>
 
@@ -87,7 +83,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
               choose file
             </span>
           </p>
-          <p className="text-[10px] font-semibold tracking-wide text-slate-400 ">
+          <p className="text-xs font-semibold tracking-wide text-slate-400 ">
             {accept}, up to {maxSizeMB} MB.
           </p>
         </div>
@@ -95,14 +91,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       {/* URL Upload */}
       <div className="space-y-3">
-        <label
-          className="flex items-center gap-2 text-xs font-black text-slate-400 py-2.5 px-1"
-        >
+        <label className="flex items-center gap-2 text-xs font-bold text-slate-400 py-3 px-1">
           Or upload from URL <BiLink className="text-slate-300" />
         </label>
-        <div
-          className="flex items-center gap-2 p-1.5 pl-5 border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-primary/10 transition-all"
-        >
+        <div className="flex items-center gap-2 p-1.5 pl-5 border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-primary/10 transition-all">
           <div className="flex-none p-2.5 text-slate-400">
             <BiLink size={18} />
           </div>
@@ -120,7 +112,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {/* File List */}
       {value.length > 0 && (
         <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-normal px-1">
             Uploaded {label}
           </h4>
           <div className="space-y-3">
@@ -134,7 +126,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
-                    <p className="text-sm font-black text-slate-800 truncate tracking-tight">
+                    <p className="text-sm font-bold text-slate-800 truncate tracking-tight">
                       {file.name}
                     </p>
                     {onRemove && (
@@ -151,18 +143,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
                       <div className="h-1.5 w-full bg-slate-100 rounded-lg overflow-hidden">
                         <div className="h-full w-2/3 bg-primary rounded-lg animate-pulse"></div>
                       </div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
                         102 KB of 32.5 MB • 4 sec left...
                       </p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                      <span className="text-xs font-bold text-slate-300 uppercase tracking-normal">
                         24.1 MB •{" "}
                       </span>
                       <div className="flex items-center gap-1 text-green-500">
                         <BiCheckCircle size={14} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">
+                        <span className="text-xs font-bold uppercase tracking-normal">
                           Completed
                         </span>
                       </div>

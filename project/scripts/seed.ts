@@ -1,687 +1,470 @@
 import mongoose from 'mongoose';
-import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
-import { connectToDatabase } from '../lib/mongodb';
+import { faker } from '@faker-js/faker';
+import * as dotenv from 'dotenv';
+import path from 'path';
 
-// Import All Models to ensure they are registered
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '../.env.local') });
+
+// --- MODEL IMPORTS ---
 import User from '../lib/models/User';
-import { Facility } from '../lib/models/Facility';
-import Consultation from '../lib/models/Consultation';
 import { PatientProfile, PractitionerProfile, EMTProfile } from '../lib/models/RoleProfiles';
+import Facility from '../lib/models/Facility';
+import Consultation from '../lib/models/Consultation';
+import { Anthropometric, MedicalContext, Prescription, LabResult } from '../lib/models/ClinicalData';
+import AttachedRecord from '../lib/models/AttachedRecord';
+import RiskScore from '../lib/models/RiskScore';
+import Message from '../lib/models/Message';
+import Conversation from '../lib/models/Conversation';
 import { EmergencyDispatch, AuditLog } from '../lib/models/TelehealthCore';
-import { Anthropometric, Prescription, LabResult, MedicalContext } from '../lib/models/ClinicalData';
 import Bed from '../lib/models/Bed';
 import BedOccupancy from '../lib/models/BedOccupancy';
 import Staff from '../lib/models/Staff';
-import HospitalTransaction from '../lib/models/HospitalTransaction';
 import HospitalAppointment from '../lib/models/HospitalAppointment';
-import { Subscription } from '../lib/models/Billing'; 
-import RiskScore from '../lib/models/RiskScore';
-import Conversation from '../lib/models/Conversation';
-import Message from '../lib/models/Message';
+import HospitalTransaction from '../lib/models/HospitalTransaction';
+import { PaymentTransaction, Subscription, PaymentMethod, PayoutRequest } from '../lib/models/Billing';
+import { Article } from '../lib/models/Article';
+import { HealthTip } from '../lib/models/HealthTip';
+import { PractitionerSchedule } from '../lib/models/Scheduling';
 
-const SA_NAMES = [
-  { first: 'Thandiwe', last: 'Mokoena' },
-  { first: 'Sibusiso', last: 'Dlamini' },
-  { first: 'Lerato', last: 'Zulu' },
-  { first: 'Willem', last: 'de Klerk' },
-  { first: 'Zanele', last: 'Ndlovu' },
-  { first: 'Khosi', last: 'Molefe' },
-  { first: 'Anke', last: 'van Wyk' },
-  { first: 'Jabu', last: 'Khumalo' },
-  { first: 'Pieter', last: 'Botha' },
-  { first: 'Nomsa', last: 'Sithole' },
-  { first: 'Lethabo', last: 'Gumede' },
-  { first: 'Dmitri', last: 'Naidoo' },
-  { first: 'Farrah', last: 'Khan' },
-  { first: 'Chantal', last: 'September' },
-  { first: 'Sizwe', last: 'Bhengu' }
-];
+// --- HELPERS ---
+const hash = (pw: string) => bcrypt.hashSync(pw, 10);
+const subDays = (d: Date, n: number) => { const r = new Date(d); r.setDate(r.getDate() - n); return r; };
+const addDays = (d: Date, n: number) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
+const pickOne = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+const generateSAId = (dob: Date, female: boolean) => {
+  const y = dob.getFullYear().toString().slice(-2);
+  const m = (dob.getMonth() + 1).toString().padStart(2, '0');
+  const d = dob.getDate().toString().padStart(2, '0');
+  const g = female ? randInt(0, 4999).toString().padStart(4, '0') : randInt(5000, 9999).toString().padStart(4, '0');
+  return `${y}${m}${d}${g}081`;
+};
 
-const PROVINCES = ['Gauteng', 'Western Cape', 'KwaZulu-Natal', 'Free State', 'Mpumalanga'];
-const HOSPITALS = [
-  { name: 'Netcare Milpark Hospital', city: 'Johannesburg', province: 'Gauteng' },
-  { name: 'Mediclinic Morningside', city: 'Sandton', province: 'Gauteng' },
-  { name: 'Groote Schuur Hospital', city: 'Cape Town', province: 'Western Cape' },
-  { name: 'Life Fourways Hospital', city: 'Johannesburg', province: 'Gauteng' },
-  { name: 'Busamed Gateway Private Hospital', city: 'Umhlanga', province: 'KwaZulu-Natal' }
-];
-
-const MEDICAL_AIDS = ['Discovery Health', 'Bonitas', 'Momentum', 'GEMS', 'Fedhealth'];
-
-async function hashPassword(password: string) {
-  return await bcrypt.hash(password, 10);
-}
-
-const randItem = <T>(arr: T[]): T | undefined => arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : undefined;
-const subtractDays = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-const addDays = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-
-async function seedDatabase() {
-  try {
-    await connectToDatabase();
-    console.log('🌱 Connected to MongoDB Atlas');
-
-    console.log('🗑️  Clearing existing simulation data...');
-    // Drop in order to handle refs or just clear all
-    const models = [
-        User, Facility, Consultation, PatientProfile, PractitionerProfile, 
-        EMTProfile, EmergencyDispatch, AuditLog, Anthropometric, Prescription, 
-        LabResult, Bed, BedOccupancy, Staff, HospitalTransaction, 
-        HospitalAppointment, Subscription, RiskScore, MedicalContext
-    ];
-    
-    for (const model of models) {
-        if (model && model.deleteMany) {
-            await model.deleteMany({});
-        }
-    }
-    console.log('✅ Collections purged.');
-
-    // 1. FACILITIES (Major SA Hospitals)
-    const facilities = [];
-    for (const h of HOSPITALS) {
-      const f = await Facility.create({
-        name: h.name,
-        facilityType: 'Private',
-        contactInfo: {
-            phone: `+27 ${faker.string.numeric(2)} ${faker.string.numeric(3)} ${faker.string.numeric(4)}`,
-            email: `info@${h.name.toLowerCase().replace(/ /g, '')}.co.za`
-        },
-        address: {
-          street: faker.location.streetAddress(),
-          city: h.city,
-          province: h.province,
-          coordinates: [faker.location.longitude(), faker.location.latitude()]
-        },
-        bedCapacity: { total: 100, generalAvailable: 40, icuAvailable: 10 },
-        isOpen: true,
-        specialties: ['Emergency', 'Cardiology', 'General Surgery'],
-        emergencyServices: true
-      });
-      facilities.push(f);
-    }
-    console.log(`🏥 Created ${facilities.length} SA Facilities`);
-
-    // 2. USERS & PROFILES
-    const passwordHash = await hashPassword('Password123!');
-
-    // Patient: Thandiwe Mokoena
-    const patientUser = await User.create({
-      email: 'patient@24-7.co.za',
-      passwordHash,
-      role: 'patient',
-      firstName: 'Thandiwe',
-      lastName: 'Mokoena',
-      status: 'active',
-      saId: '9003125441088',
-      mobile: '+27725551234',
-      mfaEnabled: false
-    });
-    await PatientProfile.create({
-      userId: patientUser._id,
-      dateOfBirth: new Date('1990-03-12'),
-      gender: 'female',
-      emergencyContact: { name: 'Sizwe Mokoena', phone: '+27825559876', relationship: 'Brother' },
-      medicalAid: { provider: 'Discovery Health', planName: 'Classic Priority', memberNumber: '987654321' },
-      subscriptionTier: 'pro',
-      popiaConsentDate: new Date('2024-01-01')
-    });
-
-    // Practitioner: Dr. Oliver Mitchell
-    const practitionerUser = await User.create({
-      email: 'practitioner@24-7.co.za',
-      passwordHash,
-      role: 'practitioner',
-      firstName: 'Oliver',
-      lastName: 'Mitchell',
-      status: 'active',
-      saId: '7805215112081',
-      mobile: '+27834445555',
-      mfaEnabled: false
-    });
-    await PractitionerProfile.create({
-      userId: practitionerUser._id,
-      specialisation: 'General Practitioner',
-      hpcsaNumber: 'MP0123456',
-      experienceYears: 15,
-      consultationFee: 650,
-      bio: 'Senior GP with extensive experience in acute care and telehealth diagnostics.',
-      languages: ['English', 'Afrikaans', 'isiZulu'],
-      acceptedMedicalAids: ['Discovery Health', 'Bonitas', 'Momentum'],
-      affiliatedFacilityIds: [facilities[0]._id, facilities[1]._id],
-      isOnline: true,
-      bankAccount: {
-          accountHolder: 'Oliver Mitchell',
-          bankName: 'First National Bank',
-          accountNumber: '62001122334',
-          branchCode: '250655',
-          taxNumber: '1234567890'
-      }
-    });
-
-    // Hospital Admin: Willem de Klerk
-    const adminUser = await User.create({
-        email: 'admin@digihealth.co.za',
-        passwordHash,
-        role: 'hospital_admin',
-        firstName: 'Willem',
-        lastName: 'de Klerk',
-        status: 'active',
-        saId: '6504125001082',
-        mobile: '+27821112222'
-    });
-
-    // EMT: John Rescuer
-    const emtUser = await User.create({
-        email: 'emt.john@24-7.co.za',
-        passwordHash,
-        role: 'emt',
-        firstName: 'John',
-        lastName: 'Rescuer',
-        status: 'active',
-        saId: '8810225113083',
-        mobile: '+27712223333'
-    });
-    await EMTProfile.create({
-        userId: emtUser._id,
-        licenseLevel: 'ALS',
-        hpcsaNumber: 'ANT001234',
-        assignedVehicle: 'AMB-101 (NP 123-456)',
-        assignedFacilityId: facilities[2]._id,
-        currentStatus: 'en_route',
-        shiftSchedule: { start: '06:00', end: '18:00', days: [1, 2, 3, 4, 5] },
-        offlineMapsRegion: 'Gauteng-Central',
-        equipmentChecklist: [
-            { item: 'Defibrillator', status: true },
-            { item: 'Oxygen Tank', status: true },
-            { item: 'Airway Kit', status: true }
-        ]
-    });
-
-    // Inspector: Sarah Molefe
-    await User.create({
-        email: 'inspector@24-7.co.za',
-        passwordHash,
-        role: 'inspector',
-        firstName: 'Sarah',
-        lastName: 'Molefe',
-        status: 'active',
-        saId: '8207150114084',
-        mobile: '+27601234567'
-    });
-
-    console.log('👤 Primary personas created with SA localization');
-
-    // 2b. Generate Bulk Data (Random SA Users)
-    const randomUsers = [];
-    for (let i = 0; i < 20; i++) {
-        const name = randItem(SA_NAMES)!;
-        const roles = ['patient', 'practitioner', 'patient', 'patient']; 
-        const role = randItem(roles)!;
-        
-        const user = await User.create({
-            email: faker.internet.email({ firstName: name.first, lastName: name.last }).toLowerCase().replace('@', `${faker.string.numeric(4)}@`),
-            passwordHash,
-            role,
-            firstName: name.first,
-            lastName: name.last,
-            status: 'active',
-            saId: faker.string.numeric(13),
-            mobile: `+27${faker.helpers.arrayElement(['72', '82', '71', '60'])}${faker.string.numeric(7)}`
-        });
-
-        if (role === 'patient') {
-            await PatientProfile.create({
-              userId:user._id,
-                dateOfBirth: faker.date.birthdate({ min: 18, max: 70, mode: 'age' }),
-                gender: randItem(['male', 'female'])!,
-                emergencyContact: { name: faker.person.fullName(), phone: '+27' + faker.string.numeric(9), relationship: 'Family' },
-                medicalAid: { provider: randItem(MEDICAL_AIDS)!, planName: 'Standard', memberNumber: faker.string.numeric(10) },
-                subscriptionTier: randItem(['free', 'pro'])
-            });
-        } else if (role === 'practitioner') {
-            await PractitionerProfile.create({
-                userId: user._id,
-                specialisation: randItem(['Cardiologist', 'Dermatologist', 'Paediatrician', 'Family Physician'])!,
-                hpcsaNumber: 'MP' + faker.string.numeric(6),
-                consultationFee: 500 + Math.random() * 400,
-                bio: faker.lorem.paragraph(),
-                languages: ['English', randItem(['Afrikaans', 'isiZulu', 'Setswana'])!],
-                affiliatedFacilityIds: [randItem(facilities)!._id]
-            });
-        }
-        randomUsers.push(user);
-    }
-    console.log(`🧑‍🤝‍🧑 Generated 20 additional random SA users`);
-
-    // 3. CLINICAL DATA SIMULATION
-    const patients = await User.find({ role: 'patient' });
-    
-    // 3a. Consultations for Dr. Mitchell
-    for (let i = 0; i < 30; i++) {
-        const patient = randItem(patients)!;
-        const start = subtractDays(faker.number.int({ min: 1, max: 60 }));
-        const end = new Date(start.getTime() + 30 * 60000);
-        
-        await Consultation.create({
-            patientId: patient._id,
-            practitionerId: practitionerUser._id,
-            facilityId: facilities[0]._id,
-            type: randItem(['chat', 'video', 'in_person'])!,
-            status: 'completed',
-            scheduledStartTime: start,
-            scheduledEndTime: end,
-            chiefComplaint: 'Reporting symptoms of ' + faker.lorem.words(3),
-            soapNotes: {
-                subjective: faker.lorem.sentence(),
-                objective: 'Vitals stable. No acute distress observed.',
-                assessment: 'Patient presents with mild symptom.',
-                plan: 'Recommended rest and follow-up in 7 days.',
-                signedAt: end
-            },
-            clinicalRisk: { score: faker.number.int({ min: 10, max: 80 }), color: randItem(['green', 'amber'])!, factors: ['Age', 'Environment'] }
-        });
-    }
-
-    // Upcoming Consults
-    for (let i = 0; i < 12; i++) {
-        const start = addDays(i);
-        start.setHours(9 + (i % 8), 0, 0, 0);
-        const end = new Date(start.getTime() + 30 * 60000);
-
-        await Consultation.create({
-            patientId: randItem(patients)!._id,
-            practitionerId: practitionerUser._id,
-            facilityId: facilities[0]._id,
-            type: randItem(['video', 'chat', 'in_person'])!,
-            status: 'scheduled',
-            scheduledStartTime: start,
-            scheduledEndTime: end,
-            chiefComplaint: 'Follow-up appointment for systemic review.'
-        });
-    }
-    console.log('📅 Seeded 42+ consultations');
-
-    // 3b. Clinical Records for Thandiwe Mokoena
-    await Anthropometric.create({
-        patientId: patientUser._id,
-        dateRecorded: subtractDays(2),
-        weightKg: 72,
-        heightCm: 165,
-        bmi: 26.4,
-        bloodType: 'O+',
-        vitalSigns: { heartRateBpm: 72, systolicBP: 135, diastolicBP: 88, spO2: 98, temperatureCelsius: 36.6 }
-    });
-    await Prescription.create({
-        patientId: patientUser._id,
-        practitionerId: practitionerUser._id,
-        medicationName: 'Amlodipine 5mg',
-        dosage: '1 tablet',
-        instructions: 'Take in the morning with food.',
-        status: 'active',
-        prescribedDate: subtractDays(10),
-        refillsRemaining: 2
-    });
-    await LabResult.create({
-        patientId: patientUser._id,
-        orderedById: practitionerUser._id,
-        testName: 'HbA1c / Glucose',
-        dateReported: subtractDays(14),
-        parameters: [{ name: 'HbA1c', value: '5.8', unit: '%', referenceRange: '4.0 - 6.0', status: 'normal' }]
-    });
-    console.log('💊 Seeded clinical history (Vitals/Meds/Labs) for Thandiwe');
-
-    // 4. HOSPITAL OPERATIONS SIMULATION (Netcare Milpark)
-    const wards = ['general', 'icu', 'emergency'] as const;
-    for (const ward of wards) {
-        for (let i = 1; i <= 10; i++) {
-            const isOccupied = Math.random() > 0.4;
-            await Bed.create({
-                facilityId: facilities[0]._id,
-                ward,
-                bedNumber: `${ward.charAt(0).toUpperCase()}${i}`,
-                status: isOccupied ? 'occupied' : 'available',
-                patientId: isOccupied ? randItem(patients)!._id : null
-            });
-        }
-    }
-    await BedOccupancy.create({
-        facilityId: facilities[0]._id,
-        timestamp: new Date(),
-        totalBeds: 40,
-        occupiedBeds: 28,
-        icuTotal: 10,
-        icuOccupied: 8,
-        emergencyTotal: 10,
-        emergencyOccupied: 7
-    });
-
-    for (let i = 0; i < 50; i++) {
-        await HospitalTransaction.create({
-            facilityId: facilities[0]._id,
-            patientId: randItem(patients)!._id,
-            amount: 750 + Math.random() * 5000,
-            type: randItem(['consultation_fee', 'procedure', 'pharmacy'])!,
-            status: randItem(['paid', 'paid', 'pending'])!,
-            paymentMethod: randItem(['medical_aid', 'card', 'cash'])!,
-            timestamp: subtractDays(i % 30)
-        });
-    }
-    console.log('🏨 Seeded Hospital operations data');
-
-    // 5. EMERGENCY RESPONSE SIMULATION
-    await EmergencyDispatch.create({
-        dispatchId: 'DISP-7721',
-        emtId: emtUser._id,
-        patientId: patientUser._id,
-        callerPhone: '+2711911',
-        priority: 'red',
-        status: 'en_route',
-        incidentLocation: {
-            address: 'Sandton City, Rivonia Rd, Sandton',
-            coordinates: [28.0567, -26.1076]
-        },
-        targetFacilityId: facilities[0]._id,
-        timeline: [
-            { status: 'pending', timestamp: new Date(Date.now() - 600000) },
-            { status: 'en_route', timestamp: new Date(Date.now() - 300000) }
-        ],
-        vitals: [
-            { timestamp: new Date(), bp: '110/70', hr: 95, spo2: 94, gcs: 14 }
-        ]
-    });
-    console.log('🚑 Seeded Emergency Dispatch simulation');
-
-    // 6. CHAT & CONSULTATION SIMULATION
-    // Create an active consultation for chat
-    const chatConsult = await Consultation.create({
-        patientId: patientUser._id,
-        practitionerId: practitionerUser._id,
-        type: 'video',
-        status: 'in_progress',
-        scheduledStartTime: subtractDays(0),
-        scheduledEndTime: addDays(0),
-        callMinutesUsed: 0
-    });
-
-    const conversation = await Conversation.create({
-        consultationId: chatConsult._id,
-        patientId: patientUser._id,
-        practitionerId: practitionerUser._id,
-        status: 'active',
-        minutesAllocated: 30,
-        minutesUsed: 0,
-        minutesRequested: 0,
-        minutesApproved: 0,
-        startedAt: subtractDays(0),
-        lastActivityAt: subtractDays(0)
-    });
-
-    // Generate 20 Messages
-    for (let i = 0; i < 20; i++) {
-        const isPractitioner = i % 2 !== 0;
-        await Message.create({
-            conversationId: conversation._id,
-            senderId: isPractitioner ? practitionerUser._id : patientUser._id,
-            receiverId: isPractitioner ? patientUser._id : practitionerUser._id,
-            content: isPractitioner ? 'How are you feeling today?' : 'I have a new symptom: headache.',
-            type: (i === 4 && !isPractitioner) ? 'quick_phrase' : 'text',
-            isRead: true,
-            createdAt: subtractDays(0).getTime() + (i * 60000),
-            updatedAt: subtractDays(0).getTime() + (i * 60000)
-        });
-    }
-
-    console.log('💬 Seeded Chat conversations & messages');
-
-    // ==================== ADD MISSING DATA ====================
-
-    // 7. RISK SCORES for all patients
-    console.log('📊 Adding risk scores...');
-    const allPatients = await User.find({ role: 'patient' });
-    for (const patient of allPatients) {
-      const riskScore = faker.number.int({ min: 10, max: 95 });
-      const factors = [];
-      if (riskScore > 70) factors.push('Age > 60', 'Hypertension history');
-      else if (riskScore > 40) factors.push('Sedentary lifestyle', 'Family history');
-      else factors.push('Healthy BMI', 'Regular exercise');
-      
-      await RiskScore.create({
-        patientId: patient._id,
-        practitionerId: practitionerUser._id, // assign to main practitioner for demo
-        score: riskScore,
-        color: riskScore > 70 ? 'red' : riskScore > 40 ? 'amber' : 'green',
-        calculatedAt: subtractDays(faker.number.int({ min: 1, max: 30 })),
-        factors: factors
-      });
-    }
-    console.log(`📊 Added risk scores for ${allPatients.length} patients`);
-
-    // 8. MEDICAL CONTEXT (chronic conditions & allergies)
-    console.log('🩺 Adding medical context...');
-    for (const patient of allPatients.slice(0, 15)) {
-      const hasChronic = faker.datatype.boolean();
-      const hasAllergy = faker.datatype.boolean();
-      await MedicalContext.create({
-        patientId: patient._id,
-        chronicConditions: hasChronic ? faker.helpers.arrayElements(['Hypertension', 'Type 2 Diabetes', 'Asthma', 'Hyperlipidemia'], { min: 1, max: 2 }) : [],
-        allergies: hasAllergy ? [
-          { allergen: 'Penicillin', severity: 'severe', reaction: 'Rash', source: 'clinician' },
-          { allergen: 'Peanuts', severity: 'mild', reaction: 'Hives', source: 'patient' }
-        ].slice(0, faker.number.int({ min: 1, max: 2 })) : [],
-        familyHistory: faker.helpers.arrayElements(['Heart Disease', 'Diabetes', 'Stroke', 'None'], 2)
-      });
-    }
-    console.log('🩺 Added medical context for 15 patients');
-
-    // 9. SUBSCRIPTIONS for patients
-    console.log('💳 Adding subscriptions...');
-    for (const patient of allPatients.slice(0, 12)) {
-      const tier = faker.helpers.arrayElement(['free', 'pro', 'family']);
-      const status = faker.helpers.arrayElement(['active', 'trial', 'cancelled']);
-      await Subscription.create({
-        patientId: patient._id,
-        tier,
-        status,
-        startDate: subtractDays(faker.number.int({ min: 1, max: 90 })),
-        nextBillingDate: addDays(faker.number.int({ min: 1, max: 30 })),
-        paymentMethodId: faker.string.alphanumeric(16),
-        autoRenew: status === 'active'
-      });
-    }
-    console.log('💳 Added subscriptions for 12 patients');
-
-    // 10. HOSPITAL APPOINTMENTS (for facility 0)
-    console.log('🏥 Adding hospital appointments...');
-    for (let i = 0; i < 30; i++) {
-      const patient = faker.helpers.arrayElement(allPatients);
-      const start = addDays(faker.number.int({ min: -15, max: 30 }));
-      start.setHours(faker.number.int({ min: 8, max: 16 }), 0, 0, 0);
-      const end = new Date(start.getTime() + 30 * 60000);
-      await HospitalAppointment.create({
-        facilityId: facilities[0]._id,
-        patientId: patient._id,
-        practitionerId: practitionerUser._id,
-        type: faker.helpers.arrayElement(['consultation', 'procedure', 'lab']),
-        scheduledStart: start,
-        scheduledEnd: end,
-        status: faker.helpers.arrayElement(['scheduled', 'completed', 'cancelled']),
-        room: `Room ${faker.number.int({ min: 1, max: 20 })}`
-      });
-    }
-    console.log('🏥 Added 30 hospital appointments');
-
-    // 11. STAFF for facilities
-    console.log('👩‍⚕️ Adding staff...');
-    const roles = ['doctor', 'nurse', 'admin', 'technician'];
-    const departments = ['Emergency', 'Cardiology', 'Radiology', 'Pharmacy', 'General Ward'];
-    for (const facility of facilities) {
-      for (let i = 0; i < 12; i++) {
-        // @ts-ignore
-        const name = faker.person.firstName() + ' ' + faker.person.lastName();
-        await Staff.create({
-          userId: null, // no login for most staff
-          facilityId: facility._id,
-          name,
-          role: faker.helpers.arrayElement(roles),
-          department: faker.helpers.arrayElement(departments),
-          shiftSchedule: { start: '08:00', end: '16:00', days: [1,2,3,4,5] },
-          isOnDuty: faker.datatype.boolean(),
-          hourlyRate: faker.number.int({ min: 100, max: 500 }),
-          qualifications: [faker.lorem.word(), faker.lorem.word()]
-        });
-      }
-    }
-    console.log('👩‍⚕️ Added staff for all facilities');
-
-    // 12. ADDITIONAL CONSULTATIONS for other practitioners
-    console.log('📅 Adding consultations for random practitioners...');
-    const allPractitioners = await User.find({ role: 'practitioner' });
-    for (const practitioner of allPractitioners) {
-      if (practitioner._id.toString() === practitionerUser._id.toString()) continue;
-      const numConsults = faker.number.int({ min: 5, max: 20 });
-      for (let i = 0; i < numConsults; i++) {
-        const patient = faker.helpers.arrayElement(allPatients);
-        const start = subtractDays(faker.number.int({ min: 1, max: 60 }));
-        const end = new Date(start.getTime() + 30 * 60000);
-        await Consultation.create({
-          patientId: patient._id,
-          practitionerId: practitioner._id,
-          facilityId: faker.helpers.arrayElement(facilities)._id,
-          type: faker.helpers.arrayElement(['video', 'chat', 'in_person']),
-          status: faker.helpers.arrayElement(['completed', 'scheduled', 'cancelled']),
-          scheduledStartTime: start,
-          scheduledEndTime: end,
-          chiefComplaint: faker.lorem.sentence(),
-          soapNotes: { subjective: faker.lorem.sentence(), objective: 'Vitals stable', assessment: 'Routine', plan: 'Follow up', signedAt: end },
-          clinicalRisk: { score: faker.number.int({ min: 10, max: 90 }), color: 'green', factors: [] }
-        });
-      }
-    }
-    console.log('📅 Added extra consultations for other practitioners');
-
-    // 13. ADDITIONAL LAB RESULTS & PRESCRIPTIONS
-    console.log('🔬 Adding more lab results and prescriptions...');
-    for (let i = 0; i < 40; i++) {
-      const patient = faker.helpers.arrayElement(allPatients);
-      const practitioner = faker.helpers.arrayElement(allPractitioners);
-      await LabResult.create({
-        patientId: patient._id,
-        orderedById: practitioner._id,
-        testName: faker.helpers.arrayElement(['Full Blood Count', 'Lipid Profile', 'Thyroid Function', 'Glucose']),
-        dateReported: subtractDays(faker.number.int({ min: 1, max: 60 })),
-        parameters: [
-          { name: 'Haemoglobin', value: faker.number.float({ min: 10, max: 18, fractionDigits: 1 }).toString(), unit: 'g/dL', referenceRange: '13.5-17.5', status: faker.helpers.arrayElement(['normal', 'low', 'high']) },
-          { name: 'Cholesterol', value: faker.number.float({ min: 3, max: 8, fractionDigits: 1 }).toString(), unit: 'mmol/L', referenceRange: '<5.2', status: 'normal' }
-        ]
-      });
-      
-      if (i % 2 === 0) {
-        await Prescription.create({
-          patientId: patient._id,
-          practitionerId: practitioner._id,
-          medicationName: faker.helpers.arrayElement(['Amoxicillin', 'Lisinopril', 'Metformin', 'Atorvastatin']),
-          dosage: '1 tablet',
-          instructions: 'Take daily with food.',
-          status: faker.helpers.arrayElement(['active', 'completed']),
-          prescribedDate: subtractDays(faker.number.int({ min: 1, max: 30 })),
-          refillsRemaining: faker.number.int({ min: 0, max: 3 })
-        });
-      }
-    }
-    console.log('🔬 Added 40 lab results and 20 prescriptions');
-
-    // 14. ADDITIONAL EMERGENCY DISPATCHES
-    console.log('🚑 Adding more emergency dispatches...');
-    for (let i = 0; i < 5; i++) {
-      const patient = faker.helpers.arrayElement(allPatients);
-      const facility = faker.helpers.arrayElement(facilities);
-      await EmergencyDispatch.create({
-        dispatchId: `DISP-${faker.string.numeric(4)}`,
-        emtId: emtUser._id,
-        patientId: patient._id,
-        callerPhone: '+271011',
-        priority: faker.helpers.arrayElement(['red', 'yellow', 'green']),
-        status: faker.helpers.arrayElement(['en_route', 'on_scene', 'transporting', 'completed']),
-        incidentLocation: {
-          address: faker.location.streetAddress(),
-          coordinates: [faker.location.longitude(), faker.location.latitude()]
-        },
-        targetFacilityId: facility._id,
-        timeline: [{ status: 'pending', timestamp: new Date(Date.now() - 600000) }],
-        vitals: [{ timestamp: new Date(), bp: '120/80', hr: 85, spo2: 97, gcs: 15 }]
-      });
-    }
-    console.log('🚑 Added 5 more emergency dispatches');
-
-    // 15. AUDIT LOGS
-    console.log('📝 Adding audit logs...');
-    let previousHash = '';
-    const actions = ['LOGIN', 'VIEWED_HEALTH_RECORD', 'MODIFIED_PRESCRIPTION', 'BOOKED_CONSULTATION', 'LOGOUT'];
-    const allUsers = await User.find();
-    for (let i = 0; i < 50; i++) {
-      const actor = faker.helpers.arrayElement(allUsers);
-      const target = faker.helpers.arrayElement(allUsers);
-      const newLog = await AuditLog.create({
-        actorId: actor._id,
-        targetId: target._id,
-        action: faker.helpers.arrayElement(actions),
-        timestamp: subtractDays(faker.number.int({ min: 0, max: 30 })),
-        ipAddress: faker.internet.ipv4(),
-        metadata: { userAgent: faker.internet.userAgent() },
-        consentVersion: '2.0',
-        previousHash: previousHash,
-        signature: ''
-      });
-      previousHash = newLog._id.toString();
-    }
-    console.log('📝 Added 50 audit logs');
-
-    // 16. ADDITIONAL CHAT CONVERSATIONS & MESSAGES
-    console.log('💬 Adding more chat conversations...');
-    const allConsultations = await Consultation.find({ status: 'completed' }).limit(10);
-    for (const consult of allConsultations) {
-      if (!consult.patientId || !consult.practitionerId) continue;
-      const existingConv = await Conversation.findOne({ consultationId: consult._id });
-      if (existingConv) continue;
-      const conversation = await Conversation.create({
-        consultationId: consult._id,
-        patientId: consult.patientId,
-        practitionerId: consult.practitionerId,
-        status: 'ended',
-        minutesAllocated: 30,
-        minutesUsed: faker.number.int({ min: 5, max: 30 }),
-        minutesRequested: 0,
-        minutesApproved: 0,
-        startedAt: consult.scheduledStartTime,
-        lastActivityAt: consult.scheduledEndTime
-      });
-      // Add random messages
-      for (let i = 0; i < faker.number.int({ min: 3, max: 15 }); i++) {
-        const sender = faker.datatype.boolean() ? consult.patientId : consult.practitionerId;
-        const receiver = sender.toString() === consult.patientId.toString() ? consult.practitionerId : consult.patientId;
-        await Message.create({
-          conversationId: conversation._id,
-          senderId: sender,
-          receiverId: receiver,
-          content: faker.lorem.sentence(),
-          type: 'text',
-          isRead: true,
-          createdAt: new Date(consult.scheduledStartTime.getTime() + (i * 60000)),
-          updatedAt: new Date(consult.scheduledStartTime.getTime() + (i * 60000))
-        });
-      }
-    }
-    console.log('💬 Added extra chat conversations and messages');
-
-    console.log('\n🌟 REAL-LIFE SIMULATION SEED COMPLETE!');
-    process.exit(0);
-
-  } catch (err) {
-    console.error('❌ SIMULATION SEED FAILED:', err);
+async function seed() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.error("❌ MONGODB_URI not found in environment. Please check your .env.local file.");
     process.exit(1);
   }
+
+  console.log("🚀 Connecting to MongoDB...");
+  await mongoose.connect(uri);
+
+  const collections = Object.values(mongoose.connection.collections);
+  console.log("🧹 Clearing existing data...");
+  for (const collection of collections) {
+    await collection.deleteMany({});
+  }
+
+  const pw = hash("Password123!");
+
+  // ---------- 1. FACILITIES ----------
+  console.log("🏥 Seeding Facilities (Hospitals)...");
+  
+  const coreHospital = await Facility.create({
+    name: "Netcare Milpark Hospital",
+    facilityType: 'Private',
+    address: { street: "9 Guild Rd, Parktown", city: "Johannesburg", province: "Gauteng", coordinates: [28.0315, -26.1802] },
+    contactInfo: { phone: "+27 11 480 0000", emergencyPhone: "+27 11 480 0111", email: "info@netcare.co.za" },
+    bedCapacity: { total: 300, generalAvailable: 240, icuAvailable: 40 },
+    currentWaitTimeMins: 15, isOpen: true,
+    specialties: ["Cardiology", "Trauma", "Neurology", "Burn Unit", "Radiology", "Pharmacy"], emergencyServices: true
+  });
+
+  const extraHospitals = await Facility.create([
+    {
+      name: "Life Brenthurst Hospital",
+      facilityType: 'Private',
+      address: { street: "4 Park Lane, Parktown", city: "Johannesburg", province: "Gauteng", coordinates: [28.0385, -26.1822] },
+      contactInfo: { phone: "+27 11 647 9000", emergencyPhone: "+27 11 647 9111", email: "brenthurst@lifehealthcare.co.za" },
+      bedCapacity: { total: 150, generalAvailable: 100, icuAvailable: 20 },
+      currentWaitTimeMins: 20, isOpen: true,
+      specialties: ["Maternity", "Orthopedics", "General Surgery"], emergencyServices: true
+    },
+    {
+      name: "Mediclinic Sandton",
+      facilityType: 'Private',
+      address: { street: "Corner Main Rd & Peter Place", city: "Sandton", province: "Gauteng", coordinates: [28.0163, -26.0718] },
+      contactInfo: { phone: "+27 11 709 2000", emergencyPhone: "+27 11 709 2111", email: "sandton@mediclinic.co.za" },
+      bedCapacity: { total: 200, generalAvailable: 150, icuAvailable: 25 },
+      currentWaitTimeMins: 10, isOpen: true,
+      specialties: ["Pediatrics", "Oncology", "Internal Medicine"], emergencyServices: true
+    },
+    {
+      name: "Helen Joseph Hospital",
+      facilityType: 'Public',
+      address: { street: "1 Perth Rd, Rossmore", city: "Johannesburg", province: "Gauteng", coordinates: [27.9945, -26.1834] },
+      contactInfo: { phone: "+27 11 489 1011", emergencyPhone: "+27 11 489 1111", email: "info@gauteng.gov.za" },
+      bedCapacity: { total: 500, generalAvailable: 400, icuAvailable: 30 },
+      currentWaitTimeMins: 45, isOpen: true,
+      specialties: ["General Medicine", "Trauma", "Psychiatry"], emergencyServices: true
+    }
+  ]);
+
+  const allHospitals = [coreHospital, ...extraHospitals];
+
+  // ---------- 2. USERS & PROFILES ----------
+  console.log("👥 Seeding Core Users...");
+
+  // -- Core Patients --
+  const thandiweUser = await User.create({ email: "thandiwe.mokoena@example.com", passwordHash: pw, role: 'patient', firstName: "Thandiwe", lastName: "Mokoena", saId: "9005125123081", mobile: "+27 82 111 2222", status: 'active' });
+  const johnDUser = await User.create({ email: "john.dlamini@example.com", passwordHash: pw, role: 'patient', firstName: "John", lastName: "Dlamini", saId: "8301155012084", mobile: "+27 71 333 4444", status: 'active' });
+
+  // -- Core Doctors --
+  const drMitchellUser = await User.create({ email: "mitchell@247digihealth.com", passwordHash: pw, role: 'practitioner', firstName: "Oliver", lastName: "Mitchell", status: 'active' });
+  const drAnkeUser = await User.create({ email: "vwyk@247digihealth.com", passwordHash: pw, role: 'practitioner', firstName: "Anke", lastName: "van Wyk", status: 'active' });
+
+  await PatientProfile.create({ userId: thandiweUser._id, dateOfBirth: new Date(1990, 4, 12), gender: 'female', emergencyContact: { name: "Samuel Mokoena", phone: "+27 82 111 0000", relationship: "Husband" }, medicalAid: { provider: "Discovery Health", planName: "Classic Smart", memberNumber: "DSC123456789" }, subscriptionTier: 'pro', popiaConsentDate: subDays(new Date(), 100), myDoctorIds: [drMitchellUser._id, drAnkeUser._id] });
+
+  await PatientProfile.create({ userId: johnDUser._id, dateOfBirth: new Date(1983, 0, 15), gender: 'male', emergencyContact: { name: "Busi Dlamini", phone: "+27 71 333 0000", relationship: "Sister" }, subscriptionTier: 'pro', popiaConsentDate: subDays(new Date(), 200), myDoctorIds: [drMitchellUser._id] });
+
+  await PractitionerProfile.create({ userId: drMitchellUser._id, specialisation: "General Practitioner", hpcsaNumber: "MP0123456", experienceYears: 12, bio: "Experienced family physician committed to holistic patient care.", languages: ["English", "Afrikaans", "isiZulu"], acceptedMedicalAids: ["Discovery", "Bonitas", "Momentum"], rating: 4.8, reviewCount: 156, isOnline: true, bankAccount: { accountHolder: "Dr O Mitchell", bankName: "FNB", accountNumber: "62822113344", branchCode: "250655", taxNumber: "9123456789" }, affiliatedFacilityIds: [coreHospital._id], assignedPatientIds: [thandiweUser._id, johnDUser._id] });
+
+  await PractitionerProfile.create({ userId: drAnkeUser._id, specialisation: "Cardiologist", hpcsaNumber: "MP0654321", experienceYears: 15, bio: "Specializing in interventional cardiology.", languages: ["English", "Afrikaans", "German"], acceptedMedicalAids: ["Discovery", "Bestmed", "GEMS"], rating: 4.9, reviewCount: 92, isOnline: true, bankAccount: { accountHolder: "Dr A van Wyk Inc", bankName: "Nedbank", accountNumber: "1234567890", branchCode: "198765", taxNumber: "9876543210" }, affiliatedFacilityIds: [coreHospital._id], assignedPatientIds: [thandiweUser._id] });
+
+  // -- Core EMT --
+  const emtUser = await User.create({ email: "john.rescuer@247digihealth.com", passwordHash: pw, role: 'emt', firstName: "John", lastName: "Rescuer", status: 'active' });
+  await EMTProfile.create({ userId: emtUser._id, licenseLevel: 'ALS', hpcsaNumber: "ANT998877", assignedVehicle: "AMB-101", assignedFacilityId: coreHospital._id, currentStatus: 'available' });
+
+  // -- Core Hospital Admin --
+  await User.create({ 
+    email: "admin@netcare.co.za", 
+    passwordHash: pw, 
+    role: 'hospital_admin', 
+    firstName: "Sarah", 
+    lastName: "Jenkins", 
+    status: 'active' 
+  });
+
+  // ---------- GENERATE 20 EXTRA PATIENTS ----------
+  console.log("👥 Generating 20 Additional Patients...");
+  const extraPatUsers = [];
+  for (let i = 0; i < 20; i++) {
+    const isFemale = faker.datatype.boolean();
+    const dob = faker.date.birthdate({ min: 18, max: 75, mode: 'age' });
+    const fn = faker.person.firstName(isFemale ? 'female' : 'male');
+    const ln = faker.person.lastName();
+    
+    const user = await User.create({
+      email: faker.internet.email({ firstName: fn, lastName: ln }).toLowerCase(),
+      passwordHash: pw,
+      role: 'patient',
+      firstName: fn,
+      lastName: ln,
+      saId: generateSAId(dob, isFemale),
+      mobile: faker.phone.number({ style: 'international' }),
+      status: 'active'
+    });
+    extraPatUsers.push(user);
+
+    await PatientProfile.create({
+      userId: user._id,
+      dateOfBirth: dob,
+      gender: isFemale ? 'female' : 'male',
+      emergencyContact: {
+        name: faker.person.fullName(),
+        phone: faker.phone.number({ style: 'international' }),
+        relationship: pickOne(["Spouse", "Parent", "Child", "Sibling"])
+      },
+      medicalAid: faker.datatype.boolean() ? { provider: pickOne(["Discovery Health", "Bonitas", "GEMS", "Bestmed"]), planName: pickOne(["Classic", "Smart", "Comprehensive"]), memberNumber: faker.string.alphanumeric(10).toUpperCase() } : undefined,
+      subscriptionTier: pickOne(['free', 'pro']),
+      popiaConsentDate: subDays(new Date(), randInt(1, 365))
+    });
+  }
+
+  // ---------- GENERATE 20 EXTRA DOCTORS ----------
+  console.log("🩺 Generating 20 Additional Doctors...");
+  const extraDocUsers = [];
+  const specialisations = ["Pediatrician", "Dermatologist", "Psychiatrist", "Neurologist", "Orthopedic Surgeon", "General Practitioner", "Oncologist", "Endocrinologist", "Gastroenterologist", "Pulmonologist"];
+  
+  for (let i = 0; i < 20; i++) {
+    const fn = faker.person.firstName();
+    const ln = faker.person.lastName();
+    const spec = pickOne(specialisations);
+    
+    const user = await User.create({
+      email: faker.internet.email({ firstName: fn, lastName: ln, provider: '247digihealth.com' }).toLowerCase(),
+      passwordHash: pw,
+      role: 'practitioner',
+      firstName: fn,
+      lastName: ln,
+      status: 'active'
+    });
+    extraDocUsers.push(user);
+
+    await PractitionerProfile.create({
+      userId: user._id,
+      specialisation: spec,
+      hpcsaNumber: "MP" + faker.string.numeric(7),
+      experienceYears: randInt(2, 35),
+      bio: faker.lorem.paragraph(),
+      languages: ["English", pickOne(["Afrikaans", "isiZulu", "Xhosa", "Sotho"])],
+      acceptedMedicalAids: ["Discovery", "Bonitas", "Momentum"],
+      rating: faker.number.float({ min: 3.5, max: 5.0, fractionDigits: 1 }),
+      reviewCount: randInt(5, 500),
+      isOnline: faker.datatype.boolean(),
+      affiliatedFacilityIds: [pickOne(allHospitals)._id]
+    });
+  }
+
+  // ---------- GENERATE 5 EXTRA EMTs ----------
+  console.log("🚑 Generating 5 Additional EMTs...");
+  const extraEmtUsers = [];
+  for (let i = 0; i < 5; i++) {
+    const fn = faker.person.firstName();
+    const ln = faker.person.lastName();
+    const user = await User.create({
+      email: faker.internet.email({ firstName: fn, lastName: ln, provider: 'rescue.com' }).toLowerCase(),
+      passwordHash: pw,
+      role: 'emt',
+      firstName: fn,
+      lastName: ln,
+      status: 'active'
+    });
+    extraEmtUsers.push(user);
+    
+    await EMTProfile.create({
+      userId: user._id,
+      licenseLevel: pickOne(['BLS', 'ILS', 'ALS']),
+      hpcsaNumber: "ANT" + faker.string.numeric(6),
+      assignedVehicle: `AMB-${randInt(100, 999)}`,
+      assignedFacilityId: pickOne(allHospitals)._id,
+      currentStatus: pickOne(['available', 'offline'])
+    });
+  }
+
+  const allPatients = [thandiweUser, johnDUser, ...extraPatUsers];
+  const allDoctors = [drMitchellUser, drAnkeUser, ...extraDocUsers];
+  const allEMTs = [emtUser, ...extraEmtUsers];
+
+  // Randomly assign patients and doctors
+  for (const doc of extraDocUsers) {
+    const assigned = [];
+    for (let j=0; j<5; j++) assigned.push(pickOne(allPatients)._id);
+    await PractitionerProfile.updateOne({ userId: doc._id }, { $set: { assignedPatientIds: assigned } });
+  }
+
+  for (const pat of extraPatUsers) {
+    const assignedDocs = [];
+    for (let j=0; j<3; j++) assignedDocs.push(pickOne(allDoctors)._id);
+    await PatientProfile.updateOne({ userId: pat._id }, { $set: { myDoctorIds: assignedDocs } });
+  }
+
+  // ---------- CLINICAL DATA FOR CORE PATIENTS ----------
+  console.log("📋 Seeding Core Clinical Data...");
+  await MedicalContext.create({ patientId: thandiweUser._id, chronicConditions: ["Hypertension", "Mild Asthma"], allergies: [{ allergen: "Penicillin", severity: "severe", reaction: "Anaphylaxis", source: "clinician" }], currentMedications: ["Amlodipine 5mg", "Salbutamol Inhaler"] });
+  await MedicalContext.create({ patientId: johnDUser._id, chronicConditions: ["Type 2 Diabetes"], allergies: [{ allergen: "Peanuts", severity: "mild", reaction: "Rash", source: "patient" }], currentMedications: ["Metformin 500mg"] });
+
+  for (let i = 6; i >= 0; i--) {
+    await Anthropometric.create({ patientId: thandiweUser._id, dateRecorded: subDays(new Date(), i * 30), heightCm: 165, weightKg: 72 - (i * 0.5), bmi: 26.4, vitalSigns: { systolicBP: 130 + randInt(-5, 5), diastolicBP: 85 + randInt(-3, 3), heartRateBpm: 72 + randInt(-4, 4), spO2: 98 + randInt(-1, 1), temperatureCelsius: 36.6 } });
+    await Anthropometric.create({ patientId: johnDUser._id, dateRecorded: subDays(new Date(), i * 30), heightCm: 180, weightKg: 88 + (i * 0.2), bmi: 27.2, vitalSigns: { systolicBP: 135 + randInt(-4, 4), diastolicBP: 88 + randInt(-3, 3), heartRateBpm: 78 + randInt(-5, 5), spO2: 97 + randInt(-1, 1), temperatureCelsius: 36.7 } });
+  }
+
+  // Give extra patients baseline clinical data
+  for (const pat of extraPatUsers) {
+    if (Math.random() > 0.5) {
+      await MedicalContext.create({ patientId: pat._id, chronicConditions: [pickOne(["Asthma", "Hypertension", "Arthritis"])] });
+    }
+  }
+
+  // ---------- CONSULTATIONS (Scale up to 100) ----------
+  console.log("📞 Seeding Consultations...");
+  const consultsToCreate = [];
+  for (let i = 0; i < 100; i++) {
+    const isPast = Math.random() > 0.2;
+    const pat = pickOne(allPatients);
+    const doc = pickOne(allDoctors);
+    const fac = pickOne(allHospitals);
+    const date = isPast ? subDays(new Date(), randInt(1, 90)) : addDays(new Date(), randInt(1, 30));
+    const status = isPast 
+      ? (Math.random() > 0.1 ? 'completed' : 'cancelled') 
+      : (Math.random() > 0.3 ? 'scheduled' : pickOne(['requested', 'pending']));
+    
+    // Generate realistic Clinical Risk for 30% of consultations
+    const hasRisk = Math.random() > 0.7;
+    const riskScore = hasRisk ? randInt(20, 95) : undefined;
+    const riskColor = riskScore ? (riskScore > 75 ? 'red' : riskScore > 40 ? 'amber' : 'green') : undefined;
+    const riskFactors = riskScore ? [
+      pickOne(["High Blood Pressure", "Irregular Pulse", "Elevated Glucose", "Respiratory Distress"]),
+      pickOne(["Family History", "Smoking", "Sedentary Lifestyle"])
+    ] : [];
+
+    consultsToCreate.push({
+      patientId: pat._id,
+      practitionerId: doc._id,
+      facilityId: fac._id,
+      type: pickOne(['video', 'chat', 'in_person']),
+      status,
+      scheduledStartTime: date,
+      scheduledEndTime: new Date(date.getTime() + 30 * 60000),
+      chiefComplaint: faker.lorem.sentence(),
+      clinicalRisk: riskScore ? { score: riskScore, color: riskColor as any, factors: riskFactors } : undefined,
+      soapNotes: status === 'completed' ? { 
+        subjective: faker.lorem.paragraph(), 
+        objective: "Vitals stable, normal heart sounds.", 
+        assessment: "Patient showing signs of improvement.", 
+        plan: "Continue current meds, follow up in 2 weeks.",
+        signedAt: new Date(date.getTime() + 45 * 60000)
+      } : undefined
+    });
+  }
+  await Consultation.insertMany(consultsToCreate);
+
+  // ---------- SECURE MESSAGING ----------
+  console.log("💬 Seeding Messages...");
+  for (let i=0; i<10; i++) {
+    const pat = pickOne(allPatients);
+    const doc = pickOne(allDoctors);
+    const conv = await Conversation.create({ patientId: pat._id, practitionerId: doc._id, status: 'active', startedAt: subDays(new Date(), randInt(1,30)), minutesAllocated: 30 });
+    for(let k=0; k<5; k++) {
+        await Message.create({
+            conversationId: conv._id, senderId: k%2===0 ? pat._id : doc._id, receiverId: k%2===0 ? doc._id : pat._id, content: faker.lorem.sentence(), isRead: true, createdAt: subDays(new Date(), 5-k)
+        });
+    }
+  }
+
+  // ---------- REALISTIC ENGLISH HEALTH ARTICLES ----------
+  console.log("✍️ Seeding Health Articles & Tips...");
+  await Article.create([
+    {
+      title: "Understanding Cardiovascular Health in the Modern Era",
+      slug: "understanding-cardiovascular-health-modern-era",
+      excerpt: "Heart disease remains a global challenge, but modern proactive measures and digital monitoring can dramatically improve lifespan and quality of life.",
+      content: `<h2>The Heart of the Matter</h2>
+      <p>Cardiovascular diseases (CVDs) remain the leading cause of death globally. Modern lifestyles, characterized by sedentary jobs, processed foods, and high stress, contribute significantly to these risks. However, the paradigm is shifting from reactive treatment to proactive prevention.</p>
+      <h3>Digital Health & Vitals</h3>
+      <p>Through consistent monitoring of blood pressure, heart rate variability, and BMI, patients can now prevent major cardiac events. Platforms like 24/7 DigiHealth allow patients and practitioners to spot trends early, adjusting lifestyle or medications before an emergency arises.</p>
+      <h3>Key Takeaways for Daily Life</h3>
+      <ul>
+        <li>Incorporate 30 minutes of moderate aerobic activity daily.</li>
+        <li>Monitor your sodium intake, prioritizing natural foods.</li>
+        <li>Log your vitals consistently if you have a family history of CVD.</li>
+      </ul>
+      <p>Remember, your heart is a muscle, and treating it with care is a daily commitment.</p>`,
+      coverImage: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80&w=800",
+      author: "Dr. Anke van Wyk",
+      tags: ["Cardiology", "Wellness", "Preventative Care"],
+      likes: 342,
+      isPublished: true,
+      publishedAt: subDays(new Date(), 10)
+    },
+    {
+      title: "Managing Type 2 Diabetes: A Holistic Approach",
+      slug: "managing-type-2-diabetes-holistic",
+      excerpt: "Diabetes management is not just about insulin; it's about a complete lifestyle recalibration encompassing diet, mental health, and physical activity.",
+      content: `<h2>Beyond the Numbers</h2>
+      <p>While monitoring HbA1c is critical, true management of Type 2 Diabetes requires a comprehensive overhaul of habits. It's an interplay of nutrition, daily routine, and clinical guidance.</p>
+      <p>Consultations, continuous glucose monitors (CGMs), and prompt telehealth reporting have changed the landscape. You are no longer alone in this journey. Regular check-ins via video call ensure tight adherence to dietary plans and rapid adjustment of metadata.</p>`,
+      coverImage: "https://images.unsplash.com/photo-1584308666744-24d5e44299ec?auto=format&fit=crop&q=80&w=800",
+      author: "Dr. Oliver Mitchell",
+      tags: ["Endocrinology", "Diabetes", "Diet"],
+      likes: 128,
+      isPublished: true,
+      publishedAt: subDays(new Date(), 5)
+    }
+  ]);
+
+  for (let i = 0; i < 15; i++) {
+    await HealthTip.create({
+      title: pickOne(["Drink More Water", "Stretch Daily", "Limit Screen Time", "Walk for 20 Mins", "Prioritize Sleep", "Check Your Posture", "Eat More Greens"]),
+      excerpt: faker.lorem.sentence(),
+      content: faker.lorem.paragraph(),
+      author: pickOne(["Dr. Mitchell", "Dr. van Wyk", "Dr. Dlamini", "Dr. Botha"]),
+      date: subDays(new Date(), i).toISOString().split('T')[0],
+      readTime: "1 min", tag: "Daily Tip", category: 'tip'
+    });
+  }
+
+  // ---------- 10. BILLING DATA (Transactions & Subs) ----------
+  console.log("💳 Seeding Billing Data...");
+  for (const pat of allPatients) {
+    const tier = pickOne(['free', 'pro', 'family']);
+    const prices: any = { free: 0, pro: 299, family: 499 };
+    
+    // 10a. Subscription
+    await Subscription.create({
+      patientId: pat._id,
+      tier,
+      status: 'active',
+      startDate: subDays(new Date(), randInt(30, 200)),
+      nextBillingDate: addDays(new Date(), randInt(5, 25)),
+      autoRenew: true,
+      price: prices[tier]
+    });
+
+    // 10b. Payment Methods
+    await PaymentMethod.create({
+      patientId: pat._id,
+      type: 'card',
+      isDefault: true,
+      cardBrand: pickOne(['Visa', 'Mastercard']),
+      last4: faker.string.numeric(4),
+      expiryMonth: randInt(1, 12),
+      expiryYear: 2027
+    });
+
+    if (Math.random() > 0.6) {
+      await PaymentMethod.create({
+        patientId: pat._id,
+        type: 'medical_aid',
+        isDefault: false,
+        medicalAidProvider: pickOne(['Discovery Health', 'Bonitas', 'GEMS']),
+        medicalAidNumber: faker.string.alphanumeric(10).toUpperCase()
+      });
+    }
+
+    // 10c. Transactions
+    const txnTypes: Array<'service_booking' | 'subscription' | 'procedure' | 'pharmacy' | 'lab'> = ['service_booking', 'subscription', 'pharmacy'];
+    const count = randInt(3, 8);
+    for (let j = 0; j < count; j++) {
+      const amount = randInt(150, 2500);
+      const cat = pickOne(txnTypes);
+      await PaymentTransaction.create({
+        patientId: pat._id,
+        practitionerId: pickOne(allDoctors)._id,
+        amount,
+        currency: 'ZAR',
+        provider: pickOne(['card', 'medical_aid', 'eft']),
+        status: pickOne(['completed', 'completed', 'completed', 'pending', 'failed']),
+        description: `${cat.replace('_', ' ')} payment`,
+        category: cat,
+        timestamp: subDays(new Date(), randInt(1, 120)),
+        platformFeeAmount: amount * 0.15,
+        practitionerEarnings: amount * 0.85
+      });
+    }
+  }
+
+  // 10d. Payout Requests for Doctors
+  for (const doc of allDoctors) {
+    if (Math.random() > 0.3) {
+      await PayoutRequest.create({
+        practitionerId: doc._id,
+        amount: randInt(5000, 25000),
+        status: pickOne(['paid', 'pending', 'approved']),
+        requestedAt: subDays(new Date(), randInt(1, 30)),
+        bankAccount: {
+          accountHolder: `Dr. ${doc.lastName}`,
+          bankName: pickOne(['FNB', 'Standard Bank', 'Nedbank', 'Absa']),
+          accountNumber: faker.string.numeric(10),
+          branchCode: faker.string.numeric(6)
+        },
+        periodFrom: subDays(new Date(), 60),
+        periodTo: subDays(new Date(), 30),
+        consultationCount: randInt(10, 50),
+        platformFeeDeducted: randInt(500, 2000)
+      });
+    }
+  }
+
+  console.log("✅ Custom Dense Seeding Completed Successfully!");
+  process.exit(0);
 }
 
-seedDatabase();
+seed().catch(err => {
+  console.error("\n❌ SEED FAILED:");
+  console.error(err);
+  process.exit(1);
+});

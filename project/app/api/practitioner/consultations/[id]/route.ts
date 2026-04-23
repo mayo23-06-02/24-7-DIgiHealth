@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import Consultation from '@/lib/models/Consultation';
+import { Consultation } from '@/lib/models/Consultation';
+import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -24,9 +25,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ success: false, error: 'Consultation not found' }, { status: 404 });
     }
 
-    // MVP Note: In a full system, you would insert an entry into a Notification collection
-    // here so the patient receives an in-app ping about the acceptance/rejection.
-    // e.g. await Notification.create({ userId: consultation.patientId, message: "Your consultation was accepted!" })
+    // If accepted, mutually link patient and doctor
+    if (status === 'scheduled') {
+      await Promise.all([
+        PractitionerProfile.updateOne(
+          { userId: consultation.practitionerId },
+          { $addToSet: { assignedPatientIds: consultation.patientId } }
+        ),
+        PatientProfile.updateOne(
+          { userId: consultation.patientId },
+          { $addToSet: { myDoctorIds: consultation.practitionerId } }
+        )
+      ]);
+    }
 
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {

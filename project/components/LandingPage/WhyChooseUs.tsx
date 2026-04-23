@@ -12,17 +12,15 @@ export default function WhyChooseUs() {
       <div className="container mx-auto px-6 sm:px-10 xl:px-16 2xl:px-24 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
         <div className="flex flex-col gap-4 mb-20">
           <div className="flex items-center gap-3">
-            <span className="text-secondary font-black text-3xl">+</span>
-            <span className="text-secondary font-bold tracking-widest uppercase text-sm">
+            <span className="text-secondary font-bold text-3xl">+</span>
+            <span className="text-secondary font-bold tracking-normal uppercase text-sm">
               Why Choose Us
             </span>
           </div>
-          <div
-            className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 items-end py-15"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 items-end py-15">
             <h2 className="text-4xl md:text-5xl font-medium text-slate-900 leading-[1.05] tracking-tight">
               A Simplified Path to <br />{" "}
-              <span className="text-primary font-black">
+              <span className="text-primary font-bold">
                 24/7 Digital Healthcare
               </span>
             </h2>
@@ -79,9 +77,7 @@ export default function WhyChooseUs() {
           </div>
 
           {/* Right Column - Blue Box */}
-          <div
-            className="bg-primary rounded-lg p-12 flex flex-col justify-between text-white p-5"
-          >
+          <div className="bg-primary rounded-lg p-12 flex flex-col justify-between text-white p-5">
             <h3 className="text-xl md:text-2xl font-normal  tracking-tight">
               We're committed to delivering the highest standard of medical care
               with sensitivity.

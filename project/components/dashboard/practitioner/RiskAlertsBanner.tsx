@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { BiError, BiChevronRight } from 'react-icons/bi';
-import RiskScoreCard from './RiskScoreCard';
+import React from "react";
+import { BiError, BiChevronRight } from "react-icons/bi";
+import RiskScoreCard from "./RiskScoreCard";
 
 interface RiskAlert {
   consultationId: string;
   patientName: string;
   score: number;
-  color: 'green' | 'amber' | 'red';
+  color: "green" | "amber" | "red";
   condition: string;
   factors: string[];
 }
@@ -18,30 +18,39 @@ interface RiskAlertsBannerProps {
   onViewQueue?: () => void;
 }
 
-export default function RiskAlertsBanner({ alerts, onViewQueue }: RiskAlertsBannerProps) {
+import Button from "@/components/ui/Button";
+
+export default function RiskAlertsBanner({
+  alerts,
+  onViewQueue,
+}: RiskAlertsBannerProps) {
   if (alerts.length === 0) return null;
 
   return (
-    <div className="bg-gradient-to-r from-red-50 via-rose-50 to-orange-50 border border-red-200 rounded-2xl p-4 shrink-0">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-red-100 rounded-xl flex items-center justify-center">
-            <BiError className="text-red-600" size={15} />
+    <div className="bg-gradient-to-r from-rose-50 to-orange-50 border border-rose-100 rounded-2xl p-4 shrink-0 shadow-none relative overflow-hidden group">
+      <div className="flex items-center justify-between mb-3 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-rose-500 rounded-xl flex items-center justify-center shadow-none shadow-rose-200">
+            <BiError className="text-white" size={16} />
           </div>
           <div>
-            <p className="text-sm font-black text-red-700">
-              {alerts.length} High-Risk {alerts.length === 1 ? 'Patient' : 'Patients'} in Queue
+            <p className="text-xs font-bold text-slate-800 uppercase tracking-normal">
+              {alerts.length} High-Risk{" "}
+              {alerts.length === 1 ? "Patient" : "Patients"}
             </p>
-            <p className="text-[10px] text-red-500 font-medium">Immediate clinical attention may be required</p>
+            <p className="text-[10px] text-rose-500 font-bold uppercase tracking-normal mt-0.5 animate-pulse">
+              Clinical attention Required
+            </p>
           </div>
         </div>
         {onViewQueue && (
-          <button
+          <Button
+            variant="ghost"
             onClick={onViewQueue}
-            className="flex items-center gap-1 text-xs font-bold text-red-600 hover:underline shrink-0"
+            className="flex items-center gap-1 text-[10px] font-bold text-rose-600 hover:bg-rose-100/50 rounded-full py-1.5 px-3 h-auto !min-w-0 border-none bg-transparent uppercase tracking-normal shadow-none"
           >
-            View All <BiChevronRight size={14} />
-          </button>
+            View Queue <BiChevronRight size={14} />
+          </Button>
         )}
       </div>
 
@@ -49,13 +58,22 @@ export default function RiskAlertsBanner({ alerts, onViewQueue }: RiskAlertsBann
         {alerts.map((alert) => (
           <div
             key={alert.consultationId}
-            className="bg-white rounded-xl border border-red-100 p-3 shrink-0 min-w-[180px] shadow-sm hover:shadow-md transition-shadow"
+            className="bg-white rounded-xl border border-red-100 p-3 shrink-0 min-w-[180px] shadow-none hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-xs font-bold text-slate-800 truncate max-w-[100px]">{alert.patientName}</p>
-              <RiskScoreCard score={alert.score} color={alert.color} size="sm" showRing={false} />
+              <p className="text-xs font-bold text-slate-800 truncate max-w-[100px]">
+                {alert.patientName}
+              </p>
+              <RiskScoreCard
+                score={alert.score}
+                color={alert.color}
+                size="sm"
+                showRing={false}
+              />
             </div>
-            <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">{alert.condition}</p>
+            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+              {alert.condition}
+            </p>
             {alert.factors.length > 0 && (
               <p className="text-[9px] text-red-500 mt-1.5 font-semibold truncate">
                 ⚑ {alert.factors[0]}

@@ -11,7 +11,7 @@ async function getPractitionerId(req: NextRequest): Promise<string> {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (token) {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
       const { payload } = await jwtVerify(token, secret);
       const user = await User.findById(payload.userId as string).lean();
       if (user && (user as any).role === 'practitioner') return (user as any)._id.toString();
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
         filter.status = 'cancelled';
         break;
       case 'requests':
-        filter.status = 'pending';
+        filter.status = { $in: ['pending', 'requested'] };
         break;
     }
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       practitionerId,
       patientId: body.patientId,
       type: body.type || 'video',
-      status: 'scheduled',
+      status: 'pending',
       scheduledStartTime: new Date(body.scheduledStart),
       scheduledEndTime: new Date(body.scheduledEnd),
       chiefComplaint: body.reason || body.chiefComplaint,

@@ -17,12 +17,16 @@ interface AITriageChatProps {
   patientName: string;
 }
 
-export default function AITriageChat({ isOpen, onClose, patientName }: AITriageChatProps) {
+export default function AITriageChat({
+  isOpen,
+  onClose,
+  patientName,
+}: AITriageChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       sender: "assistant",
-      text: `Hello ${patientName.split(" ")[0]}! I'm SymptomSage, your dedicated AI health companion. I've been trained on official clinical data to help you understand your symptoms. How can I support you today?`,
+      text: `Hello ${patientName.split(" ")[0]}! I'm Dr. SymtoSage, your dedicated AI clinical doctor. I've been trained on official clinical data to help you understand your symptoms. How can I support you today?`,
       timestamp: new Date(),
     },
   ]);
@@ -40,17 +44,17 @@ export default function AITriageChat({ isOpen, onClose, patientName }: AITriageC
     setIsTyping(true);
 
     try {
-      const history = messages.map(m => ({
+      const history = messages.map((m) => ({
         role: m.sender === "user" ? "user" : "assistant",
-        content: m.text
+        content: m.text,
       }));
 
       const response = await fetch("/api/ai-triage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            symptoms: text,
-            history: history 
+        body: JSON.stringify({
+          symptoms: text,
+          history: history,
         }),
       });
 
@@ -62,7 +66,9 @@ export default function AITriageChat({ isOpen, onClose, patientName }: AITriageC
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: "assistant",
-        text: aiText || "I'm sorry, I couldn't process that. How can I help you today?",
+        text:
+          aiText ||
+          "I'm sorry, I couldn't process that. How can I help you today?",
         timestamp: new Date(),
       };
 
@@ -82,22 +88,23 @@ export default function AITriageChat({ isOpen, onClose, patientName }: AITriageC
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      title="Clinical AI Triage" 
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Clinical AI Triage"
       width="md"
     >
       <div className="h-[600px]">
-        <ChatInterface 
-          title="SymptomSage"
+        <ChatInterface
+          title="SymtoSage"
           messages={messages}
           onSendMessage={handleSendMessage}
           isTyping={isTyping}
         />
         <div className="text-center mt-6">
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
-            Emergency? Call <span className="text-red-500">112</span> or <span className="text-red-500">10177</span> immediately.
+          <p className="text-xs font-bold text-slate-300 uppercase tracking-normal">
+            Emergency? Call <span className="text-red-500">112</span> or{" "}
+            <span className="text-red-500">10177</span> immediately.
           </p>
         </div>
       </div>

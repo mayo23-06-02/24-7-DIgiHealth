@@ -25,9 +25,7 @@ export default function AboutUs() {
       className="section bg-white h-[90vh] text-slate-900 py-32 relative overflow-hidden"
     >
       {/* Decorative Background Placeholder (DNA-like) */}
-      <div
-        className="absolute inset-y-0 left-[10%] w-1/2 bg-cover opacity-10 z-0 bg-[url('data:image/svg+xml;utf8,<svg%20viewBox=%220%200%20100%20100%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle%20cx=%2250%22%20cy=%2250%22%20r=%2240%22%20stroke=%22%23e2e8f0%22%20stroke-dasharray=%222%204%22%20stroke-width=%221%22%20fill=%22none%22/%3E%3C/svg%3E')]"
-      ></div>
+      <div className="absolute inset-y-0 left-[10%] w-1/2 bg-cover opacity-10 z-0 bg-[url('data:image/svg+xml;utf8,<svg%20viewBox=%220%200%20100%20100%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle%20cx=%2250%22%20cy=%2250%22%20r=%2240%22%20stroke=%22%23e2e8f0%22%20stroke-dasharray=%222%204%22%20stroke-width=%221%22%20fill=%22none%22/%3E%3C/svg%3E')]"></div>
 
       <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] relative z-10">
         <div className="grid grid-cols-5 md:grid-cols-5 lg:grid-cols-5 gap-12 items-center">
@@ -35,15 +33,13 @@ export default function AboutUs() {
           <div className="flex flex-col col-span-2 justify-between h-full gap-8">
             <div className="flex items-center gap-2">
               <span className="text-secondary font-extrabold text-xl">+</span>
-              <span className="text-secondary font-semibold tracking-widest uppercase text-sm">
+              <span className="text-secondary font-semibold tracking-normal uppercase text-sm">
                 About Us
               </span>
             </div>
 
             <div className="">
-              <div
-                className="flex items-center gap-4 mt-4 mb-5"
-              >
+              <div className="flex items-center gap-4 mt-4 mb-5">
                 <div className="px-6 py-2 bg-slate-100 rounded-lg text-sm font-semibold text-slate-800">
                   Our Impact
                 </div>
@@ -82,9 +78,7 @@ export default function AboutUs() {
           {/* Middle Column - Image */}
           <div className="relative col-span-3 flex-col   w-full h-[60vh]  flex justify-between bgb items-start">
             <div className="flex">
-              <div
-                className="w-full max-w-[320px] h-[200px]  rounded-lg overflow-hidden pr-5"
-              >
+              <div className="w-full max-w-[320px] h-[200px]  rounded-lg overflow-hidden pr-5">
                 <img
                   src="/LandingPage/bg-2.jpg"
                   alt="Doctor"
@@ -101,12 +95,8 @@ export default function AboutUs() {
             <div className="flex  gap-8">
               <div className="flex gap-8">
                 {/* Card 1 */}
-                <div
-                  className="bg-linear-to-b from-sky-50 to-sky-100  rounded-lg p-10"
-                >
-                  <div
-                    className="flex justify-between items-center mb-5"
-                  >
+                <div className="bg-linear-to-b from-sky-50 to-sky-100  rounded-lg p-10">
+                  <div className="flex justify-between items-center mb-5">
                     <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center ">
                       <svg
                         width="22"
@@ -121,15 +111,11 @@ export default function AboutUs() {
                         <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 12.68l7.03 6.84a1.86 1.86 0 0 0 2.54 0l7.03-6.84c2.67-2.4 2.54-5.98-.18-8.1z"></path>
                       </svg>
                     </div>
-                    <div
-                      className="bg-white px-5 py-1.25 rounded-lg text-sm font-semibold text-primary "
-                    >
+                    <div className="bg-white px-5 py-1.25 rounded-lg text-sm font-semibold text-primary ">
                       Connected Care
                     </div>
                   </div>
-                  <h4
-                    className="text-xl font-semibold text-primary mb-3.75"
-                  >
+                  <h4 className="text-xl font-semibold text-primary mb-3.75">
                     Smart Care
                   </h4>
                   <div className="p- rounded-lg text-[0.95rem] text-primary leading-relaxed ">
@@ -139,12 +125,8 @@ export default function AboutUs() {
                 </div>
 
                 {/* Card 2 */}
-                <div
-                  className="bg-linear-to-b from-sky-50 to-sky-100  rounded-lg p-10"
-                >
-                  <div
-                    className="flex justify-between items-center mb-5"
-                  >
+                <div className="bg-linear-to-b from-sky-50 to-sky-100  rounded-lg p-10">
+                  <div className="flex justify-between items-center mb-5">
                     <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center ">
                       <svg
                         width="22"
@@ -160,15 +142,11 @@ export default function AboutUs() {
                         <path d="m9 12 2 2 4-4"></path>
                       </svg>
                     </div>
-                    <div
-                      className="bg-white px-5 py-1.25 rounded-lg text-sm font-semibold text-primary "
-                    >
+                    <div className="bg-white px-5 py-1.25 rounded-lg text-sm font-semibold text-primary ">
                       Connected Care
                     </div>
                   </div>
-                  <h4
-                    className="text-xl font-semibold text-primary mb-3.75"
-                  >
+                  <h4 className="text-xl font-semibold text-primary mb-3.75">
                     Secure Data
                   </h4>
                   <div className="p- rounded-lg text-[0.95rem] text-primary leading-relaxed ">

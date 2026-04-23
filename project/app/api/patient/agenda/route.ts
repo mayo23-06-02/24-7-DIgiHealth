@@ -9,7 +9,7 @@ import { Facility } from '@/lib/models/Facility';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-dev-only');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 async function getPatientId() {
   const cookieStore = await cookies();
@@ -52,7 +52,7 @@ export async function GET() {
       time: new Date(c.scheduledStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       img: c.practitionerId ? `https://ui-avatars.com/api/?name=${c.practitionerId.firstName}+${c.practitionerId.lastName}&background=0052cc&color=fff` : '',
       concern: c.chiefComplaint || 'Scheduled Consultation',
-      status: c.status,
+      status: c.status === 'requested' ? 'requested' : c.status === 'scheduled' ? 'confirmed' : c.status,
       countdown: isPast ? 'Past' : 'Upcoming',
       consultationId: c._id,
     };

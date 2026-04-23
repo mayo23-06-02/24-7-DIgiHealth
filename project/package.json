@@ -10,7 +10,8 @@
     "seed": "node scripts/seed.mjs",
     "seed:hospital": "node --env-file=.env.local scripts/seedHospital.mjs",
     "seed:practitioner": "node --env-file=.env.local scripts/seedPractitioner.mjs",
-    "seed:emt": "node --env-file=.env.local scripts/seedEMT.mjs"
+    "seed:emt": "node --env-file=.env.local scripts/seedEMT.mjs",
+    "seed:oliver": "node --env-file=.env.local scripts/seedOliver.mjs"
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.89.1",
@@ -26,10 +27,12 @@
     "jose": "^6.2.2",
     "localforage": "^1.10.0",
     "lucide-react": "^1.7.0",
+    "mapbox-gl": "^3.21.0",
     "mongodb": "^7.1.1",
     "mongoose": "^9.4.1",
     "next": "16.2.2",
     "next-sanity": "^12.2.1",
+    "pdfkit": "^0.18.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hot-toast": "^2.6.0",

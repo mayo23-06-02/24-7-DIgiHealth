@@ -27,6 +27,123 @@ import {
 } from "react-icons/bi";
 import Button from "./Button";
 
+// ==================== PREDEFINED ANATOMY PARTS ====================
+const ANATOMY_PARTS = [
+  // Head & Neck
+  "Head",
+  "Scalp",
+  "Face",
+  "Forehead",
+  "Temple",
+  "Eye (left)",
+  "Eye (right)",
+  "Ear (left)",
+  "Ear (right)",
+  "Nose",
+  "Cheek (left)",
+  "Cheek (right)",
+  "Jaw",
+  "Chin",
+  "Neck (anterior)",
+  "Neck (posterior)",
+  "Throat",
+  "Cervical spine",
+
+  // Chest & Abdomen
+  "Chest",
+  "Sternum",
+  "Rib cage",
+  "Breast (left)",
+  "Breast (right)",
+  "Axilla (left)",
+  "Axilla (right)",
+  "Abdomen (upper)",
+  "Abdomen (lower)",
+  "Navel",
+  "Flank (left)",
+  "Flank (right)",
+  "Lumbar spine",
+  "Thoracic spine",
+
+  // Back
+  "Upper back",
+  "Mid back",
+  "Lower back",
+  "Shoulder blade (left)",
+  "Shoulder blade (right)",
+  "Sacrum",
+  "Coccyx",
+
+  // Shoulders & Arms
+  "Shoulder (left)",
+  "Shoulder (right)",
+  "Arm (left) – upper",
+  "Arm (right) – upper",
+  "Elbow (left)",
+  "Elbow (right)",
+  "Forearm (left)",
+  "Forearm (right)",
+  "Wrist (left)",
+  "Wrist (right)",
+  "Hand (left)",
+  "Hand (right)",
+  "Finger (left) – specify",
+  "Finger (right) – specify",
+
+  // Hips & Legs
+  "Hip (left)",
+  "Hip (right)",
+  "Groin",
+  "Buttock (left)",
+  "Buttock (right)",
+  "Thigh (left) – anterior",
+  "Thigh (right) – anterior",
+  "Thigh (left) – posterior",
+  "Thigh (right) – posterior",
+  "Knee (left)",
+  "Knee (right)",
+  "Calf (left)",
+  "Calf (right)",
+  "Shin (left)",
+  "Shin (right)",
+  "Ankle (left)",
+  "Ankle (right)",
+  "Foot (left)",
+  "Foot (right)",
+  "Toe (left) – specify",
+  "Toe (right) – specify",
+
+  // Internal Organs
+  "Brain",
+  "Spinal cord",
+  "Heart",
+  "Lungs (left)",
+  "Lungs (right)",
+  "Trachea",
+  "Esophagus",
+  "Liver",
+  "Gallbladder",
+  "Stomach",
+  "Pancreas",
+  "Spleen",
+  "Kidney (left)",
+  "Kidney (right)",
+  "Small intestine",
+  "Large intestine",
+  "Appendix",
+  "Bladder",
+  "Uterus",
+  "Ovary (left)",
+  "Ovary (right)",
+  "Prostate",
+  "Blood vessel",
+  "Lymph node",
+  "Bone – specify",
+  "Joint – specify",
+  "Muscle – specify",
+];
+
+// ==================== TYPES ====================
 interface Note {
   _id?: string;
   id?: string;
@@ -35,6 +152,15 @@ interface Note {
   point: { x: number; y: number; z: number };
 }
 
+interface MedicalManikinProps {
+  gender: "male" | "female";
+  heightCm: number;
+  weightKg: number;
+  readOnly?: boolean;
+  patientId?: string;
+}
+
+// ==================== HIGHLIGHT MARKER ====================
 function HighlightMarker({
   note,
   onClick,
@@ -65,9 +191,9 @@ function HighlightMarker({
         <div className="absolute top-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col items-center z-50">
           <div
             style={{ padding: "10px" }}
-            className="bg-primary text-white text-xs px-3 py-2 rounded-lg whitespace-normal min-w-[140px] max-w-[200px] shadow-xl"
+            className="bg-primary text-white text-xs px-3 py-2 rounded-lg whitespace-normal min-w-[140px] max-w-[200px] shadow-none"
           >
-            <div className="text-[9px] font-black uppercase text-amber-400 tracking-widest mb-1.5 border-b border-white/10 pb-1">
+            <div className="text-[9px] font-bold uppercase text-amber-400 tracking-normal mb-1.5 border-b border-white/10 pb-1">
               {note.part || "Surface Mapping"}
             </div>
             <div className="font-medium text-slate-50 leading-relaxed break-words">
@@ -80,6 +206,7 @@ function HighlightMarker({
   );
 }
 
+// ==================== 3D MODEL ====================
 function Model({
   url,
   bmiScale,
@@ -122,26 +249,24 @@ function Model({
     <primitive
       ref={group}
       object={scene}
-      scale={[bmiScale.x * 0.8, bmiScale.y * 0.8, bmiScale.x * 0.8]}
+      scale={[bmiScale.x * 0.7, bmiScale.y * 0.8, bmiScale.x * 0.8]}
       position={[0, 1.0, 0]}
       onClick={(e: any) => {
         if (readOnly) return;
         e.stopPropagation();
-        const partName = e.object.name || "Surface Mapping";
-        onClick(partName, e.point);
+        const rawName = e.object.name || "Surface Mapping";
+        let friendlyName = rawName;
+        const matched = ANATOMY_PARTS.find((p) =>
+          rawName.toLowerCase().includes(p.toLowerCase()),
+        );
+        if (matched) friendlyName = matched;
+        onClick(friendlyName, e.point);
       }}
     />
   );
 }
 
-interface MedicalManikinProps {
-  gender: "male" | "female";
-  heightCm: number;
-  weightKg: number;
-  readOnly?: boolean;
-  patientId?: string; // Optional — for practitioners viewing a specific patient
-}
-
+// ==================== MAIN COMPONENT ====================
 export default function MedicalManikin({
   gender,
   heightCm,
@@ -159,6 +284,17 @@ export default function MedicalManikin({
   const [customPartName, setCustomPartName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Choose model based on gender
+  const modelUrl = useMemo(() => {
+    return gender === "female" ? "/female.glb" : "/human_glb.glb";
+  }, [gender]);
+
+  // Preload both models for zero latency switching
+  useEffect(() => {
+    useGLTF.preload("/human_glb.glb");
+    useGLTF.preload("/female.glb");
+  }, []);
 
   const bmi = useMemo(() => {
     const heightM = heightCm / 100;
@@ -181,8 +317,8 @@ export default function MedicalManikin({
         : "/api/patient/annotations";
       const res = await fetch(url);
       if (res.ok) setNotes(await res.json());
-    } catch {
-      /* silent */
+    } catch (error) {
+      console.error("Failed to fetch annotations", error);
     }
     setIsLoading(false);
   }, [patientId]);
@@ -203,7 +339,6 @@ export default function MedicalManikin({
     setIsSaving(true);
     try {
       if (editingNote) {
-        // Update
         const id = editingNote._id || editingNote.id;
         const res = await fetch(`/api/patient/annotations/${id}`, {
           method: "PUT",
@@ -219,7 +354,6 @@ export default function MedicalManikin({
           );
         }
       } else if (activePart) {
-        // Create
         const res = await fetch("/api/patient/annotations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -231,7 +365,7 @@ export default function MedicalManikin({
               y: activePart.point.y,
               z: activePart.point.z,
             },
-            patientId, // If provided by practitioner
+            patientId,
           }),
         });
         if (res.ok) {
@@ -239,8 +373,8 @@ export default function MedicalManikin({
           setNotes((prev) => [...prev, created]);
         }
       }
-    } catch {
-      /* silent */
+    } catch (error) {
+      console.error("Save failed", error);
     }
     setIsSaving(false);
     setActivePart(null);
@@ -257,57 +391,68 @@ export default function MedicalManikin({
       });
       if (res.ok)
         setNotes((prev) => prev.filter((n) => (n._id || n.id) !== id));
-    } catch {
-      /* silent */
+    } catch (error) {
+      console.error("Delete failed", error);
     }
     setIsSaving(false);
     setActivePart(null);
     setEditingNote(null);
   };
 
-  return (
-    <div className="w-full h-[600px] ">
-      {/* HUD Metrics */}
-      <div>
-        <div className="mb-4">
-          <p className="text-lg font-bold text-slate-800 ">My Digital Twin</p>
-          <p className="text-xs font-thin text-slate-400 ">
-            Click, annotate, and explore the living 3D reflection of you.
-          </p>
+  if (isLoading) {
+    return (
+      <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-xl">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-slate-500">Loading 3D model...</p>
         </div>
       </div>
-      <div className="flex h-full relative group bg-linear-to-b from-slate-50 to-white rounded-xl overflow-hidden select-none">
+    );
+  }
+
+  return (
+    <div className="w-full h-[600px]">
+      <div className="mb-4">
+        <p className="text-lg font-bold text-slate-800">My Digital Twin</p>
+        <p className="text-xs font-thin text-slate-400">
+          Click, annotate, and explore the living 3D reflection of you.
+        </p>
+      </div>
+
+      <div className="flex h-full relative group bg-gradient-to-b from-slate-50 to-white rounded-xl overflow-hidden select-none">
+        {/* HUD Metrics */}
         <div className="absolute top-3 left-3 z-30 pointer-events-none">
           <div className="space-y-4">
             <div className="flex items-baseline gap-2">
               <h4 className="text-4xl font-bold text-primary tracking-tighter leading-none">
                 87%
               </h4>
-              <span className="text-[10px] font-bold text-slate-400 uppercase ">
+              <span className="text-xs font-bold text-slate-400 uppercase">
                 Medical Accuracy
               </span>
             </div>
             <div className="flex gap-2">
-              <div className="bg-slate-900 text-white px-3 py-2 rounded-full text-[10px] font-black uppercase tracking-wider">
+              <div className="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold uppercase tracking-normal">
                 BMI: {bmi.toFixed(1)}
               </div>
-              <div className="bg-primary text-white px-3 py-2 rounded-full text-[10px] font-black uppercase tracking-wider">
+              <div className="bg-primary text-white px-3 py-2 rounded-full text-xs font-bold uppercase tracking-normal">
                 {heightCm}cm / {weightKg}kg
               </div>
             </div>
           </div>
         </div>
 
-        {/* Connection Indicator */}
+        {/* Annotation Counter */}
         <div className="absolute top-3 right-3 z-30 pointer-events-none flex flex-col items-end gap-1">
-          <div className="text-3xl  text-primary leading-none">
+          <div className="text-3xl text-primary leading-none">
             {notes.length}
           </div>
-          <p className="text-sm font-semibold text-slate-400 ">
+          <p className="text-sm font-semibold text-slate-400">
             {readOnly ? "Clinical Mapping" : "Active Mapping"}
           </p>
         </div>
 
+        {/* Canvas */}
         <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 8], fov: 40 }}>
           <ambientLight intensity={0.4} />
           <spotLight
@@ -328,7 +473,7 @@ export default function MedicalManikin({
               <Html center>
                 <div className="flex flex-col items-center gap-6">
                   <div className="w-16 h-16 border-[6px] border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-normal">
                     Syncing Neural Data...
                   </p>
                 </div>
@@ -338,7 +483,7 @@ export default function MedicalManikin({
             <Float speed={1} rotationIntensity={0.05} floatIntensity={0.1}>
               <group>
                 <Model
-                  url="/human_glb.glb"
+                  url={modelUrl}
                   bmiScale={bmiScale}
                   onClick={handlePartClick}
                   readOnly={readOnly}
@@ -379,17 +524,15 @@ export default function MedicalManikin({
           <Environment preset="studio" />
         </Canvas>
 
-        {/* ANNOTATION MODAL */}
+        {/* Annotation Modal with Combobox (Datalist) */}
         {(activePart || editingNote) && (
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-8 z-[100] animate-in fade-in duration-500">
-            <div className="bg-white rounded-lg border border-slate-200  p-6 w-full max-w-lg relative overflow-hidden">
-              {/* Visual background hint */}
-
+            <div className="bg-white rounded-lg border border-slate-200 p-6 w-full max-w-lg relative overflow-hidden">
               <div className="relative z-10">
                 <div className="flex justify-between items-center mb-8">
-                  <div className="flex items-center gap-3 px-4 py-1.5 rounded-full">
+                  <div className="flex items-center gap-3 px-4 py-2 rounded-full">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="text-[10px]  text-primary uppercase tracking-widest">
+                    <span className="text-xs text-primary uppercase tracking-normal">
                       Neural Mapping Node
                     </span>
                   </div>
@@ -398,7 +541,7 @@ export default function MedicalManikin({
                       <button
                         onClick={handleDelete}
                         disabled={isSaving}
-                        className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                        className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-none"
                       >
                         <BiTrash size={18} />
                       </button>
@@ -408,26 +551,35 @@ export default function MedicalManikin({
                         setActivePart(null);
                         setEditingNote(null);
                       }}
-                      className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-slate-100 shadow-sm"
+                      className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-slate-100 shadow-none"
                     >
                       <BiX size={24} />
                     </button>
                   </div>
                 </div>
 
+                {/* Body Part Selection with Datalist */}
                 <div className="space-y-1 mb-8">
-                  <input
-                    type="text"
-                    value={customPartName}
-                    onChange={(e) => setCustomPartName(e.target.value)}
-                    placeholder="Region ID (e.g. Left Forearm)"
-                    disabled={readOnly}
-                    className="text-3xl font-black text-slate-800 tracking-tighter uppercase block w-full bg-transparent border-none outline-none focus:ring-0 placeholder:text-slate-200"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      list="anatomy-parts"
+                      value={customPartName}
+                      onChange={(e) => setCustomPartName(e.target.value)}
+                      placeholder="Select or type body part"
+                      disabled={readOnly}
+                      className="text-xl font-bold text-slate-500 tracking-tighter uppercase block w-full bg-transparent border-b-2 border-slate-200 focus:border-primary outline-none pb-1"
+                    />
+                    <datalist id="anatomy-parts">
+                      {ANATOMY_PARTS.map((part) => (
+                        <option key={part} value={part} />
+                      ))}
+                    </datalist>
+                  </div>
                   <p className="text-xs font-bold text-slate-400 max-w-sm tracking-tight leading-relaxed">
                     {readOnly
                       ? "Patient clinical observation for this specific anatomical node."
-                      : "Synchronize clinical observations, sensation intensity, and duration details with your care team."}
+                      : "Select a standard body part from the list. You may type a custom name if needed (avoid abbreviations)."}
                   </p>
                 </div>
 
@@ -441,7 +593,7 @@ export default function MedicalManikin({
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-8 py-10 text-sm font-base text-slate-700 outline-none focus:border-primary focus:bg-white transition-all  mb-8 resize-none min-h-[140px] placeholder:text-slate-400"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-8 py-10 text-sm font-base text-slate-700 outline-none focus:border-primary focus:bg-white transition-all mb-8 resize-none min-h-[140px] placeholder:text-slate-400"
                     placeholder="Describe sensation, pain levels, or injury details here..."
                     autoFocus
                   />
@@ -465,12 +617,10 @@ export default function MedicalManikin({
                       disabled={isSaving || !description.trim()}
                       size="sm"
                       variant="primary"
-                      className="text-xs font-bold"
+                      className="text-xs font-bold flex items-center gap-2"
                     >
-                      {isSaving ? (
+                      {isSaving && (
                         <BiLoaderAlt size={16} className="animate-spin" />
-                      ) : (
-                        <div></div>
                       )}
                       {editingNote ? "SYNC EDIT" : "COMMIT NODE"}
                     </Button>
@@ -481,10 +631,10 @@ export default function MedicalManikin({
           </div>
         )}
 
-        {/* Legend / Hints */}
+        {/* Legend */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
-          <div className="flex gap-4 items-center bg-white  px-8 py-2 rounded-full  transition-all duration-500 ease-out hover:bg-slate-900 group">
-            <span className="text-[10px] whitespace-nowrap font-bold text-slate-400  group-hover:text-white transition-colors">
+          <div className="flex gap-4 items-center bg-white px-8 py-2 rounded-full shadow-md transition-all duration-500">
+            <span className="text-xs whitespace-nowrap font-bold text-slate-400">
               Orbit & Zoom to Map Nervous System Nodes
             </span>
           </div>
@@ -494,5 +644,6 @@ export default function MedicalManikin({
   );
 }
 
-// Preload for zero-latency loading
+// Preload both models for zero-latency loading (done inside useEffect, but also keep static preload for immediate start)
 useGLTF.preload("/human_glb.glb");
+useGLTF.preload("/female.glb");

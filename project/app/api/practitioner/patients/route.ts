@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { MedicalContext } from '@/lib/models/ClinicalData';
+import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
@@ -11,7 +12,7 @@ async function getPractitionerId(req: NextRequest): Promise<string> {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (token) {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret');
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
       const { payload } = await jwtVerify(token, secret);
       const user = await User.findById(payload.userId as string).lean();
       if (user && (user as any).role === 'practitioner') return (user as any)._id.toString();
@@ -28,8 +29,8 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search') || '';
     const riskFilter = searchParams.get('risk') || '';
 
-    // Get all distinct patients who consulted this practitioner
-    const patientIds = await Consultation.find({ practitionerId }).distinct('patientId');
+    const profile = await PractitionerProfile.findOne({ userId: practitionerId }).lean();
+    const patientIds = profile?.assignedPatientIds || [];
 
     const patients = await User.find({ _id: { $in: patientIds }, role: 'patient' }, 'firstName lastName email mobile').lean();
 

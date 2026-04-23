@@ -10,6 +10,7 @@ interface User {
   lastName?: string;
   role: string;
   avatarUrl: string;
+  gender?: string;
 }
 
 interface AuthContextType {

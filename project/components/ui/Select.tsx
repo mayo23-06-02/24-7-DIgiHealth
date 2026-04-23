@@ -6,7 +6,10 @@ export interface SelectOption {
   label: string;
 }
 
-interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+interface SelectProps extends Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "onChange"
+> {
   label?: string;
   error?: string;
   options: SelectOption[];
@@ -41,18 +44,18 @@ const Select: React.FC<SelectProps> = ({
   return (
     <div className={`space-y-2 ${containerStyle}`}>
       {label && (
-        <label htmlFor={id} className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+        <label htmlFor={id} className="block text-xs font-bold text-slate-400 ">
           {label}
         </label>
       )}
-      
+
       <div className="relative">
         {icon && (
           <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
             {icon}
           </div>
         )}
-        
+
         <select
           id={id}
           value={value}

@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IUser extends Document {
   email: string;
   passwordHash: string;
-  role: 'patient' | 'practitioner' | 'hospital_admin' | 'emt' | 'inspector' | 'super_admin' | 'mega_admin';
+  role: 'patient' | 'practitioner' | 'hospital_admin' | 'inspector' | 'super_admin' | 'mega_admin';
   status: 'active' | 'suspended' | 'pending_verification';
   firstName: string;
   lastName: string;
@@ -20,7 +20,7 @@ const UserSchema = new Schema<IUser>(
     passwordHash: { type: String, required: true },
     role: { 
       type: String, 
-      enum: ['patient', 'practitioner', 'hospital_admin', 'emt', 'inspector', 'super_admin', 'mega_admin'], 
+      enum: ['patient', 'practitioner', 'hospital_admin', 'inspector', 'super_admin', 'mega_admin'], 
       required: true 
     },
     status: {
@@ -37,7 +37,7 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-UserSchema.index({ email: 1 });
+// UserSchema.index({ email: 1 }); redundant as unique:true is set above
 UserSchema.index({ role: 1 });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

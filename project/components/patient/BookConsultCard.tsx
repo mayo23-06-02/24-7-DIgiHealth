@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { patientApi } from '../../services/patientApi';
 import { FiVideo, FiCalendar, FiClock } from 'react-icons/fi';
+import Button from '../ui/Button';
 
 export default function BookConsultCard({ isOnline, pushToQueue }: { isOnline: boolean; pushToQueue: any }) {
   const [bookingStatus, setBookingStatus] = useState<'idle'|'loading'|'success'>('idle');
@@ -42,25 +43,33 @@ export default function BookConsultCard({ isOnline, pushToQueue }: { isOnline: b
         </div>
       ) : (
         <div className="space-y-4">
-          <button 
+          <Button
             onClick={handleBook}
-            disabled={bookingStatus === 'loading'}
-            className="w-full py-4 rounded-full bg-supportive-teal text-white font-bold text-lg hover:bg-teal-600 transition-colors shadow-md shadow-supportive-teal/30 hover:scale-[1.02] flex justify-center items-center h-[60px]"
+            disabled={bookingStatus === "loading"}
+            variant="primary"
+            fullWidth
+            className="h-[60px] text-lg rounded-full shadow-md shadow-primary/30"
           >
-            {bookingStatus === 'loading' ? (
+            {bookingStatus === "loading" ? (
               <span className="animate-pulse">Preparing Virtual Room...</span>
             ) : (
               "See a Doctor Now"
             )}
-          </button>
-          
+          </Button>
+
           <div className="flex items-center justify-center gap-2 text-sm font-medium text-slate-500 bg-slate-50 py-3 rounded-full border border-slate-100">
-            <FiClock className="text-trust-blue" /> Next available: <strong className="text-slate-800">Dr. Mokoena (GP) – 2 mins</strong>
+            <FiClock className="text-primary" /> Next available:{" "}
+            <strong className="text-slate-800">Dr. Mokoena (GP) – 2 mins</strong>
           </div>
 
-          <button className="w-full py-3 text-trust-blue font-bold flex justify-center items-center gap-2 hover:bg-slate-50 rounded-full transition-colors mt-2">
+          <Button
+            variant="ghost"
+            fullWidth
+            className="text-primary font-bold flex justify-center items-center gap-2 hover:bg-slate-50 rounded-full transition-colors mt-2 border-none bg-transparent"
+            onClick={() => {}}
+          >
             <FiCalendar /> Schedule for Later
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { FiPhoneCall, FiMapPin } from "react-icons/fi";
+import Button from "../ui/Button";
 
 export default function EmergencyBanner() {
   return (
@@ -19,12 +20,20 @@ export default function EmergencyBanner() {
         </div>
 
         <div className="flex gap-3 w-full md:w-auto">
-          <button className="flex-1 md:flex-none px-6 py-3 bg-white text-high-vis-red rounded-full font-bold shadow-sm hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+          <Button
+            variant="white"
+            onClick={() => (window.location.href = "tel:10111")}
+            className="flex-1 md:flex-none px-6 py-4 rounded-full font-bold shadow-none flex items-center justify-center gap-2 whitespace-nowrap text-red-600 h-auto"
+          >
             <FiPhoneCall /> Call 10111
-          </button>
-          <button className="flex-1 md:flex-none px-6 py-3 bg-red-900/40 border border-white/20 text-white rounded-full font-bold shadow-sm hover:bg-red-900/60 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {}}
+            className="flex-1 md:flex-none px-6 py-4 bg-red-900/40 border border-white/20 text-white rounded-full font-bold shadow-none hover:bg-red-900/60 transition-colors flex items-center justify-center gap-2 whitespace-nowrap h-auto"
+          >
             <FiMapPin /> Find ER
-          </button>
+          </Button>
         </div>
       </div>
     </div>

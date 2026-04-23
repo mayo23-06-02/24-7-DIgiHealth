@@ -15,7 +15,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/digihe
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
-  role: { type: String, enum: ['patient', 'practitioner', 'hospital_admin', 'emt', 'inspector', 'super_admin', 'mega_admin'] },
+  role: { type: String, enum: ['patient', 'practitioner', 'hospital_admin', 'inspector', 'super_admin', 'mega_admin'] },
   status: { type: String, default: 'active' },
   firstName: String,
   lastName: String,
@@ -36,47 +36,26 @@ const PractitionerProfileSchema = new mongoose.Schema({
   specialisation: String,
   hpcsaNumber: String,
   experienceYears: Number,
+  // consultationFee removed - subscription-based model
+  bio: String,
+  languages: [String],
+  rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
+  achievements: [String],
+  reviews: [{
+     reviewer: String,
+     rating: Number,
+     comment: String,
+     date: { type: Date, default: Date.now }
+  }],
   isOnline: Boolean,
-});
-
-const EMTProfileSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  licenseLevel: String,
-  hpcsaNumber: String,
-  assignedVehicle: String,
-  currentStatus: String,
-});
-
-const AnthropometricSchema = new mongoose.Schema({
-  patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  dateRecorded: Date,
-  heightCm: Number,
-  weightKg: Number,
-  bmi: Number,
-  bloodType: String,
-});
-
-const MedicalContextSchema = new mongoose.Schema({
-  patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  chronicConditions: [String],
-  allergies: [{ allergen: String, severity: String }],
 });
 
 const FacilitySchema = new mongoose.Schema({
   name: String,
   facilityType: String,
   address: { city: String, province: String, coordinates: [Number, Number] },
-  bedCapacity: { total: Number, generalAvailable: Number, icuAvailable: Number },
   currentWaitTimeMins: Number,
-});
-
-const EmergencyDispatchSchema = new mongoose.Schema({
-  dispatchId: String,
-  emtId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  dispatchTime: Date,
-  status: String,
-  incidentLocation: { address: String, coordinates: [Number, Number] },
-  targetFacilityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Facility' },
 });
 
 const ConsultationSchema = new mongoose.Schema({
@@ -111,11 +90,9 @@ mongoose.models = {}; // clear cache
 const User = mongoose.model('User', UserSchema);
 const PatientProfile = mongoose.model('PatientProfile', PatientProfileSchema);
 const PractitionerProfile = mongoose.model('PractitionerProfile', PractitionerProfileSchema);
-const EMTProfile = mongoose.model('EMTProfile', EMTProfileSchema);
 const Anthropometric = mongoose.model('Anthropometric', AnthropometricSchema);
 const MedicalContext = mongoose.model('MedicalContext', MedicalContextSchema);
 const Facility = mongoose.model('Facility', FacilitySchema);
-const EmergencyDispatch = mongoose.model('EmergencyDispatch', EmergencyDispatchSchema);
 const Consultation = mongoose.model('Consultation', ConsultationSchema);
 const AuditLog = mongoose.model('AuditLog', AuditLogSchema);
 const HealthTip = mongoose.model('HealthTip', HealthTipSchema);
@@ -127,11 +104,11 @@ async function seed() {
   await mongoose.connect(MONGODB_URI);
   console.log('✅ Connected.');
 
-  console.log('🗑️  Clearing V2 collections...');
+  console.log('🗑️  Clearing collections...');
   await Promise.all([
     User.deleteMany({}), PatientProfile.deleteMany({}), PractitionerProfile.deleteMany({}),
-    EMTProfile.deleteMany({}), Anthropometric.deleteMany({}), MedicalContext.deleteMany({}),
-    Facility.deleteMany({}), EmergencyDispatch.deleteMany({}), Consultation.deleteMany({}), AuditLog.deleteMany({}),
+    Anthropometric.deleteMany({}), MedicalContext.deleteMany({}),
+    Facility.deleteMany({}), Consultation.deleteMany({}), AuditLog.deleteMany({}),
     HealthTip.deleteMany({})
   ]);
 
@@ -140,7 +117,6 @@ async function seed() {
   const facility1 = await Facility.create({
     name: 'Prestige Medical Plaza', facilityType: 'Private',
     address: { city: 'Sandton', province: 'Gauteng', coordinates: [28.0167, -26.0548] },
-    bedCapacity: { total: 124, generalAvailable: 18, icuAvailable: 2 },
     currentWaitTimeMins: 18
   });
 
@@ -149,7 +125,7 @@ async function seed() {
   
   // -- Patient: Thabo (High Risk)
   const thabo = await User.create({
-    email: 'thabo@patient.com', passwordHash: 'hash', role: 'patient',
+    email: 'thabo@patient.com', passwordHash: '$2b$10$eN16remZzocHGTmyib5cROsDOOsSLkj7KwrZGTOrluHGwIWXzDbm6', role: 'patient',
     firstName: 'Thabo', lastName: 'Mokoena', mobile: '+27 71 123 4567'
   });
   await PatientProfile.create({ userId: thabo._id, dateOfBirth: new Date('1990-03-12'), gender: 'male', subscriptionTier: 'pro' });
@@ -158,44 +134,86 @@ async function seed() {
 
   // -- Practitioner: Dr. Nkosi
   const drNkosi = await User.create({
-    email: 'dr.nkosi@digihealth.com', passwordHash: 'hash', role: 'practitioner',
+    email: 'dr.nkosi@digihealth.com', passwordHash: '$2b$10$eN16remZzocHGTmyib5cROsDOOsSLkj7KwrZGTOrluHGwIWXzDbm6', role: 'practitioner',
     firstName: 'Sipho', lastName: 'Nkosi'
   });
-  await PractitionerProfile.create({ userId: drNkosi._id, specialisation: 'General Practitioner', hpcsaNumber: 'MP0123456', experienceYears: 14, isOnline: true });
+  await PractitionerProfile.create({ 
+     userId: drNkosi._id, 
+     specialisation: 'General Practitioner', 
+     hpcsaNumber: 'MP0123456', 
+     experienceYears: 14, 
+     // consultationFee removed
+     bio: 'Dr. Nkosi is a dedicated general practitioner with over 14 years of experience, passionate about holistic family medicine.',
+     languages: ['English', 'isiZulu'],
+     rating: 4.8,
+     reviewCount: 152,
+     achievements: ['Top GP Award 2021', 'Published Researcher in Family Medicine'],
+     reviews: [{ reviewer: 'Thabo M.', rating: 5, comment: 'Dr Nkosi is very thorough!', date: new Date() }],
+     isOnline: true 
+  });
+
+  // -- Seed 20 additional fake practitioners
+  const { faker } = await import('@faker-js/faker');
+  console.log('🩺 Seeding 20 extra Practitioners...');
+  const specialties = ['Cardiologist', 'Dermatologist', 'Pediatrician', 'Neurologist', 'Psychiatrist', 'Oncologist', 'General Practitioner', 'Orthopedic Surgeon'];
+  
+  for (let i = 0; i < 20; i++) {
+     const fn = faker.person.firstName();
+     const ln = faker.person.lastName();
+     const fakeDoc = await User.create({
+        email: faker.internet.email({ firstName: fn, lastName: ln }),
+        passwordHash: '$2b$10$eN16remZzocHGTmyib5cROsDOOsSLkj7KwrZGTOrluHGwIWXzDbm6',
+        role: 'practitioner',
+        firstName: fn,
+        lastName: ln,
+     });
+     
+     const docSpecialty = faker.helpers.arrayElement(specialties);
+     await PractitionerProfile.create({
+        userId: fakeDoc._id,
+        specialisation: docSpecialty,
+        hpcsaNumber: `MP${faker.number.int({ min: 1000000, max: 9999999 })}`,
+        experienceYears: faker.number.int({ min: 2, max: 30 }),
+        // consultationFee removed
+        bio: faker.lorem.paragraph(3),
+        languages: faker.helpers.arrayElements(['English', 'Afrikaans', 'isiZulu', 'isiXhosa', 'French'], { min: 1, max: 3 }),
+        rating: faker.number.float({ min: 3.5, max: 5.0, fractionDigits: 1 }),
+        reviewCount: faker.number.int({ min: 0, max: 500 }),
+        achievements: faker.helpers.arrayElements([
+            'Gold Medalist', 'Top Rated 2023', 'Best Researcher', 'Innovative Care Award', 'Medical Board Member'
+        ], { min: 1, max: 3 }),
+        reviews: Array.from({ length: 3 }).map(() => ({
+            reviewer: faker.person.fullName(),
+            rating: faker.number.int({ min: 4, max: 5 }),
+            comment: faker.lorem.sentence(),
+            date: faker.date.recent({ days: 90 })
+        })),
+        isOnline: faker.datatype.boolean()
+     });
+  }
 
   // -- Hospital Admin: Nandi
   const adminNandi = await User.create({
-    email: 'nandi@prestige.com', passwordHash: 'hash', role: 'hospital_admin',
+    email: 'nandi@prestige.com', passwordHash: '$2b$10$eN16remZzocHGTmyib5cROsDOOsSLkj7KwrZGTOrluHGwIWXzDbm6', role: 'hospital_admin',
     firstName: 'Nandi', lastName: 'Dlamini'
   });
 
-  // -- EMT: Bongani
-  const bongani = await User.create({
-    email: 'bongani@netcare.com', passwordHash: 'hash', role: 'emt',
-    firstName: 'Bongani', lastName: 'Khumalo'
-  });
-  await EMTProfile.create({ userId: bongani._id, licenseLevel: 'ALS', hpcsaNumber: 'EMT-0045123', assignedVehicle: 'GP-07', currentStatus: 'en_route' });
 
-  // -- Inspector: Lebo
-  const lebo = await User.create({
-    email: 'lebo@doh.gov.za', passwordHash: 'hash', role: 'inspector',
-    firstName: 'Lebo', lastName: 'Sithole'
-  });
 
   // -- Super Admin: Priya
   const priya = await User.create({
-    email: 'priya@admin.com', passwordHash: 'hash', role: 'super_admin',
+    email: 'priya@admin.com', passwordHash: '$2b$10$eN16remZzocHGTmyib5cROsDOOsSLkj7KwrZGTOrluHGwIWXzDbm6', role: 'super_admin',
     firstName: 'Priya', lastName: 'Naidoo'
   });
 
   // -- Mega Admin: Kgomotso
   const kgomotso = await User.create({
-    email: 'ceo@admin.com', passwordHash: 'hash', role: 'mega_admin',
+    email: 'ceo@admin.com', passwordHash: '$2b$10$eN16remZzocHGTmyib5cROsDOOsSLkj7KwrZGTOrluHGwIWXzDbm6', role: 'mega_admin',
     firstName: 'Kgomotso', lastName: 'Ramaphosa'
   });
 
-  // 3. Operational Data bridging them together
-  console.log('🔄 Sowing Operational Data (Consultations & EMT Dispatch)...');
+  // 3. Operational Data
+  console.log('🔄 Sowing Operational Data (Consultations)...');
   
   // Ongoing Consultation between Thabo and Dr Nkosi
   await Consultation.create({
@@ -204,11 +222,10 @@ async function seed() {
     clinicalRisk: { score: 82, color: 'red', factors: ['Obese', 'Diabetic'] }
   });
 
-  // Bongani dispatched to Prestige Medical
-  await EmergencyDispatch.create({
-    dispatchId: 'EMG-2026-007', emtId: bongani._id, status: 'en_route',
-    incidentLocation: { address: 'Bryanston', coordinates: [28.0160, -26.0500] },
-    targetFacilityId: facility1._id, dispatchTime: new Date()
+  // -- Inspector: Lebo
+  const lebo = await User.create({
+    email: 'lebo@doh.gov.za', passwordHash: '$2b$10$eN16remZzocHGTmyib5cROsDOOsSLkj7KwrZGTOrluHGwIWXzDbm6', role: 'inspector',
+    firstName: 'Lebo', lastName: 'Sithole'
   });
 
   // Lebo (Inspector) auditing
@@ -259,12 +276,11 @@ async function seed() {
     }
   ]);
 
-  console.log('\n✅ V2 Seed Complete! The Polymorphic DB Architecture is Live.');
+  console.log('\n✅ Seed Complete!');
   console.log(`\n📋 MOCK LOGIN EMAILS:`);
   console.log(`     Patient : thabo@patient.com`);
   console.log(`      Doctor : dr.nkosi@digihealth.com`);
   console.log(`       Admin : nandi@prestige.com`);
-  console.log(`         EMT : bongani@netcare.com`);
   console.log(`   Inspector : lebo@doh.gov.za`);
   
   await mongoose.disconnect();
