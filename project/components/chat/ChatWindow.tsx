@@ -118,7 +118,6 @@ export default function ChatWindow({
           <CallButton
             consultationId={consultationId as string}
             conversationId={conversationId as string}
-            role={user.role}
             participantName={opponentName}
             participantAvatar={opponentAvatar}
             onCallStart={onCallStart}

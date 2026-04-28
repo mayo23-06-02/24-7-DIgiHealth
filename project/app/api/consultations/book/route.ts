@@ -1,24 +1,25 @@
-import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { Consultation } from '@/lib/models/Consultation';
-import { Notification } from '@/lib/models/Communications';
-import User from '@/lib/models/User';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Consultation } from "@/lib/models/Consultation";
+import { Notification } from "@/lib/models/Communications";
+import User from "@/lib/models/User";
+import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(request: Request) {
   try {
-    const { practitionerId, date, time, type, chiefComplaint } = await request.json();
+    const { practitionerId, date, time, type, chiefComplaint } =
+      await request.json();
 
     await connectToDatabase();
-    
+
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    
+    const token = cookieStore.get("token")?.value;
+
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { payload } = await jwtVerify(token, SECRET);
@@ -31,30 +32,33 @@ export async function POST(request: Request) {
     const newConsultation = await Consultation.create({
       patientId: userId,
       practitionerId,
-      type: type || 'video',
-      status: 'requested',
+      type: type || "video",
+      status: "requested",
       scheduledStartTime: startTime,
       scheduledEndTime: endTime,
-      chiefComplaint: chiefComplaint || 'Routine Medical Consultation'
+      chiefComplaint: chiefComplaint || "Routine Medical Consultation",
     });
 
     // Create Notification for Practitioner
     const patientUser = await User.findById(userId);
     await Notification.create({
       userId: practitionerId,
-      type: 'new_appointment',
-      title: 'New Consultation Booked',
-      body: `${patientUser?.firstName} ${patientUser?.lastName} has booked a ${type || 'video'} consultation.`,
+      type: "new_appointment",
+      title: "New Consultation Booked",
+      body: `${patientUser?.firstName} ${patientUser?.lastName} has booked a ${type || "video"} consultation.`,
       data: { consultationId: newConsultation._id },
-      isRead: false
+      isRead: false,
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      consultation: newConsultation 
+    return NextResponse.json({
+      success: true,
+      consultation: newConsultation,
     });
   } catch (error) {
-    console.error('Booking API Error:', error);
-    return NextResponse.json({ error: 'Failed to book consultation' }, { status: 500 });
+    console.error("Booking API Error:", error);
+    return NextResponse.json(
+      { error: "Failed to book consultation" },
+      { status: 500 },
+    );
   }
 }

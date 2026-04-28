@@ -1,24 +1,28 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
-import { connectToDatabase } from '@/lib/mongodb';
-import User from '@/lib/models/User';
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
+import { connectToDatabase } from "@/lib/mongodb";
+import User from "@/lib/models/User";
 import {
-  PaymentTransaction, Subscription, PayoutRequest,
-  PaymentMethod, PlatformFeeConfig, HospitalRevenue,
+  PaymentTransaction,
+  Subscription,
+  PayoutRequest,
+  PaymentMethod,
+  PlatformFeeConfig,
+  HospitalRevenue,
   BillingAuditLog,
-} from '@/lib/models/Billing';
-import { Facility } from '@/lib/models/Facility';
+} from "@/lib/models/Billing";
+import { Facility } from "@/lib/models/Facility";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = cookieStore.get("token")?.value;
   if (!token) return null;
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     await connectToDatabase();
-    const user = await User.findById(payload.userId).lean() as any;
+    const user = (await User.findById(payload.userId).lean()) as any;
     return user;
   } catch {
     return null;
@@ -29,28 +33,45 @@ async function getAuthUser() {
 export async function GET(request: Request) {
   try {
     const user = await getAuthUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
 
     const role = user.role as string;
 
     // ── Patient View ──────────────────────────────────────────────────────────
-    if (role === 'patient') {
+    if (role === "patient") {
       const [transactions, subscription, paymentMethods] = await Promise.all([
-        PaymentTransaction.find({ patientId: user._id }).sort({ timestamp: -1 }).limit(50).lean(),
-        Subscription.findOne({ patientId: user._id }).sort({ createdAt: -1 }).lean(),
+        PaymentTransaction.find({ patientId: user._id })
+          .sort({ timestamp: -1 })
+          .limit(50)
+          .lean(),
+        Subscription.findOne({ patientId: user._id })
+          .sort({ createdAt: -1 })
+          .lean(),
         PaymentMethod.find({ patientId: user._id }).lean(),
       ]);
 
       // Summarize
-      const completed = transactions.filter((t: any) => t.status === 'completed');
-      const totalSpent = completed.reduce((s: number, t: any) => s + t.amount, 0);
-      const pending    = transactions.filter((t: any) => t.status === 'pending').length;
+      const completed = transactions.filter(
+        (t: any) => t.status === "completed",
+      );
+      const totalSpent = completed.reduce(
+        (s: number, t: any) => s + t.amount,
+        0,
+      );
+      const pending = transactions.filter(
+        (t: any) => t.status === "pending",
+      ).length;
 
       return NextResponse.json({
-        role: 'patient',
-        summary: { totalSpent, pendingCount: pending, completedCount: completed.length },
+        role: "patient",
+        summary: {
+          totalSpent,
+          pendingCount: pending,
+          completedCount: completed.length,
+        },
         transactions,
         subscription,
         paymentMethods,
@@ -58,31 +79,48 @@ export async function GET(request: Request) {
     }
 
     // ── Practitioner View ─────────────────────────────────────────────────────
-    if (role === 'practitioner') {
+    if (role === "practitioner") {
       const [payoutRequests, transactions] = await Promise.all([
-        PayoutRequest.find({ practitionerId: user._id }).sort({ requestedAt: -1 }).lean(),
-        PaymentTransaction.find({ practitionerId: user._id }).sort({ timestamp: -1 }).limit(100).lean(),
+        PayoutRequest.find({ practitionerId: user._id })
+          .sort({ requestedAt: -1 })
+          .lean(),
+        PaymentTransaction.find({ practitionerId: user._id })
+          .sort({ timestamp: -1 })
+          .limit(100)
+          .lean(),
       ]);
 
-      const paid      = payoutRequests.filter((p: any) => p.status === 'paid');
-      const pending   = payoutRequests.filter((p: any) => p.status === 'pending');
+      const paid = payoutRequests.filter((p: any) => p.status === "paid");
+      const pending = payoutRequests.filter((p: any) => p.status === "pending");
       const totalPaid = paid.reduce((s: number, p: any) => s + p.amount, 0);
-      const totalPending = pending.reduce((s: number, p: any) => s + p.amount, 0);
+      const totalPending = pending.reduce(
+        (s: number, p: any) => s + p.amount,
+        0,
+      );
       const totalEarned = transactions
-        .filter((t: any) => t.status === 'completed')
+        .filter((t: any) => t.status === "completed")
         .reduce((s: number, t: any) => s + (t.practitionerEarnings || 0), 0);
 
       // Monthly breakdown for chart (last 6 months)
       const monthlyBreakdown: Record<string, number> = {};
       transactions.forEach((t: any) => {
-        if (t.status !== 'completed') return;
-        const key = new Date(t.timestamp).toLocaleDateString('en-ZA', { month: 'short', year: '2-digit' });
-        monthlyBreakdown[key] = (monthlyBreakdown[key] || 0) + (t.practitionerEarnings || 0);
+        if (t.status !== "completed") return;
+        const key = new Date(t.timestamp).toLocaleDateString("en-ZA", {
+          month: "short",
+          year: "2-digit",
+        });
+        monthlyBreakdown[key] =
+          (monthlyBreakdown[key] || 0) + (t.practitionerEarnings || 0);
       });
 
       return NextResponse.json({
-        role: 'practitioner',
-        summary: { totalEarned, totalPaid, totalPending, pendingPayouts: pending.length },
+        role: "practitioner",
+        summary: {
+          totalEarned,
+          totalPaid,
+          totalPending,
+          pendingPayouts: pending.length,
+        },
         payoutRequests,
         transactions,
         monthlyBreakdown,
@@ -90,31 +128,46 @@ export async function GET(request: Request) {
     }
 
     // ── Hospital Admin View ───────────────────────────────────────────────────
-    if (role === 'hospital_admin') {
+    if (role === "hospital_admin") {
       const [revenues, payoutRequests, facilities] = await Promise.all([
-        HospitalRevenue.find({ period: 'monthly' }).sort({ date: -1 }).limit(24).lean(),
-        PayoutRequest.find({}).populate('practitionerId', 'firstName lastName email').sort({ requestedAt: -1 }).lean(),
+        HospitalRevenue.find({ period: "monthly" })
+          .sort({ date: -1 })
+          .limit(24)
+          .lean(),
+        PayoutRequest.find({})
+          .populate("practitionerId", "firstName lastName email")
+          .sort({ requestedAt: -1 })
+          .lean(),
         Facility.find({}).lean(),
       ]);
 
-      const totalRevenue  = revenues.reduce((s: number, r: any) => s + r.totalRevenue, 0);
-      const pendingPayouts = payoutRequests.filter((p: any) => p.status === 'pending');
+      const totalRevenue = revenues.reduce(
+        (s: number, r: any) => s + r.totalRevenue,
+        0,
+      );
+      const pendingPayouts = payoutRequests.filter(
+        (p: any) => p.status === "pending",
+      );
 
       // Aggregate by department across all revenue records
       const deptMap: Record<string, { revenue: number; count: number }> = {};
       revenues.forEach((r: any) => {
         r.byDepartment?.forEach((d: any) => {
-          if (!deptMap[d.department]) deptMap[d.department] = { revenue: 0, count: 0 };
+          if (!deptMap[d.department])
+            deptMap[d.department] = { revenue: 0, count: 0 };
           deptMap[d.department].revenue += d.revenue;
-          deptMap[d.department].count   += d.transactionCount;
+          deptMap[d.department].count += d.transactionCount;
         });
       });
-      const departmentBreakdown = Object.entries(deptMap).map(([dept, data]) => ({
-        department: dept, ...data,
-      })).sort((a, b) => b.revenue - a.revenue);
+      const departmentBreakdown = Object.entries(deptMap)
+        .map(([dept, data]) => ({
+          department: dept,
+          ...data,
+        }))
+        .sort((a, b) => b.revenue - a.revenue);
 
       return NextResponse.json({
-        role: 'hospital_admin',
+        role: "hospital_admin",
         summary: { totalRevenue, pendingPayoutCount: pendingPayouts.length },
         revenues,
         payoutRequests,
@@ -124,34 +177,60 @@ export async function GET(request: Request) {
     }
 
     // ── Super Admin / Mega Admin View ─────────────────────────────────────────
-    if (['super_admin', 'mega_admin', 'inspector'].includes(role)) {
+    if (["super_admin", "mega_admin", "inspector"].includes(role)) {
       const [
-        allTransactions, allPayouts, feeConfig, auditLogs,
-        patientCount, practitionerCount,
+        allTransactions,
+        allPayouts,
+        feeConfig,
+        auditLogs,
+        patientCount,
+        practitionerCount,
       ] = await Promise.all([
         PaymentTransaction.find({}).sort({ timestamp: -1 }).limit(200).lean(),
-        PayoutRequest.find({}).populate('practitionerId', 'firstName lastName').sort({ requestedAt: -1 }).lean(),
+        PayoutRequest.find({})
+          .populate("practitionerId", "firstName lastName")
+          .sort({ requestedAt: -1 })
+          .lean(),
         PlatformFeeConfig.findOne({}).lean(),
-        BillingAuditLog.find({}).populate('actorId', 'firstName lastName role').sort({ timestamp: -1 }).limit(50).lean(),
-        User.countDocuments({ role: 'patient' }),
-        User.countDocuments({ role: 'practitioner' }),
+        BillingAuditLog.find({})
+          .populate("actorId", "firstName lastName role")
+          .sort({ timestamp: -1 })
+          .limit(50)
+          .lean(),
+        User.countDocuments({ role: "patient" }),
+        User.countDocuments({ role: "practitioner" }),
       ]);
 
-      const totalRevenue      = allTransactions.filter((t: any) => t.status === 'completed').reduce((s: number, t: any) => s + t.amount, 0);
-      const platformRevenue   = allTransactions.filter((t: any) => t.status === 'completed').reduce((s: number, t: any) => s + (t.platformFeeAmount || 0), 0);
-      const pendingPayouts    = allPayouts.filter((p: any) => p.status === 'pending').length;
+      const totalRevenue = allTransactions
+        .filter((t: any) => t.status === "completed")
+        .reduce((s: number, t: any) => s + t.amount, 0);
+      const platformRevenue = allTransactions
+        .filter((t: any) => t.status === "completed")
+        .reduce((s: number, t: any) => s + (t.platformFeeAmount || 0), 0);
+      const pendingPayouts = allPayouts.filter(
+        (p: any) => p.status === "pending",
+      ).length;
 
       // Monthly revenue chart (last 12 months)
       const revenueByMonth: Record<string, number> = {};
       allTransactions.forEach((t: any) => {
-        if (t.status !== 'completed') return;
-        const key = new Date(t.timestamp).toLocaleDateString('en-ZA', { month: 'short', year: '2-digit' });
+        if (t.status !== "completed") return;
+        const key = new Date(t.timestamp).toLocaleDateString("en-ZA", {
+          month: "short",
+          year: "2-digit",
+        });
         revenueByMonth[key] = (revenueByMonth[key] || 0) + t.amount;
       });
 
       return NextResponse.json({
         role,
-        summary: { totalRevenue, platformRevenue, pendingPayouts, patientCount, practitionerCount },
+        summary: {
+          totalRevenue,
+          platformRevenue,
+          pendingPayouts,
+          patientCount,
+          practitionerCount,
+        },
         allTransactions,
         allPayouts,
         feeConfig,
@@ -160,9 +239,12 @@ export async function GET(request: Request) {
       });
     }
 
-    return NextResponse.json({ error: 'No billing view for this role' }, { status: 403 });
+    return NextResponse.json(
+      { error: "No billing view for this role" },
+      { status: 403 },
+    );
   } catch (err: any) {
-    console.error('[GET /api/billing]', err);
+    console.error("[GET /api/billing]", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -171,106 +253,123 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const user = await getAuthUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
     await connectToDatabase();
 
     // Approve / Reject a payout
-    if (body.action === 'update_payout' && body.payoutId) {
+    if (body.action === "update_payout" && body.payoutId) {
       const payout = await PayoutRequest.findById(body.payoutId);
-      if (!payout) return NextResponse.json({ error: 'Payout not found' }, { status: 404 });
-      payout.status      = body.status;
+      if (!payout)
+        return NextResponse.json(
+          { error: "Payout not found" },
+          { status: 404 },
+        );
+      payout.status = body.status;
       payout.processedAt = new Date();
-      payout.approvedBy  = user._id;
-      payout.notes       = body.notes || payout.notes;
+      payout.approvedBy = user._id;
+      payout.notes = body.notes || payout.notes;
       await payout.save();
 
       await BillingAuditLog.create({
-        actorId:     user._id,
-        actionType:  body.status === 'approved' ? 'PAYOUT_APPROVED' : 'PAYOUT_REJECTED',
-        targetId:    payout._id,
-        targetModel: 'PayoutRequest',
-        details:     { amount: payout.amount, status: body.status },
+        actorId: user._id,
+        actionType:
+          body.status === "approved" ? "PAYOUT_APPROVED" : "PAYOUT_REJECTED",
+        targetId: payout._id,
+        targetModel: "PayoutRequest",
+        details: { amount: payout.amount, status: body.status },
       });
 
       return NextResponse.json({ success: true, payout });
     }
 
     // Update platform fee
-    if (body.action === 'update_fee_config') {
-      if (!['super_admin', 'mega_admin'].includes(user.role)) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (body.action === "update_fee_config") {
+      if (!["super_admin", "mega_admin"].includes(user.role)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
       const config = await PlatformFeeConfig.findOneAndUpdate(
         {},
         { ...body.config, updatedBy: user._id },
-        { new: true, upsert: true }
+        { new: true, upsert: true },
       );
       await BillingAuditLog.create({
-        actorId:     user._id,
-        actionType:  'PLATFORM_FEE_UPDATED',
-        targetId:    config._id,
-        targetModel: 'PlatformFeeConfig',
-        details:     body.config,
+        actorId: user._id,
+        actionType: "PLATFORM_FEE_UPDATED",
+        targetId: config._id,
+        targetModel: "PlatformFeeConfig",
+        details: body.config,
       });
       return NextResponse.json({ success: true, config });
     }
 
     // Practitioner request a payout
-    if (body.action === 'request_payout') {
-      if (user.role !== 'practitioner') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (body.action === "request_payout") {
+      if (user.role !== "practitioner")
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       const payout = await PayoutRequest.create({
-        practitionerId:      user._id,
-        amount:              body.amount,
-        currency:            'ZAR',
-        status:              'pending',
-        requestedAt:         new Date(),
-        bankAccount:         body.bankAccount,
-        periodFrom:          new Date(body.periodFrom),
-        periodTo:            new Date(body.periodTo),
-        consultationCount:   body.consultationCount,
+        practitionerId: user._id,
+        amount: body.amount,
+        currency: "ZAR",
+        status: "pending",
+        requestedAt: new Date(),
+        bankAccount: body.bankAccount,
+        periodFrom: new Date(body.periodFrom),
+        periodTo: new Date(body.periodTo),
+        consultationCount: body.consultationCount,
         platformFeeDeducted: body.amount * 0.12,
-        notes:               body.notes,
+        notes: body.notes,
       });
       await BillingAuditLog.create({
-        actorId: user._id, actionType: 'PAYOUT_REQUESTED',
-        targetId: payout._id, targetModel: 'PayoutRequest',
+        actorId: user._id,
+        actionType: "PAYOUT_REQUESTED",
+        targetId: payout._id,
+        targetModel: "PayoutRequest",
         details: { amount: body.amount },
       });
       return NextResponse.json({ success: true, payout });
     }
 
     // Cancel subscription
-    if (body.action === 'cancel_subscription') {
+    if (body.action === "cancel_subscription") {
       const sub = await Subscription.findOneAndUpdate(
         { patientId: user._id },
-        { status: 'cancelled', autoRenew: false },
-        { new: true }
+        { status: "cancelled", autoRenew: false },
+        { new: true },
       );
       return NextResponse.json({ success: true, subscription: sub });
     }
 
     // Upgrade subscription
-    if (body.action === 'upgrade_subscription') {
+    if (body.action === "upgrade_subscription") {
       const prices: Record<string, number> = { free: 0, pro: 299, family: 499 };
       const price = prices[body.tier] || 0;
       const sub = await Subscription.findOneAndUpdate(
         { patientId: user._id },
-        { tier: body.tier, status: 'active', price, autoRenew: true, nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
-        { new: true, upsert: true }
+        {
+          tier: body.tier,
+          status: "active",
+          price,
+          autoRenew: true,
+          nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+        { new: true, upsert: true },
       );
       await BillingAuditLog.create({
-        actorId: user._id, actionType: 'SUBSCRIPTION_UPGRADED',
-        targetId: sub._id, targetModel: 'Subscription',
+        actorId: user._id,
+        actionType: "SUBSCRIPTION_UPGRADED",
+        targetId: sub._id,
+        targetModel: "Subscription",
         details: { tier: body.tier, price },
       });
       return NextResponse.json({ success: true, subscription: sub });
     }
 
-    return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (err: any) {
-    console.error('[PATCH /api/billing]', err);
+    console.error("[PATCH /api/billing]", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

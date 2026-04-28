@@ -90,7 +90,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
 
           <div className="flex-1 space-y-4">
             <div className="flex items-center gap-4">
-              <h2 className="text-4xl font-bold text-slate-900 tracking-tight font-grotesk">
+              <h2 className="text-4xl font-bold text-slate-900 tracking-tight">
                 {entity.name}
               </h2>
               {entity.rating && (
@@ -104,7 +104,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
               )}
             </div>
 
-            <p className="text-sm font-bold text-primary  tracking-normal">
+            <p className="text-sm font-bold text-primary uppercase tracking-normal">
               {entity.subtitle}
             </p>
 
@@ -125,13 +125,13 @@ const EntityModal: React.FC<EntityModalProps> = ({
           <div className="flex gap-2">
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all !min-w-0"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all min-w-0!"
             >
               <BiHeart size={20} />
             </Button>
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-all !min-w-0"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-all min-w-0!"
             >
               <BiShareAlt size={20} />
             </Button>
@@ -146,7 +146,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
                 <p className="text-2xl font-bold text-slate-900 tracking-tight">
                   {stat.value}
                 </p>
-                <p className="text-xs font-bold text-slate-400  tracking-normal mt-1">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mt-1">
                   {stat.label}
                 </p>
               </div>
@@ -158,7 +158,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8 space-y-8">
             <div className="space-y-4">
-              <h4 className="text-lg font-bold text-slate-900 tracking-tight  tracking-normal text-xs text-slate-300 font-grotesk">
+              <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase  text-slate-300">
                 Overview
               </h4>
               <p className="text-slate-600 font-medium leading-[1.8] text-sm">
@@ -167,14 +167,14 @@ const EntityModal: React.FC<EntityModalProps> = ({
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-lg font-bold text-slate-900 tracking-tight  tracking-normal text-xs text-slate-300 font-grotesk">
+              <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase tracking-normal text-slate-300">
                 Specializations & Tags
               </h4>
               <div className="flex flex-wrap gap-2">
                 {entity.tags?.map((tag, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2 rounded-xl bg-slate-100/50 text-slate-500 text-xs font-bold  tracking-normal"
+                    className="px-4 py-2 rounded-xl bg-slate-100/50 text-slate-500 text-xs font-bold uppercase tracking-normal"
                   >
                     {tag}
                   </span>
@@ -184,7 +184,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           <div className="lg:col-span-4 space-y-4">
-            <h4 className="text-lg font-bold text-slate-900 tracking-tight  tracking-normal text-xs text-slate-300 font-grotesk">
+            <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase tracking-normal text-xs text-slate-300">
               Quick Actions
             </h4>
             <div className="flex flex-col gap-3">
@@ -250,7 +250,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
             <div className="p-4 bg-red-50/50 rounded-2xl flex items-start gap-4 mt-6">
               <BiFlag className="text-red-400 shrink-0 mt-1" />
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-red-900 ">
+                <span className="text-xs font-bold text-red-900 uppercase">
                   POPIA Notice
                 </span>
                 <p className="text-xs text-red-700/60 font-medium leading-normal">

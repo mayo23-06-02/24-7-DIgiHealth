@@ -9,8 +9,8 @@ export interface ICall extends Document {
   durationSeconds: number;
   type: 'video' | 'voice';
   status: 'requested' | 'active' | 'ended' | 'missed';
-  dailyRoomUrl?: string;
-  dailyToken?: string;
+  livekitRoomName?: string;
+  livekitRoomUrl?: string;
 }
 
 const CallSchema = new Schema<ICall>({
@@ -22,8 +22,8 @@ const CallSchema = new Schema<ICall>({
   durationSeconds: { type: Number, default: 0 },
   type: { type: String, enum: ['video', 'voice'], required: true },
   status: { type: String, enum: ['requested', 'active', 'ended', 'missed'], default: 'active' },
-  dailyRoomUrl: { type: String },
-  dailyToken: { type: String },
+  livekitRoomName: { type: String },
+  livekitRoomUrl: { type: String },
 });
 
 export const Call: Model<ICall> = mongoose.models.Call || mongoose.model<ICall>('Call', CallSchema);
