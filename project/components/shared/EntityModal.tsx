@@ -125,13 +125,13 @@ const EntityModal: React.FC<EntityModalProps> = ({
           <div className="flex gap-2">
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all !min-w-0"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all min-w-0!"
             >
               <BiHeart size={20} />
             </Button>
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-all !min-w-0"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-all min-w-0!"
             >
               <BiShareAlt size={20} />
             </Button>
@@ -158,7 +158,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8 space-y-8">
             <div className="space-y-4">
-              <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase tracking-normal text-xs text-slate-300">
+              <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase  text-slate-300">
                 Overview
               </h4>
               <p className="text-slate-600 font-medium leading-[1.8] text-sm">
@@ -167,7 +167,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase tracking-normal text-xs text-slate-300">
+              <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase tracking-normal text-slate-300">
                 Specializations & Tags
               </h4>
               <div className="flex flex-wrap gap-2">

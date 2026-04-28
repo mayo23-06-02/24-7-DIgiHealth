@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { jwtVerify } from "jose";
 import RegistrationWizard from "@/components/auth/RegistrationWizard";
 
-// In Next.js 15, params must be awaited — it is now a Promise
 const validRoles = ["patient", "practitioner", "hospital"];
 
 export default async function RegistrationPage({
@@ -13,12 +12,12 @@ export default async function RegistrationPage({
   params: Promise<{ role: string }>;
 }) {
   const { role } = await params;
-  
+
   const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = cookieStore.get("token")?.value;
   if (token) {
     try {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       const { payload } = await jwtVerify(token, secret);
       if (payload && payload.role) {
         redirect(`/${payload.role}`);
@@ -28,8 +27,8 @@ export default async function RegistrationPage({
     }
   }
 
-  const safeRole = validRoles.includes(role?.toLowerCase()) 
-    ? role.toLowerCase() 
+  const safeRole = validRoles.includes(role?.toLowerCase())
+    ? role.toLowerCase()
     : "patient";
 
   return <RegistrationWizard role={safeRole} />;

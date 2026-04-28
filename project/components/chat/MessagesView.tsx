@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Avatar from "@/components/ui/Avatar";
 import Input from "@/components/ui/Input";
 import EmptyState from "@/components/ui/EmptyState";
@@ -10,18 +10,12 @@ import {
   BiLoaderAlt,
   BiMessageDetail,
   BiPlus,
-  BiMicrophone,
-  BiMicrophoneOff,
-  BiVideo,
-  BiVideoOff,
-  BiPhoneOff,
-  BiExpand,
-  BiPhone,
 } from "react-icons/bi";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { ActiveCallInfo } from "@/components/chat/CallButton";
 import { useSearchParams, useRouter } from "next/navigation";
 import Card from "@/components/ui/Card";
+import LiveKitCallPanel from "@/components/chat/LiveKitCallPanel";
 
 export interface ConversationContact {
   isPlaceholder?: boolean;
@@ -48,154 +42,6 @@ export interface MessagesViewProps {
   ) => Promise<ConversationContact[]>;
 }
 
-// ─── INLINE VIDEO / VOICE PANEL ───────────────────────────────────────────────
-function InlineCallPanel({
-  callInfo,
-  onEnd,
-}: {
-  callInfo: ActiveCallInfo;
-  onEnd: () => void;
-}) {
-  const [micOn, setMicOn] = useState(true);
-  const [videoOn, setVideoOn] = useState(callInfo.type === "video");
-  const [swapped, setSwapped] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
-
-  useEffect(() => {
-    const t = setInterval(() => setElapsed((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const fmt = (s: number) =>
-    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-
-  return (
-    <div className="h-full rounded-l-lg flex flex-col  bg-slate-400 relative overflow-hidden">
-      {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 p-5  flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-white text">
-            {callInfo.type === "video" ? "Video" : "Voice"} Consultation
-          </span>
-        </div>
-        <div className="bg-primary backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-          <span className="text-white text-xs font-bold tabular-nums">
-            {fmt(elapsed)}
-          </span>
-        </div>
-      </div>
-
-      {/* Main video area */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* Full-screen participant */}
-        <div className="absolute inset-0 bg-slate-300">
-          {callInfo.type === "video" && !swapped ? (
-            callInfo.participantAvatar ? (
-              <>
-                <img
-                  src={callInfo.participantAvatar}
-                  alt={callInfo.participantName}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 " />
-              </>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Avatar name={callInfo.participantName || "?"} size="xl" />
-              </div>
-            )
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              {videoOn ? (
-                <div className="text-white/10 flex flex-col items-center gap-3">
-                  <BiVideo size={80} />
-                  <span className="text-xs font-bold uppercase tracking-widest">
-                    Your Camera
-                  </span>
-                </div>
-              ) : (
-                <Avatar name="You" size="2xl" />
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Participant label */}
-        <div className="absolute bottom-4 left-5 z-10">
-          <div className="flex items-center py-2 gap-3 bg-primary backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-white/10">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-white text-xs font-bold tracking-tight">
-              {swapped
-                ? "Your Camera"
-                : callInfo.participantName || "Participant"}
-            </span>
-          </div>
-        </div>
-
-        {/* PiP (mini) view */}
-        <div
-          onClick={() => setSwapped(!swapped)}
-          className="absolute top-20 right-4 w-48 h-72 rounded-2xl overflow-hidden  cursor-pointer hover:scale-105 hover:border-primary transition-all duration-300 group "
-        >
-          {swapped && callInfo.participantAvatar ? (
-            <>
-              <img
-                src={callInfo.participantAvatar}
-                alt={callInfo.participantName}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-all" />
-            </>
-          ) : (
-            <div className="w-full h-full bg-slate-700 flex items-center justify-center">
-              <BiVideo size={20} className="text-white/30" />
-            </div>
-          )}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-primary/20">
-            <BiExpand size={16} className="text-white" />
-          </div>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="p-5 bg-primary border-t border-white/5 flex items-center justify-center gap-4 shrink-0">
-        <button
-          onClick={() => setMicOn(!micOn)}
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${micOn ? "bg-white/10 text-white hover:bg-white/20" : "bg-rose-500 text-white"}`}
-        >
-          {micOn ? <BiMicrophone size={20} /> : <BiMicrophoneOff size={20} />}
-        </button>
-
-        {callInfo.type === "video" && (
-          <button
-            onClick={() => setVideoOn(!videoOn)}
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${videoOn ? "bg-white/10 text-white hover:bg-white/20" : "bg-rose-500 text-white"}`}
-          >
-            {videoOn ? <BiVideo size={20} /> : <BiVideoOff size={20} />}
-          </button>
-        )}
-
-        <button
-          onClick={onEnd}
-          className="w-16 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center transition-all shadow-xl shadow-rose-900/30"
-        >
-          <BiPhoneOff size={22} />
-        </button>
-
-        <button
-          onClick={() => setSwapped(!swapped)}
-          className="w-12 h-12 rounded-2xl bg-white/10 text-white hover:bg-white/20 flex items-center justify-center transition-all"
-          title="Swap View"
-        >
-          <BiExpand size={20} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function MessagesView({
   pageTitle = "Secure Messages",
   pageSubtitle = "Stay connected with your clinical team.",
@@ -298,15 +144,15 @@ export default function MessagesView({
         )}
 
         {/* Video Panel — 65% */}
-        <div className="flex-[65] min-w-0 border-r border-slate-800">
-          <InlineCallPanel
+        <div className="flex-65 min-w-0 border-r border-slate-800">
+          <LiveKitCallPanel
             callInfo={activeCall}
-            onEnd={() => setActiveCall(null)}
+            onEnded={() => setActiveCall(null)}
           />
         </div>
 
         {/* Chat Panel — 35% */}
-        <div className="flex-[35] min-w-0 flex flex-col bg-white">
+        <div className="flex-35 min-w-0 flex flex-col bg-white">
           {/* Chat panel header */}
           <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0 flex items-center gap-3">
             <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
@@ -375,7 +221,7 @@ export default function MessagesView({
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-2 text-xs uppercase tracking-normal font-bold rounded-lg transition-all capitalize ${activeTab === tab ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}
+                  className={`flex-1 py-2 text-xs uppercase tracking-normal font-bold rounded-lg transition-all ${activeTab === tab ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}
                 >
                   {tab}
                 </button>

@@ -26,7 +26,7 @@ export default function AttachRecordModal({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { isOffline, queueAction } = useOfflineQueue();
+  const { isOffline } = useOfflineQueue();
 
   if (!isOpen) return null;
 
@@ -92,7 +92,7 @@ export default function AttachRecordModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
         onClick={isUploading ? undefined : onClose}

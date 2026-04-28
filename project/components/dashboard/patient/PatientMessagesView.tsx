@@ -1,16 +1,21 @@
 "use client";
 
-import React from "react";
-import MessagesView, { ConversationContact } from "@/components/chat/MessagesView";
+import MessagesView, {
+  ConversationContact,
+} from "@/components/chat/MessagesView";
 
 export default function PatientMessagesView() {
-  const fetchEnrichedContacts = async (existingConvs: any[]): Promise<ConversationContact[]> => {
-    const convData: ConversationContact[] = [...existingConvs.map(c => ({
-      ...c,
-      contactId: c.contactId || c.practitionerId,
-      contactName: c.contactName || c.doctor,
-      tab: 'contacts'
-    }))];
+  const fetchEnrichedContacts = async (
+    existingConvs: any[],
+  ): Promise<ConversationContact[]> => {
+    const convData: ConversationContact[] = [
+      ...existingConvs.map((c) => ({
+        ...c,
+        contactId: c.contactId || c.practitionerId,
+        contactName: c.contactName || c.doctor,
+        tab: "contacts",
+      })),
+    ];
 
     try {
       // Fetch My Doctors (Approved / Favorites)
@@ -27,8 +32,12 @@ export default function PatientMessagesView() {
               id: `new-${doc.id}`,
               contactId: doc.id,
               practitionerId: doc.id, // For backward compatibility
-              contactName: doc.name.startsWith("Dr.") ? doc.name : `Dr. ${doc.name}`,
-              avatar: doc.avatarUrl || `https://ui-avatars.com/api/?name=${doc.name.replace(" ", "+")}&background=4493b8&color=fff`,
+              contactName: doc.name.startsWith("Dr.")
+                ? doc.name
+                : `Dr. ${doc.name}`,
+              avatar:
+                doc.avatarUrl ||
+                `https://ui-avatars.com/api/?name=${doc.name.replace(" ", "+")}&background=4493b8&color=fff`,
               lastMessage: "Channel ready for consultation.",
               timestamp: "",
               unread: 0,
@@ -51,7 +60,8 @@ export default function PatientMessagesView() {
 
         pendingRequests.forEach((req: any) => {
           const existing = convData.find(
-            (c) => c.contactId === req.practitionerId || c.contactName === req.dr,
+            (c) =>
+              c.contactId === req.practitionerId || c.contactName === req.dr,
           );
           if (!existing) {
             convData.push({
@@ -60,7 +70,9 @@ export default function PatientMessagesView() {
               contactId: req.practitionerId,
               practitionerId: req.practitionerId,
               contactName: req.dr,
-              avatar: req.img || `https://ui-avatars.com/api/?name=${req.dr.replace(" ", "+")}&background=fbbf24&color=fff`,
+              avatar:
+                req.img ||
+                `https://ui-avatars.com/api/?name=${req.dr.replace(" ", "+")}&background=fbbf24&color=fff`,
               lastMessage: "Request pending clinical review.",
               timestamp: "Pending",
               unread: 0,

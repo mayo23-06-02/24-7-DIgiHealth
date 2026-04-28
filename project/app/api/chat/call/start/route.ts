@@ -1,14 +1,86 @@
-import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { Conversation } from '@/lib/models/Conversation';
-import { Call } from '@/lib/models/Call';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Conversation } from "@/lib/models/Conversation";
+import { Call } from "@/lib/models/Call";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { apiLogger } from "@/lib/apiLogger";
+import {
+  createLiveKitParticipantToken,
+  ensureLiveKitRoom,
+  getLiveKitServerUrl,
+  getLiveKitRoomService,
+} from "@/lib/livekit";
+
+function buildRoomName(conversationId: string, consultationId?: string) {
+  return consultationId
+    ? `consultation-${consultationId}`
+    : `conversation-${conversationId}`;
+}
+
+function hasUsableLiveKitState(call: {
+  livekitRoomName?: string;
+  livekitRoomUrl?: string;
+}) {
+  return Boolean(call.livekitRoomName && call.livekitRoomUrl);
+}
+
+async function retireBrokenActiveCall(
+  scope: string,
+  call: {
+    _id: { toString(): string };
+    livekitRoomName?: string;
+    save: () => Promise<unknown>;
+    status: string;
+    endedAt?: Date;
+    durationSeconds: number;
+  },
+) {
+  apiLogger.warn(scope, "retiring_broken_active_call", {
+    callId: call._id.toString(),
+    roomName: call.livekitRoomName,
+  });
+
+  if (call.livekitRoomName) {
+    try {
+      await getLiveKitRoomService().deleteRoom(call.livekitRoomName);
+      apiLogger.info(scope, "broken_call_room_deleted", {
+        callId: call._id.toString(),
+        roomName: call.livekitRoomName,
+      });
+    } catch (error) {
+      apiLogger.warn(scope, "broken_call_room_delete_failed", {
+        callId: call._id.toString(),
+        roomName: call.livekitRoomName,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  call.status = "ended";
+  call.endedAt = new Date();
+  call.durationSeconds = 0;
+  await call.save();
+}
 
 export async function POST(req: Request) {
+  const scope = "api/chat/call/start";
   try {
-    await connectToDatabase();
-    const { consultationId, conversationId, type, userId } = await req.json();
-    let conversation;
+    const currentUser = await getRequestUser();
+    if (!currentUser) {
+      apiLogger.warn(scope, "unauthorized");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
+    await connectToDatabase();
+    const { consultationId, conversationId, type } = await req.json();
+    apiLogger.info(scope, "request", {
+      consultationId,
+      conversationId,
+      type,
+      userId: currentUser.userId,
+    });
+
+    let conversation = null;
     if (consultationId) {
       conversation = await Conversation.findOne({ consultationId });
     } else if (conversationId) {
@@ -16,83 +88,128 @@ export async function POST(req: Request) {
     }
 
     if (!conversation) {
-        return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      apiLogger.warn(scope, "conversation_not_found", {
+        consultationId,
+        conversationId,
+      });
+      return NextResponse.json(
+        { error: "Conversation not found" },
+        { status: 404 },
+      );
     }
 
-    if (conversation.minutesUsed >= conversation.minutesAllocated + conversation.minutesApproved) {
-      return NextResponse.json({ error: 'No minutes left' }, { status: 400 });
+    const isParticipant =
+      conversation.patientId?.toString() === currentUser.userId ||
+      conversation.practitionerId?.toString() === currentUser.userId;
+
+    if (!isParticipant) {
+      apiLogger.warn(scope, "forbidden", {
+        conversationId: conversation._id.toString(),
+        userId: currentUser.userId,
+      });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Check if there is already an active call
-    const activeCall = await Call.findOne({ 
-      $or: [{ consultationId }, { conversationId: conversation._id }], 
-      status: 'active' 
-    });
-    if (activeCall) {
-        // Return existing room info
-        return NextResponse.json({ 
-          roomUrl: activeCall.dailyRoomUrl, 
-          token: activeCall.dailyToken, 
-          callId: activeCall._id 
-        });
+    if (
+      conversation.minutesUsed >=
+      conversation.minutesAllocated + conversation.minutesApproved
+    ) {
+      apiLogger.warn(scope, "minutes_exhausted", {
+        conversationId: conversation._id.toString(),
+        minutesUsed: conversation.minutesUsed,
+        minutesAllocated: conversation.minutesAllocated,
+        minutesApproved: conversation.minutesApproved,
+      });
+      return NextResponse.json({ error: "No minutes left" }, { status: 400 });
     }
 
-    const API_KEY = process.env.DAILY_API_KEY || 'cbe3c6f6fc1dd7ea34f6a594dbe496fde5f55d49a3bbb77154665ce5d3d3fadd';
+    let call = await Call.findOne({
+      $or: [{ consultationId }, { conversationId: conversation._id }],
+      status: "active",
+    }).sort({ startedAt: -1 });
 
-    // Create Daily.co room
-    const roomName = `call-${consultationId || conversation._id}-${Date.now()}`;
-    const roomRes = await fetch('https://api.daily.co/v1/rooms', {
-      method: 'POST',
-      headers: { 
-          'Authorization': `Bearer ${API_KEY}`, 
-          'Content-Type': 'application/json' 
+    if (call && !hasUsableLiveKitState(call)) {
+      await retireBrokenActiveCall(scope, call);
+      call = null;
+    }
+
+    if (!call) {
+      const livekitRoomName = buildRoomName(
+        conversation._id.toString(),
+        consultationId,
+      );
+
+      await ensureLiveKitRoom(livekitRoomName);
+      apiLogger.info(scope, "room_ready", {
+        roomName: livekitRoomName,
+      });
+
+      call = await Call.create({
+        consultationId: consultationId || undefined,
+        conversationId: conversation._id,
+        initiatedBy: currentUser.userId,
+        type,
+        status: "active",
+        livekitRoomName,
+        livekitRoomUrl: getLiveKitServerUrl(),
+      });
+      apiLogger.info(scope, "call_created", {
+        callId: call._id.toString(),
+        conversationId: conversation._id.toString(),
+        initiatedBy: currentUser.userId,
+      });
+    }
+
+    if (!hasUsableLiveKitState(call)) {
+      apiLogger.error(scope, "call_missing_livekit_state", {
+        callId: call._id.toString(),
+        roomName: call.livekitRoomName,
+        roomUrl: call.livekitRoomUrl,
+      });
+      return NextResponse.json(
+        { error: "Call could not be initialized fully" },
+        { status: 500 },
+      );
+    }
+
+    const identity = `${currentUser.role}:${currentUser.userId}`;
+    const displayName =
+      [currentUser.firstName, currentUser.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim() || currentUser.role;
+
+    const token = await createLiveKitParticipantToken({
+      identity,
+      name: displayName,
+      roomName: call.livekitRoomName!,
+      metadata: {
+        userId: currentUser.userId,
+        role: currentUser.role,
+        callId: call._id.toString(),
+        conversationId: conversation._id.toString(),
       },
-      body: JSON.stringify({ 
-          name: roomName, 
-          properties: { exp: Math.floor(Date.now() / 1000) + 3600 } 
-      }),
-    });
-    
-    if (!roomRes.ok) {
-        const errorText = await roomRes.text();
-        console.error("Daily.co Room Error:", errorText);
-        return NextResponse.json({ error: 'Failed to create room' }, { status: 500 });
-    }
-
-    const roomData = await roomRes.json();
-
-    // Token for initiator
-    const tokenRes = await fetch('https://api.daily.co/v1/meeting-tokens', {
-      method: 'POST',
-      headers: { 
-          'Authorization': `Bearer ${API_KEY}`, 
-          'Content-Type': 'application/json' 
-      },
-      body: JSON.stringify({ 
-          properties: { 
-              room_name: roomData.name, 
-              user_name: userId, 
-              is_owner: true, 
-              start_video_off: type === 'voice' 
-          } 
-      }),
-    });
-    
-    const tokenData = await tokenRes.ok ? await tokenRes.json() : { token: null };
-
-    // Save call record
-    const call = await Call.create({
-      consultationId: consultationId || undefined,
-      conversationId: conversation._id,
-      initiatedBy: userId,
-      type,
-      status: 'active',
-      dailyRoomUrl: roomData.url,
-      dailyToken: tokenData.token,
+      canPublish: true,
     });
 
-    return NextResponse.json({ roomUrl: roomData.url, token: tokenData.token, callId: call._id });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    apiLogger.info(scope, "token_issued", {
+      callId: call._id.toString(),
+      roomName: call.livekitRoomName,
+      userId: currentUser.userId,
+    });
+
+    return NextResponse.json({
+      roomUrl: call.livekitRoomUrl,
+      roomName: call.livekitRoomName,
+      token,
+      callId: call._id,
+      type: call.type,
+      initiatedBy: call.initiatedBy,
+    });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to start call";
+    apiLogger.error(scope, "failed", { message });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
