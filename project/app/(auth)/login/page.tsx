@@ -114,6 +114,22 @@ function LoginFormComponent() {
         </div>
 
         {/* Role Selection (High-Fidelity Pill) */}
+        <div className="flex p-1 bg-slate-100/80 rounded-xl mb-8 w-full">
+          {["Patient", "Practitioner", "Admin"].map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRole(r)}
+              className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-300 ${
+                role === r
+                  ? "bg-white text-primary shadow-sm ring-1 ring-slate-200/50"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
 
         {isRegistered && (
           <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 duration-500">
@@ -171,7 +187,9 @@ function LoginFormComponent() {
                   label={
                     role === "Patient"
                       ? "Email or SA ID"
-                      : "Email or HPCSA Number"
+                      : role === "Practitioner"
+                      ? "Email or HPCSA Number"
+                      : "Email Address"
                   }
                   required
                   value={identifier}
@@ -179,7 +197,9 @@ function LoginFormComponent() {
                   placeholder={
                     role === "Patient"
                       ? "e.g. 900101 5678 087"
-                      : "e.g. MP0123456"
+                      : role === "Practitioner"
+                      ? "e.g. MP0123456"
+                      : "admin@digihealth.co.za"
                   }
                   className=" border-none bg-slate-50/80 focus:bg-white transition-all py-4 mb-3.75"
                 />
