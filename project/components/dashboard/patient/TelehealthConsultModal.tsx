@@ -201,20 +201,7 @@ export default function TelehealthConsultModal({
             alt="Patient View"
           />
           <div className="absolute inset-0 bg-primary/10" />
-          <div className="absolute top-4 left-4 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-lg text-white text-[8px] font-bold  tracking-normal">
-            You (Patient)
-          </div>
-
-        {/* Patient Video Surface (PiP) */}
-        <div className="absolute top-24 right-10 w-48 h-64 rounded-[32px] overflow-hidden border-4 border-slate-900 shadow-3xl z-30 group cursor-move">
-          {/* Simulation of patient video */}
-          <img
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400"
-            className="w-full h-full object-cover grayscale-[0.2]"
-            alt="Patient View"
-          />
-          <div className="absolute inset-0 bg-primary/10" />
-          <div className="absolute top-4 left-4 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-lg text-white text-[8px] font-bold  tracking-normal">
+          <div className="absolute top-4 left-4 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-lg text-white text-xs font-bold  tracking-normal">
             You (Patient)
           </div>
 

@@ -24,6 +24,7 @@ import {
   BiTrash,
   BiX,
   BiLoaderAlt,
+  BiBody,
 } from "react-icons/bi";
 import Button from "./Button";
 
@@ -158,6 +159,7 @@ interface MedicalManikinProps {
   weightKg: number;
   readOnly?: boolean;
   patientId?: string;
+  onUpdateHeightWeight?: () => void;
 }
 
 // ==================== HIGHLIGHT MARKER ====================
@@ -193,7 +195,7 @@ function HighlightMarker({
             style={{ padding: "10px" }}
             className="bg-primary text-white text-xs px-3 py-2 rounded-lg whitespace-normal min-w-[140px] max-w-[200px] shadow-none"
           >
-            <div className="text-[9px] font-bold  text-amber-400 tracking-normal mb-1.5 border-b border-white/10 pb-1">
+            <div className="text-[9px] font-bold  text-gray-400 tracking-normal mb-1.5 border-b border-white/10 pb-1">
               {note.part || "Surface Mapping"}
             </div>
             <div className="font-medium text-slate-50 leading-relaxed break-words">
@@ -273,6 +275,7 @@ export default function MedicalManikin({
   weightKg,
   readOnly = false,
   patientId,
+  onUpdateHeightWeight,
 }: MedicalManikinProps) {
   const [activePart, setActivePart] = useState<{
     name: string;
@@ -297,17 +300,18 @@ export default function MedicalManikin({
   }, []);
 
   const bmi = useMemo(() => {
+    if (heightCm === 0 || weightKg === 0) return 0;
     const heightM = heightCm / 100;
     return weightKg / (heightM * heightM);
   }, [heightCm, weightKg]);
 
-  const bmiScale = useMemo(
-    () => ({
+  const bmiScale = useMemo(() => {
+    if (heightCm === 0 || weightKg === 0) return { x: 1, y: 1 };
+    return {
       x: Math.max(0.8, Math.min(1.4, bmi / 22)),
       y: Math.max(0.9, Math.min(1.1, heightCm / 175)),
-    }),
-    [bmi, heightCm],
-  );
+    };
+  }, [bmi, heightCm, weightKg]);
 
   const fetchAnnotations = useCallback(async () => {
     setIsLoading(true);
@@ -413,9 +417,13 @@ export default function MedicalManikin({
   return (
     <div className="w-full h-[600px]">
       <div className="mb-4">
-        <p className="text-lg font-bold text-slate-800">My Digital Twin</p>
-        <p className="text-xs font-thin text-slate-400">
-          Click, annotate, and explore the living 3D reflection of you.
+        <h1 className="text-lg font-bold text-slate-800">
+          {readOnly ? "Clinical Anatomical Map" : "My Digital Twin"}
+        </h1>
+        <p className="text-sm font-thin text-slate-500">
+          {readOnly
+            ? "Interactive mapping of patient symptoms and observations."
+            : "Click, annotate, and explore the living 3D reflection of you."}
         </p>
       </div>
 
@@ -424,11 +432,11 @@ export default function MedicalManikin({
         <div className="absolute top-3 left-3 z-30 pointer-events-none">
           <div className="space-y-4">
             <div className="flex items-baseline gap-2">
-              <h4 className="text-4xl font-bold text-primary tracking-tighter leading-none font-grotesk">
+              <h4 className="text-2xl font-bold text-primary leading-none font-grotesk">
                 87%
               </h4>
-              <span className="text-xs font-bold text-slate-400 ">
-                Medical Accuracy
+              <span className="text-xs font-semibold text-slate-500 ">
+                Diagnostic Fidelity
               </span>
             </div>
             <div className="flex gap-2">
@@ -444,13 +452,41 @@ export default function MedicalManikin({
 
         {/* Annotation Counter */}
         <div className="absolute top-3 right-3 z-30 pointer-events-none flex flex-col items-end gap-1">
-          <div className="text-3xl text-primary leading-none">
-            {notes.length}
-          </div>
-          <p className="text-sm font-semibold text-slate-400">
+          <p className="text-3xl text-primary leading-none">{notes.length}</p>
+          <p className="text-sm font-semibold text-slate-500">
             {readOnly ? "Clinical Mapping" : "Active Mapping"}
           </p>
         </div>
+
+        {/* Missing Data Prompt (Non-blocking) */}
+        {(heightCm === 0 || weightKg === 0) && (
+          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 w-[90%] ">
+            <div className="bg-white/80 backdrop-blur-xl border shadow border-primary/20 rounded-2xl p-5  shadow-primary/10 flex items-center gap-4 animate-in slide-in-from-bottom-4 duration-700">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
+                <BiBody size={24} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-sm font-bold text-slate-900 leading-tight">
+                  Incomplete Health Profile
+                </h1>
+                <p className="text-sm text-slate-500 leading-tight mt-0.5">
+                  Height and weight are missing. Add them to calibrate your 3D
+                  digital twin and BMI accuracy.
+                </p>
+              </div>
+              {!readOnly && (
+                <Button
+                  onClick={onUpdateHeightWeight}
+                  variant="primary"
+                  size="sm"
+                  className="px-3 h-9 text-sm shrink-0"
+                >
+                  Update Now
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Canvas */}
         <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 8], fov: 40 }}>
@@ -473,7 +509,7 @@ export default function MedicalManikin({
               <Html center>
                 <div className="flex flex-col items-center gap-6">
                   <div className="w-16 h-16 border-[6px] border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-bold text-slate-400  tracking-normal">
+                  <p className="text-xs font-bold text-slate-500  tracking-normal">
                     Syncing Neural Data...
                   </p>
                 </div>
@@ -551,7 +587,7 @@ export default function MedicalManikin({
                         setActivePart(null);
                         setEditingNote(null);
                       }}
-                      className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-slate-100 shadow-none"
+                      className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 shadow-none"
                     >
                       <BiX size={24} />
                     </button>
@@ -576,7 +612,7 @@ export default function MedicalManikin({
                       ))}
                     </datalist>
                   </div>
-                  <p className="text-xs font-bold text-slate-400 max-w-sm tracking-tight leading-relaxed">
+                  <p className="text-xs font-bold text-slate-500 max-w-sm tracking-tight leading-relaxed">
                     {readOnly
                       ? "Patient clinical observation for this specific anatomical node."
                       : "Select a standard body part from the list. You may type a custom name if needed (avoid abbreviations)."}
@@ -593,7 +629,7 @@ export default function MedicalManikin({
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-8 py-10 text-sm font-base text-slate-700 outline-none focus:border-primary focus:bg-white transition-all mb-8 resize-none min-h-[140px] placeholder:text-slate-400"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-8 py-10 text-sm font-base text-slate-700 outline-none focus:border-primary focus:bg-white transition-all mb-8 resize-none min-h-[140px] placeholder:text-slate-500"
                     placeholder="Describe sensation, pain levels, or injury details here..."
                     autoFocus
                   />
@@ -633,9 +669,9 @@ export default function MedicalManikin({
 
         {/* Legend */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
-          <div className="flex gap-4 items-center bg-white px-8 py-2 rounded-full shadow-md transition-all duration-500">
-            <span className="text-xs whitespace-nowrap font-bold text-slate-400">
-              Orbit & Zoom to Map Nervous System Nodes
+          <div className="flex gap-4 items-center bg-white px-8 py-2 rounded-full  transition-all duration-500">
+            <span className="text-sm whitespace-nowrap  text-slate-500">
+              Drag/Zoom & click to Map Body Nodes
             </span>
           </div>
         </div>

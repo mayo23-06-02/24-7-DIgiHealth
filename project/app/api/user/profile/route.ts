@@ -45,13 +45,14 @@ export async function PUT(req: NextRequest) {
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { firstName, lastName, mobile, avatarUrl } = body;
+    const { firstName, lastName, mobile, avatarUrl, mfaEnabled } = body;
 
     const update: Record<string, any> = {};
     if (firstName) update.firstName = firstName.trim();
     if (lastName) update.lastName = lastName.trim();
     if (mobile !== undefined) update.mobile = mobile.trim();
     if (avatarUrl !== undefined) update.avatarUrl = avatarUrl;
+    if (mfaEnabled !== undefined) update.mfaEnabled = Boolean(mfaEnabled);
 
     const user = await User.findByIdAndUpdate(userId, update, { new: true }).lean();
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -63,6 +64,7 @@ export async function PUT(req: NextRequest) {
         lastName: user.lastName,
         mobile: user.mobile || '',
         avatarUrl: (user as any).avatarUrl || null,
+        mfaEnabled: user.mfaEnabled,
       },
     });
   } catch (err: any) {

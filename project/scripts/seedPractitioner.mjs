@@ -71,7 +71,7 @@ const ConsultationSchema = new mongoose.Schema({
   chiefComplaint: String,
   clinicalRisk: {
     score: Number,
-    color: { type: String, enum: ['green', 'amber', 'red'] },
+    color: { type: String, enum: ['green', 'gray', 'red'] },
     factors: [String],
   },
   soapNotes: {
@@ -137,7 +137,7 @@ const COMPLAINTS = [
 
 const AI_RECS = {
   green: ['Continue current regimen', 'Follow up in 4 weeks', 'Monitor blood pressure daily'],
-  amber: ['Review medication adherence', 'Order HbA1c test', 'Schedule specialist referral'],
+  gray: ['Review medication adherence', 'Order HbA1c test', 'Schedule specialist referral'],
   red: ['Urgent cardiology referral', 'Immediate ECG review', 'Troponin levels', 'Emergency admission may be required'],
 };
 
@@ -169,7 +169,7 @@ const addDays = (d) => new Date(Date.now() + d * 86400000);
 const addHours = (h) => new Date(Date.now() + h * 3600000);
 function riskColor(score) {
   if (score < 30) return 'green';
-  if (score <= 70) return 'amber';
+  if (score <= 70) return 'gray';
   return 'red';
 }
 

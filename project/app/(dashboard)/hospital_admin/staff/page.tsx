@@ -10,8 +10,10 @@ import {
   BiEdit,
   BiTrash,
   BiLoaderAlt,
-  BiX,
+  BiUser,
 } from "react-icons/bi";
+import Modal from "@/components/ui/Modal";
+import Link from "next/link";
 
 export default function StaffManagement() {
   const [staff, setStaff] = useState<any[]>([]);
@@ -289,25 +291,25 @@ export default function StaffManagement() {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-white border-b border-slate-100">
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
+                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-left">
                     Name/User
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
+                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-left">
                     Role
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
+                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-left">
                     Department
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
+                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-center">
                     Shift
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
+                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-center">
                     On Duty
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider">
+                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-center">
                     Rate
                   </th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500  tracking-wider text-right">
+                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-right">
                     Actions
                   </th>
                 </tr>
@@ -330,15 +332,15 @@ export default function StaffManagement() {
                     </td>
                     <td className="py-4 px-6">
                       <span
-                        className={`px-2 py-1 rounded-lg text-xs font-bold  tracking-wider ${
+                        className={`px-2 py-1  uppercase text-xs font-bold  tracking-wider ${
                           item.role === "doctor"
-                            ? "bg-blue-50 text-blue-700 border-blue-100"
+                            ? "text-blue-700"
                             : item.role === "nurse"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                              : "bg-slate-100 text-slate-600 border-slate-200"
-                        } border`}
+                              ? "text-emerald-700"
+                              : "text-slate-600"
+                        } `}
                       >
-                        {item.role}
+                        <h6>{item.role}</h6>
                       </span>
                     </td>
                     <td className="py-4 px-6 text-sm text-slate-600">
@@ -362,6 +364,13 @@ export default function StaffManagement() {
                     </td>
                     <td className="py-4 px-6 text-right">
                       <div className="flex justify-end gap-2">
+                        <Link
+                          href={`/hospital_admin/staff/${item._id}`}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-primary transition-colors"
+                          title="View Profile"
+                        >
+                          <BiUser size={18} />
+                        </Link>
                         <button
                           onClick={() => {
                             setEditingStaff(item);
@@ -382,12 +391,14 @@ export default function StaffManagement() {
                             setIsModalOpen(true);
                           }}
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-primary transition-colors"
+                          title="Edit"
                         >
                           <BiEdit size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+                          title="Remove"
                         >
                           <BiTrash size={18} />
                         </button>
@@ -408,196 +419,190 @@ export default function StaffManagement() {
         )}
       </Card>
 
-      {/* Add/Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-none overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6 flex flex-col gap-4">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold font-grotesk">
-                {editingStaff ? "Edit Staff" : "Add Staff Member"}
-              </h2>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  resetForm();
-                }}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <BiX size={24} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Doctor Search Dropdown */}
-              {!editingStaff && (
-                <div className="relative">
-                  <label className="text-xs font-bold text-slate-500  tracking-wider">
-                    Select Registered Practitioner
-                  </label>
-                  <div className="relative mt-1">
-                    <BiSearch
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                      size={16}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Search by name or email..."
-                      value={doctorSearch}
-                      onChange={(e) => {
-                        setDoctorSearch(e.target.value);
-                        if (selectedDoctor) {
-                          setSelectedDoctor(null);
-                          setFormData({ ...formData, userId: "" });
-                        }
-                        setShowDoctorDropdown(true);
-                      }}
-                      onFocus={() => setShowDoctorDropdown(true)}
-                      className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary"
-                    />
-                    {isSearchingDoctor && (
-                      <BiLoaderAlt
-                        className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-primary"
-                        size={16}
-                      />
-                    )}
-                  </div>
-
-                  {showDoctorDropdown &&
-                    doctorResults.length > 0 &&
-                    !selectedDoctor && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-xl shadow-none z-50 overflow-hidden max-h-48 overflow-y-auto">
-                        {doctorResults.map((dr) => (
-                          <button
-                            key={dr._id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedDoctor(dr);
-                              setDoctorSearch(`${dr.firstName} ${dr.lastName}`);
-                              setFormData({ ...formData, userId: dr._id });
-                              setShowDoctorDropdown(false);
-                            }}
-                            className="w-full text-left px-4 py-3 hover:bg-slate-50 flex flex-col border-b border-slate-50 last:border-0"
-                          >
-                            <span className="text-sm font-bold text-slate-700">
-                              {dr.firstName} {dr.lastName}
-                            </span>
-                            <span className="text-xs text-slate-400">
-                              {dr.email}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                </div>
-              )}
-
-              {editingStaff && (
-                <div>
-                  <label className="text-xs font-bold text-slate-500  tracking-wider">
-                    Staff Member
-                  </label>
-                  <div className="mt-1 p-2 bg-slate-50 rounded-lg border border-slate-100 text-sm font-bold text-slate-700">
-                    {editingStaff.userId
-                      ? `${editingStaff.userId.firstName} ${editingStaff.userId.lastName}`
-                      : "Unassigned"}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider">
-                  Role
-                </label>
-                <select
-                  className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  value={formData.role}
-                  onChange={(e) =>
-                    setFormData({ ...formData, role: e.target.value })
-                  }
-                >
-                  <option value="doctor">Doctor</option>
-                  <option value="nurse">Nurse</option>
-                  <option value="admin">Admin</option>
-                  <option value="technician">Technician</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider">
-                  Department
-                </label>
+      {/* Add/Edit Staff Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          resetForm();
+        }}
+        title={editingStaff ? "Edit Staff Member" : "Add Staff Member"}
+      >
+        <div className="space-y-5">
+          {/* Doctor Search — only when adding */}
+          {!editingStaff && (
+            <div className="relative">
+              <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
+                Select Registered Practitioner
+              </label>
+              <div className="relative">
+                <BiSearch
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={16}
+                />
                 <input
                   type="text"
-                  className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  value={formData.department}
-                  onChange={(e) =>
-                    setFormData({ ...formData, department: e.target.value })
-                  }
-                  placeholder="e.g. Cardiology"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-500  tracking-wider">
-                    Shift Start
-                  </label>
-                  <input
-                    type="time"
-                    className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                    value={formData.shiftStart}
-                    onChange={(e) =>
-                      setFormData({ ...formData, shiftStart: e.target.value })
+                  placeholder="Search by name or email..."
+                  value={doctorSearch}
+                  onChange={(e) => {
+                    setDoctorSearch(e.target.value);
+                    if (selectedDoctor) {
+                      setSelectedDoctor(null);
+                      setFormData({ ...formData, userId: "" });
                     }
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-500  tracking-wider">
-                    Shift End
-                  </label>
-                  <input
-                    type="time"
-                    className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                    value={formData.shiftEnd}
-                    onChange={(e) =>
-                      setFormData({ ...formData, shiftEnd: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider">
-                  Hourly Rate (ZAR)
-                </label>
-                <input
-                  type="number"
-                  className="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  value={formData.hourlyRate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      hourlyRate: Number(e.target.value),
-                    })
-                  }
+                    setShowDoctorDropdown(true);
+                  }}
+                  onFocus={() => setShowDoctorDropdown(true)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
+                {isSearchingDoctor && (
+                  <BiLoaderAlt
+                    className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-primary"
+                    size={16}
+                  />
+                )}
+              </div>
+
+              {showDoctorDropdown &&
+                doctorResults.length > 0 &&
+                !selectedDoctor && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
+                    {doctorResults.map((dr) => (
+                      <button
+                        key={dr._id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDoctor(dr);
+                          setDoctorSearch(`${dr.firstName} ${dr.lastName}`);
+                          setFormData({ ...formData, userId: dr._id });
+                          setShowDoctorDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 flex flex-col border-b border-slate-50 last:border-0 transition-colors"
+                      >
+                        <span className="text-sm font-bold text-slate-700">
+                          {dr.firstName} {dr.lastName}
+                        </span>
+                        <span className="text-xs text-slate-400">
+                          {dr.email}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+            </div>
+          )}
+
+          {/* Read-only name when editing */}
+          {editingStaff && (
+            <div>
+              <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
+                Staff Member
+              </label>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm font-bold text-slate-700">
+                {editingStaff.userId
+                  ? `${editingStaff.userId.firstName} ${editingStaff.userId.lastName}`
+                  : "Unassigned"}
               </div>
             </div>
+          )}
 
-            <div className="mt-6 flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleSaveStaff} loading={loading}>
-                {editingStaff ? "Update Staff Member" : "Add to Staff"}
-              </Button>
+          {/* Role */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
+              Role
+            </label>
+            <select
+              className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              value={formData.role}
+              onChange={(e) =>
+                setFormData({ ...formData, role: e.target.value })
+              }
+            >
+              <option value="doctor">Doctor</option>
+              <option value="nurse">Nurse</option>
+              <option value="admin">Admin</option>
+              <option value="technician">Technician</option>
+            </select>
+          </div>
+
+          {/* Department */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
+              Department
+            </label>
+            <input
+              type="text"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              value={formData.department}
+              onChange={(e) =>
+                setFormData({ ...formData, department: e.target.value })
+              }
+              placeholder="e.g. Cardiology"
+            />
+          </div>
+
+          {/* Shift */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
+                Shift Start
+              </label>
+              <input
+                type="time"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                value={formData.shiftStart}
+                onChange={(e) =>
+                  setFormData({ ...formData, shiftStart: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
+                Shift End
+              </label>
+              <input
+                type="time"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                value={formData.shiftEnd}
+                onChange={(e) =>
+                  setFormData({ ...formData, shiftEnd: e.target.value })
+                }
+              />
             </div>
           </div>
+
+          {/* Hourly Rate */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
+              Hourly Rate (ZAR)
+            </label>
+            <input
+              type="number"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              value={formData.hourlyRate}
+              onChange={(e) =>
+                setFormData({ ...formData, hourlyRate: Number(e.target.value) })
+              }
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsModalOpen(false);
+                resetForm();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSaveStaff} loading={loading}>
+              {editingStaff ? "Update Staff Member" : "Add to Staff"}
+            </Button>
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default function PractitionerSidebar({
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
-    .to();
+    .toUpperCase();
 
   return (
     <>
@@ -94,7 +94,7 @@ export default function PractitionerSidebar({
               <p className="font-bold text-white text-xs tracking-normal  leading-tight opacity-90">
                 24/7 DigiHealth
               </p>
-              <p className="text-[10px] text-blue-400 font-bold  tracking-normal mt-1">
+              <p className="text-sm text-blue-400 font-bold  tracking-normal mt-1">
                 Clinical Portal
               </p>
             </div>
@@ -114,7 +114,7 @@ export default function PractitionerSidebar({
                   onClose?.();
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-[10px]  tracking-normal
+                  w-full flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm  tracking-normal
                   transition-all duration-200 group border-none h-auto !min-w-0
                   ${isCollapsed ? "justify-center" : "justify-start"}
                   ${
@@ -155,7 +155,7 @@ export default function PractitionerSidebar({
                   onClose?.();
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-[10px]  tracking-normal
+                  w-full flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm  tracking-normal
                   transition-all duration-200 group border-none h-auto !min-w-0
                   ${isCollapsed ? "justify-center" : "justify-start"}
                   ${
@@ -197,7 +197,7 @@ export default function PractitionerSidebar({
             <Button
               variant="ghost"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all text-[10px] font-bold  tracking-normal border-none h-auto !min-w-0 hidden lg:flex"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all text-sm font-bold  tracking-normal border-none h-auto !min-w-0 hidden lg:flex"
             >
               {isCollapsed ? (
                 <BiChevronRight size={18} />

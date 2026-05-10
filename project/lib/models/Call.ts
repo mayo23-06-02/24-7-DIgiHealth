@@ -8,7 +8,7 @@ export interface ICall extends Document {
   endedAt?: Date;
   durationSeconds: number;
   type: 'video' | 'voice';
-  status: 'requested' | 'active' | 'ended' | 'missed';
+  status: 'requested' | 'active' | 'ended' | 'missed' | 'declined';
   livekitRoomName?: string;
   livekitRoomUrl?: string;
 }
@@ -21,7 +21,7 @@ const CallSchema = new Schema<ICall>({
   endedAt: { type: Date },
   durationSeconds: { type: Number, default: 0 },
   type: { type: String, enum: ['video', 'voice'], required: true },
-  status: { type: String, enum: ['requested', 'active', 'ended', 'missed'], default: 'active' },
+  status: { type: String, enum: ['requested', 'active', 'ended', 'missed', 'declined'], default: 'active' },
   livekitRoomName: { type: String },
   livekitRoomUrl: { type: String },
 });

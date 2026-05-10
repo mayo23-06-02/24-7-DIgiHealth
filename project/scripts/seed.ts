@@ -285,7 +285,7 @@ async function seed() {
     // Generate realistic Clinical Risk for 30% of consultations
     const hasRisk = Math.random() > 0.7;
     const riskScore = hasRisk ? randInt(20, 95) : undefined;
-    const riskColor = riskScore ? (riskScore > 75 ? 'red' : riskScore > 40 ? 'amber' : 'green') : undefined;
+    const riskColor = riskScore ? (riskScore > 75 ? 'red' : riskScore > 40 ? 'gray' : 'green') : undefined;
     const riskFactors = riskScore ? [
       pickOne(["High Blood Pressure", "Irregular Pulse", "Elevated Glucose", "Respiratory Distress"]),
       pickOne(["Family History", "Smoking", "Sedentary Lifestyle"])

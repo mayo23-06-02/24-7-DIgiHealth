@@ -12,17 +12,35 @@ export default function MessageInput({
     fileUrl?: string,
     fileMime?: string,
   ) => void;
-  onTyping: () => void;
+  onTyping: (isTyping: boolean) => void;
 }) {
   const [text, setText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (text.trim()) {
       onSend(text, "text");
       setText("");
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      onTyping(false);
+    }
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setText(val);
+
+    if (val.trim()) {
+      onTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        onTyping(false);
+      }, 3000);
+    } else {
+      onTyping(false);
     }
   };
 
@@ -67,7 +85,7 @@ export default function MessageInput({
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={isUploading}
-        className="p-3 text-slate-400 hover:text-primary transition-all rounded-full hover:bg-slate-100 disabled:opacity-50"
+        className="p-3 text-slate-500 hover:text-primary transition-all rounded-full hover:bg-slate-100 disabled:opacity-50"
       >
         {isUploading ? (
           <BiLoaderAlt className="animate-spin" size={24} />
@@ -78,10 +96,7 @@ export default function MessageInput({
 
       <textarea
         value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          onTyping();
-        }}
+        onChange={handleTextChange}
         placeholder="Type your message..."
         className="flex-1 bg-transparent resize-none outline-none py-3 px-2 max-h-32 text-slate-700"
         rows={1}

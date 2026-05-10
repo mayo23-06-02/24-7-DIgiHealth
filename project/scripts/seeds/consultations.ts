@@ -54,7 +54,7 @@ export async function createConsultations(patients: any[], doctors: any[], hospi
           chiefComplaint: COMPLAINTS[i % COMPLAINTS.length],
           clinicalRisk: {
             score: 20 + Math.floor(Math.random() * 60),
-            color: 'amber',
+            color: 'gray',
             factors: ['Symptom monitoring', 'Follow-up']
           },
           ...(status === 'completed' && {

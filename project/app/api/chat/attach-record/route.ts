@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Update conversation lastMessage time
-    conversation.lastMessageAt = new Date();
+    conversation.lastActivityAt = new Date();
     await conversation.save();
 
     return NextResponse.json({ success: true, record, message });

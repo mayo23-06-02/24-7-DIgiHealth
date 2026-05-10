@@ -1,24 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
-import Patient from '@/lib/models/Patient';
 import User from '@/lib/models/User';
-import { PatientProfile } from '@/lib/models/RoleProfiles';
-
-// MVP: extract practitioner ID from header or fall back to env mock
-function getPractitionerId(req: NextRequest): string {
-  return (
-    req.headers.get('x-practitioner-id') ||
-    process.env.MOCK_PRACTITIONER_ID ||
-    '000000000000000000000000'
-  );
-}
+import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { apiLogger } from '@/lib/apiLogger';
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    const user = await getRequestUser();
+    
+    if (!user || (user.role !== 'practitioner' && user.role !== 'mega_admin' && user.role !== 'super_admin')) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
 
-    const practitionerId = getPractitionerId(req);
+    const practitionerId = user.userId;
     const now = new Date();
     const todayEnd = new Date(now);
     todayEnd.setHours(23, 59, 59, 999);
@@ -26,18 +23,21 @@ export async function GET(req: NextRequest) {
     // Fetch upcoming consultations for today + next 24h
     const upcomingWindow = new Date(now.getTime() + 24 * 3600000);
 
-    const consultations = await Consultation.find({
-      practitionerId,
-      scheduledStartTime: { $gte: now, $lte: upcomingWindow },
-      status: { $in: ['scheduled', 'in_progress', 'pending', 'requested'] },
-    })
-      .sort({ scheduledStartTime: 1 })
-      .limit(10)
-      .lean();
+    const [consultations, pendingConsultations] = await Promise.all([
+      Consultation.find({
+        practitionerId,
+        scheduledStartTime: { $gte: now, $lte: upcomingWindow },
+        status: { $in: ['scheduled', 'in_progress', 'pending', 'requested'] },
+      }).sort({ scheduledStartTime: 1 }).limit(10).lean(),
+      Consultation.find({
+        practitionerId,
+        status: { $in: ['pending', 'requested'] },
+      }).sort({ scheduledStartTime: 1 }).lean()
+    ]);
 
-    // Populate patient names
-    const mappedConsultations = await Promise.all(
-      consultations.map(async (c: any) => {
+    // Populate patient names for both sets
+    const mapCons = async (list: any[]) => Promise.all(
+      list.map(async (c: any) => {
         const userDoc = await User.findById(c.patientId).lean();
         const patientName = userDoc ? `${userDoc.firstName} ${userDoc.lastName}` : 'Unknown Patient';
         const initials = patientName
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
           .map((n: string) => n[0])
           .join('')
           .slice(0, 2)
-          .to();
+          .toUpperCase();
 
         return {
           consultationId: c._id.toString(),
@@ -61,15 +61,19 @@ export async function GET(req: NextRequest) {
           aiRecommendations: c.aiRecommendations || [],
           status: c.status,
           type: c.type,
+          createdAt: c.createdAt,
         };
-      }),
+      })
     );
 
-    const queue = mappedConsultations.filter(c => c.status === 'scheduled' || c.status === 'in_progress');
-    const pendingRequests = mappedConsultations.filter(c => c.status === 'pending' || c.status === 'requested');
+    const mappedUpcoming = await mapCons(consultations);
+    const mappedPending = await mapCons(pendingConsultations);
+
+    const queue = mappedUpcoming.filter(c => c.status === 'scheduled' || c.status === 'in_progress');
+    const pendingRequests = mappedPending;
 
     // High-risk alerts (score > 70) from all consultations
-    const riskAlerts = mappedConsultations
+    const riskAlerts = mappedUpcoming
       .filter((q) => q.riskScore > 70)
       .map((q) => ({
         consultationId: q.consultationId,
@@ -127,25 +131,64 @@ export async function GET(req: NextRequest) {
       max: Math.max(...Object.values(ageGroups), 10) // normalized max for UI
     }));
 
-    // Practitioner info
-    const practitioner = await User.findById(practitionerId).lean();
+    // --- Trend Calculations ---
+    const yesterdayStart = new Date(now);
+    yesterdayStart.setDate(now.getDate() - 1);
+    yesterdayStart.setHours(0,0,0,0);
+    const yesterdayEnd = new Date(yesterdayStart);
+    yesterdayEnd.setHours(23,59,59,999);
+
+    const countYesterday = await Consultation.countDocuments({
+      practitionerId,
+      scheduledStartTime: { $gte: yesterdayStart, $lte: yesterdayEnd },
+      status: { $in: ['scheduled', 'in_progress', 'completed'] },
+    });
+    const upcomingTrend = countYesterday === 0 ? 0 : parseFloat((((upcomingCount - countYesterday) / countYesterday) * 100).toFixed(1));
+
+    const lastWeekStart = new Date(now);
+    lastWeekStart.setDate(now.getDate() - 7);
+    const uniquePatientIdsLastWeek = await Consultation.find({ 
+      practitionerId,
+      createdAt: { $lt: lastWeekStart }
+    }).distinct('patientId');
+    const totalVisitorsLastWeek = uniquePatientIdsLastWeek.length;
+    const visitorsTrend = totalVisitorsLastWeek === 0 ? 0 : parseFloat((((totalVisitors - totalVisitorsLastWeek) / totalVisitorsLastWeek) * 100).toFixed(1));
+
+    // 4. Interaction Data (Mocked but structure for dynamic DB integration)
+    const interactionData = [
+      { name: 'Mon', reactions: 12, comments: 4, likes: 8, dislikes: 1 },
+      { name: 'Tue', reactions: 18, comments: 6, likes: 12, dislikes: 0 },
+      { name: 'Wed', reactions: 15, comments: 5, likes: 10, dislikes: 2 },
+      { name: 'Thu', reactions: 22, comments: 8, likes: 15, dislikes: 1 },
+      { name: 'Fri', reactions: 30, comments: 12, likes: 20, dislikes: 0 },
+      { name: 'Sat', reactions: 25, comments: 10, likes: 18, dislikes: 1 },
+      { name: 'Sun', reactions: 20, comments: 7, likes: 14, dislikes: 0 },
+    ];
+
+    // Fetch practitioner profile details for the response
+    const practitionerUser = await User.findById(practitionerId).lean();
+    const practitionerProfile = await PractitionerProfile.findOne({ userId: practitionerId }).lean();
 
     return NextResponse.json({
       success: true,
       data: {
+        isNewUser: !practitionerProfile,
         upcomingCount,
+        upcomingTrend,
         totalVisitors,
+        visitorsTrend,
         canceledThisWeek,
         chartData,
+        interactionData,
         queue,
         pendingRequests,
         riskAlerts,
-        practitioner: practitioner
+        practitioner: practitionerUser
           ? {
-              id: practitioner._id.toString(),
-              name: (practitioner as any).profile?.fullName || 'Practitioner',
-              specialisation: (practitioner as any).profile?.specialisation || '',
-              avatarUrl: (practitioner as any).profile?.avatarUrl || '',
+              id: practitionerUser._id.toString(),
+              name: `${practitionerUser.firstName} ${practitionerUser.lastName}`,
+              specialisation: practitionerProfile?.specialisation || '',
+              avatarUrl: (practitionerUser as any).avatarUrl || '',
             }
           : null,
       },

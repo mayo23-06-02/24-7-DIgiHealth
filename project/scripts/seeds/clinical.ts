@@ -144,7 +144,7 @@ export async function createClinicalData(patients: any[], doctors: any[]) {
           patientId: patient1._id,
           practitionerId: doctor1._id,
           score: 65 - (m * 2), // Improving risk
-          color: (65 - (m * 2)) > 60 ? 'amber' : 'amber',
+          color: (65 - (m * 2)) > 60 ? 'gray' : 'gray',
           factors: ['Age > 30', 'HBP', 'Diabetes'],
           condition: 'Metabolic Syndrome monitoring',
           calculatedAt: date

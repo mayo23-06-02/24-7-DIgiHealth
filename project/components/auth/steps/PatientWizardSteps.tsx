@@ -14,6 +14,7 @@ import {
   BiSolidUserPlus,
 } from "react-icons/bi";
 import Image from "next/image";
+import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
 
 // ─────────────────────────────────────────────
 // Step 1 – Identity
@@ -89,7 +90,9 @@ export function POPIAConsentStep({ formData, updateData }: any) {
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500  flex flex-col">
       <div className="bg-primary rounded-md p-8 text-white relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-2xl" />
-        <h3 className="text-xs  text-white/60 mb-4 font-grotesk">Legal Compliance</h3>
+        <h3 className="text-xs  text-white/60 mb-4 font-grotesk">
+          Legal Compliance
+        </h3>
         <h2 className="text-3xl font-bold mb-5 leading-tight font-grotesk">
           Privacy Declaration
         </h2>
@@ -230,7 +233,7 @@ export function PatientAnthropometricStep({
       : parseFloat(bmi) < 25
         ? { label: "Healthy Weight", color: "text-green-600 bg-green-50" }
         : parseFloat(bmi) < 30
-          ? { label: "Overweight", color: "text-amber-600 bg-amber-50" }
+          ? { label: "Overweight", color: "text-gray-600 bg-gray-50" }
           : { label: "Obese", color: "text-red-600 bg-red-50" }
     : null;
 
@@ -283,9 +286,7 @@ export function PatientAnthropometricStep({
           onChange={(e) => updateData("weightKg", e.target.value)}
         />
         <div className="space-y-2">
-          <label className="block text-sm font-bold text-slate-700">
-            BMI (auto)
-          </label>
+          <h1 className="block text-sm font-bold text-slate-700">BMI (auto)</h1>
           <div
             className={`px-5 py-4 rounded-xl flex items-center justify-between transition-all duration-500 min-h-[54px] ${bmiCategory ? bmiCategory.color + " shadow-inner" : "bg-slate-50 border-2 border-slate-100"}`}
           >
@@ -308,9 +309,9 @@ export function PatientAnthropometricStep({
       {/* Gender & Blood Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
         <div className="space-y-4">
-          <label className="block text-sm font-bold text-slate-700">
+          <h1 className="block text-sm font-bold text-slate-700">
             Biological Gender
-          </label>
+          </h1>
           <div className="flex flex-wrap gap-2">
             {genders.map((g) => (
               <button
@@ -330,9 +331,7 @@ export function PatientAnthropometricStep({
         </div>
 
         <div className="space-y-4">
-          <label className="block text-sm font-bold text-slate-700">
-            Blood Type
-          </label>
+          <h1 className="block text-sm font-bold text-slate-700">Blood Type</h1>
           <div className="grid grid-cols-5 gap-2">
             {bloodTypes.map((bt) => (
               <button
@@ -354,9 +353,9 @@ export function PatientAnthropometricStep({
 
       {/* Activity Level */}
       <div className="space-y-4 py-4">
-        <label className="block text-sm font-bold text-slate-700">
+        <h1 className="block text-sm font-bold text-slate-700">
           Typical Activity Level
-        </label>
+        </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {activityLevels.map((level) => (
             <button
@@ -379,7 +378,7 @@ export function PatientAnthropometricStep({
       </div>
 
       <div className="space-y-4 py-5">
-        <label
+        <h1
           style={{ marginBottom: "20px" }}
           className="block text-sm font-bold text-slate-700"
         >
@@ -387,7 +386,7 @@ export function PatientAnthropometricStep({
           <span className="text-slate-400 font-normal ml-1">
             (Select all that apply)
           </span>
-        </label>
+        </h1>
         <div className="flex flex-wrap gap-2.5">
           {commonAllergies.map((allergy) => {
             const isSelected = (formData.allergies || []).includes(allergy);
@@ -416,12 +415,12 @@ export function PatientAnthropometricStep({
       </div>
 
       <div className="space-y-4 mb-[20px]">
-        <label className="block text-sm font-bold text-slate-700 mb-[20px]">
+        <h1 className="block text-sm font-bold text-slate-700 mb-[20px]">
           Chronic Conditions{" "}
           <span className="text-slate-400 font-normal ml-1">
             (Select all that apply)
           </span>
-        </label>
+        </h1>
         <div className="flex flex-wrap gap-2.5">
           {commonConditions.map((condition) => {
             const isSelected = (formData.chronicConditions || []).includes(
@@ -450,10 +449,6 @@ export function PatientAnthropometricStep({
           })}
         </div>
       </div>
-
-      <Button variant="dashed" fullWidth onClick={onSkip}>
-        Complete Health Profile Later
-      </Button>
     </div>
   );
 }
@@ -483,7 +478,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
           />
         </div>
 
-        <div className="relative z-10">
+        <div className="relative ">
           <div className="flex justify-between items-start mb-8">
             <div className="mb-[20px]">
               <span className="text-lg font-semibold text-tertiary flex-wrap text-white mb-[20px] block">
@@ -519,7 +514,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
       {/* Card Payment Form */}
       <div className="bg-white rounded-sm gap-6  py-5 flex flex-col">
         <div className="flex items-center justify-between mb-[20px]">
-          <h3 className="text-sm font-bold text-slate-800   flex items-center gap-2 font-grotesk">
+          <h3 className="text-lg font-bold text-slate-800   flex items-center gap-2 font-grotesk">
             <BiCreditCard className="text-primary" /> Credit or Debit Card
           </h3>
           <div className="flex gap-2">
@@ -612,7 +607,7 @@ export function PatientEmergencyStep({ formData, updateData, onSkip }: any) {
       </div>
 
       <div className="p-5 mb-[20px] rounded-lg border border-slate-100 space-y-6">
-        <h3 className="text-sm font-bold text-slate-700  tracking-normal font-grotesk">
+        <h3 className="text-lg font-bold text-slate-700  tracking-normal font-grotesk">
           Contact Details
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -641,6 +636,109 @@ export function PatientEmergencyStep({ formData, updateData, onSkip }: any) {
       <Button variant="dashed" fullWidth onClick={onSkip}>
         Complete Emergency Info Later
       </Button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Step 6 – Document Uploads
+// ─────────────────────────────────────────
+export function PatientDocumentStep({ formData, updateData }: any) {
+  return (
+    <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
+      <div className="inline-flex items-center gap-2 rounded-full">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+        <span className="text-xs text-primary tracking-normal">
+          Documents & Verification
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-8">
+        <CloudinaryUpload
+          label="Profile Photo / ID Photo *"
+          description="Upload a clear photo of yourself or your ID card"
+          value={formData.profilePhoto}
+          onUploadComplete={(url) => updateData("profilePhoto", url)}
+        />
+
+        <CloudinaryUpload
+          label="Medical Certificates / Documents"
+          description="Upload any relevant medical certificates or health records (PDF or Images)"
+          value={formData.medicalDocument}
+          onUploadComplete={(url) => updateData("medicalDocument", url)}
+        />
+      </div>
+
+      <div className="p-5 bg-gray-50 rounded-lg border border-gray-100">
+        <p className="text-xs text-gray-700 font-medium leading-relaxed">
+          <strong>Note:</strong> These documents help our medical team provide
+          better care. All documents are stored securely and encrypted.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Step 7 – Password Creation (Final Step)
+// ─────────────────────────────────────────
+export function PasswordCreationStep({ formData, updateData, errors }: any) {
+  return (
+    <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
+      <div className="bg-primary/5 p-8 rounded-2xl border border-primary/10">
+        <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white mb-6">
+          <BiLockAlt size={24} />
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900 mb-2 font-grotesk">
+          {" "}
+          Secure Your Account
+        </h3>
+        <p className="text-sm text-slate-500 mb-8">
+          Create a strong password to protect your health data and access your
+          profile.
+        </p>
+
+        <div className="space-y-6">
+          <Input
+            label="Password *"
+            type="password"
+            placeholder="At least 8 characters"
+            value={formData.password || ""}
+            error={errors?.password}
+            onChange={(e) => updateData("password", e.target.value)}
+          />
+          <Input
+            label="Confirm Password *"
+            type="password"
+            placeholder="Repeat your password"
+            value={formData.confirmPassword || ""}
+            error={errors?.confirmPassword}
+            onChange={(e) => updateData("confirmPassword", e.target.value)}
+          />
+        </div>
+
+        <div className="mt-8 space-y-3">
+          <p className="text-xs font-bold text-slate-400 -widest">
+            Password Requirements:
+          </p>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {[
+              "Minimum 8 characters",
+              "At least one uppercase letter",
+              "At least one number",
+              "At least one special character",
+            ].map((req, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-2 text-xs text-slate-500 font-medium"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                {req}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

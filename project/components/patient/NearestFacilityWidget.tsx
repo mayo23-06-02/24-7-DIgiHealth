@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { patientApi } from "../../services/patientApi";
+import { patientApi } from "@/app/services/patientApi";
 import { FiMapPin, FiRefreshCw, FiNavigation } from "react-icons/fi";
 import Button from "../ui/Button";
-import { useLowBandwidth } from "../../hooks/useLowBandwidth";
+import { useLowBandwidth } from "@/app/hooks/useLowBandwidth";
 
 export default function NearestFacilityWidget({
   isOnline,
@@ -51,7 +51,7 @@ export default function NearestFacilityWidget({
   }, [isOnline]);
 
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col h-full overflow-hidden">
+    <div className="bg-white rounded-lg border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col h-full overflow-hidden">
       {!isLowBandwidth && (
         <div className="w-full h-48 bg-slate-200 relative">
           <img
@@ -90,7 +90,7 @@ export default function NearestFacilityWidget({
         </div>
 
         {loading && (
-          <div className="py-10 text-center text-slate-400 font-bold animate-pulse">
+          <div className="py-10 text-center text-slate-500 font-bold animate-pulse">
             Scanning area...
           </div>
         )}
@@ -100,7 +100,7 @@ export default function NearestFacilityWidget({
             {facilities.map((fac) => (
               <div
                 key={fac.id}
-                className="p-4 rounded-2xl border border-slate-200 hover:border-trust-blue/50 hover:shadow-md transition-all cursor-pointer group"
+                className="p-4 rounded-2xl border border-slate-200 hover:border-trust-blue/50 hover: transition-all cursor-pointer group"
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -122,7 +122,7 @@ export default function NearestFacilityWidget({
                     href={`https://maps.google.com/?q=${fac.name}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-trust-blue/10 group-hover:text-trust-blue transition-colors shrink-0"
+                    className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-trust-blue/10 group-hover:text-trust-blue transition-colors shrink-0"
                   >
                     <FiNavigation />
                   </a>
@@ -133,7 +133,7 @@ export default function NearestFacilityWidget({
                     {fac.distance} km away
                   </div>
                   <div className="text-right">
-                    <span className="block text-xs  font-bold tracking-normal text-slate-400 mb-0.5">
+                    <span className="block text-sm  font-bold tracking-normal text-slate-500 mb-0.5">
                       Live Wait Time
                     </span>
                     <span

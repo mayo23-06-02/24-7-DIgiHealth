@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
@@ -19,6 +20,7 @@ import {
   BiCalendarCheck,
   BiDownload,
   BiCalendar,
+  BiPencil,
 } from "react-icons/bi";
 
 const TABS = ["upcoming", "past", "cancelled", "requests"];
@@ -26,15 +28,14 @@ const TABS = ["upcoming", "past", "cancelled", "requests"];
 const TYPE_ICON: Record<string, React.ReactNode> = {
   video: <BiVideo className="text-emerald-500" size={16} />,
   chat: <BiChat className="text-blue-500" size={16} />,
-  "in-person": <BiClinic className="text-slate-400" size={16} />,
 };
 
 const STATUS_BADGE: Record<string, string> = {
   scheduled: "bg-blue-50 text-blue-700 border-blue-200",
-  ongoing: "bg-amber-50 text-amber-700 border-amber-200",
+  ongoing: "bg-gray-50 text-gray-700 border-gray-200",
   completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
   cancelled: "bg-rose-50 text-rose-600 border-rose-200",
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  pending: "bg-gray-50 text-gray-700 border-gray-200",
   requested: "bg-indigo-50 text-indigo-700 border-indigo-200",
 };
 
@@ -273,7 +274,9 @@ export default function PractitionerAppointmentsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Appointments</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+            Appointments
+          </h1>
           <p className="text-sm text-slate-500">
             Manage your consultation schedule
           </p>
@@ -427,9 +430,9 @@ export default function PractitionerAppointmentsPage() {
                     </td>
                     <td className="py-4 px-5">
                       <div className="flex items-center gap-1.5">
-                        {TYPE_ICON[a.type] || TYPE_ICON["in-person"]}
+                        {TYPE_ICON[a.type] || TYPE_ICON["video"]}
                         <span className="text-xs capitalize text-slate-600">
-                          {a.type}
+                          {a.type || "Telehealth"}
                         </span>
                       </div>
                     </td>
@@ -586,9 +589,9 @@ export default function PractitionerAppointmentsPage() {
           <div className="space-y-4">
             {/* Patient Search */}
             <div ref={dropdownRef}>
-              <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
+              <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                 Patient
-              </label>
+              </h1>
               <div className="relative">
                 <BiSearch
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"
@@ -671,8 +674,8 @@ export default function PractitionerAppointmentsPage() {
                               className={`w-2 h-2 rounded-full shrink-0 ${
                                 p.riskColor === "red"
                                   ? "bg-red-400"
-                                  : p.riskColor === "amber"
-                                    ? "bg-amber-400"
+                                  : p.riskColor === "gray"
+                                    ? "bg-gray-400"
                                     : "bg-emerald-400"
                               }`}
                             />
@@ -688,9 +691,9 @@ export default function PractitionerAppointmentsPage() {
             {/* Date & Time */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
+                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Date
-                </label>
+                </h1>
                 <input
                   type="date"
                   value={form.date}
@@ -702,9 +705,9 @@ export default function PractitionerAppointmentsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
+                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Time
-                </label>
+                </h1>
                 <input
                   type="time"
                   value={form.time}
@@ -719,9 +722,9 @@ export default function PractitionerAppointmentsPage() {
             {/* Duration & Method */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
+                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Duration
-                </label>
+                </h1>
                 <select
                   value={form.durationMinutes}
                   onChange={(e) =>
@@ -740,9 +743,9 @@ export default function PractitionerAppointmentsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
+                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                   Method
-                </label>
+                </h1>
                 <select
                   value={form.type}
                   onChange={(e) =>
@@ -752,16 +755,15 @@ export default function PractitionerAppointmentsPage() {
                 >
                   <option value="video">📹 Video Call</option>
                   <option value="chat">💬 Chat</option>
-                  <option value="in-person">🏥 In-Person</option>
                 </select>
               </div>
             </div>
 
             {/* Reason */}
             <div>
-              <label className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
+              <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1.5 block">
                 Reason / Notes
-              </label>
+              </h1>
               <textarea
                 rows={3}
                 value={form.reason}
@@ -795,7 +797,7 @@ export default function PractitionerAppointmentsPage() {
             <Button
               onClick={handleBooking}
               disabled={submitting || !form.patientId}
-              isLoading={submitting}
+              loading={submitting}
               icon={<BiCalendarCheck size={16} />}
             >
               {editingApptId ? "Save Changes" : "Confirm Booking"}

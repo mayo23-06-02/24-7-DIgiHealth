@@ -30,10 +30,10 @@ const Input: React.FC<InputProps> = ({
 
   const containerStyle = fullWidth ? "w-full" : "w-auto";
   const commonStyles = `
-    w-full bg-slate-50 ${isTextArea ? "rounded-xl" : "rounded-full"} outline-none 
+    w-full bg-slate-50 rounded-2xl outline-none 
     focus:ring-4 focus:ring-primary/10 focus:border-primary 
-    transition-all text-slate-900  placeholder-slate-400
-    ${error ? "border-red-400 bg-red-50 border" : "border border-slate-100 bg-slate-50"}
+    transition-all text-slate-900  placeholder-slate-500
+    ${error ? "border-red-400 bg-red-50 border" : "border border-slate-300 bg-slate-50"}
     ${icon ? "pl-14 pr-6" : "px-6"}
     ${className}
   `;
@@ -41,14 +41,14 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className={`space-y-2 ${containerStyle}`}>
       {label && (
-        <label htmlFor={id} className="block text-slate-400 ">
+        <label htmlFor={id} className="block text-slate-500 ">
           {label}
         </label>
       )}
 
       <div className="relative">
         {icon && (
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 z-10">
             {icon}
           </div>
         )}

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { FiCreditCard, FiCheckCircle } from "react-icons/fi";
-import { patientApi } from "../../services/patientApi";
+import { patientApi } from "@/app/services/patientApi";
 import Button from "../ui/Button";
 
 export default function SubscriptionCard({
@@ -27,7 +27,7 @@ export default function SubscriptionCard({
   if (!subscription) return null;
 
   return (
-    <div className="bg-primary text-white rounded-[2rem] p-8 relative overflow-hidden shadow-[0_15px_40px_rgba(0,82,204,0.3)]">
+    <div className="bg-primary text-white rounded-lg p-8 relative overflow-hidden shadow-[0_15px_40px_rgba(0,82,204,0.3)]">
       {/* Decorative BG */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
 
@@ -38,7 +38,7 @@ export default function SubscriptionCard({
           </h3>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-400 border-2 border-primary"></div>
-            <span className="font-bold tracking-normal  text-[10px]">
+            <span className="font-bold tracking-normal  text-sm">
               {subscription.status}
             </span>
           </div>
@@ -49,7 +49,7 @@ export default function SubscriptionCard({
       </div>
 
       <div className="space-y-1 mb-8 relative z-10">
-        <p className="text-white/70 text-[10px] font-bold  tracking-normal">
+        <p className="text-white/70 text-sm font-bold  tracking-normal">
           Next Billing Date
         </p>
         <p className="text-2xl font-bold">
@@ -59,7 +59,7 @@ export default function SubscriptionCard({
             year: "numeric",
           })}
         </p>
-        <p className="text-white/80 font-bold  tracking-normal text-[10px]">
+        <p className="text-white/80 font-bold  tracking-normal text-sm">
           ZAR {subscription.amount}.00 / month
         </p>
       </div>

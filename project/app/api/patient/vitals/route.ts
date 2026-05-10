@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     const userId = payload.userId as string;
 
     const data = await req.json();
-    const { vitalType, value } = data;
+    const { vitalType, value, height } = data;
 
     if (!vitalType || !value) {
       return NextResponse.json({ error: 'Missing vitalType or value' }, { status: 400 });
@@ -77,6 +77,7 @@ export async function POST(req: Request) {
         patientId: userId,
         dateRecorded: new Date(),
         weightKg: latest?.weightKg,
+        heightCm: latest?.heightCm,
         vitalSigns: {
           systolicBP: latest?.vitalSigns?.systolicBP,
           diastolicBP: latest?.vitalSigns?.diastolicBP,
@@ -102,14 +103,19 @@ export async function POST(req: Request) {
         break;
       case 'weight':
         record.weightKg = Number(value);
+        if (height) record.heightCm = Number(height);
         break;
       case 'glucose':
-        // We'll store glucose in spO2 or a custom field if schema doesn't have it
-        // Depending on strict mode, mongoose might strip it. Let's cast to any.
         (record as any).glucoseMmol = Number(value);
         break;
       default:
         return NextResponse.json({ error: 'Invalid vital type' }, { status: 400 });
+    }
+
+    // Auto-calculate BMI if both are available
+    if (record.weightKg && record.heightCm) {
+      const hMeters = record.heightCm / 100;
+      record.bmi = parseFloat((record.weightKg / (hMeters * hMeters)).toFixed(1));
     }
 
     await record.save();

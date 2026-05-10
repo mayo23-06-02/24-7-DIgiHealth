@@ -3,69 +3,126 @@
 import React, { useState } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { BiDownload, BiPrinter, BiLoaderAlt, BiCalendar } from "react-icons/bi";
+import KPICard from "@/components/ui/KPICard";
+import {
+  BiDownload,
+  BiPrinter,
+  BiLoaderAlt,
+  BiCalendar,
+  BiFile,
+  BiGroup,
+  BiBarChartAlt2,
+} from "react-icons/bi";
 
 const REPORT_TYPES = [
   {
-    id: "occupancy",
-    label: "Bed Occupancy",
-    description: "Daily/weekly bed usage report",
-    icon: "🛏️",
-  },
-  {
     id: "financial",
     label: "Financial Report",
-    description: "Revenue, payments, and billing",
+    description: "Revenue, payments, and billing summary",
     icon: "💳",
+    apiPath: "/api/hospital/reports/financial",
   },
   {
     id: "staff",
-    label: "Staff Attendance",
-    description: "Staff duty records and hours",
+    label: "Staff Records",
+    description: "Staff directory, schedules, and duty hours",
     icon: "👥",
+    apiPath: "/api/hospital/staff",
+  },
+  {
+    id: "consultations",
+    label: "Consultation Volume",
+    description: "6-month consultation analytics and trends",
+    icon: "📊",
+    apiPath: "/api/hospital/appointments",
   },
 ];
 
 export default function ReportsPage() {
-  const [selectedType, setSelectedType] = useState("occupancy");
+  const [selectedType, setSelectedType] = useState("financial");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewing, setPreviewing] = useState(false);
+
+  const selected = REPORT_TYPES.find((r) => r.id === selectedType)!;
 
   const downloadCSV = async () => {
     setLoading(true);
     try {
-      let url = `/api/hospital/reports/${selectedType}?format=csv`;
+      let url = `${selected.apiPath}?format=csv`;
       if (dateFrom) url += `&from=${dateFrom}`;
       if (dateTo) url += `&to=${dateTo}`;
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${selectedType}_report.csv`;
-      a.click();
+      const res = await fetch(url);
+      const contentType = res.headers.get("content-type") || "";
+
+      if (contentType.includes("text/csv")) {
+        const blob = await res.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `${selectedType}_report_${new Date().toISOString().split("T")[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+      } else {
+        // JSON response — convert to CSV client-side
+        const json = await res.json();
+        const rows: any[] = json.data || [];
+        if (rows.length === 0) {
+          alert("No data to export.");
+          return;
+        }
+        const headers = Object.keys(rows[0]).filter(
+          (k) => typeof rows[0][k] !== "object",
+        );
+        const csvContent = [
+          headers.join(","),
+          ...rows.map((r) =>
+            headers.map((h) => JSON.stringify(r[h] ?? "")).join(","),
+          ),
+        ].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `${selectedType}_report_${new Date().toISOString().split("T")[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+      }
     } catch (e) {
       console.error(e);
+      alert("Export failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const printReport = () => {
-    window.print();
-  };
-
-  const emailReport = () => {
-    alert(
-      `Report "${selectedType}" would be emailed to the hospital admin. (Mock action)`,
-    );
+  const loadPreview = async () => {
+    setPreviewing(true);
+    try {
+      let url = `${selected.apiPath}`;
+      if (dateFrom) url += `?from=${dateFrom}`;
+      if (dateTo) url += `${dateFrom ? "&" : "?"}to=${dateTo}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      setPreviewData((json.data || []).slice(0, 8));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPreviewing(false);
+    }
   };
 
   return (
-    <div className="w-full pb-10 flex flex-col gap-6 max-w-3xl mx-auto">
+    <div className="w-full pb-10 flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Reports</h1>
-        <p className="text-sm text-slate-500">
-          Generate and export operational reports
+        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+          Reports
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Generate and export operational reports for your facility
         </p>
       </div>
 
@@ -74,35 +131,38 @@ export default function ReportsPage() {
         {REPORT_TYPES.map((rt) => (
           <button
             key={rt.id}
-            onClick={() => setSelectedType(rt.id)}
-            className={`p-4 rounded-2xl border-2 text-left transition-all ${
+            onClick={() => {
+              setSelectedType(rt.id);
+              setPreviewData([]);
+            }}
+            className={`p-5 rounded-lg border text-left transition-all ${
               selectedType === rt.id
                 ? "border-primary bg-primary/5 shadow-none"
                 : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
-            <span className="text-3xl block mb-2">{rt.icon}</span>
-            <p
-              className={`text-sm font-bold ${selectedType === rt.id ? "text-primary" : "text-slate-800"}`}
+            <span className="text-3xl block mb-3">{rt.icon}</span>
+            <h1
+              className={`font-bold ${selectedType === rt.id ? "text-primary" : "text-slate-800"}`}
             >
               {rt.label}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">{rt.description}</p>
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">{rt.description}</p>
           </button>
         ))}
       </div>
 
-      {/* date Range & Actions */}
+      {/* Settings & Actions */}
       <Card className="flex flex-col gap-6">
         <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 font-grotesk">
-          Report Settings
+          Export Settings
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+            <h1 className="text-xs font-bold text-slate-500 tracking-wider mb-1 block">
               From Date
-            </label>
+            </h1>
             <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2">
               <BiCalendar className="text-slate-400" />
               <input
@@ -114,9 +174,9 @@ export default function ReportsPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+            <h1 className="text-xs font-bold text-slate-500 tracking-wider mb-1 block">
               To Date
-            </label>
+            </h1>
             <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2">
               <BiCalendar className="text-slate-400" />
               <input
@@ -129,27 +189,38 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
-          <p className="text-sm font-bold text-slate-700 mb-1">
-            {REPORT_TYPES.find((r) => r.id === selectedType)?.icon}{" "}
-            {REPORT_TYPES.find((r) => r.id === selectedType)?.label}
-          </p>
-          <p className="text-xs text-slate-500">
-            {REPORT_TYPES.find((r) => r.id === selectedType)?.description}
-          </p>
-          {dateFrom && dateTo && (
+        <div className="bg-slate-50 border border-slate-100 rounded-lg p-4 text-sm">
+          <h1 className="font-bold text-slate-700">
+            {selected.icon} {selected.label}
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">{selected.description}</p>
+          {dateFrom && dateTo ? (
             <p className="text-xs text-primary font-bold mt-2">
               Period: {dateFrom} → {dateTo}
             </p>
-          )}
-          {(!dateFrom || !dateTo) && (
-            <p className="text-xs text-amber-600 mt-2">
-              ℹ️ No date range set — full dataset will be exported.
+          ) : (
+            <p className="text-xs text-slate-400 mt-2">
+              ℹ️ No date range — full dataset will be exported.
             </p>
           )}
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <Button
+            onClick={loadPreview}
+            variant="outline"
+            disabled={previewing}
+            icon={
+              previewing ? (
+                <BiLoaderAlt className="animate-spin" />
+              ) : (
+                <BiBarChartAlt2 size={18} />
+              )
+            }
+            className="flex-1 min-w-[140px] justify-center"
+          >
+            Preview Data
+          </Button>
           <Button
             onClick={downloadCSV}
             disabled={loading}
@@ -165,58 +236,61 @@ export default function ReportsPage() {
             Download CSV
           </Button>
           <button
-            onClick={printReport}
+            onClick={() => window.print()}
             className="flex-1 min-w-[140px] justify-center flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
           >
             <BiPrinter size={18} /> Print Report
           </button>
-          <button
-            onClick={emailReport}
-            className="flex-1 min-w-[140px] justify-center flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            📧 Email Admin
-          </button>
         </div>
       </Card>
 
-      {/* Recent Actions Log (Mock) */}
-      <Card className="flex flex-col gap-4">
-        <h3 className="font-bold text-slate-800 font-grotesk">Recent Report Exports</h3>
-        <div className="space-y-3">
-          {[
-            {
-              type: "Financial Report",
-              date: "2026-04-10",
-              by: "system.admin@digihealth.co.za",
-            },
-            {
-              type: "Bed Occupancy",
-              date: "2026-04-08",
-              by: "system.admin@digihealth.co.za",
-            },
-            {
-              type: "Staff Attendance",
-              date: "2026-04-05",
-              by: "system.admin@digihealth.co.za",
-            },
-          ].map((log, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100"
-            >
-              <div>
-                <p className="text-sm font-bold text-slate-700">{log.type}</p>
-                <p className="text-xs text-slate-400">
-                  {log.by} · {log.date}
-                </p>
-              </div>
-              <span className="text-xs bg-emerald-50 text-emerald-700 font-bold px-2 py-1 rounded-lg border border-emerald-200">
-                CSV
-              </span>
-            </div>
-          ))}
-        </div>
-      </Card>
+      {/* Data Preview */}
+      {previewData.length > 0 && (
+        <Card className="flex flex-col gap-4 overflow-hidden p-0">
+          <div className="px-6 pt-5 pb-3 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-bold text-slate-800 font-grotesk">
+              Preview (first 8 rows)
+            </h3>
+            <span className="text-xs text-slate-500">
+              Full data in the CSV download
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm min-w-[600px]">
+              <thead>
+                <tr className="bg-slate-50">
+                  {Object.keys(previewData[0])
+                    .filter((k) => typeof previewData[0][k] !== "object")
+                    .map((key) => (
+                      <th
+                        key={key}
+                        className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider"
+                      >
+                        {key}
+                      </th>
+                    ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {previewData.map((row, i) => (
+                  <tr key={i} className="hover:bg-slate-50/50">
+                    {Object.entries(row)
+                      .filter(([, v]) => typeof v !== "object")
+                      .map(([k, v]: any) => (
+                        <td
+                          key={k}
+                          className="py-3 px-5 text-slate-600 truncate max-w-[200px]"
+                        >
+                          {String(v ?? "—")}
+                        </td>
+                      ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

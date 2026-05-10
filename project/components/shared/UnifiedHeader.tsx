@@ -15,11 +15,18 @@ import {
   BiCapsule,
   BiPulse,
   BiCalendar,
+  BiChat,
+  BiUser,
+  BiCog,
+  BiLogOut,
+  BiHeart,
+  BiChevronDown,
 } from "react-icons/bi";
 import { useAuthContext } from "../auth/AuthProvider";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import Avatar from "../ui/Avatar";
+import Modal from "../ui/Modal";
 
 interface WeatherData {
   temp: number;
@@ -37,7 +44,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   onNotificationClick,
   onMenuClick,
 }) => {
-  const { user } = useAuthContext();
+  const { user, logout } = useAuthContext();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -46,8 +53,25 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     temp: 24,
     condition: "Loading...",
     location: "Detecting location...",
-    icon: <BiSun className="text-amber-400 text-xl animate-pulse" />,
+    icon: <BiSun className="text-gray-400 text-xl animate-pulse" />,
   });
+
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [selectedNotif, setSelectedNotif] = useState<any>(null);
+  const profileRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setTime(new Date());
@@ -68,14 +92,14 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         if (!current) throw new Error("No weather data");
 
         const mapping: Record<number, { label: string; icon: any }> = {
-          0: { label: "Clear", icon: <BiSun className="text-amber-400" /> },
+          0: { label: "Clear", icon: <BiSun className="text-gray-400" /> },
           1: {
             label: "Mainly Clear",
-            icon: <BiSun className="text-amber-300" />,
+            icon: <BiSun className="text-gray-300" />,
           },
           2: {
             label: "Partly Cloudy",
-            icon: <BiCloud className="text-slate-400" />,
+            icon: <BiCloud className="text-slate-500" />,
           },
           3: {
             label: "Overcast",
@@ -96,7 +120,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           },
           95: {
             label: "Stormy",
-            icon: <BiCloudLightning className="text-amber-600" />,
+            icon: <BiCloudLightning className="text-gray-600" />,
           },
           71: {
             label: "Snowy",
@@ -106,7 +130,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
         const { label, icon } = mapping[current.weathercode] || {
           label: "Cloudy",
-          icon: <BiCloud className="text-slate-400" />,
+          icon: <BiCloud className="text-slate-500" />,
         };
 
         setWeather({
@@ -120,7 +144,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           temp: 24,
           condition: "Offline",
           location: "Location unverified",
-          icon: <BiSun className="text-amber-400" />,
+          icon: <BiSun className="text-gray-400" />,
         });
       }
     };
@@ -161,6 +185,19 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     fetchNotifications();
   };
 
+  const handleNotifClick = async (notif: any) => {
+    if (!notif.isRead) {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        body: JSON.stringify({ id: notif._id }),
+        headers: { "Content-Type": "application/json" },
+      });
+      fetchNotifications();
+    }
+    setSelectedNotif(notif);
+    setIsNotificationOpen(false);
+  };
+
   const formattedDate = useMemo(
     () =>
       time
@@ -199,7 +236,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
       <div className="hidden sm:flex flex-1 flex-col gap-1 pr-4 lg:pr-10">
         <div className="flex items-center gap-2">
-          <span className="text-xs  text-slate-400 ">{formattedDate}</span>
+          <span className="text-xs  text-slate-500 ">{formattedDate}</span>
           <span className="w-1 h-1 bg-slate-200 rounded-full" />
           <span className="text-xs font-bold text-primary ">
             {formattedTime}
@@ -213,17 +250,6 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         </div>
       </div>
 
-      <div className="flex-2 max-w-[600px] px-2 lg:px-10 hidden md:block">
-        <div className="bg-slate-100/50 border border-slate-100 rounded-full px-6 py-1 flex items-center gap-4 group focus-within:bg-white focus-within:border-primary/30 focus-within:shadow-none focus-within:shadow-primary/5 transition-all duration-500">
-          <BiSearch className="text-slate-400 text-xl group-focus-within:text-primary transition-colors" />
-          <input
-            type="text"
-            placeholder="Search doctors, clinical labs, or patient records..."
-            className="bg-transparent border-none outline-none w-[350px] text-sm text-slate-800 placeholder:text-slate-400"
-          />
-        </div>
-      </div>
-
       <div className="flex-1 flex items-center justify-end gap-3 lg:gap-6">
         <div className="relative">
           <button
@@ -231,7 +257,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
             className={`w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center cursor-pointer transition-all relative ${
               isNotificationOpen
                 ? "bg-primary text-white shadow-none shadow-primary/20"
-                : "bg-white text-slate-400 hover:text-primary hover:bg-primary/5"
+                : "bg-white text-slate-500 hover:text-primary hover:bg-primary/5"
             }`}
           >
             <BiBell size={20} />
@@ -248,15 +274,15 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                 </h4>
                 <button
                   onClick={markAllRead}
-                  className="text-sm text-primary  hover:underline"
+                  className="text-sm text-primary font-bold hover:underline"
                 >
-                  Clear all
+                  Mark all read
                 </button>
               </div>
 
               <div className="space-y-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
                 {notifications.length === 0 ? (
-                  <p className="text-center text-slate-400 py-10 text-xs">
+                  <p className="text-center text-slate-500 py-10 text-xs">
                     No notifications yet.
                   </p>
                 ) : (
@@ -264,12 +290,17 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                     <div
                       key={notif._id || i}
                       className={`flex gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group ${!notif.isRead ? "bg-primary/[0.03]" : ""}`}
+                      onClick={() => handleNotifClick(notif)}
                     >
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${notif.isRead ? "bg-slate-50 text-slate-400" : "bg-primary/10 text-primary"}`}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${notif.isRead ? "bg-slate-50 text-slate-500" : "bg-primary/10 text-primary"}`}
                       >
-                        {notif.type === "new_appointment" ? (
+                        {notif.type === "new_appointment" ||
+                        notif.type === "appointment" ? (
                           <BiCalendar />
+                        ) : notif.type === "message" ||
+                          notif.type === "new_message" ? (
+                          <BiChat />
                         ) : (
                           <BiBell />
                         )}
@@ -281,10 +312,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                           >
                             {notif.title}
                           </p>
-                          <span className="text-[9px] text-slate-400 font-bold ml-2">
-                            {new Date(notif.createdAt).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
+                          <span className="text-[9px] text-slate-500 font-bold ml-2">
+                            {new Date(notif.createdAt).toLocaleDateString([], {
+                              month: "short",
+                              day: "numeric",
                             })}
                           </span>
                         </div>
@@ -311,30 +342,186 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           )}
         </div>
 
-        <button className="hidden sm:flex w-10 h-10 bg-white rounded-xl border border-slate-100 items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-all">
-          <BiBookmark size={20} />
-        </button>
+        <div className="relative" ref={profileRef}>
+          <button
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className={`group flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-full transition-all ml-2 ${isProfileOpen ? "bg-slate-50  ring-primary/10" : ""}`}
+          >
+            <Avatar
+              name={user?.name || "User"}
+              src={user?.avatarUrl}
+              size="sm"
+              className="group-hover:scale-105"
+            />
+            <div className="hidden lg:flex flex-col items-start mr-2">
+              <h1 className="font-bold text-slate-800 truncate leading-none mb-1">
+                {user?.name || "User"}
+              </h1>
+              <h1 className="text-[9px] font-bold text-primary leading-none st">
+                {user?.role?.replace("_", " ") || "Member"}
+              </h1>
+            </div>
+            <BiChevronDown
+              size={18}
+              className={`text-slate-500 transition-transform duration-300 hidden sm:block ${isProfileOpen ? "rotate-180" : ""}`}
+            />
+          </button>
 
-        <Link
-          href={`/${user?.role}/profile`}
-          className="group flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 pr-4 lg:pr-6 rounded-full transition-all ml-2"
-        >
-          <Avatar
-            name={user?.name || "User"}
-            src={user?.avatarUrl}
-            size="sm"
-            className="group-hover:scale-105"
-          />
-          <div className="hidden lg:flex flex-col">
-            <span className="text-xs    font-bold text-slate-800 truncate leading-none mb-1">
-              {user?.name || "User"}
-            </span>
-            <span className="text-[9px] font-bold text-primary   leading-none">
-              {user?.role?.replace("_", " ") || "Member"}
-            </span>
-          </div>
-        </Link>
+          {isProfileOpen && (
+            <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl  border border-slate-100 py-3 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
+              <div className="px-5 py-3 border-b border-slate-50 mb-2">
+                <h1 className="text-sm font-bold text-slate-500 st mb-1">
+                  Quick Actions
+                </h1>
+              </div>
+
+              <Link
+                href={`/${user?.role}/profile`}
+                className="flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-primary/5 hover:text-primary transition-all group"
+                onClick={() => setIsProfileOpen(false)}
+              >
+                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary/10">
+                  <BiUser size={18} />
+                </div>
+                <h1 className="text-sm font-bold">My Profile</h1>
+              </Link>
+
+              <Link
+                href={`/${user?.role}/settings`}
+                className="flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-primary/5 hover:text-primary transition-all group"
+                onClick={() => setIsProfileOpen(false)}
+              >
+                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary/10">
+                  <BiCog size={18} />
+                </div>
+                <h1 className="text-sm font-bold">Account Settings</h1>
+              </Link>
+
+              {user?.role === "patient" && (
+                <Link
+                  href="/patient/emergency"
+                  className="flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all group"
+                  onClick={() => setIsProfileOpen(false)}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-red-50/50 flex items-center justify-center group-hover:bg-red-50">
+                    <BiHeart size={18} />
+                  </div>
+                  <h1 className="text-sm font-bold text-red-500/80 group-hover:text-red-500">
+                    Emergency Info
+                  </h1>
+                </Link>
+              )}
+
+              <div className="h-px bg-slate-50 my-2" />
+
+              <button
+                className="w-full flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-slate-50 transition-all group"
+                onClick={() => {
+                  setIsProfileOpen(false);
+                  logout();
+                }}
+              >
+                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-slate-100">
+                  <BiLogOut size={18} />
+                </div>
+                <h1 className="text-sm font-bold">Sign Out</h1>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+      {/* Notification Detail Modal */}
+      <Modal
+        isOpen={!!selectedNotif}
+        onClose={() => setSelectedNotif(null)}
+        title={selectedNotif?.title || "Activity Detail"}
+      >
+        {selectedNotif && (
+          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center gap-5">
+              <div
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-sm ${
+                  selectedNotif.type?.includes("appointment")
+                    ? "bg-emerald-50 text-emerald-500 border border-emerald-100"
+                    : selectedNotif.type?.includes("message")
+                      ? "bg-blue-50 text-blue-500 border border-blue-100"
+                      : "bg-primary/5 text-primary border border-primary/10"
+                }`}
+              >
+                {selectedNotif.type?.includes("appointment") ? (
+                  <BiCalendar />
+                ) : selectedNotif.type?.includes("message") ? (
+                  <BiChat />
+                ) : (
+                  <BiBell />
+                )}
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">
+                  {selectedNotif.type?.replace("_", " ") || "Notification"}
+                </h4>
+                <p className="text-xs font-bold text-slate-500">
+                  {new Date(selectedNotif.createdAt).toLocaleString("en-ZA", {
+                    dateStyle: "full",
+                    timeStyle: "short",
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100">
+              <p className="text-lg text-slate-700 leading-relaxed font-medium">
+                {selectedNotif.body}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-4 pt-4">
+              {selectedNotif.type?.includes("appointment") && (
+                <Link
+                  href={`/${user?.role}/appointments`}
+                  className="w-full"
+                  onClick={() => setSelectedNotif(null)}
+                >
+                  <Button fullWidth size="lg">
+                    Manage Appointment
+                  </Button>
+                </Link>
+              )}
+              {selectedNotif.type?.includes("message") && (
+                <Link
+                  href={`/${user?.role}/messages`}
+                  className="w-full"
+                  onClick={() => setSelectedNotif(null)}
+                >
+                  <Button fullWidth size="lg">
+                    Reply to Message
+                  </Button>
+                </Link>
+              )}
+              {!selectedNotif.type?.includes("appointment") &&
+                !selectedNotif.type?.includes("message") && (
+                  <Link
+                    href={`/${user?.role}/dashboard`}
+                    className="w-full"
+                    onClick={() => setSelectedNotif(null)}
+                  >
+                    <Button fullWidth size="lg">
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                )}
+              <Button
+                variant="white"
+                fullWidth
+                size="lg"
+                onClick={() => setSelectedNotif(null)}
+              >
+                Close Activity
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </header>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Avatar from "@/components/ui/Avatar";
 import Input from "@/components/ui/Input";
 import EmptyState from "@/components/ui/EmptyState";
@@ -64,12 +64,16 @@ export default function MessagesView({
   );
   const [activeCall, setActiveCall] = useState<ActiveCallInfo | null>(null);
 
+  const isFirstLoad = useRef(true);
   const fetchConversations = useCallback(async () => {
-    setIsLoading(true);
+    if (isFirstLoad.current) setIsLoading(true);
     try {
       const res = await fetch("/api/conversations");
       let convData: any[] = [];
-      if (res.ok) convData = await res.json();
+      if (res.ok) {
+        convData = await res.json();
+        isFirstLoad.current = false;
+      }
 
       const enriched = await fetchEnrichedContacts(convData);
       enriched.forEach((c) => {
@@ -126,7 +130,10 @@ export default function MessagesView({
         }
       }
     });
-  }, [fetchConversations]);
+
+    const interval = setInterval(fetchConversations, 8000); // Poll for new convs every 8s
+    return () => clearInterval(interval);
+  }, [fetchConversations, searchParams, router]);
 
   const isActiveChatOpen =
     activeChatId &&
@@ -138,7 +145,7 @@ export default function MessagesView({
     return (
       <div className="flex h-[calc(100vh-140px)] overflow-hidden -m-4 lg:-m-8 animate-in fade-in duration-300">
         {isOffline && (
-          <div className="absolute top-0 inset-x-0 z-50 bg-amber-500 text-white p-2 text-center text-xs font-bold flex items-center justify-center gap-2">
+          <div className="absolute top-0 inset-x-0 z-50 bg-gray-500 text-white p-2 text-center text-xs font-bold flex items-center justify-center gap-2">
             <BiWifiOff size={14} /> Connection lost.
           </div>
         )}
@@ -159,10 +166,10 @@ export default function MessagesView({
               <BiMessageDetail size={16} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800 leading-none">
+              <h3 className="text-lg font-bold text-slate-800 leading-none">
                 Chat
               </h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+              <p className="text-sm text-slate-500 font-bold -widest mt-0.5">
                 {activeCall.participantName || "Participant"}
               </p>
             </div>
@@ -184,31 +191,31 @@ export default function MessagesView({
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] overflow-hidden -m-4 lg:-m-8 animate-in fade-in duration-700">
       {isOffline && (
-        <div className="bg-amber-500 text-white p-2 text-center text-xs font-bold uppercase tracking-normal flex items-center justify-center gap-2">
+        <div className="bg-gray-500 text-white p-2 text-center text-xs font-bold -normal flex items-center justify-center gap-2">
           <BiWifiOff size={16} /> Connection lost. Messages will queue and send
           when online.
         </div>
       )}
 
-      <Card className="flex flex-1 overflow-hidden bg-white rounded-none border-none shadow-none">
+      <Card className="flex flex-1 overflow-hidden bg-white ">
         {/* CONVERSATION LIST */}
         <div
           className={`w-full md:w-96 border-r border-slate-100 flex-col shrink-0 ${isActiveChatOpen ? "hidden md:flex" : "flex"}`}
         >
-          <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+          <div className="pr-4">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
                   {pageTitle}
                 </h2>
-                <p className="text-slate-500 font-medium text-xs">
+                <p className="text-slate-500 font-medium text-sm">
                   {pageSubtitle}
                 </p>
               </div>
               {onNewChatClick && (
                 <button
                   onClick={onNewChatClick}
-                  className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center hover:scale-105 transition-all shadow-md shadow-primary/20"
+                  className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center hover:scale-105 transition-all "
                   title="Start New Chat"
                 >
                   <BiPlus size={24} />
@@ -221,9 +228,9 @@ export default function MessagesView({
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-2 text-xs uppercase tracking-normal font-bold rounded-lg transition-all ${activeTab === tab ? "bg-white text-primary shadow-sm" : "text-slate-400"}`}
+                  className={`flex-1 py-2 text-sm -normal  rounded-lg transition-all ${activeTab === tab ? "bg-white text-primary " : "text-slate-500"}`}
                 >
-                  {tab}
+                  <h1 className="font-bold">{tab}</h1>
                 </button>
               ))}
             </div>
@@ -288,7 +295,7 @@ export default function MessagesView({
                         <h4 className="font-bold text-slate-800 text-sm truncate pr-2">
                           {conv.contactName}
                         </h4>
-                        <span className="text-xs text-slate-400 font-bold whitespace-nowrap">
+                        <span className="text-xs text-slate-500 font-bold whitespace-nowrap">
                           {conv.timestamp || ""}
                         </span>
                       </div>
@@ -299,7 +306,7 @@ export default function MessagesView({
                           {conv.lastMessage}
                         </p>
                         {conv.unread > 0 && (
-                          <span className="w-5 h-5 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
+                          <span className="w-5 h-5 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0  shadow-primary/20">
                             {conv.unread}
                           </span>
                         )}

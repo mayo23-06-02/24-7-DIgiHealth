@@ -39,6 +39,7 @@ interface SidebarItem {
   label: string;
   href: string;
   roles: string[];
+  exact?: boolean;
 }
 
 const MAIN_NAV: SidebarItem[] = [
@@ -50,13 +51,13 @@ const MAIN_NAV: SidebarItem[] = [
     roles: [
       "patient",
       "practitioner",
-      "hospital_admin",
       "inspector",
       "super_admin",
       "mega_admin",
     ],
     exact: true,
   },
+
   {
     icon: BiCalendar,
     label: "Appointments",
@@ -69,14 +70,12 @@ const MAIN_NAV: SidebarItem[] = [
     href: "/[role]/doctors",
     roles: ["patient"],
   },
-
   {
     icon: BiCheckCircle,
     label: "Health Record",
     href: "/[role]/health-record",
     roles: ["patient"],
   },
-
   // ----- PRACTITIONER PAGES -----
   {
     icon: BiUser,
@@ -96,7 +95,6 @@ const MAIN_NAV: SidebarItem[] = [
     href: "/[role]/insights",
     roles: ["practitioner"],
   },
-
   // ----- HOSPITAL ADMIN PAGES -----
   {
     icon: BiBuildingHouse,
@@ -106,20 +104,20 @@ const MAIN_NAV: SidebarItem[] = [
   },
   {
     icon: BiUserPlus,
-    label: "Staff",
+    label: "Staff Management",
     href: "/[role]/staff",
     roles: ["hospital_admin"],
   },
   {
-    icon: BiDollarCircle,
-    label: "Billing",
-    href: "/[role]/billing",
+    icon: BiFile,
+    label: "Reports",
+    href: "/[role]/reports",
     roles: ["hospital_admin"],
   },
   {
-    icon: BiStar,
-    label: "Reviews",
-    href: "/[role]/reviews",
+    icon: BiLineChart,
+    label: "Performance",
+    href: "/[role]/performance",
     roles: ["hospital_admin"],
   },
   {
@@ -129,12 +127,11 @@ const MAIN_NAV: SidebarItem[] = [
     roles: ["hospital_admin"],
   },
   {
-    icon: BiLineChart,
-    label: "Performance",
-    href: "/[role]/performance",
+    icon: BiStar,
+    label: "Reviews",
+    href: "/[role]/reviews",
     roles: ["hospital_admin"],
   },
-
   // ----- INSPECTOR PAGES -----
   {
     icon: BiShieldQuarter,
@@ -160,7 +157,6 @@ const MAIN_NAV: SidebarItem[] = [
     href: "/[role]/anomalies",
     roles: ["inspector"],
   },
-
   // ----- SUPER ADMIN & MEGA ADMIN PAGES -----
   {
     icon: BiGroup,
@@ -186,7 +182,6 @@ const MAIN_NAV: SidebarItem[] = [
     href: "/[role]/alerts",
     roles: ["super_admin", "mega_admin"],
   },
-
   // ----- COMMON PAGES (multiple roles) -----
   {
     icon: BiMessageDetail,
@@ -307,56 +302,59 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] lg:hidden"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[90] lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={`
-        flex-col transition-all duration-500 z-[100] shrink-0
-        fixed inset-y-0 left-0 bg-white  lg:shadow-none
-        lg:relative lg:inset-auto lg:translate-x-0 lg:border-r lg:border-slate-200/50
+        fixed inset-y-0 left-0 z-[100] flex flex-col bg-white transition-all duration-500
+        lg:relative lg:inset-auto lg:border-r lg:border-slate-200/50 lg:shadow-none
         ${isCollapsed ? "w-24" : "w-72"}
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-    `}
+      `}
       >
-        {/* Mobile Close Button */}
+        {/* Mobile Close Button (only visible when open on mobile) */}
         {isOpen && (
           <button
             onClick={onClose}
-            className="absolute -right-12 top-6 w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-400 lg:hidden"
+            className="absolute -right-12 top-6 w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-500 shadow-md lg:hidden"
+            aria-label="Close menu"
           >
             ×
           </button>
         )}
+
         {/* Brand */}
         <div
           className={`
-        h-24 flex items-center border-b border-slate-200/50 transition-all duration-500
-        ${isCollapsed ? "px-4 justify-center" : "px-8"}
-      `}
+            h-24 flex items-center border-b border-slate-200/50 transition-all duration-500
+            ${isCollapsed ? "px-4 justify-center" : "px-8"}
+          `}
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-bold">
-              24
+              <span>
+                <h2>24</h2>
+              </span>
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">
-                <span className="text-slate-800 font-bold tracking-tight text-lg leading-none">
-                  24/7 TeleHealth
+                <span className="text-2xl font-bold tracking-tight text-primary">
+                  <h1> TeleHealth</h1>
                 </span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Nav Section */}
+        {/* Navigation */}
         <nav
           className={`
-        flex-1 py-6 space-y-1 overflow-y-auto custom-scrollbar 
-        ${isCollapsed ? "px-2" : "px-4"}
-      `}
+            flex-1 py-6 space-y-1 overflow-y-auto custom-scrollbar
+            ${isCollapsed ? "px-2" : "px-4"}
+          `}
         >
           {filteredMain.map((item, i) => {
             const href = item.href.replace("[role]", user.role);
@@ -367,27 +365,36 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
               <Link
                 key={i}
                 href={href}
-                className={`
-                flex items-center gap-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 group
-                ${isActive ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-50 hover:text-primary"}
-                ${isCollapsed ? "justify-center px-0" : "px-4"}
-              `}
                 title={isCollapsed ? item.label : ""}
+                onClick={() => {
+                  // Close mobile menu after navigation
+                  if (window.innerWidth < 1024 && onClose) onClose();
+                }}
               >
-                <item.icon
-                  size={22}
-                  className={`transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}
-                />
-                {!isCollapsed && (
-                  <span className="animate-in fade-in slide-in-from-left-2 duration-300">
-                    {item.label}
-                  </span>
-                )}
+                <div
+                  className={`
+                    flex items-center gap-4 py-3 my-1 rounded-lg font-semibold text-sm transition-all duration-200 group
+                    ${isActive ? "bg-primary text-white" : "text-slate-900 hover:bg-slate-50 hover:text-primary"}
+                    ${isCollapsed ? "justify-center px-0" : "px-4"}
+                  `}
+                >
+                  <item.icon
+                    size={22}
+                    className={`transition-transform duration-200 ${
+                      isActive ? "scale-110" : "group-hover:scale-110"
+                    }`}
+                  />
+                  {!isCollapsed && (
+                    <span className="animate-in fade-in slide-in-from-left-2 duration-300">
+                      <h2 className="">{item.label}</h2>
+                    </span>
+                  )}
+                </div>
               </Link>
             );
           })}
 
-          {/* Divider */}
+          {/* Divider (only when expanded) */}
           {!isCollapsed && <div className="h-px bg-slate-200 my-6 mx-2" />}
 
           {filteredSecondary.map((item, i) => {
@@ -398,25 +405,35 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
                 key={i}
                 href={href}
                 className={`
-                flex items-center gap-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 group
-                ${isActive ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-100 hover:text-primary"}
-                ${isCollapsed ? "justify-center px-0" : "px-4"}
-              `}
+                  flex items-center gap-4 py-3 my-1 rounded-lg font-semibold text-sm transition-all duration-200 group
+                  ${isActive ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-100 hover:text-primary"}
+                  ${isCollapsed ? "justify-center px-0" : "px-4"}
+                `}
                 title={isCollapsed ? item.label : ""}
+                onClick={() => {
+                  if (window.innerWidth < 1024 && onClose) onClose();
+                }}
               >
                 <item.icon size={22} />
-                {!isCollapsed && <span>{item.label}</span>}
+                {!isCollapsed && (
+                  <span>
+                    <h2 className="">{item.label}</h2>
+                  </span>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Profile/Footer */}
+        {/* Footer / Profile Section */}
         <div className="p-4 border-t border-slate-100 mt-auto">
           {!isCollapsed && (
             <Link
               href={`/${user.role}/profile`}
               className="flex items-center gap-3 mb-4 p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-slate-100 hover:border-primary/20 transition-all group"
+              onClick={() => {
+                if (window.innerWidth < 1024 && onClose) onClose();
+              }}
             >
               <Avatar
                 name={user.name}
@@ -425,12 +442,9 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
                 className="group-hover:scale-105"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-700 truncate group-hover:text-primary transition-colors">
+                <h1 className="text-sm font-semibold text-slate-700 truncate group-hover:text-primary transition-colors">
                   {user.name}
-                </p>
-                <p className="text-xs text-slate-400 truncate  tracking-normal font-bold">
-                  {user.role.replace("_", " ")}
-                </p>
+                </h1>
               </div>
             </Link>
           )}
@@ -440,6 +454,9 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
               href={`/${user.role}/profile`}
               className="flex justify-center mb-4 p-2 rounded-lg hover:bg-slate-50 transition-all group"
               title="View Profile"
+              onClick={() => {
+                if (window.innerWidth < 1024 && onClose) onClose();
+              }}
             >
               <Avatar
                 name={user.name}
@@ -456,22 +473,23 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
             icon={<BiLogOut size={20} />}
             iconPosition="left"
             className={`
-            !w-full flex items-center transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-500 rounded-lg py-3 !min-w-0
-            ${isCollapsed ? "!justify-center" : "!px-4 !gap-3"}
-          `}
+              !w-full flex items-center transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-500 rounded-lg py-3 !min-w-0
+              ${isCollapsed ? "!justify-center" : "!px-4 !gap-3"}
+            `}
           >
             {!isCollapsed && (
-              <span className="text-sm font-bold  tracking-normal">
+              <span className="text-sm font-bold tracking-normal">
                 Sign Out
               </span>
             )}
           </Button>
         </div>
 
-        {/* Toggle Button */}
+        {/* Collapse Toggle Button (hidden on mobile) */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-10 w-6 h-6 p-0 min-w-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary transition-all z-50"
+          className="absolute -right-3 top-10 hidden lg:flex w-6 h-6 rounded-lg bg-white border border-slate-200 items-center justify-center text-slate-500 hover:text-primary transition-all z-50"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
             <BiChevronRight size={14} />

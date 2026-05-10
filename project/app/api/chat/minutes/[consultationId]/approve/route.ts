@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Conversation } from '@/lib/models/Conversation';
 
-export async function POST(req: Request, { params }: { params: { consultationId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ consultationId: string }> }) {
   try {
     await connectToDatabase();
+    const { consultationId } = await params;
     
-    const conversation = await Conversation.findOne({ consultationId: params.consultationId });
+    const conversation = await Conversation.findOne({ consultationId });
     if (!conversation) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     conversation.minutesApproved += conversation.minutesRequested;

@@ -44,7 +44,8 @@ interface CheckinForm {
 }
 
 interface HealthTip {
-  id: string;
+  id?: string;
+  _id?: string;
   title: string;
   content: string;
   icon: React.ReactNode;
@@ -63,7 +64,7 @@ const MOCK_TIPS: HealthTip[] = [
     id: "2",
     title: "Screen Break",
     content: "Follow the 20-20-20 rule to reduce digital eye strain.",
-    icon: <BiBulb className="text-amber-500" />,
+    icon: <BiBulb className="text-gray-500" />,
   },
   {
     id: "3",
@@ -287,7 +288,7 @@ export default function WellnessHub() {
         {/* LEFT COLUMN: SCORE & STREAK */}
         <div className="lg:col-span-3 space-y-6">
           <Card className="text-center p-8 bg-gradient-to-br from-primary to-blue-600 text-white border-none shadow-none shadow-primary/20">
-            <h3 className="text-sm font-bold  tracking-normal opacity-80 mb-6 font-grotesk">
+            <h3 className="text-lg font-bold  tracking-normal opacity-80 mb-6 font-grotesk">
               Wellness Index
             </h3>
 
@@ -318,7 +319,7 @@ export default function WellnessHub() {
                 <span className="text-4xl font-bold">
                   {wellnessData.score}%
                 </span>
-                <span className="text-[10px]  font-bold tracking-normal opacity-60">
+                <span className="text-sm  font-bold tracking-normal opacity-60">
                   Optimal
                 </span>
               </div>
@@ -333,13 +334,13 @@ export default function WellnessHub() {
             </p>
           </Card>
 
-          <Card className="flex items-center justify-between p-6 bg-amber-50 border-amber-100 border-2">
+          <Card className="flex items-center justify-between p-6 bg-gray-50 border-gray-100 border-2">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-none shadow-amber-200">
+              <div className="w-12 h-12 bg-gray-500 rounded-2xl flex items-center justify-center text-white shadow-none shadow-gray-200">
                 <HiFire size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-amber-500  tracking-normal">
+                <p className="text-sm font-bold text-gray-500  tracking-normal">
                   Consistency
                 </p>
                 <p className="text-xl font-bold text-slate-800">
@@ -350,7 +351,7 @@ export default function WellnessHub() {
           </Card>
 
           <Card className="p-6">
-            <SectionHeader title="Weekly Trend" compact />
+            <SectionHeader title="Weekly Trend" inner />
             <div className="h-24 w-full flex items-end gap-2 mt-4">
               {wellnessData.history.map((h, i) => (
                 <div
@@ -361,7 +362,7 @@ export default function WellnessHub() {
                     className="w-full bg-primary/20 rounded-t-lg transition-all hover:bg-primary"
                     style={{ height: `${h.score}%` }}
                   />
-                  <span className="text-[8px] font-bold text-slate-400 ">
+                  <span className="text-xs font-bold text-slate-400 ">
                     {h.date.split("-")[2]}
                   </span>
                 </div>
@@ -381,9 +382,9 @@ export default function WellnessHub() {
             <div className="space-y-8 mt-6">
               {/* MOOD */}
               <div>
-                <label className="text-[10px] font-bold text-slate-400  tracking-normal mb-4 block px-1">
+                <h1 className="text-sm font-bold text-slate-400  tracking-normal mb-4 block px-1">
                   Current Sentiment
-                </label>
+                </h1>
                 <div className="flex justify-between gap-2">
                   {MOODS.map((m) => (
                     <button
@@ -396,7 +397,7 @@ export default function WellnessHub() {
                       }`}
                     >
                       {m.icon}
-                      <span className="text-[10px] font-bold  tracking-tight">
+                      <span className="text-sm font-bold  tracking-tight">
                         {m.label}
                       </span>
                     </button>
@@ -406,7 +407,7 @@ export default function WellnessHub() {
 
               {/* STATS INPUTS */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
+                <div className="bg-slate-50/50 p-6 rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3 mb-4">
                     <BiMoon className="text-blue-500" size={20} />
                     <span className="text-xs font-bold text-slate-700  tracking-tight">
@@ -426,12 +427,12 @@ export default function WellnessHub() {
                     }
                     className="w-full bg-transparent text-3xl font-bold text-slate-800 outline-none"
                   />
-                  <span className="text-[10px] font-bold text-slate-400 ">
+                  <span className="text-sm font-bold text-slate-400 ">
                     Hours
                   </span>
                 </div>
 
-                <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
+                <div className="bg-slate-50/50 p-6 rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3 mb-4">
                     <BiWalk className="text-emerald-500" size={20} />
                     <span className="text-xs font-bold text-slate-700  tracking-tight">
@@ -448,7 +449,7 @@ export default function WellnessHub() {
                     }
                     className="w-full bg-transparent text-3xl font-bold text-slate-800 outline-none"
                   />
-                  <span className="text-[10px] font-bold text-slate-400 ">
+                  <span className="text-sm font-bold text-slate-400 ">
                     Steps
                   </span>
                 </div>
@@ -459,7 +460,7 @@ export default function WellnessHub() {
                 size="lg"
                 disabled={checkin.mood === 0 || isSubmitting}
                 onClick={handleCheckin}
-                className="h-16 rounded-[1.5rem] text-[12px] font-bold  tracking-normal shadow-none shadow-primary/20"
+                className="h-16 rounded-[1.5rem] text-sm font-bold  tracking-normal shadow-none shadow-primary/20"
               >
                 {isSubmitting
                   ? "Syncing Intelligence..."
@@ -469,7 +470,7 @@ export default function WellnessHub() {
           </Card>
 
           <div className="space-y-4">
-            <SectionHeader title="Smart Health Tips" compact />
+            <SectionHeader title="Smart Health Tips" inner />
             <div className="space-y-3">
               {tips.map((tip, i) => (
                 <div
@@ -522,7 +523,7 @@ export default function WellnessHub() {
               <Button
                 variant="ghost"
                 onClick={() => setSelectedArticle(articles[0])}
-                className="w-full bg-slate-50 text-[10px] font-bold  tracking-normal text-primary hover:bg-primary hover:text-white transition-all rounded-xl py-3 border-none"
+                className="w-full bg-slate-50 text-sm font-bold  tracking-normal text-primary hover:bg-primary hover:text-white transition-all rounded-xl py-3 border-none"
               >
                 Review Full Analysis
               </Button>
@@ -537,7 +538,7 @@ export default function WellnessHub() {
             </p>
             <div className="flex items-center gap-3">
               <div className="h-0.5 w-6 bg-primary" />
-              <span className="text-[10px] font-bold  tracking-normal">
+              <span className="text-sm font-bold  tracking-normal">
                 {quote?.author}
               </span>
             </div>
@@ -563,7 +564,7 @@ export default function WellnessHub() {
           {articles.map((art) => (
             <div key={art._id} className="px-3">
               <Card
-                className="text-left group cursor-pointer hover:border-primary/20 transition-all rounded-[2rem] overflow-hidden p-0"
+                className="text-left group cursor-pointer hover:border-primary/20 transition-all rounded-lg overflow-hidden p-0"
                 onClick={() => setSelectedArticle(art)}
               >
                 <div className="h-32 overflow-hidden bg-slate-100">

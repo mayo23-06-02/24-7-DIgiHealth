@@ -20,7 +20,6 @@ import {
 const TYPE_ICON: Record<string, React.ReactNode> = {
   video: <BiVideo className="text-emerald-500" size={14} />,
   chat: <BiChat className="text-blue-500" size={14} />,
-  "in-person": <BiClinic className="text-slate-400" size={14} />,
 };
 
 export default function ConsultationsPage() {
@@ -109,8 +108,8 @@ export default function ConsultationsPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
-                    {TYPE_ICON[c.type] || TYPE_ICON["in-person"]}
-                    <span className="capitalize">{c.type}</span>
+                    {TYPE_ICON[c.type] || TYPE_ICON["video"]}
+                    <span className="capitalize">{c.type || "Telehealth"}</span>
                   </div>
                   <div className="text-xs text-slate-500 shrink-0 hidden md:block">
                     {c.scheduledStart

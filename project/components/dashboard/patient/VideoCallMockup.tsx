@@ -175,7 +175,7 @@ export default function VideoCallMockup({
 
         <button
           onClick={onClose}
-          className="w-20 h-20 rounded-[2rem] bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center  shadow-rose-900/40 hover:scale-110 active:scale-95 transition-all mx-4 rotate-0"
+          className="w-20 h-20 rounded-lg bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center  shadow-rose-900/40 hover:scale-110 active:scale-95 transition-all mx-4 rotate-0"
         >
           <BiPhoneOff size={32} />
         </button>

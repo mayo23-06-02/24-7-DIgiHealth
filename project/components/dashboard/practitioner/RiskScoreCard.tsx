@@ -4,7 +4,7 @@ import React from "react";
 
 interface RiskScoreCardProps {
   score: number;
-  color: "green" | "amber" | "red";
+  color: "green" | "gray" | "red";
   factors?: string[];
   size?: "sm" | "md" | "lg";
   showRing?: boolean;
@@ -20,13 +20,13 @@ const colorMap = {
     glow: "shadow-emerald-200",
     track: "#dcfce7",
   },
-  amber: {
+  gray: {
     ring: "#f59e0b",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
+    bg: "bg-gray-50",
+    text: "text-gray-700",
+    border: "border-gray-200",
     label: "Moderate",
-    glow: "shadow-amber-200",
+    glow: "shadow-gray-200",
     track: "#fef3c7",
   },
   red: {
@@ -64,7 +64,7 @@ export default function RiskScoreCard({
           ${c.bg} ${c.text} ${c.border}
           ${size === "sm" ? "text-xs" : "text-sm"}
           cursor-default transition-all duration-200
-          hover:shadow-md ${c.glow}
+          hover: ${c.glow}
         `}
       >
         {showRing && (

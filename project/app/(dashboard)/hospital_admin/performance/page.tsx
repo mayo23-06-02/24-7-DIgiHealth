@@ -45,9 +45,9 @@ const satisfactionTrend = [
 ];
 
 const appointmentTypes = [
-  { name: "Teleconsultation", value: 52 },
-  { name: "In-Person", value: 33 },
-  { name: "Follow-up", value: 15 },
+  { name: "Teleconsultation", value: 75 },
+  { name: "Video Call", value: 20 },
+  { name: "Follow-up (Remote)", value: 5 },
 ];
 
 const COLORS = ["var(--primary)", "#10b981", "#f59e0b"];

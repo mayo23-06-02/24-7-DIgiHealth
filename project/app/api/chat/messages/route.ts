@@ -23,6 +23,11 @@ export async function POST(req: Request) {
     // Update conversation lastActivityAt
     await Conversation.findByIdAndUpdate(conversationId, { lastActivityAt: new Date() });
 
+    // Emit socket event if server is running
+    if ((global as any).io) {
+      (global as any).io.to(conversationId).emit('new:message', message);
+    }
+
     return NextResponse.json(message);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

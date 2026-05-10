@@ -8,11 +8,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ conversa
     const { conversationId } = await params;
     const { searchParams } = new URL(req.url);
     const after = searchParams.get('after');
+    const before = searchParams.get('before');
     const limit = parseInt(searchParams.get('limit') || '50');
 
     let query: any = { conversationId };
-    if (after) {
-      query.createdAt = { $gt: new Date(after) };
+    if (after || before) {
+      query.createdAt = {};
+      if (after) query.createdAt.$gt = new Date(after);
+      if (before) query.createdAt.$lt = new Date(before);
     }
 
     const messages = await Message.find(query)

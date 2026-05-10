@@ -149,7 +149,7 @@ export function ArticleModal({
                 </span>
               ))}
             </div>
-            <h2 className="text-xl md:text-3xl font-bold text-white leading-tight tracking-tight drop-shadow-md font-grotesk">
+            <h2 className="text-xl md:text-3xl font-bold text-white leading-tight tracking-tight drop- font-grotesk">
               {article.title}
             </h2>
           </div>
@@ -183,7 +183,7 @@ export function ArticleModal({
               variant="ghost"
               className={`w-11 h-11 p-0 rounded-2xl flex items-center justify-center transition-all min-w-0 ${
                 isBookmarked
-                  ? "bg-amber-100 text-amber-600 shadow-inner"
+                  ? "bg-gray-100 text-gray-600 shadow-inner"
                   : "bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary border border-slate-100"
               }`}
             >
@@ -280,7 +280,7 @@ function ArticleCard({
             variant="ghost"
             className={`absolute top-4 right-4 w-10 h-10 backdrop-blur-md rounded-xl flex items-center justify-center transition-all duration-300 shadow-none border border-white/20 !min-w-0 p-0 ${
               isBookmarked
-                ? "bg-amber-400 text-white scale-100 opacity-100"
+                ? "bg-gray-400 text-white scale-100 opacity-100"
                 : "bg-white/30 text-white opacity-0 group-hover:opacity-100 hover:bg-primary scale-90 group-hover:scale-100"
             }`}
           >
@@ -353,20 +353,18 @@ export default function HealthBlog() {
       return new Set();
     }
   });
-  const [visibleCount, setVisibleCount] = useState(3);
-
-  // Responsive slide count
+  const [isClient, setIsClient] = useState(false);
   useEffect(() => {
-    const updateVisibleCount = () => {
-      const width = window.innerWidth;
-      if (width >= 1200) setVisibleCount(3);
-      else if (width >= 800) setVisibleCount(2);
-      else setVisibleCount(1);
-    };
-    updateVisibleCount();
-    window.addEventListener("resize", updateVisibleCount);
-    return () => window.removeEventListener("resize", updateVisibleCount);
+    setIsClient(true);
   }, []);
+
+  const visibleCount = isClient
+    ? window.innerWidth >= 1200
+      ? 4
+      : window.innerWidth >= 800
+        ? 2
+        : 1
+    : 3;
 
   const fetchArticles = useCallback(async (category: string) => {
     setLoading(true);
@@ -405,39 +403,52 @@ export default function HealthBlog() {
   const slidePercent = 100 / visibleCount;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6 px-2">
-        <div className="mb-4 px-2">
-          <h3 className="font-bold text-xl text-slate-800 font-grotesk">Health Insights</h3>
-          <p className="text-sm text-slate-500">
-            Latest medical news and wellness articles
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => setCarouselIndex((prev) => Math.max(0, prev - 1))}
-            className="w-10 h-10 p-0 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-          >
-            <BiChevronLeft size={24} />
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() =>
-              setCarouselIndex((prev) =>
-                Math.min(articles.length - 1, prev + 1),
-              )
-            }
-            className="w-10 h-10 p-0 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-          >
-            <BiChevronRight size={24} />
-          </Button>
+      <div className="flex justify-between items-center px-2">
+        <div className="flex items-center justify-between w-full gap-2">
+          <div className="mb-4 px-2">
+            <h3 className="font-bold text-2xl text-slate-900 font-grotesk">
+              Health Insights
+            </h3>
+            <p className="text-base text-slate-600">
+              Latest medical news and wellness articles
+            </p>
+          </div>
+          <div className="flex">
+            <div className="text-xs text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full border border-emerald-100 font-bold whitespace-nowrap">
+              <span className="flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              <h1>{articles.length} Available Articles</h1>
+            </div>
+            <div className="flex gap-2 ml-4">
+              <button
+                onClick={() =>
+                  setCarouselIndex((prev) => Math.max(0, prev - 1))
+                }
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+              >
+                <BiChevronLeft size={24} />
+              </button>
+              <button
+                onClick={() =>
+                  setCarouselIndex((prev) =>
+                    Math.min(articles.length - 1, prev + 1),
+                  )
+                }
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+              >
+                <BiChevronRight size={24} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-2 flex-wrap">
           {CATEGORY_FILTERS.map((f) => (
             <Button
@@ -458,7 +469,7 @@ export default function HealthBlog() {
 
         <div className="flex items-center gap-2">
           {bookmarks.size > 0 && (
-            <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg">
               <BiBookmark size={12} /> {bookmarks.size} Saved
             </span>
           )}

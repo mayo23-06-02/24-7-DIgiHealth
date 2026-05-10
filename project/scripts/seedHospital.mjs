@@ -93,8 +93,16 @@ const EmergencyIncidentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
+const HospitalAdminProfileSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: 'Facility', required: true },
+  department: { type: String },
+  permissions: [{ type: String }]
+}, { timestamps: true });
+
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 const Facility = mongoose.models.Facility || mongoose.model('Facility', FacilitySchema);
+const HospitalAdminProfile = mongoose.models.HospitalAdminProfile || mongoose.model('HospitalAdminProfile', HospitalAdminProfileSchema);
 const Bed = mongoose.models.Bed || mongoose.model('Bed', BedSchema);
 const BedOccupancy = mongoose.models.BedOccupancy || mongoose.model('BedOccupancy', BedOccupancySchema);
 const Staff = mongoose.models.Staff || mongoose.model('Staff', StaffSchema);
@@ -147,6 +155,20 @@ async function seed() {
       console.log('👤 Created hospital admin user: admin@digihealth.co.za');
     } else {
         await User.findByIdAndUpdate(adminUser._id, { facilityId: facility._id });
+    }
+
+    // Create Hospital Admin Profile
+    let adminProfile = await HospitalAdminProfile.findOne({ userId: adminUser._id });
+    if (!adminProfile) {
+      adminProfile = await HospitalAdminProfile.create({
+        userId: adminUser._id,
+        hospitalId: facility._id,
+        department: 'Administration',
+        permissions: ['all']
+      });
+      console.log('📋 Created Hospital Admin Profile');
+    } else {
+      await HospitalAdminProfile.findByIdAndUpdate(adminProfile._id, { hospitalId: facility._id });
     }
 
     // Try finding patients / practitioners from existing seed data

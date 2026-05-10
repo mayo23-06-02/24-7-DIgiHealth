@@ -3,7 +3,7 @@ import React from "react";
 interface AvatarProps {
   src?: string;
   name: string;
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   status?: "online" | "offline" | "busy" | "none";
   className?: string;
 }
@@ -16,7 +16,7 @@ const Avatar: React.FC<AvatarProps> = ({
   className = "",
 }) => {
   const sizes = {
-    xs: "w-6 h-6 text-[8px]",
+    xs: "w-6 h-6 text-xs",
     sm: "w-8 h-8 text-xs",
     md: "w-12 h-12 text-sm",
     lg: "w-16 h-16 text-xl",
@@ -42,14 +42,14 @@ const Avatar: React.FC<AvatarProps> = ({
     <div className={`relative inline-block shrink-0 ${className}`}>
       <div
         className={`
-        ${sizes[size]} rounded-lg overflow-hidden flex items-center justify-center font-bold tracking-tighter
+        ${sizes[size]} rounded-lg overflow-hidden flex items-center justify-center  tracking-tighter
         ${src ? "bg-slate-100" : "bg-primary text-white"}
       `}
       >
         {src ? (
           <img src={src} alt={name} className="w-full h-full object-cover" />
         ) : (
-          initials
+          <h1> {initials}</h1>
         )}
       </div>
 

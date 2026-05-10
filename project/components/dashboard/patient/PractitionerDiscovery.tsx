@@ -120,7 +120,7 @@ const PractitionerDiscovery: React.FC = () => {
   };
 
   const SkeletonCard = () => (
-    <div className="bg-white rounded-[2rem] p-8 border border-slate-100 animate-pulse space-y-6">
+    <div className="bg-white rounded-lg p-8 border border-slate-100 animate-pulse space-y-6">
       <div className="flex items-start gap-4">
         <div className="w-16 h-16 bg-slate-100 rounded-2xl" />
         <div className="flex-1 space-y-2">
@@ -151,9 +151,9 @@ const PractitionerDiscovery: React.FC = () => {
 
         <div className="bg-white p-8 rounded-lg border border-slate-100 shadow-none space-y-8">
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Global Search
-            </label>
+            </h1>
             <div className="relative">
               <BiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -167,9 +167,9 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Specialisation
-            </label>
+            </h1>
             <div className="space-y-2">
               {SPECIALISATIONS.map((s) => (
                 <button
@@ -177,7 +177,7 @@ const PractitionerDiscovery: React.FC = () => {
                   onClick={() =>
                     setFilters({ ...activeFilters, specialisation: s })
                   }
-                  className={`w-full text-left px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeFilters.specialisation === s ? "bg-primary text-white shadow-md" : "text-slate-500 hover:bg-slate-50"}`}
+                  className={`w-full text-left px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeFilters.specialisation === s ? "bg-primary text-white " : "text-slate-500 hover:bg-slate-50"}`}
                 >
                   {s}
                 </button>
@@ -186,9 +186,9 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Price Range (R{activeFilters.maxPrice})
-            </label>
+            </h1>
             <input
               type="range"
               min="300"
@@ -210,9 +210,9 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Language Spoken
-            </label>
+            </h1>
             <select
               className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20"
               value={activeFilters.language}
@@ -310,7 +310,7 @@ const PractitionerDiscovery: React.FC = () => {
                       </button>
                     </div>
                     <div className="text-right">
-                      <div className="flex items-center justify-end gap-1 text-amber-400 mb-1">
+                      <div className="flex items-center justify-end gap-1 text-gray-400 mb-1">
                         <BiStar size={16} className="fill-current" />
                         <span className="text-sm font-bold text-slate-800">
                           {doc.rating?.toFixed(1) || "4.9"}
@@ -414,9 +414,9 @@ const PractitionerDiscovery: React.FC = () => {
 
             <div className="space-y-6">
               <div>
-                <label className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
+                <h1 className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
                   Select Date
-                </label>
+                </h1>
                 <input
                   type="date"
                   className="w-full h-14 px-6 rounded-2xl bg-slate-50 border-none font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 shadow-inner"
@@ -428,9 +428,9 @@ const PractitionerDiscovery: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
+                <h1 className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
                   Available Time Slots
-                </label>
+                </h1>
                 <div className="grid grid-cols-4 gap-2">
                   {selectedDoc.availableSlots?.map((slot: string) => (
                     <button
@@ -447,9 +447,9 @@ const PractitionerDiscovery: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
+                <h1 className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
                   Reason for Visit
-                </label>
+                </h1>
                 <textarea
                   rows={3}
                   placeholder="e.g. Regular prescription refill, chest pain..."

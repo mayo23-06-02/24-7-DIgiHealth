@@ -16,6 +16,7 @@ import VideoCallModal from "./VideoCallModal";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import Carousel from "@/components/ui/Carousel";
+import Button from "@/components/ui/Button";
 
 export default function HealthActionCenter() {
   const [isClient, setIsClient] = useState(false);
@@ -299,6 +300,7 @@ export default function HealthActionCenter() {
           onClose={() => setActiveVoiceDoctor(null)}
           practitionerName={activeVoiceDoctor.name}
           practitionerAvatar={activeVoiceDoctor.avatarUrl}
+          roomUrl="https://247digihealth.daily.co/test-room"
         />
       )}
 
@@ -308,6 +310,7 @@ export default function HealthActionCenter() {
           onClose={() => setActiveVideoDoctor(null)}
           practitionerName={activeVideoDoctor.name}
           practitionerAvatar={activeVideoDoctor.avatarUrl}
+          roomUrl="https://247digihealth.daily.co/test-room"
         />
       )}
     </Card>

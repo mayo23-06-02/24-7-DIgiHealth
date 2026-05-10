@@ -2,7 +2,7 @@
 import React from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import FileUpload from "@/components/ui/FileUpload";
+import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
 
 const provinces = [
   "Gauteng",
@@ -49,12 +49,12 @@ export function HospitalStep1({ formData, updateData, errors }: any) {
           placeholder="e.g. 120"
         />
         <div className="md:col-span-2 space-y-4">
-          <label className="block text-sm font-bold text-slate-700">
+          <h1 className="block text-sm font-bold text-slate-700">
             Facility Type *
-          </label>
+          </h1>
           <div className="flex gap-3 flex-wrap">
             {["Public", "Private", "NGO / Clinic"].map((type) => (
-              <label
+              <h1
                 key={type}
                 className={`flex items-center gap-3 px-5 py-3.5 rounded-full border-2 cursor-pointer transition-all ${formData.facilityType === type ? "border-primary bg-primary/5 text-primary" : "border-slate-100 bg-slate-50 text-slate-500 hover:border-primary/30"}`}
               >
@@ -66,7 +66,7 @@ export function HospitalStep1({ formData, updateData, errors }: any) {
                   className="accent-primary"
                 />
                 <span className="font-bold text-sm">{type}</span>
-              </label>
+              </h1>
             ))}
           </div>
         </div>
@@ -93,9 +93,7 @@ export function HospitalStep2({ formData, updateData }: any) {
           placeholder="City"
         />
         <div className="space-y-2">
-          <label className="block text-sm font-bold text-slate-700">
-            Province *
-          </label>
+          <h1 className="block text-sm font-bold text-slate-700">Province *</h1>
           <select
             required
             value={formData.province || ""}
@@ -111,7 +109,7 @@ export function HospitalStep2({ formData, updateData }: any) {
           </select>
         </div>
         <div className="md:col-span-2 border-t border-slate-100 pt-6">
-          <h3 className="text-sm font-bold text-slate-700  tracking-normal mb-4 font-grotesk">
+          <h3 className="text-lg font-bold text-slate-700  tracking-normal mb-4 font-grotesk">
             Admin Representative
           </h3>
         </div>
@@ -128,16 +126,12 @@ export function HospitalStep2({ formData, updateData }: any) {
           onChange={(e) => updateData("adminEmail", e.target.value)}
           placeholder="admin@facility.co.za"
         />
-        <FileUpload
+        <CloudinaryUpload
           label="Proof of Employment (PDF) *"
           description="Upload a certified proof of employment for the administrator"
-          accept="PDF document only"
-          value={
-            formData.proofOfEmployment
-              ? [{ name: formData.proofOfEmployment.name, status: "completed" }]
-              : []
-          }
-          onRemove={() => updateData("proofOfEmployment", null)}
+          accept="application/pdf"
+          value={formData.proofOfEmployment}
+          onUploadComplete={(url) => updateData("proofOfEmployment", url)}
         />
       </div>
     </div>
@@ -147,7 +141,7 @@ export function HospitalStep2({ formData, updateData }: any) {
 export function HospitalStep3({ formData, updateData }: any) {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
-      <label
+      <h1
         className={`flex items-start gap-5 p-8 rounded-lg border-2 cursor-pointer transition-all ${formData.b2bAgreement ? "border-primary bg-primary/5" : "border-slate-100 bg-slate-50 hover:border-primary/30"}`}
       >
         <input
@@ -165,7 +159,7 @@ export function HospitalStep3({ formData, updateData }: any) {
             per routed emergency), and Dispatch Escalation Protocol.
           </p>
         </div>
-      </label>
+      </h1>
       <Input
         label="VAT Registration Number (optional)"
         value={formData.vatNumber || ""}
@@ -179,40 +173,26 @@ export function HospitalStep3({ formData, updateData }: any) {
 export function HospitalStep4({ formData, updateData }: any) {
   return (
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
-      <FileUpload
+      <CloudinaryUpload
         label="Facility Profile Logo *"
         description="Select or drag a professional logo for the facility (Square recommended)"
-        accept="JPEG, PNG or SVG images"
-        value={
-          formData.facilityLogo
-            ? [{ name: formData.facilityLogo.name, status: "completed" }]
-            : []
-        }
-        onRemove={() => updateData("facilityLogo", null)}
+        value={formData.facilityLogo}
+        onUploadComplete={(url) => updateData("facilityLogo", url)}
       />
 
-      <FileUpload
+      <CloudinaryUpload
         label="Facility Wallpaper *"
-        description="Select or drag a high-resolution wallpaper (1920×1080 min recommended)"
-        accept="High-res professional images"
-        value={
-          formData.facilityWallpaper
-            ? [{ name: formData.facilityWallpaper.name, status: "completed" }]
-            : []
-        }
-        onRemove={() => updateData("facilityWallpaper", null)}
+        description="Select or drag a high-resolution wallpaper"
+        value={formData.facilityWallpaper}
+        onUploadComplete={(url) => updateData("facilityWallpaper", url)}
       />
 
-      <FileUpload
+      <CloudinaryUpload
         label="Registration Certificate (PDF) *"
         description="Upload a certified facility registration certificate"
-        accept="PDF certificate only"
-        value={
-          formData.regCertificate
-            ? [{ name: formData.regCertificate.name, status: "completed" }]
-            : []
-        }
-        onRemove={() => updateData("regCertificate", null)}
+        accept="application/pdf"
+        value={formData.regCertificate}
+        onUploadComplete={(url) => updateData("regCertificate", url)}
       />
     </div>
   );

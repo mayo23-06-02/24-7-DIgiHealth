@@ -161,9 +161,9 @@ const severityConfig = {
     label: "⛔ Major",
   },
   moderate: {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
+    bg: "bg-gray-50",
+    text: "text-gray-700",
+    border: "border-gray-200",
     label: "⚠️ Moderate",
   },
   minor: {
@@ -174,6 +174,7 @@ const severityConfig = {
   },
 };
 
+import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
 export default function ClinicalDecisionSupport() {
@@ -199,26 +200,26 @@ export default function ClinicalDecisionSupport() {
     <div className="h-full flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
       {/* Header */}
       <div className="flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center shadow-md shadow-primary/20">
+        <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center  shadow-primary/20">
           <BiShield className="text-white text-lg" />
         </div>
         <div>
           <h3 className="font-bold text-slate-800 text-sm leading-tight  tracking-normal font-grotesk">
             Clinical Decision Support
           </h3>
-          <p className="text-[10px] text-slate-400 font-bold  tracking-normal mt-0.5">
+          <p className="text-sm text-slate-400 font-bold  tracking-normal mt-0.5">
             Drug checker · Guidelines · Protocols
           </p>
         </div>
       </div>
 
       {/* Drug Interaction Checker */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-none shadow-slate-900/5 shrink-0">
+      <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-none shadow-slate-900/5 shrink-0">
         <div className="flex items-center gap-3 mb-6 px-1">
           <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
             <BiPulse size={20} />
           </div>
-          <h4 className="text-[10px] font-bold text-slate-400  tracking-normal font-grotesk">
+          <h4 className="text-sm font-bold text-slate-400  tracking-normal font-grotesk">
             Precision Drug Interaction Analytics
           </h4>
         </div>
@@ -251,7 +252,7 @@ export default function ClinicalDecisionSupport() {
 
         {/* Result */}
         {interactionResult === "empty" && (
-          <p className="text-[10px] text-slate-400 text-center font-bold  tracking-normal">
+          <p className="text-sm text-slate-400 text-center font-bold  tracking-normal">
             Enter both drug names to check.
           </p>
         )}
@@ -259,7 +260,7 @@ export default function ClinicalDecisionSupport() {
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
             <BiCheckCircle className="text-emerald-600 text-base shrink-0" />
             <div>
-              <p className="text-[10px] font-bold text-emerald-700  tracking-normal">
+              <p className="text-sm font-bold text-emerald-700  tracking-normal">
                 No known interactions found
               </p>
               <p className="text-[9px] text-emerald-600 font-medium italic opacity-70">
@@ -293,7 +294,7 @@ export default function ClinicalDecisionSupport() {
           )}
 
         {/* Quick checks */}
-        <p className="text-[10px] text-slate-400 mt-4 font-bold  tracking-normal">
+        <p className="text-sm text-slate-400 mt-4 font-bold  tracking-normal">
           Quick checks:
         </p>
         <div className="flex flex-wrap gap-1.5 mt-2">
@@ -333,7 +334,7 @@ export default function ClinicalDecisionSupport() {
             return (
               <div
                 key={g.id}
-                className={`bg-white rounded-2xl border transition-all duration-300 ${isOpen ? "border-primary/20 shadow-md" : "border-slate-100 shadow-none"}`}
+                className={`bg-white rounded-2xl border transition-all duration-300 ${isOpen ? "border-primary/20 " : "border-slate-100 shadow-none"}`}
               >
                 <Button
                   variant="ghost"
@@ -365,7 +366,7 @@ export default function ClinicalDecisionSupport() {
                       {g.steps.map((step, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-[10px] text-slate-500"
+                          className="flex items-start gap-2 text-sm text-slate-500"
                         >
                           <span className="text-primary font-bold shrink-0 mt-0.5">
                             {i + 1}.
@@ -376,7 +377,7 @@ export default function ClinicalDecisionSupport() {
                     </ul>
                     <Button
                       variant="ghost"
-                      className="mt-4 inline-flex items-center gap-1 text-[10px] text-primary font-bold hover:underline p-0 !min-w-0 border-none bg-transparent  tracking-normal h-auto"
+                      className="mt-4 inline-flex items-center gap-1 text-sm text-primary font-bold hover:underline p-0 !min-w-0 border-none bg-transparent  tracking-normal h-auto"
                       onClick={() => window.open(g.link, "_blank")}
                     >
                       Full Guidelines <BiLinkExternal size={11} />

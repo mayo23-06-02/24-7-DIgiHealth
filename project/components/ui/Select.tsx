@@ -33,9 +33,9 @@ const Select: React.FC<SelectProps> = ({
 }) => {
   const containerStyle = fullWidth ? "w-full" : "w-auto";
   const commonStyles = `
-    w-full bg-slate-50 rounded-[1rem] outline-none appearance-none
+    w-full bg-slate-50 rounded-2xl outline-none appearance-none
     focus:ring-4 focus:ring-primary/10 focus:border-primary 
-    transition-all text-slate-900 placeholder-slate-400 border border-slate-100
+    transition-all text-slate-900 placeholder-slate-400 border border-slate-300
     ${error ? "border-red-400 bg-red-50 text-red-900" : ""}
     ${icon ? "pl-14 pr-12" : "px-6 pr-12"}
     ${className}
@@ -44,14 +44,14 @@ const Select: React.FC<SelectProps> = ({
   return (
     <div className={`space-y-2 ${containerStyle}`}>
       {label && (
-        <label htmlFor={id} className="block text-xs font-bold text-slate-400 ">
+        <label htmlFor={id} className="block text-sm font-bold text-slate-500 ">
           {label}
         </label>
       )}
 
       <div className="relative">
         {icon && (
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 z-10">
             {icon}
           </div>
         )}
@@ -70,7 +70,7 @@ const Select: React.FC<SelectProps> = ({
           ))}
         </select>
 
-        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
           <BiChevronDown size={24} />
         </div>
       </div>

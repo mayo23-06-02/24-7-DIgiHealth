@@ -407,9 +407,9 @@ const ScheduleView: React.FC = () => {
       {showFilters && (
         <div className="bg-white p-6 rounded-lg border border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Specialisation
-            </label>
+            </h1>
             <div className="mt-2 flex flex-wrap gap-2">
               {allSpecialisations.map((spec) => (
                 <button
@@ -430,9 +430,9 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Language
-            </label>
+            </h1>
             <div className="mt-2 flex flex-wrap gap-2">
               {allLanguages.map((lang) => (
                 <button
@@ -453,9 +453,9 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Max Fee (ZAR)
-            </label>
+            </h1>
             <input
               type="range"
               min="0"
@@ -477,9 +477,9 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
               Gender
-            </label>
+            </h1>
             <div className="flex gap-4 mt-2">
               <button
                 onClick={() =>
@@ -514,7 +514,7 @@ const ScheduleView: React.FC = () => {
       )}
 
       {isOffline && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3 text-amber-700">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3 text-gray-700">
           <BiInfoCircle size={20} />
           <span className="text-sm font-medium">
             You are offline. You can still browse cached data, but bookings will
@@ -568,7 +568,7 @@ const ScheduleView: React.FC = () => {
                         size={12}
                         className={
                           i < Math.floor(doc.rating)
-                            ? "text-amber-400 fill-amber-400"
+                            ? "text-gray-400 fill-gray-400"
                             : "text-slate-200"
                         }
                       />
@@ -705,7 +705,7 @@ const ScheduleView: React.FC = () => {
                       size={12}
                       className={
                         i < Math.floor(selectedDoc.rating)
-                          ? "text-amber-400 fill-amber-400"
+                          ? "text-gray-400 fill-gray-400"
                           : "text-slate-300"
                       }
                     />

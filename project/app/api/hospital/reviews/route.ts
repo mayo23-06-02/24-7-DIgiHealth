@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await connectToDatabase();
 
-    const reviews = await ReviewsDoc.find({})
+    const reviews = await Review.find({})
       .sort({ createdAt: -1 })
       .limit(100)
       .lean();

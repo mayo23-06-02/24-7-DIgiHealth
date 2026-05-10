@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
           .map((n: string) => n[0])
           .join('')
           .slice(0, 2)
-          .to();
+          .toUpperCase();
 
         return {
           consultationId: c._id.toString(),

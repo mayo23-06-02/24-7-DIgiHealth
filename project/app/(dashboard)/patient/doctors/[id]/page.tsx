@@ -34,24 +34,21 @@ export default function DoctorProfilePage() {
   const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
-    // In real app, fetch by ID. Here we simulate with the available API
-    fetch(`/api/practitioners/available`)
+    if (!id) return;
+    
+    setLoading(true);
+    fetch(`/api/practitioners/${id}`)
       .then((res) => res.json())
-      .then((data) => {
-        const found = data.find((d: any) => d.id === id);
-        setDoc(
-          found || {
-            id,
-            name: "Dr. Sarah Mitchell",
-            specialisation: "Cardiologist",
-            rating: 4.9,
-            reviewCount: 124,
-            isOnline: true,
-            experienceYears: 15,
-            languages: ["English", "Spanish"],
-            bio: "Dedicated clinical specialist with a focus on patient-centered outcomes. Extensively trained in advanced diagnostic methodologies and humanitarian clinical practices.",
-          },
-        );
+      .then((json) => {
+        if (json.success) {
+          setDoc(json.data);
+        } else {
+          setDoc(null);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch doctor profile", err);
+        setDoc(null);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -92,7 +89,7 @@ export default function DoctorProfilePage() {
             </div>
           </div>
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white px-6 py-2 rounded-2xl  border border-slate-100 flex items-center gap-2">
-            <BiStar className="text-amber-400" />
+            <BiStar className="text-gray-400" />
             <span className="text-sm font-bold text-slate-800">
               {doc.rating?.toFixed(1) || "5.0"}
             </span>
@@ -186,11 +183,11 @@ export default function DoctorProfilePage() {
                   Clinical Focus
                 </h6>
                 <ul className="space-y-3">
-                  {[
+                  {(doc.clinicalFocus || [
                     "Preventative Care",
                     "Diagnostic Excellence",
                     "Systemic Recovery",
-                  ].map((item) => (
+                  ]).map((item: string) => (
                     <li
                       key={item}
                       className="flex items-center gap-2 text-xs font-bold text-slate-600  tracking-tight"
@@ -206,8 +203,8 @@ export default function DoctorProfilePage() {
                   Medical Aid Certified
                 </h6>
                 <div className="flex flex-wrap gap-2">
-                  {["Discovery", "Bonitas", "Momentum", "Medishield"].map(
-                    (aid) => (
+                  {(doc.medicalAids || ["Discovery", "Bonitas", "Momentum", "Medishield"]).map(
+                    (aid: string) => (
                       <Badge
                         key={aid}
                         label={aid}
@@ -227,40 +224,47 @@ export default function DoctorProfilePage() {
               Patient Feedback
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[1, 2].map((i) => (
-                <Card
-                  key={i}
-                  className="p-6 transition-all hover:border-primary/20"
-                  variant="solid"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold text-xs">
-                        P{i}
+              {doc.reviews?.length > 0 ? (
+                doc.reviews.map((rev: any, i: number) => (
+                  <Card
+                    key={i}
+                    className="p-6 transition-all hover:border-primary/20"
+                    variant="solid"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold text-xs uppercase">
+                          {rev.patientName?.charAt(0) || "P"}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800 leading-none mb-1">
+                            {rev.patientName}
+                          </p>
+                          <p className="text-[9px] text-slate-400 font-bold  tracking-normal">
+                            {new Date(rev.date).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-800 leading-none mb-1">
-                          Patient #{String(i * 123).padStart(3, "0")}
-                        </p>
-                        <p className="text-[9px] text-slate-400 font-bold  tracking-normal">
-                          Verified Session
-                        </p>
+                      <div className="flex text-amber-400 gap-0.5">
+                        {[...Array(5)].map((_, idx) => (
+                          <BiStar 
+                            key={idx} 
+                            className={idx < rev.rating ? "fill-current" : "text-slate-200"} 
+                            size={12} 
+                          />
+                        ))}
                       </div>
                     </div>
-                    <div className="flex text-amber-400 gap-0.5">
-                      <BiStar className="fill-current" size={12} />
-                      <BiStar className="fill-current" size={12} />
-                      <BiStar className="fill-current" size={12} />
-                      <BiStar className="fill-current" size={12} />
-                      <BiStar className="fill-current" size={12} />
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500 font-bold leading-relaxed italic">
-                    "Extremely professional and attentive. The consultation felt
-                    thorough and personal. Highly recommend {doc.name}."
-                  </p>
-                </Card>
-              ))}
+                    <p className="text-xs text-slate-500 font-bold leading-relaxed italic">
+                      "{rev.comment}"
+                    </p>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-2 text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <p className="text-xs font-bold text-slate-400">No patient feedback yet.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

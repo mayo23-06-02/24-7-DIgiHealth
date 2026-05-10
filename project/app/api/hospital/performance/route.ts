@@ -1,24 +1,40 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    const user = await getRequestUser();
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account.' }, { status: 404 });
+    }
 
     const now = new Date();
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(now.getMonth() - 6);
 
-    // Total consultations this month
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Filter by facilityId
+    const baseFilter = { facilityId: hospitalId };
+
+    // Total consultations this month
     const totalThisMonth = await HospitalAppointment.countDocuments({
+      ...baseFilter,
       scheduledStart: { $gte: startOfMonth },
     });
 
     // Consultation volume by month (last 6 months)
     const volumeByMonth = await HospitalAppointment.aggregate([
-      { $match: { scheduledStart: { $gte: sixMonthsAgo } } },
+      { $match: { ...baseFilter, scheduledStart: { $gte: sixMonthsAgo } } },
       {
         $group: {
           _id: { $month: '$scheduledStart' },
@@ -36,12 +52,13 @@ export async function GET() {
 
     // Appointment type breakdown
     const typeBreakdown = await HospitalAppointment.aggregate([
+      { $match: { ...baseFilter } },
       { $group: { _id: '$type', count: { $sum: 1 } } },
     ]);
 
     const total = typeBreakdown.reduce((s: number, t: any) => s + t.count, 0) || 1;
     const appointmentTypes = typeBreakdown.map((t: any) => ({
-      name: t._id || 'Other',
+      name: t._id || 'Telehealth',
       value: Math.round((t.count / total) * 100),
     }));
 
@@ -50,29 +67,29 @@ export async function GET() {
       data: {
         kpi: {
           totalConsultationsThisMonth: totalThisMonth,
-          satisfactionScore: 4.7,
-          activePatients: 1204,
-          revenueGrowth: 18.4,
+          satisfactionScore: 4.8,
+          activePatients: 842,
+          revenueGrowth: 12.5,
         },
         consultationVolume: consultationVolume.length ? consultationVolume : [
-          { month: 'Nov', consultations: 312 }, { month: 'Dec', consultations: 289 },
-          { month: 'Jan', consultations: 401 }, { month: 'Feb', consultations: 378 },
-          { month: 'Mar', consultations: 455 }, { month: 'Apr', consultations: 432 },
+          { month: 'Nov', consultations: 145 }, { month: 'Dec', consultations: 168 },
+          { month: 'Jan', consultations: 192 }, { month: 'Feb', consultations: 215 },
+          { month: 'Mar', consultations: 238 }, { month: 'Apr', consultations: 261 },
         ],
         appointmentTypes: appointmentTypes.length ? appointmentTypes : [
-          { name: 'Teleconsultation', value: 52 },
-          { name: 'In-Person', value: 33 },
-          { name: 'Follow-up', value: 15 },
+          { name: 'Teleconsultation', value: 75 },
+          { name: 'Video Chat', value: 20 },
+          { name: 'Follow-up (Remote)', value: 5 },
         ],
         satisfactionTrend: [
-          { month: 'Nov', score: 4.1 }, { month: 'Dec', score: 4.3 },
-          { month: 'Jan', score: 4.2 }, { month: 'Feb', score: 4.5 },
-          { month: 'Mar', score: 4.6 }, { month: 'Apr', score: 4.7 },
+          { month: 'Nov', score: 4.4 }, { month: 'Dec', score: 4.5 },
+          { month: 'Jan', score: 4.6 }, { month: 'Feb', score: 4.7 },
+          { month: 'Mar', score: 4.7 }, { month: 'Apr', score: 4.8 },
         ],
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('GET /api/hospital/performance error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to fetch performance data' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

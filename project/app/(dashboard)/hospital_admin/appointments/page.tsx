@@ -7,7 +7,7 @@ import { BiPlus, BiLoaderAlt, BiCalendar, BiSearch, BiX } from "react-icons/bi";
 
 const STATUS_STYLES: Record<string, string> = {
   scheduled: "bg-blue-50 text-blue-700 border-blue-200",
-  in_progress: "bg-amber-50 text-amber-700 border-amber-200",
+  in_progress: "bg-gray-50 text-gray-700 border-gray-200",
   completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
   cancelled: "bg-rose-50 text-rose-600 border-rose-200",
 };
@@ -80,7 +80,9 @@ export default function AppointmentsPage() {
     <div className="w-full pb-10 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Appointments</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+            Appointments
+          </h1>
           <p className="text-sm text-slate-500">
             All consultations, procedures, and lab referrals
           </p>
@@ -270,7 +272,9 @@ export default function AppointmentsPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-none p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold font-grotesk">New Appointment</h2>
+              <h2 className="text-xl font-bold font-grotesk">
+                New Appointment
+              </h2>
               <button
                 onClick={() => setModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600"
@@ -280,9 +284,9 @@ export default function AppointmentsPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                   Type
-                </label>
+                </h1>
                 <select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
                   <option>Consultation</option>
                   <option>Procedure</option>
@@ -290,9 +294,9 @@ export default function AppointmentsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                   Room
-                </label>
+                </h1>
                 <input
                   type="text"
                   className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
@@ -301,18 +305,18 @@ export default function AppointmentsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+                  <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                     Start
-                  </label>
+                  </h1>
                   <input
                     type="datetime-local"
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+                  <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                     End
-                  </label>
+                  </h1>
                   <input
                     type="datetime-local"
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"

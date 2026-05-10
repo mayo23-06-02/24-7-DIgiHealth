@@ -75,7 +75,7 @@ export default function AITriageAssistant() {
             <h2 className="text-2xl font-bold text-slate-800 tracking-tighter leading-none mb-1 font-grotesk">
               Medius AI Diagnoser
             </h2>
-            <p className="text-[12px] font-bold text-slate-400  tracking-normal">
+            <p className="text-sm font-bold text-slate-500  tracking-normal">
               Rapid Differential Diagnostics
             </p>
           </div>
@@ -83,9 +83,9 @@ export default function AITriageAssistant() {
 
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">
+            <h1 className="block text-sm font-bold text-slate-700 mb-2">
               Describe Your Symptoms <span className="text-rose-500">*</span>
-            </label>
+            </h1>
             <textarea
               rows={3}
               className="w-full border-2 border-slate-100 bg-slate-50 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-0 focus:border-primary transition-all resize-none shadow-inner"
@@ -97,9 +97,9 @@ export default function AITriageAssistant() {
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
+              <h1 className="block text-sm font-bold text-slate-700 mb-2">
                 Age
-              </label>
+              </h1>
               <input
                 type="number"
                 className="w-full border-2 border-slate-100 bg-slate-50 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-0 focus:border-primary transition-all shadow-inner"
@@ -109,9 +109,9 @@ export default function AITriageAssistant() {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
+              <h1 className="block text-sm font-bold text-slate-700 mb-2">
                 Gender
-              </label>
+              </h1>
               <select
                 className="w-full border-2 border-slate-100 bg-slate-50 rounded-2xl p-4 text-sm font-medium text-slate-700 focus:outline-none focus:ring-0 focus:border-primary transition-all shadow-inner appearance-none"
                 value={gender}
@@ -163,12 +163,12 @@ export default function AITriageAssistant() {
                       <span className="font-bold text-slate-800 block text-sm mb-1">
                         {dx.disease}
                       </span>
-                      <p className="text-xs font-bold text-slate-400 bg-white px-2 py-1 rounded inline-block  tracking-wider shadow-none">
+                      <p className="text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded inline-block  tracking-wider shadow-none">
                         SNOMED CT: {dx.snomedId}
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-[12px] font-bold text-primary bg-primary/10 px-3 py-2 rounded-full inline-flex items-center">
+                      <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-2 rounded-full inline-flex items-center">
                         {Math.round(dx.confidence * 100)}% Match
                       </span>
                     </div>
@@ -176,7 +176,7 @@ export default function AITriageAssistant() {
                 ))}
               </div>
 
-              <div className="mt-6 text-xs font-bold text-slate-400 italic text-center p-4 bg-slate-50 rounded-xl">
+              <div className="mt-6 text-xs font-bold text-slate-500 italic text-center p-4 bg-slate-50 rounded-xl">
                 ⚠️ <span className="text-slate-500">Clinical Disclaimer:</span>{" "}
                 This is an AI-powered preliminary analysis and is not a
                 substitute for professional medical advice. Always consult a

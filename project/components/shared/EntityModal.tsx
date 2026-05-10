@@ -94,21 +94,21 @@ const EntityModal: React.FC<EntityModalProps> = ({
                 {entity.name}
               </h2>
               {entity.rating && (
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full text-amber-500 font-bold text-sm">
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-full text-gray-500 font-bold text-sm">
                   <BiStar />
                   {entity.rating}
-                  <span className="text-amber-300 text-xs ml-1">
+                  <span className="text-gray-300 text-xs ml-1">
                     ({entity.reviewsCount || 0})
                   </span>
                 </div>
               )}
             </div>
 
-            <p className="text-sm font-bold text-primary uppercase tracking-normal">
+            <p className="text-sm font-bold text-primary -normal">
               {entity.subtitle}
             </p>
 
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-slate-400 text-sm font-medium">
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-slate-500 text-sm font-medium">
               <div className="flex items-center gap-2">
                 <BiMapPin className="text-primary" />
                 {entity.location}
@@ -125,13 +125,13 @@ const EntityModal: React.FC<EntityModalProps> = ({
           <div className="flex gap-2">
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all min-w-0!"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-500 hover:text-rose-500 hover:bg-rose-50 transition-all min-w-0!"
             >
               <BiHeart size={20} />
             </Button>
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-all min-w-0!"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/5 transition-all min-w-0!"
             >
               <BiShareAlt size={20} />
             </Button>
@@ -146,7 +146,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
                 <p className="text-2xl font-bold text-slate-900 tracking-tight">
                   {stat.value}
                 </p>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mt-1">
+                <p className="text-xs font-bold text-slate-500 -normal mt-1">
                   {stat.label}
                 </p>
               </div>
@@ -167,14 +167,14 @@ const EntityModal: React.FC<EntityModalProps> = ({
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase tracking-normal text-slate-300">
+              <h4 className="text-lg font-bold text-slate-900 tracking-tight -normal text-slate-300">
                 Specializations & Tags
               </h4>
               <div className="flex flex-wrap gap-2">
                 {entity.tags?.map((tag, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2 rounded-xl bg-slate-100/50 text-slate-500 text-xs font-bold uppercase tracking-normal"
+                    className="px-4 py-2 rounded-xl bg-slate-100/50 text-slate-500 text-xs font-bold -normal"
                   >
                     {tag}
                   </span>
@@ -184,7 +184,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           <div className="lg:col-span-4 space-y-4">
-            <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase tracking-normal text-xs text-slate-300">
+            <h4 className="text-lg font-bold text-slate-900 tracking-tight -normal text-xs text-slate-300">
               Quick Actions
             </h4>
             <div className="flex flex-col gap-3">

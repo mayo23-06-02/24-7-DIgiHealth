@@ -9,6 +9,7 @@ import {
   BiCalendarPlus,
 } from "react-icons/bi";
 import Avatar from "../ui/Avatar";
+import { StarIcon, VerifiedIcon } from "lucide-react";
 
 interface Doctor {
   id: string;
@@ -41,14 +42,14 @@ export default function DoctorCard({
 }: DoctorCardProps) {
   return (
     <Card
-      className="flex flex-col w-full group relative overflow-hidden transition-all duration-500 hover: hover:shadow-primary/10 hover:-translate-y-1"
+      className="flex flex-col w-full h-full justify-between group relative overflow-hidden transition-all duration-500 hover: hover:shadow-primary/10 hover:-translate-y-1"
       onClick={onClick}
       variant="gradient"
     >
       {doctor.isOnline && (
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10 bg-emerald-50/80 backdrop-blur-md px-2 py-1 rounded-full border border-emerald-100">
+        <div className="absolute top-2 right-3 flex items-center gap-1.5 z-10  px-2 py-1 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-[9px] font-bold text-emerald-600  tracking-normal">
+          <span className="text-xs font-outfit font-bold text-emerald-600  tracking-normal">
             Online
           </span>
         </div>
@@ -77,12 +78,16 @@ export default function DoctorCard({
               className="font-bold text-slate-800 text-lg leading-tight cursor-pointer hover:text-primary transition-all truncate block relative z-10"
               onClick={(e) => e.stopPropagation()}
             >
-              {doctor.name}
+              <h1 className="text-slate-800 flex items-center gap-1">
+                {doctor.name}
+                <VerifiedIcon fill="#4493b8" className="w-6 h-6 text-white" />
+              </h1>
             </Link>
           ) : (
-            <div className="font-bold text-slate-800 text-lg leading-tight cursor-pointer hover:text-primary transition-all truncate block relative z-10">
+            <h1 className="text-slate-800 font-bold text-lg  flex items-center gap-1">
               {doctor.name}
-            </div>
+              <VerifiedIcon fill="#4493b8" className="w-6 h-6 text-white" />
+            </h1>
           )}
           <p className="text-sm text-primary font-semibold tracking-normal mt-1 opacity-90">
             {doctor.specialisation}
@@ -91,10 +96,10 @@ export default function DoctorCard({
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-6">
-        {doctor.languages.map((lang) => (
+        {doctor.languages?.map((lang) => (
           <span
             key={lang}
-            className="text-   bg-slate-50 text-slate-400 px-2 py-1 rounded-md hover:bg-white hover:text-primary hover:border-primary/20 transition-all cursor-default"
+            className="bg-slate-100 text-slate-600 px-4 py-1 rounded-full hover:bg-white hover:text-primary hover:border-primary/20 transition-all cursor-default"
           >
             {lang}
           </span>
@@ -103,11 +108,25 @@ export default function DoctorCard({
 
       <div className="mt-auto space-y-4">
         <div className="flex justify-between items-center py-3 border-t border-slate-50/50">
-          <span className="text-xs font-bold text-slate-400  ">
-            Clinical Access
-          </span>
-          <span className="text-xs  font-bold text-emerald-100 bg-emerald-500 px-3 py-1 rounded-full  border border-emerald-100 ">
-            Premium
+          <span className="text-sm text-slate-600  ">Premium Access</span>
+          <span className="text-xs flex items-center gap-1.5">
+            <div className="flex -space-x-0.5">
+              {[...Array(5)].map((_, i) => (
+                <StarIcon
+                  key={i}
+                  fill={
+                    i < Math.floor(doctor.rating || 0) ? "green" : "transparent"
+                  }
+                  stroke={
+                    i < Math.floor(doctor.rating || 0) ? "green" : "#cbd5e1"
+                  }
+                  className="w-3.5 h-3.5"
+                />
+              ))}
+            </div>
+            <span className="font-bold text-slate-700 ml-0.5">
+              {doctor.rating?.toFixed(1) || "0.0"}
+            </span>
           </span>
         </div>
 
@@ -137,7 +156,7 @@ export default function DoctorCard({
       {/* Quick Schedule Preview */}
       {doctor.schedule && doctor.schedule.length > 0 && (
         <div className="mt-5 pt-4 border-t border-slate-50/50 flex items-center justify-between">
-          <span className="text-[9px] font-bold text-slate-400  t flex items-center gap-1">
+          <span className="text-[9px] font-bold text-slate-500  t flex items-center gap-1">
             <span className="w-1 h-1 rounded-full bg-primary/40"></span>
             Availability Today
           </span>
@@ -151,7 +170,7 @@ export default function DoctorCard({
               </span>
             ))}
             {doctor.schedule.length > 3 && (
-              <span className="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100 whitespace-nowrap">
+              <span className="text-[9px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100 whitespace-nowrap">
                 +{doctor.schedule.length - 3}
               </span>
             )}

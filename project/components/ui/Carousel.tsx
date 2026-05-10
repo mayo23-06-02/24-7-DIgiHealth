@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel as ReactCarousel } from "react-responsive-carousel";
 
 interface CarouselProps {
-  children: React.ReactChild[];
+  children: React.ReactNode;
   showArrows?: boolean;
   showStatus?: boolean;
   showIndicators?: boolean;
@@ -18,7 +18,7 @@ interface CarouselProps {
 
 const Carousel: React.FC<CarouselProps> = ({
   children,
-  showArrows = false, // We often use custom arrows in this project
+  showArrows = false,
   showStatus = false,
   showIndicators = false,
   infiniteLoop = false,
@@ -28,6 +28,52 @@ const Carousel: React.FC<CarouselProps> = ({
   onChange,
   className = "",
 }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (centerMode && selectedItem !== undefined && scrollRef.current) {
+      const container = scrollRef.current;
+      const childrenArray = Array.from(container.children) as HTMLElement[];
+      const child = childrenArray[selectedItem];
+      if (child) {
+        container.scrollTo({
+          left: child.offsetLeft,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [selectedItem, centerMode]);
+
+  if (centerMode) {
+    const childrenArray = React.Children.toArray(children);
+    return (
+      <div className={`relative group/carousel w-full ${className}`}>
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+            .group\\/carousel ::-webkit-scrollbar { display: none; }
+          `,
+            }}
+          />
+          {childrenArray.map((child, index) => (
+            <div
+              key={index}
+              className="snap-start shrink-0 h-full transition-all duration-300"
+              style={{ width: `${centerSlidePercentage}%` }}
+            >
+              {child}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative group/carousel h-full ${className}`}>
       <ReactCarousel
@@ -37,8 +83,7 @@ const Carousel: React.FC<CarouselProps> = ({
         infiniteLoop={infiniteLoop}
         swipeable={true}
         emulateTouch={true}
-        centerMode={centerMode}
-        centerSlidePercentage={centerSlidePercentage}
+        centerMode={false}
         selectedItem={selectedItem}
         onChange={onChange}
         className="h-full"
@@ -47,7 +92,7 @@ const Carousel: React.FC<CarouselProps> = ({
           hasPrev && (
             <button
               onClick={onClickHandler}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-none border border-white flex items-center justify-center text-slate-400 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-none border border-white flex items-center justify-center text-slate-500 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
             >
               <BiChevronLeft size={24} />
             </button>
@@ -58,14 +103,14 @@ const Carousel: React.FC<CarouselProps> = ({
           hasNext && (
             <button
               onClick={onClickHandler}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-none border border-white flex items-center justify-center text-slate-400 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-none border border-white flex items-center justify-center text-slate-500 hover:text-primary transition-all opacity-0 group-hover/carousel:opacity-100"
             >
               <BiChevronRight size={24} />
             </button>
           )
         }
       >
-        {children}
+        {children as any}
       </ReactCarousel>
     </div>
   );

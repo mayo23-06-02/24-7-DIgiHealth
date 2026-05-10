@@ -33,7 +33,8 @@ import {
   BiChart,
   BiSearch,
   BiPackage,
-  BiTruck,
+  BiSolidTruck,
+  BiErrorCircle,
 } from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -81,7 +82,7 @@ const STATUS_STYLES: Record<string, string> = {
   paid: "bg-emerald-50 text-emerald-600 border-emerald-100",
   active: "bg-emerald-50 text-emerald-600 border-emerald-100",
   approved: "bg-blue-50 text-blue-600 border-blue-100",
-  pending: "bg-amber-50 text-amber-600 border-amber-100",
+  pending: "bg-gray-50 text-gray-600 border-gray-100",
   trial: "bg-purple-50 text-purple-600 border-purple-100",
   failed: "bg-red-50 text-red-600 border-red-100",
   rejected: "bg-red-50 text-red-600 border-red-100",
@@ -116,7 +117,7 @@ function SummaryCard({
   const accents: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
     emerald: "bg-emerald-50 text-emerald-600",
-    amber: "bg-amber-50 text-amber-600",
+    gray: "bg-gray-50 text-gray-600",
     rose: "bg-rose-50 text-rose-500",
     slate: "bg-slate-100 text-slate-500",
     purple: "bg-purple-50 text-purple-600",
@@ -175,7 +176,9 @@ function TransactionTable({
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
-        <h3 className="text-sm font-bold text-slate-800 font-grotesk">{title}</h3>
+        <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+          {title}
+        </h3>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative">
             <BiSearch
@@ -203,7 +206,7 @@ function TransactionTable({
             <option value="">All Statuses</option>
             {["completed", "pending", "failed", "refunded"].map((s) => (
               <option key={s} value={s}>
-                {s.charAt(0).to() + s.slice(1)}
+                {s.charAt(0).toUpperCase() + s.slice(1)}
               </option>
             ))}
           </select>
@@ -392,7 +395,7 @@ function MiniBarChart({
             key={k}
             className="flex-1 flex flex-col items-center gap-1 group"
           >
-            <span className="text-[8px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
               {fmtZAR(v)}
             </span>
             <div
@@ -403,7 +406,7 @@ function MiniBarChart({
                 <div className="absolute top-0 left-0 right-0 h-full rounded-t bg-primary shadow-none shadow-primary/30" />
               )}
             </div>
-            <p className="text-[8px] font-bold text-slate-400">{k}</p>
+            <p className="text-xs font-bold text-slate-400">{k}</p>
           </div>
         ))}
       </div>
@@ -430,7 +433,7 @@ function OrderTable({ orders }: { orders: any[] }) {
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+        <h3 className="text-lg font-bold text-slate-800 font-grotesk">
           My Orders & Refills
         </h3>
         <div className="relative">
@@ -587,7 +590,7 @@ function PatientBillingView({
           label="Pending Txns"
           value={summary.pendingCount}
           icon={<BiTime />}
-          accent="amber"
+          accent="gray"
         />
       </div>
 
@@ -595,7 +598,7 @@ function PatientBillingView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
               Subscription Plan
             </h3>
             <StatusPill status={subscription?.status || "free"} />
@@ -637,7 +640,7 @@ function PatientBillingView({
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={() => setUpgradeModal(true)}
-                  className="flex-1 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all shadow-md shadow-primary/20 active:scale-95"
+                  className="flex-1 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
                 >
                   Upgrade Plan
                 </button>
@@ -662,7 +665,7 @@ function PatientBillingView({
               </p>
               <button
                 onClick={() => setUpgradeModal(true)}
-                className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal shadow-md shadow-primary/20 hover:bg-primary/80 transition-all"
+                className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal  shadow-primary/20 hover:bg-primary/80 transition-all"
               >
                 Get Started
               </button>
@@ -673,7 +676,7 @@ function PatientBillingView({
         {/* Payment Methods */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
               Payment Methods
             </h3>
             <button className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
@@ -855,7 +858,7 @@ function PatientBillingView({
               >
                 {actionLoading
                   ? "Processing..."
-                  : `Upgrade to ${selectedTier.charAt(0).to() + selectedTier.slice(1)}`}
+                  : `Upgrade to ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`}
               </button>
             </div>
           </div>
@@ -899,14 +902,14 @@ function PractitionerBillingView({
         <SummaryCard
           label="Total Paid Out"
           value={fmtZAR(summary.totalPaid)}
-          icon={<BiBank />}
+          icon={<BiBuildings />}
           accent="primary"
         />
         <SummaryCard
           label="Pending Payouts"
           value={fmtZAR(summary.totalPending)}
           icon={<BiTime />}
-          accent="amber"
+          accent="gray"
         />
         <SummaryCard
           label="Payout Requests"
@@ -931,7 +934,7 @@ function PractitionerBillingView({
           <div className="space-y-3">
             <button
               onClick={() => setRequestModal(true)}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/80 transition-all shadow-md shadow-primary/20 active:scale-95"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
             >
               <BiTransfer size={18} /> Request Payout
             </button>
@@ -939,7 +942,7 @@ function PractitionerBillingView({
               onClick={() => setBankModal(true)}
               className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
             >
-              <BiBank size={18} /> Update Bank Account
+              <BiBuildings size={18} /> Update Bank Account
             </button>
             <button
               onClick={() => {
@@ -971,7 +974,9 @@ function PractitionerBillingView({
       {/* Payout History */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100">
-          <h3 className="text-sm font-bold text-slate-800 font-grotesk">Payout History</h3>
+          <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+            Payout History
+          </h3>
         </div>
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left min-w-[700px]">
@@ -1060,9 +1065,9 @@ function PractitionerBillingView({
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2">
+                <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-2">
                   Amount (ZAR)
-                </label>
+                </h1>
                 <input
                   type="number"
                   value={requestAmount}
@@ -1072,9 +1077,9 @@ function PractitionerBillingView({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2">
+                <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-2">
                   Notes (optional)
-                </label>
+                </h1>
                 <input
                   type="text"
                   value={requestNotes}
@@ -1111,7 +1116,7 @@ function PractitionerBillingView({
                   setRequestModal(false);
                 }}
                 disabled={!requestAmount || actionLoading}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-md disabled:opacity-50 hover:bg-primary/80 transition-all"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal  disabled:opacity-50 hover:bg-primary/80 transition-all"
               >
                 {actionLoading ? "Submitting..." : "Submit Request"}
               </button>
@@ -1140,9 +1145,9 @@ function PractitionerBillingView({
                 "Tax Number",
               ].map((field) => (
                 <div key={field}>
-                  <label className="block text-xs font-bold text-slate-400  tracking-normal mb-1.5">
+                  <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-1.5">
                     {field}
-                  </label>
+                  </h1>
                   <input
                     className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
                     placeholder={field}
@@ -1159,7 +1164,7 @@ function PractitionerBillingView({
               </button>
               <button
                 onClick={() => setBankModal(false)}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-md hover:bg-primary/80 transition-all"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all"
               >
                 Save Account
               </button>
@@ -1218,7 +1223,7 @@ function HospitalAdminBillingView({
           label="Pending Payouts"
           value={String(summary.pendingPayoutCount)}
           icon={<BiTime />}
-          accent="amber"
+          accent="gray"
         />
       </div>
 
@@ -1228,7 +1233,7 @@ function HospitalAdminBillingView({
 
         <Card noPadding>
           <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
               Revenue by Department
             </h3>
           </div>
@@ -1262,7 +1267,7 @@ function HospitalAdminBillingView({
       {/* Practitioner Payout Management */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+          <h3 className="text-lg font-bold text-slate-800 font-grotesk">
             Practitioner Payouts
           </h3>
           <button
@@ -1448,7 +1453,7 @@ function AdminBillingView({
           label="Pending Payouts"
           value={String(summary.pendingPayouts)}
           icon={<BiTime />}
-          accent="amber"
+          accent="gray"
         />
         <SummaryCard
           label="Patients"
@@ -1702,9 +1707,9 @@ function AdminBillingView({
                 ] as const
               ).map(([label, key]) => (
                 <div key={key}>
-                  <label className="block text-xs font-bold text-slate-400  tracking-normal mb-1.5">
+                  <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-1.5">
                     {label}
-                  </label>
+                  </h1>
                   <input
                     type="number"
                     min={0}
@@ -1721,7 +1726,7 @@ function AdminBillingView({
                 </div>
               ))}
             </div>
-            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl p-3 mt-4">
+            <p className="text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-xl p-3 mt-4">
               ⚠️ Changes apply to all future transactions.
             </p>
             <div className="flex gap-3 mt-6">
@@ -1737,7 +1742,7 @@ function AdminBillingView({
                   setFeeModal(false);
                 }}
                 disabled={actionLoading}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-md hover:bg-primary/80 transition-all disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all disabled:opacity-50"
               >
                 {actionLoading ? "Saving..." : "Save Config"}
               </button>
@@ -1890,7 +1895,7 @@ export default function BillingPage() {
         </div>
       ) : error ? (
         <div className="text-center py-24 space-y-4">
-          <BiAlert size={48} className="mx-auto text-slate-200" />
+          <BiErrorCircle size={48} className="mx-auto text-slate-200" />
           <p className="text-slate-400 font-bold">
             Could not load billing data.
           </p>

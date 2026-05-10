@@ -1,4 +1,3 @@
-// app/api/doctors/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
@@ -20,33 +19,31 @@ export async function GET(req: NextRequest) {
       ]
     }).select('firstName lastName email _id').lean();
 
-    // Get practitioner profiles
+    // Get practitioner profiles to ensure they have one
     const practitionerIds = users.map(u => u._id);
     const profiles = await PractitionerProfile.find({ userId: { $in: practitionerIds } }).lean();
 
-    // Merge data
+    // Filter to only users with profiles and map to expected format
     const doctors = users.map(user => {
-      const profile = profiles.find(p => p.userId.toString() === user._id.toString()) || {};
+      const profile = profiles.find(p => p.userId.toString() === user._id.toString());
+      if (!profile) return null;
+      
       return {
-        id: user._id,
+        id: user._id.toString(),
         name: `Dr. ${user.firstName} ${user.lastName}`,
-        email: user.email,
-        specialisation: profile.specialisation || 'General Practitioner',
-        rating: profile.rating || 4.5,
-        reviewCount: profile.reviewCount || 0,
-        languages: profile.languages || ['English'],
-        isOnline: profile.isOnline || false,
-        avatar: profile.avatarUrl || null,
-        experienceYears: profile.experienceYears || 0,
-        bio: profile.bio || '',
-        achievements: profile.achievements || [],
-        reviews: profile.reviews || [],
-        schedule: ['09:00 AM', '10:30 AM', '02:15 PM'] // Mock quick schedule view
+        specialisation: (profile as any).specialisation || 'General Practitioner',
+        rating: (profile as any).rating || 0,
+        reviewCount: (profile as any).reviewCount || 0,
+        languages: (profile as any).languages || [],
+        isOnline: (profile as any).isOnline || false,
+        avatar: (profile as any).profilePhoto || null,
+        nextAvailable: 'Available Now' // Fallback for UI
       };
-    });
+    }).filter(Boolean);
 
     return NextResponse.json({ success: true, data: doctors });
   } catch (error: any) {
+    console.error('[GET /api/hospital/doctors]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

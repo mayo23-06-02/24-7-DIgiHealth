@@ -11,6 +11,8 @@ export interface IPatientProfile extends Document {
   popiaConsentDate?: Date;
   favoritePractitionerIds?: Types.ObjectId[];
   myDoctorIds?: Types.ObjectId[];
+  profilePhoto?: string;
+  medicalDocuments?: string[];
 }
 
 const PatientProfileSchema = new Schema<IPatientProfile>({
@@ -30,7 +32,9 @@ const PatientProfileSchema = new Schema<IPatientProfile>({
   subscriptionTier: { type: String, enum: ['free', 'pro'], default: 'free' },
   popiaConsentDate: { type: Date },
   favoritePractitionerIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  myDoctorIds: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  myDoctorIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  profilePhoto: { type: String },
+  medicalDocuments: [{ type: String }]
 });
 
 // ==== Practitioner Profile ====
@@ -50,13 +54,20 @@ export interface IPractitionerProfile extends Document {
   affiliatedFacilityIds: Types.ObjectId[];
   assignedPatientIds?: Types.ObjectId[];
   isOnline: boolean;
+  profilePhoto?: string;
+  hpcsaCertificate?: string;
   bankAccount: {
     accountHolder: string;
     bankName: string;
     accountNumber: string;
     branchCode: string;
     taxNumber: string;
-  }
+  };
+  address?: {
+    street: string;
+    city: string;
+    province: string;
+  };
 }
 
 const PractitionerProfileSchema = new Schema<IPractitionerProfile>({
@@ -80,14 +91,38 @@ const PractitionerProfileSchema = new Schema<IPractitionerProfile>({
   affiliatedFacilityIds: [{ type: Schema.Types.ObjectId, ref: 'Facility' }],
   assignedPatientIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   isOnline: { type: Boolean, default: false },
+  profilePhoto: { type: String },
+  hpcsaCertificate: { type: String },
   bankAccount: {
     accountHolder: String,
     bankName: String,
     accountNumber: String,
     branchCode: String,
     taxNumber: String
+  },
+  address: {
+    street: String,
+    city: String,
+    province: String
   }
 });
 
 export const PatientProfile: Model<IPatientProfile> = mongoose.models.PatientProfile || mongoose.model<IPatientProfile>('PatientProfile', PatientProfileSchema);
 export const PractitionerProfile: Model<IPractitionerProfile> = mongoose.models.PractitionerProfile || mongoose.model<IPractitionerProfile>('PractitionerProfile', PractitionerProfileSchema);
+
+// ==== Hospital Admin Profile ====
+export interface IHospitalAdminProfile extends Document {
+  userId: Types.ObjectId;
+  hospitalId: Types.ObjectId;
+  department?: string;
+  permissions?: string[];
+}
+
+const HospitalAdminProfileSchema = new Schema<IHospitalAdminProfile>({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  hospitalId: { type: Schema.Types.ObjectId, ref: 'Facility', required: true },
+  department: { type: String },
+  permissions: [{ type: String }]
+});
+
+export const HospitalAdminProfile: Model<IHospitalAdminProfile> = mongoose.models.HospitalAdminProfile || mongoose.model<IHospitalAdminProfile>('HospitalAdminProfile', HospitalAdminProfileSchema);

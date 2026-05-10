@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
+import { Review } from '@/lib/models/ReviewsDocs';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
@@ -40,23 +41,36 @@ export async function GET(request: Request) {
 
     const consultations = await Consultation.find(query)
       .populate({ path: 'practitionerId', model: User, select: 'firstName lastName email' })
-      .sort({ scheduledStartTime: statusFilter === 'past' ? -1 : 1 });
+      .sort({ scheduledStartTime: statusFilter === 'past' ? -1 : 1 })
+      .lean();
 
-    const mapped = consultations.map(c => ({
-      id: c._id.toString(),
-      title: c.chiefComplaint || 'Clinical Consultation',
-      time: new Date(c.scheduledStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      duration: '1h',
-      color: c.type === 'video' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700',
-      doctor: `Dr. ${c.practitionerId.firstName} ${c.practitionerId.lastName}`,
-      doctorAvatar: `https://ui-avatars.com/api/?name=${c.practitionerId.firstName}+${c.practitionerId.lastName}&background=0052cc&color=fff`,
-      practitionerId: c.practitionerId._id.toString(),
-      type: c.type,
-      status: c.status,
-      date: new Date(c.scheduledStartTime).toDateString(),
-      scheduledStartTime: c.scheduledStartTime,
-      description: c.chiefComplaint
-    }));
+    let reviewMap = new Map();
+    if (consultations.length > 0) {
+      const consultationIds = consultations.map(c => c._id);
+      const reviews = await Review.find({ consultationId: { $in: consultationIds } }).lean();
+      reviewMap = new Map(reviews.map(r => [r.consultationId?.toString() || '', r.rating]));
+    }
+
+    const mapped = consultations.map(c => {
+      const prac = c.practitionerId as any;
+      const cIdStr = c._id.toString();
+      return {
+        id: cIdStr,
+        title: c.chiefComplaint || 'Clinical Consultation',
+        time: new Date(c.scheduledStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        duration: '1h',
+        color: c.type === 'video' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700',
+        doctor: prac ? `Dr. ${prac.firstName} ${prac.lastName}` : 'Unknown Doctor',
+        doctorAvatar: prac ? `https://ui-avatars.com/api/?name=${prac.firstName}+${prac.lastName}&background=0052cc&color=fff` : '',
+        practitionerId: prac ? prac._id.toString() : '',
+        type: c.type,
+        status: c.status,
+        date: new Date(c.scheduledStartTime).toDateString(),
+        scheduledStartTime: c.scheduledStartTime,
+        description: c.chiefComplaint,
+        rating: reviewMap.get(cIdStr) || 0
+      };
+    });
 
     return NextResponse.json(mapped);
   } catch (error) {

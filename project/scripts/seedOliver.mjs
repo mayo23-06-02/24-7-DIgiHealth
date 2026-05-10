@@ -186,7 +186,7 @@ for (let i = 0; i < 12; i++) {
     chiefComplaint: complaints[i % complaints.length],
     clinicalRisk: riskScore ? {
       score: riskScore,
-      color: riskScore > 70 ? 'red' : riskScore > 40 ? 'amber' : 'green',
+      color: riskScore > 70 ? 'red' : riskScore > 40 ? 'gray' : 'green',
       factors: [
         pick(['Elevated BP', 'High Glucose', 'Irregular Pulse', 'Respiratory Distress']),
         pick(['Smoking History', 'Sedentary Lifestyle', 'Family History CVD']),

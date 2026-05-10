@@ -28,6 +28,7 @@ import {
   BiUserVoice,
 } from "react-icons/bi";
 import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 import { Facility } from "./FacilityCard";
 
 interface FacilityProfileModalProps {
@@ -55,34 +56,7 @@ export default function FacilityProfileModal({
 
   const getWaitTimeColor = () => {
     if (facility.waitTime <= 15) return "text-green-500 bg-green-500/10";
-    if (facility.waitTime <= 45) return "text-amber-500 bg-amber-500/10";
-    return "text-rose-500 bg-rose-500/10";
-  };
-
-  const getStatusText = () => {
-    if (facility.isOpen) return "Currently Open";
-    return "Closed Now";
-  };
-
-  return (
-import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
-
-export default function FacilityProfileModal({
-  facility,
-  isOpen,
-  onClose,
-  onBook,
-  onDirections,
-  onSave,
-  onShare,
-  onReport,
-}: FacilityProfileModalProps) {
-  if (!facility) return null;
-
-  const getWaitTimeColor = () => {
-    if (facility.waitTime <= 15) return "text-green-500 bg-green-500/10";
-    if (facility.waitTime <= 45) return "text-amber-500 bg-amber-500/10";
+    if (facility.waitTime <= 45) return "text-gray-500 bg-gray-500/10";
     return "text-rose-500 bg-rose-500/10";
   };
 
@@ -96,7 +70,7 @@ export default function FacilityProfileModal({
       isOpen={isOpen}
       onClose={onClose}
       noPadding
-      width="5xl"
+      width="6xl"
       title={facility.name}
       hideHeader
     >
@@ -130,14 +104,14 @@ export default function FacilityProfileModal({
                       ? "bg-blue-600"
                       : facility.type === "Private"
                         ? "bg-emerald-600"
-                        : "bg-amber-600"
+                        : "bg-gray-600"
                   } text-white`}
                 >
                   {facility.type} Facility
                 </span>
                 <div className="flex items-center gap-1.5 px-3 py-2 bg-white/10 backdrop-blur-md rounded-lg text-white border border-white/20">
                   <BiStar
-                    className="text-amber-400"
+                    className="text-gray-400"
                     size={16}
                     fill="currentColor"
                   />
@@ -244,7 +218,7 @@ export default function FacilityProfileModal({
                   variant="outline"
                   size="sm"
                   onClick={() => onDirections?.(facility.id)}
-                  className="rounded-lg text-[10px]  font-bold tracking-normal border-slate-200"
+                  className="rounded-lg text-sm  font-bold tracking-normal border-slate-200"
                 >
                   Get Directions
                 </Button>
@@ -298,15 +272,17 @@ export default function FacilityProfileModal({
                   <div className="flex flex-wrap gap-4 pt-2">
                     <Button
                       variant="ghost"
-                      onClick={() => (window.location.href = `mailto:${facility.email}`)}
-                      className="flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-primary transition-colors !p-0 !min-w-0 !h-auto border-none bg-transparent"
+                      onClick={() =>
+                        (window.location.href = `mailto:${facility.email}`)
+                      }
+                      className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary transition-colors !p-0 !min-w-0 !h-auto border-none bg-transparent"
                     >
                       <BiEnvelope size={16} /> Contact Support
                     </Button>
                     <Button
                       variant="ghost"
                       onClick={() => window.open(facility.website, "_blank")}
-                      className="flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-primary transition-colors !p-0 !min-w-0 !h-auto border-none bg-transparent"
+                      className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary transition-colors !p-0 !min-w-0 !h-auto border-none bg-transparent"
                     >
                       <BiLink size={16} /> Visit Website
                     </Button>
@@ -639,6 +615,5 @@ export default function FacilityProfileModal({
         </div>
       </div>
     </Modal>
-  );
   );
 }

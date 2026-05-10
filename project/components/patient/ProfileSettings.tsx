@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { maskSAID, maskMobile, maskEmail } from "../../utils/maskPHI";
+import { maskSAID, maskMobile, maskEmail } from "@/app/utils/maskPHI";
 import { FiShield, FiLock, FiLogOut, FiCheck } from "react-icons/fi";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
@@ -28,7 +28,7 @@ export default function ProfileSettings({
       <div className="space-y-8">
         {/* Identity */}
         <div>
-          <h3 className="text-xs font-bold text-slate-400  tracking-normal mb-4 font-grotesk">
+          <h3 className="text-xs font-bold text-slate-500  tracking-normal mb-4 font-grotesk">
             Identity Details
           </h3>
           <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
@@ -74,7 +74,7 @@ export default function ProfileSettings({
 
         {/* Security */}
         <div>
-          <h3 className="text-xs font-bold text-slate-400  tracking-normal mb-4 font-grotesk">
+          <h3 className="text-xs font-bold text-slate-500  tracking-normal mb-4 font-grotesk">
             Security & Privacy
           </h3>
           <div className="space-y-3">
@@ -87,11 +87,11 @@ export default function ProfileSettings({
                 <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   <FiLock />
                 </div>
-                <span className="font-bold text-slate-800  tracking-normal text-[10px]">
+                <span className="font-bold text-slate-800  tracking-normal text-sm">
                   Change Password
                 </span>
               </div>
-              <span className="text-slate-400 font-bold group-hover:text-primary transition-colors">
+              <span className="text-slate-500 font-bold group-hover:text-primary transition-colors">
                 →
               </span>
             </Button>
@@ -102,10 +102,10 @@ export default function ProfileSettings({
                   <FiShield />
                 </div>
                 <div>
-                  <span className="font-bold text-slate-800 block  tracking-normal text-[10px]">
+                  <span className="font-bold text-slate-800 block  tracking-normal text-sm">
                     Two-Factor Auth (MFA)
                   </span>
-                  <span className="text-[10px] font-bold text-slate-400  tracking-normal">
+                  <span className="text-sm font-bold text-slate-500  tracking-normal">
                     Protect your clinical data
                   </span>
                 </div>
@@ -133,7 +133,7 @@ export default function ProfileSettings({
           </p>
           <Button
             variant="ghost"
-            className="text-[10px] font-bold text-emerald-600 underline p-0 !min-w-0 border-none bg-transparent h-auto"
+            className="text-sm font-bold text-emerald-600 underline p-0 !min-w-0 border-none bg-transparent h-auto"
           >
             View Data Access Audit Log
           </Button>

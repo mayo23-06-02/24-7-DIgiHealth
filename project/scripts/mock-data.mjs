@@ -136,7 +136,7 @@ export const mData = {
       scheduledStartTime: new Date(Date.now() + 24 * 3600000), // tomorrow
       scheduledEndTime: new Date(Date.now() + 24.5 * 3600000), 
       chiefComplaint: 'Refill needed for asthma pump and anxiety meds',
-      clinicalRisk: { score: 38, color: 'amber', factors: ['Asthmatic', 'Anxiety History'] }
+      clinicalRisk: { score: 38, color: 'gray', factors: ['Asthmatic', 'Anxiety History'] }
     },
     {
       _refId: 'CONS-3',

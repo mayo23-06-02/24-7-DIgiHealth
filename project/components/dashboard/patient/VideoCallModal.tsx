@@ -150,7 +150,7 @@ export default function VideoCallModal({
             />
             <div className="absolute inset-0 bg-slate-900/10" />
             <div className="absolute bottom-4 left-4 right-4 flex justify-center">
-              <div className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-[8px] font-bold text-white  tracking-normal border border-white/10">
+              <div className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-xs font-bold text-white  tracking-normal border border-white/10">
                 You (Verified)
               </div>
             </div>

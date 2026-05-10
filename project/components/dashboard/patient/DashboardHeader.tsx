@@ -40,7 +40,7 @@ export default function DashboardHeader({
     temp: 24,
     condition: "Loading...",
     location: "Detecting location...",
-    icon: <BiSun className="text-amber-400 text-xl animate-pulse" />,
+    icon: <BiSun className="text-gray-400 text-xl animate-pulse" />,
   });
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
 
@@ -68,10 +68,10 @@ export default function DashboardHeader({
 
         // Map WMO Weather Codes to icons and strings
         const mapping: Record<number, { label: string; icon: any }> = {
-          0: { label: "Clear", icon: <BiSun className="text-amber-400" /> },
+          0: { label: "Clear", icon: <BiSun className="text-gray-400" /> },
           1: {
             label: "Mainly Clear",
-            icon: <BiSun className="text-amber-300" />,
+            icon: <BiSun className="text-gray-300" />,
           },
           2: {
             label: "Partly Cloudy",
@@ -96,7 +96,7 @@ export default function DashboardHeader({
           },
           95: {
             label: "Stormy",
-            icon: <BiCloudLightning className="text-amber-600" />,
+            icon: <BiCloudLightning className="text-gray-600" />,
           },
           // 71 was duplicated in original file - fixed below
           71: {

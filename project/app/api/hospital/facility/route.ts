@@ -1,51 +1,59 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Facility from '@/lib/models/Facility';
-import User from '@/lib/models/User';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    const user = await getRequestUser();
     
-    // In actual implementation, we might read from token:
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    
-    let facilityId = null;
-    
-    if (token) {
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-        const { payload } = await jwtVerify(token, secret);
-        const user = await User.findById(payload.userId as string);
-        facilityId = user?.facilityId;
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!facilityId) {
-        // Fallback to the first available facility for demo
-        const fallback = await Facility.findOne();
-        return NextResponse.json({ success: true, data: fallback });
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account.' }, { status: 404 });
     }
 
-    const facility = await Facility.findById(facilityId);
+    const facility = await Facility.findById(hospitalId).lean();
+    if (!facility) {
+      return NextResponse.json({ success: false, error: 'Facility not found' }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true, data: facility });
   } catch (error: any) {
+    console.error('[GET /api/hospital/facility]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     await connectToDatabase();
-    const body = await req.json();
+    const user = await getRequestUser();
     
-    // Similarly, find facility based on authenticated admin.
-    const facilityId = body._id; // assume the frontend passes ID
-    const updatedFacility = await Facility.findByIdAndUpdate(facilityId, body, { new: true });
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account.' }, { status: 404 });
+    }
+
+    const body = await req.json();
+    const updatedFacility = await Facility.findByIdAndUpdate(
+      hospitalId, 
+      { ...body }, 
+      { new: true }
+    ).lean();
 
     return NextResponse.json({ success: true, data: updatedFacility });
   } catch (error: any) {
+    console.error('[PUT /api/hospital/facility]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

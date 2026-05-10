@@ -9,6 +9,7 @@ export interface IReview extends Document {
   categories: any;
   isVerified: boolean;
 }
+
 const ReviewSchema = new Schema<IReview>({
   consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation' },
   patientId: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -19,7 +20,7 @@ const ReviewSchema = new Schema<IReview>({
   isVerified: Boolean
 }, { timestamps: true });
 
-export interface IDigitalDocument extends Document {
+export interface IMedicalDocument extends Document {
   userId: Types.ObjectId;
   uploadedBy: Types.ObjectId;
   type: string;
@@ -29,7 +30,8 @@ export interface IDigitalDocument extends Document {
   status: string;
   verifiedAt?: Date;
 }
-const DocumentSchema = new Schema<IDigitalDocument>({
+
+const MedicalDocumentSchema = new Schema<IMedicalDocument>({
   userId: { type: Schema.Types.ObjectId, ref: 'User' },
   uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   type: String,
@@ -41,4 +43,4 @@ const DocumentSchema = new Schema<IDigitalDocument>({
 }, { timestamps: true });
 
 export const Review = mongoose.models.Review || mongoose.model<IReview>('Review', ReviewSchema);
-export const Document = mongoose.models.Document || mongoose.model<IDigitalDocument>('Document', DocumentSchema);
+export const MedicalDocument = mongoose.models.MedicalDocument || mongoose.model<IMedicalDocument>('MedicalDocument', MedicalDocumentSchema);

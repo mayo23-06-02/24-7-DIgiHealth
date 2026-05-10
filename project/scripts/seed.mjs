@@ -136,7 +136,7 @@ const addDays = (d) => new Date(now.getTime() + d * 86400000);
 
 function getRiskColor(score) {
   if (score < 30) return "green";
-  if (score <= 70) return "amber";
+  if (score <= 70) return "gray";
   return "red";
 }
 

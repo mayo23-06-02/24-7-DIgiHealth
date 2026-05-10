@@ -28,6 +28,7 @@ import {
   BiVideo,
   BiLoaderAlt,
 } from "react-icons/bi";
+import { VerifiedIcon } from "lucide-react";
 
 export default function DoctorsView() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function DoctorsView() {
   const [filters, setFilters] = useState({
     specialization: "",
     language: "",
+    location: "",
   });
 
   // Load practitioners from DB
@@ -67,15 +69,22 @@ export default function DoctorsView() {
 
   const filteredDoctors = doctors
     .filter((doc) => {
+      const searchTerms = searchQuery.toLowerCase();
       const matchesSearch =
-        doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.specialisation?.toLowerCase().includes(searchQuery.toLowerCase());
+        doc.name.toLowerCase().includes(searchTerms) ||
+        doc.specialisation?.toLowerCase().includes(searchTerms) ||
+        doc.about?.toLowerCase().includes(searchTerms) ||
+        doc.location?.toLowerCase().includes(searchTerms) ||
+        doc.city?.toLowerCase().includes(searchTerms);
+
       const matchesSpec =
         !filters.specialization ||
         doc.specialisation === filters.specialization;
       const matchesLang =
         !filters.language || doc.languages?.includes(filters.language);
-      return matchesSearch && matchesSpec && matchesLang;
+      const matchesLoc = !filters.location || doc.location === filters.location;
+
+      return matchesSearch && matchesSpec && matchesLang && matchesLoc;
     })
     .sort((a, b) => {
       if (sortBy === "rating") return b.rating - a.rating;
@@ -88,6 +97,9 @@ export default function DoctorsView() {
     ...new Set(doctors.map((d) => d.specialisation).filter(Boolean)),
   ];
   const allLanguages = [...new Set(doctors.flatMap((d) => d.languages || []))];
+  const allProvinces = [
+    ...new Set(doctors.map((d) => d.location).filter(Boolean)),
+  ];
 
   const handleStartMessage = async (doc: any) => {
     setIsInitiating(true);
@@ -162,7 +174,7 @@ export default function DoctorsView() {
       {/* HEADER */}
       <PageHeader
         title="Clinical Practitioners"
-        subtitle="Find and book appointments with verified HPCSA-registered specialists."
+        subtitle="Find and book appointments with verified practitioners."
       />
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -177,7 +189,13 @@ export default function DoctorsView() {
                 variant="ghost"
                 size="sm"
                 className="text-primary hover:bg-transparent lowercase p-0"
-                onClick={() => setFilters({ specialization: "", language: "" })}
+                onClick={() =>
+                  setFilters({
+                    specialization: "",
+                    language: "",
+                    location: "",
+                  })
+                }
               >
                 Reset
               </Button>
@@ -195,6 +213,18 @@ export default function DoctorsView() {
                 ]}
                 value={filters.specialization}
                 onChange={(v) => setFilters({ ...filters, specialization: v })}
+              />
+              <Select
+                label="Province / Location"
+                options={[
+                  { label: "Anywhere", value: "" },
+                  ...allProvinces.map((p) => ({
+                    label: String(p),
+                    value: String(p),
+                  })),
+                ]}
+                value={filters.location}
+                onChange={(v) => setFilters({ ...filters, location: v })}
               />
               <Select
                 label="Language"
@@ -258,9 +288,13 @@ export default function DoctorsView() {
                         status={doc.isOnline ? "online" : "offline"}
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-slate-800 truncate">
+                        <h1 className="text-slate-800 flex items-center gap-1">
                           {doc.name}
-                        </p>
+                          <VerifiedIcon
+                            fill="#4493b8"
+                            className="w-6 h-6 text-white"
+                          />
+                        </h1>
                         <p className="text-sm text-primary  truncate">
                           {doc.specialisation}
                         </p>
@@ -300,7 +334,7 @@ export default function DoctorsView() {
           )}
 
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold text-slate-400  tracking-normal font-grotesk">
+            <h3 className="text-lg font-bold text-slate-400  tracking-normal font-grotesk">
               Available Practitioners
             </h3>
             {searchQuery && (
@@ -323,7 +357,7 @@ export default function DoctorsView() {
                 actionLabel="Clear Filters"
                 onAction={() => {
                   setSearchQuery("");
-                  setFilters({ specialization: "", language: "" });
+                  setFilters({ specialization: "", language: "", location: "" });
                 }}
               />
             </Card>

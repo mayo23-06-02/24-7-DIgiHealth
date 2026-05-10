@@ -4,18 +4,36 @@ import { Anthropometric, MedicalContext } from '@/lib/models/ClinicalData';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
 
-async function getUserId(req: NextRequest): Promise<string | null> {
-  return req.headers.get('x-user-id') || null;
-}
+import { getRequestUser } from '@/lib/auth/getRequestUser';
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
-    const userId = await getUserId(req);
-    if (!userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const user = await getRequestUser();
+    if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const userId = user.userId;
 
-    // Fetch latest vitals
-    const latestVitals = await Anthropometric.findOne({ patientId: userId }).sort({ dateRecorded: -1 }).lean();
+    // Fetch two latest vitals for trend calculation
+    const vitalsHistory = await Anthropometric.find({ patientId: userId })
+      .sort({ dateRecorded: -1 })
+      .limit(2)
+      .lean();
+
+    const latest = vitalsHistory[0];
+    const previous = vitalsHistory[1];
+
+    const calculateTrend = (latestVal: number | undefined, prevVal: number | undefined) => {
+      if (!latestVal || !prevVal) return 0;
+      return parseFloat((((latestVal - prevVal) / prevVal) * 100).toFixed(1));
+    };
+
+    // Special handling for BP trend (using systolic)
+    const calculateBPTrend = () => {
+      const latestSys = latest?.vitalSigns?.systolicBP;
+      const prevSys = previous?.vitalSigns?.systolicBP;
+      if (!latestSys || !prevSys) return 0;
+      return parseFloat((((latestSys - prevSys) / prevSys) * 100).toFixed(1));
+    };
 
     // Fetch patient profile for demographics
     const profile = await PatientProfile.findOne({ userId }).lean();
@@ -26,18 +44,28 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        vitals: latestVitals ? {
-          heartRate: latestVitals.vitalSigns?.heartRateBpm || 72,
-          bloodPressure: latestVitals.vitalSigns?.bloodPressure || `${latestVitals.vitalSigns?.systolicBP || 120}/${latestVitals.vitalSigns?.diastolicBP || 80}`,
-          weight: latestVitals.weightKg || 0,
-          glucose: latestVitals.vitalSigns?.bloodGlucose || 5.5,
-          height: latestVitals.heightCm || 165,
+        isNewUser: !profile,
+        vitals: latest ? {
+          heartRate: latest.vitalSigns?.heartRateBpm || 0,
+          bloodPressure: latest.vitalSigns?.bloodPressure || (latest.vitalSigns?.systolicBP ? `${latest.vitalSigns.systolicBP}/${latest.vitalSigns.diastolicBP}` : "0/0"),
+          weight: latest.weightKg || 0,
+          glucose: latest.vitalSigns?.bloodGlucose || 0,
+          height: latest.heightCm || 0,
+          // Trends
+          heartRateTrend: calculateTrend(latest.vitalSigns?.heartRateBpm, previous?.vitalSigns?.heartRateBpm),
+          bloodPressureTrend: calculateBPTrend(),
+          weightTrend: calculateTrend(latest.weightKg, previous?.weightKg),
+          glucoseTrend: calculateTrend(latest.vitalSigns?.bloodGlucose, previous?.vitalSigns?.bloodGlucose),
         } : {
-          heartRate: 72,
-          bloodPressure: "120/80",
-          weight: 68,
-          glucose: 5.5,
-          height: 165
+          heartRate: 0,
+          bloodPressure: "0/0",
+          weight: 0,
+          glucose: 0,
+          height: 0,
+          heartRateTrend: 0,
+          bloodPressureTrend: 0,
+          weightTrend: 0,
+          glucoseTrend: 0
         },
         profile: {
           gender: profile?.gender || 'female',
@@ -45,7 +73,8 @@ export async function GET(req: NextRequest) {
         },
         medicalSummary: {
           conditions: medicalCtx?.chronicConditions || [],
-          allergiesCount: medicalCtx?.allergies?.length || 0
+          allergies: (medicalCtx?.allergies || []).map((a: any) => a.allergen),
+          currentMedications: medicalCtx?.currentMedications || []
         }
       }
     });

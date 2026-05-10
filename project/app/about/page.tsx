@@ -356,7 +356,7 @@ export default function AboutPage() {
                   <h4 className="text-2xl font-bold mb-4 text-white font-grotesk">
                     {tech.title}
                   </h4>
-                  <p className="text-slate-400 text-lg leading-relaxed font-light">
+                  <p className="text-slate-500 text-lg leading-relaxed font-light">
                     {tech.desc}
                   </p>
                 </div>
@@ -479,7 +479,7 @@ export default function AboutPage() {
                 ].map((item, i) => (
                   <li
                     key={i}
-                    className="flex items-center gap-5 text-lg font-bold text-slate-800 bg-white p-5 rounded-lg border border-slate-100 shadow-none hover:shadow-md transition-shadow"
+                    className="flex items-center gap-5 text-lg font-bold text-slate-800 bg-white p-5 rounded-lg border border-slate-100 shadow-none hover: transition-shadow"
                   >
                     <span className="w-8 h-8 rounded-lg bg-[#36b1d4]/10 text-[#36b1d4] flex items-center justify-center shrink-0">
                       <FiCheck className="stroke-[3px]" />
@@ -506,7 +506,7 @@ export default function AboutPage() {
                   (partner, i) => (
                     <div
                       key={i}
-                      className="h-28 bg-white border-2 border-slate-100 rounded-lg flex items-center justify-center font-bold text-slate-400 text-2xl hover:text-[#005A9C] hover:border-[#005A9C]/30 transition-all duration-300 cursor-default"
+                      className="h-28 bg-white border-2 border-slate-100 rounded-lg flex items-center justify-center font-bold text-slate-500 text-2xl hover:text-[#005A9C] hover:border-[#005A9C]/30 transition-all duration-300 cursor-default"
                     >
                       {partner}
                     </div>
@@ -527,7 +527,7 @@ export default function AboutPage() {
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight font-grotesk">
             Join Us on Our Journey
           </h2>
-          <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto mb-20 font-light">
+          <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-20 font-light">
             We are more than an app; we are a movement to reshape healthcare in
             our nation.{" "}
             <strong className="text-white font-medium">
@@ -566,7 +566,7 @@ export default function AboutPage() {
                   <h4 className="text-3xl font-bold text-white mb-4 font-grotesk">
                     {box.title}
                   </h4>
-                  <p className="text-slate-400 text-lg leading-relaxed mb-8">
+                  <p className="text-slate-500 text-lg leading-relaxed mb-8">
                     {box.desc}
                   </p>
                 </div>

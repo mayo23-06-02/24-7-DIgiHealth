@@ -44,7 +44,7 @@ export default function PractitionerHeader({
   const [weather, setWeather] = useState<WeatherData>({
     temp: 24,
     condition: "Clear",
-    icon: <BiSun className="text-amber-400" />,
+    icon: <BiSun className="text-gray-400" />,
   });
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -65,8 +65,8 @@ export default function PractitionerHeader({
         const code = data?.current_weather?.weathercode;
         const temp = Math.round(data?.current_weather?.temperature ?? 24);
         const map: Record<number, { label: string; icon: React.ReactNode }> = {
-          0: { label: "Clear", icon: <BiSun className="text-amber-400" /> },
-          1: { label: "Clear", icon: <BiSun className="text-amber-300" /> },
+          0: { label: "Clear", icon: <BiSun className="text-gray-400" /> },
+          1: { label: "Clear", icon: <BiSun className="text-gray-300" /> },
           2: { label: "Cloudy", icon: <BiCloud className="text-slate-300" /> },
           3: {
             label: "Overcast",
@@ -83,7 +83,7 @@ export default function PractitionerHeader({
         };
         const info = map[code] || {
           label: "Clear",
-          icon: <BiSun className="text-amber-400" />,
+          icon: <BiSun className="text-gray-400" />,
         };
         setWeather({ temp, condition: info.label, icon: info.icon });
       } catch {
@@ -160,7 +160,7 @@ export default function PractitionerHeader({
       {/* Date, Time & Weather */}
       <div className="hidden lg:flex items-center gap-4 min-w-0 pr-4 border-r border-slate-100/50">
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-slate-400  tracking-normal leading-none mb-1">
+          <span className="text-sm font-bold text-slate-400  tracking-normal leading-none mb-1">
             System Clock
           </span>
           <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ export default function PractitionerHeader({
           </div>
         </div>
         <div className="flex flex-col border-l border-slate-100 pl-4">
-          <span className="text-[10px] font-bold text-slate-400  tracking-normal leading-none mb-1">
+          <span className="text-sm font-bold text-slate-400  tracking-normal leading-none mb-1">
             Local Weather
           </span>
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
@@ -206,14 +206,14 @@ export default function PractitionerHeader({
         <div className="hidden xl:flex items-center gap-2 pr-4 mr-4 border-r border-slate-100">
           <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100 shadow-none animate-in fade-in duration-500">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold  tracking-normal leading-none">
+            <span className="text-sm font-bold  tracking-normal leading-none">
               {upcomingCount} SESSIONS
             </span>
           </div>
           {riskAlertCount > 0 && (
             <div className="flex items-center gap-2 bg-rose-50 text-rose-600 px-4 py-2 rounded-2xl border border-rose-100 shadow-none">
               <BiPulse size={14} className="animate-pulse" />
-              <span className="text-[10px] font-bold  tracking-normal leading-none">
+              <span className="text-sm font-bold  tracking-normal leading-none">
                 {riskAlertCount} ALERTS
               </span>
             </div>
@@ -232,21 +232,21 @@ export default function PractitionerHeader({
           >
             <BiBell size={20} />
             {riskAlertCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 border-2 border-white rounded-full text-[9px] text-white font-bold flex items-center justify-center shadow-md">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 border-2 border-white rounded-full text-[9px] text-white font-bold flex items-center justify-center ">
                 {riskAlertCount}
               </span>
             )}
           </Button>
 
           {isNotifOpen && (
-            <div className="absolute top-14 right-0 w-85 bg-white border border-slate-100 rounded-[2rem] shadow-none shadow-slate-900/10 p-5 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-[100]">
+            <div className="absolute top-14 right-0 w-85 bg-white border border-slate-100 rounded-lg shadow-none shadow-slate-900/10 p-5 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-[100]">
               <div className="flex items-center justify-between mb-5 px-1">
                 <h4 className="text-[11px] font-bold text-slate-800  tracking-normal font-grotesk">
                   Clinical Inbox
                 </h4>
                 <Button
                   variant="ghost"
-                  className="text-[10px] font-bold text-primary hover:bg-primary/5 border-none h-auto p-0 !min-w-0  tracking-normal"
+                  className="text-sm font-bold text-primary hover:bg-primary/5 border-none h-auto p-0 !min-w-0  tracking-normal"
                 >
                   Clear All
                 </Button>
@@ -271,7 +271,7 @@ export default function PractitionerHeader({
                           {n.time}
                         </span>
                       </div>
-                      <p className="text-[10px] font-medium text-slate-500 leading-relaxed italic opacity-80">
+                      <p className="text-sm font-medium text-slate-500 leading-relaxed italic opacity-80">
                         {n.desc}
                       </p>
                     </div>
@@ -306,7 +306,7 @@ export default function PractitionerHeader({
                   .map((w) => w[0])
                   .join("")
                   .slice(0, 2)
-                  .to()
+                  .toUpperCase()
               )}
             </div>
             <div className="hidden lg:flex flex-col items-start min-w-0">
@@ -337,14 +337,14 @@ export default function PractitionerHeader({
                 (item) => (
                   <button
                     key={item}
-                    className="w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-bold  tracking-normal text-slate-600 hover:bg-slate-50 hover:text-primary transition-all"
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold  tracking-normal text-slate-600 hover:bg-slate-50 hover:text-primary transition-all"
                   >
                     {item}
                   </button>
                 ),
               )}
               <div className="h-px bg-slate-50 my-2" />
-              <button className="w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-bold  tracking-normal text-rose-500 hover:bg-rose-50 transition-all flex items-center gap-2">
+              <button className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold  tracking-normal text-rose-500 hover:bg-rose-50 transition-all flex items-center gap-2">
                 Sign Out Clinical Portal
               </button>
             </div>

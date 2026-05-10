@@ -24,6 +24,7 @@ import {
   BiXCircle,
   BiFile,
 } from "react-icons/bi";
+import { StarIcon, VerifiedIcon } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -91,8 +92,12 @@ const AppointmentsView: React.FC = () => {
   useEffect(() => {
     if (showBookingWizard) {
       fetch("/api/practitioners/available")
-        .then((res) => res.json())
-        .then(setAvailableDocs);
+        .then((res) => {
+          if (!res.ok) return res.text().then(t => { throw new Error(t) });
+          return res.json();
+        })
+        .then(setAvailableDocs)
+        .catch(err => console.error("Available docs fetch error:", err));
     }
   }, [showBookingWizard]);
 
@@ -120,6 +125,10 @@ const AppointmentsView: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/patient/appointments?status=${activeTab}`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API Error ${res.status}: ${text.substring(0, 100)}`);
+      }
       const data = await res.json();
       if (Array.isArray(data)) {
         setAppointments(data);
@@ -220,7 +229,7 @@ const AppointmentsView: React.FC = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               variant={activeTab === tab ? "primary" : "ghost"}
-              className={`px-6 py-2 h-auto text-[11px] font-bold  tracking-normal rounded-xl transition-all ${activeTab === tab ? "shadow-md shadow-primary/20" : "text-slate-400 hover:text-slate-600"}`}
+              className={`px-6 py-2 h-auto text-[11px] font-bold  tracking-normal rounded-xl transition-all ${activeTab === tab ? " shadow-primary/20" : "text-slate-400 hover:text-slate-600"}`}
             >
               {tab}
               <span
@@ -275,7 +284,7 @@ const AppointmentsView: React.FC = () => {
       {loading ? (
         <div className="h-96 flex flex-col items-center justify-center gap-4">
           <div className="w-14 h-14 border-[5px] border-primary/10 border-t-primary rounded-full animate-spin" />
-          <p className="text-slate-400 font-bold  text-[10px] tracking-normal">
+          <p className="text-slate-400 font-bold  text-sm tracking-normal">
             Syncing Encrypted Clinical Data...
           </p>
         </div>
@@ -321,16 +330,16 @@ const AppointmentsView: React.FC = () => {
                           className="shadow-none shadow-slate-200"
                         />
                         <div>
-                          <p
-                            className="font-bold text-slate-800 text-sm leading-none mb-2 cursor-pointer hover:text-primary transition-all underline-offset-4 decoration-2"
+                          <h1
+                            className="font-bold text-slate-800 text-sm leading-none mb-1 cursor-pointer hover:text-primary transition-all underline-offset-4 decoration-2"
                             onClick={() =>
                               appt.practitionerId &&
                               handleDoctorClick(appt.practitionerId)
                             }
                           >
                             {appt.doctor}
-                          </p>
-                          <p className="text-[10px] font-bold text-slate-400  tracking-normal opacity-80">
+                          </h1>
+                          <p className="text-sm  text-slate-600  tracking-normal opacity-80">
                             {appt.specialization || "Clinical specialist"}
                           </p>
                         </div>
@@ -341,8 +350,8 @@ const AppointmentsView: React.FC = () => {
                         <p className="text-sm font-bold text-slate-700 tracking-tight">
                           {appt.date}
                         </p>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold  tracking-normal">
-                          <BiTime size={14} className="text-slate-300" />
+                        <div className="flex items-center gap-2 text-sm text-slate-600   tracking-normal">
+                          <BiTime size={14} className="text-slate-500" />
                           {appt.time} <span className="opacity-50">·</span>{" "}
                           {appt.duration}
                         </div>
@@ -351,18 +360,9 @@ const AppointmentsView: React.FC = () => {
                     <td className="px-10 py-7">
                       <Badge
                         label={appt.type.replace("_", " ")}
-                        icon={
-                          appt.type === "video" ? (
-                            <BiVideo />
-                          ) : appt.type === "chat" ? (
-                            <BiMessageDetail />
-                          ) : (
-                            <BiMap />
-                          )
-                        }
                         status="info"
                         variant="soft"
-                        className=" text-[10px] font-bold tracking-normal px-3 py-1"
+                        className=" text-sm font-bold tracking-normal px-3 py-1"
                       />
                     </td>
                     <td className="px-10 py-7">
@@ -373,11 +373,10 @@ const AppointmentsView: React.FC = () => {
                             ? "warning"
                             : appt.status === "completed"
                               ? "success"
-                              : "danger"
+                              : "error"
                         }
                         variant="solid"
-                        size="sm"
-                        className=" text-[9px] font-bold tracking-normal"
+                        className=" uppercase text-xs font-bold "
                       />
                     </td>
                     <td className="px-10 py-7 text-right">
@@ -385,7 +384,7 @@ const AppointmentsView: React.FC = () => {
                         {activeTab === "upcoming" && (
                           <Button
                             size="sm"
-                            className="h-10 px-5 rounded-xl text-[10px] font-bold  tracking-normal bg-emerald-500 hover:bg-emerald-600 shadow-none shadow-emerald-100"
+                            className="h-10 px-5 rounded-xl text-sm font-bold  tracking-normal bg-emerald-500 hover:bg-emerald-600 shadow-none shadow-emerald-100"
                             onClick={() => handleJoinCell(appt)}
                             icon={<BiVideo size={14} />}
                           >
@@ -433,7 +432,7 @@ const AppointmentsView: React.FC = () => {
                 <h4 className="text-2xl font-bold text-slate-800 tracking-tight leading-tight mb-1 truncate font-grotesk">
                   {selectedAppt.doctor}
                 </h4>
-                <p className="text-primary font-bold  tracking-normal text-[10px] mb-4 opacity-80">
+                <p className="text-primary font-bold  tracking-normal text-sm mb-4 opacity-80">
                   {selectedAppt.specialization || "Clinical Specialist"}
                 </p>
                 <div className="flex gap-2">
@@ -455,7 +454,7 @@ const AppointmentsView: React.FC = () => {
 
             <div className="p-8 rounded-lg space-y-5 shadow-none shadow-slate-900/5 bg-white border border-slate-100">
               <div>
-                <h6 className="text-[10px] font-bold text-slate-400  tracking-normal mb-3 flex items-center gap-2 font-grotesk">
+                <h6 className="text-sm font-bold text-slate-400  tracking-normal mb-3 flex items-center gap-2 font-grotesk">
                   <BiMessageDetail size={14} /> Chief Complaint
                 </h6>
                 <p className="text-sm font-bold text-slate-600 italic leading-relaxed pl-6 border-l-2 border-primary/20">
@@ -467,14 +466,14 @@ const AppointmentsView: React.FC = () => {
               </div>
               {activeTab === "cancelled" && (
                 <div className="pt-6 border-t border-slate-100">
-                  <h6 className="text-[10px] font-bold text-rose-400  tracking-normal mb-3 flex items-center gap-2 font-grotesk">
+                  <h6 className="text-sm font-bold text-rose-400  tracking-normal mb-3 flex items-center gap-2 font-grotesk">
                     <BiXCircle size={14} /> Cancellation Intel
                   </h6>
                   <p className="text-sm font-bold text-rose-600 pl-6 border-l-2 border-rose-200">
                     {selectedAppt.reason ||
                       "Patient scheduling conflict identified."}
                   </p>
-                  <p className="text-[10px] text-rose-400 font-bold mt-2 pl-6  tracking-normal opacity-60">
+                  <p className="text-sm text-rose-400 font-bold mt-2 pl-6  tracking-normal opacity-60">
                     Authority: {selectedAppt.cancelledBy || "Patient"}
                   </p>
                 </div>
@@ -491,7 +490,7 @@ const AppointmentsView: React.FC = () => {
                     icon={<BiVideo size={22} />}
                     iconPosition="right"
                   >
-                    <span className="text-[12px] font-bold  tracking-normal">
+                    <span className="text-sm font-bold  tracking-normal">
                       Launch Virtual Consulting Room
                     </span>
                   </Button>
@@ -536,7 +535,7 @@ const AppointmentsView: React.FC = () => {
                     <BiCheckShield size={20} className="text-primary" />
                   </Button>
                   <div className="pt-8 border-t border-slate-100">
-                    <h6 className="text-center text-[10px] font-bold text-slate-300  tracking-normal mb-5 font-grotesk">
+                    <h6 className="text-center text-sm font-bold text-slate-300  tracking-normal mb-5 font-grotesk">
                       Practitioner Feedback Efficiency
                     </h6>
                     <div className="flex justify-center gap-3">
@@ -544,13 +543,13 @@ const AppointmentsView: React.FC = () => {
                         <Button
                           key={s}
                           variant="ghost"
-                          className="w-14 h-14 p-0 bg-slate-50 hover:text-amber-400 hover:bg-amber-50 rounded-2xl border-none transition-all duration-300 transform hover:scale-110 active:scale-90"
+                          className="w-14 h-14 p-0 bg-slate-50 hover:text-gray-400 hover:bg-gray-50 rounded-2xl border-none transition-all duration-300 transform hover:scale-110 active:scale-90"
                         >
                           <BiStar
                             size={24}
                             className={
                               s <= 4
-                                ? "fill-amber-400 text-amber-400"
+                                ? "fill-gray-400 text-gray-400"
                                 : "text-slate-300"
                             }
                           />
@@ -562,23 +561,11 @@ const AppointmentsView: React.FC = () => {
               ) : (
                 <Button
                   fullWidth
-                  className="h-16 shadow-none shadow-primary/20 rounded-2xl text-[12px] font-bold  tracking-normal"
+                  className="h-16 shadow-none shadow-primary/20 rounded-2xl text-sm font-bold  tracking-normal"
                 >
                   Book Clinical Re-appointment
                 </Button>
               )}
-            </div>
-
-            <div className="px-6 py-4 bg-primary/[0.03] border border-primary/5 rounded-[2rem] flex items-start gap-4 transition-all hover:bg-primary/[0.05]">
-              <BiCheckShield
-                className="text-primary shrink-0 mt-0.5"
-                size={18}
-              />
-              <p className="text-[10px] text-slate-500 font-bold leading-relaxed  tracking-tight">
-                This clinical record is end-to-end encrypted under POPI Act /
-                HIPAA protocol. Access is restricted to verified healthcare
-                providers and patient only.
-              </p>
             </div>
           </div>
         )}
@@ -603,11 +590,10 @@ const AppointmentsView: React.FC = () => {
                   Medical Network
                 </h4>
                 <p className="text-[11px] text-slate-400 font-bold  tracking-normal opacity-80">
-                  Chooose from our verified network of HPCSA-registered
-                  specialists.
+                  Chooose from our verified network of practitioners.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-full overflow-y-auto pr-3 custom-scrollbar">
                 {availableDocs.map((doc) => (
                   <Card
                     key={doc.id}
@@ -617,19 +603,49 @@ const AppointmentsView: React.FC = () => {
                     }}
                     className={`group p-6 rounded-lg border-2 cursor-pointer transition-all duration-300 ${selectedDoc?.id === doc.id ? "border-primary bg-primary/5 shadow-none shadow-primary/10" : "border-slate-50 hover:border-primary/20 hover:bg-white hover:shadow-none hover:shadow-slate-900/5"}`}
                   >
-                    <div className="flex items-center gap-5">
-                      <Avatar
-                        name={doc.name}
-                        size="lg"
-                        className="group-hover:scale-110 transition-transform duration-500 shadow-none shadow-slate-100"
-                      />
-                      <div className="min-w-0">
-                        <p className="font-bold text-slate-800 text-sm mb-1 truncate group-hover:text-primary transition-colors">
-                          {doc.name}
-                        </p>
-                        <p className="text-[10px] font-bold text-primary  tracking-normal opacity-80">
-                          {doc.specialisation}
-                        </p>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-5">
+                        <Avatar
+                          name={doc.name}
+                          size="lg"
+                          status={doc.isOnline ? "online" : "offline"}
+                          className="group-hover:scale-110 transition-transform duration-500 shadow-none shadow-slate-100"
+                        />
+                        <div className="min-w-0">
+                          <h1 className="font-bold text-slate-800 text-lg mb-1 truncate flex items-center gap-1 group-hover:text-primary transition-colors">
+                            {doc.name}
+                            <VerifiedIcon
+                              fill="#4493b8"
+                              className="w-5 h-5 text-white"
+                            />
+                          </h1>
+                          <p className="uppercase font-semibold text-primary/80 text-sm tracking-normal">
+                            {doc.specialisation}
+                          </p>
+                          <div className="flex items-center gap-1.5 pt-2  py-1.5 rounded-full">
+                            <div className="flex -space-x-0.5">
+                              {[...Array(5)].map((_, i) => (
+                                <StarIcon
+                                  key={i}
+                                  fill={
+                                    i < Math.floor(doc.rating || 4.9)
+                                      ? "#2285a7"
+                                      : "transparent"
+                                  }
+                                  stroke={
+                                    i < Math.floor(doc.rating || 4.9)
+                                      ? "#2285a7"
+                                      : "#cbd5e1"
+                                  }
+                                  className="w-3 h-3"
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs font-bold text-slate-600 ml-0.5">
+                              {doc.rating ? doc.rating.toFixed(1) : "4.9"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </Card>
@@ -650,7 +666,7 @@ const AppointmentsView: React.FC = () => {
                     <p className="font-bold text-slate-800 text-sm  tracking-tight">
                       {selectedDoc.name}
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400  tracking-normal mt-1">
+                    <p className="text-sm font-bold text-slate-400  tracking-normal mt-1">
                       {selectedDoc.specialisation}
                     </p>
                   </div>
@@ -658,7 +674,7 @@ const AppointmentsView: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => setBookingStep(1)}
-                  className="text-[10px] font-bold text-primary  tracking-normal border-none hover:bg-primary/5 transition-all px-4 rounded-xl"
+                  className="text-sm font-bold text-primary  tracking-normal border-none hover:bg-primary/5 transition-all px-4 rounded-xl"
                   icon={<BiPlus className="rotate-45" size={14} />}
                 >
                   Change
@@ -675,24 +691,12 @@ const AppointmentsView: React.FC = () => {
                       setBookingData({ ...bookingData, date: e.target.value })
                     }
                   />
-                  <Select
-                    label="Session Intelligence"
-                    value={bookingData.type}
-                    onChange={(v) =>
-                      setBookingData({ ...bookingData, type: v })
-                    }
-                    options={[
-                      { label: "Virtual Video Session", value: "video" },
-                      { label: "Secure Neural Chat", value: "chat" },
-                      { label: "Institutional Facility", value: "in_person" },
-                    ]}
-                  />
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-slate-400  tracking-normal px-1 flex items-center gap-2">
+                  <h1 className="text-sm font-bold text-slate-400  tracking-normal px-1 flex items-center gap-2">
                     <BiTime size={14} /> Global Availability Slots
-                  </label>
+                  </h1>
                   <div className="grid grid-cols-4 gap-3">
                     {selectedDoc.availableSlots.map((slot: string) => (
                       <Button
@@ -703,7 +707,7 @@ const AppointmentsView: React.FC = () => {
                         onClick={() =>
                           setBookingData({ ...bookingData, time: slot })
                         }
-                        className={`h-12 text-[10px] font-bold  tracking-normal rounded-2xl transition-all duration-300 border-none ${bookingData.time === slot ? "shadow-none shadow-primary/20 scale-105" : "bg-white border border-slate-100 text-slate-400 hover:border-primary/20 hover:text-primary hover:bg-primary/5"}`}
+                        className={`h-12 text-sm font-bold  tracking-normal rounded-2xl transition-all duration-300 border-none ${bookingData.time === slot ? "shadow-none shadow-primary/20 scale-105" : "bg-white border border-slate-100 text-slate-400 hover:border-primary/20 hover:text-primary hover:bg-primary/5"}`}
                       >
                         {slot}
                       </Button>
@@ -720,7 +724,7 @@ const AppointmentsView: React.FC = () => {
                   onChange={(e) =>
                     setBookingData({ ...bookingData, reason: e.target.value })
                   }
-                  className="rounded-[1.5rem]"
+                  className=""
                 />
 
                 <Button
@@ -730,7 +734,7 @@ const AppointmentsView: React.FC = () => {
                   onClick={handleBookAppointment}
                   icon={<BiCheckCircle size={22} />}
                 >
-                  <span className="text-[12px] font-bold  tracking-normal">
+                  <span className="text-sm font-bold  tracking-normal">
                     Confirm Clinical Session
                   </span>
                 </Button>

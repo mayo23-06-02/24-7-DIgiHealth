@@ -90,45 +90,18 @@ function LoginFormComponent() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-[85vh] w-full max-w-6xl mx-auto rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-700">
+    <div className="flex flex-col lg:flex-row lg:min-h-[85vh] w-full max-w-6xl mx-auto rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-700">
       {/* Left Side: Form */}
-      <div className="bg-white  w-full lg:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center px-10">
+      <div className="bg-white rounded-lg lg:rounded-r-none py-12 w-full max-w-md mx-auto lg:max-w-1/2 lg:w-1/2 sm:p-4 p-6 lg:p-8  flex flex-col justify-center ">
         {/* Sophisticated Badge */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-primary font-extrabold text-xl">+</span>
-          </div>
-          <span className="text-primary font-bold tracking-normal  text-xs">
-            Secure Portal Access
-          </span>
-        </div>
 
-        <div className="mb-12 my-5 gap-2.5">
+        <div className="mb-12  gap-4 flex flex-col">
           <h2 className="text-4xl md:text-4xl font-medium text-slate-900 leading-[0.95] tracking-tighter mb-2.5 font-grotesk">
-            Welcome back to{" "}
-            <span className="text-primary font-bold">24/7 Care</span>
+            Welcome back!
           </h2>
-          <p className="text-sm text-slate-400   max-w-[380px]">
+          <p className=" text-slate-500   max-w-[380px]">
             Login for 24/7 expert medical support across South Africa.
           </p>
-        </div>
-
-        {/* Role Selection (High-Fidelity Pill) */}
-        <div className="flex p-1 bg-slate-100/80 rounded-xl mb-8 w-full">
-          {["Patient", "Practitioner", "Admin"].map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => setRole(r)}
-              className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-300 ${
-                role === r
-                  ? "bg-white text-primary shadow-sm ring-1 ring-slate-200/50"
-                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
         </div>
 
         {isRegistered && (
@@ -181,15 +154,15 @@ function LoginFormComponent() {
           </form>
         ) : (
           <>
-            <form onSubmit={handleLogin} className="space-y-8">
+            <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-6 mb-7.5">
                 <Input
                   label={
                     role === "Patient"
                       ? "Email or SA ID"
                       : role === "Practitioner"
-                      ? "Email or HPCSA Number"
-                      : "Email Address"
+                        ? "Email or HPCSA Number"
+                        : "Email Address"
                   }
                   required
                   value={identifier}
@@ -198,17 +171,17 @@ function LoginFormComponent() {
                     role === "Patient"
                       ? "e.g. 900101 5678 087"
                       : role === "Practitioner"
-                      ? "e.g. MP0123456"
-                      : "admin@digihealth.co.za"
+                        ? "e.g. MP0123456"
+                        : "admin@digihealth.co.za"
                   }
                   className=" border-none bg-slate-50/80 focus:bg-white transition-all py-4 mb-3.75"
                 />
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center px-1">
-                    <label className="block text-sm font-bold text-slate-700 ">
+                    <h1 className="block text-sm font-bold text-slate-700 ">
                       Password
-                    </label>
+                    </h1>
                     <Link
                       href="/forgot-password"
                       className="text-xs font-bold text-slate-400 hover:text-primary transition-all   hover:underline decoration-2 underline-offset-4"
@@ -233,20 +206,22 @@ function LoginFormComponent() {
                 </p>
               )}
 
-              <Button
-                type="submit"
-                fullWidth
-                disabled={loading}
-                className="py-5 text-base tracking-normal  font-bold"
-              >
-                {loading ? "Authenticating..." : "Login"}
-              </Button>
+              <div className="flex w-full justify-center">
+                <Button
+                  type="submit"
+                  fullWidth
+                  disabled={loading}
+                  className="py-5 mt text-base tracking-normal  font-bold"
+                >
+                  {loading ? "Authenticating..." : "Login"}
+                </Button>
+              </div>
             </form>
 
-            <div className="mt-12 relative flex flex-col items-center gap-6 px-2 py-5">
+            <div className="relative flex flex-col items-center gap-6 px-2 py-5">
               <div className="w-full flex items-center gap-4">
                 <div className="h-px bg-slate-100 grow"></div>
-                <span className="text-xs font-semibold tracking-normal text-slate-300  whitespace-nowrap">
+                <span className="text-xs font-semibold tracking-normal tracking-wide text-slate-500  whitespace-nowrap">
                   OR LOGIN VIA
                 </span>
                 <div className="h-px bg-slate-100 grow"></div>
@@ -255,26 +230,26 @@ function LoginFormComponent() {
 
             <div className=" w-full flex justify-center items-center gap-2 pb-5">
               <button
-                className="flex items-center justify-center gap-3 py-3 px-8 bg-white border-2 border-slate-100 rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn"
+                className="flex items-center justify-center gap-3 py-3 px-8 bg-white cursor-pointer rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn"
                 type="button"
               >
                 <BiLogoGoogle className="text-primary" />
-                <span className="text-xs font-bold text-slate-600 ">
+                <span className="text-xs uppercase font-bold text-slate-600 ">
                   Google
                 </span>
               </button>
               <button
-                className="flex items-center justify-center gap-3 py-3 px-8 bg-white border-2 border-slate-100 rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn"
+                className="flex items-center justify-center gap-3 py-3 px-8 bg-white cursor-pointer rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn"
                 type="button"
               >
                 <BiLogoFacebook className="text-primary" />
-                <span className="text-xs font-bold text-slate-600 ">
+                <span className="text-xs uppercase font-bold text-slate-600 ">
                   Facebook
                 </span>
               </button>
             </div>
 
-            <p className="mt-8 text-center text-xs font-medium text-slate-400 ">
+            <p className="mt-8 text-center  font-medium text-slate-400 ">
               Don't have a record yet?{" "}
               <Link
                 href="/register"
@@ -297,7 +272,7 @@ function LoginFormComponent() {
         <div className="absolute inset-x-0 bottom-16 px-16 text-white space-y-6 p-10">
           <div className="w-16 h-px bg-white/40 mb-5"></div>
 
-          <h3 className="text-4xl font-bold  tracking-tighter font-grotesk">
+          <h3 className="text-4xl lg:text-5xl font-bold  tracking-tighter font-grotesk">
             Smart Healthcare <br /> for a Digital World
           </h3>
           <p className="text-white/80 font-light leading-relaxed max-w-md mb-2.5">
@@ -306,15 +281,15 @@ function LoginFormComponent() {
           </p>
           <div className="flex items-center gap-6 mt-12 pt-8 border-t border-white/10">
             <div className="flex flex-col">
-              <span className="text-2xl font-bold">20k+</span>
-              <span className="text-xs  font-bold tracking-normal opacity-60">
+              <span className="text-2xl ">20k+</span>
+              <span className="text-xs   tracking-normal opacity-60">
                 Patients Joined
               </span>
             </div>
             <div className="w-px h-8 bg-white/10"></div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold">9 Provinces</span>
-              <span className="text-xs  font-bold tracking-normal opacity-60">
+              <span className="text-2xl ">9 Provinces</span>
+              <span className="text-xs   tracking-normal opacity-60">
                 Country Coverage
               </span>
             </div>

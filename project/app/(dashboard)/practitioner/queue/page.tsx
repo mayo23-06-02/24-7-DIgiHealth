@@ -32,7 +32,7 @@ interface QueueItem {
   scheduledEnd: string;
   reason: string;
   riskScore: number;
-  riskColor: "green" | "amber" | "red";
+  riskColor: "green" | "gray" | "red";
   riskFactors: string[];
   aiRecommendations: string[];
   status: string;
@@ -188,7 +188,7 @@ export default function FullQueuePage() {
                   <button
                     key={f}
                     onClick={() => setStatusFilter(f)}
-                    className={`px-3 py-2 rounded-full text-xs font-bold transition-all ${statusFilter === f ? "bg-[#0052CC] text-white shadow-md shadow-blue-200" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+                    className={`px-3 py-2 rounded-full text-xs font-bold transition-all ${statusFilter === f ? "bg-[#0052CC] text-white  shadow-blue-200" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
                   >
                     {labels[f]}
                   </button>
@@ -267,7 +267,7 @@ export default function FullQueuePage() {
                         </p>
                         {mins > 0 && mins < 60 && (
                           <p
-                            className={`text-xs font-bold flex items-center gap-0.5 ${mins <= 10 ? "text-red-500" : "text-amber-500"}`}
+                            className={`text-xs font-bold flex items-center gap-0.5 ${mins <= 10 ? "text-red-500" : "text-gray-500"}`}
                           >
                             <BiTime size={10} />
                             in {mins}m
@@ -368,7 +368,7 @@ export default function FullQueuePage() {
                   key={pg}
                   onClick={() => fetchQueue(pg)}
                   className={`w-9 h-9 rounded-xl text-sm font-bold transition-all
-                    ${pg === pagination.page ? "bg-[#0052CC] text-white shadow-md shadow-blue-300" : "bg-white border border-slate-200 text-slate-600 hover:border-[#0052CC]/30 hover:text-[#0052CC]"}
+                    ${pg === pagination.page ? "bg-[#0052CC] text-white  shadow-blue-300" : "bg-white border border-slate-200 text-slate-600 hover:border-[#0052CC]/30 hover:text-[#0052CC]"}
                   `}
                 >
                   {pg}

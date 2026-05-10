@@ -4,6 +4,7 @@ import {
   BiCheckDouble,
   BiDownload,
   BiFileBlank,
+  BiPhoneCall,
 } from "react-icons/bi";
 
 export default function MessageBubble({
@@ -100,9 +101,20 @@ export default function MessageBubble({
           </div>
         )}
 
-        {message.type !== "record_attachment" && (
-          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        {message.type === "call_log" && (
+          <div className="flex items-center gap-2 py-1">
+            <BiPhoneCall
+              size={18}
+              className={isOwn ? "text-white/80" : "text-slate-500"}
+            />
+            <p className="text-sm font-semibold">{message.content}</p>
+          </div>
         )}
+
+        {message.type !== "record_attachment" &&
+          message.type !== "call_log" && (
+            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          )}
 
         {message.type === "record_attachment" && (
           <a
@@ -121,7 +133,7 @@ export default function MessageBubble({
         )}
 
         <div
-          className={`flex items-center justify-end gap-1 mt-1 text-xs ${isOwn ? "text-primary-100" : "text-slate-400"}`}
+          className={`flex items-center justify-end gap-1 mt-1 text-xs ${isOwn ? "text-primary-100" : "text-slate-500"}`}
         >
           <span>{formatTime(message.createdAt)}</span>
           {isOwn &&

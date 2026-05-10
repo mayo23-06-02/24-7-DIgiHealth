@@ -28,7 +28,7 @@ interface QueueItem {
   scheduledEnd: string;
   reason: string;
   riskScore: number;
-  riskColor: "green" | "amber" | "red";
+  riskColor: "green" | "gray" | "red";
   riskFactors: string[];
   aiRecommendations: string[];
   status: string;
@@ -49,22 +49,20 @@ interface SoapModalState {
 }
 
 const typeIcon = (type: string) => {
-  if (type === "video") return <BiVideo className="text-primary" size={14} />;
   if (type === "chat") return <BiChat className="text-secondary" size={14} />;
-  return <BiClinic className="text-slate-400" size={14} />;
+  return <BiVideo className="text-primary" size={14} />;
 };
 
 const typeLabel = (type: string) => {
-  if (type === "video") return "Video";
   if (type === "chat") return "Chat";
-  return "In-Person";
+  return "Video";
 };
 
 const statusConfig: Record<
   string,
   { bg: string; text: string; label: string }
 > = {
-  requested: { bg: "bg-amber-100", text: "text-amber-700", label: "Requested" },
+  requested: { bg: "bg-gray-100", text: "text-gray-700", label: "Requested" },
   scheduled: { bg: "bg-slate-100", text: "text-slate-600", label: "Scheduled" },
   ongoing: { bg: "bg-emerald-100", text: "text-emerald-700", label: "● Live" },
   cancelled: { bg: "bg-red-100", text: "text-red-600", label: "Cancelled" },
@@ -109,7 +107,7 @@ const MOCK_QUEUE: QueueItem[] = [
     scheduledEnd: new Date(Date.now() + 135 * 60000).toISOString(),
     reason: "Asthma follow-up",
     riskScore: 45,
-    riskColor: "amber",
+    riskColor: "gray",
     riskFactors: ["Chronic asthma", "Allergen exposure"],
     aiRecommendations: ["Check peak flow rate"],
     status: "scheduled",
@@ -206,7 +204,7 @@ export default function PatientQueueTable() {
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-3">
         <BiLoader className="text-primary text-3xl animate-spin" />
-        <p className="text-[10px] text-slate-400 font-bold  tracking-normal">
+        <p className="text-sm text-slate-400 font-bold  tracking-normal">
           Syncing Patient Queue…
         </p>
       </div>
@@ -220,7 +218,7 @@ export default function PatientQueueTable() {
           <h3 className="font-bold text-slate-800 text-sm leading-tight  tracking-normal font-grotesk">
             Clinical Queue
           </h3>
-          <p className="text-[10px] text-slate-400 font-bold  tracking-normal mt-1">
+          <p className="text-sm text-slate-400 font-bold  tracking-normal mt-1">
             Refreshed{" "}
             {lastRefresh.toLocaleTimeString("en-ZA", {
               hour: "2-digit",
@@ -242,7 +240,7 @@ export default function PatientQueueTable() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-4 text-[10px] font-bold text-amber-700  tracking-normal">
+        <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-4 text-sm font-bold text-gray-700  tracking-normal">
           <BiError size={16} className="shrink-0" />
           {error}
         </div>
@@ -257,7 +255,7 @@ export default function PatientQueueTable() {
             <p className="text-xs font-bold text-slate-800  tracking-normal">
               Queue is clear
             </p>
-            <p className="text-[10px] font-medium mt-1">
+            <p className="text-sm font-medium mt-1">
               No upcoming clinical consultations assigned.
             </p>
           </div>
@@ -280,7 +278,7 @@ export default function PatientQueueTable() {
                     isOngoing
                       ? "border-emerald-200 bg-gradient-to-r from-emerald-50 to-white shadow-none shadow-emerald-50"
                       : isUrgent
-                        ? "border-amber-200 bg-gradient-to-r from-amber-50 to-white shadow-md shadow-amber-50"
+                        ? "border-gray-200 bg-gradient-to-r from-gray-50 to-white  shadow-gray-50"
                         : "border-slate-100 bg-white hover:border-primary/20 hover:bg-blue-50/10"
                   }
                 `}
@@ -306,16 +304,16 @@ export default function PatientQueueTable() {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400  tracking-normal">
+                      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-400  tracking-normal">
                         {typeIcon(item.type)} {typeLabel(item.type)}
                       </span>
                       <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400  tracking-normal tabular-nums font-mono">
+                      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-400  tracking-normal tabular-nums font-mono">
                         <BiTime size={12} className="text-slate-300" />
                         {formatTime(item.scheduledStart)}
                         {mins > 0 && mins < 120 && (
                           <span
-                            className={`ml-1 font-bold ${mins <= 15 ? "text-amber-500" : "text-slate-300"}`}
+                            className={`ml-1 font-bold ${mins <= 15 ? "text-gray-500" : "text-slate-300"}`}
                           >
                             (IN {mins}M)
                           </span>
@@ -340,7 +338,7 @@ export default function PatientQueueTable() {
 
                 {item.riskScore > 70 && item.aiRecommendations.length > 0 && (
                   <div className="ml-15 mb-4 p-3 bg-rose-50 border border-rose-100 rounded-2xl shadow-none">
-                    <p className="text-[10px] font-bold text-rose-600  tracking-normal mb-1.5 flex items-center gap-2">
+                    <p className="text-sm font-bold text-rose-600  tracking-normal mb-1.5 flex items-center gap-2">
                       <BiError size={14} /> AI Clinical Alert
                     </p>
                     <p className="text-[11px] font-bold text-rose-700 leading-tight">
@@ -421,15 +419,15 @@ export default function PatientQueueTable() {
         width="sm"
       >
         {videoModal.consultation && (
-          <div className="bg-slate-900 rounded-[2rem] overflow-hidden shadow-none">
+          <div className="bg-slate-900 rounded-lg overflow-hidden shadow-none">
             <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center gap-4 relative">
-              <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-white shadow-none">
+              <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-white shadow-none">
                 {videoModal.consultation.initials}
               </div>
               <p className="text-white font-bold text-sm tracking-normal ">
                 {videoModal.consultation.patientName}
               </p>
-              <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold  tracking-normal">
+              <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold  tracking-normal">
                 <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                 Live Connection Syncing…
               </div>

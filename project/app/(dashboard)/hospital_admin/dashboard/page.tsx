@@ -9,6 +9,7 @@ import {
   BiUserCheck,
   BiGroup,
   BiLoaderAlt,
+  BiPlus,
 } from "react-icons/bi";
 import {
   ResponsiveContainer,
@@ -20,15 +21,6 @@ import {
   CartesianGrid,
 } from "recharts";
 
-const MONTHLY_DATA = [
-  { month: "Nov", consultations: 312 },
-  { month: "Dec", consultations: 289 },
-  { month: "Jan", consultations: 401 },
-  { month: "Feb", consultations: 378 },
-  { month: "Mar", consultations: 455 },
-  { month: "Apr", consultations: 432 },
-];
-
 export default function HospitalDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -37,6 +29,10 @@ export default function HospitalDashboard() {
     const fetchData = async () => {
       try {
         const res = await fetch("/api/hospital/dashboard");
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`API Error ${res.status}: ${text.substring(0, 100)}`);
+        }
         const json = await res.json();
         if (json.success) {
           setData(json.data);
@@ -58,21 +54,84 @@ export default function HospitalDashboard() {
     );
   }
 
-  if (!data)
+  if (!data) {
     return (
-      <div className="p-8 text-center text-slate-500">
-        Failed to load dashboard data.
+      <div className="flex flex-col h-full items-center justify-center min-h-[60vh] gap-4 text-slate-500">
+        <BiGroup size={40} className="opacity-30" />
+        <p className="text-sm font-medium">Unable to load dashboard data.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-xs font-bold text-primary border border-primary/20 px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
+  }
 
-  const { kpi, upcomingAppointments } = data;
+  const { kpi, upcomingAppointments, isNewUser } = data;
+
+  if (isNewUser) {
+    return (
+      <div className="w-full pb-10 flex flex-col gap-8 max-w-4xl mx-auto py-12">
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto mb-6">
+            <BiPlus size={40} />
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900 font-grotesk">
+            Welcome to DigiHealth, {data.name || "Administrator"}
+          </h1>
+          <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+            You're just one step away from managing your facility. Let's get
+            your hospital profile set up so you can start tracking operations
+            and staff.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <Card
+            className="p-8 hover:border-primary transition-all cursor-pointer group"
+            onClick={() => (window.location.href = "/hospital_admin/facility")}
+          >
+            <h3 className="text-xl font-bold text-slate-800 mb-2 font-grotesk">
+              1. Complete Facility Profile
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Enter your hospital's name, capacity, and operating hours.
+            </p>
+            <span className="text-primary font-bold flex items-center gap-2 group-hover:gap-3 transition-all">
+              Go to Settings →
+            </span>
+          </Card>
+          <Card
+            className="p-8 hover:border-primary transition-all cursor-pointer group"
+            onClick={() => (window.location.href = "/hospital_admin/staff")}
+          >
+            <h3 className="text-xl font-bold text-slate-800 mb-2 font-grotesk">
+              2. Add Your First Staff
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Onboard doctors, nurses, and administrative personnel.
+            </p>
+            <span className="text-primary font-bold flex items-center gap-2 group-hover:gap-3 transition-all">
+              Manage Staff →
+            </span>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Facility Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Overview of today's operations</p>
+        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+          Facility Dashboard
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Overview of today's operations
+        </p>
       </div>
 
       {/* KPI Cards Row */}
@@ -110,13 +169,15 @@ export default function HospitalDashboard() {
         {/* Consultation Volume Chart */}
         <Card className="lg:col-span-4 min-h-[350px] flex flex-col">
           <div className="mb-4">
-            <h3 className="font-bold text-slate-800 font-grotesk">Consultation Volume</h3>
+            <h3 className="font-bold text-slate-800 font-grotesk">
+              Consultation Volume
+            </h3>
             <p className="text-xs text-slate-500">Last 6 months</p>
           </div>
           <div className="flex-1 w-full relative min-h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={MONTHLY_DATA}
+                data={data.monthlyData || []}
                 margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
                 barSize={32}
               >
@@ -153,7 +214,9 @@ export default function HospitalDashboard() {
 
         {/* Upcoming Appointments */}
         <Card className="lg:col-span-2 flex flex-col">
-          <h3 className="font-bold text-slate-800 mb-4 font-grotesk">Upcoming Appointments</h3>
+          <h3 className="font-bold text-lg text-slate-800 mb-4 font-grotesk">
+            Upcoming Appointments
+          </h3>
           {upcomingAppointments?.length > 0 ? (
             <div className="space-y-3">
               {upcomingAppointments.map((app: any, i: number) => (

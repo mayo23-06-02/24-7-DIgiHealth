@@ -8,7 +8,7 @@ interface RiskAlert {
   consultationId: string;
   patientName: string;
   score: number;
-  color: "green" | "amber" | "red";
+  color: "green" | "gray" | "red";
   condition: string;
   factors: string[];
 }
@@ -38,7 +38,7 @@ export default function RiskAlertsBanner({
               {alerts.length} High-Risk{" "}
               {alerts.length === 1 ? "Patient" : "Patients"}
             </p>
-            <p className="text-[10px] text-rose-500 font-bold  tracking-normal mt-0.5 animate-pulse">
+            <p className="text-sm text-rose-500 font-bold  tracking-normal mt-0.5 animate-pulse">
               Clinical attention Required
             </p>
           </div>
@@ -47,7 +47,7 @@ export default function RiskAlertsBanner({
           <Button
             variant="ghost"
             onClick={onViewQueue}
-            className="flex items-center gap-1 text-[10px] font-bold text-rose-600 hover:bg-rose-100/50 rounded-full py-1.5 px-3 h-auto !min-w-0 border-none bg-transparent  tracking-normal shadow-none"
+            className="flex items-center gap-1 text-sm font-bold text-rose-600 hover:bg-rose-100/50 rounded-full py-1.5 px-3 h-auto !min-w-0 border-none bg-transparent  tracking-normal shadow-none"
           >
             View Queue <BiChevronRight size={14} />
           </Button>
@@ -58,7 +58,7 @@ export default function RiskAlertsBanner({
         {alerts.map((alert) => (
           <div
             key={alert.consultationId}
-            className="bg-white rounded-xl border border-red-100 p-3 shrink-0 min-w-[180px] shadow-none hover:shadow-md transition-shadow"
+            className="bg-white rounded-xl border border-red-100 p-3 shrink-0 min-w-[180px] shadow-none hover: transition-shadow"
           >
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-xs font-bold text-slate-800 truncate max-w-[100px]">

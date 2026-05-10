@@ -33,6 +33,9 @@ import {
 import Link from "next/link";
 import MedicalManikin from "@/components/ui/MedicalManikin";
 import { toast } from "react-hot-toast";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import Input from "@/components/ui/Input";
 
 interface PatientProfile {
   id: string;
@@ -47,15 +50,24 @@ interface PatientProfile {
   allergies: string[];
   currentMedications: string[];
   emergencyContact: { name: string; phone: string; relationship: string };
+  prescriptions: {
+    id: string;
+    medicationName: string;
+    dosage: string;
+    instructions: string;
+    status: "active" | "completed" | "discontinued";
+    prescribedDate: string;
+    refillsRemaining: number;
+  }[];
   pastConsultations: {
     id: string;
-    scheduledStart: string;
-    scheduledEnd: string;
+    scheduledStartTime: string;
+    scheduledEndTime: string;
     status: string;
     type: string;
-    reason: string;
+    chiefComplaint: string;
     riskScore: number;
-    riskColor: "green" | "amber" | "red";
+    riskColor: "green" | "gray" | "red";
     soapNotes?: {
       subjective?: string;
       objective?: string;
@@ -64,26 +76,6 @@ interface PatientProfile {
     };
   }[];
 }
-
-const MOCK_PATIENT: PatientProfile = {
-  id: "mock",
-  fullName: "Thandiwe Mokoena",
-  email: "thandiwe.mokoena@patient.co.za",
-  avatarUrl: "",
-  dateOfBirth: "1990-03-12",
-  gender: "female",
-  mobileNumber: "+27 61 234 5678",
-  bloodType: "A+",
-  medicalHistory: ["Hypertension", "Type 2 Diabetes (since 2018)", "BMI 29.2"],
-  allergies: ["Penicillin"],
-  currentMedications: ["Metformin 500mg BD", "Amlodipine 5mg OD"],
-  emergencyContact: {
-    name: "Sipho Mokoena",
-    phone: "+27 72 456 7890",
-    relationship: "Spouse",
-  },
-  pastConsultations: [],
-};
 
 export default function PatientProfilePage() {
   const params = useParams();
@@ -99,26 +91,72 @@ export default function PatientProfilePage() {
   });
   const [expandedConsult, setExpandedConsult] = useState<string | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+  const [prescriptionForm, setPrescriptionForm] = useState({
+    medicationName: "",
+    dosage: "",
+    instructions: "",
+    refillsRemaining: 0,
+  });
   const [updateFormData, setUpdateFormData] = useState({
     medicalHistory: "",
     allergies: "",
     currentMedications: "",
   });
 
+  const handlePrescriptionSubmit = async () => {
+    if (!patient || !prescriptionForm.medicationName) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch("/api/practitioner/prescriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientId: patient.id,
+          ...prescriptionForm,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success("Prescription issued successfully");
+        setIsPrescriptionModalOpen(false);
+        setPrescriptionForm({
+          medicationName: "",
+          dosage: "",
+          instructions: "",
+          refillsRemaining: 0,
+        });
+        // Refresh patient data
+        const refreshRes = await fetch(`/api/practitioner/patients/${id}`);
+        const refreshData = await refreshRes.json();
+        if (refreshData.success) setPatient(refreshData.data);
+      } else {
+        toast.error("Failed to issue prescription");
+      }
+    } catch {
+      toast.error("Network error");
+    }
+    setActionLoading(false);
+  };
+
   useEffect(() => {
     const fetchPatient = async () => {
       if (!id || id === "mock") {
-        setPatient(MOCK_PATIENT);
         setLoading(false);
         return;
       }
       try {
         const res = await fetch(`/api/practitioner/patients/${id}`);
         const data = await res.json();
-        if (data.success) setPatient(data.data);
-        else setPatient(MOCK_PATIENT);
+        if (data.success) {
+          setPatient(data.data);
+        } else {
+          toast.error(data.error || "Patient not found");
+          setPatient(null);
+        }
       } catch {
-        setPatient(MOCK_PATIENT);
+        toast.error("Failed to load patient health record");
+        setPatient(null);
       } finally {
         setLoading(false);
       }
@@ -223,7 +261,30 @@ export default function PatientProfilePage() {
     );
   }
 
-  if (!patient) return null;
+  if (!patient) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-slate-50 gap-6 p-8">
+        <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center text-slate-400">
+          <BiUser size={40} />
+        </div>
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-slate-800 font-grotesk">
+            Record Not Found
+          </h3>
+          <p className="text-sm text-slate-500 mt-2">
+            The health record you're looking for might be unavailable or you
+            might not have access.
+          </p>
+        </div>
+        <Link
+          href="/practitioner/patients"
+          className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all"
+        >
+          Return to Patient List
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
@@ -248,43 +309,36 @@ export default function PatientProfilePage() {
                   {patient.fullName}
                 </h1>
                 <Badge
-                  variant={patient.bloodType === "O+" ? "error" : "primary"}
+                  label={patient.bloodType}
+                  status={patient.bloodType === "O+" ? "error" : "premium"}
                   className="rounded-lg px-2 text-xs"
-                >
-                  {patient.bloodType}
-                </Badge>
+                />
               </div>
               <p className="text-slate-500 font-medium mt-1">
-                {patient.gender.charAt(0).to() + patient.gender.slice(1)} ·{" "}
-                {age} Years Old · Ref: #{patient.id.slice(-6)}
+                {patient.gender.charAt(0).toUpperCase() +
+                  patient.gender.slice(1)}{" "}
+                · {age} Years Old · Ref: #{patient.id.slice(-6)}
               </p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleStartChat}
-            disabled={actionLoading}
-            className="px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-all shadow-none active:scale-95 disabled:opacity-50"
-          >
-            <BiChat className="text-primary" size={20} />
+          <Button onClick={handleStartChat} disabled={actionLoading}>
+            <BiChat className="text-white" size={20} />
             {actionLoading ? "Loading..." : "Messenger"}
-          </button>
-          <button className="px-5 py-3 rounded-2xl bg-primary text-white font-bold text-xs  tracking-normal flex items-center gap-2 hover:bg-primary/90 transition-all shadow-none shadow-primary/20 active:scale-95">
-            <BiVideo size={18} />
-            Telehealth Session
-          </button>
-          <button
+          </Button>
+
+          <Button
+            variant="outline"
             onClick={handleDownloadReport}
-            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:text-primary hover:border-primary/20 transition-all shadow-none"
             title="Download PDF Report"
           >
             <BiDownload size={22} />
-          </button>
-          <button className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:text-slate-600 transition-all shadow-none">
+          </Button>
+          <Button variant="outline">
             <BiDotsVerticalRounded size={24} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -293,17 +347,6 @@ export default function PatientProfilePage() {
         <div className="lg:col-span-8 space-y-8">
           {/* 3D Body Mapping - Primary focus */}
           <Card className="p-0 overflow-hidden h-[600px] relative">
-            <div className="absolute top-8 left-8 z-10">
-              <h3 className="text-sm font-bold text-slate-800  tracking-normal flex items-center gap-2 font-grotesk">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <BiPulse size={18} />
-                </div>
-                Anatomical Inspection
-              </h3>
-              <p className="text-xs text-slate-400 font-bold  tracking-normal mt-2 ml-10">
-                Patient Symptom Annotations
-              </p>
-            </div>
             <MedicalManikin
               gender={(patient.gender as any) || "female"}
               heightCm={170}
@@ -350,20 +393,24 @@ export default function PatientProfilePage() {
                     >
                       <div className="w-16 shrink-0 text-center">
                         <p className="text-xs font-bold text-slate-800">
-                          {new Date(c.scheduledStart).toLocaleDateString(
-                            "en-ZA",
-                            { day: "2-digit", month: "short" },
-                          )}
+                          {c.scheduledStartTime
+                            ? new Date(c.scheduledStartTime).toLocaleDateString(
+                                "en-ZA",
+                                { day: "2-digit", month: "short" },
+                              )
+                            : "N/A"}
                         </p>
                         <p className="text-xs font-bold text-slate-400 ">
-                          {new Date(c.scheduledStart).getFullYear()}
+                          {c.scheduledStartTime
+                            ? new Date(c.scheduledStartTime).getFullYear()
+                            : ""}
                         </p>
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h4 className="font-bold text-slate-800 text-sm truncate font-grotesk">
-                            {c.reason}
+                            {c.chiefComplaint || "No complaint recorded"}
                           </h4>
                           <span
                             className={`px-2 py-1 rounded-lg text-xs font-bold  tracking-tighter ${c.status === "completed" ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}
@@ -453,8 +500,8 @@ export default function PatientProfilePage() {
         {/* Sidebar info Area */}
         <div className="lg:col-span-4 space-y-8">
           {/* Summary Stats */}
-          <Card className="bg-slate-900 border-none">
-            <h3 className="text-blue-400 text-xs font-bold  tracking-normal mb-4 font-grotesk">
+          <div className="bg-primary px-4 py-6 rounded-lg border-none">
+            <h3 className="text-slate-100 font-bold  text-lg tracking-normal mb-4 font-grotesk">
               Vitals Summary
             </h3>
             <div className="space-y-4">
@@ -463,13 +510,11 @@ export default function PatientProfilePage() {
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white">
                     <BiDroplet size={16} />
                   </div>
-                  <p className="text-xs font-bold text-white/70">
-                    Blood Glucose
-                  </p>
+                  <h1 className=" font-bold text-white">Blood Glucose</h1>
                 </div>
-                <p className="text-base font-bold text-white">
+                <p className="text-lg font-bold text-white">
                   5.8{" "}
-                  <span className="text-xs font-bold text-white/50">
+                  <span className="text-sm font-normal text-white/80">
                     mmol/L
                   </span>
                 </p>
@@ -479,11 +524,11 @@ export default function PatientProfilePage() {
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white">
                     <BiPulse size={16} />
                   </div>
-                  <p className="text-xs font-bold text-white/70">Heart Rate</p>
+                  <h1 className=" font-bold text-white">Heart Rate</h1>
                 </div>
-                <p className="text-base font-bold text-rose-400">
+                <p className="text-lg font-bold text-rose-800">
                   82{" "}
-                  <span className="text-xs font-bold text-white/50">BPM</span>
+                  <span className="text-sm font-normal text-white/80">BPM</span>
                 </p>
               </div>
               <div className="flex items-center justify-between">
@@ -491,34 +536,36 @@ export default function PatientProfilePage() {
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white">
                     <BiCheckShield size={16} />
                   </div>
-                  <p className="text-xs font-bold text-white/70">Risk Status</p>
+                  <h1 className=" font-bold text-white">Risk Status</h1>
                 </div>
-                <span className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold ">
+                <span className="px-2 py-1 rounded-lg bg-emerald-500 text-emerald-100 text-xs font-bold ">
                   Normal
                 </span>
               </div>
             </div>
-          </Card>
+          </div>
 
-          {/* Medical History */}
+          {/* Clinical Background */}
           <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
-              <h3 className="text-xs font-bold  text-slate-400 tracking-normal leading-none font-grotesk">
-                Clinical Background
+              <h3 className="text-lg font-bold text-slate-600 leading-none font-grotesk">
+                Clinical Context
               </h3>
               <button
                 onClick={() => setIsUpdateModalOpen(true)}
-                className="flex items-center gap-1 text-xs font-bold  text-primary hover:underline"
+                className="flex items-center gap-1 text-sm text-primary hover:underline "
               >
-                <BiEditAlt size={12} /> Update
+                <BiEditAlt size={12} /> Sync Records
               </button>
             </div>
 
             <Card className="space-y-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <BiPulse className="text-primary" size={18} />
-                  <h4 className="text-xs font-bold text-slate-800  tracking-normal font-grotesk">
+                  <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center text-primary">
+                    <BiPulse size={18} />
+                  </div>
+                  <h4 className=" font-bold text-slate-800 tracking-normal font-grotesk">
                     Chronic Conditions
                   </h4>
                 </div>
@@ -526,23 +573,25 @@ export default function PatientProfilePage() {
                   {patient.medicalHistory.map((h) => (
                     <span
                       key={h}
-                      className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 text-xs font-bold"
+                      className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 text-sm font-bold"
                     >
                       {h}
                     </span>
                   ))}
                   {patient.medicalHistory.length === 0 && (
-                    <p className="text-xs text-slate-400 italic">
+                    <p className="text-sm text-slate-400 italic ml-1">
                       No chronic history.
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-50">
+              <div className="pt-5 border-t border-slate-50">
                 <div className="flex items-center gap-2 mb-3">
-                  <BiError className="text-rose-500" size={18} />
-                  <h4 className="text-xs font-bold text-slate-800  tracking-normal font-grotesk">
+                  <div className="w-6 h-6 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
+                    <BiError size={14} />
+                  </div>
+                  <h4 className=" font-bold text-slate-800 tracking-normal font-grotesk">
                     Allergies
                   </h4>
                 </div>
@@ -550,36 +599,86 @@ export default function PatientProfilePage() {
                   {patient.allergies.map((a) => (
                     <span
                       key={a}
-                      className="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-100"
+                      className="px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-sm font-bold border border-rose-100"
                     >
                       {a}
                     </span>
                   ))}
                   {patient.allergies.length === 0 && (
-                    <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-100">
-                      <BiCheckShield size={14} /> NO KNOWN ALLERGIES
+                    <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-100">
+                      <BiCheckShield size={12} /> NO KNOWN ALLERGIES
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-50">
-                <div className="flex items-center gap-2 mb-3">
-                  <BiCapsule className="text-purple-500" size={18} />
-                  <h4 className="text-xs font-bold text-slate-800  tracking-normal font-grotesk">
-                    Active Medications
-                  </h4>
-                </div>
-                <div className="space-y-2">
-                  {patient.currentMedications.map((m) => (
-                    <div
-                      key={m}
-                      className="p-2.5 rounded-xl bg-slate-50/50 border border-slate-100 flex items-center gap-3"
-                    >
-                      <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.4)]" />
-                      <p className="text-xs font-bold text-slate-600">{m}</p>
+              {/* Prescriptions Section */}
+              <div className="pt-5 border-t border-slate-50">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-purple-50 flex items-center justify-center text-primary">
+                      <BiCapsule size={14} />
                     </div>
-                  ))}
+                    <h4 className=" font-bold text-slate-800 tracking-normal font-grotesk">
+                      Active Prescriptions
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => setIsPrescriptionModalOpen(true)}
+                    className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-110 transition-all shadow-sm"
+                    title="Issue New Prescription"
+                  >
+                    <BiPlus size={16} />
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {patient.prescriptions && patient.prescriptions.length > 0 ? (
+                    patient.prescriptions.map((p) => (
+                      <div
+                        key={p.id}
+                        className="p-3 rounded-xl bg-slate-50/50 border border-slate-100 group hover:border-primary/20 transition-all"
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className="text-sm font-bold text-slate-700">
+                            {p.medicationName}
+                          </h3>
+                          <span
+                            className={`text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${
+                              p.status === "active"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            {p.status}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-500 font-medium mb-2">
+                          {p.dosage}
+                        </p>
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                            Refills: {p.refillsRemaining}
+                          </p>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                            {new Date(p.prescribedDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-2xl">
+                      <p className="text-sm text-slate-600 ">
+                        No active prescriptions
+                      </p>
+                      <button
+                        onClick={() => setIsPrescriptionModalOpen(true)}
+                        className="text-sm text-primary  hover:underline mt-2"
+                      >
+                        + Issue First Prescription
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -619,98 +718,158 @@ export default function PatientProfilePage() {
         patientName={soapModal.patientName}
       />
 
-      {/* Update Clinical Records Modal */}
-      {isUpdateModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            onClick={() => setIsUpdateModalOpen(false)}
-          />
-          <Card className="relative w-full max-w-md animate-in zoom-in-95 duration-200  border-none">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <BiCloudUpload size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight font-grotesk">
-                  Update Clinical Records
-                </h3>
-                <p className="text-xs text-slate-400 font-bold  tracking-normal">
-                  {patient.fullName}
-                </p>
-              </div>
+      {/* Prescription Modal */}
+      <Modal
+        isOpen={isPrescriptionModalOpen}
+        onClose={() => setIsPrescriptionModalOpen(false)}
+        title="Issue New Prescription"
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
+            <Input
+              label="Medication Name"
+              placeholder="e.g. Amoxicillin 500mg"
+              value={prescriptionForm.medicationName}
+              onChange={(e) =>
+                setPrescriptionForm((prev) => ({
+                  ...prev,
+                  medicationName: e.target.value,
+                }))
+              }
+              required
+            />
+            <Input
+              label="Dosage"
+              placeholder="e.g. One tablet twice daily"
+              value={prescriptionForm.dosage}
+              onChange={(e) =>
+                setPrescriptionForm((prev) => ({
+                  ...prev,
+                  dosage: e.target.value,
+                }))
+              }
+            />
+            <div className="space-y-2">
+              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+                Instructions
+              </h1>
+              <textarea
+                className="w-full min-h-[100px] p-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-primary/50 text-sm text-slate-700 font-medium transition-all"
+                placeholder="Specific instructions for the patient..."
+                value={prescriptionForm.instructions}
+                onChange={(e) =>
+                  setPrescriptionForm((prev) => ({
+                    ...prev,
+                    instructions: e.target.value,
+                  }))
+                }
+              />
             </div>
+            <Input
+              label="Refills Remaining"
+              type="number"
+              placeholder="0"
+              value={prescriptionForm.refillsRemaining}
+              onChange={(e) =>
+                setPrescriptionForm((prev) => ({
+                  ...prev,
+                  refillsRemaining: parseInt(e.target.value) || 0,
+                }))
+              }
+            />
+          </div>
 
-            <div className="space-y-5">
-              <div>
-                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2 px-1">
-                  Chronic Conditions (comma separated)
-                </label>
-                <textarea
-                  value={updateFormData.medicalHistory}
-                  onChange={(e) =>
-                    setUpdateFormData((prev) => ({
-                      ...prev,
-                      medicalHistory: e.target.value,
-                    }))
-                  }
-                  className="w-full h-20 rounded-xl border border-slate-200 p-3 text-sm focus:border-primary outline-none transition-all resize-none font-medium"
-                  placeholder="e.g. Hypertension, Type 2 Diabetes"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2 px-1">
-                  Allergies (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={updateFormData.allergies}
-                  onChange={(e) =>
-                    setUpdateFormData((prev) => ({
-                      ...prev,
-                      allergies: e.target.value,
-                    }))
-                  }
-                  className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-primary outline-none transition-all font-medium"
-                  placeholder="e.g. Penicillin"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-400  tracking-normal mb-2 px-1">
-                  Active Medications (comma separated)
-                </label>
-                <textarea
-                  value={updateFormData.currentMedications}
-                  onChange={(e) =>
-                    setUpdateFormData((prev) => ({
-                      ...prev,
-                      currentMedications: e.target.value,
-                    }))
-                  }
-                  className="w-full h-20 rounded-xl border border-slate-200 p-3 text-sm focus:border-primary outline-none transition-all resize-none font-medium"
-                  placeholder="e.g. Metformin 500mg"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-8">
-              <button
-                onClick={() => setIsUpdateModalOpen(false)}
-                className="flex-1 px-4 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateClinicalData}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/90 transition-all shadow-none shadow-primary/20 disabled:opacity-50"
-              >
-                {actionLoading ? "Saving..." : "Securely Update"}
-              </button>
-            </div>
-          </Card>
+          <div className="flex gap-3 pt-4">
+            <Button
+              className="flex-1"
+              onClick={handlePrescriptionSubmit}
+              disabled={actionLoading || !prescriptionForm.medicationName}
+            >
+              {actionLoading ? "Issuing..." : "Confirm & Issue Prescription"}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setIsPrescriptionModalOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
-      )}
+      </Modal>
+
+      {/* Sync Records Modal */}
+      <Modal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        title="Sync Patient Records"
+      >
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+                Chronic Conditions (Comma separated)
+              </h1>
+              <textarea
+                className="w-full min-h-[80px] p-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-primary/50 text-sm text-slate-700 font-medium transition-all"
+                value={updateFormData.medicalHistory}
+                onChange={(e) =>
+                  setUpdateFormData((prev) => ({
+                    ...prev,
+                    medicalHistory: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+                Allergies (Comma separated)
+              </h1>
+              <textarea
+                className="w-full min-h-[80px] p-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-primary/50 text-sm text-slate-700 font-medium transition-all"
+                value={updateFormData.allergies}
+                onChange={(e) =>
+                  setUpdateFormData((prev) => ({
+                    ...prev,
+                    allergies: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+                Active Medications (Comma separated)
+              </h1>
+              <textarea
+                className="w-full min-h-[80px] p-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-primary/50 text-sm text-slate-700 font-medium transition-all"
+                value={updateFormData.currentMedications}
+                onChange={(e) =>
+                  setUpdateFormData((prev) => ({
+                    ...prev,
+                    currentMedications: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <Button
+              className="flex-1"
+              onClick={handleUpdateClinicalData}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Updating..." : "Save Clinical Records"}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setIsUpdateModalOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

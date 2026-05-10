@@ -152,20 +152,20 @@ export default function SoapNoteModal({
           {FIELDS.map((field) => (
             <div key={field.key}>
               <div className="flex items-center gap-2 mb-2">
-                <span
+                <h1
                   className={`
                     w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center border border-slate-200
                     bg-primary/10 text-primary
                   `}
                 >
                   {field.abbr}
-                </span>
-                <label className="text-sm font-bold text-slate-700">
+                </h1>
+                <h1 className="text-lg font-bold text-slate-700">
                   {field.label}
-                </label>
-                <span className="text-xs text-slate-400 ml-1 hidden sm:block">
+                </h1>
+                <p className="text-sm text-slate-500 ml-1 hidden sm:block">
                   {field.hint}
-                </span>
+                </p>
               </div>
               <Input
                 textarea
@@ -175,7 +175,7 @@ export default function SoapNoteModal({
                   setNotes((prev) => ({ ...prev, [field.key]: e.target.value }))
                 }
                 placeholder={field.hint}
-                className="rounded-[1.5rem] border-slate-100 font-bold text-xs"
+                className=" border-slate-100 text-sm"
               />
             </div>
           ))}
@@ -183,7 +183,7 @@ export default function SoapNoteModal({
 
         {/* Footer */}
         <div className="pt-8 border-t border-slate-50 flex items-center justify-between gap-4">
-          <p className="text-[10px] text-slate-400 font-bold  tracking-normal px-1">
+          <p className="text-sm text-slate-400 font-bold  tracking-normal px-1">
             <kbd className="bg-slate-100 px-2 py-1 rounded text-slate-500 font-mono">
               Ctrl+S
             </kbd>{" "}

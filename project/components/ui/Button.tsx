@@ -8,11 +8,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     | "white"
     | "outline"
     | "dashed"
-    | "ghost";
+    | "ghost"
+    | "danger";
   size?: "sm" | "md" | "lg" | "xl";
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
   fullWidth?: boolean;
+  loading?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -24,20 +26,21 @@ const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   className = "",
   disabled,
+  loading = false,
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center text-sm font-grotesk  tracking-wider py-3 px-4 justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
+    "inline-flex items-center cursor-pointer max-w-[400px] text-sm font-grotesk uppercase  py-4 px-4 justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
 
   const variants = {
-    primary: "bg-[#4493b8] text-white hover:bg-primary/90 ",
+    primary: "bg-[#2b617a] text-white hover:bg-primary/90 ",
     secondary: "bg-secondary text-white hover:bg-secondary/90 ",
     accent: "bg-accent text-slate-900 hover:brightness-110 ",
     white: "bg-white text-primary border border-slate-200 hover:bg-slate-50",
     outline:
       "bg-transparent border border-primary text-primary hover:bg-primary/5",
     dashed:
-      "bg-transparent border- border-dashed border-slate-200 text-slate-400 hover:border-primary hover:text-primary",
+      "bg-transparent border- border-dashed border-slate-200 text-slate-500 hover:border-primary hover:text-primary",
     ghost: "bg-transparent text-slate-500 hover:bg-slate-100",
     danger: "bg-red-400 text-white hover:bg-red-600",
   };
@@ -53,16 +56,40 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${widthStyle} ${className} group`}
-      disabled={disabled}
+      className={`${baseStyles} ${variants[variant as keyof typeof variants] || variants.primary} ${sizes[size as keyof typeof sizes] || sizes.md} ${widthStyle} ${className} group`}
+      disabled={disabled || loading}
       {...props}
     >
+      {loading && (
+        <svg
+          className="animate-spin -ml-1 mr-3 h-5 w-5 text-current"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      )}
       {icon && iconPosition === "left" && (
         <span className="px-1 transition-transform group-hover:-translate-x-1 ">
           {icon}
         </span>
       )}
-      {children}
+      <h4 className="text-md  tracking-wide flex gap-2 items-center">
+        {children}
+      </h4>
       {icon && iconPosition === "right" && (
         <span className="px-1 text-opacity-70 transition-transform group-hover:translate-x-1">
           {icon}

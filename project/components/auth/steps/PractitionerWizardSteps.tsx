@@ -2,7 +2,7 @@
 import React from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import FileUpload from "@/components/ui/FileUpload";
+import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
 
 // ─────────────────────────────────────────────
 // Step 1 – Professional Credentials
@@ -37,7 +37,9 @@ export function PractitionerStep1({ formData, updateData, errors }: any) {
           label="HPCSA Registration Number *"
           value={formData.hpcsaNumber || ""}
           error={errors?.hpcsaNumber}
-          onChange={(e) => updateData("hpcsaNumber", e.target.value.to())}
+          onChange={(e) =>
+            updateData("hpcsaNumber", e.target.value.toUpperCase())
+          }
           placeholder="e.g. MP123456"
           className="md:col-span-2"
         />
@@ -58,9 +60,9 @@ export function PractitionerStep1({ formData, updateData, errors }: any) {
           placeholder="e.g. 7"
         />
         <div className="md:col-span-2 space-y-2">
-          <label className="block text-sm font-bold text-slate-700">
+          <h1 className="block text-sm font-bold text-slate-700">
             Primary Specialisation *
-          </label>
+          </h1>
           <select
             value={formData.specialization || ""}
             onChange={(e) => updateData("specialization", e.target.value)}
@@ -153,9 +155,7 @@ export function PractitionerStep2({ formData, updateData, errors }: any) {
           onChange={(e) => updateData("city", e.target.value)}
         />
         <div className="space-y-2">
-          <label className="block text-sm font-bold text-slate-700">
-            Province *
-          </label>
+          <h1 className="block text-sm font-bold text-slate-700">Province *</h1>
           <select
             value={formData.province || ""}
             onChange={(e) => updateData("province", e.target.value)}
@@ -169,6 +169,62 @@ export function PractitionerStep2({ formData, updateData, errors }: any) {
             ))}
           </select>
         </div>
+
+        <div className="md:col-span-2 space-y-4 pt-4 border-t border-slate-100">
+          <div>
+            <h1 className="text-sm font-bold text-slate-700 mb-1">
+              Languages Spoken *
+            </h1>
+            <p className="text-xs text-slate-400 mb-3">
+              Select all languages you can comfortably conduct consultations in.
+            </p>
+            <div className="grid lg:grid-cols-5 sm:grid-cols-3 gap-3">
+              {[
+                "English",
+                "Afrikaans",
+                "isiZulu",
+                "isiXhosa",
+                "Sesotho",
+                "Sepedi",
+                "Setswana",
+                "siSwati",
+                "Tshivenda",
+                "Xitsonga",
+                "isiNdebele",
+              ].map((lang) => {
+                const isSelected = (formData.languages || []).includes(lang);
+                return (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => {
+                      const current = formData.languages || [];
+                      const next = isSelected
+                        ? current.filter((l: string) => l !== lang)
+                        : [...current, lang];
+                      updateData("languages", next);
+                    }}
+                    className={`flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border text-sm font-bold transition-all ${
+                      isSelected
+                        ? "border-primary bg-primary/5 text-primary shadow-none"
+                        : "border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200"
+                    }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${isSelected ? "bg-primary" : "bg-slate-300"}`}
+                    />
+                    {lang}
+                  </button>
+                );
+              })}
+            </div>
+            {errors?.languages && (
+              <p className="text-xs font-bold text-red-500 mt-2">
+                {errors.languages}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -180,31 +236,22 @@ export function PractitionerStep2({ formData, updateData, errors }: any) {
 export function PractitionerStep3({ formData, updateData }: any) {
   return (
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
-      <FileUpload
+      <CloudinaryUpload
         label="Profile Photo *"
         description="Select or drag a professional headshot for your practitioner profile"
-        accept="JPEG, PNG or SVG profile photos"
-        value={
-          formData.profilePhoto
-            ? [{ name: formData.profilePhoto.name, status: "completed" }]
-            : []
-        }
-        onRemove={() => updateData("profilePhoto", null)}
+        value={formData.profilePhoto}
+        onUploadComplete={(url) => updateData("profilePhoto", url)}
       />
 
-      <FileUpload
+      <CloudinaryUpload
         label="HPCSA Registration Certificate *"
         description="Upload a certified copy of your HPCSA registration"
-        accept="PDF certificate only"
-        value={
-          formData.hpcsaCert
-            ? [{ name: formData.hpcsaCert.name, status: "completed" }]
-            : []
-        }
-        onRemove={() => updateData("hpcsaCert", null)}
+        accept="application/pdf"
+        value={formData.hpcsaCert}
+        onUploadComplete={(url) => updateData("hpcsaCert", url)}
       />
 
-      <label
+      <h1
         className={`flex items-start gap-4 p-6 rounded-lg border-2 cursor-pointer transition-all ${formData.bgCheckConsent ? "border-primary bg-primary/5" : "border-slate-100 bg-slate-50"}`}
       >
         <input
@@ -217,7 +264,7 @@ export function PractitionerStep3({ formData, updateData }: any) {
           I consent to a professional background verification via the 24/7
           TeleHealth vetted network.
         </span>
-      </label>
+      </h1>
     </div>
   );
 }
@@ -237,13 +284,15 @@ export function PractitionerStep4({ formData, updateData }: any) {
   ];
   return (
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
-      <h3 className=" font-semibold text-slate-900   font-grotesk">Earnings Account *</h3>
+      <h3 className=" font-semibold text-slate-900   font-grotesk">
+        Earnings Account *
+      </h3>
       <div className="bg-slate-200 rounded-lg p-10 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="md:col-span-2 space-y-2">
-            <label className="block text-xs font-bold text-slate-900 ">
+            <h1 className="block text-sm font-bold text-slate-900 ">
               Account Holder Name
-            </label>
+            </h1>
             <input
               type="text"
               value={formData.bankHolder || ""}
@@ -253,9 +302,9 @@ export function PractitionerStep4({ formData, updateData }: any) {
             />
           </div>
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-900 ">
+            <h1 className="block text-sm font-bold text-slate-900 ">
               Bank Name
-            </label>
+            </h1>
             <select
               value={formData.bankName || ""}
               onChange={(e) => updateData("bankName", e.target.value)}
@@ -272,9 +321,9 @@ export function PractitionerStep4({ formData, updateData }: any) {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-900 ">
+            <h1 className="block text-sm font-bold text-slate-900 ">
               Account Number
-            </label>
+            </h1>
             <input
               type="text"
               value={formData.bankAccount || ""}

@@ -33,20 +33,23 @@ export async function GET(request: Request) {
 
     const slots = ['08:00', '09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
 
-    let availablePractitioners = profiles.map(p => ({
-      id: p.userId._id.toString(),
-      name: `Dr. ${p.userId.firstName} ${p.userId.lastName}`,
-      avatar: p.userId.avatarUrl || `https://ui-avatars.com/api/?name=${p.userId.firstName}+${p.userId.lastName}&background=0052cc&color=fff`,
-      specialisation: p.specialisation,
-      availableSlots: slots.filter(() => Math.random() > 0.3),
-      bio: p.bio,
-      rating: 4.5 + Math.random() * 0.5,
-      reviewCount: Math.floor(Math.random() * 100) + 20,
-      consultationFee: p.consultationFee || 750,
-      languages: p.languages || ['English'],
-      availabilityBadge: Math.random() > 0.5 ? 'Available Today' : 'Next: Tomorrow',
-      experienceYears: p.experienceYears || 5
-    }));
+    let availablePractitioners = profiles.map(p => {
+      const u = p.userId as any;
+      return {
+        id: u._id.toString(),
+        name: `Dr. ${u.firstName} ${u.lastName}`,
+        avatar: u.avatarUrl || `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=0052cc&color=fff`,
+        specialisation: p.specialisation,
+        availableSlots: slots.filter(() => Math.random() > 0.3),
+        bio: p.bio,
+        rating: 4.5 + Math.random() * 0.5,
+        reviewCount: Math.floor(Math.random() * 100) + 20,
+        consultationFee: (p as any).consultationFee || 750,
+        languages: (p.languages && p.languages.length > 0) ? p.languages : ['English'],
+        availabilityBadge: Math.random() > 0.5 ? 'Available Today' : 'Next: Tomorrow',
+        experienceYears: p.experienceYears || 5
+      };
+    });
 
     if (search) {
       const q = search.toLowerCase();

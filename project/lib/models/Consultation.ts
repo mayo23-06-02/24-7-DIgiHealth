@@ -9,7 +9,7 @@ export interface IConsultation extends Document {
   scheduledStartTime: Date;
   scheduledEndTime: Date;
   chiefComplaint?: string;
-  clinicalRisk?: { score: number; color: 'green' | 'amber' | 'red'; factors: string[] };
+  clinicalRisk?: { score: number; color: 'green' | 'gray' | 'red'; factors: string[] };
   soapNotes?: { subjective?: string; objective?: string; assessment?: string; plan?: string; signedAt?: Date };
   callMinutesUsed: number;
 }
@@ -25,7 +25,7 @@ const ConsultationSchema = new Schema<IConsultation>({
   chiefComplaint: { type: String },
   clinicalRisk: {
     score: Number,
-    color: { type: String, enum: ['green', 'amber', 'red'] },
+    color: { type: String, enum: ['green', 'gray', 'red'] },
     factors: [{ type: String }]
   },
   soapNotes: { subjective: String, objective: String, assessment: String, plan: String, signedAt: Date },

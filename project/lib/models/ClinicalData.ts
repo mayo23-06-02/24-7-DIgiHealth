@@ -98,7 +98,28 @@ const LabResultSchema = new Schema<ILabResult>({
   }]
 });
 
+// ==== Immunization ====
+export interface IImmunization extends Document {
+  patientId: Types.ObjectId;
+  vaccineName: string;
+  dateAdministered: Date;
+  dosage: string;
+  batchNumber?: string;
+  administeredBy?: string;
+  nextDueDate?: Date;
+}
+const ImmunizationSchema = new Schema<IImmunization>({
+  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  vaccineName: { type: String, required: true },
+  dateAdministered: { type: Date, default: Date.now },
+  dosage: String,
+  batchNumber: String,
+  administeredBy: String,
+  nextDueDate: Date
+});
+
 export const Anthropometric = mongoose.models.Anthropometric || mongoose.model<IAnthropometric>('Anthropometric', AnthropometricSchema);
 export const MedicalContext = mongoose.models.MedicalContext || mongoose.model<IMedicalContext>('MedicalContext', MedicalContextSchema);
 export const Prescription = mongoose.models.Prescription || mongoose.model<IPrescription>('Prescription', PrescriptionSchema);
 export const LabResult = mongoose.models.LabResult || mongoose.model<ILabResult>('LabResult', LabResultSchema);
+export const Immunization = mongoose.models.Immunization || mongoose.model<IImmunization>('Immunization', ImmunizationSchema);

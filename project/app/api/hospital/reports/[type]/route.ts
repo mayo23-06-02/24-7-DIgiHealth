@@ -4,10 +4,10 @@ import BedOccupancy from '@/lib/models/BedOccupancy';
 import HospitalTransaction from '@/lib/models/HospitalTransaction';
 import Staff from '@/lib/models/Staff';
 
-export async function GET(req: Request, { params }: { params: { type: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ type: string }> }) {
   try {
     await connectToDatabase();
-    const { type } = params;
+    const { type } = await params;
     const { searchParams } = new URL(req.url);
     const format = searchParams.get('format') || 'csv';
 

@@ -4,11 +4,14 @@ import User from '@/lib/models/User';
 import { PractitionerProfile, PatientProfile } from '@/lib/models/RoleProfiles';
 import Consultation from '@/lib/models/Consultation';
 
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
-    const userId = req.headers.get('x-user-id');
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getRequestUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const userId = user.userId;
 
     // 1. Get doctors from past consultations
     const consultations = await Consultation.find({ patientId: userId }).select('practitionerId');

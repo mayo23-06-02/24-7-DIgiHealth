@@ -5,7 +5,7 @@ export interface IMessage extends Document {
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
   content: string;
-  type: 'text' | 'image' | 'file' | 'audio' | 'quick_phrase' | 'record_attachment';
+  type: 'text' | 'image' | 'file' | 'audio' | 'quick_phrase' | 'record_attachment' | 'call_log';
   fileUrl?: string;
   fileMime?: string;
   recordId?: Types.ObjectId;
@@ -21,7 +21,7 @@ const MessageSchema = new Schema<IMessage>({
   senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   receiverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   content: { type: String },
-  type: { type: String, enum: ['text', 'image', 'file', 'audio', 'quick_phrase', 'record_attachment'], default: 'text' },
+  type: { type: String, enum: ['text', 'image', 'file', 'audio', 'quick_phrase', 'record_attachment', 'call_log'], default: 'text' },
   fileUrl: { type: String },
   fileMime: { type: String },
   recordId: { type: Schema.Types.ObjectId, ref: 'AttachedRecord' },

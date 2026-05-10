@@ -1,16 +1,29 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import HospitalTransaction from '@/lib/models/HospitalTransaction';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import mongoose from 'mongoose';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    const user = await getRequestUser();
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account.' }, { status: 404 });
+    }
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
     const from = searchParams.get('from');
     const to = searchParams.get('to');
 
-    const filter: any = {};
+    const filter: any = { facilityId: hospitalId };
     if (status) filter.status = status;
     if (from || to) {
       filter.timestamp = {};
@@ -20,20 +33,23 @@ export async function GET(req: Request) {
 
     const transactions = await HospitalTransaction.find(filter)
       .populate('patientId', 'firstName lastName email')
-      .sort({ timestamp: -1 });
+      .sort({ timestamp: -1 })
+      .lean();
+
+    const hId = new mongoose.Types.ObjectId(hospitalId.toString());
 
     const totalRevenue = await HospitalTransaction.aggregate([
-      { $match: { status: 'paid' } },
+      { $match: { facilityId: hId, status: 'paid' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
 
     const pendingAmount = await HospitalTransaction.aggregate([
-      { $match: { status: 'pending' } },
+      { $match: { facilityId: hId, status: 'pending' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
 
     const medicalAid = await HospitalTransaction.aggregate([
-      { $match: { paymentMethod: 'medical_aid' } },
+      { $match: { facilityId: hId, paymentMethod: 'medical_aid' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
 
@@ -47,6 +63,7 @@ export async function GET(req: Request) {
       }
     });
   } catch (error: any) {
+    console.error('[GET /api/hospital/billing]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

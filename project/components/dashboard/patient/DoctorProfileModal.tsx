@@ -101,7 +101,7 @@ export default function DoctorProfileModal({
             <h2 className="text-sm font-bold text-slate-800 tracking-tight leading-none mb-1  font-grotesk">
               Dr. {doctor.name}
             </h2>
-            <p className="text-[10px] font-bold text-primary  tracking-normal opacity-80">
+            <p className="text-sm font-bold text-primary  tracking-normal opacity-80">
               {doctor.specialisation}
             </p>
           </div>
@@ -156,14 +156,14 @@ export default function DoctorProfileModal({
             </div>
 
             <div className="mt-8 flex justify-center items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 rounded-2xl border border-amber-100 shadow-none shadow-amber-100/50">
-                <BiStar className="text-amber-500 fill-amber-500" size={18} />
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 rounded-2xl border border-gray-100 shadow-none shadow-gray-100/50">
+                <BiStar className="text-gray-500 fill-gray-500" size={18} />
                 <span className="text-sm font-bold text-slate-800">
                   {doctor.rating}
                 </span>
               </div>
               <div className="h-4 w-px bg-slate-100" />
-              <span className="text-[10px] font-bold text-slate-400  tracking-normal">
+              <span className="text-sm font-bold text-slate-400  tracking-normal">
                 {doctor.reviewCount} Verified Reviews
               </span>
             </div>
@@ -171,7 +171,7 @@ export default function DoctorProfileModal({
 
           {/* Core Info Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100 flex items-center gap-5 transition-all hover:bg-white hover:shadow-none hover:shadow-slate-900/5">
+            <div className="bg-slate-50/50 rounded-lg p-6 border border-slate-100 flex items-center gap-5 transition-all hover:bg-white hover:shadow-none hover:shadow-slate-900/5">
               <div className="w-14 h-14 bg-white rounded-[1.25rem] flex items-center justify-center text-primary shadow-none border border-slate-50">
                 <BiShieldQuarter size={26} />
               </div>
@@ -184,7 +184,7 @@ export default function DoctorProfileModal({
                 </p>
               </div>
             </div>
-            <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100 flex items-center gap-5 transition-all hover:bg-white hover:shadow-none hover:shadow-slate-900/5">
+            <div className="bg-slate-50/50 rounded-lg p-6 border border-slate-100 flex items-center gap-5 transition-all hover:bg-white hover:shadow-none hover:shadow-slate-900/5">
               <div className="w-14 h-14 bg-white rounded-[1.25rem] flex items-center justify-center text-primary shadow-none border border-slate-50">
                 <BiAward size={26} />
               </div>
@@ -201,7 +201,7 @@ export default function DoctorProfileModal({
 
           {/* Contact & Facility */}
           <section className="space-y-4 bg-white border border-slate-100 rounded-lg p-8 shadow-none shadow-slate-900/5">
-            <h4 className="text-[10px] font-bold text-slate-400  tracking-[0.25em] mb-4 font-grotesk">
+            <h4 className="text-sm font-bold text-slate-400  tracking-[0.25em] mb-4 font-grotesk">
               Clinical Access Points
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -250,7 +250,7 @@ export default function DoctorProfileModal({
                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 shadow-none">
                   <BiGlobe size={18} />
                 </div>
-                <span className="text-[10px] font-bold text-slate-600  tracking-normal">
+                <span className="text-sm font-bold text-slate-600  tracking-normal">
                   {doctor.languages.join("   ·   ")}
                 </span>
               </div>
@@ -260,23 +260,23 @@ export default function DoctorProfileModal({
           {/* About & Clinical Focus */}
           <section className="space-y-8">
             <div className="relative">
-              <h3 className="text-[10px] font-bold text-slate-400  tracking-normal mb-4 px-1 font-grotesk">
+              <h3 className="text-lg font-bold text-slate-400  tracking-normal mb-4 px-1 font-grotesk">
                 Clinical Overview
               </h3>
-              <div className="text-sm font-bold text-slate-600 leading-relaxed bg-slate-50/50 p-8 rounded-[2rem] border border-dashed border-slate-200 italic shadow-inner">
+              <div className="text-sm font-bold text-slate-600 leading-relaxed bg-slate-50/50 p-8 rounded-lg border border-dashed border-slate-200 italic shadow-inner">
                 "{doctor.about}"
               </div>
             </div>
 
             <div>
-              <h3 className="text-[10px] font-bold text-slate-400  tracking-normal mb-4 px-1 font-grotesk">
+              <h3 className="text-lg font-bold text-slate-400  tracking-normal mb-4 px-1 font-grotesk">
                 Clinical Specializations
               </h3>
               <div className="flex flex-wrap gap-2.5">
                 {doctor.clinicalInterests.map((interest) => (
                   <span
                     key={interest}
-                    className="bg-primary/5 text-primary px-5 py-2.5 rounded-xl text-[10px] font-bold  tracking-normal border border-primary/10 shadow-none transition-all hover:bg-primary hover:text-white hover:shadow-none hover:shadow-primary/20 cursor-default"
+                    className="bg-primary/5 text-primary px-5 py-2.5 rounded-xl text-sm font-bold  tracking-normal border border-primary/10 shadow-none transition-all hover:bg-primary hover:text-white hover:shadow-none hover:shadow-primary/20 cursor-default"
                   >
                     {interest}
                   </span>
@@ -291,7 +291,7 @@ export default function DoctorProfileModal({
             <div className="relative z-10 space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-[10px] text-primary font-bold  tracking-normal mb-2 font-grotesk">
+                  <h3 className="text-lg text-primary font-bold  tracking-normal mb-2 font-grotesk">
                     Commercial Tier
                   </h3>
                   <p className="text-xl font-bold text-white tracking-tight leading-none">
@@ -322,7 +322,7 @@ export default function DoctorProfileModal({
           {/* Availability Intelligence */}
           <section className="space-y-5">
             <div className="flex justify-between items-center px-1">
-              <h3 className="text-[10px] font-bold text-slate-800  tracking-[0.25em] flex items-center gap-2 font-grotesk">
+              <h3 className="text-lg font-bold text-slate-800  tracking-[0.25em] flex items-center gap-2 font-grotesk">
                 <BiCalendar className="text-primary" /> Availability Grid
               </h3>
               <span className="text-[9px] font-bold text-slate-400  tracking-normal opacity-60">
@@ -331,7 +331,7 @@ export default function DoctorProfileModal({
             </div>
 
             <div className="bg-slate-50/50 rounded-lg p-8 border border-slate-100 shadow-inner">
-              <p className="text-[10px] font-bold text-slate-400  tracking-normal mb-6 px-1">
+              <p className="text-sm font-bold text-slate-400  tracking-normal mb-6 px-1">
                 TODAY,{" "}
                 {new Date().toLocaleDateString("en-ZA", {
                   day: "numeric",
@@ -360,12 +360,12 @@ export default function DoctorProfileModal({
           {/* Patient Intel */}
           <section className="space-y-6 pb-4">
             <div className="flex justify-between items-center px-1">
-              <h3 className="text-[10px] font-bold text-slate-800  tracking-[0.25em] font-grotesk">
+              <h3 className="text-lg font-bold text-slate-800  tracking-[0.25em] font-grotesk">
                 Clinical Reputation
               </h3>
               <Button
                 variant="ghost"
-                className="text-primary text-[10px] font-bold  tracking-normal hover:underline !p-0 !min-w-0 !h-auto border-none bg-transparent"
+                className="text-primary text-sm font-bold  tracking-normal hover:underline !p-0 !min-w-0 !h-auto border-none bg-transparent"
               >
                 View all Experience Logs
               </Button>
@@ -390,10 +390,10 @@ export default function DoctorProfileModal({
               ].map((review, i) => (
                 <div
                   key={i}
-                  className="bg-white border border-slate-100 p-8 rounded-[2rem] relative group overflow-hidden transition-all hover:shadow-none hover:shadow-slate-900/5"
+                  className="bg-white border border-slate-100 p-8 rounded-lg relative group overflow-hidden transition-all hover:shadow-none hover:shadow-slate-900/5"
                 >
                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-                  <div className="flex items-center gap-1.5 text-amber-400 mb-4">
+                  <div className="flex items-center gap-1.5 text-gray-400 mb-4">
                     {[...Array(5)].map((_, starI) => (
                       <BiStar
                         key={starI}
@@ -412,11 +412,11 @@ export default function DoctorProfileModal({
                     "{review.content}"
                   </p>
                   <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-slate-400  tracking-normal">
+                    <p className="text-sm font-bold text-slate-400  tracking-normal">
                       {review.name} <span className="opacity-30 mx-2">·</span>{" "}
                       {review.time}
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-500  tracking-normal">
+                    <div className="flex items-center gap-2 text-sm font-bold text-emerald-500  tracking-normal">
                       <BiCheckCircle size={16} /> RECOMMENDED
                     </div>
                   </div>

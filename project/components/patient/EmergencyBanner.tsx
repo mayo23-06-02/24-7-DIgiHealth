@@ -5,14 +5,16 @@ import Button from "../ui/Button";
 
 export default function EmergencyBanner() {
   return (
-    <div className="bg-high-vis-red text-white p-4 md:p-6 shadow-md border-b-[4px] border-red-900/30 w-full relative z-40">
+    <div className="bg-high-vis-red text-white p-4 md:p-6  border-b-[4px] border-red-900/30 w-full relative z-40">
       <div className="container mx-auto max-w-[1600px] flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-2xl animate-pulse">
             ⚠️
           </div>
           <div>
-            <h4 className="font-bold text-lg font-grotesk">Life‑threatening emergency?</h4>
+            <h4 className="font-bold text-lg font-grotesk">
+              Life‑threatening emergency?
+            </h4>
             <p className="text-white/90">
               Please do not wait. Use the emergency resources immediately.
             </p>

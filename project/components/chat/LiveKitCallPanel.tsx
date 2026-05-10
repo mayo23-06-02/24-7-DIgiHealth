@@ -118,7 +118,10 @@ export default function LiveKitCallPanel({
         message.toLowerCase().includes("client initiated disconnect");
 
       if (isCancelledDisconnect) {
-        console.warn("Abort connection attempt due to user initiated disconnect", error);
+        console.warn(
+          "Abort connection attempt due to user initiated disconnect",
+          error,
+        );
         return;
       }
 
@@ -242,7 +245,7 @@ export default function LiveKitCallPanel({
               playsInline
               className="w-full h-full object-cover"
             />
-            <div className="absolute left-3 bottom-3 rounded-full bg-black/40 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+            <div className="absolute left-3 bottom-3 rounded-full bg-black/40 px-2 py-1 text-sm font-bold -wide text-white">
               You
             </div>
           </div>
@@ -268,7 +271,7 @@ export default function LiveKitCallPanel({
 
         <button
           onClick={handleEnd}
-          className="w-16 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center transition-all shadow-xl shadow-rose-900/30"
+          className="w-16 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center transition-all  shadow-rose-900/30"
         >
           <BiPhoneOff size={22} />
         </button>

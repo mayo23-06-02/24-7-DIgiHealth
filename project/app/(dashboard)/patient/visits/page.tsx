@@ -23,59 +23,41 @@ import {
  * Features: 1-click Join (WebRTC Mock), Cancellations, Rating, Offline Sync.
  */
 
-// --- Mock Data ---
-const MOCK_VISITS = [
-  {
-    id: "v1",
-    doctor: "Dr. Thivanka Naidoo",
-    specialisation: "General Practitioner",
-    date: "2026-04-06",
-    time: "10:30 AM",
-    status: "upcoming",
-  },
-  {
-    id: "v2",
-    doctor: "Dr. Sarah Smith",
-    specialisation: "Paediatrician",
-    date: "2026-04-05",
-    time: "14:00 PM",
-    status: "past",
-    summary: "Seasonal allergies. Prescribed anti-histamines and nasal spray.",
-    rating: 0,
-  },
-  {
-    id: "v3",
-    doctor: "Dr. Alan Walker",
-    specialisation: "Cardiologist",
-    date: "2026-03-28",
-    time: "09:15 AM",
-    status: "past",
-    summary: "Routine heart checkup. Post-op recovery looks excellent.",
-    rating: 5,
-  },
-];
-
 export default function PatientVisits() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
-  const [visits, setVisits] = useState(MOCK_VISITS);
+  const [visits, setVisits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [activeVisit, setActiveVisit] = useState<any>(null);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [feedbackText, setFeedbackText] = useState("");
 
-  // Simulation loading
+  const fetchVisits = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/patient/appointments?status=${activeTab}`);
+      if (res.ok) {
+        const data = await res.json();
+        setVisits(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
+    fetchVisits();
     if (typeof window !== "undefined") {
       setIsOnline(navigator.onLine);
     }
-    return () => clearTimeout(timer);
-  }, []);
+  }, [activeTab]);
 
   // Filter visits
-  const filteredVisits = visits.filter((v) => v.status === activeTab);
+  const filteredVisits = visits; // already filtered by API
 
   // Actions
   const handleCancelVisit = async (id: string) => {
@@ -104,18 +86,31 @@ export default function PatientVisits() {
     setIsRatingModalOpen(true);
   };
 
-  const submitRating = (stars: number) => {
+  const submitRating = async (stars: number) => {
     if (!isOnline) {
       alert("Offline: Rating queued for sync.");
     } else {
-      alert(
-        `Thank you! Dr. ${activeVisit.doctor} received a ${stars} star rating.`,
-      );
+      try {
+        await fetch("/api/patient/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            consultationId: activeVisit.id,
+            practitionerId: activeVisit.practitionerId,
+            rating: stars,
+            comment: feedbackText,
+          }),
+        });
+        alert(`Thank you! Dr. ${activeVisit.doctor} received your feedback.`);
+      } catch (err) {
+        console.error(err);
+      }
     }
     setVisits((prev) =>
       prev.map((v) => (v.id === activeVisit.id ? { ...v, rating: stars } : v)),
     );
     setIsRatingModalOpen(false);
+    setFeedbackText("");
   };
 
   return (
@@ -222,7 +217,10 @@ export default function PatientVisits() {
                       </button>
                       <button
                         className="bg-supportive-teal text-white px-8 py-3 rounded-lg font-extra-bold  text-xs hover:bg-[#008ba3] transition-all"
-                        onClick={() => setIsVideoModalOpen(true)}
+                        onClick={() => {
+                          setActiveVisit(visit);
+                          setIsVideoModalOpen(true);
+                        }}
                       >
                         Join Call
                       </button>
@@ -237,7 +235,7 @@ export default function PatientVisits() {
                           Rate Session
                         </button>
                       ) : (
-                        <div className="flex gap-1 text-amber-400">
+                        <div className="flex gap-1 text-gray-400">
                           {[...Array(visit.rating)].map((_, i) => (
                             <BiStar key={i} fill="currentColor" />
                           ))}
@@ -306,7 +304,10 @@ export default function PatientVisits() {
               </div>
               <button
                 className="px-8 py-3 bg-slate-900 text-white rounded-lg font-bold text-xs  tracking-normal hover:bg-slate-800 transition-all"
-                onClick={() => setIsVideoModalOpen(false)}
+                onClick={() => {
+                  setIsVideoModalOpen(false);
+                  setIsRatingModalOpen(true);
+                }}
               >
                 End Session
               </button>
@@ -337,7 +338,7 @@ export default function PatientVisits() {
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
-                  className="text-4xl text-slate-100 hover:text-amber-400 transition-all"
+                  className="text-4xl text-slate-100 hover:text-gray-400 transition-all"
                   onClick={() => submitRating(star)}
                 >
                   <BiStar fill="currentColor" />
@@ -348,6 +349,8 @@ export default function PatientVisits() {
               placeholder="Any specific feedback? (Optional)"
               className="w-full p-5 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:border-primary transition-all text-sm font-medium"
               rows={4}
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
             />
             <button
               className="w-full py-4 bg-primary text-white rounded-lg font-bold text-xs  tracking-normal hover:bg-primary-dark transition-all"

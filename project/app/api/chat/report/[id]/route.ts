@@ -61,8 +61,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           doc.fontSize(10).font('Helvetica').fillColor('gray').text('Strictly Confidential Clinical Information', { align: 'center' });
           doc.moveDown(2);
 
-          doc.fontSize(16).fillColor('black').font('Helvetica-Bold').text('Patient Clinical Report', { underline: true });
-          doc.fontSize(10).font('Helvetica').fillColor('#666').text(`Patient ID: ${patientId.to()}`);
+          doc.fontSize(10).font('Helvetica').fillColor('#666').text(`Patient ID: ${patientId}`);
           doc.moveDown(1.5);
 
           const addSectionHeader = (title: string) => {

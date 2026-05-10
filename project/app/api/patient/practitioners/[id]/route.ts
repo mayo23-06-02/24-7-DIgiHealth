@@ -6,7 +6,7 @@ import { Facility } from '@/lib/models/Facility';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToDatabase();
@@ -36,12 +36,12 @@ export async function GET(
       languages: profile.languages || ['English'],
       avatarUrl: `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=0052cc&color=fff`,
       isOnline: profile.isOnline,
-      consultationFee: profile.consultationFee,
+      consultationFee: 0,
       experienceYears: profile.experienceYears,
       practicePhone: user.mobile,
       practiceEmail: user.email,
-      facilityName: profile.affiliatedFacilityIds?.[0]?.name || 'Independent Practice',
-      facilityId: profile.affiliatedFacilityIds?.[0]?._id?.toString(),
+      facilityName: (profile.affiliatedFacilityIds?.[0] as any)?.name || 'Independent Practice',
+      facilityId: (profile.affiliatedFacilityIds?.[0] as any)?._id?.toString(),
       about: profile.bio,
       clinicalInterests: ['General Care', profile.specialisation],
       acceptsMedicalAid: profile.acceptedMedicalAids || ['Cash']

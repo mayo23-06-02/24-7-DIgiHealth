@@ -34,7 +34,7 @@
   --bg-soft: #F1F5F9;
   --glass: rgba(255, 255, 255, 0.7);
   --shadow-none: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-none: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
@@ -66,6 +66,22 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-grotesk), system-ui, -apple-system, sans-serif;
+}
+
+p {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+}
+
+th {
+  font-family: var(--font-grotesk), system-ui, -apple-system, sans-serif;
+}
+
+input {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+}
+
+select {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
 }
 
 a {

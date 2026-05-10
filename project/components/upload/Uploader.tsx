@@ -62,10 +62,10 @@ export const ImageUploader: React.FC<UploaderProps> = ({
   return (
     <div className="space-y-4">
       {label && (
-        <label className="block text-lg font-bold text-slate-900">
+        <h1 className="block text-lg font-bold text-slate-900">
           {label}
           {required && "*"}
-        </label>
+        </h1>
       )}
 
       <div
@@ -161,10 +161,10 @@ export const PDFUploader: React.FC<UploaderProps> = ({
   return (
     <div className="space-y-4">
       {label && (
-        <label className="block text-lg font-bold text-slate-900">
+        <h1 className="block text-lg font-bold text-slate-900">
           {label}
           {required && "*"}
-        </label>
+        </h1>
       )}
       <div
         {...getRootProps()}

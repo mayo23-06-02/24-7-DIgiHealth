@@ -1,36 +1,16 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
-import {
-  BiChevronLeft,
-  BiChevronRight,
-  BiTime,
-  BiCalendar,
-  BiPlus,
-  BiTrash,
-  BiLoaderAlt,
-  BiTrendingUp,
-  BiBlock,
-  BiMap,
-  BiUser,
-  BiBuilding,
-  BiPencil,
-  BiVideo,
-  BiCheckCircle,
-  BiDollar,
-  BiSolidTruck,
-  BiHome,
-  BiStore,
-} from "react-icons/bi";
-import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
-import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
-import Carousel from "@/components/ui/Carousel";
 import { toast } from "react-hot-toast";
-import Avatar from "@/components/ui/Avatar";
+import Modal from "@/components/ui/Modal";
+
+// Sub-components
+import CalendarHeader from "./calendar/CalendarHeader";
+import DayCard from "./calendar/DayCard";
+import ScheduleFeed from "./calendar/ScheduleFeed";
+import AppointmentDetail from "./calendar/AppointmentDetail";
+import EventModal from "./calendar/EventModal";
+import Carousel from "@/components/ui/Carousel";
 
 interface Appointment {
   id: string;
@@ -48,7 +28,6 @@ interface Appointment {
   img?: string;
   countdown?: string;
   durationMinutes?: number;
-  // Refill specific fields
   prescriptionId?: string;
   prescriptionName?: string;
   deliveryMethod?: "pickup" | "delivery";
@@ -71,8 +50,7 @@ export default function PatientCalendar() {
   const [liveCarouselIndex, setLiveCarouselIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [unavailableDays, setUnavailableDays] = useState<string[]>([]);
   const [selectedDateStr, setSelectedDateStr] = useState<string>("");
 
@@ -90,7 +68,6 @@ export default function PatientCalendar() {
     notes: "",
     doctor: "",
     institution: "",
-    // Refill specific
     prescriptionId: "",
     deliveryMethod: "pickup" as "pickup" | "delivery",
     deliveryAddress: "",
@@ -100,319 +77,12 @@ export default function PatientCalendar() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Fetch prescriptions when type changes to refill
-  useEffect(() => {
-    if (showAddModal && addForm.type === "refill") {
-      const fetchPrescriptions = async () => {
-        setLoadingPrescriptions(true);
-        try {
-          const res = await fetch("/api/patient/prescriptions");
-          if (res.ok) {
-            const data = await res.json();
-            setPrescriptions(data);
-          }
-        } catch {
-          // silent
-        } finally {
-          setLoadingPrescriptions(false);
-        }
-      };
-      fetchPrescriptions();
-    }
-  }, [showAddModal, addForm.type]);
-
-  // Helper: check if an appointment is joinable (5 min before start until end)
-  const isJoinable = (appt: Appointment): boolean => {
-    if (appt.type !== "appointment") return false;
-    if (appt.status !== "confirmed") return false;
-    const [month, day, year] = appt.date.split(" ");
-    const [hours, minutes] = appt.time.split(":");
-    const appointmentDate = new Date(
-      `${month} ${day}, ${year} ${hours}:${minutes}`,
-    );
-    const now = new Date();
-    const duration = appt.durationMinutes || 30;
-    const startTime = appointmentDate.getTime();
-    const endTime = startTime + duration * 60000;
-    const nowTime = now.getTime();
-    const fiveMinutesBefore = startTime - 5 * 60000;
-    return nowTime >= fiveMinutesBefore && nowTime <= endTime;
-  };
-
-  const getJoinCountdown = (appt: Appointment): string => {
-    const [month, day, year] = appt.date.split(" ");
-    const [hours, minutes] = appt.time.split(":");
-    const appointmentDate = new Date(
-      `${month} ${day}, ${year} ${hours}:${minutes}`,
-    );
-    const now = new Date();
-    const diffSeconds = Math.floor(
-      (appointmentDate.getTime() - now.getTime()) / 1000,
-    );
-    if (diffSeconds <= 0) return "Live now";
-    const minutesLeft = Math.floor(diffSeconds / 60);
-    if (minutesLeft < 5) return `Starts in ${minutesLeft} min`;
-    return "";
-  };
+  const [visibleCount, setVisibleCount] = useState(3);
 
   useEffect(() => {
     setIsClient(true);
     fetchAgenda();
     fetchLists();
-  }, []);
-
-  const fetchAgenda = useCallback(async () => {
-    try {
-      const res = await fetch("/api/patient/agenda");
-      if (res.ok) {
-        const data = await res.json();
-        setAppointments(data);
-      }
-    } catch {
-      /* silent */
-    }
-  }, []);
-
-  const fetchLists = async () => {
-    try {
-      const [docsRes, facsRes] = await Promise.all([
-        fetch("/api/patient/my-doctors"),
-        fetch("/api/patient/facilities"),
-      ]);
-      if (docsRes.ok) setDoctors(await docsRes.json());
-      if (facsRes.ok) setFacilities(await facsRes.json());
-    } catch {
-      /* silent */
-    }
-  };
-
-  const doctorOptions = useMemo(
-    () => [
-      { value: "", label: "No preference" },
-      ...doctors.map((d) => ({ value: d.name, label: d.name })),
-    ],
-    [doctors],
-  );
-
-  const facilityOptions = useMemo(
-    () => [
-      { value: "", label: "Home/Private" },
-      ...facilities.map((f) => ({ value: f.name, label: f.name })),
-    ],
-    [facilities],
-  );
-
-  const prescriptionOptions = useMemo(() => {
-    const opts = prescriptions.map((p) => ({
-      value: p.id,
-      label: `${p.medicationName} (${p.dosage}) - ${p.refillsRemaining} refills left`,
-    }));
-    opts.unshift({ value: "new", label: "+ Request new prescription" });
-    return opts;
-  }, [prescriptions]);
-
-  const carouselDays = useMemo(() => {
-    const days: any[] = [];
-    for (let i = 0; i < 30; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      const dateStr = d.toDateString();
-      const dayAppts = appointments.filter((a) => a.date === dateStr);
-      const markerMap = dayAppts.reduce((acc: any, curr) => {
-        const type = curr.type || "appointment";
-        acc[type] = (acc[type] || 0) + 1;
-        return acc;
-      }, {});
-      const markers = Object.keys(markerMap).map((type) => ({
-        type,
-        count: markerMap[type],
-      }));
-      days.push({
-        dateStr,
-        dayNum: d.getDate(),
-        dayName: d.toLocaleString("en-US", { weekday: "short" }),
-        monthName: d.toLocaleString("en-US", { month: "short" }),
-        isToday: i === 0,
-        isUnavailable: unavailableDays.includes(dateStr),
-        markers,
-        dayAppts,
-      });
-    }
-    return days;
-  }, [appointments, unavailableDays]);
-
-  useEffect(() => {
-    if (carouselDays[carouselIndex]) {
-      setSelectedDateStr(carouselDays[carouselIndex].dateStr);
-      setLiveCarouselIndex(0);
-    }
-  }, [carouselIndex, carouselDays]);
-
-  const filteredAppointments = useMemo(() => {
-    return appointments.filter((a) => a.date === selectedDateStr);
-  }, [appointments, selectedDateStr]);
-
-  const toggleUnavailable = (dateStr: string) =>
-    setUnavailableDays((prev) =>
-      prev.includes(dateStr)
-        ? prev.filter((d) => d !== dateStr)
-        : [...prev, dateStr],
-    );
-
-  const handleAddSubmit = async () => {
-    if (!addForm.title.trim() && addForm.type !== "refill") return;
-    if (addForm.type === "refill" && !addForm.prescriptionId) {
-      toast.error("Please select a prescription");
-      return;
-    }
-    setIsSaving(true);
-    try {
-      const url = editingId
-        ? `/api/patient/agenda/${editingId}`
-        : "/api/patient/agenda";
-      const method = editingId ? "PUT" : "POST";
-      const payload: any = {
-        date: showAddModal,
-        type: addForm.type,
-        time: addForm.time,
-        notes: addForm.notes,
-      };
-      if (addForm.type === "appointment") {
-        payload.title = addForm.title;
-        payload.doctor = addForm.doctor;
-        payload.institution = addForm.institution;
-      } else if (addForm.type === "reminder") {
-        payload.title = addForm.title;
-      } else if (addForm.type === "note") {
-        payload.title = addForm.title;
-      } else if (addForm.type === "refill") {
-        payload.prescriptionId = addForm.prescriptionId;
-        payload.deliveryMethod = addForm.deliveryMethod;
-        payload.deliveryAddress = addForm.deliveryAddress;
-        payload.pharmacyId = addForm.pharmacyId;
-        payload.paymentMethod = addForm.paymentMethod;
-        payload.reminderDays = addForm.reminderDays;
-      }
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        await fetchAgenda();
-        setShowAddModal(null);
-        setEditingId(null);
-        setAddForm({
-          title: "",
-          time: "09:00",
-          type: "appointment",
-          notes: "",
-          doctor: "",
-          institution: "",
-          prescriptionId: "",
-          deliveryMethod: "pickup",
-          deliveryAddress: "",
-          pharmacyId: "",
-          paymentMethod: "insurance",
-          reminderDays: 3,
-        });
-        toast.success(
-          editingId
-            ? "Event updated"
-            : "Event synchronised with your care team",
-        );
-      } else {
-        throw new Error("Failed to save");
-      }
-    } catch {
-      toast.error("Failed to save event");
-    }
-    setIsSaving(false);
-  };
-
-  const handleDelete = async (appt: Appointment) => {
-    if (!appt.id) return;
-    setIsDeleting(true);
-    try {
-      const res = await fetch(`/api/patient/agenda/${appt.id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        await fetchAgenda();
-        toast.success("Event removed");
-      } else {
-        throw new Error("Failed to delete");
-      }
-    } catch {
-      toast.error("Failed to remove event");
-    }
-    setIsDeleting(false);
-    setSelectedAppointment(null);
-  };
-
-  const handleEdit = (appt: Appointment) => {
-    setEditingId(appt.id);
-    setAddForm({
-      title: appt.title || appt.dr || "",
-      time: appt.time || "09:00",
-      type: appt.type,
-      notes: appt.notes || appt.concern || "",
-      doctor: appt.dr || "",
-      institution: appt.institution || "",
-      prescriptionId: appt.prescriptionId || "",
-      deliveryMethod: appt.deliveryMethod || "pickup",
-      deliveryAddress: appt.deliveryAddress || "",
-      pharmacyId: appt.pharmacyId || "",
-      paymentMethod: appt.paymentMethod || "insurance",
-      reminderDays: appt.reminderDays || 3,
-    });
-    setShowAddModal(appt.date);
-  };
-
-  const onDragStart = (e: React.DragEvent, apptId: string) => {
-    e.dataTransfer.setData("apptId", apptId);
-  };
-
-  const onDrop = async (e: React.DragEvent, targetDate: string) => {
-    e.preventDefault();
-    const apptId = e.dataTransfer.getData("apptId");
-    if (!apptId) return;
-    try {
-      const res = await fetch(`/api/patient/agenda/${apptId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: targetDate }),
-      });
-      if (res.ok) {
-        await fetchAgenda();
-        toast.success("Moved successfully");
-      } else {
-        throw new Error("Failed to move");
-      }
-    } catch {
-      toast.error("Failed to move event");
-    }
-  };
-
-  const isPersonalEvent = (appt: Appointment) =>
-    ["note", "reminder", "appointment", "refill"].includes(appt.type);
-
-  const getMarkerColor = (type: string) => {
-    switch (type) {
-      case "refill":
-        return "bg-emerald-400";
-      case "reminder":
-        return "bg-amber-400";
-      case "appointment":
-        return "bg-primary";
-      default:
-        return "bg-slate-400";
-    }
-  };
-
-  const [visibleCount, setVisibleCount] = useState(3);
-  useEffect(() => {
     const updateCount = () => {
       if (window.innerWidth >= 1200) setVisibleCount(3);
       else if (window.innerWidth >= 800) setVisibleCount(2);
@@ -423,919 +93,136 @@ export default function PatientCalendar() {
     return () => window.removeEventListener("resize", updateCount);
   }, []);
 
+  const fetchAgenda = useCallback(async () => {
+    try {
+      const res = await fetch("/api/patient/agenda");
+      if (res.ok) setAppointments(await res.json());
+    } catch { /* silent */ }
+  }, []);
+
+  const fetchLists = async () => {
+    try {
+      const [docsRes, facsRes] = await Promise.all([fetch("/api/patient/my-doctors"), fetch("/api/patient/facilities")]);
+      if (docsRes.ok) setDoctors(await docsRes.json());
+      if (facsRes.ok) setFacilities(await facsRes.json());
+    } catch { /* silent */ }
+  };
+
+  useEffect(() => {
+    if (showAddModal && addForm.type === "refill") {
+      setLoadingPrescriptions(true);
+      fetch("/api/patient/prescriptions").then(res => res.json()).then(setPrescriptions).finally(() => setLoadingPrescriptions(false));
+    }
+  }, [showAddModal, addForm.type]);
+
+  const doctorOptions = useMemo(() => [{ value: "", label: "No preference" }, ...doctors.map(d => ({ value: d.name, label: d.name }))], [doctors]);
+  const facilityOptions = useMemo(() => [{ value: "", label: "No preference" }, ...facilities.map(f => ({ value: f.name, label: f.name }))], [facilities]);
+  const prescriptionOptions = useMemo(() => {
+    const opts = prescriptions.map(p => ({ value: p.id, label: `${p.medicationName} (${p.dosage}) - ${p.refillsRemaining} refills left` }));
+    opts.unshift({ value: "new", label: "+ Request new prescription" });
+    return opts;
+  }, [prescriptions]);
+
+  const carouselDays = useMemo(() => {
+    return Array.from({ length: 30 }, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() + i);
+      const dateStr = d.toDateString();
+      const dayAppts = appointments.filter(a => a.date === dateStr);
+      const markerMap = dayAppts.reduce((acc: any, curr) => { acc[curr.type || "appointment"] = (acc[curr.type || "appointment"] || 0) + 1; return acc; }, {});
+      return {
+        dateStr, dayNum: d.getDate(), dayName: d.toLocaleString("en-US", { weekday: "short" }), monthName: d.toLocaleString("en-US", { month: "short" }),
+        isToday: i === 0, isUnavailable: unavailableDays.includes(dateStr), markers: Object.keys(markerMap).map(type => ({ type, count: markerMap[type] })),
+      };
+    });
+  }, [appointments, unavailableDays]);
+
+  useEffect(() => { if (carouselDays[carouselIndex]) { setSelectedDateStr(carouselDays[carouselIndex].dateStr); setLiveCarouselIndex(0); } }, [carouselIndex, carouselDays]);
+
+  const filteredAppointments = useMemo(() => appointments.filter(a => a.date === selectedDateStr), [appointments, selectedDateStr]);
+
+  const handleAddSubmit = async () => {
+    if (!addForm.title.trim() && addForm.type !== "refill") return;
+    setIsSaving(true);
+    try {
+      const url = editingId ? `/api/patient/agenda/${editingId}` : "/api/patient/agenda";
+      const res = await fetch(url, { method: editingId ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...addForm, date: showAddModal }) });
+      if (res.ok) {
+        await fetchAgenda();
+        setShowAddModal(null);
+        toast.success(editingId ? "Event updated" : "Event synchronised");
+      }
+    } catch { toast.error("Failed to save event"); }
+    setIsSaving(false);
+  };
+
+  const handleDelete = async (appt: Appointment) => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/patient/agenda/${appt.id}`, { method: "DELETE" });
+      if (res.ok) { await fetchAgenda(); toast.success("Event removed"); setSelectedAppointment(null); }
+    } catch { toast.error("Failed to remove event"); }
+    setIsDeleting(false);
+  };
+
+  const handleEdit = (appt: Appointment) => {
+    setEditingId(appt.id);
+    setAddForm({ ...addForm, title: appt.title || appt.dr || "", time: appt.time, type: appt.type, notes: appt.notes || appt.concern || "", doctor: appt.dr || "", institution: appt.institution || "" });
+    setShowAddModal(appt.date);
+  };
+
+  const isJoinable = (appt: Appointment): boolean => {
+    if (appt.type !== "appointment" || appt.status !== "confirmed") return false;
+    const apptDate = new Date(`${appt.date} ${appt.time}`);
+    const now = new Date();
+    return now.getTime() >= apptDate.getTime() - 5 * 60000 && now.getTime() <= apptDate.getTime() + (appt.durationMinutes || 30) * 60000;
+  };
+
+  const getJoinCountdown = (appt: Appointment): string => {
+    const diff = new Date(`${appt.date} ${appt.time}`).getTime() - new Date().getTime();
+    return diff <= 0 ? "Live now" : diff < 300000 ? `Starts in ${Math.floor(diff/60000)} min` : "";
+  };
+
+  const getMarkerColor = (type: string) => ({ refill: "bg-emerald-400", reminder: "bg-gray-400", appointment: "bg-primary" }[type] || "bg-slate-400");
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* HEADER */}
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-lg font-bold text-slate-800">
-            Schedule at a Glance
-          </p>
-          <p className="text-xs font-thin text-slate-400">
-            Manage your appointments and medication reminders.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCarouselIndex((prev) => Math.max(0, prev - 1))}
-            className="w-10 h-10 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-          >
-            <BiChevronLeft size={24} />
-          </button>
-          <button
-            onClick={() =>
-              setCarouselIndex((prev) =>
-                Math.min(carouselDays.length - 1, prev + 1),
-              )
-            }
-            className="w-10 h-10 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-          >
-            <BiChevronRight size={24} />
-          </button>
-        </div>
-      </div>
+      <CalendarHeader
+        onPrev={() => setCarouselIndex(p => Math.max(0, p - 1))}
+        onNext={() => setCarouselIndex(p => Math.min(carouselDays.length - 1, p + 1))}
+      />
 
-      <div className="flex-1 overflow-y-hidden custom-scrollbar py-4 space-y-4">
-        {/* DAY CAROUSEL (same as before) */}
-        <section>
-          <Carousel
-            selectedItem={carouselIndex}
-            onChange={setCarouselIndex}
-            centerMode={true}
-            centerSlidePercentage={100 / visibleCount}
-          >
+      <div className="flex-1 flex flex-col overflow-y-auto py-4 space-y-4 custom-scrollbar">
+        <div className="flex-shrink-0">
+          <Carousel selectedItem={carouselIndex} onChange={setCarouselIndex} centerMode centerSlidePercentage={100 / visibleCount}>
             {carouselDays.map((day, idx) => (
-              <div
-                key={idx}
-                className="px-1 pb-6 h-full"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => onDrop(e, day.dateStr)}
-              >
-                <div
-                  onClick={() => setShowAddModal(day.dateStr)}
-                  className={`h-56 rounded-lg border transition-all duration-500 relative p-4 flex flex-col justify-between group cursor-pointer ${
-                    day.isUnavailable
-                      ? "bg-slate-50 border-slate-100 opacity-50 grayscale pointer-events-none"
-                      : day.isToday
-                        ? "border-primary bg-primary/5 shadow-none shadow-primary/5 ring-1 ring-primary/20"
-                        : "border-slate-100 bg-white hover:border-primary/30 hover:shadow-none hover:shadow-slate-200/50"
-                  }`}
-                >
-                  {/* same day card content as before */}
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1.5 items-center">
-                        {day.markers.map((m: any, i: number) => (
-                          <div key={i} className="flex items-center gap-0.5">
-                            <div
-                              className={`w-1.5 h-1.5 rounded-full ${getMarkerColor(m.type)}`}
-                            />
-                            {m.count > 1 && (
-                              <span className="text-[9px] font-bold text-slate-500">
-                                {m.count}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <span
-                        className={`text-xs items-center font-bold whitespace-nowrap ${
-                          day.isToday
-                            ? "text-primary flex gap-1"
-                            : "text-slate-400"
-                        }`}
-                      >
-                        {day.dayName} {day.monthName}
-                      </span>
-                    </div>
-                    {day.isToday && (
-                      <div className="text-[8px] font-bold  bg-primary px-2 py-1 rounded-full text-white">
-                        Today
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      disabled={day.isUnavailable}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowAddModal(day.dateStr);
-                      }}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-                        day.isUnavailable
-                          ? "bg-slate-100 text-slate-300 pointer-events-none"
-                          : "text-slate-500 bg-slate-200 hover:text-primary hover:bg-primary/10"
-                      }`}
-                    >
-                      <BiPlus size={18} />
-                    </button>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <div className="flex flex-col-reverse gap-2">
-                      <span
-                        className={`text-4xl font-semibold tracking-tighter ${
-                          day.isToday
-                            ? "text-primary"
-                            : "text-slate-200 group-hover:text-primary transition-colors"
-                        }`}
-                      >
-                        {day.dayNum.toString().padStart(2, "0")}
-                      </span>
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleUnavailable(day.dateStr);
-                        }}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                          day.isUnavailable
-                            ? "bg-primary text-white"
-                            : "text-slate-300 bg-slate-50 hover:text-primary"
-                        }`}
-                      >
-                        <BiBlock size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <DayCard key={idx} day={day} idx={idx} onSelect={setShowAddModal} onDrop={async (e, target) => {
+                const id = e.dataTransfer.getData("apptId");
+                if (id) { await fetch(`/api/patient/agenda/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ date: target }) }); fetchAgenda(); }
+              }} onToggleUnavailable={d => setUnavailableDays(p => p.includes(d) ? p.filter(x => x !== d) : [...p, d])} getMarkerColor={getMarkerColor} />
             ))}
           </Carousel>
-        </section>
+        </div>
 
-        {/* LIVE SCHEDULE FEED (same as before) */}
-        <section className="space-y-6 h-full">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-lg font-bold text-slate-800 font-grotesk">
-                Live Schedule Overview
-              </h4>
-              <p className="text-xs font-thin text-slate-400">
-                {selectedDateStr
-                  ? `Events for ${new Date(selectedDateStr).toLocaleDateString(
-                      "en-ZA",
-                      {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                      },
-                    )}`
-                  : "Select a day to see events"}
-              </p>
-            </div>
-            {filteredAppointments.length > 1 && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    setLiveCarouselIndex((prev) => Math.max(0, prev - 1))
-                  }
-                  className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-                >
-                  <BiChevronLeft size={24} />
-                </button>
-                <button
-                  onClick={() =>
-                    setLiveCarouselIndex((prev) =>
-                      Math.min(filteredAppointments.length - 1, prev + 1),
-                    )
-                  }
-                  className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
-                >
-                  <BiChevronRight size={24} />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {filteredAppointments.length > 0 ? (
-            <Carousel
-              selectedItem={liveCarouselIndex}
-              onChange={setLiveCarouselIndex}
-              centerMode={true}
-              centerSlidePercentage={
-                isClient && window.innerWidth < 600 ? 100 : 45
-              }
-              className="h-full"
-            >
-              {filteredAppointments.map((appt, idx) => {
-                const joinable = isJoinable(appt);
-                return (
-                  <div key={appt.id || idx} className="px-2 h-full">
-                    <div
-                      onClick={() => setSelectedAppointment(appt)}
-                      className="bg-slate-50 border border-slate-200 rounded-lg p-4 hover: hover:shadow-slate-200/50 transition-all group flex flex-col h-full cursor-pointer"
-                    >
-                      {/* Same appointment card content as before */}
-                      <div className="flex h-full justify-between items-start mb-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-slate-100 overflow-hidden relative rounded-xl">
-                            {appt.img ? (
-                              <Avatar name={appt.dr} size="md" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-2xl">
-                                {appt.type === "refill"
-                                  ? "💊"
-                                  : appt.type === "reminder"
-                                    ? "🔔"
-                                    : "📅"}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <h5 className="text-base font-bold text-slate-800 leading-none mb-1 truncate max-w-[150px] font-grotesk">
-                              {appt.dr ||
-                                appt.title ||
-                                (appt.type === "refill"
-                                  ? "Prescription Refill"
-                                  : "Event")}
-                            </h5>
-                            <div className="flex items-center gap-2">
-                              <p className="text-xs font-bold text-slate-400  tracking-normal flex items-center gap-1">
-                                <BiTime className="text-primary" /> {appt.time}
-                              </p>
-                              <span className="text-xs text-slate-300">•</span>
-                              <p className="text-xs font-bold text-slate-400  tracking-normal">
-                                {appt.status}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <Badge
-                            label={
-                              appt.countdown ||
-                              (appt.status === "confirmed"
-                                ? "Confirmed"
-                                : "Pending")
-                            }
-                            status={
-                              appt.status === "confirmed"
-                                ? "success"
-                                : "warning"
-                            }
-                            variant="soft"
-                          />
-                          {joinable && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.location.href = `/patient/messages?autoStart=true&consultationId=${appt.id}`;
-                              }}
-                              className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all px-3 py-2 rounded-lg text-xs font-bold  tracking-normal flex items-center gap-1 shadow-none"
-                            >
-                              <BiVideo size={14} /> Join Room
-                              {getJoinCountdown(appt) &&
-                                ` (${getJoinCountdown(appt)})`}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3">
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {appt.location && (
-                            <div className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
-                              <BiMap className="text-primary" /> {appt.location}
-                            </div>
-                          )}
-                          {appt.dr_specialty && (
-                            <div className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
-                              <BiTrendingUp className="text-emerald-500" />{" "}
-                              {appt.dr_specialty}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col gap-1 justify-start items-start">
-                          <p className="text-xs font-bold text-slate-300  tracking-normal leading-none">
-                            {appt.type === "refill"
-                              ? "Refill Details"
-                              : "Appointment Details"}
-                          </p>
-                          <div className="bg-white p-4 rounded-xl border border-slate-100 w-full text-xs font-bold text-slate-500 leading-relaxed text-left italic">
-                            {appt.concern ? (
-                              `"${appt.concern}"`
-                            ) : appt.prescriptionName ? (
-                              `💊 ${appt.prescriptionName}`
-                            ) : (
-                              <span className="italic text-slate-300">
-                                No notes provided
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </Carousel>
-          ) : (
-            <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              <BiCalendar size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm font-bold">
-                No events scheduled for this day.
-              </p>
-              <p className="text-xs mt-1">Tap a date above to add one.</p>
-            </div>
-          )}
-        </section>
+        <ScheduleFeed
+          selectedDateStr={selectedDateStr} filteredAppointments={filteredAppointments} liveCarouselIndex={liveCarouselIndex}
+          setLiveCarouselIndex={setLiveCarouselIndex} isClient={isClient} isJoinable={isJoinable} getJoinCountdown={getJoinCountdown}
+          setSelectedAppointment={setSelectedAppointment}
+        />
       </div>
 
-      {/* ADD/EDIT MODAL – DYNAMIC FORM FIELDS BASED ON TYPE */}
-      <Modal
-        isOpen={!!showAddModal}
-        onClose={() => {
-          setShowAddModal(null);
-          setEditingId(null);
-          setAddForm({
-            title: "",
-            time: "09:00",
-            type: "appointment",
-            notes: "",
-            doctor: "",
-            institution: "",
-            prescriptionId: "",
-            deliveryMethod: "pickup",
-            deliveryAddress: "",
-            pharmacyId: "",
-            paymentMethod: "insurance",
-            reminderDays: 3,
-          });
-        }}
-        title={`${editingId ? "Edit" : "Add"} ${addForm.type === "refill" ? "Refill" : addForm.type === "reminder" ? "Reminder" : addForm.type === "note" ? "Note" : "Appointment"} — ${
-          showAddModal
-            ? new Date(showAddModal).toLocaleDateString("en-ZA", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-              })
-            : ""
-        }`}
-      >
-        <div className="space-y-6">
-          {/* Existing events for this day (when adding) */}
-          {!editingId && showAddModal && (
-            <div className="space-y-3">
-              <p className="text-xs font-bold text-slate-400  tracking-normal">
-                Scheduled for this day
-              </p>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                {appointments.filter((a) => a.date === showAddModal).length >
-                0 ? (
-                  appointments
-                    .filter((a) => a.date === showAddModal)
-                    .map((appt) => (
-                      <div
-                        key={appt.id}
-                        draggable
-                        onDragStart={(e) => onDragStart(e, appt.id)}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 group cursor-move"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-2 h-2 rounded-full ${getMarkerColor(appt.type)}`}
-                          />
-                          <div>
-                            <p className="text-sm font-bold text-slate-800">
-                              {appt.title ||
-                                appt.dr ||
-                                (appt.type === "refill" ? "Refill" : "Event")}
-                            </p>
-                            <p className="text-xs text-slate-400 font-medium">
-                              {appt.time} • {appt.type}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => handleEdit(appt)}
-                            className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-primary transition-colors"
-                          >
-                            <BiPencil size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(appt)}
-                            className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-red-500 transition-colors"
-                          >
-                            <BiTrash size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                ) : (
-                  <p className="text-xs text-slate-400 italic py-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    No events scheduled yet
-                  </p>
-                )}
-              </div>
-              <div className="h-px bg-slate-100 my-4" />
-            </div>
-          )}
+      <EventModal
+        showAddModal={showAddModal} onClose={() => setShowAddModal(null)} editingId={editingId} addForm={addForm} setAddForm={setAddForm}
+        appointments={appointments} getMarkerColor={getMarkerColor} onDragStart={(e, id) => e.dataTransfer.setData("apptId", id)}
+        handleEdit={handleEdit} handleDelete={handleDelete} doctors={doctors} doctorOptions={doctorOptions} facilityOptions={facilityOptions}
+        loadingPrescriptions={loadingPrescriptions} prescriptionOptions={prescriptionOptions} isSaving={isSaving} handleAddSubmit={handleAddSubmit}
+      />
 
-          <div className="space-y-4">
-            <p className="text-xs font-bold text-slate-400  tracking-normal">
-              {editingId ? "Modify Selection" : "Add New Event"}
-            </p>
-
-            {/* Type Pills */}
-            <div className="flex flex-wrap gap-2">
-              {[
-                {
-                  label: "Appointment",
-                  value: "appointment",
-                  icon: <BiCalendar />,
-                },
-                {
-                  label: "Reminder",
-                  value: "reminder",
-                  icon: <BiTrendingUp />,
-                },
-                { label: "Refill", value: "refill", icon: <BiLoaderAlt /> },
-                { label: "Note", value: "note", icon: <BiPencil /> },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() =>
-                    setAddForm({
-                      ...addForm,
-                      type: opt.value as Appointment["type"],
-                    })
-                  }
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                    addForm.type === opt.value
-                      ? "bg-primary text-white border-primary shadow-none shadow-primary/20"
-                      : "bg-white text-slate-500 border-slate-200 hover:border-primary/50"
-                  }`}
-                >
-                  {opt.icon} {opt.label}
-                </button>
-              ))}
-            </div>
-
-            {/* APPOINTMENT FIELDS */}
-            {addForm.type === "appointment" && (
-              <>
-                <Input
-                  label="Concern / Title"
-                  type="text"
-                  placeholder="e.g. Blood pressure check"
-                  value={addForm.title}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, title: e.target.value })
-                  }
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Time"
-                    type="time"
-                    value={addForm.time}
-                    onChange={(e) =>
-                      setAddForm({ ...addForm, time: e.target.value })
-                    }
-                  />
-                  <Select
-                    label="Doctor"
-                    value={addForm.doctor}
-                    onChange={(v) => setAddForm({ ...addForm, doctor: v })}
-                    options={doctorOptions}
-                    icon={<BiUser />}
-                  />
-                </div>
-                <Select
-                  label="Institution / Clinic"
-                  value={addForm.institution}
-                  onChange={(v) => setAddForm({ ...addForm, institution: v })}
-                  options={facilityOptions}
-                  icon={<BiBuilding />}
-                />
-                <Input
-                  label="Notes"
-                  textarea
-                  placeholder="Any details or observations..."
-                  value={addForm.notes}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, notes: e.target.value })
-                  }
-                />
-              </>
-            )}
-
-            {/* REMINDER FIELDS */}
-            {addForm.type === "reminder" && (
-              <>
-                <Input
-                  label="Reminder Title"
-                  type="text"
-                  placeholder="e.g. Take medication, Drink water"
-                  value={addForm.title}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, title: e.target.value })
-                  }
-                />
-                <Input
-                  label="Time"
-                  type="time"
-                  value={addForm.time}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, time: e.target.value })
-                  }
-                />
-                <Input
-                  label="Notes (optional)"
-                  textarea
-                  placeholder="Additional info..."
-                  value={addForm.notes}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, notes: e.target.value })
-                  }
-                />
-              </>
-            )}
-
-            {/* NOTE FIELDS */}
-            {addForm.type === "note" && (
-              <>
-                <Input
-                  label="Note Title"
-                  type="text"
-                  placeholder="e.g. Blood pressure reading"
-                  value={addForm.title}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, title: e.target.value })
-                  }
-                />
-                <Input
-                  label="Note Content"
-                  textarea
-                  placeholder="Write your note here..."
-                  value={addForm.notes}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, notes: e.target.value })
-                  }
-                />
-              </>
-            )}
-
-            {/* REFILL FIELDS */}
-            {addForm.type === "refill" && (
-              <>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400  tracking-normal">
-                    Select Prescription
-                  </label>
-                  {loadingPrescriptions ? (
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <BiLoaderAlt className="animate-spin" /> Loading
-                      prescriptions...
-                    </div>
-                  ) : (
-                    <select
-                      value={addForm.prescriptionId}
-                      onChange={(e) =>
-                        setAddForm({
-                          ...addForm,
-                          prescriptionId: e.target.value,
-                        })
-                      }
-                      className="w-full p-3 rounded-xl border border-slate-200 bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="">-- Select a prescription --</option>
-                      {prescriptionOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-
-                {addForm.prescriptionId === "new" && (
-                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                    <p className="text-xs font-bold text-amber-700">
-                      Request new prescription? Please contact your doctor
-                      directly or use the "Message" feature.
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400  tracking-normal">
-                      Delivery Method
-                    </label>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAddForm({ ...addForm, deliveryMethod: "pickup" })
-                        }
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-bold transition ${
-                          addForm.deliveryMethod === "pickup"
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white text-slate-500 border-slate-200"
-                        }`}
-                      >
-                        <BiStore /> Pickup
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAddForm({ ...addForm, deliveryMethod: "delivery" })
-                        }
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-bold transition ${
-                          addForm.deliveryMethod === "delivery"
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white text-slate-500 border-slate-200"
-                        }`}
-                      >
-                        <BiSolidTruck /> Delivery
-                      </button>
-                    </div>
-                  </div>
-
-                  {addForm.deliveryMethod === "delivery" && (
-                    <div className="col-span-2">
-                      <Input
-                        label="Delivery Address"
-                        type="text"
-                        placeholder="Street, city, code"
-                        value={addForm.deliveryAddress}
-                        onChange={(e) =>
-                          setAddForm({
-                            ...addForm,
-                            deliveryAddress: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400  tracking-normal">
-                    Payment Method
-                  </label>
-                  <div className="flex flex-wrap gap-3">
-                    {[
-                      {
-                        value: "insurance",
-                        label: "Medical Aid",
-                        icon: <BiCheckCircle />,
-                      },
-                      {
-                        value: "card",
-                        label: "Credit/Debit Card",
-                        icon: <BiDollar />,
-                      },
-                      {
-                        value: "cash",
-                        label: "Cash on Pickup",
-                        icon: <BiDollar />,
-                      },
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() =>
-                          setAddForm({
-                            ...addForm,
-                            paymentMethod: opt.value as any,
-                          })
-                        }
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition border ${
-                          addForm.paymentMethod === opt.value
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white text-slate-500 border-slate-200"
-                        }`}
-                      >
-                        {opt.icon} {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400  tracking-normal">
-                    Remind me in (days)
-                  </label>
-                  <select
-                    value={addForm.reminderDays}
-                    onChange={(e) =>
-                      setAddForm({
-                        ...addForm,
-                        reminderDays: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full p-3 rounded-xl border border-slate-200 bg-white"
-                  >
-                    <option value={1}>1 day before</option>
-                    <option value={2}>2 days before</option>
-                    <option value={3}>3 days before</option>
-                    <option value={7}>1 week before</option>
-                  </select>
-                </div>
-
-                <Input
-                  label="Additional Notes (for pharmacist)"
-                  textarea
-                  placeholder="Any special instructions..."
-                  value={addForm.notes}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, notes: e.target.value })
-                  }
-                />
-              </>
-            )}
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              className="flex-1 rounded-xl"
-              onClick={() => {
-                setShowAddModal(null);
-                setEditingId(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="flex-1 rounded-xl"
-              disabled={
-                isSaving ||
-                (addForm.type === "appointment" && !addForm.title.trim())
-              }
-              onClick={handleAddSubmit}
-            >
-              {isSaving ? (
-                <BiLoaderAlt className="animate-spin mr-2" />
-              ) : editingId ? (
-                <BiPencil className="mr-2" />
-              ) : (
-                <BiPlus className="mr-2" />
-              )}
-              {editingId ? "Update Event" : "Save Event"}
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* DETAIL MODAL – enhanced to show refill details */}
-      <Modal
-        isOpen={!!selectedAppointment}
-        onClose={() => setSelectedAppointment(null)}
-        title="Event Details"
-      >
+      <Modal isOpen={!!selectedAppointment} onClose={() => setSelectedAppointment(null)} title="Event Details">
         {selectedAppointment && (
-          <div className="space-y-6">
-            <div className="flex gap-4 items-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl border border-primary/5 shadow-inner">
-                {selectedAppointment.img ? (
-                  <img
-                    src={selectedAppointment.img}
-                    className="w-full h-full object-cover rounded-2xl"
-                    alt=""
-                  />
-                ) : selectedAppointment.type === "refill" ? (
-                  "💊"
-                ) : selectedAppointment.type === "reminder" ? (
-                  "🔔"
-                ) : (
-                  "📅"
-                )}
-              </div>
-              <div>
-                <h4 className="text-xl font-bold text-slate-800 font-grotesk">
-                  {selectedAppointment.dr ||
-                    selectedAppointment.title ||
-                    (selectedAppointment.type === "refill"
-                      ? "Prescription Refill"
-                      : "Event")}
-                </h4>
-                <p className="text-sm font-bold text-primary mb-1">
-                  {selectedAppointment.dr_specialty || selectedAppointment.type}
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  <Badge
-                    label={selectedAppointment.date}
-                    status="info"
-                    variant="soft"
-                  />
-                  <Badge
-                    label={selectedAppointment.time}
-                    status="premium"
-                    variant="soft"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {(selectedAppointment.concern || selectedAppointment.notes) && (
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                <p className="text-sm font-bold text-slate-600 leading-relaxed italic">
-                  "{selectedAppointment.concern || selectedAppointment.notes}"
-                </p>
-              </div>
-            )}
-
-            {/* Show refill specific details */}
-            {selectedAppointment.type === "refill" && (
-              <div className="bg-slate-50 p-4 rounded-xl space-y-2">
-                {selectedAppointment.prescriptionName && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Medication:</span>
-                    <span className="font-bold">
-                      {selectedAppointment.prescriptionName}
-                    </span>
-                  </div>
-                )}
-                {selectedAppointment.deliveryMethod && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Delivery:</span>
-                    <span className="font-bold capitalize">
-                      {selectedAppointment.deliveryMethod}
-                    </span>
-                  </div>
-                )}
-                {selectedAppointment.paymentMethod && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Payment:</span>
-                    <span className="font-bold capitalize">
-                      {selectedAppointment.paymentMethod}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                <BiMap className="text-primary text-lg" />
-                {selectedAppointment.location ||
-                  (selectedAppointment.type === "refill"
-                    ? selectedAppointment.deliveryMethod === "delivery"
-                      ? selectedAppointment.deliveryAddress || "To be delivered"
-                      : "Pickup at pharmacy"
-                    : "Generic Location")}
-              </div>
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                <BiBuilding className="text-primary text-lg" />
-                {selectedAppointment.institution ||
-                  (selectedAppointment.type === "refill"
-                    ? selectedAppointment.pharmacyId || "Your pharmacy"
-                    : "Main Office")}
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              {selectedAppointment.status === "confirmed" &&
-                isJoinable(selectedAppointment) && (
-                  <Button
-                    className="flex-1 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-none shadow-primary/30"
-                    onClick={() => {
-                      window.location.href = `/patient/messages?autoStart=true&consultationId=${selectedAppointment.id}`;
-                    }}
-                  >
-                    <BiVideo className="mr-2" /> Join Appointment Room
-                  </Button>
-                )}
-              {isPersonalEvent(selectedAppointment) && (
-                <>
-                  <Button
-                    variant="outline"
-                    className="flex-1 rounded-xl"
-                    onClick={() => {
-                      handleEdit(selectedAppointment);
-                      setSelectedAppointment(null);
-                    }}
-                  >
-                    <BiPencil className="mr-2" /> Edit
-                  </Button>
-                  <Button
-                    className="flex-1 rounded-xl"
-                    disabled={isDeleting}
-                    onClick={() => handleDelete(selectedAppointment)}
-                  >
-                    {isDeleting ? (
-                      <BiLoaderAlt className="animate-spin mr-2" />
-                    ) : (
-                      <BiTrash className="mr-2" />
-                    )}
-                    Remove
-                  </Button>
-                </>
-              )}
-              {!isPersonalEvent(selectedAppointment) && (
-                <Button
-                  className="flex-1 rounded-xl"
-                  onClick={() => setSelectedAppointment(null)}
-                >
-                  Close
-                </Button>
-              )}
-            </div>
-          </div>
+          <AppointmentDetail
+            appt={selectedAppointment} isJoinable={isJoinable(selectedAppointment)} isPersonalEvent={["note", "reminder", "appointment", "refill"].includes(selectedAppointment.type)}
+            isDeleting={isDeleting} onEdit={handleEdit} onDelete={handleDelete} onClose={() => setSelectedAppointment(null)}
+          />
         )}
       </Modal>
     </div>

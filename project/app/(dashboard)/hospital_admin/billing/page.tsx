@@ -89,7 +89,7 @@ export default function BillingPage() {
   const statusBadge = (status: string) => {
     const styles: Record<string, string> = {
       paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      pending: "bg-amber-50 text-amber-700 border-amber-200",
+      pending: "bg-gray-50 text-gray-700 border-gray-200",
       refunded: "bg-slate-100 text-slate-600 border-slate-200",
     };
     return `px-2 py-1 rounded-lg text-xs font-bold  tracking-wider border ${styles[status] || styles.pending}`;

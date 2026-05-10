@@ -95,8 +95,29 @@ export async function GET(req: NextRequest) {
         rating: profile.rating || 0,
         reviewCount: profile.reviewCount || 0,
       };
+    } else if (user.role === "hospital_admin") {
+      const { HospitalAdminProfile } = await import("@/lib/models/RoleProfiles");
+      const { Facility } = await import("@/lib/models/Facility");
+      
+      const profile = await HospitalAdminProfile.findOne({ userId }).lean();
+      let facility = null;
+      if (profile?.hospitalId) {
+        facility = await Facility.findById(profile.hospitalId).lean();
+      }
+
+      roleData = {
+        department: profile?.department || "",
+        permissions: profile?.permissions || [],
+        facility: facility || {
+          name: "",
+          facilityType: "Private",
+          contactInfo: { phone: "", email: "" },
+          address: { city: "", province: "" },
+          bedCapacity: { total: 0, generalAvailable: 0, icuAvailable: 0 }
+        }
+      };
     } else {
-      // hospital_admin, inspector, super_admin, mega_admin – base info only
+      // inspector, super_admin, mega_admin – base info only
       roleData = { role: user.role, status: user.status };
     }
 
@@ -143,6 +164,23 @@ export async function PUT(req: NextRequest) {
         { $set: update },
         { upsert: true, new: true },
       );
+    } else if (user.role === "hospital_admin") {
+      const { HospitalAdminProfile } = await import("@/lib/models/RoleProfiles");
+      const { Facility } = await import("@/lib/models/Facility");
+
+      const profile = await HospitalAdminProfile.findOne({ userId });
+      if (profile?.hospitalId && body.facility) {
+        await Facility.findByIdAndUpdate(profile.hospitalId, {
+          $set: body.facility
+        });
+      }
+      if (body.department) {
+        await HospitalAdminProfile.findOneAndUpdate(
+          { userId },
+          { $set: { department: body.department } },
+          { upsert: true }
+        );
+      }
     }
 
     return NextResponse.json({ success: true });

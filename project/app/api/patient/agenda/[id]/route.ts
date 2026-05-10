@@ -16,11 +16,12 @@ async function getPatientId() {
   } catch { return null; }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const patientId = await getPatientId();
   if (!patientId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await connectToDatabase();
-  await PatientEvent.findOneAndDelete({ _id: params.id, patientId });
+  const { id } = await params;
+  await PatientEvent.findOneAndDelete({ _id: id, patientId });
   return NextResponse.json({ ok: true });
 }

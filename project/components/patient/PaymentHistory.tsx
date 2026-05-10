@@ -34,9 +34,11 @@ export default function PaymentHistory() {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8">
+    <div className="bg-white rounded-lg border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-slate-800 font-grotesk">Payment History</h3>
+        <h3 className="text-xl font-bold text-slate-800 font-grotesk">
+          Payment History
+        </h3>
         <Button
           variant="ghost"
           onClick={() => setExpanded(!expanded)}

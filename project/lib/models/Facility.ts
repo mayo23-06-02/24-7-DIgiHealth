@@ -10,6 +10,9 @@ export interface IFacility extends Document {
   isOpen: boolean;
   specialties: string[];
   emergencyServices: boolean;
+  logo?: string;
+  wallpaper?: string;
+  regCertificate?: string;
 }
 
 const FacilitySchema = new Schema<IFacility>({
@@ -24,7 +27,10 @@ const FacilitySchema = new Schema<IFacility>({
   currentWaitTimeMins: { type: Number, default: 0 },
   isOpen: { type: Boolean, default: true },
   specialties: [{ type: String }],
-  emergencyServices: { type: Boolean, default: false }
+  emergencyServices: { type: Boolean, default: false },
+  logo: { type: String },
+  wallpaper: { type: String },
+  regCertificate: { type: String }
 });
 
 export const Facility = mongoose.models.Facility || mongoose.model<IFacility>('Facility', FacilitySchema);

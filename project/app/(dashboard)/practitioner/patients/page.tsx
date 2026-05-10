@@ -15,10 +15,10 @@ import {
   BiFilter,
 } from "react-icons/bi";
 
-const RISK_LABELS = { green: "Low", amber: "Medium", red: "High" };
+const RISK_LABELS = { green: "Low", gray: "Medium", red: "High" };
 const RISK_STYLES: Record<string, string> = {
   green: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  amber: "bg-amber-50 text-amber-700 border-amber-200",
+  gray: "bg-gray-50 text-gray-700 border-gray-200",
   red: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
@@ -140,7 +140,9 @@ export default function PractitionerPatientsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Patients</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+            Patients
+          </h1>
           <p className="text-sm text-slate-500">
             {patients.length} patients under your care
           </p>
@@ -177,7 +179,7 @@ export default function PractitionerPatientsPage() {
           >
             <option value="">All Risk Levels</option>
             <option value="green">Low Risk</option>
-            <option value="amber">Medium Risk</option>
+            <option value="gray">Medium Risk</option>
             <option value="red">High Risk</option>
           </select>
         </div>

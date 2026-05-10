@@ -42,18 +42,18 @@ export default function RegisterRoleSelection() {
   ];
 
   return (
-    <div className="w-full max-w-[1300px] py-30 px-10">
-      <div className="group ring-1 ring-slate-200/5 bg-white border border-slate-200 p-12 pb-5 rounded-lg relative overflow-hidden">
-        <div className="flex items-center gap-3 mb-10">
+    <div className="w-full max-w-[1300px]   lg:py-30 lg:px-10">
+      <div className="group ring-1 ring-slate-200/5 overflow-y-auto custom-scrollbar max-h-[95vh] bg-white border border-slate-200 p-6 md:p-12 pb-5 rounded-lg relative overflow-hidden">
+        <div className="flex items-center gap-3 lg:mb-10">
           <span className="text-secondary font-bold text-3xl">+</span>
           <span className="text-secondary font-bold tracking-normal  text-sm">
             Join the Network
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-start mb-16">
-          <div className="py-5">
-            <h2 className="text-3xl md:text-4xl font-medium text-slate-900 leading-[1.05] tracking-tight mb-2.5 mb-10 font-grotesk">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-16 items-start mb-16">
+          <div className="lg:py-5 pt-4">
+            <h2 className="text-3xl md:text-4xl font-medium text-slate-900 leading-[1.05] tracking-tight mb-2 md:mb-10 font-grotesk">
               The Right Path to <br />{" "}
               <span className="text-primary font-bold">Better Health</span>
             </h2>
@@ -64,7 +64,7 @@ export default function RegisterRoleSelection() {
           </div>
 
           <div className="bg-primary rounded-lg p-10 flex flex-col justify-between text-white transform hover:scale-[1.02] duration-500 group">
-            <h3 className=" font-normal  mb-2.5 mb-10 font-grotesk">
+            <h3 className=" font-normal  mb-4 lg:mb-10 font-grotesk">
               We're committed to delivering the highest standard of medical
               record privacy and triage accuracy.
             </h3>
@@ -72,7 +72,7 @@ export default function RegisterRoleSelection() {
               {["24/7 Connectivity"].map((pill) => (
                 <div
                   key={pill}
-                  className="bg-white/10 rounded-lg text-xs font-bold border border-white/20  tracking-normal py-1.25 px-3"
+                  className="bg-white/10 rounded-lg text-xs font-bold border border-white/20  tracking-normal py-2 px-3"
                 >
                   {pill}
                 </div>

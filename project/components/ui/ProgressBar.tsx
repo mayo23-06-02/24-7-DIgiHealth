@@ -20,11 +20,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   };
 
   return (
-    <div 
-      className={`w-full bg-slate-100 overflow-hidden rounded-lg ${className}`}
+    <div
+      className={`w-full bg-slate-200 overflow-hidden rounded-lg ${className}`}
       style={{ height: `${height}px` }}
     >
-      <div 
+      <div
         className={`h-full ${colorMap[color]} transition-all duration-700 ease-out`}
         style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
       />

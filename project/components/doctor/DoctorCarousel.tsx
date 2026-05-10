@@ -57,7 +57,7 @@ export default function DoctorCarousel() {
     fetchData();
   }, []);
 
-  const handleLinkDoctor = async (docId: string, action: 'link' | 'unlink') => {
+  const handleLinkDoctor = async (docId: string, action: "link" | "unlink") => {
     try {
       const res = await fetch("/api/patient/my-doctors/link", {
         method: "POST",
@@ -87,7 +87,7 @@ export default function DoctorCarousel() {
 
   const visibleCount = isClient
     ? window.innerWidth >= 1200
-      ? 3
+      ? 4
       : window.innerWidth >= 800
         ? 2
         : 1
@@ -112,23 +112,30 @@ export default function DoctorCarousel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center  px-2">
+      <div className="flex justify-between items-center px-2">
         <div className="flex items-center justify-between w-full gap-2">
           <div className="mb-4 px-2">
-            <h3 className="font-bold text-2xl text-slate-900 font-grotesk">Available Doctors</h3>
+            <h3 className="font-bold text-2xl text-slate-900 font-grotesk">
+              Available Doctors
+            </h3>
             <p className="text-base text-slate-600">
-              Connect with our medical professionals for expert advice and
-              care.
+              Connect with our medical professionals for expert advice and care.
             </p>
           </div>
           <div className="flex">
-            <Badge label={`${doctors.length} Available`} variant="soft" />
+            <div className="text-xs text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full border border-emerald-100 font-bold whitespace-nowrap">
+              <span className="flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              <h1>{doctors.length} Available Doctors</h1>
+            </div>
             <div className="flex gap-2 ml-4">
               <button
                 onClick={() =>
                   setCarouselIndex((prev) => Math.max(0, prev - 1))
                 }
-                className="w-10 h-10 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </button>
@@ -138,7 +145,7 @@ export default function DoctorCarousel() {
                     Math.min(doctors.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </button>
@@ -178,7 +185,9 @@ export default function DoctorCarousel() {
         onBook={handleBook}
         onMessage={handleMessage}
         onLink={handleLinkDoctor}
-        isMyDoctor={selectedDoctor ? myDoctorIds.includes(selectedDoctor.id) : false}
+        isMyDoctor={
+          selectedDoctor ? myDoctorIds.includes(selectedDoctor.id) : false
+        }
       />
 
       <BookingModal

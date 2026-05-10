@@ -113,7 +113,7 @@ export default function AITriageModal({
     >
       <div className="bg-white  w-full h-[600px] flex flex-col overflow-hidden">
         {/* Disclaimer Banner */}
-        <div className="bg-blue-50 p-2 text-center border-b border-blue-100 text-[10px] text-blue-800 font-bold  tracking-normal">
+        <div className="bg-blue-50 p-2 text-center border-b border-blue-100 text-sm text-blue-800 font-bold  tracking-normal">
           ⚕️ Educational purposes only. Does not replace professional medical
           advice.
         </div>
@@ -136,7 +136,7 @@ export default function AITriageModal({
                   {message.text}
                 </div>
                 <p
-                  className={`text-[10px] mt-2 text-right font-bold  tracking-normal ${message.sender === "user" ? "opacity-70" : "text-slate-300"}`}
+                  className={`text-sm mt-2 text-right font-bold  tracking-normal ${message.sender === "user" ? "opacity-70" : "text-slate-300"}`}
                 >
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -150,7 +150,7 @@ export default function AITriageModal({
             <div className="flex justify-start">
               <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-none p-4 shadow-none inline-flex items-center gap-3">
                 <BiLoaderCircle className="animate-spin text-primary text-2xl" />
-                <span className="text-xs font-bold text-slate-400  tracking-normal">
+                <span className="text-xs font-bold text-slate-500  tracking-normal">
                   Analyzing symptoms...
                 </span>
               </div>

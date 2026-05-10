@@ -6,6 +6,7 @@ import User from '@/lib/models/User';
 import Message from '@/lib/models/Message';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import mongoose from 'mongoose';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
@@ -33,10 +34,13 @@ export async function GET() {
   await connectToDatabase();
 
   const convs = await Conversation.find({
-    $or: [{ patientId: userId }, { practitionerId: userId }]
+    $or: [
+      { patientId: new mongoose.Types.ObjectId(userId) },
+      { practitionerId: new mongoose.Types.ObjectId(userId) }
+    ]
   })
-    .populate({ path: 'patientId', model: User, select: 'firstName lastName' })
-    .populate({ path: 'practitionerId', model: User, select: 'firstName lastName' })
+    .populate({ path: 'patientId', model: User, select: 'firstName lastName role' })
+    .populate({ path: 'practitionerId', model: User, select: 'firstName lastName role' })
     .sort({ lastActivityAt: -1 })
     .lean();
 
@@ -44,23 +48,37 @@ export async function GET() {
   const result = await Promise.all(
     convs.map(async (conv: any) => {
       const lastMsg = await Message.findOne({ conversationId: conv._id }).sort({ createdAt: -1 }).lean();
+      
+      const unreadCount = await Message.countDocuments({
+        conversationId: conv._id,
+        receiverId: new mongoose.Types.ObjectId(userId),
+        isRead: false
+      });
+
       const other = conv.patientId?._id?.toString() === userId
         ? conv.practitionerId
         : conv.patientId;
+
+      const contactName = other 
+        ? (other.role === 'practitioner' 
+            ? `Dr. ${other.firstName} ${other.lastName}` 
+            : `${other.firstName} ${other.lastName}`)
+        : 'Unknown';
+
       return {
         id: conv._id,
         consultationId: conv.consultationId,
         contactId: other?._id?.toString() || '',
-        contactName: other ? `${other.firstName} ${other.lastName}` : 'Unknown',
+        contactName,
         practitionerId: conv.practitionerId?._id || conv.practitionerId,
-        doctor: other ? `${other.firstName} ${other.lastName}` : 'Unknown', // Backwards compatibility
+        doctor: contactName, // Backwards compatibility
         avatar: other ? `https://ui-avatars.com/api/?name=${other.firstName}+${other.lastName}&background=0052cc&color=fff` : '',
         lastMessage: lastMsg?.content || 'No messages yet.',
         timestamp: conv.lastActivityAt
           ? new Date(conv.lastActivityAt).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })
           : '',
         online: false,  // real-time presence handled separately
-        unread: 0,      // unread count (can be enriched later)
+        unread: unreadCount,
         status: conv.status,
       };
     })
@@ -105,12 +123,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required participant IDs' }, { status: 400 });
   }
 
-  // Check for existing persistent conversation (no consultationId)
-  let conv = await Conversation.findOne({ 
-    patientId: targetPatientId, 
-    practitionerId: targetPractitionerId, 
-    consultationId: consultationId || { $exists: false } 
-  });
+  // Check for existing persistent conversation
+  let conv;
+  if (consultationId) {
+    conv = await Conversation.findOne({ consultationId });
+  } else {
+    conv = await Conversation.findOne({ 
+      patientId: targetPatientId, 
+      practitionerId: targetPractitionerId, 
+      $or: [
+        { consultationId: { $exists: false } },
+        { consultationId: null }
+      ]
+    });
+  }
 
   if (!conv) {
     conv = await Conversation.create({

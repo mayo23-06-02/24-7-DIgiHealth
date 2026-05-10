@@ -20,7 +20,9 @@ function StarRating({ rating }: { rating: number }) {
         <BiStar
           key={s}
           size={16}
-          className={s <= rating ? "text-amber-400 fill-amber-400" : "text-slate-200"}
+          className={
+            s <= rating ? "text-gray-400 fill-gray-400" : "text-slate-200"
+          }
         />
       ))}
     </div>
@@ -35,19 +37,23 @@ export default function HospitalReviewsPage() {
   useEffect(() => {
     fetch("/api/hospital/reviews")
       .then((r) => r.json())
-      .then((d) => { if (d.success) setReviews(d.data); })
+      .then((d) => {
+        if (d.success) setReviews(d.data);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const moderated = reviews.filter((r) => filter === "all" ? true : r.status === filter);
+  const moderated = reviews.filter((r) =>
+    filter === "all" ? true : r.status === filter,
+  );
   const avgRating = reviews.length
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : "—";
 
   function badge(status: string) {
     const map: Record<string, string> = {
-      pending: "bg-amber-50 text-amber-600 border-amber-200",
+      pending: "bg-gray-50 text-gray-600 border-gray-200",
       approved: "bg-emerald-50 text-emerald-600 border-emerald-200",
       rejected: "bg-rose-50 text-rose-600 border-rose-200",
     };
@@ -66,11 +72,15 @@ export default function HospitalReviewsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Patient Reviews</h1>
-          <p className="text-sm text-slate-500 mt-1">Moderate and view all patient feedback</p>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+            Patient Reviews
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Moderate and view all patient feedback
+          </p>
         </div>
         <div className="flex items-center gap-2 bg-primary/10 text-primary font-bold px-4 py-2 rounded-xl">
-          <BiStar size={20} className="text-amber-400" />
+          <BiStar size={20} className="text-gray-400" />
           <span className="text-xl">{avgRating}</span>
           <span className="text-sm font-medium text-slate-500">/ 5.0</span>
         </div>
@@ -98,7 +108,9 @@ export default function HospitalReviewsPage() {
 
       {/* Reviews Grid */}
       {moderated.length === 0 ? (
-        <Card className="text-center py-16 text-slate-400">No reviews found.</Card>
+        <Card className="text-center py-16 text-slate-400">
+          No reviews found.
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {moderated.map((rev) => (
@@ -109,18 +121,24 @@ export default function HospitalReviewsPage() {
                     <BiUser size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">{rev.patientName}</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {rev.patientName}
+                    </p>
                     <p className="text-xs text-slate-400">
                       {new Date(rev.createdAt).toLocaleDateString("en-ZA")}
                     </p>
                   </div>
                 </div>
-                <span className={`text-xs font-bold px-2 py-1 rounded-lg border capitalize ${badge(rev.status)}`}>
+                <span
+                  className={`text-xs font-bold px-2 py-1 rounded-lg border capitalize ${badge(rev.status)}`}
+                >
                   {rev.status}
                 </span>
               </div>
               <StarRating rating={rev.rating} />
-              <p className="text-sm text-slate-600 leading-relaxed">{rev.comment}</p>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {rev.comment}
+              </p>
               {rev.status === "pending" && (
                 <div className="flex gap-2 mt-1 pt-3 border-t border-slate-100">
                   <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition-colors">

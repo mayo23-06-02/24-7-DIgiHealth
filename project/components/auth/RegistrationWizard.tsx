@@ -7,6 +7,8 @@ import {
   PatientPaymentStep,
   PatientEmergencyStep,
   POPIAConsentStep,
+  PatientDocumentStep,
+  PasswordCreationStep,
 } from "./steps/PatientWizardSteps";
 import {
   PractitionerStep1,
@@ -30,29 +32,41 @@ const roleConfig: Record<
   { label: string; color: string; steps: string[] }
 > = {
   patient: {
-    label: "Patient",
+    label: "Medical Cover",
     color: "#4493b8",
     steps: [
       "Identity",
       "Privacy Consent",
       "Health Profile",
       "Payment Setup",
-      "Emergency & Photo",
+      "Emergency & Info",
+      "Documents",
+      "Security",
+      "Preview",
     ],
   },
   practitioner: {
-    label: "Practitioner",
+    label: "Healthcare Professional",
     color: "#4493b8",
-    steps: ["Credentials", "Identity & Contact", "Documents", "Banking & Tax"],
+    steps: [
+      "Credentials",
+      "Identity & Contact",
+      "Documents",
+      "Banking & Tax",
+      "Security",
+      "Preview",
+    ],
   },
   hospital: {
-    label: "Hospital Admin",
+    label: "Healthcare Provider",
     color: "#4493b8",
     steps: [
       "Facility Details",
       "Address & Admin",
       "B2B Agreement",
       "Facility Media",
+      "Security",
+      "Preview",
     ],
   },
 };
@@ -63,6 +77,58 @@ const skippableSteps: Record<string, number[]> = {
   patient: [3, 5],
 };
 
+function PreviewStep({ formData }: { formData: any }) {
+  const previewData = { ...formData };
+  delete previewData.password;
+  delete previewData.confirmPassword;
+
+  return (
+    <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
+      <div className="inline-flex items-center gap-2 px-4 py-2 mb-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+        <span className="text-xs text-primary tracking-normal">
+          Application Preview
+        </span>
+      </div>
+      <p className="text-sm text-slate-500 mb-6">
+        Please review your details before final submission.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Object.entries(previewData).map(([key, value]) => {
+          if (value === undefined || value === null || value === "")
+            return null;
+          let displayValue = String(value);
+          if (typeof value === "boolean") displayValue = value ? "Yes" : "No";
+          else if (Array.isArray(value)) displayValue = value.join(", ");
+          else if (typeof value === "object") {
+            if (value && (value as any).url) displayValue = "Uploaded Document";
+            else return null;
+          }
+
+          const formattedKey = key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase());
+
+          return (
+            <div
+              key={key}
+              className="p-4 bg-slate-50 rounded-xl border border-slate-100"
+            >
+              <p className="text-xs font-bold text-slate-500 mb-1">
+                {formattedKey}
+              </p>
+              <p className="text-sm font-semibold text-slate-800 break-words">
+                {displayValue}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Step renderer ────────────────────────────────────────────────────────────
 function renderStep(
   role: string,
@@ -72,6 +138,10 @@ function renderStep(
   errors: any,
   onSkip: () => void,
 ) {
+  const totalSteps = roleConfig[role]?.steps.length;
+  if (step === totalSteps) {
+    return <PreviewStep formData={formData} />;
+  }
   if (role === "patient") {
     if (step === 1)
       return (
@@ -101,6 +171,18 @@ function renderStep(
           onSkip={onSkip}
         />
       );
+    if (step === 6)
+      return (
+        <PatientDocumentStep formData={formData} updateData={updateData} />
+      );
+    if (step === 7)
+      return (
+        <PasswordCreationStep
+          formData={formData}
+          updateData={updateData}
+          errors={errors}
+        />
+      );
   }
   if (role === "practitioner") {
     if (step === 1)
@@ -123,6 +205,14 @@ function renderStep(
       return <PractitionerStep3 formData={formData} updateData={updateData} />;
     if (step === 4)
       return <PractitionerStep4 formData={formData} updateData={updateData} />;
+    if (step === 5)
+      return (
+        <PasswordCreationStep
+          formData={formData}
+          updateData={updateData}
+          errors={errors}
+        />
+      );
   }
   if (role === "hospital") {
     if (step === 1)
@@ -139,6 +229,14 @@ function renderStep(
       return <HospitalStep3 formData={formData} updateData={updateData} />;
     if (step === 4)
       return <HospitalStep4 formData={formData} updateData={updateData} />;
+    if (step === 5)
+      return (
+        <PasswordCreationStep
+          formData={formData}
+          updateData={updateData}
+          errors={errors}
+        />
+      );
   }
 
   return null;
@@ -182,6 +280,8 @@ function validateStep(
       err.mobile = "Enter a valid SA mobile number.";
     if (!formData.email?.trim() || !formData.email.includes("@"))
       err.email = "A valid email address is required.";
+    if (!formData.languages || formData.languages.length === 0)
+      err.languages = "Please select at least one language.";
   }
   if (role === "hospital" && step === 2) {
     if (!formData.adminEmail?.trim() || !formData.adminEmail.includes("@"))
@@ -191,6 +291,25 @@ function validateStep(
   if (role === "patient" && step === 2) {
     if (!formData.consent) err.consent = "POPIA consent is required.";
   }
+
+  // Password validation (Always the second to last step)
+  const totalSteps = roleConfig[role]?.steps.length;
+  if (step === totalSteps - 1) {
+    if (!formData.password) {
+      err.password = "Password is required.";
+    } else if (formData.password.length < 8) {
+      err.password = "Password must be at least 8 characters.";
+    } else if (!/[A-Z]/.test(formData.password)) {
+      err.password = "Password must contain at least one uppercase letter.";
+    } else if (!/[0-9]/.test(formData.password)) {
+      err.password = "Password must contain at least one number.";
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      err.confirmPassword = "Passwords do not match.";
+    }
+  }
+
   return err;
 }
 
@@ -322,7 +441,18 @@ export default function RegistrationWizard({ role }: { role: string }) {
     setSubmitting(true);
     setGlobalError(null);
     try {
-      await new Promise((r) => setTimeout(r, 1500));
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: safeRole, formData }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+
       await clearDraft();
       router.push("/login?registered=true");
     } catch (err: any) {
@@ -339,11 +469,11 @@ export default function RegistrationWizard({ role }: { role: string }) {
         width: "100%",
         maxWidth: "1300px",
       }}
-      className="bg-white overflow-auto h-[90vh] px-10 rounded-lg  w-full max-w-4xl mx-auto relative  animate-in fade-in duration-700"
+      className="bg-white custom-scrollbar overflow-y-scroll min-h-[85vh]   max-h-[90vh] px-6 lg:px-10 rounded-lg  w-full max-w-4xl mx-auto relative  animate-in fade-in duration-700"
     >
       {/* Offline banner */}
       {!isOnline && (
-        <div className="bg-amber-500 text-white text-center text-xs font-bold  tracking-normal py-3 px-6">
+        <div className="bg-gray-500 text-white text-center text-xs font-bold  tracking-normal py-3 px-6">
           You are offline — progress saved locally. Go online to submit.
         </div>
       )}
@@ -366,13 +496,12 @@ export default function RegistrationWizard({ role }: { role: string }) {
       )}
 
       {/* Top accent line */}
-      <ProgressBar progress={progress} height={6} className="rounded-none" />
 
-      <div className=" py-10 w-full">
+      <div className="   w-full">
         {/* Header */}
-        <div className="flex items-start justify-between mb-14">
-          <div className="py-5 flex flex-col gap-[10px]">
-            <div className="inline-flex items-center gap-2 px-[10px] py-[5px] rounded-full  mb-[15px]">
+        <div className="flex pt-4 lg:pb   items-start justify-between sticky top-0 z-10 bg-white">
+          <div className="py-4 flex flex-col gap-4">
+            <div className="inline-flex items-center gap-2 px-[10px]  rounded-full  ">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
               <span className="text-xs  text-primary  tracking-normal">
                 {config.label} Registry
@@ -385,10 +514,8 @@ export default function RegistrationWizard({ role }: { role: string }) {
               </span>
             </h2>
           </div>
-          <div className="text-right shrink-0 ml-6">
-            <p className="text-xs text-slate-300  tracking-normal mb-[5px]">
-              Progress
-            </p>
+          <div className="text-right shrink-0 ml-6 ">
+            <p className="text-xs text-slate-300  tracking-normal ">Progress</p>
             <p className="text-3xl font-semibold text-primary leading-none">
               {String(step).padStart(2, "0")}
               <span className="text-slate-200 font-light">
@@ -435,7 +562,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
           }
           noValidate
         >
-          <div className="max-h-[50vh] overflow-y-auto custom-scrollbar">
+          <div className=" custom-scrollbar">
             {renderStep(
               safeRole,
               step,
@@ -447,7 +574,7 @@ export default function RegistrationWizard({ role }: { role: string }) {
           </div>
 
           {/* Navigation */}
-          <div className="flex flex-col md:flex-row gap-4 pt-16 mt-10 border-t border-slate-100 py-5">
+          <div className="flex flex-col justify-end md:flex-row gap-4 lg:pt-16 mt-6 border-t border-slate-100 py-5">
             {step > 1 && (
               <Button
                 type="button"
@@ -476,21 +603,6 @@ export default function RegistrationWizard({ role }: { role: string }) {
                 `Continue to ${config.steps[step]}`
               )}
             </Button>
-          </div>
-
-          {/* Footer links */}
-          <div className="flex items-center justify-between  border-t border-slate-50 py-5">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/register")}
-            >
-              Cancel
-            </Button>
-            <span className="text-xs text-slate-300 ">
-              POPIA Compliant • Encrypted
-            </span>
           </div>
         </form>
       </div>

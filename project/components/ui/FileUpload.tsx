@@ -54,7 +54,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <h3 className=" font-semibold text-slate-800 tracking-tight font-grotesk">
             {label}
           </h3>
-          <p className="text-xs text-slate-400 tracking-wide">{description}</p>
+          <p className="text-xs text-slate-500 tracking-wide">{description}</p>
         </div>
       </div>
 
@@ -73,7 +73,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         <input type="file" className="hidden" ref={fileInputRef} />
 
         <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center mb-2.5">
-          <BiCloudUpload className="text-slate-400 text-3xl" />
+          <BiCloudUpload className="text-slate-500 text-3xl" />
         </div>
 
         <div className="text-center space-y-2">
@@ -83,7 +83,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
               choose file
             </span>
           </p>
-          <p className="text-xs font-semibold tracking-wide text-slate-400 ">
+          <p className="text-xs font-semibold tracking-wide text-slate-500 ">
             {accept}, up to {maxSizeMB} MB.
           </p>
         </div>
@@ -91,11 +91,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       {/* URL Upload */}
       <div className="space-y-3">
-        <label className="flex items-center gap-2 text-xs font-bold text-slate-400 py-3 px-1">
+        <h1 className="flex items-center gap-2 text-xs font-bold text-slate-500 py-3 px-1">
           Or upload from URL <BiLink className="text-slate-300" />
-        </label>
+        </h1>
         <div className="flex items-center gap-2 p-1.5 pl-5 border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-primary/10 transition-all">
-          <div className="flex-none p-2.5 text-slate-400">
+          <div className="flex-none p-2.5 text-slate-500">
             <BiLink size={18} />
           </div>
           <input
@@ -112,7 +112,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {/* File List */}
       {value.length > 0 && (
         <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h4 className="text-xs font-bold text-slate-400  tracking-normal px-1 font-grotesk">
+          <h4 className="text-xs font-bold text-slate-500  tracking-normal px-1 font-grotesk">
             Uploaded {label}
           </h4>
           <div className="space-y-3">
@@ -143,7 +143,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                       <div className="h-1.5 w-full bg-slate-100 rounded-lg overflow-hidden">
                         <div className="h-full w-2/3 bg-primary rounded-lg animate-pulse"></div>
                       </div>
-                      <p className="text-xs font-bold text-slate-400  tracking-normal">
+                      <p className="text-xs font-bold text-slate-500  tracking-normal">
                         102 KB of 32.5 MB • 4 sec left...
                       </p>
                     </div>

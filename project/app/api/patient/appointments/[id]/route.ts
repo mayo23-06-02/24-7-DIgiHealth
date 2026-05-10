@@ -6,9 +6,10 @@ import { jwtVerify } from 'jose';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
+    const { id } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -20,7 +21,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const { status, scheduledStartTime, chiefComplaint } = body;
 
     // Ensure the patient owns this consultation
-    const consultation = await Consultation.findOne({ _id: params.id, patientId: userId });
+    const consultation = await Consultation.findOne({ _id: id, patientId: userId });
     if (!consultation) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     if (status) consultation.status = status;
@@ -38,6 +39,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     return PUT(req, { params });
 }

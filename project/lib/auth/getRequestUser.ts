@@ -8,6 +8,7 @@ const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "secret123!");
 export interface RequestUser {
   userId: string;
   role: string;
+  email?: string;
   firstName?: string;
   lastName?: string;
 }
@@ -32,6 +33,7 @@ export async function getRequestUser(): Promise<RequestUser | null> {
     return {
       userId: user._id.toString(),
       role: user.role,
+      email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
     };

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Conversation } from "@/lib/models/Conversation";
 import { Call } from "@/lib/models/Call";
+import { Message } from "@/lib/models/Message";
 import Consultation from "@/lib/models/Consultation";
 import { apiLogger } from "@/lib/apiLogger";
 import { getLiveKitRoomService } from "@/lib/livekit";
@@ -18,9 +19,9 @@ export async function POST(req: Request) {
       apiLogger.warn(scope, "call_not_found", { callId });
       return NextResponse.json({ error: "Call not found" }, { status: 404 });
     }
-    if (call.status === "ended") {
-      apiLogger.info(scope, "already_ended", { callId });
-      return NextResponse.json({ success: true, message: "Already ended" });
+    if (call.status === "ended" || call.status === "declined") {
+      apiLogger.info(scope, "already_inactive", { callId, status: call.status });
+      return NextResponse.json({ success: true, message: `Already ${call.status}` });
     }
 
     const endedAt = new Date();
@@ -46,6 +47,29 @@ export async function POST(req: Request) {
         callId,
         conversationId: conversation._id.toString(),
         minutesAdded: minutesToAdd,
+      });
+
+      // Create call log message
+      const receiverId = conversation.patientId.toString() === call.initiatedBy.toString() 
+        ? conversation.practitionerId 
+        : conversation.patientId;
+
+      let callStatusMsg = "";
+      if (durationSeconds < 2) {
+         callStatusMsg = "Call missed";
+      } else {
+         const m = Math.floor(durationSeconds / 60);
+         const s = durationSeconds % 60;
+         const durStr = m > 0 ? `${m}m ${s}s` : `${s}s`;
+         callStatusMsg = `${call.type === 'video' ? 'Video' : 'Voice'} call ended • ${durStr}`;
+      }
+
+      await Message.create({
+        conversationId: conversation._id,
+        senderId: call.initiatedBy,
+        receiverId,
+        type: "call_log",
+        content: callStatusMsg,
       });
     }
 

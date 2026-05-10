@@ -15,7 +15,7 @@ import Avatar from "@/components/ui/Avatar";
 
 const STATUS_BADGE: Record<string, string> = {
   paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  pending: "bg-gray-50 text-gray-700 border-gray-200",
   failed: "bg-rose-50 text-rose-600 border-rose-200",
 };
 

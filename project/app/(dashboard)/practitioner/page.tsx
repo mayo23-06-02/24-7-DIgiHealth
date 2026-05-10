@@ -17,6 +17,16 @@ import {
   BiChevronRight,
   BiPulse,
 } from "react-icons/bi";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import Avatar from "@/components/ui/Avatar";
 import Card from "@/components/ui/Card";
 import { toast } from "react-hot-toast";
@@ -72,7 +82,7 @@ export default function PractitionerDashboard() {
     const startDay = isCurrentMonth
       ? today
       : new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
-    return Array.from({ length: 10 }, (_, i) => {
+    return Array.from({ length: 15 }, (_, i) => {
       const d = new Date(startDay);
       d.setDate(startDay.getDate() + i);
       return d;
@@ -97,6 +107,10 @@ export default function PractitionerDashboard() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch("/api/practitioner/dashboard");
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`API Error ${res.status}: ${text.substring(0, 100)}`);
+        }
         const data = await res.json();
         if (data.success && isMounted) {
           setDashboardData(data.data);
@@ -170,7 +184,58 @@ export default function PractitionerDashboard() {
     );
   }
 
-  // Removed hardcoded scheduleList and requests as they are now replaced by database-driven 'queue' and 'pendingRequests'
+  if (dashboardData.isNewUser) {
+    return (
+      <div className="w-full pb-10 flex flex-col gap-8 max-w-4xl mx-auto py-12">
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto mb-6">
+            <BiPlus size={40} />
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900 font-grotesk">
+            Welcome to DigiHealth, Dr.{" "}
+            {dashboardData.practitioner?.name?.split(" ")[1] || "Practitioner"}
+          </h1>
+          <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+            Your clinical workspace is almost ready. Let's complete your
+            professional profile so patients can find and book consultations
+            with you.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <Card
+            className="p-8 hover:border-primary transition-all cursor-pointer group"
+            onClick={() => (window.location.href = "/practitioner/profile")}
+          >
+            <h3 className="text-xl font-bold text-slate-800 mb-2 font-grotesk">
+              1. Complete Professional Profile
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Set your specialization, bio, and consultation rates.
+            </p>
+            <span className="text-primary font-bold flex items-center gap-2 group-hover:gap-3 transition-all">
+              Edit Profile →
+            </span>
+          </Card>
+          <Card
+            className="p-8 hover:border-primary transition-all cursor-pointer group"
+            onClick={() => (window.location.href = "/practitioner/patients")}
+          >
+            <h3 className="text-xl font-bold text-slate-800 mb-2 font-grotesk">
+              2. Browse Patient Database
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Explore the living digital twins and clinical histories of
+              patients.
+            </p>
+            <span className="text-primary font-bold flex items-center gap-2 group-hover:gap-3 transition-all">
+              View Patients →
+            </span>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full pb-10">
@@ -184,7 +249,7 @@ export default function PractitionerDashboard() {
               <KPICard
                 label="Appointments Today"
                 value={dashboardData.upcomingCount.toString()}
-                trend={5.6}
+                trend={dashboardData.upcomingTrend || 0}
                 description="vs. Yesterday"
                 icon={<BiCalendarEvent size={24} />}
                 color="primary"
@@ -192,7 +257,7 @@ export default function PractitionerDashboard() {
               <KPICard
                 label="Total Visitors"
                 value={dashboardData.totalVisitors?.toString() || "0"}
-                trend={12.5}
+                trend={dashboardData.visitorsTrend || 0}
                 description="Total unique patients"
                 icon={<BiShow size={24} />}
                 color="emerald"
@@ -215,22 +280,25 @@ export default function PractitionerDashboard() {
               />
             </div>
 
-            {/* Patients Overview Chart */}
+            {/* Unified Patients Overview & Engagement Card */}
             <Card className="lg:col-span-5 flex flex-col min-h-full">
+              {/* Patients Overview Section */}
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+                <h3 className="text-lg font-bold text-slate-800 font-grotesk">
                   Patients Overview
                 </h3>
                 <button className="flex items-center gap-1.5 text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
-                  This Month <BiChevronDown />
+                  <p>This Month</p> <BiChevronDown />
                 </button>
               </div>
 
               <div className="flex-1 flex w-full relative min-h-[180px]">
                 {/* Y Axis */}
-                <div className="flex flex-col justify-between items-end pr-4 text-xs font-bold text-slate-400 h-[150px]">
+                <div className="flex flex-col justify-between items-end pr-4 text-xs h-[150px]">
                   {[10, 8, 6, 4, 2, 0].map((l, i) => (
-                    <span key={i}>{l}</span>
+                    <span key={i}>
+                      <p className="text-xs  text-slate-500">{l}</p>
+                    </span>
                   ))}
                 </div>
 
@@ -277,18 +345,115 @@ export default function PractitionerDashboard() {
                   )}
                 </div>
 
-                <div className="absolute bottom-0 right-0 left-[35px] flex justify-between transform translate-y-full pt-3">
+                <div className="absolute bottom-8 right-0 left-[35px] flex justify-between transform translate-y-full pt-3">
                   {(dashboardData.chartData || []).map(
                     (item: any, i: number) => (
                       <div
                         key={i}
-                        className="w-full text-center text-xs font-bold text-slate-400"
+                        className="w-full text-center text-xs  text-slate-400"
                       >
-                        {item.label}
+                        <p className="text-xs  text-slate-500"> {item.label}</p>
                       </div>
                     ),
                   )}
                 </div>
+              </div>
+
+              {/* Separator */}
+
+              {/* Engagement Analytics Section */}
+              <div className="flex items-center justify-between mt-4 mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+                    Engagement Analytics
+                  </h3>
+                  <p className="text-xs text-slate-500 ">
+                    Interactions with your shared content
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button className="text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
+                    <p className="text-xs font-bold text-slate-500">
+                      Last 7 Days
+                    </p>
+                  </button>
+                </div>
+              </div>
+
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={dashboardData.interactionData || []}
+                    margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f1f5f9"
+                    />
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                      }}
+                      itemStyle={{ fontSize: "11px", fontWeight: 700 }}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      align="right"
+                      iconType="circle"
+                      wrapperStyle={{
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        paddingBottom: "20px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="reactions"
+                      stroke="#2E3192"
+                      strokeWidth={3}
+                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="comments"
+                      stroke="#10b981"
+                      strokeWidth={3}
+                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="likes"
+                      stroke="#f59e0b"
+                      strokeWidth={3}
+                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="dislikes"
+                      stroke="#ef4444"
+                      strokeWidth={3}
+                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </Card>
           </div>
@@ -298,7 +463,7 @@ export default function PractitionerDashboard() {
             {/* Calendar Carousel */}
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+                <h3 className="text-l font-bold text-slate-800 font-grotesk">
                   Upcoming Appointments
                 </h3>
                 <div className="relative">
@@ -306,10 +471,12 @@ export default function PractitionerDashboard() {
                     onClick={() => setIsMonthOpen(!isMonthOpen)}
                     className="flex items-center gap-1.5 text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors"
                   >
-                    {viewDate.toLocaleDateString("en-US", {
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    <p>
+                      {viewDate.toLocaleDateString("en-US", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
                     <BiChevronDown
                       className={`transition-transform duration-200 ${isMonthOpen ? "rotate-180" : ""}`}
                     />
@@ -331,10 +498,12 @@ export default function PractitionerDashboard() {
                               : "text-slate-500 hover:bg-slate-50"
                           }`}
                         >
-                          {m.toLocaleDateString("en-US", {
-                            month: "long",
-                            year: "numeric",
-                          })}
+                          <h1 className="font-grotesk">
+                            {m.toLocaleDateString("en-US", {
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </h1>
                         </button>
                       ))}
                     </div>
@@ -385,7 +554,7 @@ export default function PractitionerDashboard() {
             {/* Schedule List */}
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+                <h3 className="text-lg font-bold text-slate-800 font-grotesk">
                   Schedule List (
                   {selectedDate.toLocaleDateString("en-ZA", {
                     day: "numeric",
@@ -479,7 +648,7 @@ export default function PractitionerDashboard() {
                                   />
                                 ) : (
                                   <BiPhone
-                                    className="text-amber-500"
+                                    className="text-gray-500"
                                     size={16}
                                   />
                                 )}
@@ -530,7 +699,7 @@ export default function PractitionerDashboard() {
         {/* RIGHT COLUMN (Appoint Request) */}
         <Card className="xl:col-span-4 min-h-full">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-sm font-bold text-slate-800 font-grotesk">
+            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
               Pending Requests
             </h3>
           </div>
@@ -554,39 +723,59 @@ export default function PractitionerDashboard() {
                     <div className="flex items-start gap-4 mb-4">
                       <Avatar name={req.patientName} size="md" />
                       <div className="flex-1">
-                        <h4 className="text-sm font-bold text-slate-800 mb-1 leading-none font-grotesk">
-                          {req.patientName}
-                        </h4>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="text-sm font-bold text-slate-800 leading-none font-grotesk">
+                            {req.patientName}
+                          </h4>
+                          {new Date(req.createdAt).getTime() >
+                            Date.now() - 24 * 60 * 60 * 1000 && (
+                            <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                              New
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs font-medium text-slate-500 mb-1">
                           {new Date(req.scheduledStart).toLocaleDateString()}
                         </p>
                         <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                          <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></span>
                           <p className="text-xs font-bold text-slate-400 capitalize">
                             {req.type} Consultation
                           </p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         variant="secondary"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRequestAction(req.consultationId, "cancelled");
                         }}
-                        isLoading={actionLoading === req.consultationId}
-                        className="flex-1 text-rose-500 bg-rose-50 hover:bg-rose-100"
+                        loading={actionLoading === req.consultationId}
+                        className="flex-1 text-rose-500 bg-rose-50 hover:bg-rose-100 min-w-[80px]"
                       >
-                        Reject
+                        Decline
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast(
+                            "Reschedule functionality coming soon. Please message the patient.",
+                          );
+                        }}
+                        className="flex-1 text-slate-500 min-w-[80px]"
+                      >
+                        Reschedule
                       </Button>
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRequestAction(req.consultationId, "scheduled");
                         }}
-                        isLoading={actionLoading === req.consultationId}
-                        className="flex-1"
+                        loading={actionLoading === req.consultationId}
+                        className="flex-1 min-w-[80px]"
                       >
                         Accept
                       </Button>

@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface ISystemConfig extends Document {
+export interface ISystemConfig extends Omit<Document, '_id'> {
+  _id: string;
   features: any;
   maintenanceMode: boolean;
   popiaVersion: string;

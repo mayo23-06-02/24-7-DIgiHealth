@@ -25,7 +25,7 @@ interface CalendarEvent {
   type: string;
   reason: string;
   riskScore: number;
-  riskColor: "green" | "amber" | "red";
+  riskColor: "green" | "gray" | "red";
   riskFactors: string[];
   aiRecommendations: string[];
   patientId: string;
@@ -79,11 +79,11 @@ const eventColor = (status: string, riskColor: string) => {
     };
   if (status === "requested")
     return {
-      bg: "bg-amber-50 border-amber-200 hover:bg-amber-100",
-      text: "text-amber-700",
-      dot: "bg-amber-500",
+      bg: "bg-gray-50 border-gray-200 hover:bg-gray-100",
+      text: "text-gray-700",
+      dot: "bg-gray-500",
     };
-  if (riskColor === "amber")
+  if (riskColor === "gray")
     return {
       bg: "bg-orange-50 border-orange-200 hover:bg-orange-100",
       text: "text-orange-700",
@@ -139,7 +139,7 @@ const MOCK_EVENTS: CalendarEvent[] = [
     type: "chat",
     reason: "Asthma follow-up",
     riskScore: 45,
-    riskColor: "amber",
+    riskColor: "gray",
     riskFactors: ["Chronic asthma"],
     aiRecommendations: [],
     patientId: "p3",
@@ -220,7 +220,7 @@ export default function AppointmentCalendar() {
         {/* Calendar Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h3 className="text-[10px] font-bold text-slate-400  tracking-normal leading-none mb-2 font-grotesk">
+            <h3 className="text-lg font-bold text-slate-400  tracking-normal leading-none mb-2 font-grotesk">
               Clinical Schedule
             </h3>
             <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export default function AppointmentCalendar() {
             <Button
               variant="ghost"
               onClick={() => setCurrentDate(new Date())}
-              className="text-[10px] font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-full transition-all border-none bg-transparent h-auto !min-w-0  tracking-normal"
+              className="text-sm font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-full transition-all border-none bg-transparent h-auto !min-w-0  tracking-normal"
             >
               Today
             </Button>
@@ -281,7 +281,7 @@ export default function AppointmentCalendar() {
                   {DAYS[i]}
                 </p>
                 <p
-                  className={`text-sm font-bold mt-1 ${isToday ? "text-white bg-primary w-6 h-6 rounded-full flex items-center justify-center mx-auto text-[10px] shadow-none shadow-primary/30" : "text-slate-600"}`}
+                  className={`text-sm font-bold mt-1 ${isToday ? "text-white bg-primary w-6 h-6 rounded-full flex items-center justify-center mx-auto text-sm shadow-none shadow-primary/30" : "text-slate-600"}`}
                 >
                   {day.getDate()}
                 </p>
@@ -305,7 +305,7 @@ export default function AppointmentCalendar() {
                     key={h}
                     className="h-14 flex items-start justify-end pr-3 pt-1"
                   >
-                    <span className="text-[10px] text-slate-300 font-bold tabular-nums">
+                    <span className="text-sm text-slate-300 font-bold tabular-nums">
                       {String(h).padStart(2, "0")}:00
                     </span>
                   </div>
@@ -354,7 +354,7 @@ export default function AppointmentCalendar() {
                             <span
                               className={`w-2 h-2 rounded-full shrink-0 shadow-none ${col.dot}`}
                             />
-                            <span className="text-[10px] font-bold truncate leading-tight  tracking-tight">
+                            <span className="text-sm font-bold truncate leading-tight  tracking-tight">
                               {evt.patientName.split(" ")[0]}
                             </span>
                           </div>
@@ -393,7 +393,7 @@ export default function AppointmentCalendar() {
                   <h4 className="text-sm font-bold text-slate-800 leading-tight font-grotesk">
                     {selectedEvent.patientName}
                   </h4>
-                  <p className="text-[10px] font-bold text-slate-400  tracking-normal mt-1">
+                  <p className="text-sm font-bold text-slate-400  tracking-normal mt-1">
                     {selectedEvent.reason}
                   </p>
                 </div>
@@ -435,7 +435,7 @@ export default function AppointmentCalendar() {
               </div>
               <div className="flex items-center justify-between px-1">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold  tracking-normal">
+                  <p className="text-sm text-slate-400 font-bold  tracking-normal">
                     Clinical Risk
                   </p>
                   <p className="text-[9px] text-slate-300 font-bold  tracking-normal mt-0.5">
@@ -451,7 +451,7 @@ export default function AppointmentCalendar() {
               </div>
               {selectedEvent.aiRecommendations.length > 0 && (
                 <div className="bg-emerald-50/50 border border-emerald-100 rounded-[1.5rem] p-4">
-                  <p className="text-[10px] font-bold text-emerald-600 mb-2  tracking-normal">
+                  <p className="text-sm font-bold text-emerald-600 mb-2  tracking-normal">
                     AI Triage Insights
                   </p>
                   <ul className="space-y-2">

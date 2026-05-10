@@ -31,8 +31,9 @@ export default function CallButton({
   const { user } = useAuthContext();
   const [callActive, setCallActive] = useState(false);
   const [autoJoinAvailable, setAutoJoinAvailable] = useState(false);
-  const [pendingRoomInfo, setPendingRoomInfo] =
-    useState<ActiveCallInfo | null>(null);
+  const [pendingRoomInfo, setPendingRoomInfo] = useState<ActiveCallInfo | null>(
+    null,
+  );
   const [statusLoading, setStatusLoading] = useState(false);
   const [incomingAlertOpen, setIncomingAlertOpen] = useState(false);
 
@@ -134,13 +135,13 @@ export default function CallButton({
   return (
     <div className="relative flex gap-2">
       {incomingAlertOpen && pendingRoomInfo && (
-        <div className="absolute top-14 right-0 z-30 w-80 rounded-3xl border border-rose-200 bg-white p-4 shadow-2xl shadow-rose-900/10">
+        <div className="absolute top-14 right-0 z-30 w-80 rounded-3xl border border-rose-200 bg-white p-4  shadow-rose-900/10">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
               <BiPhoneCall size={22} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-wide text-rose-500">
+              <p className="text-xs font-bold -wide text-rose-500">
                 Incoming {pendingRoomInfo.type} call
               </p>
               <p className="truncate text-sm font-semibold text-slate-800">
@@ -150,10 +151,22 @@ export default function CallButton({
           </div>
           <div className="mt-4 flex gap-2">
             <button
-              onClick={() => setIncomingAlertOpen(false)}
+              onClick={async () => {
+                try {
+                  await fetch("/api/chat/call/decline", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ callId: pendingRoomInfo.callId }),
+                  });
+                  setIncomingAlertOpen(false);
+                } catch (err) {
+                  console.error(err);
+                  setIncomingAlertOpen(false);
+                }
+              }}
               className="flex-1 rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
-              Dismiss
+              Decline
             </button>
             <button
               onClick={async () => {
@@ -232,7 +245,7 @@ export default function CallButton({
               setStatusLoading(false);
             }
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white font-bold text-xs uppercase tracking-normal rounded-xl hover:bg-rose-600 transition-all animate-pulse"
+          className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white font-bold text-xs -normal rounded-xl hover:bg-rose-600 transition-all animate-pulse"
         >
           {pendingRoomInfo.initiatedBy === user?.id
             ? "RETURN TO CALL"

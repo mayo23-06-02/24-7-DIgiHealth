@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
+    const { id } = await params;
     const body = await req.json();
-    const updated = await HospitalAppointment.findByIdAndUpdate(params.id, body, { new: true });
+    const updated = await HospitalAppointment.findByIdAndUpdate(id, body, { new: true });
     if (!updated) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {

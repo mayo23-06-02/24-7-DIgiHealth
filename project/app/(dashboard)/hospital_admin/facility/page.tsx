@@ -151,9 +151,9 @@ export default function FacilitySettings() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+            <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
               Facility Name
-            </label>
+            </h1>
             <input
               name="name"
               value={formData.name}
@@ -162,9 +162,9 @@ export default function FacilitySettings() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+            <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
               Facility Type
-            </label>
+            </h1>
             <select
               name="type"
               value={formData.type}
@@ -177,9 +177,9 @@ export default function FacilitySettings() {
             </select>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+            <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
               Address
-            </label>
+            </h1>
             <input
               name="address"
               value={formData.address}
@@ -188,9 +188,9 @@ export default function FacilitySettings() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+            <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
               Contact Number
-            </label>
+            </h1>
             <input
               name="contactNo"
               value={formData.contactNo}
@@ -199,54 +199,12 @@ export default function FacilitySettings() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
+            <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
               Email
-            </label>
+            </h1>
             <input
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-
-        <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 mt-4 font-grotesk">
-          Capacity & Hours
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
-              Total Beds
-            </label>
-            <input
-              name="totalBeds"
-              type="number"
-              value={formData.totalBeds}
-              onChange={handleChange}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
-              ICU Beds
-            </label>
-            <input
-              name="icuBeds"
-              type="number"
-              value={formData.icuBeds}
-              onChange={handleChange}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
-              Emergency Beds
-            </label>
-            <input
-              name="emergencyBeds"
-              type="number"
-              value={formData.emergencyBeds}
               onChange={handleChange}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
             />
@@ -261,16 +219,14 @@ export default function FacilitySettings() {
             onChange={handleChange}
             className="w-4 h-4 text-primary rounded border-slate-300"
           />
-          <label className="text-sm font-bold text-slate-700">
-            Open 24 Hours
-          </label>
+          <h1 className="text-sm font-bold text-slate-700">Open 24 Hours</h1>
         </div>
 
         <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 mt-4 font-grotesk">
           Services Offered
         </h3>
         <div className="flex gap-6">
-          <label className="flex items-center gap-2">
+          <h1 className="flex items-center gap-2">
             <input
               type="checkbox"
               name="emergency"
@@ -279,8 +235,8 @@ export default function FacilitySettings() {
               className="w-4 h-4 text-primary rounded border-slate-300"
             />
             <span className="text-sm text-slate-700">Emergency</span>
-          </label>
-          <label className="flex items-center gap-2">
+          </h1>
+          <h1 className="flex items-center gap-2">
             <input
               type="checkbox"
               name="radiology"
@@ -289,8 +245,8 @@ export default function FacilitySettings() {
               className="w-4 h-4 text-primary rounded border-slate-300"
             />
             <span className="text-sm text-slate-700">Radiology</span>
-          </label>
-          <label className="flex items-center gap-2">
+          </h1>
+          <h1 className="flex items-center gap-2">
             <input
               type="checkbox"
               name="pharmacy"
@@ -299,7 +255,7 @@ export default function FacilitySettings() {
               className="w-4 h-4 text-primary rounded border-slate-300"
             />
             <span className="text-sm text-slate-700">Pharmacy</span>
-          </label>
+          </h1>
         </div>
 
         <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 mt-4 font-grotesk">

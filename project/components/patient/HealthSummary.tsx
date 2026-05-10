@@ -18,7 +18,7 @@ export default function HealthSummary({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8">
+    <div className="bg-white rounded-lg border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 font-grotesk">
           <FiActivity className="text-high-vis-red" /> Health Summary

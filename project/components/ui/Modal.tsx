@@ -41,7 +41,7 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] max-h-[100vh] h-full flex items-center justify-end ">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
@@ -51,13 +51,13 @@ const Modal: React.FC<ModalProps> = ({
       {/* Content */}
       <div
         className={`
-        relative w-full ${widths[width]} max-h-[85vh] bg-white rounded-lg overflow-hidden
+        relative lg:max-w-3xl w-full max-h-full h-full bg-white rounded-lg overflow-hidden
         animate-in zoom-in-95 fade-in duration-500 transition-all shadow-none
       `}
       >
         {/* Header */}
         {!hideHeader && (
-          <div className="flex items-center justify-between px-10 py-8 border-b border-slate-50">
+          <div className="flex max-w-3xl items-center justify-between px-10 py-8 border-b border-slate-50">
             <h3 className="text-xl font-bold text-slate-900 tracking-tight  font-grotesk">
               {title ? (
                 <>
@@ -72,7 +72,7 @@ const Modal: React.FC<ModalProps> = ({
             </h3>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all"
+              className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all"
             >
               <BiX size={24} />
             </button>
@@ -83,7 +83,7 @@ const Modal: React.FC<ModalProps> = ({
         <div
           className={`
             ${noPadding ? "p-0" : "p-10"} 
-            max-h-[90vh] overflow-y-auto custom-scrollbar
+            max-h-[90vh] max-w-3xl overflow-y-auto custom-scrollbar
           `}
         >
           {children}

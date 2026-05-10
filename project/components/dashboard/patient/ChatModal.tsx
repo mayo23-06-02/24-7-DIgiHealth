@@ -269,7 +269,7 @@ export default function ChatModal({
             <div className="flex-1 flex items-center gap-3 bg-slate-50 rounded-[28px] border border-slate-100 px-6 py-2 transition-all focus-within:bg-white focus-within:shadow-none focus-within:shadow-slate-200/50 focus-within:border-primary/20">
               <Button
                 variant="ghost"
-                className="p-0 !min-w-0 text-slate-300 hover:text-amber-500 transition-colors bg-transparent border-none"
+                className="p-0 !min-w-0 text-slate-300 hover:text-gray-500 transition-colors bg-transparent border-none"
               >
                 <BiSmile size={24} />
               </Button>

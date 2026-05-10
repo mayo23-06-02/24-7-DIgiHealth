@@ -6,33 +6,36 @@ import { MedicalContext } from '@/lib/models/ClinicalData';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-
-async function getPractitionerId(req: NextRequest): Promise<string> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    if (token) {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-      const { payload } = await jwtVerify(token, secret);
-      const user = await User.findById(payload.userId as string).lean();
-      if (user && (user as any).role === 'practitioner') return (user as any)._id.toString();
-    }
-  } catch {}
-  return req.headers.get('x-practitioner-id') || process.env.MOCK_PRACTITIONER_ID || '000000000000000000000000';
-}
+import { getRequestUser } from '@/lib/auth/getRequestUser';
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
-    const practitionerId = await getPractitionerId(req);
+    const user = await getRequestUser();
+    if (!user || (user.role !== 'practitioner' && user.role !== 'mega_admin')) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    const practitionerId = user.userId;
+
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
     const riskFilter = searchParams.get('risk') || '';
 
+    // 1. Get assigned patients from profile
     const profile = await PractitionerProfile.findOne({ userId: practitionerId }).lean();
-    const patientIds = profile?.assignedPatientIds || [];
+    const assignedIds = profile?.assignedPatientIds?.map(id => id.toString()) || [];
 
-    const patients = await User.find({ _id: { $in: patientIds }, role: 'patient' }, 'firstName lastName email mobile').lean();
+    // 2. Get patients from consultations
+    const consultedIds = await Consultation.find({ practitionerId }).distinct('patientId');
+    const consultedIdStrings = consultedIds.map(id => id.toString());
+
+    // Merge and unique
+    const uniquePatientIds = [...new Set([...assignedIds, ...consultedIdStrings])];
+
+    const patients = await User.find(
+      { _id: { $in: uniquePatientIds }, role: 'patient' }, 
+      'firstName lastName email mobile gender dateOfBirth'
+    ).lean();
 
     const enriched = await Promise.all(
       patients.map(async (p: any) => {
@@ -68,11 +71,19 @@ export async function GET(req: NextRequest) {
           }
         } catch {}
 
+        let age = null;
+        if (p.dateOfBirth) {
+          const birth = new Date(p.dateOfBirth);
+          age = new Date().getFullYear() - birth.getFullYear();
+        }
+
         return {
           id: p._id.toString(),
           fullName,
           email: p.email,
           mobile: p.mobile,
+          gender: p.gender,
+          age,
           riskScore,
           riskColor,
           medicalHistory: chronicConditions,

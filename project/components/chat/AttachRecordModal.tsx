@@ -115,9 +115,9 @@ export default function AttachRecordModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               Record Type
-            </label>
+            </h1>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -132,9 +132,9 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               Title
-            </label>
+            </h1>
             <input
               type="text"
               value={title}
@@ -146,9 +146,9 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               Notes / Description (Optional)
-            </label>
+            </h1>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -158,9 +158,9 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
               File Attachment
-            </label>
+            </h1>
             <div
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
@@ -175,7 +175,7 @@ export default function AttachRecordModal({
                   <p className="text-sm font-bold text-slate-700">
                     {file.name}
                   </p>
-                  <p className="text-xs text-slate-400 font-bold mt-1">
+                  <p className="text-xs text-slate-500 font-bold mt-1">
                     {(file.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </>
@@ -187,7 +187,7 @@ export default function AttachRecordModal({
                   <p className="text-sm font-bold text-slate-600 mb-1">
                     Click or drag & drop to upload
                   </p>
-                  <p className="text-xs text-slate-400 font-medium">
+                  <p className="text-xs text-slate-500 font-medium">
                     Supports PDF, JPG, PNG, DICOM (Max 10MB)
                   </p>
                 </>

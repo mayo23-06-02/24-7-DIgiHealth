@@ -43,14 +43,15 @@ export async function GET() {
 
   const mappedCons = cons.map(c => {
     const isPast = new Date(c.scheduledStartTime) < new Date();
+    const prac = c.practitionerId as any;
     return {
       id: c._id,
       type: 'doctor',
-      dr: c.practitionerId ? `Dr. ${c.practitionerId.firstName} ${c.practitionerId.lastName}` : 'Unknown Doctor',
-      field: c.practitionerId ? specMap.get(c.practitionerId._id.toString()) || 'General' : 'General',
+      dr: prac ? `Dr. ${prac.firstName} ${prac.lastName}` : 'Unknown Doctor',
+      field: prac ? specMap.get(prac._id.toString()) || 'General' : 'General',
       date: new Date(c.scheduledStartTime).toDateString(),
       time: new Date(c.scheduledStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      img: c.practitionerId ? `https://ui-avatars.com/api/?name=${c.practitionerId.firstName}+${c.practitionerId.lastName}&background=0052cc&color=fff` : '',
+      img: prac ? `https://ui-avatars.com/api/?name=${prac.firstName}+${prac.lastName}&background=0052cc&color=fff` : '',
       concern: c.chiefComplaint || 'Scheduled Consultation',
       status: c.status === 'requested' ? 'requested' : c.status === 'scheduled' ? 'confirmed' : c.status,
       countdown: isPast ? 'Past' : 'Upcoming',

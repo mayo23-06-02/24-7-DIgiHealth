@@ -53,7 +53,7 @@ export default function DoctorCard({
   const getAvailabilityColor = () => {
     const mins = doctor.nextAvailableMinutes ?? 0;
     if (mins <= 15) return "text-green-600 bg-green-50";
-    if (mins <= 45) return "text-amber-600 bg-amber-50";
+    if (mins <= 45) return "text-gray-600 bg-gray-50";
     return "text-slate-500 bg-slate-100";
   };
 
@@ -125,7 +125,7 @@ export default function DoctorCard({
         </div>
 
         <div className="flex justify-center items-center gap-1 mt-3">
-          <div className="flex items-center gap-0.5 text-amber-500">
+          <div className="flex items-center gap-0.5 text-gray-500">
             <BiStar size={14} fill="currentColor" />
             <span className="text-sm font-bold text-slate-700">
               {doctor.rating}
@@ -209,9 +209,9 @@ export default function DoctorCard({
             </div>
 
             <div className="text-right shrink-0">
-              <div className="flex items-center justify-end gap-1 px-2 py-1 bg-amber-50 rounded-lg border border-amber-100 mb-2">
+              <div className="flex items-center justify-end gap-1 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 mb-2">
                 <BiStar
-                  className="text-amber-500"
+                  className="text-gray-500"
                   size={14}
                   fill="currentColor"
                 />

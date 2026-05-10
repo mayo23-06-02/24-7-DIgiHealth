@@ -1,6 +1,6 @@
 import React from "react";
 
-type BadgeStatus =
+export type BadgeStatus =
   | "success"
   | "warning"
   | "error"
@@ -44,19 +44,19 @@ const Badge: React.FC<BadgeProps> = ({
     },
   };
 
-  const style = configs[status];
+  const style = configs[status] || configs.neutral;
 
   return (
     <span
       className={`
-      inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-grotesk font-bold  tracking-wider
+      inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-grotesk font-bold  tracking-wider
       ${style.base} ${className}
     `}
     >
       {dot && (
         <span className={`w-1.5 h-1.5 rounded-lg ${style.dot} animate-pulse`} />
       )}
-      {label}
+      <h1> {label}</h1>
     </span>
   );
 };

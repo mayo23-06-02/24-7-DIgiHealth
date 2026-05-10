@@ -17,7 +17,7 @@ const Card: React.FC<CardProps> = ({
   onClick, // ✅ destructure
 }) => {
   const baseStyles =
-    "rounded-lg transition-all duration-300 overflow-hidden  w-full";
+    "rounded-lg transition-all border border-slate-200 duration-300 overflow-hidden  w-full";
 
   const variants = {
     solid: "bg-white border border-slate-100",

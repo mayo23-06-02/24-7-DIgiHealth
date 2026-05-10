@@ -62,7 +62,7 @@ export default function FacilityCard({
     if (facility.waitTime <= 15)
       return "bg-green-100 text-green-700 border-green-200";
     if (facility.waitTime <= 45)
-      return "bg-amber-100 text-amber-700 border-amber-200";
+      return "bg-gray-100 text-gray-700 border-gray-200";
     return "bg-red-100 text-red-700 border-red-200";
   };
 
@@ -77,7 +77,7 @@ export default function FacilityCard({
       case "Private":
         return "bg-emerald-500 text-white";
       case "NGO":
-        return "bg-amber-500 text-white";
+        return "bg-gray-500 text-white";
       default:
         return "bg-slate-500 text-white";
     }
@@ -158,7 +158,7 @@ export default function FacilityCard({
             {facility.type}
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full shadow-none border border-white/20">
-            <BiStar size={14} className="text-amber-500" fill="currentColor" />
+            <BiStar size={14} className="text-gray-500" fill="currentColor" />
             <span className="text-xs font-bold text-slate-800">
               {facility.rating}
             </span>

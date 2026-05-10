@@ -1,15 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    const user = await getRequestUser();
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account.' }, { status: 404 });
+    }
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
     const date = searchParams.get('date');
 
-    const filter: any = {};
+    const filter: any = { facilityId: hospitalId };
     if (status) filter.status = status;
     if (date) {
       const d = new Date(date);
@@ -21,21 +33,38 @@ export async function GET(req: Request) {
     const appointments = await HospitalAppointment.find(filter)
       .populate('patientId', 'firstName lastName email')
       .populate('practitionerId', 'firstName lastName profile')
-      .sort({ scheduledStart: 1 });
+      .sort({ scheduledStart: 1 })
+      .lean();
 
     return NextResponse.json({ success: true, data: appointments });
   } catch (error: any) {
+    console.error('[GET /api/hospital/appointments]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
+    const user = await getRequestUser();
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account.' }, { status: 404 });
+    }
+
     const body = await req.json();
-    const appointment = await HospitalAppointment.create(body);
+    const appointment = await HospitalAppointment.create({
+      ...body,
+      facilityId: hospitalId
+    });
+    
     return NextResponse.json({ success: true, data: appointment });
   } catch (error: any) {
+    console.error('[POST /api/hospital/appointments]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
