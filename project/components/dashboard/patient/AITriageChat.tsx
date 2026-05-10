@@ -26,7 +26,7 @@ export default function AITriageChat({
     {
       id: "1",
       sender: "assistant",
-      text: `Hello ${patientName.split(" ")[0]}! I'm Dr. SymtoSage, your dedicated AI clinical doctor. I've been trained on official clinical data to help you understand your symptoms. How can I support you today?`,
+      text: `Hello ${patientName.split(" ")[0]}! I'm SymtoSage, your AI clinical assistant. I can help you analyze symptoms, cross-reference clinical data, and provide triage support. How can I assist you today?`,
       timestamp: new Date(),
     },
   ]);
