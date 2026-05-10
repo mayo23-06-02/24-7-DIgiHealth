@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { 
   BiBrain, 
-  BiStethoscope, 
+  BiPulse, 
   BiHistory, 
   BiSave, 
   BiSearch, 
@@ -212,7 +212,7 @@ export default function AIDiagnizerPage() {
         <div className="lg:col-span-5 space-y-6">
           <Card variant="glass" className="border-primary/10">
             <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <BiStethoscope className="text-primary" /> Patient Assessment
+              <BiPulse className="text-primary" /> Patient Assessment
             </h3>
             
             <form onSubmit={handleDiagnose} className="space-y-6">
