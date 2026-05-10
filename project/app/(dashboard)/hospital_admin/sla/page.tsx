@@ -183,15 +183,15 @@ export default function HospitalSLAPage() {
                   </p>
                   <StatusBadge status={sla.status} />
                 </div>
-                <p className="text-xs text-slate-400 mb-2">{sla.description}</p>
+                <p className="text-xs text-slate-500 mb-2">{sla.description}</p>
                 <ProgressBar target={sla.target} current={sla.current} />
               </div>
               <div className="text-right shrink-0 w-28">
                 <p className="text-sm font-bold text-slate-800">
                   {sla.current}{" "}
-                  <span className="font-normal text-slate-400">{sla.unit}</span>
+                  <span className="font-normal text-slate-500">{sla.unit}</span>
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   Target: {sla.target} {sla.unit}
                 </p>
               </div>

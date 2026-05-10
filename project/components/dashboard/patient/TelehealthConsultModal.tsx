@@ -283,7 +283,7 @@ export default function TelehealthConsultModal({
                 <h4 className="text-base font-bold text-slate-800 tracking-tight leading-none mb-1 font-grotesk">
                   Session Chat
                 </h4>
-                <p className="text-xs font-bold text-slate-400  tracking-normal">
+                <p className="text-xs font-bold text-slate-500  tracking-normal">
                   Dr. {doctor.name.split(" ")[1]}
                 </p>
               </div>
@@ -291,7 +291,7 @@ export default function TelehealthConsultModal({
             <Button
               variant="ghost"
               onClick={() => setIsChatOpen(false)}
-              className="w-10 h-10 p-0 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-400 !min-w-0 border-none bg-transparent"
+              className="w-10 h-10 p-0 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-500 !min-w-0 border-none bg-transparent"
             >
               <BiX size={24} />
             </Button>
@@ -324,7 +324,7 @@ export default function TelehealthConsultModal({
               <Button
                 type="button"
                 variant="ghost"
-                className="text-slate-400 hover:text-primary transition-colors p-0 !min-w-0 border-none bg-transparent"
+                className="text-slate-500 hover:text-primary transition-colors p-0 !min-w-0 border-none bg-transparent"
               >
                 <BiPaperclip size={20} />
               </Button>

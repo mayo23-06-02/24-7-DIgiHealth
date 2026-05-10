@@ -43,15 +43,15 @@ export default function RegisterRoleSelection() {
 
   return (
     <div className="w-full max-w-[1300px]   lg:py-30 lg:px-10">
-      <div className="group ring-1 ring-slate-200/5 overflow-y-auto custom-scrollbar max-h-[95vh] bg-white border border-slate-200 p-6 md:p-12 pb-5 rounded-lg relative overflow-hidden">
-        <div className="flex items-center gap-3 lg:mb-10">
-          <span className="text-secondary font-bold text-3xl">+</span>
-          <span className="text-secondary font-bold tracking-normal  text-sm">
+      <div className="group  ring-1 ring-slate-200/5 overflow-y-auto custom-scrollbar max-h-[95vh] bg-white border border-slate-200 p-6 md:p-12 pb-5 rounded-lg relative overflow-hidden">
+        <div className="flex max-w-5xl mx-auto items-center gap-3 lg:mb-10">
+          <span className="text-secondary  text-3xl">+</span>
+          <span className="text-secondary  tracking-normal  text-sm">
             Join the Network
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-16 items-start mb-16">
+        <div className="grid grid-cols-1 max-w-5xl mx-auto lg:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-16 items-start mb-16">
           <div className="lg:py-5 pt-4">
             <h2 className="text-3xl md:text-4xl font-medium text-slate-900 leading-[1.05] tracking-tight mb-2 md:mb-10 font-grotesk">
               The Right Path to <br />{" "}
@@ -81,7 +81,7 @@ export default function RegisterRoleSelection() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4  border-t border-slate-100 py-5">
+        <div className="flex flex-col gap-4 max-w-5xl mx-auto  border-t border-slate-100 py-5">
           {roles.map((role) => (
             <button
               key={role.id}
@@ -107,7 +107,7 @@ export default function RegisterRoleSelection() {
                   className={`text-xl md:text-2xl transition-all duration-500 tracking-tight ${
                     hoveredRole === role.id
                       ? "text-primary font-semibold translate-x-3"
-                      : "text-slate-400 font-medium"
+                      : "text-slate-500 font-medium"
                   }`}
                 >
                   {role.title}
@@ -116,7 +116,7 @@ export default function RegisterRoleSelection() {
 
               <div className="flex items-center gap-8 translate-x-2 group-hover:translate-x-0 transition-transform duration-500">
                 <p
-                  className={`hidden lg:block text-slate-400 text-sm max-w-sm text-right transition-opacity duration-500 font-medium ${
+                  className={`hidden lg:block text-slate-500 text-sm max-w-sm text-right transition-opacity duration-500 font-medium ${
                     hoveredRole === role.id
                       ? "opacity-100 translate-x-0"
                       : "opacity-0 translate-x-4"
@@ -138,8 +138,8 @@ export default function RegisterRoleSelection() {
           ))}
         </div>
 
-        <div className="mt-20 flex flex-col border-t border-slate-100 md:flex-row items-center justify-between gap-10 py-5">
-          <p className="text-slate-400  text-sm">
+        <div className="mt-20 flex max-w-5xl mx-auto flex-col border-t border-slate-100 md:flex-row items-center justify-between gap-10 py-5">
+          <p className="text-slate-500  text-sm">
             Need support with your application?{" "}
             <button className="text-primary font-bold hover:underline ml-2">
               Contact Guidance Team

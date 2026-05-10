@@ -322,7 +322,7 @@ export default function PractitionerAppointmentsPage() {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[220px]">
           <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
             size={16}
           />
           <input
@@ -334,7 +334,7 @@ export default function PractitionerAppointmentsPage() {
           />
         </div>
         <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-          <BiCalendar className="text-slate-400" size={15} />
+          <BiCalendar className="text-slate-500" size={15} />
           <input
             type="date"
             value={dateFrom}
@@ -343,7 +343,7 @@ export default function PractitionerAppointmentsPage() {
           />
         </div>
         <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-          <BiCalendar className="text-slate-400" size={15} />
+          <BiCalendar className="text-slate-500" size={15} />
           <input
             type="date"
             value={dateTo}
@@ -408,7 +408,7 @@ export default function PractitionerAppointmentsPage() {
                           <p className="text-sm font-bold text-slate-800">
                             {a.patientName}
                           </p>
-                          <p className="text-xs text-slate-400 line-clamp-1">
+                          <p className="text-xs text-slate-500 line-clamp-1">
                             {a.reason}
                           </p>
                         </div>
@@ -421,7 +421,7 @@ export default function PractitionerAppointmentsPage() {
                           { day: "numeric", month: "short", year: "numeric" },
                         )}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-slate-500">
                         {new Date(a.scheduledStart).toLocaleTimeString(
                           "en-ZA",
                           { hour: "2-digit", minute: "2-digit" },
@@ -520,7 +520,7 @@ export default function PractitionerAppointmentsPage() {
                   <tr>
                     <td
                       colSpan={6}
-                      className="py-12 text-center text-slate-400"
+                      className="py-12 text-center text-slate-500"
                     >
                       No {tab} appointments found.
                     </td>
@@ -594,7 +594,7 @@ export default function PractitionerAppointmentsPage() {
               </h1>
               <div className="relative">
                 <BiSearch
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none z-10"
                   size={15}
                 />
                 <input
@@ -629,7 +629,7 @@ export default function PractitionerAppointmentsPage() {
                       }));
                       setPatientSearch("");
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-400 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-rose-400 transition-colors"
                   >
                     <BiX size={14} />
                   </button>
@@ -639,12 +639,12 @@ export default function PractitionerAppointmentsPage() {
                 {showDropdown && !form.patientId && (
                   <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-2xl  shadow-slate-200/60 z-50 overflow-hidden max-h-60 overflow-y-auto">
                     {patientLoading ? (
-                      <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-400">
+                      <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-500">
                         <BiLoaderAlt className="animate-spin" size={14} />{" "}
                         Searching patients…
                       </div>
                     ) : patientResults.length === 0 ? (
-                      <div className="py-6 text-center text-xs text-slate-400">
+                      <div className="py-6 text-center text-xs text-slate-500">
                         {patientSearch.length < 1
                           ? "Start typing to find a patient"
                           : "No matching patients found"}
@@ -665,7 +665,7 @@ export default function PractitionerAppointmentsPage() {
                             <p className="text-sm font-bold text-slate-800 truncate">
                               {p.firstName} {p.lastName}
                             </p>
-                            <p className="text-xs text-slate-400 truncate">
+                            <p className="text-xs text-slate-500 truncate">
                               {p.email || p.phone || "Patient"}
                             </p>
                           </div>

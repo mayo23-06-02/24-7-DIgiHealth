@@ -220,7 +220,7 @@ export default function AppointmentCalendar() {
         {/* Calendar Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h3 className="text-lg font-bold text-slate-400  tracking-normal leading-none mb-2 font-grotesk">
+            <h3 className="text-lg font-bold text-slate-500  tracking-normal leading-none mb-2 font-grotesk">
               Clinical Schedule
             </h3>
             <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export default function AppointmentCalendar() {
                 className={`py-3 text-center border-l border-slate-100 transition-colors ${isToday ? "bg-primary/5" : ""}`}
               >
                 <p
-                  className={`text-[9px] font-bold  tracking-[0.25em] ${isToday ? "text-primary" : "text-slate-400"}`}
+                  className={`text-[9px] font-bold  tracking-[0.25em] ${isToday ? "text-primary" : "text-slate-500"}`}
                 >
                   {DAYS[i]}
                 </p>
@@ -393,7 +393,7 @@ export default function AppointmentCalendar() {
                   <h4 className="text-sm font-bold text-slate-800 leading-tight font-grotesk">
                     {selectedEvent.patientName}
                   </h4>
-                  <p className="text-sm font-bold text-slate-400  tracking-normal mt-1">
+                  <p className="text-sm font-bold text-slate-500  tracking-normal mt-1">
                     {selectedEvent.reason}
                   </p>
                 </div>
@@ -401,7 +401,7 @@ export default function AppointmentCalendar() {
               <Button
                 variant="ghost"
                 onClick={() => setSelectedEvent(null)}
-                className="w-8 h-8 p-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors border-none !min-w-0"
+                className="w-8 h-8 p-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-600 transition-colors border-none !min-w-0"
               >
                 <BiX size={18} />
               </Button>
@@ -409,7 +409,7 @@ export default function AppointmentCalendar() {
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
-                  <p className="text-[9px] text-slate-400 font-bold  tracking-normal mb-1">
+                  <p className="text-[9px] text-slate-500 font-bold  tracking-normal mb-1">
                     Time Window
                   </p>
                   <p className="text-xs font-bold text-slate-700 tabular-nums">
@@ -425,7 +425,7 @@ export default function AppointmentCalendar() {
                   </p>
                 </div>
                 <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
-                  <p className="text-[9px] text-slate-400 font-bold  tracking-normal mb-1">
+                  <p className="text-[9px] text-slate-500 font-bold  tracking-normal mb-1">
                     Session Type
                   </p>
                   <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5  tracking-tight">
@@ -435,7 +435,7 @@ export default function AppointmentCalendar() {
               </div>
               <div className="flex items-center justify-between px-1">
                 <div>
-                  <p className="text-sm text-slate-400 font-bold  tracking-normal">
+                  <p className="text-sm text-slate-500 font-bold  tracking-normal">
                     Clinical Risk
                   </p>
                   <p className="text-[9px] text-slate-300 font-bold  tracking-normal mt-0.5">

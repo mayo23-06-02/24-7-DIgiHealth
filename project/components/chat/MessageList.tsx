@@ -1,10 +1,18 @@
-import React from 'react';
-import MessageBubble from './MessageBubble';
+import React from "react";
+import MessageBubble from "./MessageBubble";
 
-export default function MessageList({ messages, currentUserId, onMessageSeen }: { messages: any[], currentUserId: string, onMessageSeen: (id: string) => void }) {
+export default function MessageList({
+  messages,
+  currentUserId,
+  onMessageSeen,
+}: {
+  messages: any[];
+  currentUserId: string;
+  onMessageSeen: (id: string) => void;
+}) {
   if (!messages || messages.length === 0) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-slate-400">
+      <div className="h-full flex flex-col items-center justify-center text-slate-500">
         <p>No messages yet. Start the conversation!</p>
       </div>
     );
@@ -18,9 +26,9 @@ export default function MessageList({ messages, currentUserId, onMessageSeen }: 
           message={message}
           isOwn={message.senderId === currentUserId}
           onSeen={() => {
-             if (!message.isRead && message.senderId !== currentUserId) {
-                onMessageSeen(message._id);
-             }
+            if (!message.isRead && message.senderId !== currentUserId) {
+              onMessageSeen(message._id);
+            }
           }}
         />
       ))}

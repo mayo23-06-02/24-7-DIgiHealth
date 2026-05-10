@@ -131,7 +131,7 @@ export default function DoctorCard({
               {doctor.rating}
             </span>
           </div>
-          <span className="text-xs text-slate-400 font-bold  tracking-tighter">
+          <span className="text-xs text-slate-500 font-bold  tracking-tighter">
             ({doctor.reviewCount} reviews)
           </span>
         </div>
@@ -218,7 +218,7 @@ export default function DoctorCard({
                 <span className="text-xs font-bold text-slate-700">
                   {doctor.rating}
                 </span>
-                <span className="text-xs text-slate-400 font-bold  tracking-tight">
+                <span className="text-xs text-slate-500 font-bold  tracking-tight">
                   ({doctor.reviewCount})
                 </span>
               </div>
@@ -253,7 +253,7 @@ export default function DoctorCard({
                     e.stopPropagation();
                     onViewProfile(doctor.id);
                   }}
-                  className="text-slate-400 text-xs font-bold  tracking-normal hover:text-primary transition-all active:scale-95"
+                  className="text-slate-500 text-xs font-bold  tracking-normal hover:text-primary transition-all active:scale-95"
                 >
                   View Profile
                 </button>

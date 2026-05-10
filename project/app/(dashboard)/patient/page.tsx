@@ -337,7 +337,6 @@ export default function PatientDashboard() {
               }
             />
           </Card>
-
         </div>
         <Card className="xl:col-span-7 h-[700px] overflow-hidden flex flex-col p-0">
           <PatientCalendar />
@@ -401,7 +400,7 @@ export default function PatientDashboard() {
                         className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
                         required
                       />
-                      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold">
                         kg
                       </div>
                     </div>
@@ -419,7 +418,7 @@ export default function PatientDashboard() {
                         className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
                         required
                       />
-                      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold">
                         cm
                       </div>
                     </div>
@@ -442,7 +441,7 @@ export default function PatientDashboard() {
                         </h1>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm  text-slate-400 ">Status</p>
+                        <p className="text-sm  text-slate-500 ">Status</p>
                         <h1 className="text-sm font-bold uppercase text-primary">
                           {(() => {
                             const bmi =
@@ -476,7 +475,7 @@ export default function PatientDashboard() {
                     className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
                     required
                   />
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 ">
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 ">
                     {updateVitalType === "heartRate" && "bpm"}
                     {updateVitalType === "glucose" && "mmol/L"}
                   </div>
@@ -510,7 +509,6 @@ export default function PatientDashboard() {
           </div>
         </form>
       </Modal>
-
     </div>
   );
 }

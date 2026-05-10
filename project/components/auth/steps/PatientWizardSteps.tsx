@@ -245,7 +245,7 @@ export function PatientAnthropometricStep({
         </span>
         <div className="flex-1">
           <p className="text-sm font-bold text-slate-700">Optional Section</p>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             You can skip this and add it later in your dashboard.
           </p>
         </div>
@@ -262,7 +262,7 @@ export function PatientAnthropometricStep({
               key={u}
               type="button"
               onClick={() => setUnit(u as any)}
-              className={`px-4 py-2 rounded text-xs font-bold  transition-all ${unit === u ? "bg-white text-primary shadow-none" : "text-slate-400"}`}
+              className={`px-4 py-2 rounded text-xs font-bold  transition-all ${unit === u ? "bg-white text-primary shadow-none" : "text-slate-500"}`}
             >
               {u === "metric" ? "cm / kg" : "in / lbs"}
             </button>
@@ -365,7 +365,7 @@ export function PatientAnthropometricStep({
               className={`px-4 py-4 rounded-xl text-left text-sm font-semibold transition-all border-2 flex items-center justify-between group ${
                 formData.activityLevel === level
                   ? "bg-primary border-primary text-white "
-                  : "bg-white border-slate-100 text-slate-400 "
+                  : "bg-white border-slate-100 text-slate-500 "
               }`}
             >
               <span className="flex-1">{level}</span>
@@ -383,7 +383,7 @@ export function PatientAnthropometricStep({
           className="block text-sm font-bold text-slate-700"
         >
           Known Allergies{" "}
-          <span className="text-slate-400 font-normal ml-1">
+          <span className="text-slate-500 font-normal ml-1">
             (Select all that apply)
           </span>
         </h1>
@@ -404,7 +404,7 @@ export function PatientAnthropometricStep({
                 className={`px-8 py-3 rounded-full text-sm font-medium transition-all duration-300 border-2 ${
                   isSelected
                     ? "bg-primary border-primary text-white "
-                    : "bg-white border-slate-100 text-slate-400 "
+                    : "bg-white border-slate-100 text-slate-500 "
                 }`}
               >
                 {allergy}
@@ -417,7 +417,7 @@ export function PatientAnthropometricStep({
       <div className="space-y-4 mb-[20px]">
         <h1 className="block text-sm font-bold text-slate-700 mb-[20px]">
           Chronic Conditions{" "}
-          <span className="text-slate-400 font-normal ml-1">
+          <span className="text-slate-500 font-normal ml-1">
             (Select all that apply)
           </span>
         </h1>
@@ -440,7 +440,7 @@ export function PatientAnthropometricStep({
                 className={`px-8 py-3 rounded-full text-sm font-bold transition-all duration-300 border-2 ${
                   isSelected
                     ? "bg-primary border-primary text-white "
-                    : "bg-white border-slate-100 text-slate-400 "
+                    : "bg-white border-slate-100 text-slate-500 "
                 }`}
               >
                 {condition}
@@ -574,7 +574,7 @@ export function PatientPaymentStep({ formData, updateData }: any) {
         </div>
 
         <div className="mt-8 pt-8 border-t border-slate-50 py-5">
-          <p className="text-xs font-semibold text-slate-400 leading-relaxed flex items-center gap-2">
+          <p className="text-xs font-semibold text-slate-500 leading-relaxed flex items-center gap-2">
             <BiShieldQuarter className="text-green-500" />
             Your payment info is secured via 256-bit AES encryption. We do not
             store your full card number on our servers.
@@ -597,7 +597,7 @@ export function PatientEmergencyStep({ formData, updateData, onSkip }: any) {
         </span>
         <div className="flex-1">
           <p className="text-sm font-bold text-slate-700">Emergency & Photo</p>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5">
             This information is vital for your safety.
           </p>
         </div>
@@ -718,7 +718,7 @@ export function PasswordCreationStep({ formData, updateData, errors }: any) {
         </div>
 
         <div className="mt-8 space-y-3">
-          <p className="text-xs font-bold text-slate-400 -widest">
+          <p className="text-xs font-bold text-slate-500 -widest">
             Password Requirements:
           </p>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">

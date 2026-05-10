@@ -93,7 +93,7 @@ const STATUS_STYLES: Record<string, string> = {
 function StatusPill({ status }: { status: string }) {
   return (
     <span
-      className={`px-3 py-1 rounded-lg text-xs font-bold  tracking-normal border ${STATUS_STYLES[status] ?? "bg-slate-100 text-slate-400 border-slate-200"}`}
+      className={`px-3 py-1 rounded-lg text-xs font-bold  tracking-normal border ${STATUS_STYLES[status] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
     >
       {status}
     </span>
@@ -129,14 +129,14 @@ function SummaryCard({
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-bold text-slate-400  tracking-normal truncate">
+        <p className="text-xs font-bold text-slate-500  tracking-normal truncate">
           {label}
         </p>
         <p className="text-xl font-bold text-slate-800 leading-tight truncate">
           {value}
         </p>
         {sub && (
-          <p className="text-xs text-slate-400 font-medium mt-0.5">{sub}</p>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">{sub}</p>
         )}
       </div>
     </Card>
@@ -263,7 +263,7 @@ function TransactionTable({
               ].map((h) => (
                 <th
                   key={h}
-                  className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
+                  className="px-6 py-4 text-xs font-bold text-slate-500  tracking-normal"
                 >
                   {h}
                 </th>
@@ -275,7 +275,7 @@ function TransactionTable({
               <tr>
                 <td
                   colSpan={7}
-                  className="py-12 text-center text-slate-400 text-sm font-medium"
+                  className="py-12 text-center text-slate-500 text-sm font-medium"
                 >
                   No transactions found
                 </td>
@@ -294,7 +294,7 @@ function TransactionTable({
                       {t.description || "—"}
                     </p>
                     {t.medicalAidClaimRef && (
-                      <p className="text-xs text-slate-400 font-medium mt-0.5">
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">
                         Ref: {t.medicalAidClaimRef}
                       </p>
                     )}
@@ -309,7 +309,7 @@ function TransactionTable({
                       {fmtZAR(t.amount)}
                     </p>
                     {t.platformFeeAmount && (
-                      <p className="text-xs text-slate-400 font-medium">
+                      <p className="text-xs text-slate-500 font-medium">
                         Fee: {fmtZAR(t.platformFeeAmount)}
                       </p>
                     )}
@@ -336,14 +336,14 @@ function TransactionTable({
 
       {totalPages > 1 && (
         <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
-          <p className="text-xs text-slate-400 font-medium">
+          <p className="text-xs text-slate-500 font-medium">
             {filtered.length} results · Page {page} of {totalPages}
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
+              className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
             >
               <BiChevronDown className="rotate-90" size={16} />
             </button>
@@ -362,7 +362,7 @@ function TransactionTable({
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
+              className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
             >
               <BiChevronDown className="-rotate-90" size={16} />
             </button>
@@ -385,7 +385,7 @@ function MiniBarChart({
   const max = Math.max(...entries.map(([, v]) => v), 1);
   return (
     <Card>
-      <p className="text-xs font-bold text-slate-400  tracking-normal mb-4">
+      <p className="text-xs font-bold text-slate-500  tracking-normal mb-4">
         {label}
       </p>
       <div className="flex items-end gap-2 h-24">
@@ -394,7 +394,7 @@ function MiniBarChart({
             key={k}
             className="flex-1 flex flex-col items-center gap-1 group"
           >
-            <span className="text-xs font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
               {fmtZAR(v)}
             </span>
             <div
@@ -405,7 +405,7 @@ function MiniBarChart({
                 <div className="absolute top-0 left-0 right-0 h-full rounded-t bg-primary shadow-none shadow-primary/30" />
               )}
             </div>
-            <p className="text-xs font-bold text-slate-400">{k}</p>
+            <p className="text-xs font-bold text-slate-500">{k}</p>
           </div>
         ))}
       </div>
@@ -499,7 +499,7 @@ function PatientBillingView({
                   <p className="text-2xl font-bold text-slate-800 capitalize">
                     Full Access Plan
                   </p>
-                  <p className="text-sm text-slate-400 font-medium">
+                  <p className="text-sm text-slate-500 font-medium">
                     {fmtZAR(250)} / month
                   </p>
                 </div>
@@ -532,7 +532,7 @@ function PatientBillingView({
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-slate-400 text-sm font-medium mb-4">
+              <p className="text-slate-500 text-sm font-medium mb-4">
                 No active subscription
               </p>
               <Button
@@ -557,7 +557,7 @@ function PatientBillingView({
           </div>
           <div className="space-y-3">
             {paymentMethods.length === 0 ? (
-              <p className="text-center text-slate-400 text-sm py-8">
+              <p className="text-center text-slate-500 text-sm py-8">
                 No payment methods saved
               </p>
             ) : (
@@ -579,7 +579,7 @@ function PatientBillingView({
                         <p className="text-xs font-bold text-slate-800">
                           {pm.cardBrand} •••• {pm.last4}
                         </p>
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-slate-500 font-medium">
                           Expires {pm.expiryMonth}/{pm.expiryYear}
                         </p>
                       </>
@@ -589,7 +589,7 @@ function PatientBillingView({
                         <p className="text-xs font-bold text-slate-800">
                           {pm.medicalAidProvider}
                         </p>
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-slate-500 font-medium">
                           Member: {pm.medicalAidNumber}
                         </p>
                       </>
@@ -599,7 +599,7 @@ function PatientBillingView({
                         <p className="text-xs font-bold text-slate-800">
                           {pm.bankName}
                         </p>
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-slate-500 font-medium">
                           Acc: •••• {pm.accountNumber?.slice(-4)}
                         </p>
                       </>
@@ -646,7 +646,7 @@ function PatientBillingView({
               </h3>
               <button
                 onClick={() => setUpgradeModal(false)}
-                className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all"
+                className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all"
               >
                 ✕
               </button>
@@ -663,7 +663,7 @@ function PatientBillingView({
                 </div>
                 <p className="text-3xl font-bold text-slate-800 mb-2">
                   R250
-                  <span className="text-sm font-medium text-slate-400">
+                  <span className="text-sm font-medium text-slate-500">
                     /mo
                   </span>
                 </p>
@@ -768,7 +768,7 @@ function PractitionerBillingView({
           />
         </div>
         <Card>
-          <p className="text-xs font-bold text-slate-400  tracking-normal mb-4">
+          <p className="text-xs font-bold text-slate-500  tracking-normal mb-4">
             Quick Actions
           </p>
           <div className="space-y-3">
@@ -833,7 +833,7 @@ function PractitionerBillingView({
                 ].map((h) => (
                   <th
                     key={h}
-                    className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
+                    className="px-6 py-4 text-xs font-bold text-slate-500  tracking-normal"
                   >
                     {h}
                   </th>
@@ -845,7 +845,7 @@ function PractitionerBillingView({
                 <tr>
                   <td
                     colSpan={7}
-                    className="py-16 text-center text-slate-400 text-sm"
+                    className="py-16 text-center text-slate-500 text-sm"
                   >
                     No payout history
                   </td>
@@ -874,7 +874,7 @@ function PractitionerBillingView({
                     <td className="px-6 py-4">
                       <StatusPill status={p.status} />
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-400">
+                    <td className="px-6 py-4 text-xs text-slate-500">
                       {fmtDate(p.requestedAt)}
                     </td>
                   </tr>
@@ -905,7 +905,7 @@ function PractitionerBillingView({
             </h3>
             <div className="space-y-4">
               <div>
-                <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-2">
+                <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-2">
                   Amount (ZAR)
                 </h1>
                 <input
@@ -917,7 +917,7 @@ function PractitionerBillingView({
                 />
               </div>
               <div>
-                <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-2">
+                <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-2">
                   Notes (optional)
                 </h1>
                 <input
@@ -928,7 +928,7 @@ function PractitionerBillingView({
                   placeholder="Monthly payout request"
                 />
               </div>
-              <p className="text-xs text-slate-400 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
                 Platform fee of 12% will be deducted. Net amount:{" "}
                 <strong>
                   {fmtZAR(parseFloat(requestAmount || "0") * 0.88)}
@@ -985,7 +985,7 @@ function PractitionerBillingView({
                 "Tax Number",
               ].map((field) => (
                 <div key={field}>
-                  <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-1.5">
+                  <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-1.5">
                     {field}
                   </h1>
                   <input
@@ -1152,7 +1152,7 @@ function HospitalAdminBillingView({
                 ].map((h) => (
                   <th
                     key={h}
-                    className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
+                    className="px-6 py-4 text-xs font-bold text-slate-500  tracking-normal"
                   >
                     {h}
                   </th>
@@ -1164,7 +1164,7 @@ function HospitalAdminBillingView({
                 <tr>
                   <td
                     colSpan={7}
-                    className="py-16 text-center text-slate-400 text-sm"
+                    className="py-16 text-center text-slate-500 text-sm"
                   >
                     No payout requests
                   </td>
@@ -1184,7 +1184,7 @@ function HospitalAdminBillingView({
                         <p className="text-xs font-bold text-slate-800">
                           {name}
                         </p>
-                        <p className="text-xs text-slate-400">{pract?.email}</p>
+                        <p className="text-xs text-slate-500">{pract?.email}</p>
                       </td>
                       <td className="px-6 py-4 text-xs text-slate-500">
                         {fmtDate(p.periodFrom)} – {fmtDate(p.periodTo)}
@@ -1320,7 +1320,7 @@ function AdminBillingView({
 
         <Card>
           <div className="flex items-center justify-between mb-5">
-            <p className="text-xs font-bold text-slate-400  tracking-normal">
+            <p className="text-xs font-bold text-slate-500  tracking-normal">
               Platform Fee Config
             </p>
             <button
@@ -1375,7 +1375,7 @@ function AdminBillingView({
               className={`flex-1 py-4 text-xs font-bold  tracking-normal transition-all ${
                 activeSubTab === tab
                   ? "bg-primary/5 text-primary border-b-2 border-primary"
-                  : "text-slate-400 hover:text-slate-600"
+                  : "text-slate-500 hover:text-slate-600"
               }`}
             >
               {tab === "transactions"
@@ -1410,7 +1410,7 @@ function AdminBillingView({
                   ].map((h) => (
                     <th
                       key={h}
-                      className="px-6 py-4 text-xs font-bold text-slate-400  tracking-normal"
+                      className="px-6 py-4 text-xs font-bold text-slate-500  tracking-normal"
                     >
                       {h}
                     </th>
@@ -1440,7 +1440,7 @@ function AdminBillingView({
                       <td className="px-6 py-4">
                         <StatusPill status={p.status} />
                       </td>
-                      <td className="px-6 py-4 text-xs text-slate-400">
+                      <td className="px-6 py-4 text-xs text-slate-500">
                         {fmtDate(p.requestedAt)}
                       </td>
                       <td className="px-6 py-4">
@@ -1484,7 +1484,7 @@ function AdminBillingView({
         {activeSubTab === "audit" && (
           <div className="divide-y divide-slate-50">
             {auditLogs.length === 0 ? (
-              <p className="text-center text-slate-400 py-12">No audit logs</p>
+              <p className="text-center text-slate-500 py-12">No audit logs</p>
             ) : (
               auditLogs.map((log: any, i: number) => {
                 const actor = log.actorId;
@@ -1496,7 +1496,7 @@ function AdminBillingView({
                     key={log._id || i}
                     className="flex items-start gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 text-slate-400 text-sm">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 text-slate-500 text-sm">
                       <BiHistory />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -1507,12 +1507,12 @@ function AdminBillingView({
                         <span className="text-xs font-bold text-slate-700">
                           {name}
                         </span>
-                        <span className="text-xs text-slate-400 font-medium">
+                        <span className="text-xs text-slate-500 font-medium">
                           {fmtDate(log.timestamp)}
                         </span>
                       </div>
                       {log.details && (
-                        <p className="text-xs text-slate-400 font-medium mt-1 truncate">
+                        <p className="text-xs text-slate-500 font-medium mt-1 truncate">
                           {Object.entries(log.details)
                             .map(([k, v]) => `${k}: ${v}`)
                             .join(" · ")}
@@ -1547,7 +1547,7 @@ function AdminBillingView({
                 ] as const
               ).map(([label, key]) => (
                 <div key={key}>
-                  <h1 className="block text-sm font-bold text-slate-400  tracking-normal mb-1.5">
+                  <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-1.5">
                     {label}
                   </h1>
                   <input
@@ -1718,14 +1718,14 @@ export default function BillingPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-32 gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-primary animate-spin" />
-          <p className="text-sm font-bold text-slate-400 ">
+          <p className="text-sm font-bold text-slate-500 ">
             Loading Financial Data...
           </p>
         </div>
       ) : error ? (
         <div className="text-center py-24 space-y-4">
           <BiAperture size={48} className="mx-auto text-slate-200" />
-          <p className="text-slate-400 font-bold">
+          <p className="text-slate-500 font-bold">
             Could not load billing data.
           </p>
           <button

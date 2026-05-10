@@ -412,7 +412,7 @@ export default function HealthRecordPage() {
                 {activeTab === "timeline" && (
                   <Card className="space-y-6 animate-dissolve">
                     {filteredEvents.length === 0 ? (
-                      <div className="text-center py-10 text-slate-400">
+                      <div className="text-center py-10 text-slate-500">
                         No events found in your medical history.
                       </div>
                     ) : (
@@ -433,7 +433,7 @@ export default function HealthRecordPage() {
                           </div>
                           <div className="bg-white border border-slate-200 rounded-lg pl-12 pr-6 pt-8 pb-6 hover:border-primary/20 transition-all">
                             <div className="flex justify-end items-start mb-2">
-                              <span className="text-xs font-medium text-slate-400">
+                              <span className="text-xs font-medium text-slate-500">
                                 {formatDate(event.date)}
                               </span>
                             </div>
@@ -474,7 +474,7 @@ export default function HealthRecordPage() {
                               </Button>
                               <Button
                                 variant="ghost"
-                                className="!p-0 !min-w-0 !h-auto text-xs font-bold text-slate-400 flex items-center gap-1.5 hover:text-primary transition-colors bg-transparent"
+                                className="!p-0 !min-w-0 !h-auto text-xs font-bold text-slate-500 flex items-center gap-1.5 hover:text-primary transition-colors bg-transparent"
                               >
                                 <Download size={16} /> Summary
                               </Button>
@@ -604,7 +604,7 @@ export default function HealthRecordPage() {
                 {activeTab === "labs" && (
                   <div className="space-y-6 animate-dissolve">
                     {labs.length === 0 ? (
-                      <div className="text-center py-10 text-slate-400">
+                      <div className="text-center py-10 text-slate-500">
                         No laboratory results on record.
                       </div>
                     ) : (
@@ -634,7 +634,7 @@ export default function HealthRecordPage() {
                                 className="bg-slate-50/50 border border-slate-100 p-4 rounded-lg"
                               >
                                 <div className="flex justify-between items-center mb-1">
-                                  <span className="text-xs font-semibold text-slate-400 tracking-normal">
+                                  <span className="text-xs font-semibold text-slate-500 tracking-normal">
                                     {v.parameter}
                                   </span>
                                   {v.status === "normal" ? (
@@ -655,7 +655,7 @@ export default function HealthRecordPage() {
                                     {v.unit}
                                   </span>
                                 </div>
-                                <p className="text-xs text-slate-400 mt-2 font-medium">
+                                <p className="text-xs text-slate-500 mt-2 font-medium">
                                   Ref: {v.referenceRange}
                                 </p>
                               </div>
@@ -671,7 +671,7 @@ export default function HealthRecordPage() {
                 {activeTab === "medications" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-dissolve">
                     {medications.length === 0 ? (
-                      <div className="col-span-full text-center py-10 text-slate-400">
+                      <div className="col-span-full text-center py-10 text-slate-500">
                         No prescribed medications found.
                       </div>
                     ) : (
@@ -704,7 +704,7 @@ export default function HealthRecordPage() {
                             "{med.instructions}"
                           </p>
                           <div className="flex justify-between items-center pt-4 border-t border-slate-50">
-                            <span className="text-xs text-slate-400">
+                            <span className="text-xs text-slate-500">
                               Prescribed {formatDate(med.prescribedDate)}
                             </span>
                             {med.refillsLeft > 0 && (
@@ -730,7 +730,7 @@ export default function HealthRecordPage() {
                 {activeTab === "allergies" && (
                   <div className="space-y-4 animate-dissolve">
                     {allergies.length === 0 ? (
-                      <div className="text-center py-10 text-slate-400">
+                      <div className="text-center py-10 text-slate-500">
                         No allergies recorded.
                       </div>
                     ) : (
@@ -746,7 +746,7 @@ export default function HealthRecordPage() {
                                   ? "bg-rose-50 text-rose-500"
                                   : allergy.severity === "moderate"
                                     ? "bg-amber-50 text-amber-500"
-                                    : "bg-slate-50 text-slate-400"
+                                    : "bg-slate-50 text-slate-500"
                               }`}
                             >
                               <FilterIcon size={28} />
@@ -772,7 +772,7 @@ export default function HealthRecordPage() {
                             >
                               {allergy.severity.toUpperCase()}
                             </span>
-                            <span className="text-xs font-bold text-slate-400">
+                            <span className="text-xs font-bold text-slate-500">
                               {allergy.source}
                             </span>
                             <button
@@ -788,7 +788,7 @@ export default function HealthRecordPage() {
                     )}
                     <button
                       onClick={() => setIsAllergyModalOpen(true)}
-                      className="w-full py-5 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 font-bold text-sm hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-5 rounded-xl border-2 border-dashed border-slate-200 text-slate-500 font-bold text-sm hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
                     >
                       <BiPlus size={20} /> Report New Allergy
                     </button>
@@ -800,7 +800,7 @@ export default function HealthRecordPage() {
                   <Card className="overflow-x-auto custom-scrollbar animate-dissolve">
                     <table className="w-full text-left border-collapse min-w-[800px]">
                       <thead>
-                        <tr className="bg-slate-50 text-slate-400 text-xs font-bold tracking-normal">
+                        <tr className="bg-slate-50 text-slate-500 text-xs font-bold tracking-normal">
                           <th className="px-8 py-5">Vaccine</th>
                           <th className="px-8 py-5">Status</th>
                           <th className="px-8 py-5">Date</th>
@@ -813,7 +813,7 @@ export default function HealthRecordPage() {
                           <tr>
                             <td
                               colSpan={5}
-                              className="text-center py-10 text-slate-400"
+                              className="text-center py-10 text-slate-500"
                             >
                               No immunization records found.
                             </td>
@@ -836,7 +836,7 @@ export default function HealthRecordPage() {
                                 {formatDate(imm.date)}
                               </td>
                               <td className="px-8 py-6">
-                                <span className="text-xs font-medium text-slate-400">
+                                <span className="text-xs font-medium text-slate-500">
                                   {imm.administeredBy}
                                 </span>
                               </td>
@@ -870,7 +870,7 @@ export default function HealthRecordPage() {
             />
             <div className="absolute bottom-10 inset-x-10 z-40 pointer-events-none">
               <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-100 shadow-none">
-                <p className="text-xs font-bold text-slate-400 tracking-normal mb-1">
+                <p className="text-xs font-bold text-slate-500 tracking-normal mb-1">
                   Health Tip
                 </p>
                 <p className="text-xs font-bold text-slate-700 leading-tight">
@@ -903,7 +903,7 @@ export default function HealthRecordPage() {
                 <p className="text-sm font-bold text-slate-800">
                   {selectedMedForRefill?.name}
                 </p>
-                <p className="text-xs text-slate-400 font-medium">
+                <p className="text-xs text-slate-500 font-medium">
                   {selectedMedForRefill?.dosage} ·{" "}
                   {selectedMedForRefill?.refillsLeft} Refills Left
                 </p>
@@ -926,7 +926,7 @@ export default function HealthRecordPage() {
                 className={`p-4 h-auto rounded-xl border flex flex-col items-center gap-2 transition-all !min-w-0 ${
                   refillForm.deliveryMethod === "pickup"
                     ? ""
-                    : "border-slate-100 bg-white text-slate-400 hover:border-slate-200"
+                    : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
                 }`}
               >
                 <BiStore size={24} />
@@ -947,7 +947,7 @@ export default function HealthRecordPage() {
                 className={`p-4 h-auto rounded-xl border flex flex-col items-center gap-2 transition-all !min-w-0 ${
                   refillForm.deliveryMethod === "delivery"
                     ? ""
-                    : "border-slate-100 bg-white text-slate-400 hover:border-slate-200"
+                    : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
                 }`}
               >
                 <BiSolidTruck size={24} />
@@ -989,7 +989,7 @@ export default function HealthRecordPage() {
             )}
 
             <div className="space-y-2">
-              <h1 className="text-xs font-bold text-slate-400 tracking-normal">
+              <h1 className="text-xs font-bold text-slate-500 tracking-normal">
                 Additional Notes
               </h1>
               <textarea

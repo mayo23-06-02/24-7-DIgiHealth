@@ -61,7 +61,7 @@ const DayCard: React.FC<DayCardProps> = ({
             </div>
             <span
               className={`items-center font-semibold whitespace-nowrap ${
-                day.isToday ? "text-primary flex gap-1" : "text-slate-400"
+                day.isToday ? "text-primary flex gap-1" : "text-slate-500"
               }`}
             >
               {day.dayName} {day.monthName}
@@ -110,7 +110,7 @@ const DayCard: React.FC<DayCardProps> = ({
               className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                 day.isUnavailable
                   ? "bg-primary text-white"
-                  : "text-slate-400 bg-slate-100 hover:text-primary"
+                  : "text-slate-500 bg-slate-100 hover:text-primary"
               }`}
             >
               <BiBlock size={18} />

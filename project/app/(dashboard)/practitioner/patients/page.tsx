@@ -159,7 +159,7 @@ export default function PractitionerPatientsPage() {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[220px]">
           <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
             size={16}
           />
           <input
@@ -171,7 +171,7 @@ export default function PractitionerPatientsPage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <BiFilter className="text-slate-400" size={18} />
+          <BiFilter className="text-slate-500" size={18} />
           <select
             value={riskFilter}
             onChange={(e) => setRiskFilter(e.target.value)}
@@ -222,7 +222,7 @@ export default function PractitionerPatientsPage() {
                           <p className="text-sm font-bold text-slate-800">
                             {p.fullName}
                           </p>
-                          <p className="text-xs text-slate-400 capitalize">
+                          <p className="text-xs text-slate-500 capitalize">
                             {p.gender}
                           </p>
                         </div>
@@ -292,10 +292,10 @@ export default function PractitionerPatientsPage() {
                         >
                           View
                         </Link>
-                        <button className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-colors">
+                        <button className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary transition-colors">
                           <BiMessageDetail size={14} />
                         </button>
-                        <button className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:border-emerald-200 transition-colors">
+                        <button className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors">
                           <BiCalendar size={14} />
                         </button>
                       </div>
@@ -306,7 +306,7 @@ export default function PractitionerPatientsPage() {
                   <tr>
                     <td
                       colSpan={7}
-                      className="py-12 text-center text-slate-400"
+                      className="py-12 text-center text-slate-500"
                     >
                       No patients found.
                     </td>

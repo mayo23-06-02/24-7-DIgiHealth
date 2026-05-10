@@ -164,7 +164,7 @@ export default function ReportsPage() {
               From Date
             </h1>
             <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2">
-              <BiCalendar className="text-slate-400" />
+              <BiCalendar className="text-slate-500" />
               <input
                 type="date"
                 value={dateFrom}
@@ -178,7 +178,7 @@ export default function ReportsPage() {
               To Date
             </h1>
             <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2">
-              <BiCalendar className="text-slate-400" />
+              <BiCalendar className="text-slate-500" />
               <input
                 type="date"
                 value={dateTo}
@@ -199,7 +199,7 @@ export default function ReportsPage() {
               Period: {dateFrom} → {dateTo}
             </p>
           ) : (
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="text-xs text-slate-500 mt-2">
               ℹ️ No date range — full dataset will be exported.
             </p>
           )}

@@ -270,7 +270,7 @@ export default function DoctorsView() {
                 <h3 className=" font-bold text-slate-800  flex items-center gap-2 font-grotesk">
                   My Doctors
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   {myDoctors.length} found
                 </p>
               </div>
@@ -334,11 +334,11 @@ export default function DoctorsView() {
           )}
 
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-bold text-slate-400  tracking-normal font-grotesk">
+            <h3 className="text-lg font-bold text-slate-500  tracking-normal font-grotesk">
               Available Practitioners
             </h3>
             {searchQuery && (
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 {filteredDoctors.length} doctors found
               </p>
             )}
@@ -357,7 +357,11 @@ export default function DoctorsView() {
                 actionLabel="Clear Filters"
                 onAction={() => {
                   setSearchQuery("");
-                  setFilters({ specialization: "", language: "", location: "" });
+                  setFilters({
+                    specialization: "",
+                    language: "",
+                    location: "",
+                  });
                 }}
               />
             </Card>

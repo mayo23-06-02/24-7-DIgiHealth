@@ -75,7 +75,7 @@ export default function DashboardHeader({
           },
           2: {
             label: "Partly Cloudy",
-            icon: <BiCloud className="text-slate-400" />,
+            icon: <BiCloud className="text-slate-500" />,
           },
           3: {
             label: "Overcast",
@@ -107,7 +107,7 @@ export default function DashboardHeader({
 
         const { label, icon } = mapping[current.weathercode] || {
           label: "Cloudy",
-          icon: <BiCloud className="text-slate-400" />,
+          icon: <BiCloud className="text-slate-500" />,
         };
 
         setWeather({
@@ -123,7 +123,7 @@ export default function DashboardHeader({
           temp: 24,
           condition: "Offline",
           location: "Location unverified",
-          icon: <BiCloud className="text-slate-400" />,
+          icon: <BiCloud className="text-slate-500" />,
         });
       }
     };
@@ -173,7 +173,7 @@ export default function DashboardHeader({
         {/* Date & Weather (Hidden on small mobile) */}
         <div className="hidden sm:flex flex-1 flex flex-col gap-1 pr-10">
           <div className="flex items-center gap-3">
-            <span className="text-xs font- text-slate-400 ">
+            <span className="text-xs font- text-slate-500 ">
               {formattedDate}
             </span>
             <span className="w-1 h-1 bg-slate-200 rounded-lg" />
@@ -194,7 +194,7 @@ export default function DashboardHeader({
         {/* SEARCH BAR (STICKY MIDDLE) */}
         <div className="flex-[2] max-w-[600px] px-10">
           <div className="bg-slate-100 border border-slate-100 rounded-lg px-5 py-4 flex items-center gap-6 group focus-within:bg-white focus-within:border-primary/30 transition-all duration-500">
-            <BiSearch className="text-slate-400 text-2xl group-focus-within:text-primary transition-colors" />
+            <BiSearch className="text-slate-500 text-2xl group-focus-within:text-primary transition-colors" />
             <input
               type="text"
               placeholder="Search Task, appointment or doctor name"
@@ -211,7 +211,7 @@ export default function DashboardHeader({
               className={`w-10 h-10 rounded-lg border border-slate-100 flex items-center justify-center cursor-pointer transition-all relative ${
                 isNotificationOpen
                   ? "bg-primary text-white"
-                  : "bg-white text-slate-400 hover:text-primary hover:bg-primary/5"
+                  : "bg-white text-slate-500 hover:text-primary hover:bg-primary/5"
               }`}
             >
               <BiBell size={18} />
@@ -278,7 +278,7 @@ export default function DashboardHeader({
                           <p className="text-sm font-bold text-slate-800 truncate">
                             {notifItem.title}
                           </p>
-                          <span className="text-xs text-slate-400 font-bold whitespace-nowrap ml-2">
+                          <span className="text-xs text-slate-500 font-bold whitespace-nowrap ml-2">
                             {notifItem.time}
                           </span>
                         </div>
@@ -299,7 +299,7 @@ export default function DashboardHeader({
               </div>
             )}
           </div>
-          <div className="w-10 h-10 bg-white rounded-lg border border-slate-100 flex items-center justify-center text-slate-400 cursor-pointer  hover:text-primary hover:bg-primary/5 transition-all">
+          <div className="w-10 h-10 bg-white rounded-lg border border-slate-100 flex items-center justify-center text-slate-500 cursor-pointer  hover:text-primary hover:bg-primary/5 transition-all">
             <BiBookmark size={18} />
           </div>
         </div>
@@ -339,7 +339,7 @@ export default function DashboardHeader({
                 <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 font-grotesk">
                   {selectedNotification.title}
                 </h3>
-                <span className="text-xs font-bold  tracking-normal text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold  tracking-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
                   {selectedNotification.time}
                 </span>
               </div>
@@ -376,7 +376,7 @@ export default function DashboardHeader({
 
               <button
                 onClick={() => setSelectedNotification(null)}
-                className="w-full py-3.5 mt-2 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-rose-500 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                className="w-full py-3.5 mt-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-rose-500 font-bold text-xs flex items-center justify-center gap-2 transition-all"
               >
                 <BiTrash size={16} /> Delete Notification
               </button>

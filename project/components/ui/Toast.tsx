@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { BiCheckCircle, BiErrorCircle, BiInfoCircle, BiX } from "react-icons/bi";
+import {
+  BiCheckCircle,
+  BiErrorCircle,
+  BiInfoCircle,
+  BiX,
+} from "react-icons/bi";
 
 interface ToastProps {
   message: string;
@@ -37,12 +42,16 @@ const Toast: React.FC<ToastProps> = ({
 
   return (
     <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[300] animate-in slide-in-from-top duration-300">
-      <div className={`flex items-center gap-3 px-6 py-4 rounded-lg border ${bgColors[type]} backdrop-blur-md`}>
+      <div
+        className={`flex items-center gap-3 px-6 py-4 rounded-lg border ${bgColors[type]} backdrop-blur-md`}
+      >
         {icons[type]}
-        <p className="text-sm font-bold text-slate-800 whitespace-nowrap">{message}</p>
+        <p className="text-sm font-bold text-slate-800 whitespace-nowrap">
+          {message}
+        </p>
         <button
           onClick={onClose}
-          className="ml-2 p-1 hover:bg-white/50 rounded-lg transition-colors text-slate-400 hover:text-slate-600"
+          className="ml-2 p-1 hover:bg-white/50 rounded-lg transition-colors text-slate-500 hover:text-slate-600"
         >
           <BiX size={18} />
         </button>

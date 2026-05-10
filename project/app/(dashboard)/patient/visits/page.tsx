@@ -127,7 +127,7 @@ export default function PatientVisits() {
           <h1 className="text-4xl font-bold tracking-tighter text-slate-900 mb-2 font-grotesk">
             Visits Mission Control
           </h1>
-          <p className="text-sm text-slate-400 font-medium tracking-tight">
+          <p className="text-sm text-slate-500 font-medium tracking-tight">
             Manage your upcoming expert care sessions and past medical sessions.
           </p>
         </header>
@@ -138,7 +138,7 @@ export default function PatientVisits() {
             className={`px-6 py-3 rounded-lg text-xs font-extra-bold  tracking-normal transition-all ${
               activeTab === "upcoming"
                 ? "bg-primary text-white"
-                : "text-slate-400 hover:text-primary"
+                : "text-slate-500 hover:text-primary"
             }`}
             onClick={() => setActiveTab("upcoming")}
           >
@@ -148,7 +148,7 @@ export default function PatientVisits() {
             className={`px-6 py-3 rounded-lg text-xs font-extra-bold  tracking-normal transition-all ${
               activeTab === "past"
                 ? "bg-primary text-white"
-                : "text-slate-400 hover:text-primary"
+                : "text-slate-500 hover:text-primary"
             }`}
             onClick={() => setActiveTab("past")}
           >
@@ -175,7 +175,7 @@ export default function PatientVisits() {
           ) : filteredVisits.length === 0 ? (
             <div className="text-center py-20 bg-white/50 rounded-lg border-2 border-dashed border-slate-200">
               <BiCalendar size={64} className="mx-auto text-slate-200 mb-6" />
-              <p className="font-bold text-slate-400  tracking-normal text-sm">
+              <p className="font-bold text-slate-500  tracking-normal text-sm">
                 No {activeTab} visits found
               </p>
             </div>
@@ -193,7 +193,7 @@ export default function PatientVisits() {
                   <h3 className="text-lg font-bold text-slate-900 font-grotesk">
                     Dr. {visit.doctor}
                   </h3>
-                  <p className="text-xs font-bold text-slate-400  tracking-normal">
+                  <p className="text-xs font-bold text-slate-500  tracking-normal">
                     {visit.specialisation}
                   </p>
                   <div className="flex flex-wrap items-center gap-4 mt-3 text-sm font-semibold text-slate-500">
@@ -272,7 +272,7 @@ export default function PatientVisits() {
               </div>
               <button
                 onClick={() => setIsVideoModalOpen(false)}
-                className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all"
+                className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-all"
               >
                 <BiX size={24} />
               </button>
@@ -295,7 +295,7 @@ export default function PatientVisits() {
             </div>
             <div className="p-8 bg-slate-50 flex items-center justify-between border-t border-slate-100">
               <div>
-                <p className="text-xs font-bold text-slate-400  tracking-normal">
+                <p className="text-xs font-bold text-slate-500  tracking-normal">
                   Connection Health
                 </p>
                 <p className="text-sm font-bold text-primary">
@@ -330,7 +330,7 @@ export default function PatientVisits() {
               <h2 className="text-2xl font-bold text-slate-900 font-grotesk">
                 Rate Your Session
               </h2>
-              <p className="text-sm text-slate-400 font-medium">
+              <p className="text-sm text-slate-500 font-medium">
                 How was your consultation with Dr. {activeVisit?.doctor}?
               </p>
             </div>

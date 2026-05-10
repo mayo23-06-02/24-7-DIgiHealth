@@ -92,7 +92,7 @@ function LoginFormComponent() {
   return (
     <div className="flex flex-col lg:flex-row lg:min-h-[85vh] w-full max-w-6xl mx-auto rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-700">
       {/* Left Side: Form */}
-      <div className="bg-white rounded-lg lg:rounded-r-none py-12 w-full max-w-md mx-auto lg:max-w-1/2 lg:w-1/2 sm:p-4 p-6 lg:p-8  flex flex-col justify-center ">
+      <div className="bg-white rounded-lg lg:rounded-r-none lg:px-8 py-12 w-full max-w-md mx-auto lg:max-w-1/2 lg:w-1/2 sm:p-4 p-6 lg:p-8  flex flex-col justify-center ">
         {/* Sophisticated Badge */}
 
         <div className="mb-12  gap-4 flex flex-col">
@@ -147,7 +147,7 @@ function LoginFormComponent() {
             <button
               type="button"
               onClick={() => setMfaRequired(false)}
-              className="w-full mt-4 text-xs font-bold text-slate-400 hover:text-primary transition-colors text-center"
+              className="w-full mt-4 text-xs font-bold text-slate-500 hover:text-primary transition-colors text-center"
             >
               Cancel & Return
             </button>
@@ -184,7 +184,7 @@ function LoginFormComponent() {
                     </h1>
                     <Link
                       href="/forgot-password"
-                      className="text-xs font-bold text-slate-400 hover:text-primary transition-all   hover:underline decoration-2 underline-offset-4"
+                      className="text-xs font-bold text-slate-500 hover:text-primary transition-all   hover:underline decoration-2 underline-offset-4"
                     >
                       Forgot Password?
                     </Link>
@@ -249,15 +249,17 @@ function LoginFormComponent() {
               </button>
             </div>
 
-            <p className="mt-8 text-center  font-medium text-slate-400 ">
-              Don't have a record yet?{" "}
+            <div className="mt-8 text-center flex justify-center  gap-2  font-medium text-slate-700 ">
+              <p>Don't have a record yet? </p>
               <Link
                 href="/register"
-                className="font-bold text-primary hover:text-secondary border-b-2 border-primary/20 transition-all ml-1 pb-1"
+                className=" text-blue-600 hover:text-secondary  transition-all ml-1 pb-1"
               >
-                Apply Now
+                <p className="font-semibold text-blue-500 underline ">
+                  Register Here
+                </p>
               </Link>
-            </p>
+            </div>
           </>
         )}
       </div>

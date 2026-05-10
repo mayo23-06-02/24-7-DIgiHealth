@@ -51,7 +51,7 @@ interface Pagination {
 const typeIcon = (type: string) => {
   if (type === "video") return <BiVideo className="text-[#0052CC]" size={14} />;
   if (type === "chat") return <BiChat className="text-[#00A3BF]" size={14} />;
-  return <BiClinic className="text-slate-400" size={14} />;
+  return <BiClinic className="text-slate-500" size={14} />;
 };
 
 function formatDatetime(dt: string) {
@@ -151,7 +151,7 @@ export default function FullQueuePage() {
               <h1 className="text-xl font-bold text-slate-800 font-grotesk">
                 Patient Queue
               </h1>
-              <p className="text-sm text-slate-400 mt-0.5">
+              <p className="text-sm text-slate-500 mt-0.5">
                 {pagination.total} consultations · Page {pagination.page} of{" "}
                 {pagination.totalPages}
               </p>
@@ -167,7 +167,7 @@ export default function FullQueuePage() {
           {/* Filters */}
           <div className="bg-white rounded-2xl border border-slate-100 p-4 mb-6 shadow-none flex flex-col sm:flex-row gap-3">
             <div className="flex-1 flex items-center gap-2.5 bg-slate-50 rounded-xl px-4 py-3 focus-within:bg-white focus-within:border focus-within:border-[#0052CC]/30 border border-transparent transition-all">
-              <BiSearch className="text-slate-400 shrink-0" size={16} />
+              <BiSearch className="text-slate-500 shrink-0" size={16} />
               <input
                 type="text"
                 value={search}
@@ -177,7 +177,7 @@ export default function FullQueuePage() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <BiFilter className="text-slate-400 shrink-0" size={16} />
+              <BiFilter className="text-slate-500 shrink-0" size={16} />
               {["scheduled,ongoing", "completed", "cancelled"].map((f) => {
                 const labels: Record<string, string> = {
                   "scheduled,ongoing": "Active",
@@ -200,7 +200,7 @@ export default function FullQueuePage() {
           {/* Table */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-none overflow-hidden">
             {/* Table Header */}
-            <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-400  tracking-normal">
+            <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-500  tracking-normal">
               <div className="col-span-3">Patient</div>
               <div className="col-span-2">Time</div>
               <div className="col-span-3">Reason</div>
@@ -210,12 +210,12 @@ export default function FullQueuePage() {
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center py-16 gap-3 text-slate-400">
+              <div className="flex items-center justify-center py-16 gap-3 text-slate-500">
                 <BiLoader className="animate-spin text-[#0052CC]" size={24} />
                 <span className="text-sm font-medium">Loading queue…</span>
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-2 text-slate-400">
+              <div className="flex flex-col items-center justify-center py-16 gap-2 text-slate-500">
                 <BiCheckCircle size={36} className="text-emerald-300" />
                 <p className="text-sm font-semibold">No consultations found</p>
                 <p className="text-xs">Try changing filters or refreshing.</p>
@@ -259,7 +259,7 @@ export default function FullQueuePage() {
                             { hour: "2-digit", minute: "2-digit" },
                           )}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-slate-500">
                           {new Date(item.scheduledStart).toLocaleDateString(
                             "en-ZA",
                             { day: "numeric", month: "short" },

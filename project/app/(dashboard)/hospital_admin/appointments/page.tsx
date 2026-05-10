@@ -96,7 +96,7 @@ export default function AppointmentsPage() {
       <div className="flex flex-wrap gap-4">
         <div className="relative flex-1 min-w-[200px]">
           <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
             size={18}
           />
           <input
@@ -119,7 +119,7 @@ export default function AppointmentsPage() {
           <option value="cancelled">Cancelled</option>
         </select>
         <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-          <BiCalendar className="text-slate-400" size={16} />
+          <BiCalendar className="text-slate-500" size={16} />
           <input
             type="date"
             value={filterDate}
@@ -228,7 +228,7 @@ export default function AppointmentsPage() {
                   <tr>
                     <td
                       colSpan={7}
-                      className="py-10 text-center text-slate-400"
+                      className="py-10 text-center text-slate-500"
                     >
                       No appointments found.
                     </td>
@@ -277,7 +277,7 @@ export default function AppointmentsPage() {
               </h2>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-500 hover:text-slate-600"
               >
                 <BiX size={24} />
               </button>

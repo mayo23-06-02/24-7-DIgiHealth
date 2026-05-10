@@ -48,7 +48,7 @@ const WeekCalendar: React.FC<WeekCalendarProps> = ({
               d.setDate(d.getDate() - 7);
               setViewDate(d);
             }}
-            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-all"
+            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-all"
           >
             <BiChevronLeft size={20} />
           </button>
@@ -58,7 +58,7 @@ const WeekCalendar: React.FC<WeekCalendarProps> = ({
               d.setDate(d.getDate() + 7);
               setViewDate(d);
             }}
-            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-all"
+            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-all"
           >
             <BiChevronRight size={20} />
           </button>
@@ -72,7 +72,7 @@ const WeekCalendar: React.FC<WeekCalendarProps> = ({
             onClick={() => onDateSelect(day)}
             className={`
               flex-1 flex flex-col items-center py-4 rounded-2xl transition-all duration-300
-              ${isSelected(day) ? "bg-primary text-white shadow-none shadow-primary/30 scale-105" : "hover:bg-slate-50 text-slate-400"}
+              ${isSelected(day) ? "bg-primary text-white shadow-none shadow-primary/30 scale-105" : "hover:bg-slate-50 text-slate-500"}
             `}
           >
             <span className="text-xs font-bold  tracking-normal mb-1 opacity-60">

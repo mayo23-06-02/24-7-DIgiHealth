@@ -110,7 +110,7 @@ export default function HealthActionCenter() {
         </div>
         <Button
           variant="ghost"
-          className="w-10 h-10 p-0 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+          className="w-10 h-10 p-0 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
         >
           <BiCaretDown size={20} />
         </Button>
@@ -130,7 +130,7 @@ export default function HealthActionCenter() {
               <Button
                 variant="ghost"
                 onClick={() => setDoctorIndex((prev) => Math.max(0, prev - 1))}
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </Button>
@@ -141,7 +141,7 @@ export default function HealthActionCenter() {
                     Math.min(doctorsData.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </Button>
@@ -201,7 +201,7 @@ export default function HealthActionCenter() {
                 onClick={() =>
                   setFacilityIndex((prev) => Math.max(0, prev - 1))
                 }
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </Button>
@@ -212,7 +212,7 @@ export default function HealthActionCenter() {
                     Math.min(facilitiesData.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </Button>

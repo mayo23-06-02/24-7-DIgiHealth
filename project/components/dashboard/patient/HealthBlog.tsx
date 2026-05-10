@@ -166,7 +166,7 @@ export function ArticleModal({
                 <p className="text-sm font-bold text-slate-800 leading-none">
                   {article.author}
                 </p>
-                <p className="text-xs font-bold text-slate-400  mt-1.5 flex items-center gap-2">
+                <p className="text-xs font-bold text-slate-500  mt-1.5 flex items-center gap-2">
                   <BiTime size={14} className="text-primary" />
                   {new Date(article.publishedAt).toLocaleDateString("en-ZA", {
                     month: "long",
@@ -184,7 +184,7 @@ export function ArticleModal({
               className={`w-11 h-11 p-0 rounded-2xl flex items-center justify-center transition-all min-w-0 ${
                 isBookmarked
                   ? "bg-gray-100 text-gray-600 shadow-inner"
-                  : "bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary border border-slate-100"
+                  : "bg-slate-50 text-slate-500 hover:bg-primary/10 hover:text-primary border border-slate-100"
               }`}
             >
               <BiBookmark size={22} />
@@ -203,7 +203,7 @@ export function ArticleModal({
           />
 
           <div className="pt-8 border-t border-slate-50">
-            <p className="text-xs  text-slate-400  mb-4 flex items-center gap-2">
+            <p className="text-xs  text-slate-500  mb-4 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" /> Share
               with others
             </p>
@@ -311,7 +311,7 @@ function ArticleCard({
                 <p className="text-xs font-bold text-slate-700 leading-none">
                   {article.author}
                 </p>
-                <p className="text-[9px] font-bold text-slate-400  tracking-normal mt-1">
+                <p className="text-[9px] font-bold text-slate-500  tracking-normal mt-1">
                   {new Date(article.publishedAt).toLocaleDateString("en-ZA", {
                     month: "short",
                     day: "numeric",
@@ -321,7 +321,7 @@ function ArticleCard({
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg border border-slate-100">
               <BiTime size={14} className="text-primary" />
-              <span className="text-xs font-bold text-slate-400  tracking-normal">
+              <span className="text-xs font-bold text-slate-500  tracking-normal">
                 {article.readTimeMinutes} MIN
               </span>
             </div>
@@ -428,7 +428,7 @@ export default function HealthBlog() {
                 onClick={() =>
                   setCarouselIndex((prev) => Math.max(0, prev - 1))
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </button>
@@ -438,7 +438,7 @@ export default function HealthBlog() {
                     Math.min(articles.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-400"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </button>
@@ -476,7 +476,7 @@ export default function HealthBlog() {
           <Button
             variant="ghost"
             onClick={() => fetchArticles(activeCategory)}
-            className="w-9 h-9 p-0 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary/30 transition-all !min-w-0"
+            className="w-9 h-9 p-0 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all !min-w-0"
             title="Refresh"
           >
             <BiRefresh size={18} />
@@ -486,14 +486,14 @@ export default function HealthBlog() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center pt-20 gap-3 text-slate-400">
+        <div className="flex items-center justify-center pt-20 gap-3 text-slate-500">
           <BiLoaderAlt size={24} className="animate-spin text-primary" />
           <span className="text-sm font-bold">Loading articles...</span>
         </div>
       ) : error ? (
         <div className="text-center py-16 space-y-3">
           <BiNews size={36} className="mx-auto text-slate-200" />
-          <p className="text-sm font-bold text-slate-400">
+          <p className="text-sm font-bold text-slate-500">
             Could not load articles.
           </p>
           <Button
@@ -507,7 +507,7 @@ export default function HealthBlog() {
       ) : articles.length === 0 ? (
         <div className="text-center py-16 space-y-2">
           <BiNews size={36} className="mx-auto text-slate-200" />
-          <p className="text-sm font-bold text-slate-400">
+          <p className="text-sm font-bold text-slate-500">
             No articles in this category yet.
           </p>
         </div>

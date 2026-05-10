@@ -84,7 +84,7 @@ export default function DashboardSidebar({
         {/* Mobile Close Button */}
         <button
           onClick={onClose}
-          className="absolute -right-12 top-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-400 lg:hidden"
+          className="absolute -right-12 top-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-500 lg:hidden"
         >
           ×
         </button>

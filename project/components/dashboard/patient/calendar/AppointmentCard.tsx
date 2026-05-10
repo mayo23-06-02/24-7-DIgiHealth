@@ -67,14 +67,12 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
               <h5 className="text-base font-bold text-slate-800 leading-none mb-1 truncate max-w-[150px] font-grotesk">
                 {appt.dr ||
                   appt.title ||
-                  (appt.type === "refill"
-                    ? "Prescription Refill"
-                    : "Event")}
+                  (appt.type === "refill" ? "Prescription Refill" : "Event")}
               </h5>
               <div className="flex items-center gap-2">
                 <p className="text-xs font-semibold text-slate-500 tracking-normal flex items-center gap-1">
                   <BiTime
-                    className={isExpired ? "text-slate-400" : "text-primary"}
+                    className={isExpired ? "text-slate-500" : "text-primary"}
                   />{" "}
                   {appt.time}
                 </p>
@@ -134,7 +132,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
           <div className="flex flex-col gap-1 justify-start items-start">
             <p className="text-sm font-semibold mb-2 text-slate-600 tracking-normal leading-none">
-              {appt.type === "refill" ? "Refill Details" : "Appointment Details"}
+              {appt.type === "refill"
+                ? "Refill Details"
+                : "Appointment Details"}
             </p>
             <div className="bg-white p-4 rounded-xl border border-slate-100 w-full text-xs text-slate-500 leading-relaxed text-left">
               {appt.concern ? (

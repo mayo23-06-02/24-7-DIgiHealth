@@ -90,7 +90,7 @@ export default function VideoCallMockup({
                     <BiUser className="text-6xl text-primary" />
                   </div>
                   <p className="text-white font-bold text-xl">{doctorName}</p>
-                  <p className="text-slate-400 text-sm mt-2">Connecting...</p>
+                  <p className="text-slate-500 text-sm mt-2">Connecting...</p>
                 </div>
               )}
               {/* Doctor Identity Tag */}
@@ -137,9 +137,9 @@ export default function VideoCallMockup({
             <div className="flex-1 rounded-lg overflow-hidden bg-slate-800 border border-white/5 relative">
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800/50">
                 <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center mb-4">
-                  <BiUser className="text-4xl text-slate-400" />
+                  <BiUser className="text-4xl text-slate-500" />
                 </div>
-                <p className="text-slate-400 font-bold">You</p>
+                <p className="text-slate-500 font-bold">You</p>
               </div>
               <div className="absolute bottom-8 left-8 py-2 px-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-white">
                 {isMuted && <BiMicrophoneOff size={14} />}

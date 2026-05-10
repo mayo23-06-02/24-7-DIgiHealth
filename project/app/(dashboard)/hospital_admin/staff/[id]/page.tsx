@@ -127,7 +127,7 @@ export default function StaffProfilePage() {
                 {staff.role}
               </span>
               <span
-                className={`px-2 py-1 rounded-lg text-xs font-bold ${staff.isOnDuty ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}
+                className={`px-2 py-1 rounded-lg text-xs font-bold ${staff.isOnDuty ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}
               >
                 {staff.isOnDuty ? "● On Duty" : "○ Off Duty"}
               </span>
@@ -136,7 +136,7 @@ export default function StaffProfilePage() {
               {staff.department} · {staff.shiftSchedule?.start} –{" "}
               {staff.shiftSchedule?.end}
             </p>
-            <div className="flex gap-4 mt-2 text-xs text-slate-400">
+            <div className="flex gap-4 mt-2 text-xs text-slate-500">
               {user?.email && (
                 <span className="flex items-center gap-1">
                   <BiEnvelope size={13} />
@@ -298,7 +298,7 @@ export default function StaffProfilePage() {
             <h3 className="text-lg font-bold text-slate-700 font-grotesk">
               Recent Appointments
             </h3>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-500">
               {recentAppointments.length} records
             </span>
           </div>
@@ -331,7 +331,7 @@ export default function StaffProfilePage() {
                           <p className="text-sm font-bold text-slate-700">
                             {a.patientName}
                           </p>
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-slate-500">
                             {a.patientEmail}
                           </p>
                         </div>
@@ -365,7 +365,7 @@ export default function StaffProfilePage() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="py-12 text-center text-slate-400 text-sm"
+                      className="py-12 text-center text-slate-500 text-sm"
                     >
                       No appointments found.
                     </td>
@@ -384,7 +384,7 @@ export default function StaffProfilePage() {
             <h3 className="text-lg font-bold text-slate-700 font-grotesk">
               Patient History
             </h3>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-500">
               {kpi.uniquePatients} unique patients
             </span>
           </div>
@@ -418,7 +418,7 @@ export default function StaffProfilePage() {
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-5 text-xs text-slate-400">
+                    <td className="py-3 px-5 text-xs text-slate-500">
                       {p.email}
                     </td>
                     <td className="py-3 px-5">
@@ -439,7 +439,7 @@ export default function StaffProfilePage() {
                   <tr>
                     <td
                       colSpan={4}
-                      className="py-12 text-center text-slate-400 text-sm"
+                      className="py-12 text-center text-slate-500 text-sm"
                     >
                       No patient history found.
                     </td>
@@ -458,7 +458,7 @@ export default function StaffProfilePage() {
             <h3 className="text-lg font-bold text-slate-700 mb-1 font-grotesk">
               Revenue (Last 6 Months)
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-500 mb-4">
               Based on completed consultations × hourly rate
             </p>
             <ResponsiveContainer width="100%" height={260}>
@@ -490,20 +490,20 @@ export default function StaffProfilePage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-slate-50 rounded-xl">
-                  <p className="text-xs text-slate-400 ">Rate/hr</p>
+                  <p className="text-xs text-slate-500 ">Rate/hr</p>
                   <p className="text-base font-bold text-slate-800">
                     R {staff.hourlyRate}
                   </p>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-xl">
-                  <p className="text-xs text-slate-400 ">Paid Consults</p>
+                  <p className="text-xs text-slate-500 ">Paid Consults</p>
                   <p className="text-base font-bold text-slate-800">
                     {kpi.completedConsultations}
                   </p>
                 </div>
               </div>
               <div className="pt-3 border-t border-slate-100">
-                <p className="text-xs text-slate-400 font-bold mb-2">
+                <p className="text-xs text-slate-500 font-bold mb-2">
                   Monthly Breakdown
                 </p>
                 {monthlyRevenue.slice(-3).map((m: any) => (
@@ -593,7 +593,7 @@ export default function StaffProfilePage() {
                   </p>
                   <p className="text-sm font-bold text-slate-500">{m.label}</p>
                 </div>
-                <div className="text-xs text-slate-400 border-t border-slate-100 pt-3">
+                <div className="text-xs text-slate-500 border-t border-slate-100 pt-3">
                   Target: {m.invert ? `≤ ${m.target}` : `≥ ${m.target}`}
                   {m.unit || "%"}
                 </div>

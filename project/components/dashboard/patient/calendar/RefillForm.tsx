@@ -31,11 +31,11 @@ const RefillForm: React.FC<RefillFormProps> = ({
   return (
     <>
       <div className="space-y-2">
-        <h1 className="text-xs font-bold text-slate-400 tracking-normal">
+        <h1 className="text-xs font-bold text-slate-500 tracking-normal">
           Select Prescription
         </h1>
         {loadingPrescriptions ? (
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-2 text-slate-500">
             <BiLoaderAlt className="animate-spin" /> Loading prescriptions...
           </div>
         ) : (
@@ -70,7 +70,7 @@ const RefillForm: React.FC<RefillFormProps> = ({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <h1 className="text-xs font-bold text-slate-400 tracking-normal">
+          <h1 className="text-xs font-bold text-slate-500 tracking-normal">
             Delivery Method
           </h1>
           <div className="flex gap-3">
@@ -122,7 +122,7 @@ const RefillForm: React.FC<RefillFormProps> = ({
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-xs font-bold text-slate-400 tracking-normal">
+        <h1 className="text-xs font-bold text-slate-500 tracking-normal">
           Payment Method
         </h1>
         <div className="flex flex-wrap gap-3">
@@ -164,7 +164,7 @@ const RefillForm: React.FC<RefillFormProps> = ({
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-xs font-bold text-slate-400 tracking-normal">
+        <h1 className="text-xs font-bold text-slate-500 tracking-normal">
           Remind me in (days)
         </h1>
         <select

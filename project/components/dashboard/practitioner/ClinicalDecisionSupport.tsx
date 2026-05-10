@@ -207,7 +207,7 @@ export default function ClinicalDecisionSupport() {
           <h3 className="font-bold text-slate-800 text-sm leading-tight  tracking-normal font-grotesk">
             Clinical Decision Support
           </h3>
-          <p className="text-sm text-slate-400 font-bold  tracking-normal mt-0.5">
+          <p className="text-sm text-slate-500 font-bold  tracking-normal mt-0.5">
             Drug checker · Guidelines · Protocols
           </p>
         </div>
@@ -219,7 +219,7 @@ export default function ClinicalDecisionSupport() {
           <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
             <BiPulse size={20} />
           </div>
-          <h4 className="text-sm font-bold text-slate-400  tracking-normal font-grotesk">
+          <h4 className="text-sm font-bold text-slate-500  tracking-normal font-grotesk">
             Precision Drug Interaction Analytics
           </h4>
         </div>
@@ -252,7 +252,7 @@ export default function ClinicalDecisionSupport() {
 
         {/* Result */}
         {interactionResult === "empty" && (
-          <p className="text-sm text-slate-400 text-center font-bold  tracking-normal">
+          <p className="text-sm text-slate-500 text-center font-bold  tracking-normal">
             Enter both drug names to check.
           </p>
         )}
@@ -294,7 +294,7 @@ export default function ClinicalDecisionSupport() {
           )}
 
         {/* Quick checks */}
-        <p className="text-sm text-slate-400 mt-4 font-bold  tracking-normal">
+        <p className="text-sm text-slate-500 mt-4 font-bold  tracking-normal">
           Quick checks:
         </p>
         <div className="flex flex-wrap gap-1.5 mt-2">
@@ -353,7 +353,7 @@ export default function ClinicalDecisionSupport() {
                   {isOpen ? (
                     <BiChevronUp className="text-primary text-base shrink-0" />
                   ) : (
-                    <BiChevronDown className="text-slate-400 text-base shrink-0" />
+                    <BiChevronDown className="text-slate-500 text-base shrink-0" />
                   )}
                 </Button>
 

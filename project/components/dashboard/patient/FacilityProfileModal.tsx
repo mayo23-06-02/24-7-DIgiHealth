@@ -167,7 +167,7 @@ export default function FacilityProfileModal({
                   <BiTime size={28} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400  tracking-normal">
+                  <p className="text-xs font-bold text-slate-500  tracking-normal">
                     Wait Time
                   </p>
                   <p
@@ -182,7 +182,7 @@ export default function FacilityProfileModal({
                   <BiPlusMedical size={28} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400  tracking-normal">
+                  <p className="text-xs font-bold text-slate-500  tracking-normal">
                     General Beds
                   </p>
                   <p className="text-xl font-bold tracking-tight leading-none mt-1">
@@ -195,7 +195,7 @@ export default function FacilityProfileModal({
                   <BiTrendingUp size={28} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400  tracking-normal">
+                  <p className="text-xs font-bold text-slate-500  tracking-normal">
                     Occupancy
                   </p>
                   <p className="text-xl font-bold tracking-tight leading-none mt-1">
@@ -226,7 +226,7 @@ export default function FacilityProfileModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white border border-slate-100 p-8 rounded-lg">
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-slate-400  tracking-normal">
+                    <p className="text-xs font-bold text-slate-500  tracking-normal">
                       Street Address
                     </p>
                     <p className="text-base font-bold text-slate-800 leading-relaxed">
@@ -243,7 +243,7 @@ export default function FacilityProfileModal({
                         <BiPhoneCall size={20} />
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold text-slate-400 ">
+                        <p className="text-[9px] font-bold text-slate-500 ">
                           Main Practice
                         </p>
                         <p className="text-sm font-bold text-slate-700">
@@ -323,11 +323,11 @@ export default function FacilityProfileModal({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm font-bold text-slate-600">
-                <span className=" text-[9px] tracking-normal text-slate-400">
+                <span className=" text-[9px] tracking-normal text-slate-500">
                   Weekdays
                 </span>
                 <span>08:00 – 18:00</span>
-                <span className=" text-[9px] tracking-normal text-slate-400">
+                <span className=" text-[9px] tracking-normal text-slate-500">
                   Weekends
                 </span>
                 <span>09:00 – 13:00</span>
@@ -378,7 +378,7 @@ export default function FacilityProfileModal({
                       <p className="text-base font-bold text-slate-800 tracking-tight truncate group-hover:text-primary transition-colors">
                         {spec.name}
                       </p>
-                      <p className="text-xs font-bold text-slate-400  tracking-normal">
+                      <p className="text-xs font-bold text-slate-500  tracking-normal">
                         {spec.specialty}
                       </p>
                       <div className="mt-2 flex items-center gap-2 text-emerald-500">
@@ -501,7 +501,7 @@ export default function FacilityProfileModal({
             {/* REAL-TIME OCCUPANCY CARD */}
             <div className="bg-slate-50 border border-slate-100 rounded-lg p-8 space-y-8">
               <div>
-                <h5 className="text-xs font-bold text-slate-400  tracking-normal mb-6 font-grotesk">
+                <h5 className="text-xs font-bold text-slate-500  tracking-normal mb-6 font-grotesk">
                   Real-Time Operations
                 </h5>
                 <div className="space-y-6">
@@ -532,7 +532,7 @@ export default function FacilityProfileModal({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-white rounded-lg border border-slate-100 text-center">
-                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-500  tracking-normal mb-1">
                         Queue Size
                       </p>
                       <p className="text-lg font-bold text-slate-800">
@@ -540,7 +540,7 @@ export default function FacilityProfileModal({
                       </p>
                     </div>
                     <div className="p-4 bg-white rounded-lg border border-slate-100 text-center">
-                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-500  tracking-normal mb-1">
                         Ambulance
                       </p>
                       <p
@@ -563,10 +563,10 @@ export default function FacilityProfileModal({
                     className="flex-1 flex flex-col items-center gap-2 p-5 bg-white rounded-lg border border-slate-100 transition-all group active:scale-95 !h-auto !min-w-0"
                   >
                     <BiShareAlt
-                      className="text-slate-400 group-hover:text-primary transition-colors"
+                      className="text-slate-500 group-hover:text-primary transition-colors"
                       size={24}
                     />
-                    <span className="text-xs font-bold  tracking-normal text-slate-400">
+                    <span className="text-xs font-bold  tracking-normal text-slate-500">
                       Share
                     </span>
                   </Button>
@@ -576,10 +576,10 @@ export default function FacilityProfileModal({
                     className="flex-1 flex flex-col items-center gap-2 p-5 bg-white rounded-lg border border-slate-100 transition-all group active:scale-95 !h-auto !min-w-0"
                   >
                     <BiSolidFlagAlt
-                      className="text-slate-400 group-hover:text-rose-500 transition-colors"
+                      className="text-slate-500 group-hover:text-rose-500 transition-colors"
                       size={24}
                     />
-                    <span className="text-xs font-bold  tracking-normal text-slate-400">
+                    <span className="text-xs font-bold  tracking-normal text-slate-500">
                       Report
                     </span>
                   </Button>

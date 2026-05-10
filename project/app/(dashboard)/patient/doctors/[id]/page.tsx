@@ -35,7 +35,7 @@ export default function DoctorProfilePage() {
 
   useEffect(() => {
     if (!id) return;
-    
+
     setLoading(true);
     fetch(`/api/practitioners/${id}`)
       .then((res) => res.json())
@@ -46,7 +46,7 @@ export default function DoctorProfilePage() {
           setDoc(null);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to fetch doctor profile", err);
         setDoc(null);
       })
@@ -57,7 +57,7 @@ export default function DoctorProfilePage() {
     return (
       <div className="p-10 flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold text-slate-400  tracking-normal leading-none">
+        <p className="text-xs font-bold text-slate-500  tracking-normal leading-none">
           Retrieving Encrypted Practitioner Profile...
         </p>
       </div>
@@ -108,7 +108,7 @@ export default function DoctorProfilePage() {
                 className=" font-bold text-xs"
               />
               <span className="text-slate-300">|</span>
-              <span className="text-xs font-bold text-slate-400">
+              <span className="text-xs font-bold text-slate-500">
                 HPCSA Reg: MP{String(id).slice(-6)}
               </span>
             </div>
@@ -116,7 +116,7 @@ export default function DoctorProfilePage() {
 
           <div className="flex flex-wrap justify-center lg:justify-start gap-8">
             <div className="flex flex-col">
-              <span className="text-xs  text-slate-400  tracking-normal mb-1 text-center lg:text-left">
+              <span className="text-xs  text-slate-500  tracking-normal mb-1 text-center lg:text-left">
                 Experience
               </span>
               <span className="font-bold text-slate-500">
@@ -124,7 +124,7 @@ export default function DoctorProfilePage() {
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs  text-slate-400  tracking-normal mb-1 text-center lg:text-left">
+              <span className="text-xs  text-slate-500  tracking-normal mb-1 text-center lg:text-left">
                 Languages
               </span>
               <span className="font-bold text-slate-500">
@@ -132,7 +132,7 @@ export default function DoctorProfilePage() {
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs  text-slate-400  tracking-normal mb-1 text-center lg:text-left">
+              <span className="text-xs  text-slate-500  tracking-normal mb-1 text-center lg:text-left">
                 Reviews
               </span>
               <span className="font-bold text-slate-500">
@@ -170,7 +170,7 @@ export default function DoctorProfilePage() {
         <div className="lg:col-span-2 space-y-10">
           {/* BIO */}
           <Card className="p-12 space-y-6" variant="solid">
-            <h4 className="text-sm font-bold text-slate-400   font-grotesk">
+            <h4 className="text-sm font-bold text-slate-500   font-grotesk">
               Professional Biography
             </h4>
             <p className="text-slate-600 leading-relaxed  text-sm">
@@ -179,15 +179,17 @@ export default function DoctorProfilePage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-6 border-t border-slate-50">
               <div className="space-y-4">
-                <h6 className=" font-bold text-slate-400 text-sm   font-grotesk">
+                <h6 className=" font-bold text-slate-500 text-sm   font-grotesk">
                   Clinical Focus
                 </h6>
                 <ul className="space-y-3">
-                  {(doc.clinicalFocus || [
-                    "Preventative Care",
-                    "Diagnostic Excellence",
-                    "Systemic Recovery",
-                  ]).map((item: string) => (
+                  {(
+                    doc.clinicalFocus || [
+                      "Preventative Care",
+                      "Diagnostic Excellence",
+                      "Systemic Recovery",
+                    ]
+                  ).map((item: string) => (
                     <li
                       key={item}
                       className="flex items-center gap-2 text-xs font-bold text-slate-600  tracking-tight"
@@ -199,20 +201,25 @@ export default function DoctorProfilePage() {
                 </ul>
               </div>
               <div className="space-y-4">
-                <h6 className=" font-bold text-slate-400 text-sm   font-grotesk">
+                <h6 className=" font-bold text-slate-500 text-sm   font-grotesk">
                   Medical Aid Certified
                 </h6>
                 <div className="flex flex-wrap gap-2">
-                  {(doc.medicalAids || ["Discovery", "Bonitas", "Momentum", "Medishield"]).map(
-                    (aid: string) => (
-                      <Badge
-                        key={aid}
-                        label={aid}
-                        variant="soft"
-                        className="font-bold text-[9px]"
-                      />
-                    ),
-                  )}
+                  {(
+                    doc.medicalAids || [
+                      "Discovery",
+                      "Bonitas",
+                      "Momentum",
+                      "Medishield",
+                    ]
+                  ).map((aid: string) => (
+                    <Badge
+                      key={aid}
+                      label={aid}
+                      variant="soft"
+                      className="font-bold text-[9px]"
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -220,7 +227,7 @@ export default function DoctorProfilePage() {
 
           {/* REVIEWS PREVIEW */}
           <div className="space-y-6">
-            <h4 className="text-xs font-bold text-slate-400  tracking-normal px-2 font-grotesk">
+            <h4 className="text-xs font-bold text-slate-500  tracking-normal px-2 font-grotesk">
               Patient Feedback
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -233,24 +240,28 @@ export default function DoctorProfilePage() {
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold text-xs uppercase">
+                        <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
                           {rev.patientName?.charAt(0) || "P"}
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-800 leading-none mb-1">
                             {rev.patientName}
                           </p>
-                          <p className="text-[9px] text-slate-400 font-bold  tracking-normal">
+                          <p className="text-[9px] text-slate-500 font-bold  tracking-normal">
                             {new Date(rev.date).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       <div className="flex text-amber-400 gap-0.5">
                         {[...Array(5)].map((_, idx) => (
-                          <BiStar 
-                            key={idx} 
-                            className={idx < rev.rating ? "fill-current" : "text-slate-200"} 
-                            size={12} 
+                          <BiStar
+                            key={idx}
+                            className={
+                              idx < rev.rating
+                                ? "fill-current"
+                                : "text-slate-200"
+                            }
+                            size={12}
                           />
                         ))}
                       </div>
@@ -262,7 +273,9 @@ export default function DoctorProfilePage() {
                 ))
               ) : (
                 <div className="col-span-2 text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                  <p className="text-xs font-bold text-slate-400">No patient feedback yet.</p>
+                  <p className="text-xs font-bold text-slate-500">
+                    No patient feedback yet.
+                  </p>
                 </div>
               )}
             </div>
@@ -279,7 +292,7 @@ export default function DoctorProfilePage() {
               <BiCheckShield size={120} />
             </div>
             <div className="text-center relative z-10">
-              <p className="text-xs font-bold text-slate-400  tracking-normal mb-4">
+              <p className="text-xs font-bold text-slate-500  tracking-normal mb-4">
                 Access Status
               </p>
               <h3 className="text-3xl font-bold tracking-tight font-grotesk">
@@ -297,7 +310,7 @@ export default function DoctorProfilePage() {
                   className="text-emerald-400 shrink-0 mt-1"
                   size={24}
                 />
-                <p className="text-xs font-bold  leading-relaxed tracking-normal text-slate-400">
+                <p className="text-xs font-bold  leading-relaxed tracking-normal text-slate-500">
                   Unlocked via your health premium. No consultation fees apply
                   for this session.
                 </p>
@@ -313,7 +326,7 @@ export default function DoctorProfilePage() {
 
           <Card className="p-6 space-y-6" variant="solid">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-slate-400  tracking-normal font-grotesk">
+              <h4 className="text-xs font-bold text-slate-500  tracking-normal font-grotesk">
                 Live Status
               </h4>
               <BiWorld
@@ -347,7 +360,7 @@ export default function DoctorProfilePage() {
                   />
                 ))}
               </div>
-              <p className="text-[9px] text-slate-400 font-bold  tracking-normal">
+              <p className="text-[9px] text-slate-500 font-bold  tracking-normal">
                 12 patients waiting
               </p>
             </div>

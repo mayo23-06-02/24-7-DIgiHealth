@@ -101,14 +101,14 @@ export default function HospitalReviewsPage() {
             {f}
           </button>
         ))}
-        <span className="ml-auto text-sm text-slate-400 self-center">
+        <span className="ml-auto text-sm text-slate-500 self-center">
           {moderated.length} review{moderated.length !== 1 ? "s" : ""}
         </span>
       </div>
 
       {/* Reviews Grid */}
       {moderated.length === 0 ? (
-        <Card className="text-center py-16 text-slate-400">
+        <Card className="text-center py-16 text-slate-500">
           No reviews found.
         </Card>
       ) : (
@@ -124,7 +124,7 @@ export default function HospitalReviewsPage() {
                     <p className="text-sm font-semibold text-slate-800">
                       {rev.patientName}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-500">
                       {new Date(rev.createdAt).toLocaleDateString("en-ZA")}
                     </p>
                   </div>

@@ -258,7 +258,7 @@ export default function StaffManagement() {
         <div className="p-4 border-b border-slate-100 flex gap-4 bg-slate-50">
           <div className="relative flex-1 max-w-sm">
             <BiSearch
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
               size={18}
             />
             <input
@@ -326,7 +326,7 @@ export default function StaffManagement() {
                           ? `${item.userId.firstName} ${item.userId.lastName}`
                           : "Unassigned User"}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-slate-500">
                         {item.userId?.email || "N/A"}
                       </p>
                     </td>
@@ -366,7 +366,7 @@ export default function StaffManagement() {
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/hospital_admin/staff/${item._id}`}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-primary transition-colors"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
                           title="View Profile"
                         >
                           <BiUser size={18} />
@@ -390,14 +390,14 @@ export default function StaffManagement() {
                             );
                             setIsModalOpen(true);
                           }}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-primary transition-colors"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
                           title="Edit"
                         >
                           <BiEdit size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"
                           title="Remove"
                         >
                           <BiTrash size={18} />
@@ -437,7 +437,7 @@ export default function StaffManagement() {
               </label>
               <div className="relative">
                 <BiSearch
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
                   size={16}
                 />
                 <input
@@ -482,7 +482,7 @@ export default function StaffManagement() {
                         <span className="text-sm font-bold text-slate-700">
                           {dr.firstName} {dr.lastName}
                         </span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-slate-500">
                           {dr.email}
                         </span>
                       </button>

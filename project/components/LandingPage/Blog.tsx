@@ -110,7 +110,7 @@ export default function Blog() {
                     </svg>
                   </div>
                 </div>
-                <span className="text-slate-400 text-[0.9rem] font-medium">
+                <span className="text-slate-500 text-[0.9rem] font-medium">
                   {post.date}
                 </span>
               </div>

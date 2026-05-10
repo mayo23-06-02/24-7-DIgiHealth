@@ -93,11 +93,14 @@ const AppointmentsView: React.FC = () => {
     if (showBookingWizard) {
       fetch("/api/practitioners/available")
         .then((res) => {
-          if (!res.ok) return res.text().then(t => { throw new Error(t) });
+          if (!res.ok)
+            return res.text().then((t) => {
+              throw new Error(t);
+            });
           return res.json();
         })
         .then(setAvailableDocs)
-        .catch(err => console.error("Available docs fetch error:", err));
+        .catch((err) => console.error("Available docs fetch error:", err));
     }
   }, [showBookingWizard]);
 
@@ -229,11 +232,11 @@ const AppointmentsView: React.FC = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               variant={activeTab === tab ? "primary" : "ghost"}
-              className={`px-6 py-2 h-auto text-[11px] font-bold  tracking-normal rounded-xl transition-all ${activeTab === tab ? " shadow-primary/20" : "text-slate-400 hover:text-slate-600"}`}
+              className={`px-6 py-2 h-auto text-[11px] font-bold  tracking-normal rounded-xl transition-all ${activeTab === tab ? " shadow-primary/20" : "text-slate-500 hover:text-slate-600"}`}
             >
               {tab}
               <span
-                className={`ml-2.5 px-2 py-0.5 rounded-lg text-[9px] font-bold border ${activeTab === tab ? "bg-white/20 border-white/20 text-white" : "bg-white border-slate-100 text-slate-400"}`}
+                className={`ml-2.5 px-2 py-0.5 rounded-lg text-[9px] font-bold border ${activeTab === tab ? "bg-white/20 border-white/20 text-white" : "bg-white border-slate-100 text-slate-500"}`}
               >
                 {counts[tab]}
               </span>
@@ -265,14 +268,14 @@ const AppointmentsView: React.FC = () => {
             <Button
               variant="ghost"
               onClick={() => setViewType("list")}
-              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${viewType === "list" ? "bg-white shadow-none text-primary" : "text-slate-400 hover:text-slate-600"}`}
+              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${viewType === "list" ? "bg-white shadow-none text-primary" : "text-slate-500 hover:text-slate-600"}`}
             >
               <BiListUl size={20} />
             </Button>
             <Button
               variant="ghost"
               onClick={() => setViewType("calendar")}
-              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${viewType === "calendar" ? "bg-white shadow-none text-primary" : "text-slate-400 hover:text-slate-600"}`}
+              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${viewType === "calendar" ? "bg-white shadow-none text-primary" : "text-slate-500 hover:text-slate-600"}`}
             >
               <BiCalendar size={20} />
             </Button>
@@ -284,7 +287,7 @@ const AppointmentsView: React.FC = () => {
       {loading ? (
         <div className="h-96 flex flex-col items-center justify-center gap-4">
           <div className="w-14 h-14 border-[5px] border-primary/10 border-t-primary rounded-full animate-spin" />
-          <p className="text-slate-400 font-bold  text-sm tracking-normal">
+          <p className="text-slate-500 font-bold  text-sm tracking-normal">
             Syncing Encrypted Clinical Data...
           </p>
         </div>
@@ -308,7 +311,7 @@ const AppointmentsView: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-slate-50/50 border-b font-semibold border-slate-100 text-sm text-slate-400  tracking-normal">
+                <tr className="bg-slate-50/50 border-b font-semibold border-slate-100 text-sm text-slate-500  tracking-normal">
                   <th className="px-10 py-6">Medical Specialist</th>
                   <th className="px-10 py-6">Timeline Details</th>
                   <th className="px-10 py-6">Consultation Type</th>
@@ -394,7 +397,7 @@ const AppointmentsView: React.FC = () => {
                         <Button
                           variant="ghost"
                           onClick={() => setSelectedAppt(appt)}
-                          className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-400 hover:text-primary transition-all border-none !min-w-0"
+                          className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all border-none !min-w-0"
                         >
                           <BiChevronRight size={22} />
                         </Button>
@@ -454,7 +457,7 @@ const AppointmentsView: React.FC = () => {
 
             <div className="p-8 rounded-lg space-y-5 shadow-none shadow-slate-900/5 bg-white border border-slate-100">
               <div>
-                <h6 className="text-sm font-bold text-slate-400  tracking-normal mb-3 flex items-center gap-2 font-grotesk">
+                <h6 className="text-sm font-bold text-slate-500  tracking-normal mb-3 flex items-center gap-2 font-grotesk">
                   <BiMessageDetail size={14} /> Chief Complaint
                 </h6>
                 <p className="text-sm font-bold text-slate-600 italic leading-relaxed pl-6 border-l-2 border-primary/20">
@@ -589,7 +592,7 @@ const AppointmentsView: React.FC = () => {
                 <h4 className="text-xl font-bold text-slate-800  tracking-tight mb-1 font-grotesk">
                   Medical Network
                 </h4>
-                <p className="text-[11px] text-slate-400 font-bold  tracking-normal opacity-80">
+                <p className="text-[11px] text-slate-500 font-bold  tracking-normal opacity-80">
                   Chooose from our verified network of practitioners.
                 </p>
               </div>
@@ -666,7 +669,7 @@ const AppointmentsView: React.FC = () => {
                     <p className="font-bold text-slate-800 text-sm  tracking-tight">
                       {selectedDoc.name}
                     </p>
-                    <p className="text-sm font-bold text-slate-400  tracking-normal mt-1">
+                    <p className="text-sm font-bold text-slate-500  tracking-normal mt-1">
                       {selectedDoc.specialisation}
                     </p>
                   </div>
@@ -694,7 +697,7 @@ const AppointmentsView: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="text-sm font-bold text-slate-400  tracking-normal px-1 flex items-center gap-2">
+                  <h1 className="text-sm font-bold text-slate-500  tracking-normal px-1 flex items-center gap-2">
                     <BiTime size={14} /> Global Availability Slots
                   </h1>
                   <div className="grid grid-cols-4 gap-3">
@@ -707,7 +710,7 @@ const AppointmentsView: React.FC = () => {
                         onClick={() =>
                           setBookingData({ ...bookingData, time: slot })
                         }
-                        className={`h-12 text-sm font-bold  tracking-normal rounded-2xl transition-all duration-300 border-none ${bookingData.time === slot ? "shadow-none shadow-primary/20 scale-105" : "bg-white border border-slate-100 text-slate-400 hover:border-primary/20 hover:text-primary hover:bg-primary/5"}`}
+                        className={`h-12 text-sm font-bold  tracking-normal rounded-2xl transition-all duration-300 border-none ${bookingData.time === slot ? "shadow-none shadow-primary/20 scale-105" : "bg-white border border-slate-100 text-slate-500 hover:border-primary/20 hover:text-primary hover:bg-primary/5"}`}
                       >
                         {slot}
                       </Button>

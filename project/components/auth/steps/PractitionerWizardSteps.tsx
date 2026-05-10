@@ -175,7 +175,7 @@ export function PractitionerStep2({ formData, updateData, errors }: any) {
             <h1 className="text-sm font-bold text-slate-700 mb-1">
               Languages Spoken *
             </h1>
-            <p className="text-xs text-slate-400 mb-3">
+            <p className="text-xs text-slate-500 mb-3">
               Select all languages you can comfortably conduct consultations in.
             </p>
             <div className="grid lg:grid-cols-5 sm:grid-cols-3 gap-3">

@@ -138,7 +138,7 @@ export default function ChatModal({
             <Button
               onClick={onClose}
               variant="secondary"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 group transition-all !min-w-0"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 group transition-all !min-w-0"
             >
               <BiX
                 size={28}
@@ -167,7 +167,7 @@ export default function ChatModal({
                   Active Consultation
                 </span>
                 <span className="text-slate-200">|</span>
-                <span className="text-xs font-bold text-slate-400  tracking-normal">
+                <span className="text-xs font-bold text-slate-500  tracking-normal">
                   {consultationId}
                 </span>
               </div>
@@ -176,7 +176,7 @@ export default function ChatModal({
           <div className="flex gap-2">
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-all active:scale-90 shadow-none !min-w-0"
+              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-all active:scale-90 shadow-none !min-w-0"
             >
               <BiDotsVerticalRounded size={24} />
             </Button>
@@ -186,7 +186,7 @@ export default function ChatModal({
         {/* Messages Loop */}
         <div className="flex-1 overflow-y-auto px-10 py-10 space-y-8 custom-scrollbar bg-slate-50/20">
           <div className="flex justify-center mb-10">
-            <span className="px-5 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-400  tracking-normal shadow-none">
+            <span className="px-5 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500  tracking-normal shadow-none">
               Secure End-to-End Encryption Enabled
             </span>
           </div>
@@ -254,13 +254,13 @@ export default function ChatModal({
               <Button
                 variant="white"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-14 h-14 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
+                className="w-14 h-14 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
               >
                 <BiImageAdd size={24} />
               </Button>
               <Button
                 variant="white"
-                className="w-14 h-14 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
+                className="w-14 h-14 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
               >
                 <BiMicrophone size={24} />
               </Button>

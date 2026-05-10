@@ -48,7 +48,7 @@ export default function WhyChooseUs() {
                   <div
                     key={val}
                     onMouseEnter={() => setActiveWhyTab(val)}
-                    className={`py-4 md:py-[1.2rem] border-b border-slate-200 text-2xl md:text-[1.8rem] transition-all duration-300 relative cursor-pointer ${activeWhyTab === val ? "font-medium text-primary" : "font-normal text-slate-400"}`}
+                    className={`py-4 md:py-[1.2rem] border-b border-slate-200 text-2xl md:text-[1.8rem] transition-all duration-300 relative cursor-pointer ${activeWhyTab === val ? "font-medium text-primary" : "font-normal text-slate-500"}`}
                   >
                     {val}
                     {activeWhyTab === val && (

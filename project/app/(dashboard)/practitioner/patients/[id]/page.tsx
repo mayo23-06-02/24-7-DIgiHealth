@@ -254,7 +254,7 @@ export default function PatientProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 gap-4">
         <BiLoader className="animate-spin text-primary" size={40} />
-        <p className="text-sm font-bold text-slate-400  tracking-normal">
+        <p className="text-sm font-bold text-slate-500  tracking-normal">
           Retrieving Health Record...
         </p>
       </div>
@@ -264,7 +264,7 @@ export default function PatientProfilePage() {
   if (!patient) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] bg-slate-50 gap-6 p-8">
-        <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center text-slate-400">
+        <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center text-slate-500">
           <BiUser size={40} />
         </div>
         <div className="text-center">
@@ -293,7 +293,7 @@ export default function PatientProfilePage() {
         <div className="space-y-4">
           <Link
             href="/practitioner"
-            className="inline-flex items-center gap-2 text-xs font-bold  tracking-normal text-slate-400 hover:text-primary transition-all group"
+            className="inline-flex items-center gap-2 text-xs font-bold  tracking-normal text-slate-500 hover:text-primary transition-all group"
           >
             <BiArrowBack
               className="group-hover:-translate-x-1 transition-transform"
@@ -363,7 +363,7 @@ export default function PatientProfilePage() {
                 <h3 className="text-base font-bold text-slate-800 font-grotesk">
                   Clinical Timeline
                 </h3>
-                <p className="text-xs text-slate-400 font-bold  tracking-normal mt-0.5">
+                <p className="text-xs text-slate-500 font-bold  tracking-normal mt-0.5">
                   Historical Consultations & Outcomes
                 </p>
               </div>
@@ -376,7 +376,7 @@ export default function PatientProfilePage() {
               {patient.pastConsultations.length === 0 ? (
                 <div className="py-20 text-center">
                   <BiClinic className="mx-auto text-slate-200 mb-4" size={48} />
-                  <p className="text-sm font-bold text-slate-400">
+                  <p className="text-sm font-bold text-slate-500">
                     No consultation history available.
                   </p>
                 </div>
@@ -400,7 +400,7 @@ export default function PatientProfilePage() {
                               )
                             : "N/A"}
                         </p>
-                        <p className="text-xs font-bold text-slate-400 ">
+                        <p className="text-xs font-bold text-slate-500 ">
                           {c.scheduledStartTime
                             ? new Date(c.scheduledStartTime).getFullYear()
                             : ""}
@@ -413,18 +413,18 @@ export default function PatientProfilePage() {
                             {c.chiefComplaint || "No complaint recorded"}
                           </h4>
                           <span
-                            className={`px-2 py-1 rounded-lg text-xs font-bold  tracking-tighter ${c.status === "completed" ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}
+                            className={`px-2 py-1 rounded-lg text-xs font-bold  tracking-tighter ${c.status === "completed" ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}
                           >
                             {c.status}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 mt-1.5">
-                          <div className="flex items-center gap-1 text-xs font-bold text-slate-400 ">
+                          <div className="flex items-center gap-1 text-xs font-bold text-slate-500 ">
                             <BiVideo className="text-primary" />
                             {c.type} Session
                           </div>
                           <div className="w-1 h-1 rounded-full bg-slate-200" />
-                          <div className="flex items-center gap-1 text-xs font-bold text-slate-400 ">
+                          <div className="flex items-center gap-1 text-xs font-bold text-slate-500 ">
                             <BiTime />
                             30 Minutes
                           </div>
@@ -447,7 +447,7 @@ export default function PatientProfilePage() {
                               patientName: patient.fullName,
                             });
                           }}
-                          className="w-10 h-10 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-primary hover:border-primary/20 hover:shadow-none transition-all flex items-center justify-center"
+                          className="w-10 h-10 rounded-xl bg-white border border-slate-100 text-slate-500 hover:text-primary hover:border-primary/20 hover:shadow-none transition-all flex items-center justify-center"
                         >
                           <BiNote size={18} />
                         </button>
@@ -579,7 +579,7 @@ export default function PatientProfilePage() {
                     </span>
                   ))}
                   {patient.medicalHistory.length === 0 && (
-                    <p className="text-sm text-slate-400 italic ml-1">
+                    <p className="text-sm text-slate-500 italic ml-1">
                       No chronic history.
                     </p>
                   )}
@@ -657,10 +657,10 @@ export default function PatientProfilePage() {
                           {p.dosage}
                         </p>
                         <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
-                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
                             Refills: {p.refillsRemaining}
                           </p>
-                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
                             {new Date(p.prescribedDate).toLocaleDateString()}
                           </p>
                         </div>
@@ -698,7 +698,7 @@ export default function PatientProfilePage() {
               <p className="text-sm font-bold text-slate-800">
                 {patient.emergencyContact.name}
               </p>
-              <p className="text-xs font-bold text-slate-400  tracking-normal">
+              <p className="text-xs font-bold text-slate-500  tracking-normal">
                 {patient.emergencyContact.relationship}
               </p>
               <p className="text-base font-bold text-primary mt-2">
@@ -750,7 +750,7 @@ export default function PatientProfilePage() {
               }
             />
             <div className="space-y-2">
-              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+              <h1 className="text-sm font-bold text-slate-500 uppercase tracking-widest ml-1">
                 Instructions
               </h1>
               <textarea
@@ -807,7 +807,7 @@ export default function PatientProfilePage() {
         <div className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+              <h1 className="text-sm font-bold text-slate-500 uppercase tracking-widest ml-1">
                 Chronic Conditions (Comma separated)
               </h1>
               <textarea
@@ -822,7 +822,7 @@ export default function PatientProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+              <h1 className="text-sm font-bold text-slate-500 uppercase tracking-widest ml-1">
                 Allergies (Comma separated)
               </h1>
               <textarea
@@ -837,7 +837,7 @@ export default function PatientProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <h1 className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+              <h1 className="text-sm font-bold text-slate-500 uppercase tracking-widest ml-1">
                 Active Medications (Comma separated)
               </h1>
               <textarea

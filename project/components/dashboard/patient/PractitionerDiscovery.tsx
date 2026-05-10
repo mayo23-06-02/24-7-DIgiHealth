@@ -151,11 +151,11 @@ const PractitionerDiscovery: React.FC = () => {
 
         <div className="bg-white p-8 rounded-lg border border-slate-100 shadow-none space-y-8">
           <div className="space-y-4">
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Global Search
             </h1>
             <div className="relative">
-              <BiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <BiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search by name..."
@@ -167,7 +167,7 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Specialisation
             </h1>
             <div className="space-y-2">
@@ -186,7 +186,7 @@ const PractitionerDiscovery: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Price Range (R{activeFilters.maxPrice})
             </h1>
             <input
@@ -203,14 +203,14 @@ const PractitionerDiscovery: React.FC = () => {
                 })
               }
             />
-            <div className="flex justify-between text-xs font-bold text-slate-400">
+            <div className="flex justify-between text-xs font-bold text-slate-500">
               <span>R300</span>
               <span>R2500+</span>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Language Spoken
             </h1>
             <select
@@ -248,11 +248,11 @@ const PractitionerDiscovery: React.FC = () => {
       {/* DOCTORS GRID */}
       <div className="flex-1 space-y-8 animate-in fade-in duration-1000">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold text-slate-400  tracking-normal font-grotesk">
+          <h4 className="text-xs font-bold text-slate-500  tracking-normal font-grotesk">
             Showing {doctors.length} Verified Practitioners
           </h4>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-400 ">Sort by:</span>
+            <span className="text-xs font-bold text-slate-500 ">Sort by:</span>
             <select
               className="bg-transparent border-none text-xs font-bold text-primary  tracking-normal focus:ring-0 cursor-pointer"
               value={sortBy}
@@ -316,7 +316,7 @@ const PractitionerDiscovery: React.FC = () => {
                           {doc.rating?.toFixed(1) || "4.9"}
                         </span>
                       </div>
-                      <p className="text-xs font-bold text-slate-400  tracking-tight">
+                      <p className="text-xs font-bold text-slate-500  tracking-tight">
                         {doc.reviewCount || 0} Reviews
                       </p>
                     </div>
@@ -333,7 +333,7 @@ const PractitionerDiscovery: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-4 bg-slate-50 rounded-2xl">
-                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-500  tracking-normal mb-1">
                         Fee
                       </p>
                       <p className="text-sm font-bold text-slate-800 leading-none">
@@ -341,7 +341,7 @@ const PractitionerDiscovery: React.FC = () => {
                       </p>
                     </div>
                     <div className="p-4 bg-slate-50 rounded-2xl">
-                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-500  tracking-normal mb-1">
                         Status
                       </p>
                       <p className="text-xs font-bold text-emerald-600  tracking-tight leading-none truncate">
@@ -414,7 +414,7 @@ const PractitionerDiscovery: React.FC = () => {
 
             <div className="space-y-6">
               <div>
-                <h1 className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
+                <h1 className="text-xs font-bold text-slate-500  tracking-normal block mb-3">
                   Select Date
                 </h1>
                 <input
@@ -428,7 +428,7 @@ const PractitionerDiscovery: React.FC = () => {
               </div>
 
               <div>
-                <h1 className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
+                <h1 className="text-xs font-bold text-slate-500  tracking-normal block mb-3">
                   Available Time Slots
                 </h1>
                 <div className="grid grid-cols-4 gap-2">
@@ -438,7 +438,7 @@ const PractitionerDiscovery: React.FC = () => {
                       onClick={() =>
                         setBookingData({ ...bookingData, time: slot })
                       }
-                      className={`h-12 rounded-xl text-xs font-bold transition-all ${bookingData.time === slot ? "bg-primary text-white shadow-none" : "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-800"}`}
+                      className={`h-12 rounded-xl text-xs font-bold transition-all ${bookingData.time === slot ? "bg-primary text-white shadow-none" : "bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
                     >
                       {slot}
                     </button>
@@ -447,7 +447,7 @@ const PractitionerDiscovery: React.FC = () => {
               </div>
 
               <div>
-                <h1 className="text-xs font-bold text-slate-400  tracking-normal block mb-3">
+                <h1 className="text-xs font-bold text-slate-500  tracking-normal block mb-3">
                   Reason for Visit
                 </h1>
                 <textarea

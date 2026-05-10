@@ -143,7 +143,7 @@ export default function PractitionerBillingPage() {
             className="border border-slate-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-[200px] focus:outline-none focus:border-primary"
           />
           <div className="flex items-center gap-2">
-            <BiFilter className="text-slate-400" />
+            <BiFilter className="text-slate-500" />
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -156,7 +156,7 @@ export default function PractitionerBillingPage() {
             </select>
           </div>
           <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-400" size={15} />
+            <BiCalendar className="text-slate-500" size={15} />
             <input
               type="date"
               value={dateFrom}
@@ -165,7 +165,7 @@ export default function PractitionerBillingPage() {
             />
           </div>
           <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-400" size={15} />
+            <BiCalendar className="text-slate-500" size={15} />
             <input
               type="date"
               value={dateTo}
@@ -247,7 +247,7 @@ export default function PractitionerBillingPage() {
                   <tr>
                     <td
                       colSpan={6}
-                      className="py-12 text-center text-slate-400"
+                      className="py-12 text-center text-slate-500"
                     >
                       No transactions found.
                     </td>

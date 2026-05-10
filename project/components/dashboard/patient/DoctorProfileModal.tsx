@@ -92,7 +92,7 @@ export default function DoctorProfileModal({
           <Button
             variant="ghost"
             onClick={onClose}
-            className="w-10 h-10 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all active:scale-90 !min-w-0 border-none bg-transparent"
+            className="w-10 h-10 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-all active:scale-90 !min-w-0 border-none bg-transparent"
           >
             <BiX size={28} />
           </Button>
@@ -109,7 +109,7 @@ export default function DoctorProfileModal({
           <div className="flex gap-2">
             <Button
               variant="ghost"
-              className="w-10 h-10 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 !min-w-0 border-none bg-transparent"
+              className="w-10 h-10 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-primary transition-all active:scale-90 !min-w-0 border-none bg-transparent"
               aria-label="Share"
             >
               <BiShareAlt size={20} />
@@ -117,7 +117,7 @@ export default function DoctorProfileModal({
             <Button
               variant="ghost"
               onClick={() => setIsSaved(!isSaved)}
-              className={`w-10 h-10 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center transition-all active:scale-90 !min-w-0 border-none bg-transparent ${isSaved ? "text-rose-500" : "text-slate-400"}`}
+              className={`w-10 h-10 p-0 rounded-xl hover:bg-slate-50 flex items-center justify-center transition-all active:scale-90 !min-w-0 border-none bg-transparent ${isSaved ? "text-rose-500" : "text-slate-500"}`}
               aria-label="Save doctor"
             >
               {isSaved ? (
@@ -163,7 +163,7 @@ export default function DoctorProfileModal({
                 </span>
               </div>
               <div className="h-4 w-px bg-slate-100" />
-              <span className="text-sm font-bold text-slate-400  tracking-normal">
+              <span className="text-sm font-bold text-slate-500  tracking-normal">
                 {doctor.reviewCount} Verified Reviews
               </span>
             </div>
@@ -176,7 +176,7 @@ export default function DoctorProfileModal({
                 <BiShieldQuarter size={26} />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] font-bold text-slate-400  tracking-normal mb-1.5">
+                <p className="text-[9px] font-bold text-slate-500  tracking-normal mb-1.5">
                   HPCSA Registration
                 </p>
                 <p className="text-xs font-bold text-slate-800 font-mono tracking-wider truncate">
@@ -189,7 +189,7 @@ export default function DoctorProfileModal({
                 <BiAward size={26} />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] font-bold text-slate-400  tracking-normal mb-1.5">
+                <p className="text-[9px] font-bold text-slate-500  tracking-normal mb-1.5">
                   Professional Tenure
                 </p>
                 <p className="text-sm font-bold text-slate-800 tracking-tight">
@@ -201,7 +201,7 @@ export default function DoctorProfileModal({
 
           {/* Contact & Facility */}
           <section className="space-y-4 bg-white border border-slate-100 rounded-lg p-8 shadow-none shadow-slate-900/5">
-            <h4 className="text-sm font-bold text-slate-400  tracking-[0.25em] mb-4 font-grotesk">
+            <h4 className="text-sm font-bold text-slate-500  tracking-[0.25em] mb-4 font-grotesk">
               Clinical Access Points
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -210,7 +210,7 @@ export default function DoctorProfileModal({
                 onClick={() => window.open(`tel:${doctor.practicePhone}`)}
                 className="flex items-center gap-4 bg-slate-50 hover:bg-primary/5 p-2 pr-6 rounded-2xl transition-all border-none h-auto !min-w-0 justify-start normal-case"
               >
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover/btn:text-primary shadow-none">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-500 group-hover/btn:text-primary shadow-none">
                   <BiPhone size={18} />
                 </div>
                 <span className="text-sm font-bold text-slate-700 tracking-tight">
@@ -222,7 +222,7 @@ export default function DoctorProfileModal({
                 onClick={() => window.open(`mailto:${doctor.practiceEmail}`)}
                 className="flex items-center gap-4 bg-slate-50 hover:bg-primary/5 p-2 pr-6 rounded-2xl transition-all border-none h-auto !min-w-0 justify-start normal-case"
               >
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover/btn:text-primary shadow-none">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-500 group-hover/btn:text-primary shadow-none">
                   <BiEnvelope size={18} />
                 </div>
                 <span className="text-sm font-bold text-slate-700 tracking-tight truncate">
@@ -233,21 +233,21 @@ export default function DoctorProfileModal({
                 variant="ghost"
                 className="flex items-center gap-4 bg-slate-50 hover:bg-primary/5 p-2 pr-6 rounded-2xl transition-all border-none h-auto !min-w-0 justify-start text-left col-span-1 md:col-span-2 normal-case"
               >
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover/btn:text-primary shadow-none">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-500 group-hover/btn:text-primary shadow-none">
                   <BiBuilding size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-bold text-slate-700 tracking-tight group-hover/btn:text-primary transition-colors block">
                     {doctor.facilityName}
                   </span>
-                  <p className="text-[9px] text-slate-400 font-bold  tracking-normal opacity-80 mt-0.5">
+                  <p className="text-[9px] text-slate-500 font-bold  tracking-normal opacity-80 mt-0.5">
                     View Facility Analytics{" "}
                     <BiChevronRight className="inline" />
                   </p>
                 </div>
               </Button>
               <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-transparent col-span-1 md:col-span-2">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 shadow-none">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-500 shadow-none">
                   <BiGlobe size={18} />
                 </div>
                 <span className="text-sm font-bold text-slate-600  tracking-normal">
@@ -260,7 +260,7 @@ export default function DoctorProfileModal({
           {/* About & Clinical Focus */}
           <section className="space-y-8">
             <div className="relative">
-              <h3 className="text-lg font-bold text-slate-400  tracking-normal mb-4 px-1 font-grotesk">
+              <h3 className="text-lg font-bold text-slate-500  tracking-normal mb-4 px-1 font-grotesk">
                 Clinical Overview
               </h3>
               <div className="text-sm font-bold text-slate-600 leading-relaxed bg-slate-50/50 p-8 rounded-lg border border-dashed border-slate-200 italic shadow-inner">
@@ -269,7 +269,7 @@ export default function DoctorProfileModal({
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-slate-400  tracking-normal mb-4 px-1 font-grotesk">
+              <h3 className="text-lg font-bold text-slate-500  tracking-normal mb-4 px-1 font-grotesk">
                 Clinical Specializations
               </h3>
               <div className="flex flex-wrap gap-2.5">
@@ -302,7 +302,7 @@ export default function DoctorProfileModal({
                   <BiWallet size={24} className="text-primary" />
                 </div>
               </div>
-              <p className="text-xs text-slate-400 font-bold leading-relaxed max-w-sm">
+              <p className="text-xs text-slate-500 font-bold leading-relaxed max-w-sm">
                 Accepts most major medical aid providers including Discovery,
                 Momentum, and GEMS for direct clinical billing.
               </p>
@@ -325,13 +325,13 @@ export default function DoctorProfileModal({
               <h3 className="text-lg font-bold text-slate-800  tracking-[0.25em] flex items-center gap-2 font-grotesk">
                 <BiCalendar className="text-primary" /> Availability Grid
               </h3>
-              <span className="text-[9px] font-bold text-slate-400  tracking-normal opacity-60">
+              <span className="text-[9px] font-bold text-slate-500  tracking-normal opacity-60">
                 TZ: AFRICA/JOHANNESBURG
               </span>
             </div>
 
             <div className="bg-slate-50/50 rounded-lg p-8 border border-slate-100 shadow-inner">
-              <p className="text-sm font-bold text-slate-400  tracking-normal mb-6 px-1">
+              <p className="text-sm font-bold text-slate-500  tracking-normal mb-6 px-1">
                 TODAY,{" "}
                 {new Date().toLocaleDateString("en-ZA", {
                   day: "numeric",
@@ -412,7 +412,7 @@ export default function DoctorProfileModal({
                     "{review.content}"
                   </p>
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-slate-400  tracking-normal">
+                    <p className="text-sm font-bold text-slate-500  tracking-normal">
                       {review.name} <span className="opacity-30 mx-2">·</span>{" "}
                       {review.time}
                     </p>
@@ -443,7 +443,7 @@ export default function DoctorProfileModal({
             disabled={!selectedSlot}
             onClick={() => onBook(doctor.id, selectedSlot || undefined)}
             fullWidth
-            className={`h-16 rounded-[1.5rem] text-[11px] font-bold  tracking-normal shadow-none transition-all ${selectedSlot ? "bg-primary text-white shadow-primary/30" : "bg-slate-100 text-slate-400 border-none"}`}
+            className={`h-16 rounded-[1.5rem] text-[11px] font-bold  tracking-normal shadow-none transition-all ${selectedSlot ? "bg-primary text-white shadow-primary/30" : "bg-slate-100 text-slate-500 border-none"}`}
             icon={<BiCalendar size={20} />}
             iconPosition="right"
           >

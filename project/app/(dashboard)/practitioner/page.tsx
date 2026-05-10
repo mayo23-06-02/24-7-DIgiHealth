@@ -350,7 +350,7 @@ export default function PractitionerDashboard() {
                     (item: any, i: number) => (
                       <div
                         key={i}
-                        className="w-full text-center text-xs  text-slate-400"
+                        className="w-full text-center text-xs  text-slate-500"
                       >
                         <p className="text-xs  text-slate-500"> {item.label}</p>
                       </div>
@@ -534,7 +534,7 @@ export default function PractitionerDashboard() {
                             ? "text-primary"
                             : isToday
                               ? "text-primary/60"
-                              : "text-slate-400"
+                              : "text-slate-500"
                         }`}
                       >
                         {date.toLocaleDateString("en-US", { weekday: "short" })}
@@ -596,7 +596,7 @@ export default function PractitionerDashboard() {
                       <tr>
                         <td
                           colSpan={5}
-                          className="py-12 text-center text-slate-400 text-sm font-medium bg-slate-50/30 rounded-xl"
+                          className="py-12 text-center text-slate-500 text-sm font-medium bg-slate-50/30 rounded-xl"
                         >
                           No appointments scheduled for this day
                         </td>
@@ -665,7 +665,7 @@ export default function PractitionerDashboard() {
                                     : item.consultationId,
                                 )
                               }
-                              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors ml-auto p-0"
+                              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/5 transition-colors ml-auto p-0"
                             >
                               <BiDotsVerticalRounded size={20} />
                             </Button>
@@ -707,7 +707,7 @@ export default function PractitionerDashboard() {
           <div className="flex flex-col gap-4">
             {dashboardData.pendingRequests &&
             dashboardData.pendingRequests.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 font-medium text-sm bg-slate-50/50 rounded-xl border border-slate-100 border-dashed">
+              <div className="p-8 text-center text-slate-500 font-medium text-sm bg-slate-50/50 rounded-xl border border-slate-100 border-dashed">
                 No pending requests
               </div>
             ) : (
@@ -739,7 +739,7 @@ export default function PractitionerDashboard() {
                         </p>
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></span>
-                          <p className="text-xs font-bold text-slate-400 capitalize">
+                          <p className="text-xs font-bold text-slate-500 capitalize">
                             {req.type} Consultation
                           </p>
                         </div>

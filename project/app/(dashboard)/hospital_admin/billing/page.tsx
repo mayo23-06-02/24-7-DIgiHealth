@@ -157,7 +157,7 @@ export default function BillingPage() {
             <option value="refunded">Refunded</option>
           </select>
           <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-400" size={16} />
+            <BiCalendar className="text-slate-500" size={16} />
             <input
               type="date"
               value={dateFrom}
@@ -166,7 +166,7 @@ export default function BillingPage() {
             />
           </div>
           <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-400" size={16} />
+            <BiCalendar className="text-slate-500" size={16} />
             <input
               type="date"
               value={dateTo}
@@ -253,7 +253,7 @@ export default function BillingPage() {
                   <tr>
                     <td
                       colSpan={6}
-                      className="py-10 text-center text-slate-400"
+                      className="py-10 text-center text-slate-500"
                     >
                       No transactions found.
                     </td>

@@ -70,7 +70,7 @@ export default function PractitionerHeader({
           2: { label: "Cloudy", icon: <BiCloud className="text-slate-300" /> },
           3: {
             label: "Overcast",
-            icon: <BiCloud className="text-slate-400" />,
+            icon: <BiCloud className="text-slate-500" />,
           },
           61: {
             label: "Rainy",
@@ -160,7 +160,7 @@ export default function PractitionerHeader({
       {/* Date, Time & Weather */}
       <div className="hidden lg:flex items-center gap-4 min-w-0 pr-4 border-r border-slate-100/50">
         <div className="flex flex-col">
-          <span className="text-sm font-bold text-slate-400  tracking-normal leading-none mb-1">
+          <span className="text-sm font-bold text-slate-500  tracking-normal leading-none mb-1">
             System Clock
           </span>
           <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ export default function PractitionerHeader({
           </div>
         </div>
         <div className="flex flex-col border-l border-slate-100 pl-4">
-          <span className="text-sm font-bold text-slate-400  tracking-normal leading-none mb-1">
+          <span className="text-sm font-bold text-slate-500  tracking-normal leading-none mb-1">
             Local Weather
           </span>
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
@@ -189,7 +189,7 @@ export default function PractitionerHeader({
       <div className="flex-1 max-w-lg hidden md:block">
         <div className="bg-slate-50 border border-slate-100 rounded-2xl px-5 py-2.5 flex items-center gap-3 group focus-within:bg-white focus-within:shadow-none focus-within:shadow-primary/5 focus-within:border-primary/20 transition-all duration-300">
           <BiSearch
-            className="text-slate-400 group-focus-within:text-primary shrink-0 transition-colors"
+            className="text-slate-500 group-focus-within:text-primary shrink-0 transition-colors"
             size={18}
           />
           <input
@@ -228,7 +228,7 @@ export default function PractitionerHeader({
               setIsNotifOpen(!isNotifOpen);
               setIsProfileOpen(false);
             }}
-            className={`w-11 h-11 p-0 rounded-2xl flex items-center justify-center transition-all relative border-none !min-w-0 ${isNotifOpen ? "bg-primary text-white shadow-none shadow-primary/30" : "bg-slate-50 text-slate-400 hover:bg-primary/5 hover:text-primary"}`}
+            className={`w-11 h-11 p-0 rounded-2xl flex items-center justify-center transition-all relative border-none !min-w-0 ${isNotifOpen ? "bg-primary text-white shadow-none shadow-primary/30" : "bg-slate-50 text-slate-500 hover:bg-primary/5 hover:text-primary"}`}
           >
             <BiBell size={20} />
             {riskAlertCount > 0 && (
@@ -267,7 +267,7 @@ export default function PractitionerHeader({
                         <p className="text-[11px] font-bold text-slate-800  tracking-tight">
                           {n.title}
                         </p>
-                        <span className="text-[9px] font-bold text-slate-400  tracking-normal tabular-nums">
+                        <span className="text-[9px] font-bold text-slate-500  tracking-normal tabular-nums">
                           {n.time}
                         </span>
                       </div>
@@ -319,14 +319,14 @@ export default function PractitionerHeader({
             </div>
             <BiChevronDown
               size={14}
-              className={`text-slate-400 hidden lg:block transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`}
+              className={`text-slate-500 hidden lg:block transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`}
             />
           </Button>
 
           {isProfileOpen && (
             <div className="absolute top-14 right-0 w-56 bg-white border border-slate-100 rounded-[1.5rem] shadow-none p-2 animate-in zoom-in-95 duration-300 z-[100]">
               <div className="px-4 py-3 mb-2 border-b border-slate-50">
-                <p className="text-[9px] font-bold text-slate-400  tracking-normal mb-1">
+                <p className="text-[9px] font-bold text-slate-500  tracking-normal mb-1">
                   Signed in as
                 </p>
                 <p className="text-[11px] font-bold text-slate-800 truncate">

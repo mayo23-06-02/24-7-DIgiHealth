@@ -243,7 +243,7 @@ export default function HospitalDashboard() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center flex-1 py-10 text-slate-400">
+            <div className="flex flex-col items-center justify-center flex-1 py-10 text-slate-500">
               <BiCalendar size={32} className="mb-2 opacity-40" />
               <p className="text-sm">No upcoming appointments</p>
             </div>

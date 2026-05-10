@@ -61,7 +61,7 @@ export default function AppointmentCheckup() {
         {[9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map((d, i) => (
           <div
             key={d}
-            className={`min-w-[120px] p-6 text-center rounded-lg border transition-all cursor-pointer group ${i === 4 ? "bg-primary border-primary text-white" : "bg-white border-slate-50 text-slate-400 hover:border-primary/30 hover:text-slate-800"}`}
+            className={`min-w-[120px] p-6 text-center rounded-lg border transition-all cursor-pointer group ${i === 4 ? "bg-primary border-primary text-white" : "bg-white border-slate-50 text-slate-500 hover:border-primary/30 hover:text-slate-800"}`}
           >
             <p
               className={`text-xs font-bold  mb-3 tracking-normal ${i === 4 ? "text-white/60" : "text-slate-300 group-hover:text-primary/50"}`}
@@ -116,7 +116,7 @@ export default function AppointmentCheckup() {
                 </h4>
                 <div className="flex items-center gap-2 mb-2">
                   <BiPulse className="text-rose-500 animate-pulse" />
-                  <span className="text-xs font-bold text-slate-400  tracking-normal">
+                  <span className="text-xs font-bold text-slate-500  tracking-normal">
                     {appt.field}
                   </span>
                 </div>
@@ -126,7 +126,7 @@ export default function AppointmentCheckup() {
               </div>
             </div>
 
-            <p className="text-[13px] text-slate-400 font-bold mb-10 leading-relaxed italic line-clamp-2 group-hover:text-slate-600 transition-colors">
+            <p className="text-[13px] text-slate-500 font-bold mb-10 leading-relaxed italic line-clamp-2 group-hover:text-slate-600 transition-colors">
               "{appt.concern}"
             </p>
 

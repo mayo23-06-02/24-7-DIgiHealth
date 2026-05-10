@@ -42,8 +42,10 @@ export default function CallModal({
             </div>
           </div>
           <div className="text-center">
-            <h3 className="text-white text-xl font-bold font-grotesk">Voice Consultation</h3>
-            <p className="text-slate-400 text-sm mt-1">
+            <h3 className="text-white text-xl font-bold font-grotesk">
+              Voice Consultation
+            </h3>
+            <p className="text-slate-500 text-sm mt-1">
               Connecting to secure clinical channel...
             </p>
           </div>

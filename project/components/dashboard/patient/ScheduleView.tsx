@@ -327,7 +327,7 @@ const ScheduleView: React.FC = () => {
               <button
                 key={m}
                 onClick={() => setViewMode(m)}
-                className={`px-6 py-2 rounded-lg text-xs font-bold  tracking-normal transition-all ${viewMode === m ? "bg-primary text-white" : "text-slate-400 hover:bg-slate-50"}`}
+                className={`px-6 py-2 rounded-lg text-xs font-bold  tracking-normal transition-all ${viewMode === m ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 {m}
               </button>
@@ -349,13 +349,13 @@ const ScheduleView: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrevious}
-              className="w-12 h-12 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary transition-all"
+              className="w-12 h-12 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-slate-500 hover:text-primary transition-all"
             >
               <BiChevronLeft size={24} />
             </button>
             <button
               onClick={handleNext}
-              className="w-12 h-12 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary transition-all"
+              className="w-12 h-12 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-slate-500 hover:text-primary transition-all"
             >
               <BiChevronRight size={24} />
             </button>
@@ -367,7 +367,7 @@ const ScheduleView: React.FC = () => {
       <div className="bg-white p-4 rounded-lg border border-slate-100 flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
           <BiSearch
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"
             size={20}
           />
           <input
@@ -397,7 +397,7 @@ const ScheduleView: React.FC = () => {
         </button>
         <button
           onClick={clearFilters}
-          className="text-xs font-semibold text-slate-400 hover:text-primary underline"
+          className="text-xs font-semibold text-slate-500 hover:text-primary underline"
         >
           Clear all
         </button>
@@ -407,7 +407,7 @@ const ScheduleView: React.FC = () => {
       {showFilters && (
         <div className="bg-white p-6 rounded-lg border border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Specialisation
             </h1>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -430,7 +430,7 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Language
             </h1>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -453,7 +453,7 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Max Fee (ZAR)
             </h1>
             <input
@@ -477,7 +477,7 @@ const ScheduleView: React.FC = () => {
             </div>
           </div>
           <div>
-            <h1 className="text-xs font-bold text-slate-400  tracking-normal">
+            <h1 className="text-xs font-bold text-slate-500  tracking-normal">
               Gender
             </h1>
             <div className="flex gap-4 mt-2">
@@ -527,7 +527,7 @@ const ScheduleView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
         {/* Practitioner Sidebar */}
         <div className="space-y-4">
-          <h4 className="text-xs font-bold text-slate-400  tracking-normal px-2 font-grotesk">
+          <h4 className="text-xs font-bold text-slate-500  tracking-normal px-2 font-grotesk">
             Clinical Providers
           </h4>
           <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-300px)] pr-2 custom-scrollbar">
@@ -555,7 +555,7 @@ const ScheduleView: React.FC = () => {
                     >
                       {doc.name}
                     </p>
-                    <p className="text-xs font-bold text-slate-400  tracking-normal">
+                    <p className="text-xs font-bold text-slate-500  tracking-normal">
                       {doc.specialisation}
                     </p>
                   </div>
@@ -573,18 +573,18 @@ const ScheduleView: React.FC = () => {
                         }
                       />
                     ))}
-                    <span className="text-xs text-slate-400 ml-1">
+                    <span className="text-xs text-slate-500 ml-1">
                       ({doc.reviewCount})
                     </span>
                   </div>
-                  <p className="text-xs font-bold text-slate-400 ">
+                  <p className="text-xs font-bold text-slate-500 ">
                     R{doc.consultationFee}
                   </p>
                 </div>
               </div>
             ))}
             {filteredPractitioners.length === 0 && !loading && (
-              <div className="text-center py-8 text-slate-400">
+              <div className="text-center py-8 text-slate-500">
                 <BiUser size={40} className="mx-auto mb-2 opacity-30" />
                 <p className="text-sm">No practitioners match your filters.</p>
                 <button
@@ -605,14 +605,14 @@ const ScheduleView: React.FC = () => {
               <thead>
                 <tr className="bg-white">
                   <th className="p-4 border-b border-r border-slate-100 w-24">
-                    <BiTime className="mx-auto text-slate-400" size={20} />
+                    <BiTime className="mx-auto text-slate-500" size={20} />
                   </th>
                   {days.map((day, i) => (
                     <th
                       key={i}
                       className={`p-6 border-b border-r border-slate-100 text-center min-w-[140px] ${day.toDateString() === new Date().toDateString() ? "bg-primary/5" : ""}`}
                     >
-                      <p className="text-xs font-bold text-slate-400  tracking-normal mb-1">
+                      <p className="text-xs font-bold text-slate-500  tracking-normal mb-1">
                         {day.toLocaleDateString("en-US", { weekday: "short" })}
                       </p>
                       <p className="text-lg font-bold text-slate-800">
@@ -628,7 +628,7 @@ const ScheduleView: React.FC = () => {
               <tbody>
                 {timeSlots.map((slot) => (
                   <tr key={slot}>
-                    <td className="p-4 border-b border-r border-slate-100 text-xs font-bold text-slate-400  text-center bg-slate-50/20">
+                    <td className="p-4 border-b border-r border-slate-100 text-xs font-bold text-slate-500  text-center bg-slate-50/20">
                       {slot}
                     </td>
                     {days.map((day, i) => {
@@ -719,7 +719,7 @@ const ScheduleView: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-5 bg-slate-50 rounded-lg">
-                <p className="text-xs font-bold text-slate-400  mb-1">
+                <p className="text-xs font-bold text-slate-500  mb-1">
                   Appointment Date
                 </p>
                 <p className="font-bold text-slate-800">
@@ -729,7 +729,7 @@ const ScheduleView: React.FC = () => {
                 </p>
               </div>
               <div className="p-5 bg-slate-50 rounded-lg">
-                <p className="text-xs font-bold text-slate-400  mb-1">
+                <p className="text-xs font-bold text-slate-500  mb-1">
                   Session Time
                 </p>
                 <p className="font-bold text-slate-800">

@@ -67,14 +67,16 @@ export default function ConsultationsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Consultations</h1>
+          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+            Consultations
+          </h1>
           <p className="text-sm text-slate-500">
             History of completed consultations with SOAP notes and clinical data
           </p>
         </div>
         <div className="relative w-full md:w-72">
           <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
             size={16}
           />
           <input
@@ -103,7 +105,7 @@ export default function ConsultationsPage() {
                     <p className="text-sm font-bold text-slate-800">
                       {c.patientName}
                     </p>
-                    <p className="text-xs text-slate-400 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
                       {c.reason || "General consultation"}
                     </p>
                   </div>
@@ -201,7 +203,7 @@ export default function ConsultationsPage() {
                           ) : null,
                         )
                       ) : (
-                        <div className="col-span-2 text-xs text-slate-400 py-4 text-center">
+                        <div className="col-span-2 text-xs text-slate-500 py-4 text-center">
                           No SOAP note recorded for this consultation.{" "}
                           <button
                             onClick={() =>
@@ -247,7 +249,7 @@ export default function ConsultationsPage() {
               </div>
             ))}
             {paginated.length === 0 && !loading && (
-              <div className="py-12 text-center text-slate-400">
+              <div className="py-12 text-center text-slate-500">
                 No past consultations found.
               </div>
             )}

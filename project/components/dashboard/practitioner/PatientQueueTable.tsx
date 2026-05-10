@@ -204,7 +204,7 @@ export default function PatientQueueTable() {
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-3">
         <BiLoader className="text-primary text-3xl animate-spin" />
-        <p className="text-sm text-slate-400 font-bold  tracking-normal">
+        <p className="text-sm text-slate-500 font-bold  tracking-normal">
           Syncing Patient Queue…
         </p>
       </div>
@@ -218,7 +218,7 @@ export default function PatientQueueTable() {
           <h3 className="font-bold text-slate-800 text-sm leading-tight  tracking-normal font-grotesk">
             Clinical Queue
           </h3>
-          <p className="text-sm text-slate-400 font-bold  tracking-normal mt-1">
+          <p className="text-sm text-slate-500 font-bold  tracking-normal mt-1">
             Refreshed{" "}
             {lastRefresh.toLocaleTimeString("en-ZA", {
               hour: "2-digit",
@@ -232,7 +232,7 @@ export default function PatientQueueTable() {
             setLoading(true);
             fetchQueue();
           }}
-          className="w-10 h-10 p-0 rounded-full bg-slate-50 hover:bg-primary/5 text-slate-400 hover:text-primary flex items-center justify-center transition-all active:scale-95 border-none bg-transparent !min-w-0"
+          className="w-10 h-10 p-0 rounded-full bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary flex items-center justify-center transition-all active:scale-95 border-none bg-transparent !min-w-0"
           aria-label="Refresh queue"
         >
           <BiRefresh size={20} />
@@ -247,7 +247,7 @@ export default function PatientQueueTable() {
       )}
 
       {queue.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-48 gap-3 text-slate-400">
+        <div className="flex flex-col items-center justify-center h-48 gap-3 text-slate-500">
           <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-300">
             <BiCheckCircle size={32} />
           </div>
@@ -304,11 +304,11 @@ export default function PatientQueueTable() {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-400  tracking-normal">
+                      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500  tracking-normal">
                         {typeIcon(item.type)} {typeLabel(item.type)}
                       </span>
                       <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-400  tracking-normal tabular-nums font-mono">
+                      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500  tracking-normal tabular-nums font-mono">
                         <BiTime size={12} className="text-slate-300" />
                         {formatTime(item.scheduledStart)}
                         {mins > 0 && mins < 120 && (
@@ -397,7 +397,7 @@ export default function PatientQueueTable() {
                   </Button>
                   <Button
                     variant="ghost"
-                    className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-primary/5 text-slate-400 hover:text-primary transition-all flex items-center justify-center border-none !min-w-0"
+                    className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all flex items-center justify-center border-none !min-w-0"
                   >
                     <BiUser size={18} />
                   </Button>
@@ -440,7 +440,7 @@ export default function PatientQueueTable() {
                 <p className="text-white font-bold text-sm mb-1  tracking-normal">
                   Patient Profile
                 </p>
-                <p className="text-slate-400 text-[11px] font-medium leading-relaxed italic opacity-80">
+                <p className="text-slate-500 text-[11px] font-medium leading-relaxed italic opacity-80">
                   {videoModal.consultation.reason}
                 </p>
               </div>

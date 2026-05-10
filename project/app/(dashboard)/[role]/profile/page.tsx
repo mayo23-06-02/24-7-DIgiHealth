@@ -87,7 +87,11 @@ interface HospitalAdminRoleData {
     facilityType: string;
     contactInfo: { phone: string; email: string };
     address: { city: string; province: string; street?: string };
-    bedCapacity: { total: number; generalAvailable: number; icuAvailable: number };
+    bedCapacity: {
+      total: number;
+      generalAvailable: number;
+      icuAvailable: number;
+    };
     specialties: string[];
     emergencyServices: boolean;
   };
@@ -445,7 +449,7 @@ export default function ProfilePage() {
             <BiUser className="text-primary animate-pulse" size={24} />
           </div>
         </div>
-        <h1 className="text-sm font-bold text-slate-400  animate-pulse">
+        <h1 className="text-sm font-bold text-slate-500  animate-pulse">
           Accessing Neural Profile...
         </h1>
       </div>
@@ -530,8 +534,9 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-4 text-white/60 text-xs font-bold ">
                   <span className="flex items-center gap-1.5">
                     <BiBriefcase className="text-white" />
-                    {currentRole === "hospital_admin" && hospitalData?.facility?.name 
-                      ? hospitalData.facility.name 
+                    {currentRole === "hospital_admin" &&
+                    hospitalData?.facility?.name
+                      ? hospitalData.facility.name
                       : user.role.replace("_", " ")}
                   </span>
                   <span className="flex items-center gap-1.5">
@@ -834,7 +839,7 @@ export default function ProfilePage() {
                           <h1 className="text-xl font-bold text-slate-800 font-grotesk">
                             {practitionerData.hpcsaNumber}
                           </h1>
-                          <p className="text-sm  text-slate-400 ">
+                          <p className="text-sm  text-slate-500 ">
                             HPCSA Registration
                           </p>
                         </div>
@@ -923,7 +928,8 @@ export default function ProfilePage() {
                                 ...hospitalData.facility,
                                 bedCapacity: {
                                   ...hospitalData.facility.bedCapacity,
-                                  generalAvailable: parseInt(e.target.value) || 0,
+                                  generalAvailable:
+                                    parseInt(e.target.value) || 0,
                                 },
                               },
                             })
@@ -1079,13 +1085,13 @@ export default function ProfilePage() {
                               setEditDocId(doc.id);
                               setEditDocLabel(doc.type);
                             }}
-                            className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
+                            className="p-2 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
                           >
                             <BiEditAlt size={18} />
                           </button>
                           <button
                             onClick={() => handleDeleteDoc(doc.id)}
-                            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                            className="p-2 text-slate-500 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
                           >
                             <BiTrash size={18} />
                           </button>
@@ -1123,7 +1129,7 @@ export default function ProfilePage() {
                       )}
 
                       <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
-                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">
                           {new Date(doc.createdAt).toLocaleDateString("en-ZA", {
                             day: "numeric",
                             month: "short",
@@ -1219,7 +1225,7 @@ export default function ProfilePage() {
                     >
                       <div className="flex items-center gap-5">
                         <div
-                          className={`w-14 h-14 rounded-2xl flex items-center justify-center ${device.active ? "bg-emerald-500/10 text-emerald-500" : "bg-slate-200 text-slate-400"}`}
+                          className={`w-14 h-14 rounded-2xl flex items-center justify-center ${device.active ? "bg-emerald-500/10 text-emerald-500" : "bg-slate-200 text-slate-500"}`}
                         >
                           <BiDevices size={24} />
                         </div>
@@ -1227,7 +1233,7 @@ export default function ProfilePage() {
                           <h1 className="text-sm font-bold text-slate-800">
                             {device.name}
                           </h1>
-                          <p className="text-sm font-bold text-slate-400 ">
+                          <p className="text-sm font-bold text-slate-500 ">
                             LAST USED: {device.lastUsed}
                           </p>
                         </div>
@@ -1375,7 +1381,7 @@ export default function ProfilePage() {
                     <h1 className="text-lg font-bold text-slate-800 font-grotesk">
                       Active Consent Hash
                     </h1>
-                    <p className="text-sm font-bold text-slate-400 ">
+                    <p className="text-sm font-bold text-slate-500 ">
                       Verified: April 2026
                     </p>
                   </div>
@@ -1410,7 +1416,7 @@ export default function ProfilePage() {
         {/* ── SIDEBAR STATS ────────────────────────────────────────────── */}
         <div className="xl:col-span-4 space-y-6">
           <Card className="p-8 rounded-lg bg-white border-slate-100  shadow-slate-900/5 sticky top-8">
-            <h1 className="text-xs font-bold text-slate-400 uppercase  mb-6">
+            <h1 className="text-xs font-bold text-slate-500 uppercase  mb-6">
               Profile Health
             </h1>
             <div className="space-y-6">
@@ -1441,7 +1447,7 @@ export default function ProfilePage() {
                   <BiCheckCircle size={20} />
                 </div>
                 <div>
-                  <h1 className="text-sm font-bold text-slate-400 st mb-0.5">
+                  <h1 className="text-sm font-bold text-slate-500 st mb-0.5">
                     Integrity Score
                   </h1>
                   <h1 className="text-sm font-bold text-slate-800">

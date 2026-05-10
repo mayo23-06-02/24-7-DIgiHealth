@@ -109,7 +109,8 @@ const EventModal: React.FC<EventModalProps> = ({
               Event Scheduled for this day
             </p>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {appointments.filter((a) => a.date === showAddModal).length > 0 ? (
+              {appointments.filter((a) => a.date === showAddModal).length >
+              0 ? (
                 appointments
                   .filter((a) => a.date === showAddModal)
                   .map((appt) => (
@@ -122,7 +123,7 @@ const EventModal: React.FC<EventModalProps> = ({
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-2 h-2 rounded-full ${getMarkerColor(
-                            appt.type
+                            appt.type,
                           )}`}
                         />
                         <div>
@@ -131,7 +132,7 @@ const EventModal: React.FC<EventModalProps> = ({
                               appt.dr ||
                               (appt.type === "refill" ? "Refill" : "Event")}
                           </p>
-                          <p className="text-xs text-slate-400 font-medium">
+                          <p className="text-xs text-slate-500 font-medium">
                             {appt.time} • {appt.type}
                           </p>
                         </div>
@@ -139,13 +140,13 @@ const EventModal: React.FC<EventModalProps> = ({
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEdit(appt)}
-                          className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-primary transition-colors"
+                          className="p-1.5 hover:bg-white rounded-lg text-slate-500 hover:text-primary transition-colors"
                         >
                           <BiPencil size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(appt)}
-                          className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-red-500 transition-colors"
+                          className="p-1.5 hover:bg-white rounded-lg text-slate-500 hover:text-red-500 transition-colors"
                         >
                           <BiTrash size={14} />
                         </button>
@@ -169,7 +170,11 @@ const EventModal: React.FC<EventModalProps> = ({
 
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "Appointment", value: "appointment", icon: <BiCalendar /> },
+              {
+                label: "Appointment",
+                value: "appointment",
+                icon: <BiCalendar />,
+              },
               { label: "Reminder", value: "reminder", icon: <BiTrendingUp /> },
               { label: "Refill", value: "refill", icon: <BiLoaderAlt /> },
               { label: "Note", value: "note", icon: <BiPencil /> },
@@ -196,13 +201,17 @@ const EventModal: React.FC<EventModalProps> = ({
                     <BiUser size={24} />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-gray-900 font-grotesk">No Practitioners Found</p>
+                    <p className="text-sm font-bold text-gray-900 font-grotesk">
+                      No Practitioners Found
+                    </p>
                     <p className="text-xs mb-4 text-gray-700 leading-relaxed">
                       You need to add a practitioner before you can schedule.
                     </p>
                   </div>
                   <Link href="/patient/doctors">
-                    <Button variant={"outline"} size={"sm"}>Browse Practitioners</Button>
+                    <Button variant={"outline"} size={"sm"}>
+                      Browse Practitioners
+                    </Button>
                   </Link>
                 </div>
               ) : (
@@ -212,14 +221,18 @@ const EventModal: React.FC<EventModalProps> = ({
                     type="text"
                     placeholder="e.g. Blood pressure check"
                     value={addForm.title}
-                    onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, title: e.target.value })
+                    }
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <Input
                       label="Time"
                       type="time"
                       value={addForm.time}
-                      onChange={(e) => setAddForm({ ...addForm, time: e.target.value })}
+                      onChange={(e) =>
+                        setAddForm({ ...addForm, time: e.target.value })
+                      }
                     />
                     <Select
                       label="Doctor"
@@ -241,7 +254,9 @@ const EventModal: React.FC<EventModalProps> = ({
                     textarea
                     placeholder="Any details or observations..."
                     value={addForm.notes}
-                    onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, notes: e.target.value })
+                    }
                   />
                 </>
               )}
@@ -255,20 +270,26 @@ const EventModal: React.FC<EventModalProps> = ({
                 type="text"
                 placeholder="e.g. Take medication"
                 value={addForm.title}
-                onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, title: e.target.value })
+                }
               />
               <Input
                 label="Time"
                 type="time"
                 value={addForm.time}
-                onChange={(e) => setAddForm({ ...addForm, time: e.target.value })}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, time: e.target.value })
+                }
               />
               <Input
                 label="Notes (optional)"
                 textarea
                 placeholder="Additional info..."
                 value={addForm.notes}
-                onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, notes: e.target.value })
+                }
               />
             </>
           )}
@@ -280,14 +301,18 @@ const EventModal: React.FC<EventModalProps> = ({
                 type="text"
                 placeholder="e.g. Blood pressure reading"
                 value={addForm.title}
-                onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, title: e.target.value })
+                }
               />
               <Input
                 label="Note Content"
                 textarea
                 placeholder="Write your note here..."
                 value={addForm.notes}
-                onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, notes: e.target.value })
+                }
               />
             </>
           )}
@@ -303,13 +328,24 @@ const EventModal: React.FC<EventModalProps> = ({
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" className="flex-1" onClick={onClose}>
+            Cancel
+          </Button>
           <Button
             className="flex-1"
-            disabled={isSaving || (addForm.type === "appointment" && !addForm.title.trim())}
+            disabled={
+              isSaving ||
+              (addForm.type === "appointment" && !addForm.title.trim())
+            }
             onClick={handleAddSubmit}
           >
-            {isSaving ? <BiLoaderAlt className="animate-spin mr-2" /> : editingId ? <BiPencil className="mr-2" /> : <BiPlus className="mr-2" />}
+            {isSaving ? (
+              <BiLoaderAlt className="animate-spin mr-2" />
+            ) : editingId ? (
+              <BiPencil className="mr-2" />
+            ) : (
+              <BiPlus className="mr-2" />
+            )}
             {editingId ? "Update Event" : "Save Event"}
           </Button>
         </div>

@@ -183,7 +183,7 @@ export default function SoapNoteModal({
 
         {/* Footer */}
         <div className="pt-8 border-t border-slate-50 flex items-center justify-between gap-4">
-          <p className="text-sm text-slate-400 font-bold  tracking-normal px-1">
+          <p className="text-sm text-slate-500 font-bold  tracking-normal px-1">
             <kbd className="bg-slate-100 px-2 py-1 rounded text-slate-500 font-mono">
               Ctrl+S
             </kbd>{" "}
@@ -193,7 +193,7 @@ export default function SoapNoteModal({
             <Button
               onClick={onClose}
               variant="ghost"
-              className="px-6 bg-slate-50 text-slate-400 hover:text-slate-600 transition-all border-none"
+              className="px-6 bg-slate-50 text-slate-500 hover:text-slate-600 transition-all border-none"
             >
               Discard
             </Button>

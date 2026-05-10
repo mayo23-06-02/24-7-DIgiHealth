@@ -29,7 +29,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <h4 className="text-lg font-semibold text-slate-700 mb-2 tracking-tight font-grotesk">
         {title}
       </h4>
-      <p className="text-sm text-slate-400  max-w-sm mb-8 leading-relaxed">
+      <p className="text-sm text-slate-500  max-w-sm mb-8 leading-relaxed">
         {description}
       </p>
       {actionLabel && onAction && (

@@ -112,7 +112,7 @@ export default function VoiceCallModal({
                 Senior Practitioner
               </span>
               <span className="text-slate-200">|</span>
-              <span className="text-xs font-bold text-slate-400">
+              <span className="text-xs font-bold text-slate-500">
                 Cardiology Hub
               </span>
             </div>
@@ -132,7 +132,7 @@ export default function VoiceCallModal({
               <Button
                 variant="ghost"
                 onClick={() => setIsMuted(!isMuted)}
-                className={`w-20 h-20 p-0 rounded-[32px] flex items-center justify-center text-3xl  transition-all active:scale-90 group !min-w-0 ${isMuted ? "bg-rose-500 text-white shadow-rose-500/40 animate-in zoom-in-90" : "bg-slate-50 text-slate-400 hover:text-primary hover:bg-white border border-slate-100"}`}
+                className={`w-20 h-20 p-0 rounded-[32px] flex items-center justify-center text-3xl  transition-all active:scale-90 group !min-w-0 ${isMuted ? "bg-rose-500 text-white shadow-rose-500/40 animate-in zoom-in-90" : "bg-slate-50 text-slate-500 hover:text-primary hover:bg-white border border-slate-100"}`}
               >
                 {isMuted ? <BiMicrophoneOff /> : <BiMicrophone />}
               </Button>
@@ -148,7 +148,7 @@ export default function VoiceCallModal({
               <Button
                 variant="ghost"
                 onClick={() => setIsSpeakerOn(!isSpeakerOn)}
-                className={`w-20 h-20 p-0 rounded-[32px] flex items-center justify-center text-3xl  transition-all active:scale-90 !min-w-0 ${isSpeakerOn ? "bg-primary text-white shadow-primary/40" : "bg-slate-50 text-slate-400 hover:text-primary hover:bg-white border border-slate-100"}`}
+                className={`w-20 h-20 p-0 rounded-[32px] flex items-center justify-center text-3xl  transition-all active:scale-90 !min-w-0 ${isSpeakerOn ? "bg-primary text-white shadow-primary/40" : "bg-slate-50 text-slate-500 hover:text-primary hover:bg-white border border-slate-100"}`}
               >
                 {isSpeakerOn ? <BiVolumeFull /> : <BiVolumeMute />}
               </Button>
@@ -160,10 +160,10 @@ export default function VoiceCallModal({
                 variant="ghost"
                 className="flex flex-col items-center gap-2 group p-2 rounded-2xl hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiPlus />
                 </div>
-                <span className="text-[9px] font-bold text-slate-400  tracking-normal group-hover:text-primary transition-colors">
+                <span className="text-[9px] font-bold text-slate-500  tracking-normal group-hover:text-primary transition-colors">
                   Add Person
                 </span>
               </Button>
@@ -171,10 +171,10 @@ export default function VoiceCallModal({
                 variant="ghost"
                 className="flex flex-col items-center gap-2 group p-2 rounded-2xl hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiUser />
                 </div>
-                <span className="text-[9px] font-bold text-slate-400  tracking-normal group-hover:text-primary transition-colors">
+                <span className="text-[9px] font-bold text-slate-500  tracking-normal group-hover:text-primary transition-colors">
                   Patient Info
                 </span>
               </Button>
@@ -182,10 +182,10 @@ export default function VoiceCallModal({
                 variant="ghost"
                 className="flex flex-col items-center gap-2 group p-2 rounded-2xl hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiDotsVerticalRounded size={20} />
                 </div>
-                <span className="text-[9px] font-bold text-slate-400  tracking-normal group-hover:text-primary transition-colors">
+                <span className="text-[9px] font-bold text-slate-500  tracking-normal group-hover:text-primary transition-colors">
                   Actions
                 </span>
               </Button>

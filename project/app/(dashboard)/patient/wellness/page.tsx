@@ -362,7 +362,7 @@ export default function WellnessHub() {
                     className="w-full bg-primary/20 rounded-t-lg transition-all hover:bg-primary"
                     style={{ height: `${h.score}%` }}
                   />
-                  <span className="text-xs font-bold text-slate-400 ">
+                  <span className="text-xs font-bold text-slate-500 ">
                     {h.date.split("-")[2]}
                   </span>
                 </div>
@@ -382,7 +382,7 @@ export default function WellnessHub() {
             <div className="space-y-8 mt-6">
               {/* MOOD */}
               <div>
-                <h1 className="text-sm font-bold text-slate-400  tracking-normal mb-4 block px-1">
+                <h1 className="text-sm font-bold text-slate-500  tracking-normal mb-4 block px-1">
                   Current Sentiment
                 </h1>
                 <div className="flex justify-between gap-2">
@@ -393,7 +393,7 @@ export default function WellnessHub() {
                       className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-[1.5rem] transition-all duration-300 ${
                         checkin.mood === m.val
                           ? "bg-primary text-white shadow-none shadow-primary/30 scale-105"
-                          : "bg-slate-50 text-slate-400 hover:bg-white hover:shadow-none hover:shadow-slate-900/5"
+                          : "bg-slate-50 text-slate-500 hover:bg-white hover:shadow-none hover:shadow-slate-900/5"
                       }`}
                     >
                       {m.icon}
@@ -427,7 +427,7 @@ export default function WellnessHub() {
                     }
                     className="w-full bg-transparent text-3xl font-bold text-slate-800 outline-none"
                   />
-                  <span className="text-sm font-bold text-slate-400 ">
+                  <span className="text-sm font-bold text-slate-500 ">
                     Hours
                   </span>
                 </div>
@@ -449,7 +449,7 @@ export default function WellnessHub() {
                     }
                     className="w-full bg-transparent text-3xl font-bold text-slate-800 outline-none"
                   />
-                  <span className="text-sm font-bold text-slate-400 ">
+                  <span className="text-sm font-bold text-slate-500 ">
                     Steps
                   </span>
                 </div>
@@ -578,7 +578,7 @@ export default function WellnessHub() {
                     <span className="text-[9px] font-bold text-primary  tracking-normal">
                       {art.tags?.[0]}
                     </span>
-                    <span className="text-[9px] font-bold text-slate-400  tracking-normal flex items-center gap-1">
+                    <span className="text-[9px] font-bold text-slate-500  tracking-normal flex items-center gap-1">
                       <BiBookOpen /> {art.readTimeMinutes} Mins
                     </span>
                   </div>
