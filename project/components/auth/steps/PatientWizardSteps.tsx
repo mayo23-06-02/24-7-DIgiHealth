@@ -16,6 +16,8 @@ import {
 import Image from "next/image";
 import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
 
+const genders = ["Male", "Female", "Non-binary / Other", "Prefer not to say"];
+
 // ─────────────────────────────────────────────
 // Step 1 – Identity
 // ─────────────────────────────────────────────
@@ -77,6 +79,31 @@ export function PatientStep1({ formData, updateData, errors }: any) {
           onChange={(e) => updateData("email", e.target.value)}
           className="md:col-span-2"
         />
+
+        <div className="md:col-span-2 space-y-4">
+          <label className="block text-sm font-bold text-slate-700">
+            Biological Gender *
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {genders.map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => updateData("gender", g)}
+                className={`px-6 py-3 rounded-full text-sm font-semibold transition-all border-2 ${
+                  formData.gender === g
+                    ? "bg-primary border-primary text-white "
+                    : "bg-white border-slate-100 text-slate-500 "
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+          {errors?.gender && (
+            <p className="text-xs text-red-500 font-medium">{errors.gender}</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -158,7 +185,7 @@ const bloodTypes = [
   "O-",
   "Unknown",
 ];
-const genders = ["Male", "Female", "Non-binary / Other", "Prefer not to say"];
+
 const activityLevels = [
   "Sedentary (little or no exercise)",
   "Lightly active (1–3×/week)",
@@ -306,30 +333,8 @@ export function PatientAnthropometricStep({
         </div>
       </div>
 
-      {/* Gender & Blood Type */}
+      {/* Blood Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-        <div className="space-y-4">
-          <h1 className="block text-sm font-bold text-slate-700">
-            Biological Gender
-          </h1>
-          <div className="flex flex-wrap gap-2">
-            {genders.map((g) => (
-              <button
-                key={g}
-                type="button"
-                onClick={() => updateData("gender", g)}
-                className={`px-6 py-3 rounded-full text-sm font-semibold transition-all border-2 ${
-                  formData.gender === g
-                    ? "bg-primary border-primary text-white "
-                    : "bg-white border-slate-100 text-slate-500 "
-                }`}
-              >
-                {g}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="space-y-4">
           <h1 className="block text-sm font-bold text-slate-700">Blood Type</h1>
           <div className="grid grid-cols-5 gap-2">

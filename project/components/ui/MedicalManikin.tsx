@@ -214,11 +214,13 @@ function Model({
   bmiScale,
   onClick,
   readOnly,
+  gender,
 }: {
   url: string;
   bmiScale: { x: number; y: number };
   onClick: (name: string, point: THREE.Vector3) => void;
   readOnly?: boolean;
+  gender: "male" | "female";
 }) {
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
@@ -251,8 +253,12 @@ function Model({
     <primitive
       ref={group}
       object={scene}
-      scale={[bmiScale.x * 0.7, bmiScale.y * 0.8, bmiScale.x * 0.8]}
-      position={[0, 1.0, 0]}
+      scale={
+        gender === "female"
+          ? [bmiScale.x * 1.4, bmiScale.y * 1.4, bmiScale.x * 1.4]
+          : [bmiScale.x * 0.7, bmiScale.y * 0.8, bmiScale.x * 0.8]
+      }
+      position={gender === "female" ? [0, -2.8, 0] : [0, 1.0, 0]}
       onClick={(e: any) => {
         if (readOnly) return;
         e.stopPropagation();
@@ -270,13 +276,14 @@ function Model({
 
 // ==================== MAIN COMPONENT ====================
 export default function MedicalManikin({
-  gender,
+  gender: rawGender,
   heightCm,
   weightKg,
   readOnly = false,
   patientId,
   onUpdateHeightWeight,
 }: MedicalManikinProps) {
+  const gender = rawGender.toLowerCase() === "female" ? "female" : "male";
   const [activePart, setActivePart] = useState<{
     name: string;
     point: THREE.Vector3;
@@ -523,6 +530,7 @@ export default function MedicalManikin({
                   bmiScale={bmiScale}
                   onClick={handlePartClick}
                   readOnly={readOnly}
+                  gender={gender}
                 />
                 {notes.map((note) => (
                   <HighlightMarker

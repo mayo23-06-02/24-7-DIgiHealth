@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { PatientProfile, PractitionerProfile, HospitalAdminProfile } from "@/lib/models/RoleProfiles";
+import { Anthropometric, MedicalContext } from "@/lib/models/ClinicalData";
 import Facility from "@/lib/models/Facility";
 import bcrypt from "bcryptjs";
 
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
 
     // 5. Create Profile based on role
     if (wizardRole === "patient") {
+      // Create Main Profile
       await PatientProfile.create({
         userId: newUser._id,
         dateOfBirth: formData.dob ? new Date(formData.dob) : new Date(),
@@ -69,6 +71,36 @@ export async function POST(request: Request) {
         subscriptionTier: "pro", 
         profilePhoto: formData.profilePhoto,
         medicalDocuments: formData.medicalDocument ? [formData.medicalDocument] : [],
+      });
+
+      // Create Initial Vitals (if provided)
+      if (formData.heightCm || formData.weightKg) {
+        const height = parseFloat(formData.heightCm) || 0;
+        const weight = parseFloat(formData.weightKg) || 0;
+        const bmi = height > 0 ? (weight / (height / 100) ** 2).toFixed(1) : 0;
+        
+        await Anthropometric.create({
+          patientId: newUser._id,
+          heightCm: height,
+          weightKg: weight,
+          bmi: parseFloat(bmi as string),
+          bloodType: formData.bloodType || "Unknown",
+          dateRecorded: new Date()
+        });
+      }
+
+      // Create Medical Context (Allergies & Conditions)
+      await MedicalContext.create({
+        patientId: newUser._id,
+        chronicConditions: formData.chronicConditions || [],
+        allergies: (formData.allergies || []).map((a: string) => ({
+          allergen: a,
+          severity: "moderate",
+          reaction: "Unknown",
+          source: "patient"
+        })),
+        currentMedications: [],
+        familyHistory: []
       });
     } else if (wizardRole === "practitioner") {
       await PractitionerProfile.create({

@@ -1,9 +1,9 @@
 import { v2 as cloudinary } from 'cloudinary';
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dmvgc1ktj',
-  api_key: process.env.CLOUDINARY_API_KEY || 'XNB5RSsafDYWr5m1uBlZUFuWYJc',
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'dmvgc1ktj',
+  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY || '445174386726859',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'hQVkKbA_kvuRlj6MioPdIrZVTIE',
 });
 
 export const uploadToCloudinary = (buffer: Buffer, folder: string) => {

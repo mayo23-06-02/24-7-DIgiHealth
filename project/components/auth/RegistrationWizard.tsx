@@ -258,6 +258,8 @@ function validateStep(
       err.mobile = "Enter a valid SA mobile number.";
     if (!formData.email?.trim() || !formData.email.includes("@"))
       err.email = "A valid email address is required.";
+    if (!formData.gender)
+      err.gender = "Please select your biological gender.";
   }
   if (role === "practitioner" && step === 1) {
     if (!formData.hpcsaNumber?.match(/^[A-Z]{2}\d{5,7}$/))

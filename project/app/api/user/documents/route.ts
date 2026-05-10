@@ -8,9 +8,9 @@ import { v2 as cloudinary } from 'cloudinary';
 
 // Configure cloudinary with fallback defaults if env vars are malformed
 cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/\\/g, '').trim() || 'dmvgc1ktj',
-  api_key: process.env.CLOUDINARY_API_KEY?.replace(/\\/g, '').trim() || '445174386726859',
-  api_secret: process.env.CLOUDINARY_API_SECRET?.replace(/\\/g, '').trim() || 'hQVkKbA_kvuRlj6MioPdIrZVTIE'
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'dmvgc1ktj',
+  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY || '445174386726859',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'hQVkKbA_kvuRlj6MioPdIrZVTIE',
 });
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
