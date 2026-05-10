@@ -364,9 +364,10 @@ export default function AIDiagnizerPage() {
                     <div key={i} className="p-4 rounded-2xl bg-white border border-slate-100 hover:shadow-lg hover:shadow-primary/5 transition-all">
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-bold text-slate-800">{diag.condition}</h4>
-                        <Badge variant={i === 0 ? "success" : "neutral"} size="sm">
-                          {diag.confidence}% Confidence
-                        </Badge>
+                        <Badge 
+                          status={i === 0 ? "success" : "neutral"} 
+                          label={`${diag.confidence}% Confidence`}
+                        />
                       </div>
                       <p className="text-sm text-slate-500 leading-relaxed">
                         {diag.description}
