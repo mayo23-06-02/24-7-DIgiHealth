@@ -26,10 +26,14 @@ export default auth(async function middleware(request: any) {
     return NextResponse.next();
   }
 
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   const token = request.cookies.get("token")?.value;
   const user = session?.user || null;
 
-  if (pathname === "/login" || pathname.startsWith("/register")) {
+  if (pathname === "/" || pathname === "/login" || pathname.startsWith("/register")) {
     if (token || user) {
       try {
         let role;
