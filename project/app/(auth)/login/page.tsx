@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { BiLogoFacebook, BiLogoGoogle } from "react-icons/bi";
+import { signIn } from "next-auth/react";
 
 function LoginFormComponent() {
   const router = useRouter();
@@ -230,8 +231,10 @@ function LoginFormComponent() {
 
             <div className=" w-full flex justify-center items-center gap-2 pb-5">
               <button
-                className="flex items-center justify-center gap-3 py-3 px-8 bg-white cursor-pointer rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn"
+                className="flex items-center justify-center gap-3 py-3 px-8 bg-white cursor-pointer rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn disabled:opacity-50 disabled:cursor-not-allowed"
                 type="button"
+                disabled={loading}
+                onClick={() => signIn("google", { callbackUrl: "/patient" })}
               >
                 <BiLogoGoogle className="text-primary" />
                 <span className="text-xs uppercase font-bold text-slate-600 ">
@@ -239,8 +242,10 @@ function LoginFormComponent() {
                 </span>
               </button>
               <button
-                className="flex items-center justify-center gap-3 py-3 px-8 bg-white cursor-pointer rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn"
+                className="flex items-center justify-center gap-3 py-3 px-8 bg-white cursor-pointer rounded-lg hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group/btn disabled:opacity-50 disabled:cursor-not-allowed"
                 type="button"
+                disabled={loading}
+                onClick={() => signIn("facebook", { callbackUrl: "/patient" })}
               >
                 <BiLogoFacebook className="text-primary" />
                 <span className="text-xs uppercase font-bold text-slate-600 ">
