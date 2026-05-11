@@ -36,6 +36,8 @@ import { toast } from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
+import VitalCardsGrid from "@/components/dashboard/practitioner/VitalCardsGrid";
+
 
 interface PatientProfile {
   id: string;
@@ -103,6 +105,14 @@ export default function PatientProfilePage() {
     allergies: "",
     currentMedications: "",
   });
+  const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
+  const [vitalsFormData, setVitalsFormData] = useState({
+    heartRate: "",
+    bloodPressure: "",
+    bodyMass: "70",
+    glucose: "0",
+  });
+
 
   const handlePrescriptionSubmit = async () => {
     if (!patient || !prescriptionForm.medicationName) return;
@@ -225,6 +235,16 @@ export default function PatientProfilePage() {
     setActionLoading(false);
   };
 
+  const handleVitalsSubmit = async () => {
+    setActionLoading(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    toast.success("Vitals updated successfully");
+    setIsVitalsModalOpen(false);
+    setActionLoading(false);
+  };
+
+
   const handleStartChat = async () => {
     if (!patient) return;
     setActionLoading(true);
@@ -342,7 +362,10 @@ export default function PatientProfilePage() {
         </div>
       </div>
 
+      <VitalCardsGrid onCardClick={() => setIsVitalsModalOpen(true)} />
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
         {/* Main Content Area */}
         <div className="lg:col-span-8 space-y-8">
           {/* 3D Body Mapping - Primary focus */}
@@ -797,6 +820,80 @@ export default function PatientProfilePage() {
           </div>
         </div>
       </Modal>
+
+      {/* Vitals Update Modal */}
+      <Modal
+        isOpen={isVitalsModalOpen}
+        onClose={() => setIsVitalsModalOpen(false)}
+        title="Update Patient Vitals"
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="Heart Rate (BPM)"
+              placeholder="e.g. 72"
+              value={vitalsFormData.heartRate}
+              onChange={(e) =>
+                setVitalsFormData((prev) => ({
+                  ...prev,
+                  heartRate: e.target.value,
+                }))
+              }
+            />
+            <Input
+              label="Blood Pressure (mmHg)"
+              placeholder="e.g. 120/80"
+              value={vitalsFormData.bloodPressure}
+              onChange={(e) =>
+                setVitalsFormData((prev) => ({
+                  ...prev,
+                  bloodPressure: e.target.value,
+                }))
+              }
+            />
+            <Input
+              label="Body Mass (kg)"
+              placeholder="e.g. 70"
+              value={vitalsFormData.bodyMass}
+              onChange={(e) =>
+                setVitalsFormData((prev) => ({
+                  ...prev,
+                  bodyMass: e.target.value,
+                }))
+              }
+            />
+            <Input
+              label="Blood Glucose (mmol/L)"
+              placeholder="e.g. 5.5"
+              value={vitalsFormData.glucose}
+              onChange={(e) =>
+                setVitalsFormData((prev) => ({
+                  ...prev,
+                  glucose: e.target.value,
+                }))
+              }
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button
+              className="flex-1"
+              onClick={handleVitalsSubmit}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Updating..." : "Save Vitals"}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setIsVitalsModalOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
 
       {/* Sync Records Modal */}
       <Modal
