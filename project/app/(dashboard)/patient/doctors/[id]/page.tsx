@@ -281,7 +281,6 @@ export default function DoctorProfilePage() {
         <div className="space-y-6">
           <div
             className="p-8 space-y-8 rounded-lg bg-slate-600 text-white  relative overflow-hidden group"
-            variant="solid"
           >
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-1000">
               <BiCheckShield size={120} />
