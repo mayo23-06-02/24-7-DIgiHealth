@@ -92,7 +92,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       }
 
       socket.on("new:message", (message: any) => {
-        if (message.receiverId === user.userId) {
+        if (message.receiverId === user.id) {
           setUnreadMessagesCount((prev) => prev + 1);
           // Alert user
           toast.success(`New message from ${message.senderName || "Practitioner"}`, {
