@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { MedicalContext } from '@/lib/models/ClinicalData';
 import Patient from '@/lib/models/Patient';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
