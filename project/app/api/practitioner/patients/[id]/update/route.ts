@@ -10,12 +10,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const body = await req.json();
     const { medicalHistory, allergies, currentMedications } = body;
 
-    // 1. Get User ID from Patient ID
-    const patientDoc = await Patient.findById(id).lean();
-    if (!patientDoc) return NextResponse.json({ success: false, error: 'Patient Record Not Found' }, { status: 404 });
-    const userId = patientDoc.userId;
+    // 1. Authorization Check (Matching GET route)
+    const userPayload = await getRequestUser();
+    if (!userPayload || (userPayload.role !== 'practitioner' && userPayload.role !== 'mega_admin')) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    const practitionerId = userPayload.userId;
 
-    // 2. Update MedicalContext (Detailed Record)
+    // 2. Update MedicalContext (Primary Detailed Record)
+    // We use 'id' from params which is the patient's userId
     const formattedAllergies = (allergies || []).map((a: string) => ({
       allergen: a,
       severity: 'moderate',
@@ -23,33 +26,33 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       source: 'clinician'
     }));
 
-    await MedicalContext.findOneAndUpdate(
-      { patientId: userId },
+    const updatedContext = await MedicalContext.findOneAndUpdate(
+      { patientId: id },
       { 
         chronicConditions: medicalHistory,
         allergies: formattedAllergies,
         currentMedications: currentMedications
       },
       { upsert: true, new: true }
-    );
+    ).lean();
 
-    // 3. Update Patient Model (Base Profile)
-    const updatedPatient = await Patient.findByIdAndUpdate(
-      id,
+    // 3. Update Patient Model (Legacy/Base Profile) - Optional or Create if missing
+    const updatedPatient = await Patient.findOneAndUpdate(
+      { userId: id },
       { 
         medicalHistory,
         allergies,
         currentMedications
       },
-      { new: true }
+      { new: true, upsert: false } // Don't upsert here if we don't have enough data (like DOB/Gender)
     ).lean();
     
     return NextResponse.json({ 
       success: true, 
       data: {
-        medicalHistory: updatedPatient?.medicalHistory || [],
-        allergies: updatedPatient?.allergies || [],
-        currentMedications: updatedPatient?.currentMedications || []
+        medicalHistory: updatedContext?.chronicConditions || [],
+        allergies: (updatedContext?.allergies || []).map((a: any) => a.allergen),
+        currentMedications: updatedContext?.currentMedications || []
       } 
     });
   } catch (err: any) {

@@ -63,6 +63,7 @@ app.prepare().then(async () => {
 
   io.on('connection', (socket) => {
     const userId = socket.data.user.userId;
+    socket.join(userId);
     console.log(`[Socket] User connected: ${userId}`);
 
     socket.on('join:conversation', (conversationId) => {
@@ -92,12 +93,26 @@ app.prepare().then(async () => {
 
         // Broadcast to others in the conversation
         socket.to(conversationId).emit('new:message', newMessage);
+        // Also emit to the specific receiver's personal room for global notifications
+        io.to(receiverId.toString()).emit('new:message', newMessage);
         // Acknowledge to sender
         socket.emit('message:sent', newMessage);
       } catch (err) {
         console.error('[Socket] Error saving message:', err);
         socket.emit('error', { message: 'Failed to send message' });
       }
+    });
+
+    socket.on('call:initiate', (data) => {
+      const { receiverId, type, conversationId, callId } = data;
+      // Notify the specific receiver
+      io.to(receiverId).emit('incoming:call', {
+        from: userId,
+        type,
+        conversationId,
+        callId
+      });
+      console.log(`[Socket] Call initiated from ${userId} to ${receiverId}`);
     });
 
     socket.on('typing:start', (conversationId) => {

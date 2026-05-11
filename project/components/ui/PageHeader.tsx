@@ -31,7 +31,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       <h2 className="text-2xl font-bold text-slate-800 tracking-tight font-grotesk">
         {title}
       </h2>
-      {subtitle && <p className="text-slate-600 text-lg mt-0.5 ">{subtitle}</p>}
+      {subtitle && (
+        <p className="text-slate-600 lg:text-lg mt-0.5 ">{subtitle}</p>
+      )}
     </div>
     {right && <div className="flex items-center gap-3 shrink-0">{right}</div>}
   </div>

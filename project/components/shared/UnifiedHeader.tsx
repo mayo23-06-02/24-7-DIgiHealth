@@ -27,6 +27,8 @@ import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import Avatar from "../ui/Avatar";
 import Modal from "../ui/Modal";
+import { getSocket } from "@/lib/socket";
+import toast from "react-hot-toast";
 
 interface WeatherData {
   temp: number;
@@ -58,7 +60,68 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [selectedNotif, setSelectedNotif] = useState<any>(null);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const profileRef = React.useRef<HTMLDivElement>(null);
+
+  const fetchUnreadMessagesCount = async () => {
+    try {
+      const res = await fetch("/api/chat/unread-count");
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadMessagesCount(data.unreadCount);
+      }
+    } catch {
+      /* silent */
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadMessagesCount();
+    const interval = setInterval(fetchUnreadMessagesCount, 60000); // Backup polling
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Use a small delay to ensure cookie is set/ready if needed
+    const timer = setTimeout(() => {
+      const socket = getSocket();
+      if (!socket.connected) {
+        socket.connect();
+      }
+
+      socket.on("new:message", (message: any) => {
+        if (message.receiverId === user.userId) {
+          setUnreadMessagesCount((prev) => prev + 1);
+          // Alert user
+          toast.success(`New message from ${message.senderName || "Practitioner"}`, {
+            icon: "💬",
+            duration: 5000,
+          });
+        }
+      });
+
+      socket.on("incoming:call", (call: any) => {
+        // This assumes we add incoming:call event to server.ts
+        toast(`Incoming ${call.type} call...`, {
+          icon: "📞",
+          duration: 10000,
+          style: {
+            background: "#0052CC",
+            color: "#fff",
+          }
+        });
+      });
+
+      return () => {
+        socket.off("new:message");
+        socket.off("incoming:call");
+      };
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -236,21 +299,34 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
       <div className="hidden sm:flex flex-1 flex-col gap-1 pr-4 lg:pr-10">
         <div className="flex items-center gap-2">
-          <span className="text-xs  text-slate-500 ">{formattedDate}</span>
+          <h1 className="text-xs  text-slate-500 ">{formattedDate}</h1>
           <span className="w-1 h-1 bg-slate-200 rounded-full" />
-          <span className="text-xs font-bold text-primary ">
-            {formattedTime}
-          </span>
+          <h1 className="text-xs font-bold text-primary ">{formattedTime}</h1>
         </div>
         <div className="flex items-center gap-2 text-slate-800">
           <span className="text-sm">{weather.icon}</span>
-          <span className="text-xs font-bold">
+          <p className="text-xs font-bold">
             {weather.temp}°C {weather.condition}
-          </span>
+          </p>
         </div>
       </div>
 
       <div className="flex-1 flex items-center justify-end gap-3 lg:gap-6">
+        <div className="relative">
+          <Link href={`/${user?.role}/messages`}>
+            <button
+              className={`w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center cursor-pointer transition-all relative bg-white text-slate-500 hover:text-primary hover:bg-primary/5`}
+            >
+              <BiChat size={20} />
+              {unreadMessagesCount > 0 && (
+                <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 border-2 border-white rounded-full flex items-center justify-center">
+                   <span className="text-[10px] text-white font-bold">{unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}</span>
+                </div>
+              )}
+            </button>
+          </Link>
+        </div>
+
         <div className="relative">
           <button
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}

@@ -173,7 +173,7 @@ export default function DoctorProfilePage() {
             <h4 className="text-sm font-bold text-slate-500   font-grotesk">
               Professional Biography
             </h4>
-            <p className="text-slate-600 leading-relaxed  text-sm">
+            <p className="text-slate-600 leading-relaxed  ">
               {doc.bio ||
                 "Dedicated clinical specialist with a focus on patient-centered outcomes. Extensively trained in advanced diagnostic methodologies and humanitarian clinical practices."}
             </p>
@@ -192,10 +192,10 @@ export default function DoctorProfilePage() {
                   ).map((item: string) => (
                     <li
                       key={item}
-                      className="flex items-center gap-2 text-xs font-bold text-slate-600  tracking-tight"
+                      className="flex items-center gap-2 text-sm font-semibold text-slate-600  tracking-tight"
                     >
                       <BiCheckCircle className="text-emerald-500" size={16} />{" "}
-                      {item}
+                      <h1>{item}</h1>
                     </li>
                   ))}
                 </ul>
@@ -213,12 +213,7 @@ export default function DoctorProfilePage() {
                       "Medishield",
                     ]
                   ).map((aid: string) => (
-                    <Badge
-                      key={aid}
-                      label={aid}
-                      variant="soft"
-                      className="font-bold text-[9px]"
-                    />
+                    <Badge key={aid} label={aid} variant="soft" className="" />
                   ))}
                 </div>
               </div>
@@ -227,7 +222,7 @@ export default function DoctorProfilePage() {
 
           {/* REVIEWS PREVIEW */}
           <div className="space-y-6">
-            <h4 className="text-xs font-bold text-slate-500  tracking-normal px-2 font-grotesk">
+            <h4 className="text-sm font-bold text-slate-500  tracking-normal px-2 font-grotesk">
               Patient Feedback
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -284,8 +279,8 @@ export default function DoctorProfilePage() {
 
         {/* SIDEBAR: ACCESS & AVAILABILITY */}
         <div className="space-y-6">
-          <Card
-            className="p-8 space-y-8 bg-slate-900 text-white  relative overflow-hidden group"
+          <div
+            className="p-8 space-y-8 rounded-lg bg-slate-600 text-white  relative overflow-hidden group"
             variant="solid"
           >
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-1000">
@@ -310,19 +305,14 @@ export default function DoctorProfilePage() {
                   className="text-emerald-400 shrink-0 mt-1"
                   size={24}
                 />
-                <p className="text-xs font-bold  leading-relaxed tracking-normal text-slate-500">
+                <p className="text-sm font-medium  leading-relaxed tracking-normal text-slate-100">
                   Unlocked via your health premium. No consultation fees apply
                   for this session.
                 </p>
               </div>
-              <Button
-                className="w-full h-14 bg-white text-slate-900 border-none hover:bg-slate-50 font-bold  tracking-normal text-xs rounded-xl"
-                onClick={() => setShowBooking(true)}
-              >
-                Schedule Now
-              </Button>
+              <Button  onClick={() => setShowBooking(true)}>Schedule Now</Button>
             </div>
-          </Card>
+          </div>
 
           <Card className="p-6 space-y-6" variant="solid">
             <div className="flex items-center justify-between">

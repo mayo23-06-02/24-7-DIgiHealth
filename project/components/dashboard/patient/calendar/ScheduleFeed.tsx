@@ -49,7 +49,7 @@ const ScheduleFeed: React.FC<ScheduleFeedProps> = ({
           <h4 className="text-lg font-bold text-slate-800 font-grotesk">
             Live Schedule Overview
           </h4>
-          <p className="text-sm font-thin text-slate-500">
+          <p className="text-sm lg:text-base font-grotesk  text-slate-500">
             {selectedDateStr
               ? `Events for ${new Date(selectedDateStr).toLocaleDateString(
                   "en-ZA",

@@ -160,7 +160,7 @@ export default function ChatWindow({
   return (
     <Card className="flex flex-col h-full overflow-hidden  rounded-none">
       {/* Header */}
-      <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white shrink-0">
+      <div className="flex justify-between items-center lg:px-6 py-4 border-b border-slate-100 bg-white shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Avatar name={opponentName} src={opponentAvatar} size="sm" />
@@ -214,7 +214,7 @@ export default function ChatWindow({
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-100 p-3 bg-white flex items-end gap-2 shrink-0">
+      <div className="border-t border-slate-100  bg-white flex items-end gap-2 shrink-0">
         {user.role === "practitioner" && (
           <button
             onClick={() => setIsAttachModalOpen(true)}
@@ -226,11 +226,11 @@ export default function ChatWindow({
         )}
         <div className="flex-1 flex flex-col overflow-hidden">
           {user.role === "patient" && (
-            <div className="mb-2">
+            <h1 className="mb-2">
               <QuickPhrases
                 onSelect={(phrase) => handleSend(phrase, "quick_phrase")}
               />
-            </div>
+            </h1>
           )}
           <MessageInput
             onSend={handleSend}

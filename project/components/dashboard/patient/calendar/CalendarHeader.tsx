@@ -13,7 +13,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onPrev, onNext }) => {
         <h1 className="text-lg font-bold font-grotesk text-slate-800">
           Schedule at a Glance
         </h1>
-        <p className="text-sm font-grotesk font-thin text-slate-500">
+        <p className="text-sm lg:text-base font-grotesk  text-slate-500">
           Manage your appointments and medication reminders.
         </p>
       </div>

@@ -361,7 +361,7 @@ export default function HealthRecordPage() {
         variant="glass"
         className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-2 sticky top-0 z-30"
       >
-        <div className="flex p-1 gap-2 overflow-x-auto no-scrollbar max-w-full">
+        <div className="flex p-1 gap-2 overflow-x-auto custom-scrollbar lg:no-scrollbar max-w-full">
           {[
             { id: "timeline", label: "Timeline", icon: <Clock size={16} /> },
             {

@@ -291,7 +291,7 @@ export default function MedicalManikin({
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [description, setDescription] = useState("");
-  const [customPartName, setCustomPartName] = useState("");
+  const [customPartName, setCustomPartName] = useState("Select a part");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -427,7 +427,7 @@ export default function MedicalManikin({
         <h1 className="text-lg font-bold text-slate-800">
           {readOnly ? "Clinical Anatomical Map" : "My Digital Twin"}
         </h1>
-        <p className="text-sm font-thin text-slate-500">
+        <p className="text-sm lg:text-base font-grotesk  text-slate-500">
           {readOnly
             ? "Interactive mapping of patient symptoms and observations."
             : "Click, annotate, and explore the living 3D reflection of you."}

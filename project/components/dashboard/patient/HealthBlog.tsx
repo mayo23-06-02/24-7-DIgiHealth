@@ -415,7 +415,7 @@ export default function HealthBlog() {
               Latest medical news and wellness articles
             </p>
           </div>
-          <div className="flex">
+          <div className="flex items-center gap-3">
             <div className="text-xs text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full border border-emerald-100 font-bold whitespace-nowrap">
               <span className="flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>

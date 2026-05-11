@@ -76,7 +76,15 @@ th {
   font-family: var(--font-grotesk), system-ui, -apple-system, sans-serif;
 }
 
+button {
+  font-family: var(--font-grotesk), system-ui, -apple-system, sans-serif;
+}
+
 input {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+}
+
+span {
   font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
 }
 
