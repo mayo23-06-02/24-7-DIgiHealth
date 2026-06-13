@@ -37,6 +37,7 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import VitalCardsGrid from "@/components/dashboard/practitioner/VitalCardsGrid";
+import PatientHealthRecord from "@/components/dashboard/shared/PatientHealthRecord";
 
 
 interface PatientProfile {
@@ -112,7 +113,6 @@ export default function PatientProfilePage() {
     bodyMass: "70",
     glucose: "0",
   });
-
 
   const handlePrescriptionSubmit = async () => {
     if (!patient || !prescriptionForm.medicationName) return;
@@ -244,7 +244,6 @@ export default function PatientProfilePage() {
     setActionLoading(false);
   };
 
-
   const handleStartChat = async () => {
     if (!patient) return;
     setActionLoading(true);
@@ -365,7 +364,6 @@ export default function PatientProfilePage() {
       <VitalCardsGrid onCardClick={() => setIsVitalsModalOpen(true)} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
         {/* Main Content Area */}
         <div className="lg:col-span-8 space-y-8">
           {/* 3D Body Mapping - Primary focus */}
@@ -414,7 +412,10 @@ export default function PatientProfilePage() {
                         )
                       }
                     >
-                      <div className="w-16 shrink-0 text-center">
+                      <div
+                        className="w-16 flex flex-col gap-1.5 items-center hf
+                       shrink-0 text-center"
+                      >
                         <p className="text-xs font-bold text-slate-800">
                           {c.scheduledStartTime
                             ? new Date(c.scheduledStartTime).toLocaleDateString(
@@ -431,7 +432,7 @@ export default function PatientProfilePage() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex pb-2 items-center gap-2">
                           <h4 className="font-bold text-slate-800 text-sm truncate font-grotesk">
                             {c.chiefComplaint || "No complaint recorded"}
                           </h4>
@@ -444,12 +445,12 @@ export default function PatientProfilePage() {
                         <div className="flex items-center gap-3 mt-1.5">
                           <div className="flex items-center gap-1 text-xs font-bold text-slate-500 ">
                             <BiVideo className="text-primary" />
-                            {c.type} Session
+                            <p> {c.type} Session </p>
                           </div>
                           <div className="w-1 h-1 rounded-full bg-slate-200" />
                           <div className="flex items-center gap-1 text-xs font-bold text-slate-500 ">
                             <BiTime />
-                            30 Minutes
+                            <p>30 Minutes</p>
                           </div>
                         </div>
                       </div>
@@ -518,6 +519,14 @@ export default function PatientProfilePage() {
               )}
             </div>
           </Card>
+
+          {/* Comprehensive Health Records */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-slate-800 font-grotesk px-1">
+              Complete Medical Context
+            </h3>
+            <PatientHealthRecord patientId={patient.id} isPractitioner={true} />
+          </div>
         </div>
 
         {/* Sidebar info Area */}
@@ -893,7 +902,6 @@ export default function PatientProfilePage() {
           </div>
         </div>
       </Modal>
-
 
       {/* Sync Records Modal */}
       <Modal

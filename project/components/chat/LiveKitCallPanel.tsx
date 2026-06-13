@@ -51,15 +51,15 @@ export default function LiveKitCallPanel({
       roomRef.current = room;
 
       const attachRemoteTrack = () => {
-        const publication = Array.from(
+        if (!roomRef.current || roomRef.current.state !== "connected") return;
+
+        const remoteVideoPublication = Array.from(
           room.remoteParticipants.values(),
         ).flatMap((participant) =>
           Array.from(participant.trackPublications.values()),
-        );
+        ).find((pub) => pub.kind === Track.Kind.Video && pub.isSubscribed && pub.track);
 
-        const remoteVideo = publication.find(
-          (track) => track.kind === Track.Kind.Video && track.track,
-        )?.track;
+        const remoteVideo = remoteVideoPublication?.track;
 
         if (remoteVideo && remoteVideoRef.current) {
           remoteVideo.attach(remoteVideoRef.current);
@@ -68,11 +68,17 @@ export default function LiveKitCallPanel({
       };
 
       room
-        .on(RoomEvent.TrackSubscribed, (track) => {
+        .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
           if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
-            track.attach(remoteVideoRef.current);
+            // Only attach if participant is still valid
+            if (room.remoteParticipants.has(participant.sid)) {
+              track.attach(remoteVideoRef.current);
+            }
           }
           setRemoteConnected(true);
+        })
+        .on(RoomEvent.TrackUnsubscribed, (track) => {
+          track.detach();
         })
         .on(RoomEvent.ParticipantDisconnected, () => {
           if (room.remoteParticipants.size === 0) {
@@ -87,23 +93,37 @@ export default function LiveKitCallPanel({
           onEnded();
         });
 
-      await room.connect(callInfo.roomUrl, callInfo.token, {
-        autoSubscribe: true,
-      });
-
-      if (!isActive || connectAttemptRef.current !== attemptId) {
+      try {
+        await room.connect(callInfo.roomUrl, callInfo.token, {
+          autoSubscribe: true,
+        });
+      } catch (err) {
+        if (isActive) throw err;
         return;
       }
 
-      const localAudioTrack = await createLocalAudioTrack();
-      await room.localParticipant.publishTrack(localAudioTrack);
+      if (!isActive || connectAttemptRef.current !== attemptId || room.state !== "connected") {
+        return;
+      }
 
-      if (callInfo.type === "video") {
-        const localVideoTrack = await createLocalVideoTrack();
-        await room.localParticipant.publishTrack(localVideoTrack);
-        if (localVideoRef.current) {
-          localVideoTrack.attach(localVideoRef.current);
+      // Publish local tracks
+      try {
+        const localAudioTrack = await createLocalAudioTrack();
+        if (room.state === "connected") {
+          await room.localParticipant.publishTrack(localAudioTrack);
         }
+
+        if (callInfo.type === "video") {
+          const localVideoTrack = await createLocalVideoTrack();
+          if (room.state === "connected") {
+            await room.localParticipant.publishTrack(localVideoTrack);
+            if (localVideoRef.current) {
+              localVideoTrack.attach(localVideoRef.current);
+            }
+          }
+        }
+      } catch (trackErr) {
+        console.warn("Failed to publish local tracks:", trackErr);
       }
 
       attachRemoteTrack();

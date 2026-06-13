@@ -3,7 +3,6 @@ import { connectToDatabase } from '@/lib/mongodb';
 import AttachedRecord from '@/lib/models/AttachedRecord';
 import Conversation from '@/lib/models/Conversation';
 import Message from '@/lib/models/Message';
-import User from '@/lib/models/User';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export async function POST(req: NextRequest) {
