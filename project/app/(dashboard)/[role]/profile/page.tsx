@@ -18,7 +18,6 @@ import {
   BiTrash,
   BiCreditCard,
   BiBuilding,
-  BiPlus,
   BiFirstAid,
   BiCertification,
   BiBriefcase,
@@ -30,7 +29,6 @@ import {
   BiImage,
 } from "react-icons/bi";
 
-import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -472,7 +470,7 @@ export default function ProfilePage() {
     { id: "documents", label: "Documents", icon: BiFile },
     { id: "security", label: "Security", icon: BiShieldQuarter },
     { id: "notifications", label: "Alerts", icon: BiBell },
-    { id: "billing", label: "Treasury", icon: BiWallet },
+    { id: "billing", label: "Subscriptions", icon: BiWallet },
     { id: "privacy", label: "POPIA", icon: BiClipboard },
   ];
 
@@ -481,7 +479,7 @@ export default function ProfilePage() {
       {/* ── PROFILE HERO ─────────────────────────────────────────────── */}
       <section className="relative group">
         <div className="h-64 md:h-80 w-full bg-primary rounded-lg overflow-hidden relative  shadow-slate-900/10">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-black/60 opacity-60" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/30 via-transparent to-black/60 opacity-60" />
           <div className="absolute inset-0 backdrop-blur-[1px]" />
           <div className="absolute top-0 right-0 w-full h-full">
             <div className="absolute top-10 right-10 w-64 h-64 bg-primary/20 blur-[120px] rounded-full animate-pulse" />
@@ -1280,7 +1278,7 @@ export default function ProfilePage() {
                     {
                       key: "sms",
                       label: "Mobile SMS",
-                      sub: "High-priority emergency bypass",
+                      sub: "Quick updates such as schedule reminders",
                       icon: BiMobileAlt,
                     },
                   ] as const
@@ -1332,7 +1330,6 @@ export default function ProfilePage() {
             </Card>
           )}
 
-          {/* Billing / POPIA */}
           {activeTab === "billing" && (
             <Card className="p-12 rounded-[2.5rem] bg-slate-900 text-white relative overflow-hidden  shadow-slate-900/40 animate-in slide-in-from-left-4 duration-500">
               <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 blur-[140px] rounded-full -translate-y-1/2 translate-x-1/2 animate-pulse" />
@@ -1351,13 +1348,13 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap gap-4">
                   <Button
                     variant="white"
-                    className="h-16 rounded-[1.5rem] px-10 text-xs font-bold st text-slate-900 "
+                    className="h-16 rounded-3xl px-10 text-xs font-bold st text-slate-900 "
                   >
                     Cancel Subscription
                   </Button>
                   <Button
                     variant="ghost"
-                    className="h-16 rounded-[1.5rem] px-10 text-xs font-bold st text-white/50 border-white/10 hover:text-white hover:bg-white/5"
+                    className="h-16 rounded-3xl px-10 text-xs font-bold st text-white/50 border-white/10 hover:text-white hover:bg-white/5"
                   >
                     Billing Ledger
                   </Button>
@@ -1367,49 +1364,77 @@ export default function ProfilePage() {
           )}
 
           {activeTab === "privacy" && (
-            <Card className="p-8 space-y-8 rounded-lg border-slate-100  shadow-slate-900/5 animate-in slide-in-from-left-4 duration-500">
-              <SectionHead
-                icon={<BiClipboard size={24} />}
-                title="Compliance Directive"
-                sub="POPIA and data lifecycle parameters"
-                color="blue"
-              />
-              <div className="p-10 bg-slate-50/50 rounded-lg border border-dashed border-slate-200 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-primary/40" />
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h1 className="text-lg font-bold text-slate-800 font-grotesk">
-                      Active Consent Hash
-                    </h1>
-                    <p className="text-sm font-bold text-slate-500 ">
-                      Verified: April 2026
+            <div className="space-y-6 animate-in slide-in-from-left-4 duration-500">
+              <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
+                <SectionHead
+                  icon={<BiClipboard size={24} />}
+                  title="POPIA Consent"
+                  sub="Protection of Personal Information Act — South Africa"
+                  color="blue"
+                />
+
+                <div className="p-8 bg-blue-50/60 border border-blue-100 rounded-lg space-y-3">
+                  <h3 className="text-sm font-bold text-slate-800">
+                    Why we need your consent
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    In accordance with the{" "}
+                    <strong>
+                      Protection of Personal Information Act 4 of 2013 (POPIA)
+                    </strong>
+                    , 24/7 DigiHealth is required to obtain your explicit
+                    consent before processing your personal and health
+                    information. This includes your clinical records, biometric
+                    data, and contact details.
+                  </p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    You will be directed to our secure consent form hosted on
+                    our official portal. Please read it carefully and complete
+                    all fields before submitting.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 p-6 bg-slate-50 border border-slate-100 rounded-lg">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary border border-slate-100 shrink-0">
+                    <BiFile size={24} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-800">
+                      POPIA Consent Form
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Hosted securely on the 24/7 DigiHealth portal
                     </p>
                   </div>
-                  <div className="bg-emerald-500/10 text-emerald-500 px-6 py-2 rounded-2xl border border-emerald-500/20 text-sm font-bold st">
-                    Compliant
-                  </div>
+                  <a
+                    href="https://www.247digihealth.co.za/popia-consent"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button className="h-11 px-6 text-sm font-bold shrink-0 flex items-center gap-2">
+                      <BiUpload size={16} />
+                      Complete Form
+                    </Button>
+                  </a>
                 </div>
-                <p className="text-sm text-slate-500 italic leading-relaxed font-medium">
-                  "I hereby authorize 24/7 DigiHealth to process my clinical and
-                  biometric data in accordance with the Protection of Personal
-                  Information Act (POPIA)."
+
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  By completing the form you confirm that you have read and
+                  understood how 24/7 DigiHealth processes your data, and you
+                  consent to its use for clinical, administrative, and
+                  communication purposes as described in our Privacy Policy. You
+                  may withdraw consent at any time by contacting our Information
+                  Officer at{" "}
+                  <a
+                    href="mailto:privacy@247digihealth.co.za"
+                    className="text-primary underline"
+                  >
+                    privacy@247digihealth.co.za
+                  </a>
+                  .
                 </p>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                <Button
-                  variant="outline"
-                  className="h-14 rounded-2xl px-8 text-sm font-bold st"
-                >
-                  Download Policy
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="h-14 rounded-2xl px-8 text-sm font-bold st text-primary hover:bg-primary/5"
-                >
-                  Data Access Logs
-                </Button>
-              </div>
-            </Card>
+              </Card>
+            </div>
           )}
         </div>
 
@@ -1458,7 +1483,7 @@ export default function ProfilePage() {
             </div>
           </Card>
 
-          <Card className="p-8 rounded-lg bg-gradient-to-br from-primary/70 to-gray-400 text-white  shadow-primary/20">
+          <Card className="p-8 rounded-lg bg-linear-to-br from-primary/70 to-gray-400 text-white  shadow-primary/20">
             <h1 className="text-lg font-bold font-grotesk mb-2">
               Need Assistance?
             </h1>

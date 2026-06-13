@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BiVideo, BiPhoneCall, BiLoaderAlt } from "react-icons/bi";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 
@@ -18,6 +18,7 @@ export default function CallButton({
   conversationId,
   participantName,
   participantAvatar,
+  scheduledAt,
   onCallStart,
   onCallEnd,
 }: {
@@ -25,6 +26,8 @@ export default function CallButton({
   conversationId?: string;
   participantName?: string;
   participantAvatar?: string;
+  /** ISO string or Date of the scheduled consultation start time */
+  scheduledAt?: string | Date;
   onCallStart?: (info: ActiveCallInfo) => void;
   onCallEnd?: () => void;
 }) {
@@ -36,6 +39,19 @@ export default function CallButton({
   );
   const [statusLoading, setStatusLoading] = useState(false);
   const [incomingAlertOpen, setIncomingAlertOpen] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Refresh current time every 30 s so the window opens automatically
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Gate: show start-call buttons only from 2 min before scheduledAt onward.
+  // If no scheduledAt is provided (direct DM), always show.
+  const isCallWindowOpen = scheduledAt
+    ? now >= new Date(scheduledAt).getTime() - 2 * 60 * 1000
+    : true;
 
   const startCall = async (type: "video" | "voice") => {
     setStatusLoading(true);
@@ -79,6 +95,8 @@ export default function CallButton({
   };
 
   useEffect(() => {
+    // No need to poll while we're already in the call
+    if (callActive) return;
     const interval = setInterval(async () => {
       if (!consultationId && !conversationId) return;
       try {
@@ -253,7 +271,7 @@ export default function CallButton({
         </button>
       )}
 
-      {!autoJoinAvailable && (
+      {!autoJoinAvailable && isCallWindowOpen && (
         <>
           <button
             onClick={() => startCall("voice")}
@@ -280,6 +298,15 @@ export default function CallButton({
             )}
           </button>
         </>
+      )}
+
+      {!autoJoinAvailable && !isCallWindowOpen && scheduledAt && (
+        <span className="text-xs font-semibold text-slate-400 px-2">
+          Call opens at{" "}
+          {new Date(
+            new Date(scheduledAt).getTime() - 2 * 60 * 1000,
+          ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
       )}
     </div>
   );

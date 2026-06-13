@@ -444,63 +444,37 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           </button>
 
           {isProfileOpen && (
-            <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl  border border-slate-100 py-3 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
-              <div className="px-5 py-3 border-b border-slate-50 mb-2">
-                <h1 className="text-sm font-bold text-slate-500 st mb-1">
+            <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/60 py-3 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
+              <div className="px-5 py-3 border-b border-slate-100 mb-2">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Quick Actions
-                </h1>
+                </p>
               </div>
 
               <Link
                 href={`/${user?.role}/profile`}
-                className="flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-primary/5 hover:text-primary transition-all group"
+                className="flex items-center gap-3 px-5 py-3 text-slate-700 hover:bg-primary/5 hover:text-primary transition-all group"
                 onClick={() => setIsProfileOpen(false)}
               >
-                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary/10">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-primary/10">
                   <BiUser size={18} />
                 </div>
-                <h1 className="text-sm font-bold">My Profile</h1>
+                <span className="text-sm font-bold">My Profile</span>
               </Link>
 
-              <Link
-                href={`/${user?.role}/settings`}
-                className="flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-primary/5 hover:text-primary transition-all group"
-                onClick={() => setIsProfileOpen(false)}
-              >
-                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary/10">
-                  <BiCog size={18} />
-                </div>
-                <h1 className="text-sm font-bold">Account Settings</h1>
-              </Link>
-
-              {user?.role === "patient" && (
-                <Link
-                  href="/patient/emergency"
-                  className="flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-red-50 hover:text-red-500 transition-all group"
-                  onClick={() => setIsProfileOpen(false)}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-red-50/50 flex items-center justify-center group-hover:bg-red-50">
-                    <BiHeart size={18} />
-                  </div>
-                  <h1 className="text-sm font-bold text-red-500/80 group-hover:text-red-500">
-                    Emergency Info
-                  </h1>
-                </Link>
-              )}
-
-              <div className="h-px bg-slate-50 my-2" />
+              <div className="h-px bg-slate-100 my-2" />
 
               <button
-                className="w-full flex items-center gap-3 px-5 py-3 text-slate-600 hover:bg-slate-50 transition-all group"
+                className="w-full flex items-center gap-3 px-5 py-3 text-slate-700 hover:bg-slate-50 transition-all group"
                 onClick={() => {
                   setIsProfileOpen(false);
                   logout();
                 }}
               >
-                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-slate-100">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-slate-200">
                   <BiLogOut size={18} />
                 </div>
-                <h1 className="text-sm font-bold">Sign Out</h1>
+                <span className="text-sm font-bold">Sign Out</span>
               </button>
             </div>
           )}

@@ -182,7 +182,6 @@ const MAIN_NAV: SidebarItem[] = [
     href: "/[role]/alerts",
     roles: ["super_admin", "mega_admin"],
   },
-  // ----- COMMON PAGES (multiple roles) -----
   {
     icon: BiMessageDetail,
     label: "Messages",
@@ -201,12 +200,12 @@ const MAIN_NAV: SidebarItem[] = [
       "inspector",
     ],
   },
-  {
-    icon: BiHeart,
-    label: "Wellness",
-    href: "/[role]/wellness",
-    roles: ["patient"],
-  },
+  // {
+  //   icon: BiHeart,
+  //   label: "Wellness",
+  //   href: "/[role]/wellness",
+  //   roles: ["patient"],
+  // },
   {
     icon: BiUser,
     label: "Profile",
@@ -245,14 +244,14 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[90] lg:hidden"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-90 lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={`
-        fixed inset-y-0 left-0 z-[100] flex flex-col bg-white transition-all duration-500
+        fixed inset-y-0 left-0 z-100 flex flex-col bg-white transition-all duration-500
         lg:relative lg:inset-auto lg:border-r lg:border-slate-200/50 lg:shadow-none
         ${isCollapsed ? "w-24" : "w-72"}
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
@@ -277,15 +276,15 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
           `}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-bold">
+            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-bold">
               <span>
-                <h2>24</h2>
+                <h2>24/7</h2>
               </span>
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">
                 <span className="text-2xl font-bold tracking-tight text-primary">
-                  <h1> TeleHealth</h1>
+                  <h1> DigiHealth</h1>
                 </span>
               </div>
             )}
@@ -386,8 +385,8 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
             icon={<BiLogOut size={20} />}
             iconPosition="left"
             className={`
-              !w-full flex items-center transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-500 rounded-lg py-3 !min-w-0
-              ${isCollapsed ? "!justify-center" : "!px-4 !gap-3"}
+              w-full! flex items-center transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-500 rounded-lg py-3 min-w-0!
+              ${isCollapsed ? "justify-center!" : "px-4! gap-3!"}
             `}
           >
             {!isCollapsed && (
@@ -398,7 +397,6 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
           </Button>
         </div>
 
-        {/* Collapse Toggle Button (hidden on mobile) */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="absolute -right-3 top-10 hidden lg:flex w-6 h-6 rounded-lg bg-white border border-slate-200 items-center justify-center text-slate-500 hover:text-primary transition-all z-50"

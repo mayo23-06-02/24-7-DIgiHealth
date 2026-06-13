@@ -6,11 +6,9 @@ import Link from "next/link";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import QuickPhrases from "./QuickPhrases";
-import ConsultationTimer from "./ConsultationTimer";
 import CallButton, { ActiveCallInfo } from "./CallButton";
 import TypingIndicator from "./TypingIndicator";
 import OfflineBanner from "./OfflineBanner";
-import PDFReportButton from "./PDFReportButton";
 import AttachRecordModal from "./AttachRecordModal";
 import { useChat } from "@/hooks/useChat";
 import { useChatSocket } from "@/hooks/useChatSocket";
@@ -22,11 +20,14 @@ import Avatar from "../ui/Avatar";
 export default function ChatWindow({
   consultationId: propConsultationId,
   conversationId: propConversationId,
+  scheduledAt,
   onCallStart,
   onCallEnd,
 }: {
   consultationId?: string;
   conversationId?: string;
+  /** ISO string for the scheduled consultation start time — gates call buttons */
+  scheduledAt?: string;
   onCallStart?: (info: ActiveCallInfo) => void;
   onCallEnd?: () => void;
 } = {}) {
@@ -185,16 +186,20 @@ export default function ChatWindow({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <CallButton
-            consultationId={consultationId as string}
-            conversationId={conversationId as string}
-            participantName={opponentName}
-            participantAvatar={opponentAvatar}
-            onCallStart={onCallStart}
-            onCallEnd={onCallEnd}
-          />
-        </div>
+        {/* Call buttons hidden for patients until scheduling flow is ready */}
+        {user.role !== "patient" && (
+          <div className="flex items-center gap-2">
+            <CallButton
+              consultationId={consultationId as string}
+              conversationId={conversationId as string}
+              participantName={opponentName}
+              participantAvatar={opponentAvatar}
+              scheduledAt={scheduledAt ?? (conversation as any)?.scheduledAt ?? (conversation as any)?.consultationId?.scheduledAt}
+              onCallStart={onCallStart}
+              onCallEnd={onCallEnd}
+            />
+          </div>
+        )}
       </div>
 
       {isOffline && <OfflineBanner />}

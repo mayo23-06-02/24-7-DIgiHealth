@@ -9,7 +9,6 @@ import PatientCalendar from "@/components/dashboard/patient/PatientCalendar";
 import HealthActionCenter from "@/components/dashboard/patient/HealthActionCenter";
 import DoctorCarousel from "@/components/doctor/DoctorCarousel";
 import HealthBlog from "@/components/dashboard/patient/HealthBlog";
-import AITriageChat from "@/components/dashboard/patient/AITriageChat";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import {
   BiPlus,
@@ -19,11 +18,9 @@ import {
   BiPulse,
   BiDroplet,
   BiBody,
+  BiRuler,
   BiCapsule,
-  BiBot,
   BiLoaderCircle,
-  BiChat,
-  BiMessage,
 } from "react-icons/bi";
 import Link from "next/link";
 import Modal from "@/components/ui/Modal";
@@ -242,90 +239,75 @@ export default function PatientDashboard() {
         </div>
       </section>
 
-      {/* KPI GRID */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
+      {/* KPI GRID — showing last weigh-in only; clinical vitals commented out for future use */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* <KPICard
           label="Heart Rate"
-          value={
-            dashboardData?.vitals?.heartRate
-              ? dashboardData.vitals.heartRate.toString()
-              : "---"
-          }
+          value={dashboardData?.vitals?.heartRate ? dashboardData.vitals.heartRate.toString() : "---"}
           unit="bpm"
           icon={<BiHeart size={24} />}
           trend={dashboardData?.vitals?.heartRateTrend || 0}
           color={dashboardData?.vitals?.heartRate ? "primary" : "slate"}
-          description={
-            dashboardData?.vitals?.heartRate
-              ? "Current reading"
-              : "Update required"
-          }
+          description={dashboardData?.vitals?.heartRate ? "Current reading" : "Update required"}
           onClick={() => handleUpdateClick("heartRate", "Heart Rate")}
-        />
-        <KPICard
+        /> */}
+        {/* <KPICard
           label="Blood Pressure"
-          value={
-            dashboardData?.vitals?.bloodPressure &&
-            dashboardData.vitals.bloodPressure !== "0/0"
-              ? dashboardData.vitals.bloodPressure
-              : "---/---"
-          }
+          value={dashboardData?.vitals?.bloodPressure && dashboardData.vitals.bloodPressure !== "0/0" ? dashboardData.vitals.bloodPressure : "---/---"}
           icon={<BiPulse size={24} />}
           trend={dashboardData?.vitals?.bloodPressureTrend || 0}
-          color={
-            dashboardData?.vitals?.bloodPressure &&
-            dashboardData.vitals.bloodPressure !== "0/0"
-              ? "emerald"
-              : "slate"
-          }
-          description={
-            dashboardData?.vitals?.bloodPressure &&
-            dashboardData.vitals.bloodPressure !== "0/0"
-              ? "Last recorded"
-              : "Update required"
-          }
+          color={dashboardData?.vitals?.bloodPressure && dashboardData.vitals.bloodPressure !== "0/0" ? "emerald" : "slate"}
+          description={dashboardData?.vitals?.bloodPressure && dashboardData.vitals.bloodPressure !== "0/0" ? "Last recorded" : "Update required"}
           onClick={() => handleUpdateClick("bloodPressure", "Blood Pressure")}
-        />
+        /> */}
         <KPICard
-          label="Body Mass"
+          label="Weight"
           value={
             dashboardData?.vitals?.weight
               ? dashboardData.vitals.weight.toString()
-              : "0"
+              : "---"
           }
           unit="kg"
           icon={<BiBody size={24} />}
           trend={dashboardData?.vitals?.weightTrend || 0}
-          color={dashboardData?.vitals?.weight ? "slate" : "slate"}
+          color={dashboardData?.vitals?.weight ? "primary" : "slate"}
           description={
-            dashboardData?.vitals?.weight ? "Latest weight" : "Update required"
+            dashboardData?.vitals?.weight ? "Last weigh-in" : "Update required"
           }
-          onClick={() => handleUpdateClick("weight", "Body Mass")}
+          onClick={() => handleUpdateClick("weight", "Body Mass & Height")}
         />
         <KPICard
-          label="Glucose"
+          label="Height"
           value={
-            dashboardData?.vitals?.glucose
-              ? dashboardData.vitals.glucose.toString()
-              : "0"
+            dashboardData?.vitals?.height
+              ? dashboardData.vitals.height.toString()
+              : "---"
           }
+          unit="cm"
+          icon={<BiBody size={24} />}
+          trend={0}
+          color={dashboardData?.vitals?.height ? "slate" : "slate"}
+          description={
+            dashboardData?.vitals?.height ? "Last recorded" : "Update required"
+          }
+          onClick={() => handleUpdateClick("weight", "Body Mass & Height")}
+        />
+        {/* <KPICard
+          label="Glucose"
+          value={dashboardData?.vitals?.glucose ? dashboardData.vitals.glucose.toString() : "0"}
           unit="mmol"
           icon={<BiDroplet size={24} />}
           trend={dashboardData?.vitals?.glucoseTrend || 0}
           color={dashboardData?.vitals?.glucose ? "primary" : "slate"}
-          description={
-            dashboardData?.vitals?.glucose
-              ? "Last test result"
-              : "Update required"
-          }
+          description={dashboardData?.vitals?.glucose ? "Last test result" : "Update required"}
           onClick={() => handleUpdateClick("glucose", "Glucose")}
-        />
+        /> */}
       </section>
 
       {/* MID SECTION */}
       <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div className="xl:col-span-5 space-y-6 flex flex-col">
-          <Card className="flex-1 min-h-[500px]">
+          <Card className="flex-1 min-h-[500px]" noPadding>
             <MedicalManikin
               gender={
                 dashboardData?.profile?.gender || (user.gender as any) || "male"

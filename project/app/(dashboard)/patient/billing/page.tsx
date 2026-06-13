@@ -430,23 +430,54 @@ function PatientBillingView({
     paymentMethods = [],
   } = data;
   const [upgradeModal, setUpgradeModal] = useState(false);
-  const [selectedTier, setSelectedTier] = useState("pro");
+  const [selectedTier, setSelectedTier] = useState("basic");
 
   const tiers = [
     {
-      id: "full_access",
-      label: "Full Access",
+      id: "basic",
+      label: "Basic",
       price: 250,
+      consultations: 2,
       features: [
-        "Unlimited consultations",
-        "Full AI triage & diagnostic tools",
-        "Complete medical health record PDF",
+        "2 consultations per month",
+        "24/7 platform access",
+        "AI triage & symptom checker",
+        "Digital health record",
+        "Secure messaging",
+      ],
+    },
+    {
+      id: "standard",
+      label: "Standard",
+      price: 500,
+      consultations: 5,
+      features: [
+        "5 consultations per month",
+        "24/7 platform access",
+        "Full AI triage & diagnostics",
+        "Medical health record PDF",
+        "Medication reminders",
+        "Secure messaging",
+      ],
+    },
+    {
+      id: "premium",
+      label: "Premium",
+      price: 1000,
+      consultations: 10,
+      features: [
+        "10 consultations per month",
+        "24/7 priority access",
+        "Priority AI triage",
+        "Full medical health record PDF",
         "Medication refills & reminders",
         "Secure cloud health vault",
-        "Self-pay or Insurance covered",
+        "Self-pay or insurance covered",
       ],
     },
   ];
+
+  const currentTier = tiers.find((t) => t.id === subscription?.tier) ?? null;
 
   const cardIcons: Record<string, string> = {
     Visa: "💳",
@@ -465,13 +496,13 @@ function PatientBillingView({
           accent="primary"
         />
         <SummaryCard
-          label="Completed Txns"
+          label="Completed Transactions"
           value={summary.completedCount}
           icon={<BiCheckCircle />}
           accent="emerald"
         />
         <SummaryCard
-          label="Pending Txns"
+          label="Pending Transactions"
           value={summary.pendingCount}
           icon={<BiTime />}
           accent="gray"
@@ -487,33 +518,36 @@ function PatientBillingView({
             </h3>
             <StatusPill status={subscription?.status || "free"} />
           </div>
-          {subscription ? (
+          {subscription && currentTier ? (
             <div className="space-y-5">
               <div className="flex items-center gap-4">
-                <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold bg-primary/10 text-primary`}
-                >
-                  🚀
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-primary/10">
+                  <BiWallet size={28} className="text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-slate-800 capitalize">
-                    Full Access Plan
+                  <p className="text-2xl font-bold text-slate-800">
+                    {currentTier.label} Plan
                   </p>
                   <p className="text-sm text-slate-500 font-medium">
-                    {fmtZAR(250)} / month
+                    {fmtZAR(currentTier.price)} / month &middot;{" "}
+                    {currentTier.consultations} consultations
                   </p>
                 </div>
               </div>
               <div className="flex gap-4 pt-2 border-t border-slate-100 text-xs font-medium text-slate-500">
                 <span>Started {fmtDate(subscription.startDate)}</span>
                 <span>·</span>
-                <span>
-                  Next billing {fmtDate(subscription.nextBillingDate)}
-                </span>
+                <span>Next billing {fmtDate(subscription.nextBillingDate)}</span>
               </div>
               <div className="flex gap-3 mt-4">
-                <Button onClick={() => setUpgradeModal(true)} fullWidth>
-                  Update Payment
+                <Button
+                  onClick={() => {
+                    setSelectedTier(currentTier.id);
+                    setUpgradeModal(true);
+                  }}
+                  fullWidth
+                >
+                  Upgrade Plan
                 </Button>
                 {subscription.status !== "cancelled" && (
                   <Button
@@ -531,15 +565,18 @@ function PatientBillingView({
               </div>
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-slate-500 text-sm font-medium mb-4">
+            <div className="text-center py-8 space-y-4">
+              <p className="text-slate-500 text-sm font-medium">
                 No active subscription
               </p>
               <Button
-                onClick={() => setUpgradeModal(true)}
-                className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal  shadow-primary/20 hover:bg-primary/80 transition-all"
+                onClick={() => {
+                  setSelectedTier("basic");
+                  setUpgradeModal(true);
+                }}
+                className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-bold tracking-normal shadow-primary/20 hover:bg-primary/80 transition-all"
               >
-                Get Started
+                Choose a Plan
               </Button>
             </div>
           )}
@@ -564,7 +601,7 @@ function PatientBillingView({
               paymentMethods.map((pm: any, i: number) => (
                 <div
                   key={pm._id || i}
-                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${pm.isDefault ? "border-primary/30 bg-primary/[0.02]" : "border-slate-100 hover:border-slate-200"}`}
+                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${pm.isDefault ? "border-primary/30 bg-primary/2" : "border-slate-100 hover:border-slate-200"}`}
                 >
                   <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-xl shrink-0">
                     {pm.type === "card"
@@ -632,18 +669,23 @@ function PatientBillingView({
         showDownload
       />
 
-      {/* Upgrade Modal */}
+      {/* Plan Selection Modal */}
       {upgradeModal && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setUpgradeModal(false)}
           />
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 ">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-800 font-grotesk">
-                Platform Access Plan
-              </h3>
+          <div className="relative w-full max-w-3xl bg-white rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 font-grotesk">
+                  Choose Your Plan
+                </h3>
+                <p className="text-sm text-slate-500 font-medium mt-0.5">
+                  All plans include 24/7 platform access
+                </p>
+              </div>
               <button
                 onClick={() => setUpgradeModal(false)}
                 className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all"
@@ -651,54 +693,74 @@ function PatientBillingView({
                 ✕
               </button>
             </div>
-            <div className="p-8">
-              <div className="p-6 rounded-2xl border-2 border-primary bg-primary/[0.03] text-left">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-bold  tracking-normal text-primary">
-                    Recommended Plan
-                  </p>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg ">
-                    Insurance Accepted
-                  </span>
-                </div>
-                <p className="text-3xl font-bold text-slate-800 mb-2">
-                  R250
-                  <span className="text-sm font-medium text-slate-500">
-                    /mo
-                  </span>
-                </p>
-                <p className="text-sm text-slate-500 mb-6 font-medium">
-                  Complete access to all 24/7 DigiHealth features for
-                  individuals.
-                </p>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                  {tiers[0].features.map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-start gap-2 text-xs font-medium text-slate-600"
-                    >
-                      <BiCheckCircle
-                        className="text-emerald-500 shrink-0 mt-0.5"
-                        size={14}
-                      />{" "}
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+
+            <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {tiers.map((tier) => {
+                const isCurrent = currentTier?.id === tier.id;
+                const isSelected = selectedTier === tier.id;
+                return (
+                  <button
+                    key={tier.id}
+                    onClick={() => setSelectedTier(tier.id)}
+                    className={`relative text-left p-6 rounded-2xl border-2 transition-all duration-200 ${
+                      isSelected
+                        ? "border-primary bg-primary/[0.03]"
+                        : "border-slate-100 hover:border-slate-200 bg-white"
+                    }`}
+                  >
+                    {isCurrent && (
+                      <span className="absolute top-3 right-3 text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">
+                        Current
+                      </span>
+                    )}
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                      <BiWallet size={20} className="text-primary" />
+                    </div>
+                    <p className="text-lg font-bold text-slate-800 mb-1">
+                      {tier.label}
+                    </p>
+                    <p className="text-2xl font-bold text-primary mb-0.5">
+                      R{tier.price}
+                      <span className="text-sm font-medium text-slate-500">
+                        /mo
+                      </span>
+                    </p>
+                    <p className="text-xs text-slate-500 font-medium mb-4">
+                      {tier.consultations} consultations per month
+                    </p>
+                    <ul className="space-y-2">
+                      {tier.features.map((f) => (
+                        <li
+                          key={f}
+                          className="flex items-start gap-2 text-xs font-medium text-slate-600"
+                        >
+                          <BiCheckCircle
+                            className="text-emerald-500 shrink-0 mt-0.5"
+                            size={13}
+                          />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </button>
+                );
+              })}
             </div>
+
             <div className="px-8 pb-8">
               <button
                 onClick={() => {
                   onAction("upgrade_subscription", { tier: selectedTier });
                   setUpgradeModal(false);
                 }}
-                disabled={actionLoading}
-                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-none shadow-primary/20 hover:bg-primary/80 transition-all disabled:opacity-50"
+                disabled={actionLoading || currentTier?.id === selectedTier}
+                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-sm tracking-normal shadow-primary/20 hover:bg-primary/80 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {actionLoading
                   ? "Processing..."
-                  : `Upgrade to ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`}
+                  : currentTier?.id === selectedTier
+                    ? "This is your current plan"
+                    : `Switch to ${tiers.find((t) => t.id === selectedTier)?.label} — R${tiers.find((t) => t.id === selectedTier)?.price}/mo`}
               </button>
             </div>
           </div>

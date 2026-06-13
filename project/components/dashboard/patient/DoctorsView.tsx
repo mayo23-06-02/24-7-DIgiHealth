@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import Badge from "@/components/ui/Badge";
-import Modal from "@/components/ui/Modal";
 import Avatar from "@/components/ui/Avatar";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -17,14 +15,7 @@ import BookingModal from "@/components/doctor/BookingModal";
 import {
   BiSearch,
   BiFilterAlt,
-  BiStar,
-  BiHeart,
-  BiCalendar,
   BiMessageDetail,
-  BiCheckShield,
-  BiBadgeCheck,
-  BiGlobe,
-  BiPhone,
   BiVideo,
   BiLoaderAlt,
 } from "react-icons/bi";
@@ -96,7 +87,27 @@ export default function DoctorsView() {
   const uniqueSpecializations = [
     ...new Set(doctors.map((d) => d.specialisation).filter(Boolean)),
   ];
-  const allLanguages = [...new Set(doctors.flatMap((d) => d.languages || []))];
+
+  const SA_LANGUAGES = [
+    "English",
+    "Afrikaans",
+    "Zulu",
+    "Xhosa",
+    "Sotho",
+    "Pedi",
+    "Tswana",
+    "Tsonga",
+    "Venda",
+    "Swati",
+    "Ndebele",
+  ];
+  const allLanguages = [
+    ...new Set([
+      ...SA_LANGUAGES,
+      ...doctors.flatMap((d) => d.languages || []),
+    ]),
+  ];
+
   const allProvinces = [
     ...new Set(doctors.map((d) => d.location).filter(Boolean)),
   ];
@@ -312,7 +323,8 @@ export default function DoctorsView() {
                         >
                           <BiMessageDetail size={16} />
                         </Button>
-                        <Button
+                        {/* Immediate call hidden until scheduling flow is ready */}
+                        {/* <Button
                           variant="ghost"
                           size="sm"
                           onClick={(e) => {
@@ -323,7 +335,7 @@ export default function DoctorsView() {
                           title="Immediate Test Call"
                         >
                           <BiVideo size={16} />
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
                   </Card>

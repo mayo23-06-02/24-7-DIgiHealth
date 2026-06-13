@@ -422,8 +422,8 @@ export default function MedicalManikin({
   }
 
   return (
-    <div className="w-full h-[600px]">
-      <div className="mb-4">
+    <div className="w-full h-[600px] flex flex-col">
+      <div className="mb-4 shrink-0">
         <h1 className="text-lg font-bold text-slate-800">
           {readOnly ? "Clinical Anatomical Map" : "My Digital Twin"}
         </h1>
@@ -434,7 +434,7 @@ export default function MedicalManikin({
         </p>
       </div>
 
-      <div className="flex h-full relative group bg-gradient-to-b from-slate-50 to-white rounded-xl overflow-hidden select-none">
+      <div className="flex flex-1 relative group bg-linear-to-b from-slate-50 to-white rounded-xl overflow-hidden select-none">
         {/* HUD Metrics */}
         <div className="absolute top-3 left-3 z-30 pointer-events-none">
           <div className="space-y-4">

@@ -473,7 +473,7 @@ export default function PractitionerAppointmentsPage() {
                         {a.status === "scheduled" && (
                           <button
                             onClick={() =>
-                              (window.location.href = `/practitioner/chat?patient=${a.patientId}`)
+                              (window.location.href = `/practitioner/chat/${a.consultationId}`)
                             }
                             className="flex items-center gap-1 px-3 py-2 text-xs font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                           >
