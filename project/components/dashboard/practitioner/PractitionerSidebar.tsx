@@ -32,8 +32,6 @@ const mainNav = [
   { name: "Notes", icon: <BiNote size={20} /> },
 ];
 
-const secondaryNav = [{ name: "Settings", icon: <BiCog size={20} /> }];
-
 import Button from "@/components/ui/Button";
 
 export default function PractitionerSidebar({
@@ -137,39 +135,6 @@ export default function PractitionerSidebar({
                 )}
                 {!isCollapsed && isActive && (
                   <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white opacity-80" />
-                )}
-              </Button>
-            );
-          })}
-
-          <div className="h-px bg-white/5 my-4 mx-3" />
-
-          {secondaryNav.map((item) => {
-            const isActive = activeTab === item.name;
-            return (
-              <Button
-                key={item.name}
-                variant={isActive ? "primary" : "ghost"}
-                onClick={() => {
-                  onTabChange(item.name);
-                  onClose?.();
-                }}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm  tracking-normal
-                  transition-all duration-200 group border-none h-auto !min-w-0
-                  ${isCollapsed ? "justify-center" : "justify-start"}
-                  ${
-                    isActive
-                      ? "bg-white/10 text-white"
-                      : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
-                  }
-                `}
-              >
-                <span className="shrink-0">{item.icon}</span>
-                {!isCollapsed && (
-                  <span className="animate-in fade-in duration-200">
-                    {item.name}
-                  </span>
                 )}
               </Button>
             );

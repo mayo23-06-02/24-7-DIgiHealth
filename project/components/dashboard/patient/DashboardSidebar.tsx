@@ -57,12 +57,6 @@ export default function DashboardSidebar({
     { name: "Health Record", icon: <BiCheckCircle size={22} /> },
   ];
 
-  const secondaryNav: NavItem[] = [
-    { name: "General", icon: <BiCog size={22} /> },
-    { name: "Language", icon: <BiGlobe size={22} /> },
-    { name: "Support", icon: <BiSupport size={22} /> },
-  ];
-
   return (
     <>
       {/* Mobile Overlay */}
@@ -142,33 +136,6 @@ export default function DashboardSidebar({
                     {item.name}
                   </span>
                 )}
-              </button>
-            );
-          })}
-
-          {/* Divider */}
-          {!isCollapsed && <div className="h-px bg-slate-200 my-3 mx-2" />}
-
-          {secondaryNav.map((item) => {
-            const isActive = activeNav === item.name;
-            return (
-              <button
-                key={item.name}
-                onClick={() => onTabChange(item.name)}
-                className={`
-                w-full flex items-center gap-4 py-3 rounded-lg font-semibold text-sm
-                transition-all duration-200 group
-                ${
-                  isActive
-                    ? "bg-primary text-white"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-primary"
-                }
-                ${isCollapsed ? "justify-center" : "px-4"}
-              `}
-                title={isCollapsed ? item.name : ""}
-              >
-                <span className="text-xl">{item.icon}</span>
-                {!isCollapsed && <span>{item.name}</span>}
               </button>
             );
           })}

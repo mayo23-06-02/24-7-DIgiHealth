@@ -223,60 +223,6 @@ const MAIN_NAV: SidebarItem[] = [
 ];
 
 // ==================== SECONDARY NAVIGATION (Settings, etc.) ====================
-const SECONDARY_NAV: SidebarItem[] = [
-  {
-    icon: BiCog,
-    label: "General",
-    href: "/settings",
-    roles: [
-      "patient",
-      "practitioner",
-      "hospital_admin",
-      "inspector",
-      "super_admin",
-      "mega_admin",
-    ],
-  },
-  {
-    icon: BiGlobe,
-    label: "Language",
-    href: "/settings/language",
-    roles: [
-      "patient",
-      "practitioner",
-      "hospital_admin",
-      "inspector",
-      "super_admin",
-      "mega_admin",
-    ],
-  },
-  {
-    icon: BiSupport,
-    label: "Support",
-    href: "/support",
-    roles: [
-      "patient",
-      "practitioner",
-      "hospital_admin",
-      "inspector",
-      "super_admin",
-      "mega_admin",
-    ],
-  },
-  {
-    icon: BiShieldQuarter,
-    label: "Privacy & POPIA",
-    href: "/settings/privacy",
-    roles: [
-      "patient",
-      "practitioner",
-      "hospital_admin",
-      "inspector",
-      "super_admin",
-      "mega_admin",
-    ],
-  },
-];
 
 interface UnifiedSidebarProps {
   isOpen?: boolean;
@@ -291,9 +237,6 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
   if (!user) return null;
 
   const filteredMain = MAIN_NAV.filter((item) =>
-    item.roles.includes(user.role),
-  );
-  const filteredSecondary = SECONDARY_NAV.filter((item) =>
     item.roles.includes(user.role),
   );
 
@@ -390,36 +333,6 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
                     </span>
                   )}
                 </div>
-              </Link>
-            );
-          })}
-
-          {/* Divider (only when expanded) */}
-          {!isCollapsed && <div className="h-px bg-slate-200 my-6 mx-2" />}
-
-          {filteredSecondary.map((item, i) => {
-            const href = item.href.replace("[role]", user.role);
-            const isActive = pathname === href;
-            return (
-              <Link
-                key={i}
-                href={href}
-                className={`
-                  flex items-center gap-4 py-3 my-1 rounded-lg font-semibold text-sm transition-all duration-200 group
-                  ${isActive ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-100 hover:text-primary"}
-                  ${isCollapsed ? "justify-center px-0" : "px-4"}
-                `}
-                title={isCollapsed ? item.label : ""}
-                onClick={() => {
-                  if (window.innerWidth < 1024 && onClose) onClose();
-                }}
-              >
-                <item.icon size={22} />
-                {!isCollapsed && (
-                  <span>
-                    <h2 className="">{item.label}</h2>
-                  </span>
-                )}
               </Link>
             );
           })}
