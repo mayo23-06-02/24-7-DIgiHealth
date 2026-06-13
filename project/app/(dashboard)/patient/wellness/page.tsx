@@ -287,7 +287,7 @@ export default function WellnessHub() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* LEFT COLUMN: SCORE & STREAK */}
         <div className="lg:col-span-3 space-y-6">
-          <Card className="text-center p-8 bg-gradient-to-br from-primary to-blue-600 text-white border-none shadow-none shadow-primary/20">
+          <Card className="text-center p-8 bg-linear-to-br from-primary to-blue-600 text-white border-none shadow-none shadow-primary/20">
             <h3 className="text-lg font-bold  tracking-normal opacity-80 mb-6 font-grotesk">
               Wellness Index
             </h3>

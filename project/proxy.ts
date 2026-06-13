@@ -120,4 +120,3 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-

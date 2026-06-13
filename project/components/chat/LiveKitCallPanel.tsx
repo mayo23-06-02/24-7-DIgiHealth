@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Room,
   RoomEvent,
@@ -28,6 +28,8 @@ export default function LiveKitCallPanel({
   const roomRef = useRef<Room | null>(null);
   const shouldClosePanelRef = useRef(false);
   const connectAttemptRef = useRef(0);
+  const onEndedRef = useRef(onEnded);
+  useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const [micOn, setMicOn] = useState(true);
@@ -90,7 +92,7 @@ export default function LiveKitCallPanel({
           if (!isCurrentRoom || !shouldClosePanelRef.current) {
             return;
           }
-          onEnded();
+          onEndedRef.current();
         });
 
       try {
@@ -146,7 +148,7 @@ export default function LiveKitCallPanel({
       }
 
       console.error("LiveKit connect failed:", error);
-      onEnded();
+      onEndedRef.current();
     });
 
     return () => {
@@ -158,7 +160,7 @@ export default function LiveKitCallPanel({
         room.disconnect();
       }
     };
-  }, [callInfo, onEnded]);
+  }, [callInfo]); // onEnded intentionally excluded — kept stable via onEndedRef
 
   const fmt = (seconds: number) =>
     `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;

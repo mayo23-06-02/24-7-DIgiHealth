@@ -15,7 +15,8 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "24/7 DigiHealth | Advanced Telehealth Ecosystem for South Africa",
-  description: "A scalable, role-based medical platform bridging the gap in South African healthcare through AI triage, virtual consultations, and emergency routing.",
+  description:
+    "A scalable, role-based medical platform bridging the gap in South African healthcare through AI triage, virtual consultations, and emergency routing.",
 };
 
 import AuthProvider from "@/components/AuthProvider";
@@ -26,11 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${grotesk.variable} ${outfit.variable} antialiased`}>
+    <html
+      lang="en"
+      className={`${grotesk.variable} ${outfit.variable} antialiased`}
+    >
       <body className="font-outfit">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
         <Toaster position="top-right" />
       </body>
     </html>

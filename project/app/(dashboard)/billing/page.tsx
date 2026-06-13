@@ -581,13 +581,13 @@ function PatientBillingView({
           accent="primary"
         />
         <SummaryCard
-          label="Completed Txns"
+          label="Completed Transactions"
           value={summary.completedCount}
           icon={<BiCheckCircle />}
           accent="emerald"
         />
         <SummaryCard
-          label="Pending Txns"
+          label="Pending Transactions"
           value={summary.pendingCount}
           icon={<BiTime />}
           accent="gray"

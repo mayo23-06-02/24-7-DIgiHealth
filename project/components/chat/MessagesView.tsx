@@ -64,6 +64,12 @@ export default function MessagesView({
   );
   const [activeCall, setActiveCall] = useState<ActiveCallInfo | null>(null);
 
+  const handleCallStart = useCallback(
+    (info: ActiveCallInfo) => setActiveCall(info),
+    [],
+  );
+  const handleCallEnd = useCallback(() => setActiveCall(null), []);
+
   const isFirstLoad = useRef(true);
   const fetchConversations = useCallback(async () => {
     if (isFirstLoad.current) setIsLoading(true);
@@ -131,9 +137,11 @@ export default function MessagesView({
       }
     });
 
-    const interval = setInterval(fetchConversations, 8000); // Poll for new convs every 8s
+    // Pause polling while a call is active to avoid re-renders that destabilise LiveKit
+    if (activeCall) return;
+    const interval = setInterval(fetchConversations, 8000);
     return () => clearInterval(interval);
-  }, [fetchConversations, searchParams, router]);
+  }, [fetchConversations, searchParams, router, activeCall]);
 
   const isActiveChatOpen =
     activeChatId &&
@@ -179,7 +187,7 @@ export default function MessagesView({
           <div className="flex-1 min-h-0 overflow-hidden">
             <ChatWindow
               conversationId={activeChatId!}
-              onCallEnd={() => setActiveCall(null)}
+              onCallEnd={handleCallEnd}
             />
           </div>
         </div>
@@ -323,8 +331,8 @@ export default function MessagesView({
           <div className="flex-1 flex flex-col  relative overflow-hidden">
             <ChatWindow
               conversationId={activeChatId!}
-              onCallStart={(info) => setActiveCall(info)}
-              onCallEnd={() => setActiveCall(null)}
+              onCallStart={handleCallStart}
+              onCallEnd={handleCallEnd}
             />
           </div>
         ) : (

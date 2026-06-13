@@ -50,7 +50,6 @@ export default function PatientMessagesView() {
         });
       }
 
-      // Fetch Pending Requests from Agenda
       const agendaRes = await fetch("/api/patient/agenda");
       if (agendaRes.ok) {
         const agenda = await agendaRes.json();
