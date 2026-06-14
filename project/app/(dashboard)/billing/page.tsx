@@ -1955,6 +1955,7 @@ export default function BillingPage() {
           ) : (
             <BiXCircle size={18} />
           )}
+
           {toast.msg}
         </div>
       )}

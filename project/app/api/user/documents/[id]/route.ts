@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { MedicalDocument as DigitalDocument } from '@/lib/models/ReviewsDocs';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { storage, ref, deleteObject, isFirebaseConfigured } from '@/lib/firebase';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
@@ -28,6 +29,16 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
     const doc = await DigitalDocument.findOneAndDelete({ _id: id, userId });
     if (!doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+
+    // If it was stored in Firebase, delete the storage object
+    if (doc.cloudinaryUrl?.includes('firebasestorage.googleapis.com') && isFirebaseConfigured) {
+      try {
+        const storageRef = ref(storage, doc.publicId);
+        await deleteObject(storageRef);
+      } catch (err) {
+        console.error('Failed to delete document from Firebase Storage:', err);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

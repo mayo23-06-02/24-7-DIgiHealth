@@ -439,9 +439,8 @@ function PatientBillingView({
       price: 250,
       consultations: 2,
       features: [
-        "2 consultations per month",
+        "5 consultations per month",
         "24/7 platform access",
-        "AI triage & symptom checker",
         "Digital health record",
         "Secure messaging",
       ],
@@ -452,9 +451,8 @@ function PatientBillingView({
       price: 500,
       consultations: 5,
       features: [
-        "5 consultations per month",
+        "10 consultations per month",
         "24/7 platform access",
-        "Full AI triage & diagnostics",
         "Medical health record PDF",
         "Medication reminders",
         "Secure messaging",
@@ -466,13 +464,11 @@ function PatientBillingView({
       price: 1000,
       consultations: 10,
       features: [
-        "10 consultations per month",
+        "Unlimited consultations ",
         "24/7 priority access",
-        "Priority AI triage",
         "Full medical health record PDF",
         "Medication refills & reminders",
         "Secure cloud health vault",
-        "Self-pay or insurance covered",
       ],
     },
   ];
@@ -537,7 +533,9 @@ function PatientBillingView({
               <div className="flex gap-4 pt-2 border-t border-slate-100 text-xs font-medium text-slate-500">
                 <span>Started {fmtDate(subscription.startDate)}</span>
                 <span>·</span>
-                <span>Next billing {fmtDate(subscription.nextBillingDate)}</span>
+                <span>
+                  Next billing {fmtDate(subscription.nextBillingDate)}
+                </span>
               </div>
               <div className="flex gap-3 mt-4">
                 <Button
@@ -676,7 +674,7 @@ function PatientBillingView({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setUpgradeModal(false)}
           />
-          <div className="relative w-full max-w-3xl bg-white rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-5xl bg-white rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-xl font-bold text-slate-800 font-grotesk">

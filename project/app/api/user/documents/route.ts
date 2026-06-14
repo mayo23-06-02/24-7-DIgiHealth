@@ -5,6 +5,7 @@ import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { v2 as cloudinary } from 'cloudinary';
+import { storage, ref, uploadString, getDownloadURL, isFirebaseConfigured } from '@/lib/firebase';
 
 // Configure cloudinary with fallback defaults if env vars are malformed
 cloudinary.config({
@@ -65,14 +66,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'dataUrl and mimeType are required' }, { status: 400 });
     }
 
-    // Upload to Cloudinary
-    const uploadRes = await cloudinary.uploader.upload(dataUrl, {
-      folder: 'digihealth_user_docs',
-      resource_type: 'auto', // Auto-detect image vs raw (pdf, doc)
-    });
+    let fileUrl = "";
+    let publicId = "";
 
-    const fileUrl = uploadRes.secure_url;
-    const publicId = uploadRes.public_id;
+    if (isFirebaseConfigured) {
+      // Upload to Firebase Storage
+      const fileName = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+      const storagePath = `digihealth_user_docs/${userId}/${fileName}`;
+      const storageRef = ref(storage, storagePath);
+      await uploadString(storageRef, dataUrl, 'data_url');
+      fileUrl = await getDownloadURL(storageRef);
+      publicId = storagePath;
+    } else {
+      // Upload to Cloudinary
+      const uploadRes = await cloudinary.uploader.upload(dataUrl, {
+        folder: 'digihealth_user_docs',
+        resource_type: 'auto', // Auto-detect image vs raw (pdf, doc)
+      });
+      fileUrl = uploadRes.secure_url;
+      publicId = uploadRes.public_id;
+    }
 
     // If this is an avatar upload, update the user's avatarUrl directly
     if (isAvatar) {

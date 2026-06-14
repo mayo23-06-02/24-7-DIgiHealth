@@ -14,6 +14,8 @@ import {
 } from "@/lib/models/Billing";
 import { Facility } from "@/lib/models/Facility";
 
+import Consultation from "@/lib/models/Consultation";
+
 async function getAuthUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
@@ -53,6 +55,26 @@ export async function GET(request: Request) {
         PaymentMethod.find({ patientId: user._id }).lean(),
       ]);
 
+      // Count consultations completed since subscription started (or fallback last 30 days)
+      const startDate = subscription?.startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const consultationsUsed = await Consultation.countDocuments({
+        patientId: user._id,
+        status: "completed",
+        scheduledStartTime: { $gte: startDate }
+      });
+
+      // Calculate max consultations based on subscription tier
+      const tier = subscription?.tier || "free";
+      let consultationsMax = 1;
+      let chatsMax = 5;
+      if (tier === "pro") {
+        consultationsMax = 5;
+        chatsMax = 999; // Represents unlimited in UI
+      } else if (tier === "family") {
+        consultationsMax = 15;
+        chatsMax = 999;
+      }
+
       // Summarize
       const completed = transactions.filter(
         (t: any) => t.status === "completed",
@@ -65,6 +87,17 @@ export async function GET(request: Request) {
         (t: any) => t.status === "pending",
       ).length;
 
+      // Provide a clean fallback subscription if none is active in DB
+      const activeSubscription = subscription || {
+        patientId: user._id,
+        tier: "free",
+        status: "active",
+        startDate: user.createdAt || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        price: 0,
+        autoRenew: false,
+      };
+
       return NextResponse.json({
         role: "patient",
         summary: {
@@ -73,8 +106,14 @@ export async function GET(request: Request) {
           completedCount: completed.length,
         },
         transactions,
-        subscription,
+        subscription: activeSubscription,
         paymentMethods,
+        utilization: {
+          consultationsUsed,
+          consultationsMax,
+          chatsUsed: 2, // Mock chats usage count for demo
+          chatsMax,
+        }
       });
     }
 
