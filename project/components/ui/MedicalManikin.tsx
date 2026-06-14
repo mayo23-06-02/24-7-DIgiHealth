@@ -423,7 +423,7 @@ export default function MedicalManikin({
 
   return (
     <div className="w-full h-[600px] flex flex-col">
-      <div className="mb-4 shrink-0">
+      <div className="mb-4 p-4">
         <h1 className="text-lg font-bold text-slate-800">
           {readOnly ? "Clinical Anatomical Map" : "My Digital Twin"}
         </h1>
@@ -436,7 +436,7 @@ export default function MedicalManikin({
 
       <div className="flex flex-1 relative group bg-linear-to-b from-slate-50 to-white rounded-xl overflow-hidden select-none">
         {/* HUD Metrics */}
-        <div className="absolute top-3 left-3 z-30 pointer-events-none">
+        <div className="absolute top-5 left-5 z-30 pointer-events-none">
           <div className="space-y-4">
             <div className="flex items-baseline gap-2">
               <h4 className="text-2xl font-bold text-primary leading-none font-grotesk">
@@ -458,7 +458,7 @@ export default function MedicalManikin({
         </div>
 
         {/* Annotation Counter */}
-        <div className="absolute top-3 right-3 z-30 pointer-events-none flex flex-col items-end gap-1">
+        <div className="absolute top-5 right-5 z-30 pointer-events-none flex flex-col items-end gap-1">
           <p className="text-3xl text-primary leading-none">{notes.length}</p>
           <p className="text-sm font-semibold text-slate-500">
             {readOnly ? "Clinical Mapping" : "Active Mapping"}
