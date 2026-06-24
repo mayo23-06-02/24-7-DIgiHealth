@@ -33,7 +33,7 @@ export default function PractitionerMessagesPage() {
               contactId: p.id,
               contactName: p.fullName,
               avatar: `https://ui-avatars.com/api/?name=${p.fullName.replace(" ", "+")}&background=4493b8&color=fff`,
-              lastMessage: "Clinical channel opened.",
+              lastMessage: "Start chatting",
               timestamp: "",
               unread: 0,
               online: false, // We could pull online status if the API gave it

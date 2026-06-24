@@ -7,6 +7,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { BiLogoFacebook, BiLogoGoogle } from "react-icons/bi";
 import { signIn } from "next-auth/react";
+import LogoMain from "@/components/ui/LogoMain";
 
 function LoginFormComponent() {
   const router = useRouter();
@@ -277,8 +278,9 @@ function LoginFormComponent() {
         {/* Floating Content on Image */}
 
         <div className="absolute inset-x-0 bottom-16 px-16 text-white space-y-6 p-10">
-          <div className="w-16 h-px bg-white/40 mb-5"></div>
+          <LogoMain width={300} height={300} alt={true} />
 
+          <div className="w-16 h-px bg-white/40 mb-5"></div>
           <h3 className="text-4xl lg:text-5xl font-bold  tracking-tighter font-grotesk">
             Smart Healthcare <br /> for a Digital World
           </h3>
@@ -287,13 +289,6 @@ function LoginFormComponent() {
             Professional, immediate, and accessible care 24/7.
           </p>
           <div className="flex items-center gap-6 mt-12 pt-8 border-t border-white/10">
-            <div className="flex flex-col">
-              <span className="text-2xl ">20k+</span>
-              <span className="text-xs   tracking-normal opacity-60">
-                Patients Joined
-              </span>
-            </div>
-            <div className="w-px h-8 bg-white/10"></div>
             <div className="flex flex-col">
               <span className="text-2xl ">9 Provinces</span>
               <span className="text-xs   tracking-normal opacity-60">

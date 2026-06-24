@@ -264,7 +264,7 @@ export default function PatientDashboard() {
           label="Weight"
           value={
             dashboardData?.vitals?.weight
-              ? dashboardData.vitals.weight.toString()
+              ? dashboardData.vitals.weight.toFixed(0).toString()
               : "---"
           }
           unit="kg"

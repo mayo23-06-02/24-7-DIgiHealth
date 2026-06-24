@@ -9,6 +9,8 @@ export const useChatSocket = (conversationId: string | null, currentUserId: stri
   const socketRef = useRef<any>(null);
 
   useEffect(() => {
+    setMessages([]);
+    setTypingUsers(new Set());
     if (!conversationId || !currentUserId) return;
 
     const socket = getSocket();

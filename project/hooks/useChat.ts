@@ -30,7 +30,7 @@ export function useChat(id: string, isConversationId: boolean = false) {
       });
   }, [id, isConversationId]);
 
-  const fetchMessages = async (beforeDate?: string) => {
+  const fetchMessages = async (beforeDate?: string, clearCurrent: boolean = false) => {
     if (!id) return;
     if (beforeDate) setLoadingMore(true);
 
@@ -41,7 +41,7 @@ export function useChat(id: string, isConversationId: boolean = false) {
     let url = `${baseUrl}?limit=50`;
     if (beforeDate) {
       url += `&before=${beforeDate}`;
-    } else if (messages.length > 0) {
+    } else if (!clearCurrent && messages.length > 0) {
       // For polling NEW messages
       const lastMsg = messages[messages.length - 1];
       url += `&after=${lastMsg.createdAt || lastMsg.timestamp}`;
@@ -56,18 +56,17 @@ export function useChat(id: string, isConversationId: boolean = false) {
           setHasMore(false);
         }
 
-        if (newMessages.length > 0) {
-          setMessages(prev => {
-            const combined = beforeDate ? [...newMessages, ...prev] : [...prev, ...newMessages];
-            const seen = new Set();
-            return combined.filter(msg => {
-              const mid = msg._id || msg.id;
-              if (seen.has(mid)) return false;
-              seen.add(mid);
-              return true;
-            });
+        setMessages(prev => {
+          const base = (clearCurrent || beforeDate) ? [] : prev;
+          const combined = beforeDate ? [...newMessages, ...prev] : [...base, ...newMessages];
+          const seen = new Set();
+          return combined.filter(msg => {
+            const mid = msg._id || msg.id;
+            if (seen.has(mid)) return false;
+            seen.add(mid);
+            return true;
           });
-        }
+        });
       }
     } catch (err) {
       console.error('Failed to fetch messages:', err);
@@ -77,10 +76,13 @@ export function useChat(id: string, isConversationId: boolean = false) {
     }
   };
 
-  // Initial fetch only - Sockets handle real-time updates
+  // Reset state and run fresh fetch on conversation ID switch
   useEffect(() => {
     if (!id) return;
-    fetchMessages();
+    setMessages([]);
+    setLoading(true);
+    setHasMore(true);
+    fetchMessages(undefined, true);
   }, [id, isConversationId]);
 
   const loadMore = async () => {

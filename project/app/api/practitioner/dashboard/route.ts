@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
+import { PaymentTransaction, PayoutRequest } from '@/lib/models/Billing';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { apiLogger } from '@/lib/apiLogger';
 
@@ -154,16 +155,75 @@ export async function GET(req: NextRequest) {
     const totalVisitorsLastWeek = uniquePatientIdsLastWeek.length;
     const visitorsTrend = totalVisitorsLastWeek === 0 ? 0 : parseFloat((((totalVisitors - totalVisitorsLastWeek) / totalVisitorsLastWeek) * 100).toFixed(1));
 
-    // 4. Interaction Data (Mocked but structure for dynamic DB integration)
-    const interactionData = [
-      { name: 'Mon', reactions: 12, comments: 4, likes: 8, dislikes: 1 },
-      { name: 'Tue', reactions: 18, comments: 6, likes: 12, dislikes: 0 },
-      { name: 'Wed', reactions: 15, comments: 5, likes: 10, dislikes: 2 },
-      { name: 'Thu', reactions: 22, comments: 8, likes: 15, dislikes: 1 },
-      { name: 'Fri', reactions: 30, comments: 12, likes: 20, dislikes: 0 },
-      { name: 'Sat', reactions: 25, comments: 10, likes: 18, dislikes: 1 },
-      { name: 'Sun', reactions: 20, comments: 7, likes: 14, dislikes: 0 },
-    ];
+    // 4. Earnings & Payout Tracker Data
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const recentTransactions = await PaymentTransaction.find({
+      practitionerId,
+      status: 'completed',
+      timestamp: { $gte: sevenDaysAgo }
+    }).lean();
+
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const earningsMap: Record<string, number> = {};
+    const volumeMap: Record<string, number> = {};
+    const feesMap: Record<string, number> = {};
+
+    for (let d = 6; d >= 0; d--) {
+      const date = new Date();
+      date.setDate(date.getDate() - d);
+      const label = daysOfWeek[date.getDay()];
+      earningsMap[label] = 0;
+      volumeMap[label] = 0;
+      feesMap[label] = 0;
+    }
+
+    recentTransactions.forEach((tx: any) => {
+      const txDate = new Date(tx.timestamp);
+      const label = daysOfWeek[txDate.getDay()];
+      if (label in earningsMap) {
+        earningsMap[label] += tx.practitionerEarnings || 0;
+        volumeMap[label] += tx.amount || 0;
+        feesMap[label] += tx.platformFeeAmount || 0;
+      }
+    });
+
+    const earningsChartData = Object.keys(earningsMap).map(label => ({
+      name: label,
+      earnings: parseFloat(earningsMap[label].toFixed(2)),
+      gross: parseFloat(volumeMap[label].toFixed(2)),
+      fees: parseFloat(feesMap[label].toFixed(2))
+    }));
+
+    const allTransactions = await PaymentTransaction.find({
+      practitionerId,
+      status: 'completed'
+    }).lean();
+
+    let totalGross = 0;
+    let totalNet = 0;
+    let totalFees = 0;
+    allTransactions.forEach((tx: any) => {
+      totalGross += tx.amount || 0;
+      totalNet += tx.practitionerEarnings || 0;
+      totalFees += tx.platformFeeAmount || 0;
+    });
+
+    const recentPayouts = await PayoutRequest.find({ practitionerId })
+      .sort({ requestedAt: -1 })
+      .limit(5)
+      .lean();
+
+    const formattedPayouts = recentPayouts.map((p: any) => ({
+      payoutId: p._id.toString(),
+      amount: p.amount,
+      status: p.status,
+      requestedAt: p.requestedAt,
+      periodFrom: p.periodFrom,
+      periodTo: p.periodTo,
+      consultationCount: p.consultationCount
+    }));
 
     // Fetch practitioner profile details for the response
     const practitionerUser = await User.findById(practitionerId).lean();
@@ -179,7 +239,13 @@ export async function GET(req: NextRequest) {
         visitorsTrend,
         canceledThisWeek,
         chartData,
-        interactionData,
+        earningsChartData,
+        financials: {
+          totalGross: parseFloat(totalGross.toFixed(2)),
+          totalNet: parseFloat(totalNet.toFixed(2)),
+          totalFees: parseFloat(totalFees.toFixed(2))
+        },
+        recentPayouts: formattedPayouts,
         queue,
         pendingRequests,
         riskAlerts,

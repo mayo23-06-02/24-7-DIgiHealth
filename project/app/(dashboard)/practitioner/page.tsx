@@ -281,7 +281,7 @@ export default function PractitionerDashboard() {
             </div>
 
             {/* Unified Patients Overview & Engagement Card */}
-            <Card className="lg:col-span-5 flex flex-col min-h-full">
+            <Card className="lg:col-span-5 flex flex-col ">
               {/* Patients Overview Section */}
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-slate-800 font-grotesk">
@@ -294,7 +294,7 @@ export default function PractitionerDashboard() {
 
               <div className="flex-1 flex w-full relative min-h-[180px]">
                 {/* Y Axis */}
-                <div className="flex flex-col justify-between items-end pr-4 text-xs h-[150px]">
+                <div className="flex flex-col justify-between items-end pr-4 text-xs h-full">
                   {[10, 8, 6, 4, 2, 0].map((l, i) => (
                     <span key={i}>
                       <p className="text-xs  text-slate-500">{l}</p>
@@ -303,7 +303,7 @@ export default function PractitionerDashboard() {
                 </div>
 
                 {/* Bars */}
-                <div className="flex-1 flex justify-between items-end h-[150px] relative border-b border-slate-100">
+                <div className="flex-1 flex justify-between items-end h-full relative border-b border-slate-100">
                   <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                     {[...Array(5)].map((_, i) => (
                       <div
@@ -357,103 +357,6 @@ export default function PractitionerDashboard() {
                     ),
                   )}
                 </div>
-              </div>
-
-              {/* Separator */}
-
-              {/* Engagement Analytics Section */}
-              <div className="flex items-center justify-between mt-4 mb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800 font-grotesk">
-                    Engagement Analytics
-                  </h3>
-                  <p className="text-xs text-slate-500 ">
-                    Interactions with your shared content
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button className="text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
-                    <p className="text-xs font-bold text-slate-500">
-                      Last 7 Days
-                    </p>
-                  </button>
-                </div>
-              </div>
-
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={dashboardData.interactionData || []}
-                    margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#f1f5f9"
-                    />
-                    <XAxis
-                      dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                      }}
-                      itemStyle={{ fontSize: "11px", fontWeight: 700 }}
-                    />
-                    <Legend
-                      verticalAlign="top"
-                      align="right"
-                      iconType="circle"
-                      wrapperStyle={{
-                        fontSize: "10px",
-                        fontWeight: 700,
-                        paddingBottom: "20px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="reactions"
-                      stroke="#2E3192"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
-                      activeDot={{ r: 6 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="comments"
-                      stroke="#10b981"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
-                      activeDot={{ r: 6 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="likes"
-                      stroke="#f59e0b"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
-                      activeDot={{ r: 6 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="dislikes"
-                      stroke="#ef4444"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
               </div>
             </Card>
           </div>

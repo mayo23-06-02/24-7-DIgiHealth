@@ -29,6 +29,7 @@ import Avatar from "../ui/Avatar";
 import Modal from "../ui/Modal";
 import { getSocket } from "@/lib/socket";
 import toast from "react-hot-toast";
+import LogoMain from "../ui/LogoMain";
 
 interface WeatherData {
   temp: number;
@@ -95,10 +96,13 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         if (message.receiverId === user.id) {
           setUnreadMessagesCount((prev) => prev + 1);
           // Alert user
-          toast.success(`New message from ${message.senderName || "Practitioner"}`, {
-            icon: "💬",
-            duration: 5000,
-          });
+          toast.success(
+            `New message from ${message.senderName || "Practitioner"}`,
+            {
+              icon: "💬",
+              duration: 5000,
+            },
+          );
         }
       });
 
@@ -110,7 +114,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           style: {
             background: "#0052CC",
             color: "#fff",
-          }
+          },
         });
       });
 
@@ -295,6 +299,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         >
           <BiMenuAltLeft size={24} />
         </button>
+        <LogoMain width={150} height={200} alt={false} />
       </div>
 
       <div className="hidden sm:flex flex-1 flex-col gap-1 pr-4 lg:pr-10">
@@ -320,7 +325,9 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               <BiChat size={20} />
               {unreadMessagesCount > 0 && (
                 <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 border-2 border-white rounded-full flex items-center justify-center">
-                   <span className="text-[10px] text-white font-bold">{unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}</span>
+                  <span className="text-[10px] text-white font-bold">
+                    {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                  </span>
                 </div>
               )}
             </button>

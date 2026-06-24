@@ -62,29 +62,21 @@ export default function ChatWindow({
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Merge initial messages with socket messages
+  // Merge initial messages with socket messages reactively to avoid race conditions and overwrites
   const [allMessages, setAllMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    if (initialMessages.length > 0) {
-      setAllMessages(initialMessages);
-    }
-  }, [initialMessages]);
-
-  useEffect(() => {
-    if (socketMessages.length > 0) {
-      setAllMessages((prev) => {
-        const combined = [...prev, ...socketMessages];
-        const seen = new Set();
-        return combined.filter((msg) => {
-          const mid = msg._id || msg.id;
-          if (seen.has(mid)) return false;
-          seen.add(mid);
-          return true;
-        });
-      });
-    }
-  }, [socketMessages]);
+    const combined = [...initialMessages, ...socketMessages];
+    const seen = new Set();
+    const unique = combined.filter((msg) => {
+      const mid = msg._id || msg.id;
+      if (!mid) return true;
+      if (seen.has(mid)) return false;
+      seen.add(mid);
+      return true;
+    });
+    setAllMessages(unique);
+  }, [initialMessages, socketMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -186,20 +178,7 @@ export default function ChatWindow({
             </p>
           </div>
         </div>
-        {/* Call buttons hidden for patients until scheduling flow is ready */}
-        {user.role !== "patient" && (
-          <div className="flex items-center gap-2">
-            <CallButton
-              consultationId={consultationId as string}
-              conversationId={conversationId as string}
-              participantName={opponentName}
-              participantAvatar={opponentAvatar}
-              scheduledAt={scheduledAt ?? (conversation as any)?.scheduledAt ?? (conversation as any)?.consultationId?.scheduledAt}
-              onCallStart={onCallStart}
-              onCallEnd={onCallEnd}
-            />
-          </div>
-        )}
+
       </div>
 
       {isOffline && <OfflineBanner />}

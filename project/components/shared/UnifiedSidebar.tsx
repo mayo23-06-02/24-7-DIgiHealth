@@ -33,6 +33,7 @@ import {
 import { useAuthContext } from "../auth/AuthProvider";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
+import LogoMain from "../ui/LogoMain";
 
 interface SidebarItem {
   icon: any;
@@ -276,15 +277,10 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isOpen, onClose }) => {
           `}
         >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-bold">
-              <span>
-                <h2>24/7</h2>
-              </span>
-            </div>
             {!isCollapsed && (
               <div className="flex flex-col">
                 <span className="text-2xl font-bold tracking-tight text-primary">
-                  <h1> DigiHealth</h1>
+                  <LogoMain width={200} height={200} alt={false} />
                 </span>
               </div>
             )}
