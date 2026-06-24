@@ -13,12 +13,16 @@ export interface ActiveCallInfo {
   participantAvatar?: string;
 }
 
+const PATIENT_CALL_WINDOW_LEAD_MS = 4 * 60 * 1000; // window opens 4 min before scheduledAt
+const DEFAULT_CALL_WINDOW_MS = 30 * 60 * 1000; // fallback length when no scheduledEndAt is given
+
 export default function CallButton({
   consultationId,
   conversationId,
   participantName,
   participantAvatar,
   scheduledAt,
+  scheduledEndAt,
   onCallStart,
   onCallEnd,
 }: {
@@ -28,6 +32,8 @@ export default function CallButton({
   participantAvatar?: string;
   /** ISO string or Date of the scheduled consultation start time */
   scheduledAt?: string | Date;
+  /** ISO string or Date the scheduled consultation ends — closes the patient call window */
+  scheduledEndAt?: string | Date;
   onCallStart?: (info: ActiveCallInfo) => void;
   onCallEnd?: () => void;
 }) {
@@ -47,11 +53,27 @@ export default function CallButton({
     return () => clearInterval(t);
   }, []);
 
-  // Gate: show start-call buttons only from 2 min before scheduledAt onward.
-  // If no scheduledAt is provided (direct DM), always show.
-  const isCallWindowOpen = scheduledAt
-    ? now >= new Date(scheduledAt).getTime() - 2 * 60 * 1000
-    : true;
+  // Gate: practitioners can call patients at any time. Patients can only
+  // initiate a call within a short window around the scheduled consultation
+  // — opening 4 min before scheduledAt and closing at scheduledEndAt (or 30
+  // min after start if no end time is known) — and never if nothing is
+  // scheduled at all.
+  const isPractitioner = user?.role === "practitioner";
+  const scheduledStartMs = scheduledAt
+    ? new Date(scheduledAt).getTime()
+    : null;
+  const scheduledEndMs = scheduledEndAt
+    ? new Date(scheduledEndAt).getTime()
+    : scheduledStartMs
+      ? scheduledStartMs + DEFAULT_CALL_WINDOW_MS
+      : null;
+  const isWithinPatientWindow =
+    scheduledStartMs !== null &&
+    now >= scheduledStartMs - PATIENT_CALL_WINDOW_LEAD_MS &&
+    now <= (scheduledEndMs as number);
+  const isCallWindowOpen = isPractitioner ? true : isWithinPatientWindow;
+  const hasPatientWindowPassed =
+    scheduledEndMs !== null && now > scheduledEndMs;
 
   const startCall = async (type: "video" | "voice") => {
     setStatusLoading(true);
@@ -300,14 +322,17 @@ export default function CallButton({
         </>
       )}
 
-      {!autoJoinAvailable && !isCallWindowOpen && scheduledAt && (
-        <span className="text-xs font-semibold text-slate-400 px-2">
-          Call opens at{" "}
-          {new Date(
-            new Date(scheduledAt).getTime() - 2 * 60 * 1000,
-          ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
-      )}
+      {!autoJoinAvailable &&
+        !isCallWindowOpen &&
+        scheduledAt &&
+        !hasPatientWindowPassed && (
+          <span className="text-xs font-semibold text-slate-400 px-2">
+            Call opens at{" "}
+            {new Date(
+              scheduledStartMs! - PATIENT_CALL_WINDOW_LEAD_MS,
+            ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        )}
     </div>
   );
 }

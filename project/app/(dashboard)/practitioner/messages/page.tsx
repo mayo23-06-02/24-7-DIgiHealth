@@ -1,26 +1,28 @@
 "use client";
 
-import React, { useCallback } from "react";
-import MessagesView, { ConversationContact } from "@/components/chat/MessagesView";
+import MessagesView, {
+  ConversationContact,
+} from "@/components/chat/MessagesView";
 
 export default function PractitionerMessagesPage() {
-
-  const fetchEnrichedContacts = async (existingConvs: any[]): Promise<ConversationContact[]> => {
-    const convData: ConversationContact[] = [...existingConvs.map(c => ({
-      ...c,
-      contactId: c.contactId || c.patientId, // for practitioner, the other person is patient
-      contactName: c.contactName || c.doctor, // backend gives 'doctor' arbitrarily in backup route mapping
-      tab: 'contacts'
-    }))];
+  const fetchEnrichedContacts = async (
+    existingConvs: any[],
+  ): Promise<ConversationContact[]> => {
+    const convData: ConversationContact[] = [
+      ...existingConvs.map((c) => ({
+        ...c,
+        contactId: c.contactId || c.patientId, // for practitioner, the other person is patient
+        contactName: c.contactName || c.doctor, // backend gives 'doctor' arbitrarily in backup route mapping
+        tab: "contacts",
+      })),
+    ];
 
     try {
-      // Fetch official patient list
       const patientRes = await fetch("/api/practitioner/patients");
       if (patientRes.ok) {
         const payload = await patientRes.json();
         const patientData = payload.data || [];
 
-        // Merge: If a patient exists in the official list but no conversation yet, add as placeholder
         patientData.forEach((p: any) => {
           const hasConv = convData.find(
             (c) => c.contactId === p.id || c.contactName === p.fullName,
@@ -52,7 +54,7 @@ export default function PractitionerMessagesPage() {
   };
 
   return (
-    <MessagesView 
+    <MessagesView
       pageTitle="Messages"
       pageSubtitle="Secure communication with your patients."
       emptyStateTitle="No Active Channels"

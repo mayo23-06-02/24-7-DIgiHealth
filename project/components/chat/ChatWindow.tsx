@@ -37,7 +37,6 @@ export default function ChatWindow({
 
   const { user } = useAuthContext();
 
-  // Base data fetching (REST for history and info)
   const {
     messages: initialMessages,
     sendMessage: restSendMessage,
@@ -46,7 +45,6 @@ export default function ChatWindow({
     markAsRead: restMarkAsRead,
   } = useChat((consultationId || conversationId) as string, !!conversationId);
 
-  // Real-time integration
   const {
     messages: socketMessages,
     setMessages: setSocketMessages,
@@ -150,6 +148,13 @@ export default function ChatWindow({
       ? conversation.practitionerId?.avatarUrl
       : conversation.patientId?.avatarUrl;
 
+  // The consultation this conversation is linked to (if any) — drives the
+  // patient-side call window gate. Practitioners are never gated by it.
+  const linkedConsultation =
+    conversation.consultationId && typeof conversation.consultationId === "object"
+      ? conversation.consultationId
+      : null;
+
   return (
     <Card className="flex flex-col h-full overflow-hidden  rounded-none">
       {/* Header */}
@@ -179,6 +184,16 @@ export default function ChatWindow({
           </div>
         </div>
 
+        <CallButton
+          consultationId={typeof consultationId === "string" ? consultationId : undefined}
+          conversationId={conversation._id}
+          participantName={opponentName}
+          participantAvatar={opponentAvatar}
+          scheduledAt={scheduledAt || linkedConsultation?.scheduledStartTime}
+          scheduledEndAt={linkedConsultation?.scheduledEndTime}
+          onCallStart={onCallStart}
+          onCallEnd={onCallEnd}
+        />
       </div>
 
       {isOffline && <OfflineBanner />}

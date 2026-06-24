@@ -10,14 +10,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ consulta
     
     // Auto-create conversation if it doesn't exist
     let conv = await Conversation.findOne({ consultationId })
-      .populate('patientId practitionerId', 'firstName lastName avatar');
+      .populate('patientId practitionerId', 'firstName lastName avatar')
+      .populate('consultationId', 'scheduledStartTime scheduledEndTime status');
 
     if (!conv) {
       const consultation = await Consultation.findById(consultationId);
       if (!consultation) {
         return NextResponse.json({ error: 'Consultation not found' }, { status: 404 });
       }
-      
+
       const newConv = new Conversation({
         consultationId: consultation._id,
         patientId: consultation.patientId,
@@ -25,9 +26,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ consulta
         minutesAllocated: 30, // Default 30 mins
       });
       await newConv.save();
-      
+
       conv = await Conversation.findById(newConv._id)
-        .populate('patientId practitionerId', 'firstName lastName avatar');
+        .populate('patientId practitionerId', 'firstName lastName avatar')
+        .populate('consultationId', 'scheduledStartTime scheduledEndTime status');
     }
 
     return NextResponse.json(conv);

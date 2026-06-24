@@ -112,9 +112,7 @@ export default function MessagesView({
         newUrl.searchParams.delete("contactId");
         window.history.replaceState(null, "", newUrl.toString());
       }
-    } catch {
-      /* silent */
-    }
+    } catch {}
   };
 
   useEffect(() => {
