@@ -43,7 +43,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
   return (
     <div
       style={{ width: "100%", maxWidth: "1300px" }}
-      className="bg-white custom-scrollbar overflow-y-scroll min-h-[85vh] max-h-[90vh] px-6 lg:px-10 rounded-lg w-full max-w-4xl mx-auto relative animate-in fade-in duration-700"
+      className="bg-white custom-scrollbar overflow-y-scroll h-full lg:min-h-[85vh] max-h-[90vh] px-6 lg:px-10 rounded-lg w-full max-w-4xl mx-auto relative animate-in fade-in duration-700"
     >
       {/* Offline banner */}
       {!isOnline && (

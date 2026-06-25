@@ -2,7 +2,7 @@ import React from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { jwtVerify } from "jose";
-import RegistrationWizard from "@/components/auth/RegistrationWizard";
+import RegistrationWizard from "@/components/auth/Register/RegistrationWizard";
 
 const validRoles = ["patient", "practitioner", "hospital"];
 
@@ -30,6 +30,5 @@ export default async function RegistrationPage({
   const safeRole = validRoles.includes(role?.toLowerCase())
     ? role.toLowerCase()
     : "patient";
-
   return <RegistrationWizard role={safeRole} />;
 }

@@ -16,7 +16,7 @@ import {
 import Image from "next/image";
 import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
 
-const genders = ["Male", "Female", "Non-binary / Other", "Prefer not to say"];
+const genders = ["Male", "Female"];
 
 // ─────────────────────────────────────────────
 // Step 1 – Identity

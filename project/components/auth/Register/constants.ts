@@ -4,12 +4,10 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
     color: "#4493b8",
     steps: [
       "Identity",
-      "Privacy Consent",
       "Health Profile",
-      "Payment Setup",
-      "Emergency & Info",
       "Documents",
       "Security",
+      "Privacy Consent",
       "Preview",
     ],
   },
@@ -17,12 +15,12 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
     label: "Healthcare Professional",
     color: "#4493b8",
     steps: [
-      "Credentials",
-      "Identity & Contact",
-      "Documents",
-      "Banking & Tax",
-      "Security",
-      "Preview",
+      "Credentials",        // step 1
+      "Identity & Contact", // step 2
+      "Documents",          // step 3
+      "Banking & Tax",      // step 4
+      "Security",           // step 5
+      "Preview",            // step 6
     ],
   },
   hospital: {
@@ -40,5 +38,5 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
 };
 
 export const skippableSteps: Record<string, number[]> = {
-  patient: [3, 5], // 1‑indexed steps that can be skipped
+  // none for now
 };
