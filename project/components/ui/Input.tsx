@@ -30,10 +30,9 @@ const Input: React.FC<InputProps> = ({
 
   const containerStyle = fullWidth ? "w-full" : "w-auto";
   const commonStyles = `
-    w-full bg-slate-50 rounded-2xl outline-none 
-    focus:ring-4 focus:ring-primary/10 focus:border-primary 
+    w-full bg-slate-50 rounded-full outline-none  
     transition-all text-slate-900  placeholder-slate-500
-    ${error ? "border-red-400 bg-red-50 border" : "border border-slate-300 bg-slate-50"}
+    ${error ? "border-red-400 bg-red-50 border" : "border border-slate-200 bg-slate-50"}
     ${icon ? "pl-14 pr-6" : "px-6"}
     ${className}
   `;
@@ -62,7 +61,7 @@ const Input: React.FC<InputProps> = ({
         ) : (
           <input
             id={id}
-            className={`${commonStyles} py-4`}
+            className={`${commonStyles} py-2.5 md:py-4`}
             {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
           />
         )}
