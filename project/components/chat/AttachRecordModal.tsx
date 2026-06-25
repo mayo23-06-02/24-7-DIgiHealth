@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useRef } from "react";
 import {
   BiX,
@@ -31,16 +32,19 @@ export default function AttachRecordModal({
   if (!isOpen) return null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
+    if (e.target.files?.[0]) setFile(e.target.files[0]);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
+    if (e.dataTransfer.files?.[0]) setFile(e.dataTransfer.files[0]);
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,19 +53,14 @@ export default function AttachRecordModal({
       toast.error("Please provide a title and select a file.");
       return;
     }
-
     if (isOffline) {
-      toast.error("You are offline. Attachment queued for later sync.");
-      // Add to offline queue if implemented. For now, just close and we'd rely on useOfflineQueue
-      // In a full implementation, you'd serialize the file (e.g. base64) and save to IndexedDB.
-      // Because files can be large, it requires dedicated offline handling.
+      toast.error("You are offline. Attachment queued.");
       onClose();
       return;
     }
 
     setIsUploading(true);
-    const toastId = toast.loading("Uploading record securely...");
-
+    const toastId = toast.loading("Uploading record...");
     try {
       const formData = new FormData();
       formData.append("conversationId", conversationId);
@@ -74,30 +73,25 @@ export default function AttachRecordModal({
         method: "POST",
         body: formData,
       });
-
       if (!res.ok) throw new Error("Upload failed");
-
-      toast.success("Record attached successfully.", { id: toastId });
+      toast.success("Record attached.", { id: toastId });
       onClose();
-      // Reset state
-      setTitle("");
-      setDescription("");
-      setFile(null);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to attach record.", { id: toastId });
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed.", { id: toastId });
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
         onClick={isUploading ? undefined : onClose}
       />
-      <div className="relative w-full max-w-lg bg-white rounded-3xl p-6  animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 animate-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
           disabled={isUploading}
@@ -115,9 +109,9 @@ export default function AttachRecordModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <label className="block text-sm font-bold text-slate-500 tracking-wide mb-1.5 px-1">
               Record Type
-            </h1>
+            </label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -132,9 +126,9 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <label className="block text-sm font-bold text-slate-500 tracking-wide mb-1.5 px-1">
               Title
-            </h1>
+            </label>
             <input
               type="text"
               value={title}
@@ -146,9 +140,9 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <label className="block text-sm font-bold text-slate-500 tracking-wide mb-1.5 px-1">
               Notes / Description (Optional)
-            </h1>
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -158,9 +152,9 @@ export default function AttachRecordModal({
           </div>
 
           <div>
-            <h1 className="block text-sm font-bold text-slate-500  tracking-wide mb-1.5 px-1">
+            <label className="block text-sm font-bold text-slate-500 tracking-wide mb-1.5 px-1">
               File Attachment
-            </h1>
+            </label>
             <div
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
@@ -214,7 +208,7 @@ export default function AttachRecordModal({
             <button
               type="submit"
               disabled={isUploading || !file || !title}
-              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold  tracking-normal text-xs flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-none shadow-primary/20 disabled:opacity-50 disabled:shadow-none"
+              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50"
             >
               {isUploading ? (
                 <>
