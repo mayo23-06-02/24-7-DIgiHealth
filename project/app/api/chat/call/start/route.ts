@@ -111,8 +111,9 @@ export async function POST(req: Request) {
     }
 
     if (
+      currentUser.role !== "practitioner" &&
       conversation.minutesUsed >=
-      conversation.minutesAllocated + conversation.minutesApproved
+        conversation.minutesAllocated + conversation.minutesApproved
     ) {
       apiLogger.warn(scope, "minutes_exhausted", {
         conversationId: conversation._id.toString(),
