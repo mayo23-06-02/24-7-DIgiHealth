@@ -1,27 +1,29 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  PatientStep1,
-  PatientAnthropometricStep,
-  PatientPaymentStep,
-  PatientEmergencyStep,
-  POPIAConsentStep,
-  PatientDocumentStep,
-  PasswordCreationStep,
-} from "./steps/PatientWizardSteps";
-import {
-  PractitionerStep1,
-  PractitionerStep2,
-  PractitionerStep3,
-  PractitionerStep4,
-} from "./steps/PractitionerWizardSteps";
-import {
-  HospitalStep1,
-  HospitalStep2,
-  HospitalStep3,
-  HospitalStep4,
-} from "./steps/HospitalWizardSteps";
+import PatientStep1 from "./Register/Steps/Patient/PatientStep1";
+import PatientStep3 from "./Register/Steps/Patient/PatientStep3";
+import PatientStep4 from "./Register/Steps/Patient/PatientStep4";
+import PatientStep5 from "./Register/Steps/Patient/PatientStep5";
+import PatientStep2 from "./Register/Steps/Patient/PatientStep2";
+import PasswordCreationStep from "./Register/Shared/PasswordCreationStep";
+
+// Aliases to match legacy render logic names
+const POPIAConsentStep = PatientStep2;
+const PatientAnthropometricStep = PatientStep3;
+const PatientPaymentStep = PatientStep4;
+const PatientEmergencyStep = PatientStep5;
+const PatientDocumentStep = PatientStep5; // No dedicated document step; reuses emergency/POPIA step
+
+import PractitionerStep1 from "./Register/Steps/Practitioner/PractitionerStep1";
+import PractitionerStep2 from "./Register/Steps/Practitioner/PractitionerStep2";
+import PractitionerStep3 from "./Register/Steps/Practitioner/PractitionerStep3";
+import PractitionerStep4 from "./Register/Steps/Practitioner/PractitionerStep4";
+
+import HospitalStep1 from "./Register/Steps/Hospital/HospitalStep1";
+import HospitalStep2 from "./Register/Steps/Hospital/HospitalStep2";
+import HospitalStep3 from "./Register/Steps/Hospital/HospitalStep3";
+import HospitalStep4 from "./Register/Steps/Hospital/HospitalStep4";
 
 import Button from "@/components/ui/Button";
 import ProgressBar from "@/components/ui/ProgressBar";
