@@ -4,7 +4,7 @@ import { BiVideo, BiPhoneCall, BiLoaderAlt } from "react-icons/bi";
 import { CallButtonProps } from "./types";
 import { useCallManagement } from "./useCallManagement";
 
-const PATIENT_CALL_WINDOW_LEAD_MS = 4 * 60 * 1000;
+const PATIENT_CALL_WINDOW_LEAD_MS = 5 * 60 * 1000;
 
 export default function CallButton(props: CallButtonProps) {
   const {

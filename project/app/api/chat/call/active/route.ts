@@ -18,9 +18,15 @@ export async function GET() {
 
     await connectToDatabase();
 
-    // Find active calls initiated by the current user
+    // Find all conversations where current user is a participant
+    const userConversations = await Conversation.find({
+      $or: [{ patientId: userId }, { practitionerId: userId }],
+    }).select("_id").lean();
+    const conversationIds = userConversations.map((c) => c._id);
+
+    // Find active calls in those conversations
     const activeCalls = await Call.find({
-      initiatedBy: userId,
+      conversationId: { $in: conversationIds },
       status: "active",
     }).lean();
 

@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { CallButtonProps, ActiveCallInfo } from "./types";
 
-const PATIENT_CALL_WINDOW_LEAD_MS = 4 * 60 * 1000;
+import { useCall } from "@/components/context/CallContext";
+
+const PATIENT_CALL_WINDOW_LEAD_MS = 5 * 60 * 1000;
 const DEFAULT_CALL_WINDOW_MS = 30 * 60 * 1000;
 
 export function useCallManagement({
@@ -16,7 +18,7 @@ export function useCallManagement({
   onCallEnd,
 }: CallButtonProps) {
   const { user } = useAuthContext();
-  const [callActive, setCallActive] = useState(false);
+  const { setActiveCall, activeCall, clearCall } = useCall();
   const [autoJoinAvailable, setAutoJoinAvailable] = useState(false);
   const [pendingRoomInfo, setPendingRoomInfo] = useState<ActiveCallInfo | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
@@ -60,9 +62,8 @@ export function useCallManagement({
           participantName,
           participantAvatar,
         };
-        setCallActive(true);
-        setAutoJoinAvailable(false);
         setIncomingAlertOpen(false);
+        setActiveCall(info);
         onCallStart?.(info);
       } else {
         alert(data.error || "Call could not start.");
@@ -76,7 +77,7 @@ export function useCallManagement({
 
   // Poll for active calls
   useEffect(() => {
-    if (callActive) return;
+    if (activeCall) return;
     const interval = setInterval(async () => {
       if (!consultationId && !conversationId) return;
       const endpoint = consultationId
@@ -102,10 +103,11 @@ export function useCallManagement({
           }
         } else {
           setAutoJoinAvailable(false);
-          setCallActive(false);
-          setPendingRoomInfo(null);
           setIncomingAlertOpen(false);
-          if (callActive) onCallEnd?.();
+          if (activeCall) {
+            clearCall();
+            onCallEnd?.();
+          }
         }
       } catch {}
     }, 3000);
@@ -119,10 +121,9 @@ export function useCallManagement({
       const res = await fetch(`/api/chat/call/join/${pendingRoomInfo.callId}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to join call");
-      setCallActive(true);
       setAutoJoinAvailable(false);
       setIncomingAlertOpen(false);
-      onCallStart?.({
+      const joinedInfo = {
         roomUrl: data.roomUrl,
         roomName: data.roomName,
         token: data.token,
@@ -131,7 +132,9 @@ export function useCallManagement({
         initiatedBy: data.initiatedBy,
         participantName,
         participantAvatar,
-      });
+      };
+      setActiveCall(joinedInfo);
+      onCallStart?.(joinedInfo);
     } catch (err) {
       console.error(err);
     } finally {
@@ -152,7 +155,7 @@ export function useCallManagement({
   }, [pendingRoomInfo]);
 
   return {
-    callActive,
+    callActive: !!activeCall,
     autoJoinAvailable,
     pendingRoomInfo,
     incomingAlertOpen,

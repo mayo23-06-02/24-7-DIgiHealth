@@ -7,6 +7,7 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
+import { useAuthContext } from "@/components/auth/AuthProvider";
 
 export interface CallInfo {
   roomUrl: string;
@@ -23,6 +24,7 @@ export interface CallInfo {
 
 interface CallContextType {
   activeCall: CallInfo | null;
+  setActiveCall: (call: CallInfo | null) => void;
   incomingCall: CallInfo | null;
   setIncomingCall: (call: CallInfo | null) => void;
   acceptCall: (callInfo: CallInfo) => void;
@@ -35,6 +37,7 @@ const CallContext = createContext<CallContextType | undefined>(undefined);
 
 export const CallProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
+  const { user } = useAuthContext();
   const [incomingCall, setIncomingCall] = useState<CallInfo | null>(null);
   const [activeCall, setActiveCall] = useState<CallInfo | null>(null);
 
@@ -59,10 +62,12 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
 
         // Redirect to the messages page with the conversation ID
         if (callInfo.conversationId) {
-          router.push(`/patient/messages?chatId=${callInfo.conversationId}`);
+          const prefix = user?.role === "practitioner" ? "/practitioner" : "/patient";
+          router.push(`${prefix}/messages?chatId=${callInfo.conversationId}`);
         } else {
           // Fallback: go to messages page
-          router.push("/patient/messages");
+          const prefix = user?.role === "practitioner" ? "/practitioner" : "/patient";
+          router.push(`${prefix}/messages`);
         }
       } catch (error) {
         console.error("Accept call error:", error);
@@ -93,6 +98,7 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     activeCall,
+    setActiveCall,
     incomingCall,
     setIncomingCall,
     acceptCall,

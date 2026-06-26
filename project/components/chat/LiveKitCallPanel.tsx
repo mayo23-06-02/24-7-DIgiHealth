@@ -72,10 +72,7 @@ export default function LiveKitCallPanel({
       room
         .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
           if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
-            // Only attach if participant is still valid
-            if (room.remoteParticipants.has(participant.sid)) {
-              track.attach(remoteVideoRef.current);
-            }
+            track.attach(remoteVideoRef.current);
           }
           setRemoteConnected(true);
         })
@@ -198,7 +195,7 @@ export default function LiveKitCallPanel({
   };
 
   return (
-    <div className="h-full rounded-l-lg flex flex-col bg-slate-900 relative overflow-hidden">
+    <div className="h-full flex flex-col bg-slate-900 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 z-20 p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -259,7 +256,7 @@ export default function LiveKitCallPanel({
         </div>
 
         {callInfo.type === "video" && (
-          <div className="absolute top-20 right-4 w-48 h-72 rounded-2xl overflow-hidden bg-slate-800 border border-white/10">
+          <div className="absolute top-20 right-4 w-24 h-36 md:w-48 md:h-72 rounded-xl md:rounded-2xl overflow-hidden bg-slate-800 border border-white/10">
             <video
               ref={localVideoRef}
               autoPlay

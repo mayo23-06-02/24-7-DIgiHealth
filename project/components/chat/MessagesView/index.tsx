@@ -10,6 +10,7 @@ import { ActiveCallInfo } from "../CallButton";
 import Card from "../../ui/Card";
 import { BiMessageDetail } from "react-icons/bi";
 import EmptyState from "../../ui/EmptyState";
+import { useCall } from "@/components/context/CallContext";
 
 interface MessagesViewProps {
   fetchEnrichedContacts: (convs: any[]) => Promise<any[]>;
@@ -30,7 +31,7 @@ export default function MessagesView({
 }: MessagesViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeCall, setActiveCall] = useState<ActiveCallInfo | null>(null);
+  const { activeCall, setActiveCall, clearCall } = useCall();
   const [activeChatId, setActiveChatId] = useState<string | null>(
     searchParams.get("chatId"),
   );
@@ -50,15 +51,22 @@ export default function MessagesView({
   };
 
   const handleCallStart = useCallback(
-    (info: ActiveCallInfo) => setActiveCall(info),
-    [],
+    (info: any) => setActiveCall(info),
+    [setActiveCall],
   );
-  const handleCallEnd = useCallback(() => setActiveCall(null), []);
+  const handleCallEnd = useCallback(() => clearCall(), [clearCall]);
 
   const isActiveChatOpen = activeChatId && !activeChatId.startsWith("new-");
 
-  // Split-screen layout when call is active
+  // Full-screen overlay for video call; split-screen layout for voice call
   if (activeCall && isActiveChatOpen) {
+    if (activeCall.type === "video") {
+      return (
+        <div className="fixed inset-0 z-50 bg-slate-900 w-screen h-screen flex flex-col">
+          <LiveKitCallPanel callInfo={activeCall} onEnded={handleCallEnd} />
+        </div>
+      );
+    }
     return (
       <div className="flex h-[calc(100vh-140px)] overflow-hidden -m-4 lg:-m-8">
         <div className="w-1/1 lg:w-1/2 min-w-0 border-r border-slate-800">
