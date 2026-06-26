@@ -11,13 +11,11 @@ export default function CallButton(props: CallButtonProps) {
     callActive,
     autoJoinAvailable,
     pendingRoomInfo,
-    incomingAlertOpen,
     statusLoading,
     isCallWindowOpen,
     hasPatientWindowPassed,
     startCall,
     joinCall,
-    declineCall,
   } = useCallManagement(props);
 
   const { participantName, scheduledAt } = props;
@@ -25,38 +23,7 @@ export default function CallButton(props: CallButtonProps) {
 
   return (
     <div className="relative flex gap-2">
-      {incomingAlertOpen && pendingRoomInfo && (
-        <div className="absolute top-14 right-0 z-30 w-80 rounded-3xl border border-rose-200 bg-white p-4 shadow-rose-900/10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
-              <BiPhoneCall size={22} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold tracking-wider text-rose-500">
-                Incoming {pendingRoomInfo.type} call
-              </p>
-              <p className="truncate text-sm font-semibold text-slate-800">
-                {participantName || "Participant"} is calling
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={declineCall}
-              className="flex-1 rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-            >
-              Decline
-            </button>
-            <button
-              onClick={joinCall}
-              className="flex-1 rounded-2xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
-            >
-              Join now
-            </button>
-          </div>
-        </div>
-      )}
-
+      {/* Show "JOIN ACTIVE CALL" button if there is an active call in this conversation */}
       {autoJoinAvailable && pendingRoomInfo && (
         <button
           onClick={joinCall}
@@ -68,6 +35,7 @@ export default function CallButton(props: CallButtonProps) {
         </button>
       )}
 
+      {/* Start call buttons (only if no active call and within window) */}
       {!autoJoinAvailable && isCallWindowOpen && (
         <>
           <button
@@ -97,6 +65,7 @@ export default function CallButton(props: CallButtonProps) {
         </>
       )}
 
+      {/* Show countdown to call window opening */}
       {!autoJoinAvailable &&
         !isCallWindowOpen &&
         scheduledAt &&

@@ -115,7 +115,7 @@ export default function ConversationList({
               conv={conv}
               isActive={Boolean(
                 activeId?.toString() === conv.id?.toString() ||
-                activeId?.includes(conv.contactId)
+                activeId?.includes(conv.contactId),
               )}
               onClick={() => {
                 if (conv.isPlaceholder) {

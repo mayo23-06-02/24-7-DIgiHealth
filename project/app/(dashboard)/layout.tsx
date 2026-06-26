@@ -5,6 +5,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import DashboardShell from "@/components/shared/DashboardShell";
+import CallWrapper from "@/components/providers/CallWrapper";
 
 export default async function DashboardLayout({
   children,
@@ -26,7 +27,6 @@ export default async function DashboardLayout({
     await connectToDatabase();
     const dbUser = await User.findById(payload.userId).lean();
 
-    // In mega-admin case, there might not be a db entry if they are hardcoded, but assuming typical flow here:
     if (dbUser) {
       user = {
         id: dbUser._id.toString(),
@@ -37,7 +37,6 @@ export default async function DashboardLayout({
         avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(dbUser.firstName)}+${encodeURIComponent(dbUser.lastName)}&background=4493b8&color=fff`,
       };
     } else {
-      // Fallback if token exists but user isn't in DB right now
       const fName = (payload.firstName as string) || "User";
       const lName = (payload.lastName as string) || "";
       user = {
@@ -50,7 +49,6 @@ export default async function DashboardLayout({
       };
     }
   } catch (err) {
-    // Bad token or DB error
     console.error("Layout Auth Error:", err);
   }
 
@@ -60,7 +58,10 @@ export default async function DashboardLayout({
 
   return (
     <AuthProvider user={user}>
-      <DashboardShell>{children}</DashboardShell>
+      {/* Wrap everything with CallWrapper to enable global incoming call notifications */}
+      <CallWrapper>
+        <DashboardShell>{children}</DashboardShell>
+      </CallWrapper>
     </AuthProvider>
   );
 }

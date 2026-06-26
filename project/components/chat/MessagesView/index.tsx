@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+export type { ConversationContact } from "./types";
 import { useSearchParams, useRouter } from "next/navigation";
 import ConversationList from "./ConversationList";
 import ChatWindow from "../ChatWindow";
