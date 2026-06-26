@@ -264,14 +264,16 @@ const AppointmentsView: React.FC = () => {
       />
 
       {/* TABS & TOOLS */}
+      {/* TABS & TOOLS */}
       <Card className="flex flex-col gap-4 border border-slate-100 sticky top-0 z-30 p-3">
-        <div className="flex flex-wrap gap-1.5 bg-slate-50 rounded-2xl p-1">
+        {/* Tabs - horizontally scrollable on small screens */}
+        <div className="flex gap-1.5 bg-slate-50 rounded-2xl p-1 overflow-x-auto custom-scrollbar">
           {(["upcoming", "past", "cancelled"] as const).map((tab) => (
             <Button
               key={tab}
               onClick={() => setActiveTab(tab)}
               variant={activeTab === tab ? "primary" : "ghost"}
-              className={`px-4 py-2 h-auto text-[11px] font-bold tracking-normal rounded-xl transition-all flex items-center gap-1 ${
+              className={`px-4 py-2 h-auto text-[11px] font-bold tracking-normal rounded-xl transition-all flex items-center gap-1 whitespace-nowrap ${
                 activeTab === tab
                   ? "shadow-primary/20"
                   : "text-slate-500 hover:text-slate-600"
@@ -291,21 +293,24 @@ const AppointmentsView: React.FC = () => {
           ))}
         </div>
 
+        {/* Filters - progressively reveal on larger screens */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          <div className="flex flex-wrap gap-2 items-center">
-            <Select
-              value={sortBy}
-              onChange={(v) => setSortBy(v)}
-              options={[
-                { value: "newest", label: "Newest" },
-                { value: "oldest", label: "Oldest" },
-              ]}
-              className="w-36"
-            />
-            <Input type="date" className="w-40" />
-          </div>
+          {/* Search – single input on small, two inputs on larger */}
           <div className="flex flex-1 flex-wrap gap-2 items-center">
-            <div className="flex-1 min-w-[160px]">
+            {/* Small screen: combined search */}
+            <div className="flex-1 min-w-[120px] sm:hidden">
+              <Input
+                type="text"
+                placeholder="Search appointments..."
+                icon={<BiSearch size={18} />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            {/* Medium+ screens: separate doctor and general search */}
+            <div className="hidden sm:flex flex-1 min-w-[140px]">
               <Input
                 type="text"
                 placeholder="Search by doctor..."
@@ -315,7 +320,7 @@ const AppointmentsView: React.FC = () => {
                 className="w-full"
               />
             </div>
-            <div className="flex-1 min-w-[160px]">
+            <div className="hidden sm:flex flex-1 min-w-[140px]">
               <Input
                 type="text"
                 placeholder="Search all fields..."
@@ -325,30 +330,46 @@ const AppointmentsView: React.FC = () => {
                 className="w-full"
               />
             </div>
-          </div>
-          <div className="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200/50 self-start sm:self-auto">
-            <Button
-              variant="ghost"
-              onClick={() => setViewType("list")}
-              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${
-                viewType === "list"
-                  ? "bg-white shadow-none text-primary"
-                  : "text-slate-500 hover:text-slate-600"
-              }`}
-            >
-              <BiListUl size={20} />
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setViewType("calendar")}
-              className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${
-                viewType === "calendar"
-                  ? "bg-white shadow-none text-primary"
-                  : "text-slate-500 hover:text-slate-600"
-              }`}
-            >
-              <BiCalendar size={20} />
-            </Button>
+
+            {/* Sort & Date – hidden on small, visible on medium+ */}
+            <div className="hidden md:flex flex-wrap gap-2 items-center">
+              <Select
+                value={sortBy}
+                onChange={(v) => setSortBy(v)}
+                options={[
+                  { value: "newest", label: "Newest" },
+                  { value: "oldest", label: "Oldest" },
+                ]}
+                className="w-36"
+              />
+              <Input type="date" className="w-40" />
+            </div>
+
+            {/* View toggle – hidden on small, visible on medium+ */}
+            <div className="hidden sm:flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200/50 self-start sm:self-auto">
+              <Button
+                variant="ghost"
+                onClick={() => setViewType("list")}
+                className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${
+                  viewType === "list"
+                    ? "bg-white shadow-none text-primary"
+                    : "text-slate-500 hover:text-slate-600"
+                }`}
+              >
+                <BiListUl size={20} />
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setViewType("calendar")}
+                className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${
+                  viewType === "calendar"
+                    ? "bg-white shadow-none text-primary"
+                    : "text-slate-500 hover:text-slate-600"
+                }`}
+              >
+                <BiCalendar size={20} />
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
@@ -949,8 +970,7 @@ const AppointmentsView: React.FC = () => {
                 </div>
 
                 <Input
-                  isTextArea
-                  label="Chief Complaint Intel"
+                  label="Reason for consultation"
                   rows={4}
                   placeholder="Describe your current clinical symptoms, duration, and any relevant history for the specialist to review before the session."
                   value={bookingData.reason}
@@ -962,7 +982,7 @@ const AppointmentsView: React.FC = () => {
 
                 <Button
                   fullWidth
-                  className="h-14 sm:h-16 shadow-none shadow-primary/30 rounded-[1.5rem] bg-primary hover:bg-primary/95 text-white"
+                  className="h-14 mb-16 lg:mb-0 sm:h-16 shadow-none shadow-primary/30 rounded-[1.5rem] bg-primary hover:bg-primary/95 text-white"
                   disabled={!bookingData.time || !bookingData.reason}
                   onClick={handleBookAppointment}
                   icon={<BiCheckCircle size={20} />}

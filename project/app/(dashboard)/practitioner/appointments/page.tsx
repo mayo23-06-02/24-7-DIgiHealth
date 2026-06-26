@@ -771,7 +771,7 @@ export default function PractitionerAppointmentsPage() {
                   setForm((f) => ({ ...f, reason: e.target.value }))
                 }
                 className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm resize-none focus:outline-none focus:border-primary"
-                placeholder="Chief complaint or reason for visit…"
+                placeholder="Reason for consultation…"
               />
             </div>
 
