@@ -15,7 +15,7 @@ export interface CallInfo {
   token: string;
   callId: string;
   type: "video" | "voice";
-  initiatedBy: string;
+  initiatedBy?: string;
   participantName?: string;
   participantAvatar?: string;
   conversationId?: string; // to redirect to the correct chat
