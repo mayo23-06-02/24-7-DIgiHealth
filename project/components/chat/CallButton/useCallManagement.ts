@@ -112,7 +112,7 @@ export function useCallManagement({
       } catch {}
     }, 3000);
     return () => clearInterval(interval);
-  }, [callActive, consultationId, conversationId, participantName, participantAvatar, user, onCallEnd]);
+  }, [activeCall, consultationId, conversationId, participantName, participantAvatar, user, onCallEnd]);
 
   const joinCall = useCallback(async () => {
     if (!pendingRoomInfo) return;

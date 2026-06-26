@@ -1,4 +1,3 @@
-import React from "react";
 import { BiArchive } from "react-icons/bi";
 import Button from "./Button";
 
