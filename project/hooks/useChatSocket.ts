@@ -2,14 +2,20 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { getSocket } from "@/lib/socket";
 import { IMessage } from "@/lib/models/Message";
 
+// Per-conversation socket message cache (survives chat switches)
+const socketMessageCache = new Map<string, IMessage[]>();
+
 export const useChatSocket = (conversationId: string | null, currentUserId: string | null) => {
-  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [messages, setMessages] = useState<IMessage[]>(() =>
+    conversationId ? (socketMessageCache.get(conversationId) ?? []) : []
+  );
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<any>(null);
 
   useEffect(() => {
-    setMessages([]);
+    // Restore socket messages for this conversation from cache (no empty flash)
+    setMessages(conversationId ? (socketMessageCache.get(conversationId) ?? []) : []);
     setTypingUsers(new Set());
     if (!conversationId || !currentUserId) return;
 
@@ -34,7 +40,9 @@ export const useChatSocket = (conversationId: string | null, currentUserId: stri
         setMessages((prev) => {
           // Avoid duplicates
           if (prev.some(m => (m._id || (m as any).id) === (message._id || (message as any).id))) return prev;
-          return [...prev, message];
+          const updated = [...prev, message];
+          socketMessageCache.set(conversationId, updated);
+          return updated;
         });
       }
     });
@@ -42,7 +50,9 @@ export const useChatSocket = (conversationId: string | null, currentUserId: stri
     socket.on("message:sent", (message: IMessage) => {
       setMessages((prev) => {
         if (prev.some(m => (m._id || (m as any).id) === (message._id || (message as any).id))) return prev;
-        return [...prev, message];
+        const updated = [...prev, message];
+        if (conversationId) socketMessageCache.set(conversationId, updated);
+        return updated;
       });
     });
 
