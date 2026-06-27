@@ -238,14 +238,14 @@ const AppointmentsView: React.FC = () => {
       if (appt.status === "completed") {
         return {
           ...appt,
-          computedStatus: "past",
+          computedStatus: "past" as AppointmentStatus,
           isNew: appt.isNew && !seenIds.has(appt.id),
         };
       }
       if (appt.status === "missed") {
         return {
           ...appt,
-          computedStatus: "missed",
+          computedStatus: "missed" as AppointmentStatus,
           isNew: appt.isNew && !seenIds.has(appt.id),
         };
       }
