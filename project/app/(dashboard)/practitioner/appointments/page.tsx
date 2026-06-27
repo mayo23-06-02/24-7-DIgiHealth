@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -8,7 +14,7 @@ import Avatar from "@/components/ui/Avatar";
 import Select from "@/components/ui/Select";
 import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
-import Modal from "@/components/ui/Modal";
+import BookingModal from "@/components/doctor/BookingModal";
 import {
   BiSearch,
   BiPlus,
@@ -40,23 +46,13 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  scheduled: "bg-blue-50 text-blue-700 border-blue-200",
+  scheduled: "bg-primary/20 text-primary border-primary-200",
   ongoing: "bg-gray-50 text-gray-700 border-gray-200",
   completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
   cancelled: "bg-rose-50 text-rose-600 border-rose-200",
   pending: "bg-gray-50 text-gray-700 border-gray-200",
   requested: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  missed: "bg-amber-50 text-amber-700 border-amber-200",
-};
-
-const EMPTY_FORM = {
-  patientId: "",
-  patientName: "",
-  date: "",
-  time: "",
-  type: "video",
-  reason: "",
-  durationMinutes: 30,
+  missed: "bg-red-50 text-red-700 border-red-200",
 };
 
 export default function PractitionerAppointmentsPage() {
@@ -73,59 +69,16 @@ export default function PractitionerAppointmentsPage() {
     patientName: "",
   });
   const [editingApptId, setEditingApptId] = useState<string | null>(null);
+  const [editingPatient, setEditingPatient] = useState<{ id: string; name: string } | null>(null);
+  const [editingInitialForm, setEditingInitialForm] = useState<any>(null);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("newest");
-
-  // Form state
-  const [form, setForm] = useState({ ...EMPTY_FORM });
-  const [patientSearch, setPatientSearch] = useState("");
-  const [patientResults, setPatientResults] = useState<any[]>([]);
-  const [patientLoading, setPatientLoading] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [bookingError, setBookingError] = useState("");
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  // Debounced patient search
-  useEffect(() => {
-    if (!patientSearch.trim() || form.patientId) {
-      setPatientResults([]);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setPatientLoading(true);
-      try {
-        const res = await fetch(
-          `/api/practitioner/patients?search=${encodeURIComponent(patientSearch)}&limit=8`,
-        );
-        const json = await res.json();
-        if (json.success) setPatientResults(json.data || []);
-      } catch {
-        /* silent */
-      } finally {
-        setPatientLoading(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [patientSearch, form.patientId]);
 
   // Fetch all appointments (tab=all)
   const fetchAppointments = useCallback(async (showLoading = true) => {
@@ -139,7 +92,7 @@ export default function PractitionerAppointmentsPage() {
           const newApps = json.data.filter((a: any) => !prevIds.has(a.id));
           return json.data.map((a: any) => ({
             ...a,
-            isNew: newApps.some((n) => n.id === a.id),
+            isNew: newApps.some((n: any) => n.id === a.id),
           }));
         });
       } else {
@@ -197,78 +150,18 @@ export default function PractitionerAppointmentsPage() {
     await updateStatus(id, "cancelled");
   };
 
-  const handlePatientSelect = (patient: any) => {
-    const name = `${patient.firstName} ${patient.lastName}`;
-    setForm((f) => ({
-      ...f,
-      patientId: patient._id || patient.id,
-      patientName: name,
-    }));
-    setPatientSearch(name);
-    setShowDropdown(false);
-    setPatientResults([]);
-  };
-
   const handleEditAppt = (a: any) => {
     const start = new Date(a.scheduledStart);
     setEditingApptId(a.id);
-    setForm({
-      patientId: a.patientId,
-      patientName: a.patientName,
+    setEditingPatient({ id: a.patientId, name: a.patientName });
+    setEditingInitialForm({
       date: start.toISOString().split("T")[0],
       time: start.toTimeString().split(" ")[0].slice(0, 5),
       type: a.type,
       reason: a.reason,
       durationMinutes: a.durationMinutes || 30,
     });
-    setPatientSearch(a.patientName);
     setNewModal(true);
-  };
-
-  const handleBooking = async () => {
-    if (!form.patientId || !form.date || !form.time) {
-      setBookingError("Please select a patient, date, and time.");
-      return;
-    }
-    setSubmitting(true);
-    setBookingError("");
-    try {
-      const scheduledStart = new Date(`${form.date}T${form.time}`);
-      const scheduledEnd = new Date(
-        scheduledStart.getTime() + form.durationMinutes * 60000,
-      );
-      const url = editingApptId
-        ? `/api/practitioner/appointments/${editingApptId}`
-        : "/api/practitioner/appointments";
-      const method = editingApptId ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId: form.patientId,
-          scheduledStartTime: scheduledStart.toISOString(),
-          scheduledEndTime: scheduledEnd.toISOString(),
-          type: form.type,
-          chiefComplaint: form.reason,
-          status: editingApptId ? undefined : "pending",
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setNewModal(false);
-        setEditingApptId(null);
-        setForm({ ...EMPTY_FORM });
-        setPatientSearch("");
-        fetchAppointments();
-      } else {
-        setBookingError(json.error || "Booking failed. Please try again.");
-      }
-    } catch {
-      setBookingError("Network error. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   // Mark items as seen when tab changes
@@ -371,17 +264,26 @@ export default function PractitionerAppointmentsPage() {
     if (sortBy === "newest") {
       list.sort(
         (a, b) =>
-          new Date(b.scheduledStart).getTime() - new Date(a.scheduledStart).getTime(),
+          new Date(b.scheduledStart).getTime() -
+          new Date(a.scheduledStart).getTime(),
       );
     } else {
       list.sort(
         (a, b) =>
-          new Date(a.scheduledStart).getTime() - new Date(b.scheduledStart).getTime(),
+          new Date(a.scheduledStart).getTime() -
+          new Date(a.scheduledStart).getTime(),
       );
     }
 
     return list;
-  }, [appointmentsWithStatus, activeTab, searchQuery, dateFrom, dateTo, sortBy]);
+  }, [
+    appointmentsWithStatus,
+    activeTab,
+    searchQuery,
+    dateFrom,
+    dateTo,
+    sortBy,
+  ]);
 
   // Dynamic counts per tab
   const counts = useMemo(() => {
@@ -466,9 +368,9 @@ export default function PractitionerAppointmentsPage() {
           <Button
             onClick={() => {
               setNewModal(true);
-              setForm({ ...EMPTY_FORM });
-              setPatientSearch("");
-              setBookingError("");
+              setEditingApptId(null);
+              setEditingPatient(null);
+              setEditingInitialForm(null);
             }}
             icon={<BiPlus size={18} />}
           >
@@ -479,15 +381,17 @@ export default function PractitionerAppointmentsPage() {
 
       {/* Tabs */}
       <div className="flex gap-1.5 bg-slate-50 rounded-2xl p-1 overflow-x-auto custom-scrollbar w-fit max-w-full">
-        {([
-          "all",
-          "upcoming",
-          "ongoing",
-          "past",
-          "missed",
-          "cancelled",
-          "requests",
-        ] as AppointmentStatus[]).map((t) => (
+        {(
+          [
+            "all",
+            "upcoming",
+            "ongoing",
+            "past",
+            "missed",
+            "cancelled",
+            "requests",
+          ] as AppointmentStatus[]
+        ).map((t) => (
           <Button
             key={t}
             onClick={() => handleTabChange(t)}
@@ -652,8 +556,9 @@ export default function PractitionerAppointmentsPage() {
                     </td>
                     <td className="py-4 px-5">
                       <span
-                        className={`text-xs font-bold px-2.5 py-1 rounded-lg border uppercase ${
-                          STATUS_BADGE[a.computedStatus] || STATUS_BADGE.scheduled
+                        className={`text-xs font-bold px-2 py-1 rounded-lg  uppercase ${
+                          STATUS_BADGE[a.computedStatus] ||
+                          STATUS_BADGE.scheduled
                         }`}
                       >
                         {a.computedStatus}
@@ -777,22 +682,15 @@ export default function PractitionerAppointmentsPage() {
       />
 
       {/* New/Edit Appointment Modal */}
-      <Modal
+      <BookingModal
         isOpen={newModal}
+        mode="practitioner"
+        editingApptId={editingApptId}
+        patient={editingPatient}
+        initialForm={editingInitialForm ?? undefined}
         onClose={() => {
           setNewModal(false);
           setEditingApptId(null);
-          setForm({ ...EMPTY_FORM });
-          setPatientSearch("");
-        }}
-        title={editingApptId ? "Edit Clinical Appointment" : "Schedule New Appointment"}
-        width="sm"
-      >
-        <div className="space-y-6">
-          <p className="text-xs text-slate-500 -mt-4 mb-4">
-            Schedule a consultation with an existing patient
-          </p>
-
           <div className="space-y-4">
             {/* Patient Search */}
             <div ref={dropdownRef}>
@@ -847,7 +745,8 @@ export default function PractitionerAppointmentsPage() {
                   <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-2xl shadow-slate-200/60 z-50 overflow-hidden max-h-60 overflow-y-auto">
                     {patientLoading ? (
                       <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-500">
-                        <BiLoaderAlt className="animate-spin" size={14} /> Searching patients…
+                        <BiLoaderAlt className="animate-spin" size={14} />{" "}
+                        Searching patients…
                       </div>
                     ) : patientResults.length === 0 ? (
                       <div className="py-6 text-center text-xs text-slate-500">

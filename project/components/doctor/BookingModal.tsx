@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -14,6 +14,7 @@ import {
   BiLeftArrow,
   BiRightArrow,
   BiCheck,
+  BiSearch,
 } from "react-icons/bi";
 import { toast } from "react-hot-toast";
 import Card from "../ui/Card";
@@ -30,14 +31,30 @@ interface Doctor {
   isOnline?: boolean;
 }
 
+interface Patient {
+  id: string;
+  name: string;
+  email?: string;
+  avatar?: string;
+}
+
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  mode?: "patient" | "practitioner";
   doctor?: Doctor | null;
+  patient?: Patient | null;
+  editingApptId?: string | null;
+  initialForm?: {
+    date?: string;
+    time?: string;
+    reason?: string;
+    durationMinutes?: number;
+    type?: string;
+  };
   onSuccess?: () => void;
 }
 
-// Generate 30â€‘minute slots from 08:00 to 23:30
 const generateTimeSlots = (): string[] => {
   const slots: string[] = [];
   for (let hour = 8; hour < 24; hour++) {
@@ -54,148 +71,232 @@ const generateTimeSlots = (): string[] => {
 export default function BookingModal({
   isOpen,
   onClose,
+  mode = "patient",
   doctor = null,
+  patient = null,
+  editingApptId = null,
+  initialForm,
   onSuccess,
 }: BookingModalProps) {
+  const isPractitionerMode = mode === "practitioner";
+
   const [step, setStep] = useState(1);
-  const [selectedDoctorState, setSelectedDoctorState] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
   const [selectedTime, setSelectedTime] = useState("");
   const [concern, setConcern] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [durationMinutes, setDurationMinutes] = useState(30);
+  const [consultType, setConsultType] = useState("video");
 
-  // Practitioner Search (only used if doctor prop is not supplied)
+  const [selectedDoctorState, setSelectedDoctorState] = useState<Doctor | null>(null);
   const [availableDocs, setAvailableDocs] = useState<Doctor[]>([]);
   const [doctorSearch, setDoctorSearch] = useState("");
 
-  // Determine total steps dynamically
-  const totalSteps = doctor ? 3 : 4;
+  const [selectedPatientState, setSelectedPatientState] = useState<Patient | null>(null);
+  const [patientSearch, setPatientSearch] = useState("");
+  const [patientResults, setPatientResults] = useState<Patient[]>([]);
+  const [patientLoading, setPatientLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const showDoctorSelect = !doctor && step === 1;
-  const showDateTime = (doctor && step === 1) || (!doctor && step === 2);
-  const showConcern = (doctor && step === 2) || (!doctor && step === 3);
-  const showConfirm = (doctor && step === 3) || (!doctor && step === 4);
+  const hasPreSelected = isPractitionerMode ? !!patient : !!doctor;
+  const totalSteps = hasPreSelected ? 3 : 4;
 
-  // Sync state when modal is opened or doctor changes
+  const showPersonSelect = !hasPreSelected && step === 1;
+  const showDateTime = (hasPreSelected && step === 1) || (!hasPreSelected && step === 2);
+  const showConcern = (hasPreSelected && step === 2) || (!hasPreSelected && step === 3);
+  const showConfirm = (hasPreSelected && step === 3) || (!hasPreSelected && step === 4);
+
   useEffect(() => {
     if (isOpen) {
-      setSelectedDoctorState(doctor);
       setStep(1);
-      setSelectedDate(new Date().toISOString().split("T")[0]);
-      setSelectedTime("");
-      setConcern("");
+      setSelectedDate(initialForm?.date || new Date().toISOString().split("T")[0]);
+      setSelectedTime(initialForm?.time || "");
+      setConcern(initialForm?.reason || "");
+      setDurationMinutes(initialForm?.durationMinutes || 30);
+      setConsultType(initialForm?.type || "video");
       setDoctorSearch("");
+      setPatientSearch(patient?.name || "");
+      if (isPractitionerMode) {
+        setSelectedPatientState(patient || null);
+      } else {
+        setSelectedDoctorState(doctor || null);
+      }
     }
-  }, [isOpen, doctor]);
+  }, [isOpen, doctor, patient, isPractitionerMode, initialForm]);
 
-  // Fetch available practitioners if booking from a general dashboard
   useEffect(() => {
-    if (isOpen && !doctor) {
+    if (isOpen && !isPractitionerMode && !doctor) {
       fetch("/api/practitioners/available")
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch");
           return res.json();
         })
         .then((data) => {
-          const docs = data.map((doc: any) => ({
-            id: doc.id,
-            name: doc.name,
-            specialisation: doc.specialisation || doc.specialty || "Clinical Specialist",
-            avatar: doc.avatar,
-            rating: doc.rating,
-            isOnline: doc.isOnline,
-          }));
-          setAvailableDocs(docs);
+          setAvailableDocs(
+            data.map((doc: any) => ({
+              id: doc.id,
+              name: doc.name,
+              specialisation: doc.specialisation || doc.specialty || "Clinical Specialist",
+              avatar: doc.avatar,
+              rating: doc.rating,
+              isOnline: doc.isOnline,
+            })),
+          );
         })
         .catch((err) => console.error("Available docs fetch error:", err));
     }
-  }, [isOpen, doctor]);
+  }, [isOpen, doctor, isPractitionerMode]);
 
-  // All possible 30â€‘minute slots (hardcoded)
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  useEffect(() => {
+    if (!isPractitionerMode) return;
+    if (!patientSearch.trim() || selectedPatientState?.id) {
+      setPatientResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setPatientLoading(true);
+      try {
+        const res = await fetch(
+          `/api/practitioner/patients?search=${encodeURIComponent(patientSearch)}&limit=8`,
+        );
+        const json = await res.json();
+        if (json.success) {
+          setPatientResults(
+            (json.data || []).map((p: any) => ({
+              id: p._id || p.id,
+              name: `${p.firstName} ${p.lastName}`,
+              email: p.email || p.phone || "",
+              avatar: p.avatar,
+            })),
+          );
+        }
+      } catch { /* silent */ } finally {
+        setPatientLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [patientSearch, selectedPatientState, isPractitionerMode]);
+
   const allSlots = useMemo(() => generateTimeSlots(), []);
-
-  // Filter slots for selected practitioner
   const availableTimes = useMemo(() => {
-    if (selectedDoctorState?.schedule && selectedDoctorState.schedule.length > 0) {
+    if (!isPractitionerMode && selectedDoctorState?.schedule?.length) {
       return allSlots.filter((slot) => selectedDoctorState.schedule!.includes(slot));
     }
     return allSlots;
-  }, [selectedDoctorState, allSlots]);
+  }, [selectedDoctorState, allSlots, isPractitionerMode]);
 
-  const handleClose = () => {
-    onClose();
-  };
+  const handleClose = () => onClose();
 
   const handleNext = () => {
-    if (showDoctorSelect) {
-      if (!selectedDoctorState) {
-        toast.error("Please select a practitioner.");
+    if (showPersonSelect) {
+      const missing = isPractitionerMode ? !selectedPatientState : !selectedDoctorState;
+      if (missing) {
+        toast.error(isPractitionerMode ? "Please select a patient." : "Please select a practitioner.");
         return;
       }
     }
-    if (showDateTime) {
-      if (!selectedTime) {
-        toast.error("Please select a time slot.");
-        return;
-      }
+    if (showDateTime && !selectedTime) {
+      toast.error("Please select a time slot.");
+      return;
     }
-    if (showConcern) {
-      if (!concern.trim()) {
-        toast.error("Please describe your reason for consultation.");
-        return;
-      }
+    if (showConcern && !concern.trim()) {
+      toast.error("Please describe the reason for this consultation.");
+      return;
     }
     setStep((s) => Math.min(s + 1, totalSteps));
   };
 
-  const handlePrev = () => {
-    setStep((s) => Math.max(s - 1, 1));
-  };
+  const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleSubmit = async () => {
-    if (!selectedDoctorState) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/consultations/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          practitionerId: selectedDoctorState.id,
-          date: selectedDate,
-          time: selectedTime,
-          type: "video",
-          chiefComplaint: concern,
-        }),
-      });
-
-      if (res.ok) {
-        toast.success("Appointment confirmed and synced!");
-        onSuccess?.();
-        handleClose();
+      if (isPractitionerMode) {
+        if (!selectedPatientState) return;
+        const scheduledStart = new Date(`${selectedDate}T${selectedTime}`);
+        const scheduledEnd = new Date(scheduledStart.getTime() + durationMinutes * 60000);
+        const url = editingApptId
+          ? `/api/practitioner/appointments/${editingApptId}`
+          : "/api/practitioner/appointments";
+        const res = await fetch(url, {
+          method: editingApptId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            patientId: selectedPatientState.id,
+            scheduledStartTime: scheduledStart.toISOString(),
+            scheduledEndTime: scheduledEnd.toISOString(),
+            type: consultType,
+            chiefComplaint: concern,
+            status: editingApptId ? undefined : "pending",
+          }),
+        });
+        const json = await res.json();
+        if (json.success) {
+          toast.success(editingApptId ? "Appointment updated!" : "Appointment scheduled!");
+          onSuccess?.();
+          handleClose();
+        } else {
+          throw new Error(json.error || "Booking failed");
+        }
       } else {
-        throw new Error("Failed to book");
+        if (!selectedDoctorState) return;
+        const res = await fetch("/api/consultations/book", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            practitionerId: selectedDoctorState.id,
+            date: selectedDate,
+            time: selectedTime,
+            type: "video",
+            chiefComplaint: concern,
+          }),
+        });
+        if (res.ok) {
+          toast.success("Appointment confirmed and synced!");
+          onSuccess?.();
+          handleClose();
+        } else {
+          throw new Error("Failed to book");
+        }
       }
-    } catch (error) {
-      toast.error("Process failed. Please try again.");
+    } catch (error: any) {
+      toast.error(error?.message || "Process failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Format date for preview
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr + "T00:00:00");
     return d.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+      weekday: "long", year: "numeric", month: "long", day: "numeric",
     });
   };
 
-  // Helper to render step indicator
+  const selectedPerson = isPractitionerMode ? selectedPatientState : selectedDoctorState;
+  const selectedPersonLabel = isPractitionerMode ? "Patient" : "Primary Practitioner";
+  const selectedPersonName = isPractitionerMode
+    ? (selectedPatientState?.name || "")
+    : selectedDoctorState
+      ? (selectedDoctorState.name.startsWith("Dr. ") ? selectedDoctorState.name : `Dr. ${selectedDoctorState.name}`)
+      : "";
+  const selectedPersonSub = isPractitionerMode
+    ? (selectedPatientState?.email || "Patient")
+    : (selectedDoctorState?.specialisation || "");
+
   const StepIndicator = () => {
     const stepsArray = Array.from({ length: totalSteps }, (_, i) => i + 1);
     return (
@@ -214,11 +315,7 @@ export default function BookingModal({
               {step > s ? <BiCheck size={16} /> : s}
             </div>
             {s < totalSteps && (
-              <div
-                className={`w-12 h-0.5 ${
-                  step > s ? "bg-emerald-500" : "bg-slate-200"
-                }`}
-              />
+              <div className={`w-12 h-0.5 ${step > s ? "bg-emerald-500" : "bg-slate-200"}`} />
             )}
           </div>
         ))}
@@ -230,157 +327,186 @@ export default function BookingModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Secure Clinical Booking"
+      title={
+        isPractitionerMode
+          ? editingApptId ? "Edit Clinical Appointment" : "Schedule New Appointment"
+          : "Secure Clinical Booking"
+      }
       width="md"
     >
       <div className="space-y-6 py-2">
-        {/* Step indicator */}
         <StepIndicator />
 
-        {/* Doctor info (always visible once a practitioner is selected) */}
-        {selectedDoctorState && (
+        {/* Selected person card */}
+        {selectedPerson && (
           <Card className="flex items-center gap-5 bg-slate-50/50 p-5 rounded-lg border border-slate-100">
             <div className="w-14 h-14 flex items-center justify-center overflow-hidden rounded-lg shrink-0">
-              {selectedDoctorState.avatar ? (
-                <img
-                  src={selectedDoctorState.avatar}
-                  alt={selectedDoctorState.name}
-                  className="w-full h-full object-cover"
-                />
+              {(selectedPerson as any).avatar ? (
+                <img src={(selectedPerson as any).avatar} alt={selectedPersonName} className="w-full h-full object-cover" />
               ) : (
-                <Avatar name={selectedDoctorState.name} size="lg" />
+                <Avatar name={selectedPersonName} size="lg" />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-bold text-slate-500 tracking-normal mb-0.5 font-grotesk">
-                Primary Practitioner
-              </h4>
-              <h4 className="font-bold text-slate-800 text-lg leading-tight tracking-tight font-grotesk">
-                {selectedDoctorState.name.startsWith("Dr. ") ? selectedDoctorState.name : `Dr. ${selectedDoctorState.name}`}
-              </h4>
-              <p className="text-slate-600 tracking-normal opacity-80 mt-0.5">
-                {selectedDoctorState.specialisation}
-              </p>
+              <h4 className="text-sm font-bold text-slate-500 tracking-normal mb-0.5 font-grotesk">{selectedPersonLabel}</h4>
+              <h4 className="font-bold text-slate-800 text-lg leading-tight tracking-tight font-grotesk">{selectedPersonName}</h4>
+              <p className="text-slate-600 tracking-normal opacity-80 mt-0.5">{selectedPersonSub}</p>
             </div>
           </Card>
         )}
 
-        {/* Step 1: Doctor Selection (only if no doctor prop supplied) */}
-        {showDoctorSelect && (
+        {/* STEP: Person Selection */}
+        {showPersonSelect && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
             <div className="px-1">
               <h4 className="text-lg font-bold text-slate-800 tracking-tight mb-1 font-grotesk">
-                Medical Network
+                {isPractitionerMode ? "Select Patient" : "Medical Network"}
               </h4>
               <p className="text-xs text-slate-500 font-bold tracking-normal opacity-80">
-                Choose from our verified network of practitioners.
+                {isPractitionerMode
+                  ? "Search and select a patient from your practice."
+                  : "Choose from our verified network of practitioners."}
               </p>
             </div>
-            <div className="px-1">
-              <Input
-                type="text"
-                placeholder="Search practitioners..."
-                value={doctorSearch}
-                onChange={(e) => setDoctorSearch(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
-              {availableDocs
-                .filter(
-                  (doc) =>
-                    doc.name.toLowerCase().includes(doctorSearch.toLowerCase()) ||
-                    doc.specialisation.toLowerCase().includes(doctorSearch.toLowerCase()),
-                )
-                .map((doc) => {
-                  const isSelected = selectedDoctorState?.id === doc.id;
-                  const docDisplayName = doc.name.startsWith("Dr. ") ? doc.name : `Dr. ${doc.name}`;
-                  return (
-                    <Card
-                      key={doc.id}
-                      onClick={() => {
-                        setSelectedDoctorState(doc);
-                        setStep(2);
-                      }}
-                      className={`group p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
-                        isSelected
-                          ? "border-primary bg-primary/5 shadow-none shadow-primary/10"
-                          : "border-slate-100 bg-white hover:border-primary/20 hover:bg-slate-50/20"
-                      }`}
+
+            {isPractitionerMode ? (
+              <div ref={dropdownRef} className="relative px-1">
+                <div className="relative">
+                  <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
+                  <input
+                    type="text"
+                    placeholder="Type to search your patients…"
+                    value={patientSearch}
+                    onFocus={() => { if (!selectedPatientState?.id && patientSearch) setShowDropdown(true); }}
+                    onChange={(e) => {
+                      setPatientSearch(e.target.value);
+                      setSelectedPatientState(null);
+                      setShowDropdown(true);
+                    }}
+                    className={`w-full pl-9 pr-9 py-3 border rounded-xl text-sm focus:outline-none transition-colors ${
+                      selectedPatientState ? "border-primary bg-primary/5 font-medium" : "border-slate-200 focus:border-primary"
+                    }`}
+                  />
+                  {selectedPatientState && (
+                    <button
+                      onClick={() => { setSelectedPatientState(null); setPatientSearch(""); }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-400 transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        <Avatar
-                          name={doc.name}
-                          src={doc.avatar}
-                          size="md"
-                          className="group-hover:scale-105 transition-transform duration-500 shadow-none shadow-slate-100"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <h1 className="font-bold text-slate-800 text-sm mb-0.5 truncate group-hover:text-primary transition-colors">
-                            {docDisplayName}
-                          </h1>
-                          <p className="font-semibold text-slate-500 text-xs tracking-normal">
-                            {doc.specialisation}
-                          </p>
-                        </div>
+                      <BiX size={14} />
+                    </button>
+                  )}
+                </div>
+                {showDropdown && !selectedPatientState && (
+                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-2xl shadow-lg z-50 overflow-hidden max-h-64 overflow-y-auto">
+                    {patientLoading ? (
+                      <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-500">
+                        <BiLoaderAlt className="animate-spin" size={14} /> Searching patients…
                       </div>
-                    </Card>
-                  );
-                })}
-            </div>
+                    ) : patientResults.length === 0 ? (
+                      <div className="py-6 text-center text-xs text-slate-500">
+                        {patientSearch.length < 1 ? "Start typing to find a patient" : "No matching patients found"}
+                      </div>
+                    ) : (
+                      patientResults.map((p, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onMouseDown={() => {
+                            setSelectedPatientState(p);
+                            setPatientSearch(p.name);
+                            setShowDropdown(false);
+                            setPatientResults([]);
+                            setStep(2);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-primary/5 transition-colors text-left border-b border-slate-50 last:border-0"
+                        >
+                          <Avatar name={p.name} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-slate-800 truncate">{p.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{p.email || "Patient"}</p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="px-1">
+                  <Input type="text" placeholder="Search practitioners..." value={doctorSearch} onChange={(e) => setDoctorSearch(e.target.value)} className="w-full" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
+                  {availableDocs
+                    .filter((doc) =>
+                      doc.name.toLowerCase().includes(doctorSearch.toLowerCase()) ||
+                      doc.specialisation.toLowerCase().includes(doctorSearch.toLowerCase()),
+                    )
+                    .map((doc) => {
+                      const isSelected = selectedDoctorState?.id === doc.id;
+                      const docDisplayName = doc.name.startsWith("Dr. ") ? doc.name : `Dr. ${doc.name}`;
+                      return (
+                        <Card
+                          key={doc.id}
+                          onClick={() => { setSelectedDoctorState(doc); setStep(2); }}
+                          className={`group p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                            isSelected
+                              ? "border-primary bg-primary/5 shadow-none shadow-primary/10"
+                              : "border-slate-100 bg-white hover:border-primary/20 hover:bg-slate-50/20"
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <Avatar name={doc.name} src={doc.avatar} size="md" className="group-hover:scale-105 transition-transform duration-500 shadow-none shadow-slate-100" />
+                            <div className="min-w-0 flex-1">
+                              <h1 className="font-bold text-slate-800 text-sm mb-0.5 truncate group-hover:text-primary transition-colors">{docDisplayName}</h1>
+                              <p className="font-semibold text-slate-500 text-xs tracking-normal">{doc.specialisation}</p>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        {/* Step 2: Date & Time */}
+        {/* STEP: Date & Time */}
         {showDateTime && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-            {/* Date selection */}
             <div className="space-y-3">
               <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
                 <BiCalendar size={14} className="text-primary" /> Select Date
               </label>
               <div className="flex gap-2 overflow-x-auto py-3 px-1 -mx-4 custom-scrollbar">
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(
-                  (offset) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() + offset);
-                    const dateStr = d.toISOString().split("T")[0];
-                    const dayName = d.toLocaleDateString("en-US", {
-                      weekday: "short",
-                    });
-                    const dayNum = d.getDate();
-                    const isSelected = selectedDate === dateStr;
-                    return (
-                      <button
-                        key={dateStr}
-                        onClick={() => setSelectedDate(dateStr)}
-                        className={`flex flex-col items-center justify-center rounded-xl border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${
-                          isSelected
-                            ? "border-primary bg-primary text-white shadow-primary/30 scale-105"
-                            : "border-slate-200 bg-white text-slate-500 hover:border-primary/30"
-                        }`}
-                      >
-                        <span
-                          className={`text-[9px] font-bold tracking-normal ${isSelected ? "text-white/70" : "text-slate-500"}`}
-                        >
-                          {dayName}
-                        </span>
-                        <span
-                          className={`text-2xl font-bold tabular-nums tracking-tighter ${isSelected ? "text-white" : "text-slate-800"}`}
-                        >
-                          {dayNum}
-                        </span>
-                      </button>
-                    );
-                  },
-                )}
+                {[0,1,2,3,4,5,6,7,8,9,10,11,12,13].map((offset) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + offset);
+                  const dateStr = d.toISOString().split("T")[0];
+                  const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+                  const dayNum = d.getDate();
+                  const isSelected = selectedDate === dateStr;
+                  return (
+                    <button
+                      key={dateStr}
+                      onClick={() => setSelectedDate(dateStr)}
+                      className={`flex flex-col items-center justify-center rounded-xl border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${
+                        isSelected
+                          ? "border-primary bg-primary text-white shadow-primary/30 scale-105"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-primary/30"
+                      }`}
+                    >
+                      <span className={`text-[9px] font-bold tracking-normal ${isSelected ? "text-white/70" : "text-slate-500"}`}>{dayName}</span>
+                      <span className={`text-2xl font-bold tabular-nums tracking-tighter ${isSelected ? "text-white" : "text-slate-800"}`}>{dayNum}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Time selection */}
             <div className="space-y-3">
               <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
-                <BiTime size={14} className="text-primary" /> Select Time (30â€‘minute slots)
+                <BiTime size={14} className="text-primary" /> Select Time (30-minute slots)
               </label>
               <div className="max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -400,15 +526,43 @@ export default function BookingModal({
                 </div>
               </div>
               {availableTimes.length === 0 && (
-                <p className="text-sm text-rose-500 font-bold px-1">
-                  No available slots for this date.
-                </p>
+                <p className="text-sm text-rose-500 font-bold px-1">No available slots for this date.</p>
               )}
             </div>
+
+            {isPractitionerMode && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 tracking-wider mb-1.5 block">Duration</label>
+                  <select
+                    value={durationMinutes}
+                    onChange={(e) => setDurationMinutes(Number(e.target.value))}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary"
+                  >
+                    <option value={15}>15 min</option>
+                    <option value={30}>30 min</option>
+                    <option value={45}>45 min</option>
+                    <option value={60}>1 hour</option>
+                    <option value={90}>1.5 hours</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 tracking-wider mb-1.5 block">Method</label>
+                  <select
+                    value={consultType}
+                    onChange={(e) => setConsultType(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary"
+                  >
+                    <option value="video">?? Video Call</option>
+                    <option value="chat">?? Chat</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Step 3: Reason for Consultation */}
+        {/* STEP: Reason */}
         {showConcern && (
           <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
             <div className="space-y-2">
@@ -428,91 +582,68 @@ export default function BookingModal({
           </div>
         )}
 
-        {/* Step 4: Preview & Confirm */}
-        {showConfirm && selectedDoctorState && (
+        {/* STEP: Confirm */}
+        {showConfirm && selectedPerson && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
             <div className="bg-slate-50/50 rounded-xl p-6 space-y-4 border border-slate-100">
-              <h4 className="text-sm font-bold text-slate-500 tracking-normal uppercase">
-                Booking Summary
-              </h4>
+              <h4 className="text-sm font-bold text-slate-500 tracking-normal uppercase">Booking Summary</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-bold text-slate-400 tracking-wide">
-                    Practitioner
-                  </p>
-                  <p className="font-bold text-slate-800">
-                    {selectedDoctorState.name.startsWith("Dr. ") ? selectedDoctorState.name : `Dr. ${selectedDoctorState.name}`}
-                  </p>
+                  <p className="text-xs font-bold text-slate-400 tracking-wide">{isPractitionerMode ? "Patient" : "Practitioner"}</p>
+                  <p className="font-bold text-slate-800">{selectedPersonName}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 tracking-wide">
-                    Specialisation
-                  </p>
-                  <p className="font-bold text-slate-800">
-                    {selectedDoctorState.specialisation}
-                  </p>
+                  <p className="text-xs font-bold text-slate-400 tracking-wide">{isPractitionerMode ? "Contact" : "Specialisation"}</p>
+                  <p className="font-bold text-slate-800">{selectedPersonSub}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 tracking-wide">
-                    Date
-                  </p>
-                  <p className="font-bold text-slate-800">
-                    {formatDate(selectedDate)}
-                  </p>
+                  <p className="text-xs font-bold text-slate-400 tracking-wide">Date</p>
+                  <p className="font-bold text-slate-800">{formatDate(selectedDate)}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 tracking-wide">
-                    Time
-                  </p>
+                  <p className="text-xs font-bold text-slate-400 tracking-wide">Time</p>
                   <p className="font-bold text-slate-800">{selectedTime}</p>
                 </div>
+                {isPractitionerMode && (
+                  <>
+                    <div>
+                      <p className="text-xs font-bold text-slate-400 tracking-wide">Duration</p>
+                      <p className="font-bold text-slate-800">{durationMinutes} min</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-400 tracking-wide">Method</p>
+                      <p className="font-bold text-slate-800 capitalize">{consultType}</p>
+                    </div>
+                  </>
+                )}
                 <div className="sm:col-span-2">
-                  <p className="text-xs font-bold text-slate-400 tracking-wide">
-                    Reason for Consultation
-                  </p>
-                  <p className="font-bold text-slate-800 break-words">
-                    {concern}
-                  </p>
+                  <p className="text-xs font-bold text-slate-400 tracking-wide">Reason for Consultation</p>
+                  <p className="font-bold text-slate-800 break-words">{concern}</p>
                 </div>
               </div>
             </div>
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
-              <BiCheckCircle
-                className="text-emerald-600 shrink-0 mt-0.5"
-                size={20}
-              />
+              <BiCheckCircle className="text-emerald-600 shrink-0 mt-0.5" size={20} />
               <p className="text-sm font-bold text-emerald-700">
-                You are about to confirm this appointment. A confirmation
-                notification will be sent to your registered email and the
-                practitioner will be notified.
+                {isPractitionerMode
+                  ? "You are about to schedule this appointment. The patient will be notified."
+                  : "You are about to confirm this appointment. A confirmation notification will be sent to your registered email and the practitioner will be notified."}
               </p>
             </div>
           </div>
         )}
 
-        {/* Navigation buttons */}
+        {/* Navigation */}
         <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100">
           {step > 1 ? (
-            <Button
-              variant="ghost"
-              onClick={handlePrev}
-              icon={<FaArrowLeft size={16} />}
-              iconPosition="left"
-            >
+            <Button variant="ghost" onClick={handlePrev} icon={<FaArrowLeft size={16} />} iconPosition="left">
               Back
             </Button>
           ) : (
-            <Button variant="ghost" onClick={handleClose}>
-              Cancel
-            </Button>
+            <Button variant="ghost" onClick={handleClose}>Cancel</Button>
           )}
           {step < totalSteps ? (
-            <Button
-              onClick={handleNext}
-              icon={<FaArrowRight size={16} />}
-              iconPosition="right"
-              fullWidth
-            >
+            <Button onClick={handleNext} icon={<FaArrowRight size={16} />} iconPosition="right" fullWidth>
               Continue
             </Button>
           ) : (
@@ -520,17 +651,11 @@ export default function BookingModal({
               onClick={handleSubmit}
               disabled={isSubmitting}
               className="h-12 rounded-xl text-sm font-bold tracking-normal bg-emerald-500 text-white shadow-emerald-300"
-              icon={
-                isSubmitting ? (
-                  <BiLoaderAlt className="animate-spin" size={18} />
-                ) : (
-                  <BiCheckCircle size={18} />
-                )
-              }
+              icon={isSubmitting ? <BiLoaderAlt className="animate-spin" size={18} /> : <BiCheckCircle size={18} />}
               iconPosition="right"
               fullWidth
             >
-              {isSubmitting ? "Confirming..." : "Confirm Appointment"}
+              {isSubmitting ? "Confirming..." : editingApptId ? "Save Changes" : "Confirm Appointment"}
             </Button>
           )}
         </div>
