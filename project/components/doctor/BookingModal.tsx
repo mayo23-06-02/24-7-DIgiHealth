@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
@@ -174,9 +174,9 @@ export default function BookingModal({
         if (json.success) {
           setPatientResults(
             (json.data || []).map((p: any) => ({
-              id: p._id || p.id,
-              name: `${p.firstName} ${p.lastName}`,
-              email: p.email || p.phone || "",
+              id: p.id || p._id,
+              name: p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Unknown Patient",
+              email: p.email || p.mobile || "",
               avatar: p.avatar,
             })),
           );
