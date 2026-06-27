@@ -1,25 +1,33 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Module-level cache: survives component unmount/remount and chat switches
-// Key: conversationId, Value: messages array
 const messageCache = new Map<string, any[]>();
 const conversationCache = new Map<string, any>();
 
 export function useChat(id: string, isConversationId: boolean = false) {
-  // Seed initial state from cache to prevent flash-to-empty on switch-back
-  const [messages, setMessages] = useState<any[]>(() => messageCache.get(id) ?? []);
+  const [messages, setMessagesState] = useState<any[]>(() => messageCache.get(id) ?? []);
   const [conversation, setConversation] = useState<any>(() => conversationCache.get(id) ?? null);
   const [loading, setLoading] = useState(() => !conversationCache.has(id));
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Keep cache in sync whenever messages change
+  const idRef = useRef(id);
   useEffect(() => {
-    if (id && messages.length > 0) {
-      messageCache.set(id, messages);
-    }
-  }, [id, messages]);
+    idRef.current = id;
+  }, [id]);
 
+  // Wrapped setMessages that automatically updates the module cache for the current ID
+  const setMessages = useCallback((newVal: any[] | ((prev: any[]) => any[])) => {
+    setMessagesState(prev => {
+      const resolved = typeof newVal === 'function' ? (newVal as Function)(prev) : newVal;
+      if (idRef.current) {
+        messageCache.set(idRef.current, resolved);
+      }
+      return resolved;
+    });
+  }, []);
+
+  // Sync conversation cache
   useEffect(() => {
     if (id && conversation) {
       conversationCache.set(id, conversation);
@@ -50,9 +58,6 @@ export function useChat(id: string, isConversationId: boolean = false) {
       });
   }, [id, isConversationId]);
 
-  const idRef = useRef(id);
-  idRef.current = id;
-
   const fetchMessages = async (beforeDate?: string, clearCurrent: boolean = false) => {
     if (!id) return;
     if (beforeDate) setLoadingMore(true);
@@ -65,7 +70,6 @@ export function useChat(id: string, isConversationId: boolean = false) {
     if (beforeDate) {
       url += `&before=${beforeDate}`;
     } else if (!clearCurrent) {
-      // For polling NEW messages — append after the last known message
       const cached = messageCache.get(id) ?? [];
       if (cached.length > 0) {
         const lastMsg = cached[cached.length - 1];
@@ -83,28 +87,26 @@ export function useChat(id: string, isConversationId: boolean = false) {
         }
 
         setMessages(prev => {
-          // Guard against stale updates for a previously active chat
           if (idRef.current !== id) return prev;
-
-          const base = clearCurrent ? [] : (beforeDate ? prev : prev);
+          const base = clearCurrent ? [] : prev;
           const combined = beforeDate ? [...newMessages, ...base] : [...base, ...newMessages];
           const seen = new Set<string>();
-          const unique = combined.filter(msg => {
+          return combined.filter(msg => {
             const mid = msg._id || msg.id;
             if (!mid) return true;
             if (seen.has(mid)) return false;
             seen.add(mid);
             return true;
           });
-          messageCache.set(id, unique);
-          return unique;
         });
       }
     } catch (err) {
       console.error('Failed to fetch messages:', err);
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (idRef.current === id) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -112,17 +114,16 @@ export function useChat(id: string, isConversationId: boolean = false) {
   useEffect(() => {
     if (!id) return;
 
-    // Restore from cache instantly (no flash to empty)
     const cached = messageCache.get(id);
     if (cached && cached.length > 0) {
-      setMessages(cached);
+      setMessagesState(cached);
       setLoading(false);
     } else {
+      setMessagesState([]);
       setLoading(true);
     }
 
     setHasMore(true);
-    // Always re-validate to get any new messages since last visit
     fetchMessages(undefined, !cached || cached.length === 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isConversationId]);
@@ -138,11 +139,7 @@ export function useChat(id: string, isConversationId: boolean = false) {
   const sendMessage = async (msgData: any) => {
     const tempId = Date.now().toString();
     const tempMsg = { ...msgData, _id: tempId, createdAt: new Date().toISOString() };
-    setMessages(prev => {
-      const updated = [...prev, tempMsg];
-      messageCache.set(id, updated);
-      return updated;
-    });
+    setMessages(prev => [...prev, tempMsg]);
 
     try {
       const res = await fetch('/api/chat/messages', {
@@ -151,11 +148,7 @@ export function useChat(id: string, isConversationId: boolean = false) {
         body: JSON.stringify(msgData)
       });
       const savedMsg = await res.json();
-      setMessages(prev => {
-        const updated = prev.map(m => m._id === tempId ? savedMsg : m);
-        messageCache.set(id, updated);
-        return updated;
-      });
+      setMessages(prev => prev.map(m => m._id === tempId ? savedMsg : m));
     } catch (err) {
       console.error('Send failed:', err);
     }
@@ -168,15 +161,11 @@ export function useChat(id: string, isConversationId: boolean = false) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messageId })
       });
-      setMessages(prev => {
-        const updated = prev.map(m => m._id === messageId ? { ...m, isRead: true } : m);
-        messageCache.set(id, updated);
-        return updated;
-      });
+      setMessages(prev => prev.map(m => m._id === messageId ? { ...m, isRead: true } : m));
     } catch (err) {
       console.error('Failed to mark as read:', err);
     }
   };
 
-  return { messages, sendMessage, conversation, loading, loadMore, hasMore, loadingMore, markAsRead };
+  return { messages, setMessages, sendMessage, conversation, loading, loadMore, hasMore, loadingMore, markAsRead };
 }

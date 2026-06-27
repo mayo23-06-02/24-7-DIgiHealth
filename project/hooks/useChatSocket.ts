@@ -2,20 +2,24 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { getSocket } from "@/lib/socket";
 import { IMessage } from "@/lib/models/Message";
 
-// Per-conversation socket message cache (survives chat switches)
-const socketMessageCache = new Map<string, IMessage[]>();
-
-export const useChatSocket = (conversationId: string | null, currentUserId: string | null) => {
-  const [messages, setMessages] = useState<IMessage[]>(() =>
-    conversationId ? (socketMessageCache.get(conversationId) ?? []) : []
-  );
+export const useChatSocket = (
+  conversationId: string | null,
+  currentUserId: string | null,
+  options: {
+    onNewMessage?: (message: IMessage) => void;
+    onMessageSent?: (message: IMessage) => void;
+    onMessageRead?: (data: { messageId: string; readAt: string }) => void;
+  } = {}
+) => {
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<any>(null);
 
+  // Keep options in ref to avoid effect recreation if handlers change
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   useEffect(() => {
-    // Restore socket messages for this conversation from cache (no empty flash)
-    setMessages(conversationId ? (socketMessageCache.get(conversationId) ?? []) : []);
     setTypingUsers(new Set());
     if (!conversationId || !currentUserId) return;
 
@@ -26,66 +30,64 @@ export const useChatSocket = (conversationId: string | null, currentUserId: stri
       socket.connect();
     }
 
-    socket.on("connect", () => {
+    const onConnect = () => {
       setIsConnected(true);
       socket.emit("join:conversation", conversationId);
-    });
+    };
 
-    socket.on("disconnect", () => {
+    const onDisconnect = () => {
       setIsConnected(false);
-    });
+    };
 
-    socket.on("new:message", (message: IMessage) => {
+    const onNewMsg = (message: IMessage) => {
       if (message.conversationId.toString() === conversationId) {
-        setMessages((prev) => {
-          // Avoid duplicates
-          if (prev.some(m => (m._id || (m as any).id) === (message._id || (message as any).id))) return prev;
-          const updated = [...prev, message];
-          socketMessageCache.set(conversationId, updated);
-          return updated;
-        });
+        optionsRef.current.onNewMessage?.(message);
       }
-    });
+    };
 
-    socket.on("message:sent", (message: IMessage) => {
-      setMessages((prev) => {
-        if (prev.some(m => (m._id || (m as any).id) === (message._id || (message as any).id))) return prev;
-        const updated = [...prev, message];
-        if (conversationId) socketMessageCache.set(conversationId, updated);
-        return updated;
-      });
-    });
+    const onMsgSent = (message: IMessage) => {
+      optionsRef.current.onMessageSent?.(message);
+    };
 
-    socket.on("typing:start", ({ userId }: { userId: string }) => {
+    const onTypingStart = ({ userId }: { userId: string }) => {
       if (userId !== currentUserId) {
         setTypingUsers((prev) => new Set(prev).add(userId));
       }
-    });
+    };
 
-    socket.on("typing:stop", ({ userId }: { userId: string }) => {
+    const onTypingStop = ({ userId }: { userId: string }) => {
       setTypingUsers((prev) => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
       });
-    });
+    };
 
-    socket.on("message:read", ({ messageId, readAt }: { messageId: string, readAt: string }) => {
-      setMessages((prev) => prev.map(m => 
-        (m._id?.toString() || (m as any).id) === messageId 
-          ? ({ ...m, isRead: true, readAt: new Date(readAt) } as any) 
-          : m
-      ));
-    });
+    const onMsgRead = ({ messageId, readAt }: { messageId: string, readAt: string }) => {
+      optionsRef.current.onMessageRead?.({ messageId, readAt });
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("new:message", onNewMsg);
+    socket.on("message:sent", onMsgSent);
+    socket.on("typing:start", onTypingStart);
+    socket.on("typing:stop", onTypingStop);
+    socket.on("message:read", onMsgRead);
+
+    // If already connected
+    if (socket.connected) {
+      onConnect();
+    }
 
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("new:message");
-      socket.off("message:sent");
-      socket.off("typing:start");
-      socket.off("typing:stop");
-      socket.off("message:read");
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("new:message", onNewMsg);
+      socket.off("message:sent", onMsgSent);
+      socket.off("typing:start", onTypingStart);
+      socket.off("typing:stop", onTypingStop);
+      socket.off("message:read", onMsgRead);
     };
   }, [conversationId, currentUserId]);
 
@@ -119,8 +121,6 @@ export const useChatSocket = (conversationId: string | null, currentUserId: stri
   }, [conversationId]);
 
   return {
-    messages,
-    setMessages,
     typingUsers,
     isConnected,
     sendMessage,

@@ -35,8 +35,8 @@ export default function CallButton(props: CallButtonProps) {
         </button>
       )}
 
-      {/* Start call buttons (only if no active call and within window) */}
-      {!autoJoinAvailable && isCallWindowOpen && (
+      {/* Start call buttons (only for practitioners, if no active call) */}
+      {!autoJoinAvailable && isCallWindowOpen && props.user?.role === "practitioner" && (
         <>
           <button
             onClick={() => startCall("voice")}
@@ -64,19 +64,6 @@ export default function CallButton(props: CallButtonProps) {
           </button>
         </>
       )}
-
-      {/* Show countdown to call window opening */}
-      {!autoJoinAvailable &&
-        !isCallWindowOpen &&
-        scheduledAt &&
-        !hasPatientWindowPassed && (
-          <span className="text-xs font-semibold text-slate-400 px-2">
-            Call opens at{" "}
-            {new Date(
-              scheduledStartMs! - PATIENT_CALL_WINDOW_LEAD_MS,
-            ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        )}
     </div>
   );
 }

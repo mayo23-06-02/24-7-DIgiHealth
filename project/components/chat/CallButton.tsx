@@ -293,7 +293,7 @@ export default function CallButton({
         </button>
       )}
 
-      {!autoJoinAvailable && isCallWindowOpen && (
+      {!autoJoinAvailable && isPractitioner && (
         <>
           <button
             onClick={() => startCall("voice")}
@@ -321,18 +321,6 @@ export default function CallButton({
           </button>
         </>
       )}
-
-      {!autoJoinAvailable &&
-        !isCallWindowOpen &&
-        scheduledAt &&
-        !hasPatientWindowPassed && (
-          <span className="text-xs font-semibold text-slate-400 px-2">
-            Call opens at{" "}
-            {new Date(
-              scheduledStartMs! - PATIENT_CALL_WINDOW_LEAD_MS,
-            ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        )}
     </div>
   );
 }

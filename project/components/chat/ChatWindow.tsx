@@ -38,7 +38,8 @@ export default function ChatWindow({
   const { user } = useAuthContext();
 
   const {
-    messages: initialMessages,
+    messages,
+    setMessages,
     sendMessage: restSendMessage,
     conversation,
     loading,
@@ -46,39 +47,43 @@ export default function ChatWindow({
   } = useChat((consultationId || conversationId) as string, !!conversationId);
 
   const {
-    messages: socketMessages,
-    setMessages: setSocketMessages,
     typingUsers: socketTypingUsers,
     isConnected,
     sendMessage: socketSendMessage,
     startTyping,
     stopTyping,
     markAsRead: socketMarkAsRead,
-  } = useChatSocket(conversationId || conversation?._id, user?.id || null);
+  } = useChatSocket(conversationId || conversation?._id, user?.id || null, {
+    onNewMessage: (msg) => {
+      setMessages((prev) => {
+        if (prev.some((m) => (m._id || m.id) === (msg._id || msg.id))) return prev;
+        return [...prev, msg];
+      });
+    },
+    onMessageSent: (msg) => {
+      setMessages((prev) => {
+        if (prev.some((m) => (m._id || m.id) === (msg._id || msg.id))) return prev;
+        return [...prev, msg];
+      });
+    },
+    onMessageRead: ({ messageId, readAt }) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          (m._id?.toString() || m.id) === messageId
+            ? { ...m, isRead: true, readAt: new Date(readAt) }
+            : m
+        )
+      );
+    },
+  });
 
   const { isOffline, queueMessage } = useOfflineQueue();
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Merge initial messages with socket messages reactively to avoid race conditions and overwrites
-  const [allMessages, setAllMessages] = useState<any[]>([]);
-
-  useEffect(() => {
-    const combined = [...initialMessages, ...socketMessages];
-    const seen = new Set();
-    const unique = combined.filter((msg) => {
-      const mid = msg._id || msg.id;
-      if (!mid) return true;
-      if (seen.has(mid)) return false;
-      seen.add(mid);
-      return true;
-    });
-    setAllMessages(unique);
-  }, [initialMessages, socketMessages]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [allMessages]);
+  }, [messages]);
 
   if (loading || !conversation || !user) {
     return (
@@ -111,7 +116,7 @@ export default function ChatWindow({
     if (isOffline) {
       await queueMessage(msg);
       // Optimistic update for offline
-      setAllMessages((prev) => [
+      setMessages((prev) => [
         ...prev,
         {
           ...msg,
@@ -201,7 +206,7 @@ export default function ChatWindow({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 relative custom-scrollbar">
         <MessageList
-          messages={allMessages}
+          messages={messages}
           currentUserId={user.id}
           onMessageSeen={(id) => {
             socketMarkAsRead(id);

@@ -94,12 +94,17 @@ const AppointmentsView: React.FC = () => {
     null,
   );
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [rebookDoctor, setRebookDoctor] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("newest");
   const router = useRouter();
-  const [waitingRoomAppt, setWaitingRoomAppt] = useState<Appointment | null>(null);
-  const [rescheduleAppt, setRescheduleAppt] = useState<Appointment | null>(null);
+  const [waitingRoomAppt, setWaitingRoomAppt] = useState<Appointment | null>(
+    null,
+  );
+  const [rescheduleAppt, setRescheduleAppt] = useState<Appointment | null>(
+    null,
+  );
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [rescheduling, setRescheduling] = useState(false);
@@ -230,10 +235,17 @@ const AppointmentsView: React.FC = () => {
     return appointments.map((appt) => {
       const computed = computeStatus(appt);
       // If server already says missed/completed, keep that
-      if (appt.status === "missed" || appt.status === "completed") {
+      if (appt.status === "completed") {
         return {
           ...appt,
-          computedStatus: appt.status as AppointmentStatus,
+          computedStatus: "past",
+          isNew: appt.isNew && !seenIds.has(appt.id),
+        };
+      }
+      if (appt.status === "missed") {
+        return {
+          ...appt,
+          computedStatus: "missed",
           isNew: appt.isNew && !seenIds.has(appt.id),
         };
       }
@@ -329,7 +341,11 @@ const AppointmentsView: React.FC = () => {
   const handleJoinCell = (appt: Appointment) => {
     const start = new Date(appt.scheduledStartTime);
     // If start time is invalid or the meeting has already started, go straight to the room
-    if (!appt.scheduledStartTime || isNaN(start.getTime()) || new Date() >= start) {
+    if (
+      !appt.scheduledStartTime ||
+      isNaN(start.getTime()) ||
+      new Date() >= start
+    ) {
       router.push(`/patient/chat/${appt.id}`);
     } else {
       setWaitingRoomAppt(appt);
@@ -342,7 +358,7 @@ const AppointmentsView: React.FC = () => {
     if (!isNaN(existing.getTime())) {
       setRescheduleDate(existing.toISOString().split("T")[0]);
       setRescheduleTime(
-        `${String(existing.getHours()).padStart(2, "0")}:${String(existing.getMinutes()).padStart(2, "0")}`
+        `${String(existing.getHours()).padStart(2, "0")}:${String(existing.getMinutes()).padStart(2, "0")}`,
       );
     } else {
       setRescheduleDate(new Date().toISOString().split("T")[0]);
@@ -383,7 +399,9 @@ const AppointmentsView: React.FC = () => {
     if (!cancelAppt) return;
     setCancelling(true);
     try {
-      const res = await fetch(`/api/consultations/${cancelAppt.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/consultations/${cancelAppt.id}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
         setCancelAppt(null);
         fetchAppointments(false);
@@ -487,7 +505,7 @@ const AppointmentsView: React.FC = () => {
               key={tab}
               onClick={() => handleTabChange(tab)}
               variant={activeTab === tab ? "primary" : "ghost"}
-              className={`px-4 py-2 h-auto text-[11px] font-bold tracking-normal rounded-xl transition-all flex items-center gap-1 whitespace-nowrap ${
+              className={`px-4 py-2 h-auto text-xs lg:telg font-bold tracking-normal rounded-xl transition-all flex items-center gap-1 whitespace-nowrap ${
                 activeTab === tab
                   ? "shadow-primary/20"
                   : "text-slate-500 hover:text-slate-600"
@@ -710,13 +728,35 @@ const AppointmentsView: React.FC = () => {
                                   : "Join Room"}
                               </Button>
                             )}
-                            <Button
-                              variant="ghost"
-                              onClick={() => setSelectedAppt(appt)}
-                              className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all border-none !min-w-0"
-                            >
-                              <BiChevronRight size={22} />
-                            </Button>
+                            {appt.computedStatus !== "upcoming" &&
+                            appt.computedStatus !== "ongoing" ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-10 px-4 rounded-xl text-xs font-bold border-slate-200 text-primary hover:bg-primary/5"
+                                onClick={() => {
+                                  setRebookDoctor({
+                                    id: appt.practitionerId || "",
+                                    name: appt.doctor.replace("Dr. ", ""),
+                                    specialisation:
+                                      appt.specialization ||
+                                      "Clinical Specialist",
+                                    avatar: appt.doctorAvatar,
+                                  });
+                                  setShowBookingModal(true);
+                                }}
+                              >
+                                Re-book
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                onClick={() => setSelectedAppt(appt)}
+                                className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all border-none !min-w-0"
+                              >
+                                <BiChevronRight size={22} />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -831,6 +871,27 @@ const AppointmentsView: React.FC = () => {
                               : "Join Room"}
                           </Button>
                         )}
+                        {appt.computedStatus !== "upcoming" &&
+                          appt.computedStatus !== "ongoing" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-3 text-xs font-bold rounded-xl border-slate-200 text-primary hover:bg-primary/5"
+                              onClick={() => {
+                                setRebookDoctor({
+                                  id: appt.practitionerId || "",
+                                  name: appt.doctor.replace("Dr. ", ""),
+                                  specialisation:
+                                    appt.specialization ||
+                                    "Clinical Specialist",
+                                  avatar: appt.doctorAvatar,
+                                });
+                                setShowBookingModal(true);
+                              }}
+                            >
+                              Re-book
+                            </Button>
+                          )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1019,6 +1080,18 @@ const AppointmentsView: React.FC = () => {
                 <Button
                   fullWidth
                   className="h-14 shadow-none shadow-primary/20 rounded-2xl text-sm font-bold tracking-normal"
+                  onClick={() => {
+                    const appt = selectedAppt!;
+                    setSelectedAppt(null); // Close the detail modal
+                    setRebookDoctor({
+                      id: appt.practitionerId || "",
+                      name: appt.doctor.replace("Dr. ", ""),
+                      specialisation:
+                        appt.specialization || "Clinical Specialist",
+                      avatar: appt.doctorAvatar,
+                    });
+                    setShowBookingModal(true);
+                  }}
                 >
                   Book Clinical Re-appointment
                 </Button>
@@ -1031,7 +1104,11 @@ const AppointmentsView: React.FC = () => {
       {/* ─── SECURE CLINICAL BOOKING MODAL ─── */}
       <BookingModal
         isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
+        onClose={() => {
+          setShowBookingModal(false);
+          setRebookDoctor(null);
+        }}
+        doctor={rebookDoctor}
         onSuccess={() => fetchAppointments(false)}
       />
 
@@ -1042,68 +1119,94 @@ const AppointmentsView: React.FC = () => {
         title="Clinical Waiting Room"
         width="md"
       >
-        {waitingRoomAppt && (() => {
-          const tl = getWaitingRoomTimeLeft(waitingRoomAppt);
-          const hh = String(tl.hours).padStart(2, "0");
-          const mm = String(tl.minutes).padStart(2, "0");
-          const ss = String(tl.seconds).padStart(2, "0");
-          return (
-            <div className="space-y-6 text-center py-2">
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative">
-                  <Avatar
-                    src={waitingRoomAppt.doctorAvatar}
-                    name={waitingRoomAppt.doctor}
-                    size="xl"
-                    className="border-4 border-primary/10 shadow-lg"
-                  />
-                  <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white rounded-full animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 font-grotesk">{waitingRoomAppt.doctor}</h3>
-                  <p className="text-sm font-semibold text-slate-500 mt-0.5">{waitingRoomAppt.specialization || "Clinical Specialist"}</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 shadow-inner space-y-4">
-                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Session Starts In</p>
-                <div className="flex justify-center items-end gap-3">
-                  <div className="flex flex-col items-center">
-                    <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-slate-800">{hh}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">Hrs</span>
+        {waitingRoomAppt &&
+          (() => {
+            const tl = getWaitingRoomTimeLeft(waitingRoomAppt);
+            const hh = String(tl.hours).padStart(2, "0");
+            const mm = String(tl.minutes).padStart(2, "0");
+            const ss = String(tl.seconds).padStart(2, "0");
+            return (
+              <div className="space-y-6 text-center py-2">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative">
+                    <Avatar
+                      src={waitingRoomAppt.doctorAvatar}
+                      name={waitingRoomAppt.doctor}
+                      size="xl"
+                      className="border-4 border-primary/10 shadow-lg"
+                    />
+                    <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white rounded-full animate-pulse" />
                   </div>
-                  <span className="text-4xl font-extrabold text-slate-300 mb-5">:</span>
-                  <div className="flex flex-col items-center">
-                    <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-primary">{mm}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">Min</span>
-                  </div>
-                  <span className="text-4xl font-extrabold text-slate-300 mb-5">:</span>
-                  <div className="flex flex-col items-center">
-                    <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-slate-800">{ss}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">Sec</span>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800 font-grotesk">
+                      {waitingRoomAppt.doctor}
+                    </h3>
+                    <p className="text-sm font-semibold text-slate-500 mt-0.5">
+                      {waitingRoomAppt.specialization || "Clinical Specialist"}
+                    </p>
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed font-medium pt-2 border-t border-slate-100">
-                  You will be automatically redirected to the consultation room when the session begins.
-                </p>
-              </div>
 
-              <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-center justify-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-                <span className="text-xs font-bold text-emerald-700">Secure encrypted line active — standby</span>
-              </div>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 shadow-inner space-y-4">
+                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                    Session Starts In
+                  </p>
+                  <div className="flex justify-center items-end gap-3">
+                    <div className="flex flex-col items-center">
+                      <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-slate-800">
+                        {hh}
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
+                        Hrs
+                      </span>
+                    </div>
+                    <span className="text-4xl font-extrabold text-slate-300 mb-5">
+                      :
+                    </span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-primary">
+                        {mm}
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
+                        Min
+                      </span>
+                    </div>
+                    <span className="text-4xl font-extrabold text-slate-300 mb-5">
+                      :
+                    </span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-slate-800">
+                        {ss}
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
+                        Sec
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium pt-2 border-t border-slate-100">
+                    You will be automatically redirected to the consultation
+                    room when the session begins.
+                  </p>
+                </div>
 
-              <Button
-                variant="ghost"
-                fullWidth
-                onClick={() => setWaitingRoomAppt(null)}
-                className="h-12 border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-xl font-bold text-sm tracking-normal"
-              >
-                Return to Dashboard
-              </Button>
-            </div>
-          );
-        })()}
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+                  <span className="text-xs font-bold text-emerald-700">
+                    Secure encrypted line active — standby
+                  </span>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  onClick={() => setWaitingRoomAppt(null)}
+                  className="h-12 border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-xl font-bold text-sm tracking-normal"
+                >
+                  Return to Dashboard
+                </Button>
+              </div>
+            );
+          })()}
       </Modal>
 
       {/* ─── RESCHEDULE MODAL ─── */}
@@ -1116,10 +1219,18 @@ const AppointmentsView: React.FC = () => {
         {rescheduleAppt && (
           <div className="space-y-5 py-2">
             <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <Avatar src={rescheduleAppt.doctorAvatar} name={rescheduleAppt.doctor} size="md" />
+              <Avatar
+                src={rescheduleAppt.doctorAvatar}
+                name={rescheduleAppt.doctor}
+                size="md"
+              />
               <div>
-                <p className="font-bold text-slate-800 text-sm">{rescheduleAppt.doctor}</p>
-                <p className="text-xs text-slate-500 font-medium">{rescheduleAppt.specialization || "Clinical Specialist"}</p>
+                <p className="font-bold text-slate-800 text-sm">
+                  {rescheduleAppt.doctor}
+                </p>
+                <p className="text-xs text-slate-500 font-medium">
+                  {rescheduleAppt.specialization || "Clinical Specialist"}
+                </p>
               </div>
             </div>
 
@@ -1131,7 +1242,9 @@ const AppointmentsView: React.FC = () => {
               min={new Date().toISOString().split("T")[0]}
             />
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700">New Time</label>
+              <label className="text-sm font-bold text-slate-700">
+                New Time
+              </label>
               <input
                 type="time"
                 min="08:00"
@@ -1166,14 +1279,23 @@ const AppointmentsView: React.FC = () => {
         {cancelAppt && (
           <div className="space-y-5 py-2">
             <div className="flex items-center gap-4 p-4 bg-rose-50/60 rounded-xl border border-rose-100">
-              <Avatar src={cancelAppt.doctorAvatar} name={cancelAppt.doctor} size="md" />
+              <Avatar
+                src={cancelAppt.doctorAvatar}
+                name={cancelAppt.doctor}
+                size="md"
+              />
               <div>
-                <p className="font-bold text-slate-800 text-sm">{cancelAppt.doctor}</p>
-                <p className="text-xs text-slate-500 font-medium">{cancelAppt.date} · {cancelAppt.time}</p>
+                <p className="font-bold text-slate-800 text-sm">
+                  {cancelAppt.doctor}
+                </p>
+                <p className="text-xs text-slate-500 font-medium">
+                  {cancelAppt.date} · {cancelAppt.time}
+                </p>
               </div>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed font-medium text-center">
-              Are you sure you want to cancel this appointment? This action cannot be undone.
+              Are you sure you want to cancel this appointment? This action
+              cannot be undone.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button
