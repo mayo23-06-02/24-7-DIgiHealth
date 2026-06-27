@@ -1,4 +1,4 @@
-"use client";
+ï»¿"use client";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
@@ -8,13 +8,11 @@ import {
   BiTime,
   BiCheckCircle,
   BiLoaderAlt,
-  BiUser,
-  BiBuilding,
   BiX,
-  BiLeftArrow,
-  BiRightArrow,
   BiCheck,
   BiSearch,
+  BiVideo,
+  BiChat,
 } from "react-icons/bi";
 import { toast } from "react-hot-toast";
 import Card from "../ui/Card";
@@ -375,7 +373,7 @@ export default function BookingModal({
                   <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
                   <input
                     type="text"
-                    placeholder="Type to search your patients…"
+                    placeholder="Type to search your patients..."
                     value={patientSearch}
                     onFocus={() => { if (!selectedPatientState?.id && patientSearch) setShowDropdown(true); }}
                     onChange={(e) => {
@@ -400,7 +398,7 @@ export default function BookingModal({
                   <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-2xl shadow-lg z-50 overflow-hidden max-h-64 overflow-y-auto">
                     {patientLoading ? (
                       <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-500">
-                        <BiLoaderAlt className="animate-spin" size={14} /> Searching patients…
+                        <BiLoaderAlt className="animate-spin" size={14} /> Searching patients...
                       </div>
                     ) : patientResults.length === 0 ? (
                       <div className="py-6 text-center text-xs text-slate-500">
@@ -553,8 +551,8 @@ export default function BookingModal({
                     onChange={(e) => setConsultType(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary"
                   >
-                    <option value="video">?? Video Call</option>
-                    <option value="chat">?? Chat</option>
+                    <option value="video">Video Call</option>
+                    <option value="chat">Chat</option>
                   </select>
                 </div>
               </div>
@@ -575,7 +573,7 @@ export default function BookingModal({
                   placeholder="Briefly describe the clinical symptoms or reason for this consultation..."
                   value={concern}
                   onChange={(e) => setConcern(e.target.value)}
-                  className="w-full h-40 rounded-xl bg-slate-50/50 border border-slate-100 p-4 text-slate-700 focus:outline-none focus:bg-white focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all resize-none placeholder:text-slate-400 "
+                  className="w-full h-40 rounded-xl bg-slate-50/50 border border-slate-100 p-4 text-slate-700 focus:outline-none focus:bg-white focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all resize-none placeholder:text-slate-400"
                 />
               </div>
             </div>
