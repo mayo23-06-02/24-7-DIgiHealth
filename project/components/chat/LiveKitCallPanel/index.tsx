@@ -62,21 +62,19 @@ export default function LiveKitCallPanel({
 
       const attachRemoteTrack = () => {
         if (!roomRef.current || roomRef.current.state !== "connected") return;
-        const remoteVideoPublication = Array.from(
-          room.remoteParticipants.values(),
-        )
-          .flatMap((participant) =>
-            Array.from(participant.trackPublications.values()),
-          )
-          .find(
-            (pub) =>
-              pub.kind === Track.Kind.Video && pub.isSubscribed && pub.track,
-          );
-        const remoteVideo = remoteVideoPublication?.track;
+        const publications = Array.from(room.remoteParticipants.values()).flatMap(
+          (p) => Array.from(p.trackPublications.values()),
+        );
+        const remoteVideo = publications.find(
+          (pub) => pub.kind === Track.Kind.Video && pub.isSubscribed && pub.track,
+        )?.track;
         if (remoteVideo && remoteVideoRef.current) {
           remoteVideo.attach(remoteVideoRef.current);
           setRemoteConnected(true);
         }
+        publications
+          .filter((pub) => pub.kind === Track.Kind.Audio && pub.isSubscribed && pub.track)
+          .forEach((pub) => pub.track!.attach());
       };
 
       room
@@ -84,6 +82,8 @@ export default function LiveKitCallPanel({
           if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
             track.attach(remoteVideoRef.current);
             setRemoteConnected(true);
+          } else if (track.kind === Track.Kind.Audio) {
+            track.attach();
           }
         })
         .on(RoomEvent.TrackUnsubscribed, (track) => track.detach())
