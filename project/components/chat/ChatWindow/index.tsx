@@ -54,20 +54,20 @@ export default function ChatWindow({
   } = useChatSocket(conversationId || conversation?._id, user?.id || null, {
     onNewMessage: (msg) => {
       setMessages((prev) => {
-        if (prev.some((m) => (m._id || m.id) === (msg._id || msg.id))) return prev;
+        if (prev.some((m) => String(m._id) === String(msg._id))) return prev;
         return [...prev, msg];
       });
     },
     onMessageSent: (msg) => {
       setMessages((prev) => {
-        if (prev.some((m) => (m._id || m.id) === (msg._id || msg.id))) return prev;
+        if (prev.some((m) => String(m._id) === String(msg._id))) return prev;
         return [...prev, msg];
       });
     },
     onMessageRead: ({ messageId, readAt }) => {
       setMessages((prev) =>
         prev.map((m) =>
-          (m._id?.toString() || m.id) === messageId
+          m._id?.toString() === messageId
             ? { ...m, isRead: true, readAt: new Date(readAt) }
             : m
         )
