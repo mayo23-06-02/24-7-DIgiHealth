@@ -6,7 +6,7 @@ export const getSocket = (token?: string): Socket => {
   if (!socket) {
     socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin, {
       auth: {
-        token
+        token,
       },
       autoConnect: false,
       reconnection: true,

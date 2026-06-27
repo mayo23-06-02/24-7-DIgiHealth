@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useAuthContext } from '@/components/auth/AuthProvider';
+import { useAuthContext } from "@/components/auth/AuthProvider";
 
 export function useAuth() {
   const { user, logout } = useAuthContext();
-  
+
   return {
     user,
     logout,

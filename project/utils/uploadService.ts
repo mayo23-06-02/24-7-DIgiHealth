@@ -24,16 +24,19 @@ export async function fetchUploadToken(): Promise<string> {
  * Uploads chosen file to a Cloudinary temporary directory via Next.js API.
  * The temp location is cleared after 24 hours if registration isn't completed.
  */
-export async function uploadToTemp(file: File, token: string): Promise<UploadResponse> {
+export async function uploadToTemp(
+  file: File,
+  token: string,
+): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append("file", file);
 
   const res = await fetch("/api/upload/temp", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
-    body: formData
+    body: formData,
   });
 
   if (!res.ok) throw new Error("File upload could not be processed.");
@@ -43,18 +46,23 @@ export async function uploadToTemp(file: File, token: string): Promise<UploadRes
 /**
  * Submits the final registration data for a specific role (Patient, Practitioner, etc.)
  */
-export async function submitRegistration(role: string, data: any): Promise<any> {
+export async function submitRegistration(
+  role: string,
+  data: any,
+): Promise<any> {
   const res = await fetch(`/api/auth/register/${role.toLowerCase()}`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 
   const result = await res.json();
   if (!res.ok) {
-    throw new Error(result.error?.message || "Registration failed. Please contact support.");
+    throw new Error(
+      result.error?.message || "Registration failed. Please contact support.",
+    );
   }
 
   return result;

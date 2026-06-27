@@ -1,12 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 // Module-level cache: survives component unmount/remount and chat switches
 const messageCache = new Map<string, any[]>();
 const conversationCache = new Map<string, any>();
 
 export function useChat(id: string, isConversationId: boolean = false) {
-  const [messages, setMessagesState] = useState<any[]>(() => messageCache.get(id) ?? []);
-  const [conversation, setConversation] = useState<any>(() => conversationCache.get(id) ?? null);
+  const [messages, setMessagesState] = useState<any[]>(
+    () => messageCache.get(id) ?? [],
+  );
+  const [conversation, setConversation] = useState<any>(
+    () => conversationCache.get(id) ?? null,
+  );
   const [loading, setLoading] = useState(() => !conversationCache.has(id));
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -17,15 +21,19 @@ export function useChat(id: string, isConversationId: boolean = false) {
   }, [id]);
 
   // Wrapped setMessages that automatically updates the module cache for the current ID
-  const setMessages = useCallback((newVal: any[] | ((prev: any[]) => any[])) => {
-    setMessagesState(prev => {
-      const resolved = typeof newVal === 'function' ? (newVal as Function)(prev) : newVal;
-      if (idRef.current) {
-        messageCache.set(idRef.current, resolved);
-      }
-      return resolved;
-    });
-  }, []);
+  const setMessages = useCallback(
+    (newVal: any[] | ((prev: any[]) => any[])) => {
+      setMessagesState((prev) => {
+        const resolved =
+          typeof newVal === "function" ? (newVal as Function)(prev) : newVal;
+        if (idRef.current) {
+          messageCache.set(idRef.current, resolved);
+        }
+        return resolved;
+      });
+    },
+    [],
+  );
 
   // Sync conversation cache
   useEffect(() => {
@@ -42,23 +50,26 @@ export function useChat(id: string, isConversationId: boolean = false) {
       : `/api/chat/conversations/${id}`;
 
     fetch(url)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.error) {
-          console.error('Conversation fetch error:', data.error);
+          console.error("Conversation fetch error:", data.error);
           setConversation(null);
         } else {
           setConversation(data);
           conversationCache.set(id, data);
         }
       })
-      .catch(err => {
-        console.error('Conversation fetch catch:', err);
+      .catch((err) => {
+        console.error("Conversation fetch catch:", err);
         setConversation(null);
       });
   }, [id, isConversationId]);
 
-  const fetchMessages = async (beforeDate?: string, clearCurrent: boolean = false) => {
+  const fetchMessages = async (
+    beforeDate?: string,
+    clearCurrent: boolean = false,
+  ) => {
     if (!id) return;
     if (beforeDate) setLoadingMore(true);
 
@@ -86,12 +97,14 @@ export function useChat(id: string, isConversationId: boolean = false) {
           setHasMore(false);
         }
 
-        setMessages(prev => {
+        setMessages((prev) => {
           if (idRef.current !== id) return prev;
           const base = clearCurrent ? [] : prev;
-          const combined = beforeDate ? [...newMessages, ...base] : [...base, ...newMessages];
+          const combined = beforeDate
+            ? [...newMessages, ...base]
+            : [...base, ...newMessages];
           const seen = new Set<string>();
-          return combined.filter(msg => {
+          return combined.filter((msg) => {
             const mid = msg._id || msg.id;
             if (!mid) return true;
             if (seen.has(mid)) return false;
@@ -101,7 +114,7 @@ export function useChat(id: string, isConversationId: boolean = false) {
         });
       }
     } catch (err) {
-      console.error('Failed to fetch messages:', err);
+      console.error("Failed to fetch messages:", err);
     } finally {
       if (idRef.current === id) {
         setLoading(false);
@@ -138,34 +151,50 @@ export function useChat(id: string, isConversationId: boolean = false) {
 
   const sendMessage = async (msgData: any) => {
     const tempId = Date.now().toString();
-    const tempMsg = { ...msgData, _id: tempId, createdAt: new Date().toISOString() };
-    setMessages(prev => [...prev, tempMsg]);
+    const tempMsg = {
+      ...msgData,
+      _id: tempId,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, tempMsg]);
 
     try {
-      const res = await fetch('/api/chat/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(msgData)
+      const res = await fetch("/api/chat/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msgData),
       });
       const savedMsg = await res.json();
-      setMessages(prev => prev.map(m => m._id === tempId ? savedMsg : m));
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? savedMsg : m)));
     } catch (err) {
-      console.error('Send failed:', err);
+      console.error("Send failed:", err);
     }
   };
 
   const markAsRead = async (messageId: string) => {
     try {
-      await fetch('/api/chat/messages/read', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageId })
+      await fetch("/api/chat/messages/read", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId }),
       });
-      setMessages(prev => prev.map(m => m._id === messageId ? { ...m, isRead: true } : m));
+      setMessages((prev) =>
+        prev.map((m) => (m._id === messageId ? { ...m, isRead: true } : m)),
+      );
     } catch (err) {
-      console.error('Failed to mark as read:', err);
+      console.error("Failed to mark as read:", err);
     }
   };
 
-  return { messages, setMessages, sendMessage, conversation, loading, loadMore, hasMore, loadingMore, markAsRead };
+  return {
+    messages,
+    setMessages,
+    sendMessage,
+    conversation,
+    loading,
+    loadMore,
+    hasMore,
+    loadingMore,
+    markAsRead,
+  };
 }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import NextAuth from "next-auth";
-import authConfig from "@/src/auth.config";
+import authConfig from "@/lib/auth/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
@@ -33,7 +33,11 @@ export default auth(async function middleware(request: any) {
   const token = request.cookies.get("token")?.value;
   const user = session?.user || null;
 
-  if (pathname === "/" || pathname === "/login" || pathname.startsWith("/register")) {
+  if (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname.startsWith("/register")
+  ) {
     if (token || user) {
       try {
         let role;
@@ -46,9 +50,7 @@ export default auth(async function middleware(request: any) {
         }
 
         if (role) {
-          return NextResponse.redirect(
-            new URL(`/${role}`, request.url),
-          );
+          return NextResponse.redirect(new URL(`/${role}`, request.url));
         }
       } catch (err) {
         // Token is invalid, let them view the login page

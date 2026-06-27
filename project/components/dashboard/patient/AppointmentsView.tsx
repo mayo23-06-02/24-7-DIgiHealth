@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   BiCalendar,
@@ -125,16 +125,38 @@ const AppointmentsView: React.FC = () => {
     [currentTime],
   );
 
-  // Automatically redirect if waiting room countdown finishes
+  const joiningRef = useRef(false);
+
+  const joinChat = useCallback(
+    async (appt: Appointment) => {
+      try {
+        const res = await fetch(`/api/chat/conversations/${appt.id}`);
+        const conv = await res.json();
+        if (res.ok && conv._id) {
+          setWaitingRoomAppt(null);
+          router.push(`/patient/messages?chatId=${conv._id}&join=video`);
+        } else {
+          joiningRef.current = false;
+        }
+      } catch (e) {
+        console.error("Failed to join consultation room", e);
+        joiningRef.current = false;
+      }
+    },
+    [router],
+  );
+
+  // Navigate to the consultation room when the waiting room countdown reaches zero
   useEffect(() => {
-    if (waitingRoomAppt) {
+    if (waitingRoomAppt && !joiningRef.current) {
       const timeLeft = getWaitingRoomTimeLeft(waitingRoomAppt);
       if (timeLeft.totalMs <= 0) {
-        router.push(`/patient/chat/${waitingRoomAppt.id}`);
-        setWaitingRoomAppt(null);
+        joiningRef.current = true;
+        joinChat(waitingRoomAppt);
       }
     }
-  }, [currentTime, waitingRoomAppt, getWaitingRoomTimeLeft, router]);
+    if (!waitingRoomAppt) joiningRef.current = false;
+  }, [currentTime, waitingRoomAppt, getWaitingRoomTimeLeft, joinChat]);
 
   // Update current time every second
   useEffect(() => {
@@ -338,19 +360,17 @@ const AppointmentsView: React.FC = () => {
     }
   };
 
-  const handleJoinCell = (appt: Appointment) => {
-    const start = new Date(appt.scheduledStartTime);
-    // If start time is invalid or the meeting has already started, go straight to the room
-    if (
-      !appt.scheduledStartTime ||
-      isNaN(start.getTime()) ||
-      new Date() >= start
-    ) {
-      router.push(`/patient/chat/${appt.id}`);
-    } else {
-      setWaitingRoomAppt(appt);
-    }
-  };
+  const handleJoinCell = useCallback(
+    (appt: Appointment) => {
+      const start = new Date(appt.scheduledStartTime);
+      if (!appt.scheduledStartTime || isNaN(start.getTime()) || new Date() >= start) {
+        joinChat(appt);
+      } else {
+        setWaitingRoomAppt(appt);
+      }
+    },
+    [joinChat],
+  );
 
   const handleReschedule = (appt: Appointment) => {
     // Pre-fill with existing appointment date/time

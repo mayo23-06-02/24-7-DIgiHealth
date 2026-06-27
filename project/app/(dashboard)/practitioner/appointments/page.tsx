@@ -18,17 +18,13 @@ import BookingModal from "@/components/doctor/BookingModal";
 import {
   BiSearch,
   BiPlus,
-  BiLoaderAlt,
   BiVideo,
   BiChat,
   BiX,
   BiNote,
-  BiCalendarCheck,
   BiDownload,
   BiCalendar,
   BiPencil,
-  BiTime,
-  BiXCircle,
 } from "react-icons/bi";
 
 type AppointmentStatus =
@@ -69,7 +65,10 @@ export default function PractitionerAppointmentsPage() {
     patientName: "",
   });
   const [editingApptId, setEditingApptId] = useState<string | null>(null);
-  const [editingPatient, setEditingPatient] = useState<{ id: string; name: string } | null>(null);
+  const [editingPatient, setEditingPatient] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [editingInitialForm, setEditingInitialForm] = useState<any>(null);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
@@ -77,7 +76,7 @@ export default function PractitionerAppointmentsPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("newest");
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch all appointments (tab=all)
@@ -148,6 +147,20 @@ export default function PractitionerAppointmentsPage() {
 
   const cancelAppt = async (id: string) => {
     await updateStatus(id, "cancelled");
+  };
+
+  const handleJoinRoom = async (consultationId: string) => {
+    try {
+      const res = await fetch(`/api/chat/conversations/${consultationId}`);
+      const conv = await res.json();
+      if (!res.ok || !conv._id) {
+        toast.error("Unable to find consultation room");
+        return;
+      }
+      window.location.href = `/practitioner/messages?chatId=${conv._id}&join=video`;
+    } catch {
+      toast.error("Unable to join consultation room");
+    }
   };
 
   const handleEditAppt = (a: any) => {
@@ -585,9 +598,7 @@ export default function PractitionerAppointmentsPage() {
                         {(a.computedStatus === "upcoming" ||
                           a.computedStatus === "ongoing") && (
                           <button
-                            onClick={() =>
-                              (window.location.href = `/practitioner/chat/${a.consultationId}`)
-                            }
+                            onClick={() => handleJoinRoom(a.consultationId)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-primary hover:bg-primary/95 transition-colors"
                           >
                             <BiVideo size={14} /> Join Room
@@ -701,4 +712,3 @@ export default function PractitionerAppointmentsPage() {
     </div>
   );
 }
-

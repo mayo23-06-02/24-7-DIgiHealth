@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 export type { ConversationContact } from "./types";
 import { useSearchParams, useRouter } from "next/navigation";
 import ConversationList from "./ConversationList";
@@ -58,11 +58,47 @@ export default function MessagesView({
 
   const isActiveChatOpen = activeChatId && !activeChatId.startsWith("new-");
 
-  // Full-screen overlay for video call; split-screen layout for voice call
+  // Auto-start video call when navigating from appointments with ?join=video
+  const joinParam = searchParams.get("join");
+  const hasAutoStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (joinParam !== "video" || !activeChatId || activeCall || hasAutoStartedRef.current) return;
+    hasAutoStartedRef.current = true;
+    const conv = conversations.find((c) => c.id === activeChatId);
+    fetch("/api/chat/call/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conversationId: activeChatId, type: "video" }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.roomUrl) {
+          setActiveCall({
+            roomUrl: data.roomUrl,
+            roomName: data.roomName,
+            token: data.token,
+            callId: data.callId,
+            type: "video",
+            initiatedBy: data.initiatedBy,
+            participantName: conv?.contactName,
+            participantAvatar: conv?.avatar,
+          });
+          router.replace(`?chatId=${activeChatId}`, { scroll: false });
+        } else {
+          hasAutoStartedRef.current = false;
+        }
+      })
+      .catch(() => {
+        hasAutoStartedRef.current = false;
+      });
+  }, [joinParam, activeChatId, activeCall, conversations, setActiveCall, router]);
+
+  // Video call fills the main content area (sidebar remains visible); voice call gets split-screen
   if (activeCall && isActiveChatOpen) {
     if (activeCall.type === "video") {
       return (
-        <div className="fixed inset-0 z-50 bg-slate-900 w-screen h-screen flex flex-col">
+        <div className="flex flex-col h-[calc(100vh-140px)] -m-4 lg:-m-8 bg-slate-900 overflow-hidden">
           <LiveKitCallPanel callInfo={activeCall} onEnded={handleCallEnd} />
         </div>
       );

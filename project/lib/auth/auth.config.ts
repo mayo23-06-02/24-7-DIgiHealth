@@ -1,6 +1,6 @@
-import Google from "next-auth/providers/google"
-import Facebook from "next-auth/providers/facebook"
-import type { NextAuthConfig } from "next-auth"
+import Google from "next-auth/providers/google";
+import Facebook from "next-auth/providers/facebook";
+import type { NextAuthConfig } from "next-auth";
 
 export default {
   providers: [
@@ -19,7 +19,7 @@ export default {
       if (user) {
         token.id = user.id;
         // @ts-ignore
-        token.role = user.role || "patient"; 
+        token.role = user.role || "patient";
       }
       return token;
     },
@@ -36,4 +36,4 @@ export default {
   pages: {
     signIn: "/login",
   },
-} satisfies NextAuthConfig
+} satisfies NextAuthConfig;

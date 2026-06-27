@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import AuthProvider from "@/components/AuthProvider";
 
 const grotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -18,8 +19,6 @@ export const metadata: Metadata = {
   description:
     "A scalable, role-based medical platform bridging the gap in South African healthcare through AI triage, virtual consultations, and emergency routing.",
 };
-
-import AuthProvider from "@/components/AuthProvider";
 
 export default function RootLayout({
   children,

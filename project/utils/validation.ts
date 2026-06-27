@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Validates a South African Identity Number 
+ * Validates a South African Identity Number
  * Using the Luhn Algorithm (checksum)
  */
 export function validateSaId(idNumber: string): boolean {
@@ -44,5 +44,5 @@ export function validateHpcsa(number: string): boolean {
  */
 export function validateMobile(mobile: string): boolean {
   const saMobileRegex = /^(?:\+27|0)[6-8][0-9]{8}$/;
-  return saMobileRegex.test(mobile.replace(/\s+/g, ''));
+  return saMobileRegex.test(mobile.replace(/\s+/g, ""));
 }

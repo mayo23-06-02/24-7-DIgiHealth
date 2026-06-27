@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { fetchUploadToken, uploadToTemp } from "../../services/uploadService";
+import { fetchUploadToken, uploadToTemp } from "../../utils/uploadService";
 
 interface UploaderProps {
   onUploadComplete: (url: string, publicId: string) => void;

@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { maskSAID, maskMobile, maskEmail } from "@/app/utils/maskPHI";
+import { useState } from "react";
+import { maskSAID, maskMobile, maskEmail } from "@/utils/maskPHI";
 import { FiShield, FiLock, FiLogOut, FiCheck } from "react-icons/fi";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";

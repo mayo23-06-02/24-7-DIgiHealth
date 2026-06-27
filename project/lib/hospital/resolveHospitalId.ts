@@ -1,6 +1,6 @@
-import { HospitalAdminProfile } from '@/lib/models/RoleProfiles';
-import User from '@/lib/models/User';
-import Facility from '@/lib/models/Facility';
+import { HospitalAdminProfile } from "@/lib/models/RoleProfiles";
+import User from "@/lib/models/User";
+import Facility from "@/lib/models/Facility";
 
 /**
  * Resolves the Facility (hospital) ID for a hospital_admin user.
@@ -14,10 +14,12 @@ import Facility from '@/lib/models/Facility';
  */
 export async function resolveHospitalId(
   userId: string,
-  userEmail?: string
+  userEmail?: string,
 ): Promise<string | null> {
   // ── 1. HospitalAdminProfile ───────────────────────────────────────────────
-  const profile = (await HospitalAdminProfile.findOne({ userId }).lean()) as any;
+  const profile = (await HospitalAdminProfile.findOne({
+    userId,
+  }).lean()) as any;
   if (profile?.hospitalId) return profile.hospitalId.toString();
 
   // ── 2. User.facilityId ───────────────────────────────────────────────────
@@ -27,8 +29,8 @@ export async function resolveHospitalId(
     await HospitalAdminProfile.create({
       userId,
       hospitalId: userDoc.facilityId,
-      department: 'Administration',
-      permissions: ['all'],
+      department: "Administration",
+      permissions: ["all"],
     }).catch(() => {}); // ignore duplicate-key on race
     return userDoc.facilityId.toString();
   }
@@ -36,10 +38,7 @@ export async function resolveHospitalId(
   // ── 3. Facility by email ──────────────────────────────────────────────────
   if (userEmail) {
     const facility = (await Facility.findOne({
-      $or: [
-        { 'contactInfo.email': userEmail },
-        { email: userEmail },
-      ],
+      $or: [{ "contactInfo.email": userEmail }, { email: userEmail }],
     }).lean()) as any;
 
     if (facility?._id) {
@@ -49,8 +48,8 @@ export async function resolveHospitalId(
       await HospitalAdminProfile.create({
         userId,
         hospitalId: facility._id,
-        department: 'Administration',
-        permissions: ['all'],
+        department: "Administration",
+        permissions: ["all"],
       }).catch(() => {});
       return facilityId;
     }
