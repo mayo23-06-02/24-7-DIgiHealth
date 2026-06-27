@@ -56,7 +56,7 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
             >
               <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-75 group-hover:hidden" />
               <BiBrain size={32} className="relative z-10" />
-              
+
               {/* Optional Tooltip/Badge */}
               <div className="absolute -top-2 -left-2 bg-secondary text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm whitespace-nowrap">
                 AI ASSISTANT

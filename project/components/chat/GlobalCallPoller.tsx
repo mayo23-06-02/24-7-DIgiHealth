@@ -4,7 +4,7 @@ import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useCall } from "../context/CallContext";
 
 export default function GlobalCallPoller() {
-  const { setIncomingCall, incomingCall } = useCall();
+  const { setIncomingCall, incomingCall, activeCall } = useCall();
   const { user } = useAuthContext();
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -20,8 +20,8 @@ export default function GlobalCallPoller() {
         const incoming = data.calls?.find(
           (c: any) => c.initiatedBy !== user.id,
         );
-        if (incoming) {
-          // Only set if it's a new incoming call (different callId)
+        if (incoming && activeCall?.callId !== incoming.callId) {
+          // Only set if it's a new incoming call (different callId) and we're not already in it
           if (!incomingCall || incomingCall.callId !== incoming.callId) {
             setIncomingCall({
               callId: incoming.callId,
@@ -58,7 +58,7 @@ export default function GlobalCallPoller() {
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
     };
-  }, [user, setIncomingCall, incomingCall]);
+  }, [user, setIncomingCall, incomingCall, activeCall]);
 
   return null;
 }

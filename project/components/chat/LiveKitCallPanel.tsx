@@ -5,6 +5,7 @@ import {
   Room,
   RoomEvent,
   Track,
+  RemoteTrackPublication,
   createLocalAudioTrack,
   createLocalVideoTrack,
 } from "livekit-client";
@@ -15,7 +16,9 @@ import {
   BiPhoneOff,
   BiVideo,
   BiVideoOff,
+  BiExpand,
 } from "react-icons/bi";
+import { FaCompress } from "react-icons/fa";
 import type { ActiveCallInfo } from "@/components/chat/CallButton";
 
 export default function LiveKitCallPanel({
@@ -32,37 +35,53 @@ export default function LiveKitCallPanel({
   useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [videoOn, setVideoOn] = useState(callInfo.type === "video");
   const [elapsed, setElapsed] = useState(0);
   const [remoteConnected, setRemoteConnected] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [audioBlocked, setAudioBlocked] = useState(false);
+  // Track subscribed audio publications in state so React renders real <audio>
+  // elements in the DOM — mirrors how @livekit/components-react RoomAudioRenderer works.
+  const [remoteAudioPubs, setRemoteAudioPubs] = useState<RemoteTrackPublication[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => setElapsed((value) => value + 1), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // Use stable primitive deps instead of the callInfo object reference to avoid
+  // unnecessary reconnects when the parent re-renders with a new object.
+  const { roomUrl, token, type: callType } = callInfo;
   useEffect(() => {
+    if (!roomUrl || !token) return;
     let isActive = true;
     const attemptId = connectAttemptRef.current + 1;
     connectAttemptRef.current = attemptId;
     shouldClosePanelRef.current = false;
 
     const connectRoom = async () => {
-      const room = new Room();
+      // webAudioMix: true routes remote audio through LiveKit's internal
+      // AudioContext pipeline so room.startAudio() can unlock it.
+      const room = new Room({ webAudioMix: true });
       roomRef.current = room;
 
-      const attachRemoteTrack = () => {
+      const syncAudioPubs = () => {
+        const pubs = Array.from(room.remoteParticipants.values()).flatMap((p) =>
+          Array.from(p.trackPublications.values()).filter(
+            (pub) => pub.kind === Track.Kind.Audio && pub.isSubscribed && pub.track,
+          ),
+        );
+        setRemoteAudioPubs(pubs);
+      };
+
+      const attachRemoteVideo = () => {
         if (!roomRef.current || roomRef.current.state !== "connected") return;
-
-        const remoteVideoPublication = Array.from(
-          room.remoteParticipants.values(),
-        ).flatMap((participant) =>
-          Array.from(participant.trackPublications.values()),
-        ).find((pub) => pub.kind === Track.Kind.Video && pub.isSubscribed && pub.track);
-
-        const remoteVideo = remoteVideoPublication?.track;
-
+        const remoteVideo = Array.from(room.remoteParticipants.values())
+          .flatMap((p) => Array.from(p.trackPublications.values()))
+          .find((pub) => pub.kind === Track.Kind.Video && pub.isSubscribed && pub.track)
+          ?.track;
         if (remoteVideo && remoteVideoRef.current) {
           remoteVideo.attach(remoteVideoRef.current);
           setRemoteConnected(true);
@@ -70,32 +89,39 @@ export default function LiveKitCallPanel({
       };
 
       room
-        .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        .on(RoomEvent.TrackSubscribed, (track) => {
           if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
             track.attach(remoteVideoRef.current);
+            setRemoteConnected(true);
+          } else if (track.kind === Track.Kind.Audio) {
+            syncAudioPubs();
           }
-          setRemoteConnected(true);
         })
         .on(RoomEvent.TrackUnsubscribed, (track) => {
-          track.detach();
+          if (track.kind === Track.Kind.Video) {
+            track.detach();
+          } else if (track.kind === Track.Kind.Audio) {
+            syncAudioPubs();
+          }
         })
         .on(RoomEvent.ParticipantDisconnected, () => {
-          if (room.remoteParticipants.size === 0) {
-            setRemoteConnected(false);
-          }
+          if (room.remoteParticipants.size === 0) setRemoteConnected(false);
+          syncAudioPubs();
+        })
+        .on(RoomEvent.AudioPlaybackStatusChanged, () => {
+          setAudioBlocked(!room.canPlaybackAudio);
         })
         .on(RoomEvent.Disconnected, () => {
-          const isCurrentRoom = roomRef.current === room;
-          if (!isCurrentRoom || !shouldClosePanelRef.current) {
-            return;
+          setRemoteAudioPubs([]);
+          if (roomRef.current === room && shouldClosePanelRef.current) {
+            onEndedRef.current();
           }
-          onEndedRef.current();
         });
 
       try {
-        await room.connect(callInfo.roomUrl, callInfo.token, {
-          autoSubscribe: true,
-        });
+        await room.connect(roomUrl, token, { autoSubscribe: true });
+        await room.startAudio();
+        setAudioBlocked(!room.canPlaybackAudio);
       } catch (err) {
         if (isActive) throw err;
         return;
@@ -105,45 +131,32 @@ export default function LiveKitCallPanel({
         return;
       }
 
-      // Publish local tracks
       try {
         const localAudioTrack = await createLocalAudioTrack();
-        if (room.state === "connected") {
-          await room.localParticipant.publishTrack(localAudioTrack);
-        }
-
-        if (callInfo.type === "video") {
+        await room.localParticipant.publishTrack(localAudioTrack);
+        if (callType === "video") {
           const localVideoTrack = await createLocalVideoTrack();
-          if (room.state === "connected") {
-            await room.localParticipant.publishTrack(localVideoTrack);
-            if (localVideoRef.current) {
-              localVideoTrack.attach(localVideoRef.current);
-            }
-          }
+          await room.localParticipant.publishTrack(localVideoTrack);
+          if (localVideoRef.current) localVideoTrack.attach(localVideoRef.current);
         }
       } catch (trackErr) {
         console.warn("Failed to publish local tracks:", trackErr);
       }
 
-      attachRemoteTrack();
+      attachRemoteVideo();
+      syncAudioPubs();
     };
 
     connectRoom().catch((error) => {
-      const message =
-        error instanceof Error ? error.message : String(error ?? "");
+      const message = error instanceof Error ? error.message : String(error ?? "");
       const isCancelledDisconnect =
         !isActive ||
         connectAttemptRef.current !== attemptId ||
         message.toLowerCase().includes("client initiated disconnect");
-
       if (isCancelledDisconnect) {
-        console.warn(
-          "Abort connection attempt due to user initiated disconnect",
-          error,
-        );
+        console.warn("Abort connection attempt due to user initiated disconnect", error);
         return;
       }
-
       console.error("LiveKit connect failed:", error);
       onEndedRef.current();
     });
@@ -152,12 +165,41 @@ export default function LiveKitCallPanel({
       isActive = false;
       const room = roomRef.current;
       roomRef.current = null;
+      setRemoteAudioPubs([]);
       if (room) {
         shouldClosePanelRef.current = false;
         room.disconnect();
       }
     };
-  }, [callInfo]); // onEnded intentionally excluded — kept stable via onEndedRef
+  }, [roomUrl, token, callType]);
+
+  // ── Fullscreen ──
+  const toggleFullscreen = useCallback(async () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      await containerRef.current.requestFullscreen?.();
+      setIsFullscreen(true);
+    } else {
+      await document.exitFullscreen?.();
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onFSChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFSChange);
+    return () => document.removeEventListener("fullscreenchange", onFSChange);
+  }, []);
+
+  // Retry startAudio() on any user interaction — handles browsers that block
+  // audio autoplay until a gesture happens inside the call panel.
+  const handleContainerClick = useCallback(async () => {
+    const room = roomRef.current;
+    if (room && !room.canPlaybackAudio) {
+      await room.startAudio();
+      setAudioBlocked(!room.canPlaybackAudio);
+    }
+  }, []);
 
   const fmt = (seconds: number) =>
     `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
@@ -165,7 +207,6 @@ export default function LiveKitCallPanel({
   const handleToggleMic = async () => {
     const room = roomRef.current;
     if (!room) return;
-
     const next = !micOn;
     await room.localParticipant.setMicrophoneEnabled(next);
     setMicOn(next);
@@ -174,7 +215,6 @@ export default function LiveKitCallPanel({
   const handleToggleVideo = async () => {
     const room = roomRef.current;
     if (!room) return;
-
     const next = !videoOn;
     await room.localParticipant.setCameraEnabled(next);
     setVideoOn(next);
@@ -195,21 +235,60 @@ export default function LiveKitCallPanel({
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 z-20 p-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div
+      ref={containerRef}
+      onClick={handleContainerClick}
+      className="h-full flex flex-col bg-slate-900 relative overflow-hidden"
+    >
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 z-20 p-5 flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-3 pointer-events-auto">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-white">
             {callInfo.type === "video" ? "Video" : "Voice"} Consultation
           </span>
         </div>
-        <div className="bg-primary px-3 py-1.5 rounded-full border border-white/10">
-          <span className="text-white text-xs font-bold tabular-nums">
-            {fmt(elapsed)}
-          </span>
+        <div className="flex items-center gap-3 pointer-events-auto">
+          <div className="bg-primary px-3 py-1.5 rounded-full border border-white/10">
+            <span className="text-white text-xs font-bold tabular-nums">{fmt(elapsed)}</span>
+          </div>
+          <button
+            onClick={toggleFullscreen}
+            className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all"
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? <FaCompress size={20} /> : <BiExpand size={20} />}
+          </button>
         </div>
       </div>
 
+      {/* Audio renderer — each subscribed audio publication gets a real <audio>
+          element in the DOM. Using opacity:0 + 1×1px instead of display:none
+          so the browser's autoplay policy allows playback. */}
+      <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }}>
+        {remoteAudioPubs.map((pub) => (
+          <audio
+            key={pub.trackSid}
+            autoPlay
+            playsInline
+            ref={(el) => {
+              if (el && pub.track) pub.track.attach(el);
+              else if (!el && pub.track) pub.track.detach();
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Audio blocked banner */}
+      {audioBlocked && (
+        <div className="absolute top-14 inset-x-0 z-30 flex justify-center pointer-events-none">
+          <div className="bg-amber-500/90 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg pointer-events-auto">
+            Click anywhere to enable audio
+          </div>
+        </div>
+      )}
+
+      {/* Video area */}
       <div className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0 bg-slate-950">
           {callInfo.type === "video" ? (
@@ -218,14 +297,11 @@ export default function LiveKitCallPanel({
               autoPlay
               muted={false}
               playsInline
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Avatar
-                name={callInfo.participantName || "Participant"}
-                size="xl"
-              />
+              <Avatar name={callInfo.participantName || "Participant"} size="xl" />
             </div>
           )}
 
@@ -238,8 +314,7 @@ export default function LiveKitCallPanel({
                   size="xl"
                 />
                 <p className="mt-4 text-sm font-semibold">
-                  Waiting for {callInfo.participantName || "participant"} to
-                  join
+                  Waiting for {callInfo.participantName || "participant"} to join
                 </p>
               </div>
             </div>
@@ -264,13 +339,14 @@ export default function LiveKitCallPanel({
               playsInline
               className="w-full h-full object-cover"
             />
-            <div className="absolute left-3 bottom-3 rounded-full bg-black/40 px-2 py-1 text-sm font-bold -wide text-white">
+            <div className="absolute left-3 bottom-3 rounded-full bg-black/40 px-2 py-1 text-sm font-bold text-white">
               You
             </div>
           </div>
         )}
       </div>
 
+      {/* Controls */}
       <div className="p-5 bg-primary border-t border-white/5 flex items-center justify-center gap-4 shrink-0">
         <button
           onClick={handleToggleMic}
@@ -290,7 +366,7 @@ export default function LiveKitCallPanel({
 
         <button
           onClick={handleEnd}
-          className="w-16 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center transition-all  shadow-rose-900/30"
+          className="w-16 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center transition-all shadow-rose-900/30"
         >
           <BiPhoneOff size={22} />
         </button>

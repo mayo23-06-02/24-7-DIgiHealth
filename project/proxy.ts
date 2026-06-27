@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import NextAuth from "next-auth";
 import authConfig from "@/lib/auth/auth.config";
