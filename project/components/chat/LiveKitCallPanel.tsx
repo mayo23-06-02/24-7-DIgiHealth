@@ -105,15 +105,26 @@ export default function LiveKitCallPanel({
           }
         })
         .on(RoomEvent.ParticipantDisconnected, () => {
-          if (room.remoteParticipants.size === 0) setRemoteConnected(false);
           syncAudioPubs();
+          if (room.remoteParticipants.size === 0) {
+            setRemoteConnected(false);
+            // Other side ended the call — close our panel after a brief moment
+            setTimeout(() => {
+              if (roomRef.current === room) {
+                shouldClosePanelRef.current = true;
+                room.disconnect();
+              }
+            }, 1500);
+          }
         })
         .on(RoomEvent.AudioPlaybackStatusChanged, () => {
           setAudioBlocked(!room.canPlaybackAudio);
         })
         .on(RoomEvent.Disconnected, () => {
           setRemoteAudioPubs([]);
-          if (roomRef.current === room && shouldClosePanelRef.current) {
+          // Fire onEnded for any external disconnect (remote hung up, server deleted room).
+          // Cleanup unmount nulls roomRef.current first, so that path is excluded.
+          if (roomRef.current === room) {
             onEndedRef.current();
           }
         });
@@ -228,8 +239,11 @@ export default function LiveKitCallPanel({
         body: JSON.stringify({ callId: callInfo.callId }),
       });
     } finally {
-      shouldClosePanelRef.current = true;
-      roomRef.current?.disconnect();
+      // Null the ref before disconnect so the Disconnected handler doesn't
+      // double-fire onEnded() — the server deletes the room which triggers it.
+      const room = roomRef.current;
+      roomRef.current = null;
+      room?.disconnect();
       onEnded();
     }
   };

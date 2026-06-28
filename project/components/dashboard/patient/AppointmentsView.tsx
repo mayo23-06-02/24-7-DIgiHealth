@@ -129,12 +129,20 @@ const AppointmentsView: React.FC = () => {
 
   const joinChat = useCallback(
     async (appt: Appointment) => {
+      if (!appt.practitionerId) {
+        joiningRef.current = false;
+        return;
+      }
       try {
-        const res = await fetch(`/api/chat/conversations/${appt.id}`);
-        const conv = await res.json();
-        if (res.ok && conv._id) {
+        const res = await fetch('/api/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contactId: appt.practitionerId }),
+        });
+        const data = await res.json();
+        if (res.ok && data.conversationId) {
           setWaitingRoomAppt(null);
-          router.push(`/patient/messages?chatId=${conv._id}&join=video`);
+          router.push(`/patient/messages?chatId=${data.conversationId}&join=video`);
         } else {
           joiningRef.current = false;
         }
@@ -575,7 +583,7 @@ const AppointmentsView: React.FC = () => {
               <Button
                 variant="ghost"
                 onClick={() => setViewType("list")}
-                className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${
+                className={`w-10 h-10 p-0 rounded-xl border-none min-w-0! transition-all ${
                   viewType === "list"
                     ? "bg-white shadow-none text-primary"
                     : "text-slate-500 hover:text-slate-600"
@@ -586,7 +594,7 @@ const AppointmentsView: React.FC = () => {
               <Button
                 variant="ghost"
                 onClick={() => setViewType("calendar")}
-                className={`w-10 h-10 p-0 rounded-xl border-none !min-w-0 transition-all ${
+                className={`w-10 h-10 p-0 rounded-xl border-none min-w-0! transition-all ${
                   viewType === "calendar"
                     ? "bg-white shadow-none text-primary"
                     : "text-slate-500 hover:text-slate-600"
@@ -652,7 +660,7 @@ const AppointmentsView: React.FC = () => {
                     return (
                       <tr
                         key={appt.id}
-                        className="hover:bg-primary/[0.02] transition-colors group cursor-default"
+                        className="hover:bg-primary/2 transition-colors group cursor-default"
                       >
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-4">
@@ -772,7 +780,7 @@ const AppointmentsView: React.FC = () => {
                               <Button
                                 variant="ghost"
                                 onClick={() => setSelectedAppt(appt)}
-                                className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all border-none !min-w-0"
+                                className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all border-none min-w-0!"
                               >
                                 <BiChevronRight size={22} />
                               </Button>

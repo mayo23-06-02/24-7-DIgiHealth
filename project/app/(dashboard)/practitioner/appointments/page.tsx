@@ -149,15 +149,19 @@ export default function PractitionerAppointmentsPage() {
     await updateStatus(id, "cancelled");
   };
 
-  const handleJoinRoom = async (consultationId: string) => {
+  const handleJoinRoom = async (patientId: string) => {
     try {
-      const res = await fetch(`/api/chat/conversations/${consultationId}`);
-      const conv = await res.json();
-      if (!res.ok || !conv._id) {
+      const res = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contactId: patientId }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.conversationId) {
         toast.error("Unable to find consultation room");
         return;
       }
-      window.location.href = `/practitioner/messages?chatId=${conv._id}&join=video`;
+      window.location.href = `/practitioner/messages?chatId=${data.conversationId}&join=video`;
     } catch {
       toast.error("Unable to join consultation room");
     }
@@ -598,7 +602,7 @@ export default function PractitionerAppointmentsPage() {
                         {(a.computedStatus === "upcoming" ||
                           a.computedStatus === "ongoing") && (
                           <button
-                            onClick={() => handleJoinRoom(a.consultationId)}
+                            onClick={() => handleJoinRoom(a.patientId)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-primary hover:bg-primary/95 transition-colors"
                           >
                             <BiVideo size={14} /> Join Room

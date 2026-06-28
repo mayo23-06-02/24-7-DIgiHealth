@@ -34,9 +34,19 @@ export async function GET() {
   await connectToDatabase();
 
   const convs = await Conversation.find({
-    $or: [
-      { patientId: new mongoose.Types.ObjectId(userId) },
-      { practitionerId: new mongoose.Types.ObjectId(userId) }
+    $and: [
+      {
+        $or: [
+          { patientId: new mongoose.Types.ObjectId(userId) },
+          { practitionerId: new mongoose.Types.ObjectId(userId) }
+        ]
+      },
+      {
+        $or: [
+          { consultationId: { $exists: false } },
+          { consultationId: null }
+        ]
+      }
     ]
   })
     .populate({ path: 'patientId', model: User, select: 'firstName lastName role' })
