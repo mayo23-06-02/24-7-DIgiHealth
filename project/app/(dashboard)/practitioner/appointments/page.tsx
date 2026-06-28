@@ -151,9 +151,9 @@ export default function PractitionerAppointmentsPage() {
 
   const handleJoinRoom = async (patientId: string) => {
     try {
-      const res = await fetch('/api/conversations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contactId: patientId }),
       });
       const data = await res.json();
@@ -503,7 +503,7 @@ export default function PractitionerAppointmentsPage() {
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100">
                   <th className="py-4 px-5 text-xs font-bold text-slate-500 tracking-wider">
-                    Patient Details
+                    Patient
                   </th>
                   <th className="py-4 px-5 text-xs font-bold text-slate-500 tracking-wider">
                     Date & Time
