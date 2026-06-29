@@ -9,6 +9,7 @@ interface Props {
   onCancel?: (id: string) => void;
   onAccept?: (id: string) => void;
   onDecline?: (id: string) => void;
+  onClick?: (appointment: Appointment) => void;
   showActions?: boolean;
   compact?: boolean;
   emptyMessage?: string;
@@ -21,6 +22,7 @@ export default function AppointmentList({
   onCancel,
   onAccept,
   onDecline,
+  onClick,
   showActions = true,
   compact = false,
   emptyMessage = "No appointments found.",
@@ -43,6 +45,7 @@ export default function AppointmentList({
           onCancel={onCancel}
           onAccept={onAccept}
           onDecline={onDecline}
+          onClick={onClick}
           showActions={showActions}
           compact={compact}
         />

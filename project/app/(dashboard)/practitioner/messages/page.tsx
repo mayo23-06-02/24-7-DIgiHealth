@@ -3,6 +3,7 @@
 import MessagesView, {
   ConversationContact,
 } from "@/components/chat/MessagesView";
+import CallWrapper from "@/components/providers/CallWrapper";
 
 export default function PractitionerMessagesPage() {
   const fetchEnrichedContacts = async (
@@ -54,12 +55,14 @@ export default function PractitionerMessagesPage() {
   };
 
   return (
-    <MessagesView
-      pageTitle="Messages"
-      pageSubtitle="Secure communication with your patients."
-      emptyStateTitle="No Active Channels"
-      emptyStateDesc="Select a patient from your clinical list to continue Secure Direct Messaging."
-      fetchEnrichedContacts={fetchEnrichedContacts}
-    />
+    <CallWrapper>
+      <MessagesView
+        pageTitle="Messages"
+        pageSubtitle="Secure communication with your patients."
+        emptyStateTitle="No Active Channels"
+        emptyStateDesc="Select a patient from your clinical list to continue Secure Direct Messaging."
+        fetchEnrichedContacts={fetchEnrichedContacts}
+      />
+    </CallWrapper>
   );
 }

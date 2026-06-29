@@ -46,27 +46,27 @@ export async function POST(
     const otherPartyId = isPatient ? consultation.practitionerId : consultation.patientId;
     const currentUser = await User.findById(userId);
 
-    consultation.status = "scheduled";
-    await consultation.save();
+    // Delete the consultation
+    await Consultation.findByIdAndDelete(id);
 
     // Notify the other party
     await Notification.create({
       userId: otherPartyId,
-      type: "appointment_approved",
-      title: "Appointment Accepted",
-      body: `${isPatient ? "Patient" : `Dr. ${currentUser?.firstName} ${currentUser?.lastName}`} has accepted the consultation for ${new Date(consultation.scheduledStartTime).toLocaleString()}.`,
+      type: "appointment_declined",
+      title: "Appointment Declined",
+      body: `${isPatient ? "Patient" : `Dr. ${currentUser?.firstName} ${currentUser?.lastName}`} has declined the consultation request for ${new Date(consultation.scheduledStartTime).toLocaleString()}.`,
       data: { consultationId: consultation._id },
       isRead: false,
     });
 
     return NextResponse.json({
       success: true,
-      consultation,
+      message: "Appointment declined and deleted",
     });
   } catch (error) {
-    console.error("Approve API Error:", error);
+    console.error("Decline API Error:", error);
     return NextResponse.json(
-      { error: "Failed to approve consultation" },
+      { error: "Failed to decline consultation" },
       { status: 500 },
     );
   }

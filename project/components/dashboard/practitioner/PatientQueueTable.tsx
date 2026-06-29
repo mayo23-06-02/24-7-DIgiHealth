@@ -15,6 +15,7 @@ import {
 } from "react-icons/bi";
 import RiskScoreCard from "./RiskScoreCard";
 import SoapNoteModal from "./SoapNoteModal";
+import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 
@@ -156,6 +157,8 @@ export default function PatientQueueTable() {
     consultationId: "",
     patientName: "",
   });
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const fetchQueue = useCallback(async () => {
@@ -191,6 +194,42 @@ export default function PatientQueueTable() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDecline = async (id: string) => {
+    if (!confirm("Decline this appointment request?")) return;
+    try {
+      const res = await fetch(`/api/consultations/${id}/decline`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        fetchQueue();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleViewPatientProfile = (patientId: string) => {
+    window.location.href = `/practitioner/patients/${patientId}`;
+  };
+
+  const handleAppointmentClick = (item: QueueItem) => {
+    setSelectedAppointment({
+      id: item.consultationId,
+      consultationId: item.consultationId,
+      patientId: item.patientId,
+      patientName: item.patientName,
+      patientAvatar: item.avatarUrl,
+      scheduledStart: item.scheduledStart,
+      scheduledEnd: item.scheduledEnd,
+      status: item.status,
+      type: item.type,
+      reason: item.reason,
+      riskScore: item.riskScore,
+      riskColor: item.riskColor,
+    });
+    setShowDetailsModal(true);
   };
 
   useEffect(() => {
@@ -273,7 +312,7 @@ export default function PatientQueueTable() {
               <div
                 key={item.consultationId}
                 className={`
-                  group rounded-[1.5rem] border p-5 transition-all duration-300 hover:shadow-none cursor-default
+                  group rounded-[1.5rem] border p-5 transition-all duration-300 hover:shadow-none cursor-pointer
                   ${
                     isOngoing
                       ? "border-emerald-200 bg-gradient-to-r from-emerald-50 to-white shadow-none shadow-emerald-50"
@@ -282,6 +321,7 @@ export default function PatientQueueTable() {
                         : "border-slate-100 bg-white hover:border-primary/20 hover:bg-blue-50/10"
                   }
                 `}
+                onClick={() => handleAppointmentClick(item)}
               >
                 <div className="flex items-center gap-4 mb-4">
                   <div className="relative shrink-0">
@@ -349,14 +389,22 @@ export default function PatientQueueTable() {
 
                 <div className="flex items-center gap-2 mt-4">
                   {item.status === "requested" ? (
-                    <Button
-                      onClick={() => handleApprove(item.consultationId)}
-                      fullWidth
-                      className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-200"
-                      icon={<BiCheckCircle size={14} />}
-                    >
-                      Approve Request
-                    </Button>
+                    <>
+                      <Button
+                        onClick={() => handleApprove(item.consultationId)}
+                        className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-200"
+                        icon={<BiCheckCircle size={14} />}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        onClick={() => handleDecline(item.consultationId)}
+                        variant="ghost"
+                        className="flex-1 py-4 bg-rose-50 hover:bg-rose-100 text-rose-500 text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto border-none"
+                      >
+                        Decline
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       onClick={() =>
@@ -473,6 +521,17 @@ export default function PatientQueueTable() {
         }
         consultationId={soapModal.consultationId}
         patientName={soapModal.patientName}
+      />
+
+      <AppointmentDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedAppointment(null);
+        }}
+        appointment={selectedAppointment}
+        userType="practitioner"
+        onViewProfile={handleViewPatientProfile}
       />
     </>
   );

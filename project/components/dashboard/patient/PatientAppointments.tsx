@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import AppointmentList from "@/components/shared/Appointments/AppointmentList";
 import AppointmentFilters from "@/components/shared/Appointments/AppointmentFilters";
+import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -30,6 +31,8 @@ export default function PatientAppointments() {
   const [sortBy, setSortBy] = useState("newest");
   const [showBooking, setShowBooking] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Tabs configuration
   const tabs: Tab[] = [
@@ -150,6 +153,46 @@ export default function PatientAppointments() {
     }
   };
 
+  const handleAccept = async (id: string) => {
+    try {
+      const res = await fetch(`/api/consultations/${id}/approve`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Appointment accepted");
+        fetchAppointments(false);
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to accept");
+      }
+    } catch {
+      toast.error("Error accepting");
+    }
+  };
+
+  const handleDecline = async (id: string) => {
+    if (!confirm("Decline this appointment request?")) return;
+    try {
+      const res = await fetch(`/api/consultations/${id}/decline`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Appointment declined");
+        fetchAppointments(false);
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to decline");
+      }
+    } catch {
+      toast.error("Error declining");
+    }
+  };
+
+  const handleViewDoctorProfile = (doctorId: string) => {
+    window.location.href = `/patient/doctors/${doctorId}`;
+  };
+
+  const handleAppointmentClick = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowDetailsModal(true);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -214,6 +257,9 @@ export default function PatientAppointments() {
             onJoin={handleJoin}
             onEdit={handleReschedule}
             onCancel={handleCancel}
+            onAccept={handleAccept}
+            onDecline={handleDecline}
+            onClick={handleAppointmentClick}
             emptyMessage={`No ${activeTab} appointments`}
           />
         )}
@@ -229,6 +275,18 @@ export default function PatientAppointments() {
         doctor={selectedDoctor}
         onSuccess={() => fetchAppointments(false)}
         mode="patient"
+      />
+
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedAppointment(null);
+        }}
+        appointment={selectedAppointment}
+        userType="patient"
+        onViewProfile={handleViewDoctorProfile}
       />
     </div>
   );

@@ -3,7 +3,7 @@ import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { BiVideo, BiChat, BiTime, BiCalendar } from "react-icons/bi";
-import { Appointment } from "@/hooks/useAppointments";
+import { Appointment } from "@/lib/hooks/useAppointments";
 
 interface Props {
   appointment: Appointment;
@@ -12,6 +12,7 @@ interface Props {
   onCancel?: (id: string) => void;
   onAccept?: (id: string) => void;
   onDecline?: (id: string) => void;
+  onClick?: (appointment: Appointment) => void;
   showActions?: boolean;
   compact?: boolean;
 }
@@ -23,6 +24,7 @@ export default function AppointmentCard({
   onCancel,
   onAccept,
   onDecline,
+  onClick,
   showActions = true,
   compact = false,
 }: Props) {
@@ -44,7 +46,8 @@ export default function AppointmentCard({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-slate-100 rounded-xl bg-white hover:shadow-md transition-shadow ${compact ? "py-3" : ""}`}
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-slate-100 rounded-xl bg-white hover:shadow-md transition-shadow cursor-pointer ${compact ? "py-3" : ""}`}
+      onClick={() => onClick?.(appointment)}
     >
       <div className="flex items-center gap-4 min-w-0 flex-1">
         <Avatar

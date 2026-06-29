@@ -3,6 +3,7 @@
 import MessagesView, {
   ConversationContact,
 } from "@/components/chat/MessagesView";
+import CallWrapper from "@/components/providers/CallWrapper";
 
 export default function PatientMessagesView() {
   const fetchEnrichedContacts = async (
@@ -91,13 +92,15 @@ export default function PatientMessagesView() {
   };
 
   return (
-    <MessagesView
-      pageTitle="Secure Messages"
-      pageSubtitle="Stay connected with your doctors."
-      emptyStateTitle="No Messages"
-      emptyStateDesc="Start a conversation from the Doctors page."
-      onNewChatClick={() => (window.location.href = "/patient/doctors")}
-      fetchEnrichedContacts={fetchEnrichedContacts}
-    />
+    <CallWrapper>
+      <MessagesView
+        pageTitle="Secure Messages"
+        pageSubtitle="Stay connected with your doctors."
+        emptyStateTitle="No Messages"
+        emptyStateDesc="Start a conversation from the Doctors page."
+        onNewChatClick={() => (window.location.href = "/patient/doctors")}
+        fetchEnrichedContacts={fetchEnrichedContacts}
+      />
+    </CallWrapper>
   );
 }

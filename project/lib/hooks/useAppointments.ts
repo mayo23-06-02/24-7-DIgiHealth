@@ -8,6 +8,7 @@ export interface Appointment {
   patientAvatar?: string;
   practitionerId?: string;
   practitionerName?: string;
+  practitionerAvatar?: string;
   scheduledStart: string; // ISO
   scheduledEnd: string;
   status: string;
@@ -17,6 +18,7 @@ export interface Appointment {
   riskColor?: string;
   isNew?: boolean;
   computedStatus?: string;
+  duration?: string;
 }
 
 export function useAppointments(fetchUrl: string) {
@@ -55,6 +57,11 @@ export function useAppointments(fetchUrl: string) {
     }
   }, [fetchUrl]);
 
+  // Fetch appointments on mount
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
   // Compute status based on current time
   const computeStatus = useCallback((appt: Appointment) => {
     const start = new Date(appt.scheduledStart);
@@ -71,6 +78,13 @@ export function useAppointments(fetchUrl: string) {
     if (appt.status === 'in_progress') {
       if (now < end) return 'ongoing';
       return 'past';
+    }
+    // Handle scheduled status - time-based transitions
+    if (appt.status === 'scheduled') {
+      if (now < start) return 'upcoming';
+      if (now >= start && now < tenMinsAfterStart) return 'ongoing';
+      if (now >= end) return 'past';
+      return 'ongoing';
     }
     if (now < start) return 'upcoming';
     if (now >= start && now < tenMinsAfterStart) return 'ongoing';
