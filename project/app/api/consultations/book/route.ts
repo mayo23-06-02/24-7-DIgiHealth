@@ -1,64 +1,43 @@
-import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { Consultation } from "@/lib/models/Consultation";
-import { Notification } from "@/lib/models/Communications";
-import User from "@/lib/models/User";
-import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
+import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb';
+import { Consultation } from '@/lib/models/Consultation';
+import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { practitionerId, date, time, type, chiefComplaint } =
-      await request.json();
-
     await connectToDatabase();
-
+    const body = await req.json();
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { payload } = await jwtVerify(token, SECRET);
+    const token = cookieStore.get('token')?.value;
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
 
-    // Create startTime and endTime
-    const startTime = new Date(`${date}T${time}:00`);
-    const endTime = new Date(startTime.getTime() + 60 * 60000); // 1 hour duration
+    // Validate dates
+    const start = new Date(body.scheduledStart);
+    const end = new Date(body.scheduledEnd);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
+    }
+    if (start < new Date()) {
+      return NextResponse.json({ error: 'Cannot book in the past' }, { status: 400 });
+    }
 
-    const newConsultation = await Consultation.create({
+    const consultation = await Consultation.create({
       patientId: userId,
-      practitionerId,
-      type: type || "video",
-      status: "requested",
-      scheduledStartTime: startTime,
-      scheduledEndTime: endTime,
-      chiefComplaint: chiefComplaint || "Routine Medical Consultation",
+      practitionerId: body.practitionerId,
+      type: body.type || 'video',
+      status: body.status || 'requested',
+      scheduledStartTime: start,
+      scheduledEndTime: end,
+      chiefComplaint: body.reason || body.chiefComplaint,
     });
 
-    // Create Notification for Practitioner
-    const patientUser = await User.findById(userId);
-    await Notification.create({
-      userId: practitionerId,
-      type: "new_appointment",
-      title: "New Consultation Booked",
-      body: `${patientUser?.firstName} ${patientUser?.lastName} has booked a ${type || "video"} consultation.`,
-      data: { consultationId: newConsultation._id },
-      isRead: false,
-    });
-
-    return NextResponse.json({
-      success: true,
-      consultation: newConsultation,
-    });
-  } catch (error) {
-    console.error("Booking API Error:", error);
-    return NextResponse.json(
-      { error: "Failed to book consultation" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: true, data: consultation });
+  } catch (err: any) {
+    console.error('[POST /api/consultations/book]', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

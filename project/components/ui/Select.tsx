@@ -33,7 +33,7 @@ const Select: React.FC<SelectProps> = ({
 }) => {
   const containerStyle = fullWidth ? "w-full" : "w-auto";
   const commonStyles = `
-    w-full bg-slate-50 rounded-2xl outline-none appearance-none
+    w-full bg-slate-50 rounded-full outline-none appearance-none
     focus:ring-4 focus:ring-primary/10 focus:border-primary 
     transition-all text-slate-900 placeholder-slate-400 border border-slate-300
     ${error ? "border-red-400 bg-red-50 text-red-900" : ""}
@@ -60,7 +60,7 @@ const Select: React.FC<SelectProps> = ({
           id={id}
           value={value}
           onChange={(e) => onChange && onChange(e.target.value)}
-          className={`${commonStyles} py-4 cursor-pointer`}
+          className={`${commonStyles} py-3 cursor-pointer`}
           {...props}
         >
           {options.map((opt) => (

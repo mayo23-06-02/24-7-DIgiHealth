@@ -103,66 +103,6 @@ const EventModal: React.FC<EventModalProps> = ({
       }`}
     >
       <div className="space-y-6">
-        {!editingId && showAddModal && (
-          <div className="space-y-3">
-            <p className="font-semibold text-slate-600 tracking-normal">
-              Event Scheduled for this day
-            </p>
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {appointments.filter((a) => a.date === showAddModal).length >
-              0 ? (
-                appointments
-                  .filter((a) => a.date === showAddModal)
-                  .map((appt) => (
-                    <div
-                      key={appt.id}
-                      draggable
-                      onDragStart={(e) => onDragStart(e, appt.id)}
-                      className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 group cursor-move"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-2 h-2 rounded-full ${getMarkerColor(
-                            appt.type,
-                          )}`}
-                        />
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">
-                            {appt.title ||
-                              appt.dr ||
-                              (appt.type === "refill" ? "Refill" : "Event")}
-                          </p>
-                          <p className="text-xs text-slate-500 font-medium">
-                            {appt.time} • {appt.type}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleEdit(appt)}
-                          className="p-1.5 hover:bg-white rounded-lg text-slate-500 hover:text-primary transition-colors"
-                        >
-                          <BiPencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(appt)}
-                          className="p-1.5 hover:bg-white rounded-lg text-slate-500 hover:text-red-500 transition-colors"
-                        >
-                          <BiTrash size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <p className="text-xs text-slate-600 italic py-4 text-center bg-slate-50 rounded-xl border border-dashed border-slate-400">
-                  No events scheduled yet
-                </p>
-              )}
-            </div>
-            <div className="h-px bg-slate-100 my-4" />
-          </div>
-        )}
-
         <div className="space-y-4">
           <p className="text-slate-600 font-semibold tracking-normal">
             {editingId ? "Modify Selection" : "Add New Event"}
@@ -242,13 +182,6 @@ const EventModal: React.FC<EventModalProps> = ({
                       icon={<BiUser />}
                     />
                   </div>
-                  <Select
-                    label="Institution / Clinic"
-                    value={addForm.institution}
-                    onChange={(v) => setAddForm({ ...addForm, institution: v })}
-                    options={facilityOptions}
-                    icon={<BiBuilding />}
-                  />
                   <Input
                     label="Notes"
                     textarea

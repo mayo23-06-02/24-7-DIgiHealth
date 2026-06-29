@@ -1,5 +1,5 @@
-import AppointmentsView from "@/components/dashboard/patient/AppointmentsView";
+import PatientAppointments from "@/components/dashboard/patient/PatientAppointments";
 
 export default function PatientAppointmentsPage() {
-  return <AppointmentsView />;
+  return <PatientAppointments />;
 }

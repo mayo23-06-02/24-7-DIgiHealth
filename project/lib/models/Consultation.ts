@@ -5,7 +5,7 @@ export interface IConsultation extends Document {
   practitionerId: Types.ObjectId;
   facilityId?: Types.ObjectId;
   type: 'video' | 'chat' | 'in_person';
-  status: 'requested' | 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'requested' | 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'missed';
   scheduledStartTime: Date;
   scheduledEndTime: Date;
   chiefComplaint?: string;
@@ -19,24 +19,17 @@ const ConsultationSchema = new Schema<IConsultation>({
   practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   facilityId: { type: Schema.Types.ObjectId, ref: 'Facility' },
   type: { type: String, enum: ['video', 'chat', 'in_person'], required: true },
-  status: { type: String, enum: ['requested', 'pending', 'scheduled', 'in_progress', 'completed', 'cancelled'], default: 'requested' },
+  status: { type: String, enum: ['requested', 'pending', 'scheduled', 'in_progress', 'completed', 'cancelled', 'missed'], default: 'requested' },
   scheduledStartTime: { type: Date, required: true },
   scheduledEndTime: { type: Date, required: true },
   chiefComplaint: { type: String },
-  clinicalRisk: {
-    score: Number,
-    color: { type: String, enum: ['green', 'gray', 'red'] },
-    factors: [{ type: String }]
-  },
+  clinicalRisk: { score: Number, color: { type: String, enum: ['green', 'gray', 'red'] }, factors: [String] },
   soapNotes: { subjective: String, objective: String, assessment: String, plan: String, signedAt: Date },
-  callMinutesUsed: { type: Number, default: 0 }
+  callMinutesUsed: { type: Number, default: 0 },
 }, { timestamps: true });
 
 ConsultationSchema.index({ patientId: 1, scheduledStartTime: -1 });
 ConsultationSchema.index({ practitionerId: 1, scheduledStartTime: -1 });
 
-if (mongoose.models.Consultation) {
-  delete mongoose.models.Consultation;
-}
-export const Consultation: Model<IConsultation> = mongoose.model<IConsultation>('Consultation', ConsultationSchema);
+export const Consultation = mongoose.models.Consultation || mongoose.model<IConsultation>('Consultation', ConsultationSchema);
 export default Consultation;

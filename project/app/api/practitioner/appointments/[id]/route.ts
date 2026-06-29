@@ -4,45 +4,42 @@ import { Consultation } from '@/lib/models/Consultation';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectToDatabase();
-    const { id } = await params;
+    const { id } = params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
-
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const { payload } = await jwtVerify(token, SECRET);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
-
     const body = await req.json();
-    const { status, scheduledStart, scheduledEnd, chiefComplaint, reason } = body;
 
-    // Ensure the patient owns this consultation
-    const consultation = await Consultation.findOne({ _id: id, patientId: userId });
+    const consultation = await Consultation.findOne({ _id: id, practitionerId: userId });
     if (!consultation) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    if (status) consultation.status = status;
-    if (scheduledStart) {
-        consultation.scheduledStartTime = new Date(scheduledStart);
-        consultation.status = 'requested';
+    if (body.status) consultation.status = body.status;
+    if (body.scheduledStart) {
+      const newStart = new Date(body.scheduledStart);
+      if (isNaN(newStart.getTime())) return NextResponse.json({ error: 'Invalid date' }, { status: 400 });
+      consultation.scheduledStartTime = newStart;
     }
-    if (scheduledEnd) {
-        consultation.scheduledEndTime = new Date(scheduledEnd);
+    if (body.scheduledEnd) {
+      const newEnd = new Date(body.scheduledEnd);
+      if (isNaN(newEnd.getTime())) return NextResponse.json({ error: 'Invalid date' }, { status: 400 });
+      consultation.scheduledEndTime = newEnd;
     }
-    if (chiefComplaint) consultation.chiefComplaint = chiefComplaint;
-    else if (reason) consultation.chiefComplaint = reason;
-
+    if (body.chiefComplaint || body.reason) {
+      consultation.chiefComplaint = body.chiefComplaint || body.reason;
+    }
     await consultation.save();
-
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    return PUT(req, { params });
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  return PUT(req, { params });
 }

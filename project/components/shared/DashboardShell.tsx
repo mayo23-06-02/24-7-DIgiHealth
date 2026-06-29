@@ -5,7 +5,6 @@ import UnifiedSidebar from "./UnifiedSidebar";
 import UnifiedHeader from "./UnifiedHeader";
 import { useAuthContext } from "../auth/AuthProvider";
 import { BiBrain } from "react-icons/bi";
-import AITriageChat from "../dashboard/patient/AITriageChat";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -62,12 +61,6 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
                 AI ASSISTANT
               </div>
             </button>
-
-            <AITriageChat
-              isOpen={isTriageOpen}
-              onClose={() => setIsTriageOpen(false)}
-              patientName={user.name || "Doctor"}
-            />
           </>
         )}
       </div>

@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   BiCalendar,
@@ -33,7 +39,6 @@ import Select from "@/components/ui/Select";
 import EmptyState from "@/components/ui/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
 import PatientCalendar from "./PatientCalendar";
-import DoctorProfileModal from "./DoctorProfileModal";
 import BookingModal from "@/components/doctor/BookingModal";
 
 type AppointmentStatus =
@@ -134,15 +139,17 @@ const AppointmentsView: React.FC = () => {
         return;
       }
       try {
-        const res = await fetch('/api/conversations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contactId: appt.practitionerId }),
         });
         const data = await res.json();
         if (res.ok && data.conversationId) {
           setWaitingRoomAppt(null);
-          router.push(`/patient/messages?chatId=${data.conversationId}&join=video`);
+          router.push(
+            `/patient/messages?chatId=${data.conversationId}&join=video`,
+          );
         } else {
           joiningRef.current = false;
         }
@@ -371,7 +378,11 @@ const AppointmentsView: React.FC = () => {
   const handleJoinCell = useCallback(
     (appt: Appointment) => {
       const start = new Date(appt.scheduledStartTime);
-      if (!appt.scheduledStartTime || isNaN(start.getTime()) || new Date() >= start) {
+      if (
+        !appt.scheduledStartTime ||
+        isNaN(start.getTime()) ||
+        new Date() >= start
+      ) {
         joinChat(appt);
       } else {
         setWaitingRoomAppt(appt);
@@ -1345,15 +1356,6 @@ const AppointmentsView: React.FC = () => {
           </div>
         )}
       </Modal>
-
-      {/* ─── DOCTOR PROFILE MODAL ─── */}
-      <DoctorProfileModal
-        isOpen={!!selectedPractitioner}
-        onClose={() => setSelectedPractitioner(null)}
-        doctor={selectedPractitioner}
-        onBook={() => {}}
-        onMessage={(id) => (window.location.href = "/patient/messages")}
-      />
     </div>
   );
 };

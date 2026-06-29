@@ -1,91 +1,57 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
-import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-
-async function getAuthUserId(): Promise<string | null> {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    await connectToDatabase();
+    const { id } = params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
-    if (!token) return null;
-    const { payload } = await jwtVerify(token, SECRET);
-    return payload.userId as string;
-  } catch {
-    return null;
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const { payload } = await jwtVerify(token, secret);
+    const userId = payload.userId as string;
+    const body = await req.json();
+
+    const consultation = await Consultation.findOne({ _id: id, patientId: userId });
+    if (!consultation) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    if (body.scheduledStartTime) {
+      const newStart = new Date(body.scheduledStartTime);
+      if (isNaN(newStart.getTime())) return NextResponse.json({ error: 'Invalid date' }, { status: 400 });
+      if (newStart < new Date()) return NextResponse.json({ error: 'Cannot reschedule to past' }, { status: 400 });
+      consultation.scheduledStartTime = newStart;
+      consultation.scheduledEndTime = new Date(newStart.getTime() + 30 * 60000); // default 30 min
+      consultation.status = 'pending'; // wait for doctor re‑accept
+    }
+    if (body.chiefComplaint) consultation.chiefComplaint = body.chiefComplaint;
+    await consultation.save();
+    return NextResponse.json({ success: true, data: consultation });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
 
-// PATCH /api/consultations/[id] — reschedule (change scheduledStartTime/End)
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const userId = await getAuthUserId();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectToDatabase();
-    const { id } = await params;
-    const body = await request.json();
-    const { scheduledStartTime, scheduledEndTime } = body;
+    const { id } = params;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const { payload } = await jwtVerify(token, secret);
+    const userId = payload.userId as string;
 
-    if (!scheduledStartTime) {
-      return NextResponse.json({ error: 'scheduledStartTime is required' }, { status: 400 });
-    }
-
-    const start = new Date(scheduledStartTime);
-    if (isNaN(start.getTime())) {
-      return NextResponse.json({ error: 'Invalid scheduledStartTime' }, { status: 400 });
-    }
-
-    // Default end = start + 1 hour
-    const end = scheduledEndTime ? new Date(scheduledEndTime) : new Date(start.getTime() + 60 * 60 * 1000);
-
-    const consultation = await Consultation.findOneAndUpdate(
-      { _id: id, patientId: userId },
-      { scheduledStartTime: start, scheduledEndTime: end, status: 'scheduled' },
-      { new: true }
-    );
-
-    if (!consultation) {
-      return NextResponse.json({ error: 'Consultation not found or not authorized' }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, consultation });
-  } catch (error) {
-    console.error('PATCH consultation error:', error);
-    return NextResponse.json({ error: 'Failed to update consultation' }, { status: 500 });
-  }
-}
-
-// DELETE /api/consultations/[id] — cancel
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const userId = await getAuthUserId();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  try {
-    await connectToDatabase();
-    const { id } = await params;
-
-    const consultation = await Consultation.findOneAndUpdate(
-      { _id: id, patientId: userId },
-      { status: 'cancelled' },
-      { new: true }
-    );
-
-    if (!consultation) {
-      return NextResponse.json({ error: 'Consultation not found or not authorized' }, { status: 404 });
-    }
-
+    const consultation = await Consultation.findOne({ _id: id, patientId: userId });
+    if (!consultation) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    consultation.status = 'cancelled';
+    await consultation.save();
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('DELETE consultation error:', error);
-    return NextResponse.json({ error: 'Failed to cancel consultation' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

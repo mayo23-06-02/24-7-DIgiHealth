@@ -39,11 +39,12 @@ const Input: React.FC<InputProps> = ({
   if (isPassword) paddingClass = "px-6 pr-12"; // eye toggle on right
 
   const commonStyles = `
-    w-full bg-slate-50 rounded-full outline-none  
+    w-full bg-slate-50  outline-none  
     transition-all text-slate-900 placeholder-slate-500
     ${error ? "border-red-400 bg-red-50 border" : "border border-slate-200 bg-slate-50"}
     ${paddingClass}
     ${className}
+    ${textarea ? "rounded-2xl" : "rounded-full"}
   `;
 
   const inputType = isPassword ? (showPassword ? "text" : "password") : type;

@@ -255,91 +255,96 @@ export default function BookingModal({
       return;
     }
 
-    // 2. Construct date safely using Date.UTC
-    let scheduledStart: Date;
-    try {
-      const [year, month, day] = selectedDate.split("-").map(Number);
-      const [hours, minutes] = selectedTime.split(":").map(Number);
-      const utcTimestamp = Date.UTC(year, month - 1, day, hours, minutes);
-      if (isNaN(utcTimestamp)) throw new Error("Invalid date components");
-      scheduledStart = new Date(utcTimestamp);
-      if (isNaN(scheduledStart.getTime()))
-        throw new Error("Invalid date object");
-    } catch {
+    // 2. Build a valid Date using local time (no timezone shifting)
+    const dateTimeString = `${selectedDate}T${selectedTime}:00`;
+    const localDate = new Date(dateTimeString);
+    if (isNaN(localDate.getTime())) {
       toast.error("The selected date or time is invalid. Please try again.");
       return;
     }
 
-    // 3. Calculate end time
+    // 3. Prevent booking in the past (optional but helpful)
+    if (localDate.getTime() < Date.now()) {
+      toast.error(
+        "Cannot book an appointment in the past. Please choose a future time.",
+      );
+      return;
+    }
+
+    // 4. Calculate end time (duration: default 30 min for patients)
     const duration = isPractitionerMode ? durationMinutes : 30;
-    const scheduledEnd = new Date(scheduledStart.getTime() + duration * 60000);
+    const endDate = new Date(localDate.getTime() + duration * 60000);
+    if (isNaN(endDate.getTime())) {
+      toast.error("Invalid end time calculated. Please try again.");
+      return;
+    }
+
+    // 5. Prepare payload with ISO strings (UTC)
+    const payload = {
+      scheduledStart: localDate.toISOString(),
+      scheduledEnd: endDate.toISOString(),
+    };
+
+    // Add role-specific fields
+    if (isPractitionerMode) {
+      if (!selectedPatientState) {
+        toast.error("No patient selected.");
+        return;
+      }
+      Object.assign(payload, {
+        patientId: selectedPatientState.id,
+        type: consultType,
+        reason: concern,
+        chiefComplaint: concern,
+        status: editingApptId ? undefined : "pending",
+      });
+    } else {
+      if (!selectedDoctorState) {
+        toast.error("No practitioner selected.");
+        return;
+      }
+      Object.assign(payload, {
+        practitionerId: selectedDoctorState.id,
+        type: "video",
+        reason: concern,
+        chiefComplaint: concern,
+      });
+    }
 
     setIsSubmitting(true);
     try {
-      if (isPractitionerMode) {
-        if (!selectedPatientState) {
-          toast.error("No patient selected.");
-          setIsSubmitting(false);
-          return;
-        }
-        const url = editingApptId
+      const url = isPractitionerMode
+        ? editingApptId
           ? `/api/practitioner/appointments/${editingApptId}`
-          : "/api/practitioner/appointments";
-        const payload = {
-          patientId: selectedPatientState.id,
-          // Use "scheduledStart" and "scheduledEnd" as expected by the backend
-          scheduledStart: scheduledStart.toISOString(),
-          scheduledEnd: scheduledEnd.toISOString(),
-          type: consultType,
-          reason: concern, // backend uses "reason" for chief complaint in POST
-          chiefComplaint: concern, // also include chiefComplaint as fallback
-          status: editingApptId ? undefined : "pending",
-        };
-        console.log("📤 Practitioner payload:", payload);
-        const res = await fetch(url, {
-          method: editingApptId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const json = await res.json();
-        if (json.success) {
-          toast.success(
-            editingApptId ? "Appointment updated!" : "Appointment scheduled!",
-          );
-          onSuccess?.();
-          handleClose();
-        } else {
-          throw new Error(json.error || "Booking failed");
-        }
+          : "/api/practitioner/appointments"
+        : "/api/consultations/book";
+
+      const method = isPractitionerMode
+        ? editingApptId
+          ? "PUT"
+          : "POST"
+        : "POST";
+
+      console.log("📤 Booking payload:", JSON.stringify(payload, null, 2));
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (json.success || res.ok) {
+        toast.success(
+          isPractitionerMode
+            ? editingApptId
+              ? "Appointment updated!"
+              : "Appointment scheduled!"
+            : "Appointment confirmed and synced!",
+        );
+        onSuccess?.();
+        handleClose();
       } else {
-        // Patient mode – uses /api/consultations/book
-        if (!selectedDoctorState) {
-          toast.error("No practitioner selected.");
-          setIsSubmitting(false);
-          return;
-        }
-        const payload = {
-          practitionerId: selectedDoctorState.id,
-          scheduledStart: scheduledStart.toISOString(),
-          scheduledEnd: scheduledEnd.toISOString(),
-          type: "video",
-          reason: concern, // backend uses "reason" for chief complaint
-          chiefComplaint: concern, // fallback
-        };
-        console.log("📤 Patient payload:", payload);
-        const res = await fetch("/api/consultations/book", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-          toast.success("Appointment confirmed and synced!");
-          onSuccess?.();
-          handleClose();
-        } else {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || "Failed to book");
-        }
+        throw new Error(json.error || json.message || "Booking failed");
       }
     } catch (error: any) {
       toast.error(error?.message || "Process failed. Please try again.");
