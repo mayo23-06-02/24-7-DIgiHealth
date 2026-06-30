@@ -5,6 +5,7 @@ import UnifiedSidebar from "./UnifiedSidebar";
 import { useAuthContext } from "../auth/AuthProvider";
 import { BiBrain } from "react-icons/bi";
 import Header from "@/components/shared/Header";
+import Sidebar from "./Sidebar";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -23,7 +24,7 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
           On desktop: It's a standard flex-child (not fixed). Taking up its own column.
           On mobile: It overlays (using position: fixed) managed inside UnifiedSidebar.
       */}
-      <UnifiedSidebar
+      <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
