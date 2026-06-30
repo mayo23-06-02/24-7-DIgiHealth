@@ -2,9 +2,9 @@
 
 import React from "react";
 import UnifiedSidebar from "./UnifiedSidebar";
-import UnifiedHeader from "./UnifiedHeader";
 import { useAuthContext } from "../auth/AuthProvider";
 import { BiBrain } from "react-icons/bi";
+import Header from "@/components/shared/Header";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -37,12 +37,12 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative">
         {/* ── HEADER ── */}
         <div className="shrink-0 z-30">
-          <UnifiedHeader onMenuClick={() => setIsSidebarOpen(true)} />
+          <Header onMenuClick={() => setIsSidebarOpen(true)} />
         </div>
 
         {/* ── CONTENT AREA ── */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 custom-scrollbar">
-          <div className="max-w-[1600px] mx-auto">{children}</div>
+          <div className="max-w-400 mx-auto">{children}</div>
         </main>
 
         {/* ── FLOATING AI TRIAGE BUTTON (Only for Practitioners) ── */}

@@ -15,6 +15,7 @@ import Select from "@/components/ui/Select";
 import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
 import BookingModal from "@/components/doctor/BookingModal";
+import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
 import {
   BiSearch,
   BiPlus,
@@ -76,8 +77,15 @@ export default function PractitionerAppointmentsPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("newest");
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleAppointmentClick = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowDetailsModal(true);
+  };
 
   // Fetch all appointments (tab=all)
   const fetchAppointments = useCallback(async (showLoading = true) => {
@@ -712,6 +720,17 @@ export default function PractitionerAppointmentsPage() {
         onSuccess={() => {
           fetchAppointments();
         }}
+      />
+
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedAppointment(null);
+        }}
+        appointment={selectedAppointment}
+        userType="practitioner"
       />
     </div>
   );
