@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import UnifiedSidebar from "./UnifiedSidebar";
 import { useAuthContext } from "../auth/AuthProvider";
 import { BiBrain } from "react-icons/bi";
 import Header from "@/components/shared/Header";

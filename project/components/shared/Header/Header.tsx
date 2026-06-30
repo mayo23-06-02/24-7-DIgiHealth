@@ -10,7 +10,12 @@ import LogoMain from "@/components/ui/LogoMain";
 import WeatherWidget from "./WeatherWidget";
 import NotificationBell from "./NotificationBell";
 import ProfileMenu from "./ProfileMenu";
-import { UnifiedHeaderProps } from "./types";
+
+// ── Type definition (inline, no external types.ts needed) ──
+export interface UnifiedHeaderProps {
+  onNotificationClick?: () => void;
+  onMenuClick?: () => void;
+}
 
 // ── Main Component ──
 export default function Header({
@@ -62,7 +67,7 @@ export default function Header({
   });
 
   return (
-    <header className="h-16 px-4 lg:px-10 flex items-center justify-between border-b border-slate-100 bg-white/70 backdrop-blur-xl sticky top-0 z-30 transition-all duration-500">
+    <header className="h-24 px-4 lg:px-10 flex items-center justify-between border-b border-slate-100 bg-white/70 backdrop-blur-xl sticky top-0 z-30 transition-all duration-500">
       {/* Mobile menu + logo */}
       <div className="flex items-center gap-4 lg:hidden mr-4">
         <button
@@ -71,7 +76,7 @@ export default function Header({
         >
           <BiMenuAltLeft size={24} />
         </button>
-        <LogoMain width={130} height={200} alt={false} />
+        <LogoMain width={150} height={200} alt={false} />
       </div>
 
       {/* Date / Time / Weather (desktop) */}
@@ -90,7 +95,7 @@ export default function Header({
         <div className="relative">
           <Link href={`/${user?.role}/messages`}>
             <button
-              className="w-10 h-10 rounded-xl  flex items-center justify-center cursor-pointer transition-all relative  text-slate-500 hover:text-primary hover:bg-primary/5"
+              className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center cursor-pointer transition-all relative bg-white text-slate-500 hover:text-primary hover:bg-primary/5"
             >
               <BiChat size={20} />
               {unreadMessagesCount > 0 && (
