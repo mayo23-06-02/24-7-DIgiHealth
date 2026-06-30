@@ -7,6 +7,7 @@ import React, {
   useRef,
   useMemo,
 } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -53,6 +54,7 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export default function PractitionerAppointmentsPage() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<AppointmentStatus>("upcoming");
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,10 @@ export default function PractitionerAppointmentsPage() {
   const fetchAppointments = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      const res = await fetch("/api/practitioner/appointments?tab=all");
+      let url = "/api/practitioner/appointments?tab=all";
+      if (dateFrom) url += `&dateFrom=${dateFrom}`;
+      if (dateTo) url += `&dateTo=${dateTo}`;
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setAppointments((prev) => {
@@ -111,12 +116,25 @@ export default function PractitionerAppointmentsPage() {
     } finally {
       if (showLoading) setLoading(false);
     }
-  }, []);
+  }, [dateFrom, dateTo]);
 
   // Fetch on mount
   useEffect(() => {
     fetchAppointments(true);
   }, [fetchAppointments]);
+
+  // Handle URL parameters for tab and date filters
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const dateFromParam = searchParams.get("dateFrom");
+    const dateToParam = searchParams.get("dateTo");
+    
+    if (tabParam && ["all", "upcoming", "ongoing", "past", "missed", "cancelled", "requests"].includes(tabParam)) {
+      setActiveTab(tabParam as AppointmentStatus);
+    }
+    if (dateFromParam) setDateFrom(dateFromParam);
+    if (dateToParam) setDateTo(dateToParam);
+  }, [searchParams]);
 
   // Background polling every 5 seconds (no loading spinner)
   useEffect(() => {

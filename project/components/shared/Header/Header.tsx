@@ -67,7 +67,7 @@ export default function Header({
   });
 
   return (
-    <header className="h-24 px-4 lg:px-10 flex items-center justify-between border-b border-slate-100 bg-white/70 backdrop-blur-xl sticky top-0 z-30 transition-all duration-500">
+    <header className="h-16 px-4 lg:px-10 flex items-center justify-between border-b border-slate-100 bg-white/70 backdrop-blur-xl sticky top-0 z-30 transition-all duration-500">
       {/* Mobile menu + logo */}
       <div className="flex items-center gap-4 lg:hidden mr-4">
         <button

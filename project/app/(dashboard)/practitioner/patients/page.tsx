@@ -5,6 +5,7 @@ import Card from "@/components/ui/Card";
 import Avatar from "@/components/ui/Avatar";
 import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   BiSearch,
   BiLoaderAlt,
@@ -13,6 +14,7 @@ import {
   BiPhone,
   BiCalendar,
   BiFilter,
+  BiX,
 } from "react-icons/bi";
 
 const RISK_LABELS = { green: "Low", gray: "Medium", red: "High" };
@@ -23,10 +25,13 @@ const RISK_STYLES: Record<string, string> = {
 };
 
 export default function PractitionerPatientsPage() {
+  const searchParams = useSearchParams();
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [sortField, setSortField] = useState("fullName");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
@@ -38,6 +43,8 @@ export default function PractitionerPatientsPage() {
       let url = "/api/practitioner/patients?";
       if (search) url += `search=${encodeURIComponent(search)}&`;
       if (riskFilter) url += `risk=${riskFilter}&`;
+      if (dateFrom) url += `dateFrom=${dateFrom}&`;
+      if (dateTo) url += `dateTo=${dateTo}&`;
       const res = await fetch(url);
       const json = await res.json();
       if (json.success) setPatients(json.data);
@@ -46,11 +53,19 @@ export default function PractitionerPatientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, riskFilter]);
+  }, [search, riskFilter, dateFrom, dateTo]);
 
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
+
+  // Handle URL parameters for date filter
+  useEffect(() => {
+    const dateFromParam = searchParams.get("dateFrom");
+    const dateToParam = searchParams.get("dateTo");
+    if (dateFromParam) setDateFrom(dateFromParam);
+    if (dateToParam) setDateTo(dateToParam);
+  }, [searchParams]);
 
   const toggleSort = (field: string) => {
     if (sortField === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -183,6 +198,35 @@ export default function PractitionerPatientsPage() {
             <option value="red">High Risk</option>
           </select>
         </div>
+        <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
+          <BiCalendar className="text-slate-500" size={15} />
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="text-sm outline-none text-slate-700 font-medium"
+          />
+        </div>
+        <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
+          <BiCalendar className="text-slate-500" size={15} />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="text-sm outline-none text-slate-700 font-medium"
+          />
+        </div>
+        {(dateFrom || dateTo) && (
+          <button
+            onClick={() => {
+              setDateFrom("");
+              setDateTo("");
+            }}
+            className="flex items-center gap-1 px-3 py-2 text-xs font-bold text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50"
+          >
+            <BiX size={14} /> Clear
+          </button>
+        )}
       </div>
 
       {/* Table */}
