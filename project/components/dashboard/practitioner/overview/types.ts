@@ -29,6 +29,7 @@ export interface PendingRequest {
   scheduledStart: string;
   type: 'video' | 'phone' | 'in_person';
   createdAt: string;
+  reason?: string;
 }
 
 export interface ChartDataPoint {

@@ -5,7 +5,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import KPICard from '@/components/ui/KPICard';
-import { BiCalendarEvent, BiShow, BiPulse, BiCalendarX } from 'react-icons/bi';
+import { BiCalendarEvent, BiShow, BiPulse, BiCalendarX, BiUserPlus } from 'react-icons/bi';
 
 interface StatsGridProps {
   upcomingCount: number;
@@ -73,7 +73,7 @@ export default function StatsGrid({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <KPICard
         label="Appointments Today"
         value={upcomingCount.toString()}
@@ -88,7 +88,7 @@ export default function StatsGrid({
         value={totalVisitors.toString()}
         trend={visitorsTrend}
         description="Total unique patients"
-        icon={<BiShow size={24} />}
+        icon={<BiUserPlus size={24} />}
         color="emerald"
         onClick={handleNewPatientsClick}
       />

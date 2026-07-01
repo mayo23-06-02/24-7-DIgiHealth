@@ -8,7 +8,8 @@ export interface Notification {
 }
 
 export interface WeatherData {
-  temperature: number;
+  temp: number;
   condition: string;
   location: string;
+  icon?: React.ReactNode;
 }

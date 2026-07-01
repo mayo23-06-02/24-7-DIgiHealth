@@ -11,10 +11,11 @@ import PendingRequests from "./PendingRequests";
 import { BiPlus } from "react-icons/bi";
 
 export default function PractitionerOverview() {
-  const { data, loading, actionLoading, handleRequestAction } =
+  const { data, loading, actionLoading, handleRequestAction, refetch } =
     usePractitionerDashboard();
   const [viewDate, setViewDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [chartPeriod, setChartPeriod] = React.useState('current');
 
   // Filter schedule for selected date
   const filteredSchedule = React.useMemo(() => {
@@ -42,6 +43,13 @@ export default function PractitionerOverview() {
     );
   }, [viewDate]);
 
+  // Handle chart period change
+  const handleChartPeriodChange = React.useCallback((period: string) => {
+    setChartPeriod(period);
+    // In a real implementation, this would trigger a new API call with the period parameter
+    // For now, we'll just update the state
+  }, []);
+
   if (loading) {
     return (
       <div className="w-full h-[60vh] flex items-center justify-center">
@@ -50,65 +58,16 @@ export default function PractitionerOverview() {
     );
   }
 
-  if (data.isNewUser) {
-    return (
-      <div className="w-full pb-10 flex flex-col gap-8 max-w-4xl mx-auto py-12">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto mb-6">
-            <BiPlus size={40} />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 font-grotesk">
-            Welcome to DigiHealth, Dr.{" "}
-            {data.practitioner?.name?.split(" ")[1] || "Practitioner"}
-          </h1>
-          <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-            Your clinical workspace is almost ready. Let's complete your
-            professional profile so patients can find and book consultations
-            with you.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          <Card
-            className="p-8 hover:border-primary transition-all cursor-pointer group"
-            onClick={() => (window.location.href = "/practitioner/profile")}
-          >
-            <h3 className="text-xl font-bold text-slate-800 mb-2 font-grotesk">
-              1. Complete Professional Profile
-            </h3>
-            <p className="text-sm text-slate-500 mb-6">
-              Set your specialization, bio, and consultation rates.
-            </p>
-            <span className="text-primary font-bold flex items-center gap-2 group-hover:gap-3 transition-all">
-              Edit Profile →
-            </span>
-          </Card>
-          <Card
-            className="p-8 hover:border-primary transition-all cursor-pointer group"
-            onClick={() => (window.location.href = "/practitioner/patients")}
-          >
-            <h3 className="text-xl font-bold text-slate-800 mb-2 font-grotesk">
-              2. Browse Patient Database
-            </h3>
-            <p className="text-sm text-slate-500 mb-6">
-              Explore the living digital twins and clinical histories of
-              patients.
-            </p>
-            <span className="text-primary font-bold flex items-center gap-2 group-hover:gap-3 transition-all">
-              View Patients →
-            </span>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+ 
 
   return (
     <div className="w-full pb-10">
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+       
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
         {/* LEFT COLUMN */}
-        <div className="xl:col-span-8 flex flex-col gap-6">
+        <div className="xl:col-span-8 flex flex-col gap-4">
           {/* Stats + Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-7">
               <StatsGrid
                 upcomingCount={data.upcomingCount}
@@ -120,7 +79,11 @@ export default function PractitionerOverview() {
               />
             </div>
             <div className="lg:col-span-5">
-              <PatientChart data={data.chartData || []} />
+              <PatientChart 
+                data={data.chartData || []} 
+                selectedPeriod={chartPeriod}
+                onPeriodChange={handleChartPeriodChange}
+              />
             </div>
           </div>
 

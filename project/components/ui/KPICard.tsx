@@ -30,12 +30,12 @@ const KPICard: React.FC<KPICardProps> = ({
       onClick={onClick}
     >
       <div>
-        <div className="py-4 px-6  flex items-start justify-between ">
+        <div className="py-4 px-4  flex items-start justify-between ">
           <div
             className={`
           w-12 h-12 rounded-lg  flex items-center justify-center text-white 
           transition-all duration-500 
-          ${color === "primary" ? "bg-primary" : color === "emerald" ? "bg-emerald-500" : "bg-slate-800"}
+          ${color === "primary" ? "bg-primary" : color === "emerald" ? "bg-emerald-500" : color === "red" ? "bg-red-500" : "bg-slate-800"}
         `}
           >
             {icon}
@@ -44,7 +44,7 @@ const KPICard: React.FC<KPICardProps> = ({
           {trend !== undefined && (
             <div
               className={`
-            flex items-center gap-1 font-bold px-2 py-1 rounded-full text-sm 
+            flex items-center gap-1 font-bold px-2 py-1 rounded-full text-xs 
             ${trend >= 0 ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-600"}
           `}
             >

@@ -106,30 +106,46 @@ export async function GET(req: NextRequest) {
       scheduledStartTime: { $gte: startOfWeek }
     });
 
-    // 3. Patients Overview (Age Groups)
-    const patientProfiles = await PatientProfile.find({ userId: { $in: uniquePatientIds } }).lean();
-    const ageGroups = {
-      '18-25': 0,
-      '26-35': 0,
-      '36-45': 0,
-      '46-60': 0,
-      '61+': 0
-    };
-
-    patientProfiles.forEach((p: any) => {
-      const birth = new Date(p.dateOfBirth);
-      const age = now.getFullYear() - birth.getFullYear();
-      if (age <= 25) ageGroups['18-25']++;
-      else if (age <= 35) ageGroups['26-35']++;
-      else if (age <= 45) ageGroups['36-45']++;
-      else if (age <= 60) ageGroups['46-60']++;
-      else ageGroups['61+']++;
+    // 3. Patient Growth (New patients over time)
+    // Get first consultation date for each patient
+    const allConsultations = await Consultation.find({ practitionerId })
+      .sort({ createdAt: 1 })
+      .lean();
+    
+    // Track first consultation for each patient
+    const patientFirstConsultation = new Map<string, Date>();
+    allConsultations.forEach((c: any) => {
+      if (!patientFirstConsultation.has(c.patientId.toString())) {
+        patientFirstConsultation.set(c.patientId.toString(), c.createdAt);
+      }
     });
 
-    const chartData = Object.entries(ageGroups).map(([label, value]) => ({
+    // Group new patients by month for the last 6 months
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const growthData: Record<string, number> = {};
+    
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${months[date.getMonth()]} ${date.getFullYear()}`;
+      growthData[key] = 0;
+    }
+
+    // Count new patients per month
+    patientFirstConsultation.forEach((firstDate) => {
+      const monthDiff = (now.getFullYear() - firstDate.getFullYear()) * 12 + (now.getMonth() - firstDate.getMonth());
+      if (monthDiff >= 0 && monthDiff < 6) {
+        const key = `${months[firstDate.getMonth()]} ${firstDate.getFullYear()}`;
+        if (growthData.hasOwnProperty(key)) {
+          growthData[key]++;
+        }
+      }
+    });
+
+    const chartData = Object.entries(growthData).map(([label, value]) => ({
       label,
       value,
-      max: Math.max(...Object.values(ageGroups), 10) // normalized max for UI
+      max: Math.max(...Object.values(growthData), 10)
     }));
 
     // --- Trend Calculations ---
