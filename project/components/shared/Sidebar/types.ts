@@ -5,3 +5,8 @@ export interface SidebarItem {
   label: string;
   icon: LucideIcon;
 }
+
+export interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
