@@ -9,6 +9,8 @@ import CalendarCarousel from "./CalendarCarousel";
 import ScheduleList from "./ScheduleList";
 import PendingRequests from "./PendingRequests";
 import { BiPlus } from "react-icons/bi";
+import Button from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 export default function PractitionerOverview() {
   const { data, loading, actionLoading, handleRequestAction, refetch } =
@@ -16,6 +18,10 @@ export default function PractitionerOverview() {
   const [viewDate, setViewDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [chartPeriod, setChartPeriod] = React.useState('current');
+const router = useRouter();
+  const handleRescheduleSuccess = () => {
+    refetch();
+  };
 
   // Filter schedule for selected date
   const filteredSchedule = React.useMemo(() => {
@@ -57,12 +63,35 @@ export default function PractitionerOverview() {
       </div>
     );
   }
+  
 
- 
+  // Helper to get start of current week (Monday)
+  const getWeekStart = () => {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(today.setDate(diff));
+    return monday.toISOString().split('T')[0];
+  };
+
+  // Helper to get end of current week (Sunday)
+  const getWeekEnd = () => {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? 0 : 7);
+    const sunday = new Date(today.setDate(diff));
+    return sunday.toISOString().split('T')[0];
+  };
+
+ const handlePendingAppointmentsClick = () => {
+    const weekStart = getWeekStart();
+    const weekEnd = getWeekEnd();
+    router.push(`/practitioner/appointments?tab=requests&dateFrom=${weekStart}&dateTo=${weekEnd}`);
+  };
 
   return (
     <div className="w-full pb-10">
-       
+
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
         {/* LEFT COLUMN */}
         <div className="xl:col-span-8 flex flex-col gap-4">
@@ -78,9 +107,26 @@ export default function PractitionerOverview() {
                 canceledThisWeek={data.canceledThisWeek}
               />
             </div>
+            <Card className="lg:hidden xl:col-span-4 min-h-full">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+                  Pending Requests
+                </h3>
+                <Button onClick={handlePendingAppointmentsClick} variant="ghost" size="sm">
+                  View All
+                </Button>
+              </div>
+              <PendingRequests
+                requests={data.pendingRequests || []}
+                onAccept={(id) => handleRequestAction(id, "scheduled")}
+                onDecline={(id) => handleRequestAction(id, "cancelled")}
+                actionLoading={actionLoading}
+                onRescheduleSuccess={handleRescheduleSuccess}
+              />
+            </Card>
             <div className="lg:col-span-5">
-              <PatientChart 
-                data={data.chartData || []} 
+              <PatientChart
+                data={data.chartData || []}
                 selectedPeriod={chartPeriod}
                 onPeriodChange={handleChartPeriodChange}
               />
@@ -100,8 +146,8 @@ export default function PractitionerOverview() {
         </div>
 
         {/* RIGHT COLUMN – Pending Requests */}
-        <Card className="xl:col-span-4 min-h-full">
-          <div className="flex items-center justify-between mb-8">
+        <Card className=" hidden lg:block xl:col-span-4 min-h-full">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-slate-800 font-grotesk">
               Pending Requests
             </h3>
@@ -111,6 +157,7 @@ export default function PractitionerOverview() {
             onAccept={(id) => handleRequestAction(id, "scheduled")}
             onDecline={(id) => handleRequestAction(id, "cancelled")}
             actionLoading={actionLoading}
+            onRescheduleSuccess={handleRescheduleSuccess}
           />
         </Card>
       </div>

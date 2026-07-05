@@ -37,32 +37,42 @@ export async function GET(req: NextRequest) {
     const from = searchParams.get('from');
     const to = searchParams.get('to');
 
+    console.log('[GET /api/practitioner/appointments] practitionerId:', practitionerId, 'tab:', tab);
+
     const now = new Date();
     const filter: any = { practitionerId };
 
-    switch (tab) {
-      case 'upcoming':
-        filter.scheduledStartTime = { $gte: now };
-        filter.status = { $in: ['scheduled', 'in_progress'] };
-        break;
-      case 'past':
-        filter.scheduledStartTime = { $lt: now };
-        filter.status = { $in: ['completed', 'cancelled'] };
-        break;
-      case 'cancelled':
-        filter.status = 'cancelled';
-        break;
-      case 'requests':
-        filter.status = { $in: ['pending', 'requested'] };
-        break;
+    // Don't apply time-based filters by default to show all appointments
+    // Only apply if tab is specifically requested
+    if (tab !== 'all') {
+      switch (tab) {
+        case 'upcoming':
+          filter.scheduledStartTime = { $gte: now };
+          filter.status = { $in: ['scheduled', 'in_progress'] };
+          break;
+        case 'past':
+          filter.scheduledStartTime = { $lt: now };
+          filter.status = { $in: ['completed', 'cancelled'] };
+          break;
+        case 'cancelled':
+          filter.status = 'cancelled';
+          break;
+        case 'requests':
+          filter.status = { $in: ['pending', 'requested'] };
+          break;
+      }
     }
 
     if (from) filter.scheduledStartTime = { ...filter.scheduledStartTime, $gte: new Date(from) };
     if (to) filter.scheduledStartTime = { ...filter.scheduledStartTime, $lte: new Date(to) };
 
+    console.log('[GET /api/practitioner/appointments] filter:', JSON.stringify(filter));
+
     const consultations = await Consultation.find(filter)
       .sort({ scheduledStartTime: tab === 'upcoming' || tab === 'requests' ? 1 : -1 })
       .lean();
+
+    console.log('[GET /api/practitioner/appointments] consultations found:', consultations.length);
 
     // Enrich with patient info
     const enriched = await Promise.all(
@@ -77,8 +87,8 @@ export async function GET(req: NextRequest) {
           consultationId: c._id.toString(),
           patientId: c.patientId.toString(),
           patientName,
-          scheduledStart: (c as any).scheduledStartTime,
-          scheduledEnd: (c as any).scheduledEndTime,
+          scheduledStart: (c as any).scheduledStartTime || c.scheduledStart,
+          scheduledEnd: (c as any).scheduledEndTime || c.scheduledEnd,
           status: c.status,
           type: c.type,
           reason: c.chiefComplaint,
@@ -90,7 +100,10 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    return NextResponse.json({ success: true, data: enriched.filter(Boolean) });
+    const result = enriched.filter(Boolean);
+    console.log('[GET /api/practitioner/appointments] enriched result:', result.length);
+
+    return NextResponse.json({ success: true, data: result });
   } catch (err: any) {
     console.error('[GET /api/practitioner/appointments]', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

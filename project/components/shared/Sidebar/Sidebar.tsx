@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import LogoMain from "@/components/ui/LogoMain";
 import NavItem from "./NavItem";
@@ -12,12 +12,27 @@ import { SidebarProps } from "./types";
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user } = useAuthContext();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   if (!user) return null;
 
   const filteredNav = MAIN_NAV.filter((item) =>
     item.roles?.includes(user.role)
   );
+
+  if (!isMounted) {
+    return (
+      <aside
+        className="fixed inset-y-0 left-0 z-100 flex flex-col bg-white w-60 lg:relative lg:inset-auto lg:border-r lg:border-slate-200/50 lg:shadow-none -translate-x-full lg:translate-x-0"
+      >
+        {/* Placeholder to prevent hydration mismatch */}
+      </aside>
+    );
+  }
 
   return (
     <>
@@ -33,7 +48,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         className={`
           fixed inset-y-0 left-0 z-100 flex flex-col bg-white transition-all duration-500
           lg:relative lg:inset-auto lg:border-r lg:border-slate-200/50 lg:shadow-none
-          ${isCollapsed ? "w-24" : "w-72"}
+          ${isCollapsed ? "w-24" : "w-60"}
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >

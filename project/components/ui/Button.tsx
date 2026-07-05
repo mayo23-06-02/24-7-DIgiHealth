@@ -30,10 +30,10 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center flex cursor-pointer max-w-[400px] text-sm font-grotesk uppercase   justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
+    "inline-flex hover:scale-105 items-center flex cursor-pointer max-w-[400px] text-sm font-grotesk uppercase   justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
 
   const variants = {
-    primary: "bg-[#2b617a] text-white hover:bg-primary/90 ",
+    primary: "bg-primary text-white hover:bg-[#326E8A] ",
     secondary: "bg-secondary text-white hover:bg-secondary/90 ",
     accent: "bg-accent text-slate-900 hover:brightness-110 ",
     white: "bg-white text-primary border border-slate-200 hover:bg-slate-50",
@@ -46,7 +46,7 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const sizes = {
-    sm: "px-4 py-2 text-xs",
+    sm: "px-3 py-2 text-[10px]",
     md: "px-6 py-3 text-sm",
     lg: "px-8 py-4.5 text-lg",
     xl: "px-10 py-6 text-lg",

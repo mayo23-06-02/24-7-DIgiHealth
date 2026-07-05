@@ -9,13 +9,13 @@ interface CardProps {
   onClick?: () => void; // ✅ add this
 }
 
-const Card: React.FC<CardProps> = ({
+const Card = function Card({
   children,
   variant = "solid",
   className = "",
   noPadding = false,
   onClick, // ✅ destructure
-}) => {
+}: CardProps) {
   const baseStyles =
     "rounded-lg transition-all border border-slate-200 duration-300 overflow-hidden  w-full";
 
@@ -28,12 +28,12 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`${baseStyles} ${variants[variant]} ${noPadding ? "" : "p-6"} ${className}`}
+      className={`${baseStyles} ${variants[variant]} ${noPadding ? "" : "p-4"} ${className}`}
       onClick={onClick} // ✅ attach handler
     >
       {children}
     </div>
-  );
+  ) as React.ReactElement;
 };
 
 export default Card;

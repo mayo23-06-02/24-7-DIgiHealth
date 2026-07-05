@@ -1,9 +1,27 @@
-
 "use client";
 import React from 'react';
 import Card from '@/components/ui/Card';
 import { BiChevronDown } from 'react-icons/bi';
 import { ChartDataPoint } from './types';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface PatientChartProps {
   data: ChartDataPoint[];
@@ -12,19 +30,6 @@ interface PatientChartProps {
 }
 
 export default function PatientChart({ data, selectedPeriod = 'current', onPeriodChange }: PatientChartProps) {
-  
-  const maxVal = Math.max(...data.map(d => d.value), 1);
-  
-  // Generate dynamic Y-axis labels based on max value
-  const yAxisLabels = React.useMemo(() => {
-    if (maxVal <= 5) return [5, 4, 3, 2, 1, 0];
-    if (maxVal <= 10) return [10, 8, 6, 4, 2, 0];
-    if (maxVal <= 20) return [20, 16, 12, 8, 4, 0];
-    if (maxVal <= 50) return [50, 40, 30, 20, 10, 0];
-    const step = Math.ceil(maxVal / 5);
-    return Array.from({ length: 6 }, (_, i) => (maxVal - (i * step)));
-  }, [maxVal]);
-
   const monthOptions = [
     { value: 'current', label: 'This Month' },
     { value: 'last', label: 'Last Month' },
@@ -33,6 +38,81 @@ export default function PatientChart({ data, selectedPeriod = 'current', onPerio
     { value: '6months', label: 'Last 6 Months' },
     { value: 'year', label: 'This Year' },
   ];
+
+  const chartData = {
+    labels: data.map(d => d.label),
+    datasets: [
+      {
+        label: 'New Patients',
+        data: data.map(d => d.value),
+        backgroundColor: data.map(d => 
+          d.value === Math.max(...data.map(item => item.value)) && d.value > 0
+            ? '#2b617a'
+            : 'rgba(43, 97, 122, 0.2)'
+        ),
+        borderColor: data.map(d => 
+          d.value === Math.max(...data.map(item => item.value)) && d.value > 0
+            ? '#2b617a'
+            : 'rgba(43, 97, 122, 0.5)'
+        ),
+        borderWidth: 1,
+        borderRadius: 4,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: false,
+        callbacks: {
+          label: (context: any) => `${context.parsed.y} new patients`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)',
+          borderDash: [5, 5],
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            size: 11,
+          },
+        },
+        border: {
+          display: false,
+        },
+      },
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            size: 11,
+          },
+        },
+        border: {
+          display: false,
+        },
+      },
+    },
+  };
 
   return (
     <Card className="flex flex-col h-full">
@@ -56,48 +136,8 @@ export default function PatientChart({ data, selectedPeriod = 'current', onPerio
         </div>
       </div>
 
-      <div className="flex-1 flex w-full relative min-h-[200px] pb-8">
-        {/* Y Axis */}
-        <div className="flex flex-col justify-between items-end pr-4 text-xs h-full pb-8">
-          {yAxisLabels.map((label, i) => (
-            <span key={i} className="text-xs text-slate-500">{label}</span>
-          ))}
-        </div>
-
-        {/* Bars */}
-        <div className="flex-1 flex justify-between items-end h-full relative border-b border-slate-100 pb-8">
-          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="w-full border-t border-slate-50 border-dashed" />
-            ))}
-          </div>
-
-          {data.map((item, i) => {
-            const isActive = item.value === maxVal && item.value > 0;
-            const barHeight = maxVal > 0 ? (item.value / maxVal) * 100 : 0;
-            
-            return (
-              <div key={i} className="flex flex-col items-center justify-end gap-2 group w-full h-full relative z-10 px-1 xl:px-2 pb-8">
-                <span className="text-xs font-bold text-slate-500 border border-slate-200 bg-white rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 shadow-sm whitespace-nowrap z-20">
-                  {item.value} new patients
-                </span>
-                <div className="w-full h-full max-w-[40px] bg-slate-100 rounded-t flex flex-col justify-end group-hover:bg-slate-200 transition-colors">
-                  <div
-                    className={`w-full rounded-t transition-all duration-500 ${
-                      isActive
-                        ? 'bg-primary shadow-[0_4px_15px_rgba(46,49,146,0.4)]'
-                        : 'bg-primary/20'
-                    }`}
-                    style={{ height: `${barHeight}%` }}
-                  />
-                </div>
-                <div className="text-xs text-slate-500 text-center mt-2 truncate w-full">
-                  {item.label}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="flex-1 w-full relative min-h-[200px]">
+        <Bar data={chartData} options={chartOptions} />
       </div>
     </Card>
   );

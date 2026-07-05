@@ -73,8 +73,9 @@ export default function StatsGrid({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <KPICard
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2 w-full">
+        <KPICard
         label="Appointments Today"
         value={upcomingCount.toString()}
         trend={upcomingTrend}
@@ -92,6 +93,8 @@ export default function StatsGrid({
         color="emerald"
         onClick={handleNewPatientsClick}
       />
+      </div>
+     <div className="flex gap-2 w-full">
       <KPICard
         label="High Risk Patients"
         value={riskAlerts.toString()}
@@ -110,6 +113,7 @@ export default function StatsGrid({
         color="slate"
         onClick={handleCanceledAppointmentsClick}
       />
+     </div>
     </div>
   );
 }
