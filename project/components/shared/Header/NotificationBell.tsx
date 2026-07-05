@@ -159,10 +159,10 @@ export default function NotificationBell({
                             {notif.title}
                           </p>
                           <span className="text-[9px] text-slate-500 font-bold ml-2">
-                            {new Date(notif.createdAt).toLocaleDateString(
-                              [],
-                              { month: "short", day: "numeric" }
-                            )}
+                            {new Date(notif.createdAt).toLocaleDateString([], {
+                              month: "short",
+                              day: "numeric",
+                            })}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 truncate">
@@ -202,8 +202,8 @@ export default function NotificationBell({
                       selectedNotif.type?.includes("appointment")
                         ? "bg-emerald-50 text-emerald-500 border border-emerald-100"
                         : selectedNotif.type?.includes("message")
-                        ? "bg-blue-50 text-blue-500 border border-blue-100"
-                        : "bg-primary/5 text-primary border border-primary/10"
+                          ? "bg-blue-50 text-blue-500 border border-blue-100"
+                          : "bg-primary/5 text-primary border border-primary/10"
                     }`}
                   >
                     {selectedNotif.type?.includes("appointment") ? (
@@ -221,7 +221,7 @@ export default function NotificationBell({
                     <p className="text-xs font-bold text-slate-500">
                       {new Date(selectedNotif.createdAt).toLocaleString(
                         "en-ZA",
-                        { dateStyle: "full", timeStyle: "short" }
+                        { dateStyle: "full", timeStyle: "short" },
                       )}
                     </p>
                   </div>
@@ -243,7 +243,7 @@ export default function NotificationBell({
                         setIsOpen(false);
                       }}
                     >
-                      <Button fullWidth size="lg">
+                      <Button className="py-2" fullWidth size="lg">
                         Manage Appointment
                       </Button>
                     </Link>
@@ -257,7 +257,7 @@ export default function NotificationBell({
                         setIsOpen(false);
                       }}
                     >
-                      <Button fullWidth size="lg">
+                      <Button className="py-2" fullWidth size="lg">
                         Reply to Message
                       </Button>
                     </Link>
@@ -272,7 +272,7 @@ export default function NotificationBell({
                           setIsOpen(false);
                         }}
                       >
-                        <Button fullWidth size="lg">
+                        <Button className="py-2" fullWidth size="lg">
                           Go to Dashboard
                         </Button>
                       </Link>
@@ -281,6 +281,7 @@ export default function NotificationBell({
                     variant="white"
                     fullWidth
                     size="lg"
+                    className="py-2"
                     onClick={() => setIsDetailOpen(false)}
                   >
                     Close

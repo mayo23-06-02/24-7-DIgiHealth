@@ -1,12 +1,7 @@
 import React from "react";
 
 export type BadgeStatus =
-  | "success"
-  | "warning"
-  | "error"
-  | "info"
-  | "neutral"
-  | "premium";
+  "success" | "warning" | "error" | "info" | "neutral" | "premium";
 
 interface BadgeProps {
   label: string;
@@ -25,7 +20,7 @@ const Badge: React.FC<BadgeProps> = ({
 }) => {
   const configs: Record<BadgeStatus, { base: string; dot: string }> = {
     success: { base: "bg-primary text-white ", dot: "bg-primary" },
-    warning: { base: "bg-accent text-white ", dot: "bg-accent" },
+    warning: { base: "bg-accent text-gray-800 ", dot: "bg-accent" },
     error: {
       base: "bg-red-100 text-red-700 border-red-200",
       dot: "bg-red-500",

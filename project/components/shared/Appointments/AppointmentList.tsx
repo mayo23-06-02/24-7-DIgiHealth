@@ -9,6 +9,7 @@ interface Props {
   onCancel?: (id: string) => void;
   onAccept?: (id: string) => void;
   onDecline?: (id: string) => void;
+  onRebook?: (id: string) => void;
   onClick?: (appointment: Appointment) => void;
   showActions?: boolean;
   compact?: boolean;
@@ -22,6 +23,7 @@ export default function AppointmentList({
   onCancel,
   onAccept,
   onDecline,
+  onRebook,
   onClick,
   showActions = true,
   compact = false,
@@ -35,7 +37,7 @@ export default function AppointmentList({
     );
   }
   return (
-    <div className="space-y-3">
+    <div className="space-y-1">
       {appointments.map((appt) => (
         <AppointmentCard
           key={appt.id}
@@ -45,6 +47,7 @@ export default function AppointmentList({
           onCancel={onCancel}
           onAccept={onAccept}
           onDecline={onDecline}
+          onRebook={onRebook}
           onClick={onClick}
           showActions={showActions}
           compact={compact}

@@ -30,7 +30,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex hover:scale-105 items-center flex cursor-pointer max-w-[400px] text-sm font-grotesk uppercase   justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
+    "inline-flex lg:hover:scale-105 items-center flex cursor-pointer max-w-[400px] text-sm font-grotesk uppercase   justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
 
   const variants = {
     primary: "bg-primary text-white hover:bg-[#326E8A] ",
@@ -83,17 +83,15 @@ const Button: React.FC<ButtonProps> = ({
         </svg>
       )}
       {icon && iconPosition === "left" && (
-        <span className="px-4 transition-transform group-hover:-translate-x-1 ">
-          {icon}
-        </span>
+        <span className="px-2  ">{icon}</span>
       )}
-      <h4 className="text-md text-center  tracking-wide flex gap-2 items-center">
+      <h4
+        className={`text-md text-center tracking-wide flex gap-2 items-center ${icon ? "hidden sm:flex" : "flex"}`}
+      >
         {children}
       </h4>
       {icon && iconPosition === "right" && (
-        <span className="px-4 text-opacity-70 transition-transform group-hover:translate-x-1">
-          {icon}
-        </span>
+        <span className="px-2 ">{icon}</span>
       )}
     </button>
   );

@@ -25,14 +25,14 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   className = "",
 }) => (
   <div
-    className={`flex flex-col md:flex-row md:items-center justify-between gap-4 ${className}`}
+    className={`flex flex-row md:items-center justify-between gap-4 ${className}`}
   >
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 tracking-tight font-grotesk">
+      <h2 className="text-lg lg:text-xl font-bold text-slate-800 tracking-tight font-grotesk">
         {title}
       </h2>
       {subtitle && (
-        <p className="text-slate-600 lg:text-lg mt-0.5 ">{subtitle}</p>
+        <p className="text-slate-600 text-xs lg:text-md mt-0.5 ">{subtitle}</p>
       )}
     </div>
     {right && <div className="flex items-center gap-3 shrink-0">{right}</div>}
