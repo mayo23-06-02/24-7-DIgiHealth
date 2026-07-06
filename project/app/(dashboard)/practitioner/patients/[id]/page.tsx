@@ -75,6 +75,7 @@ interface PatientProfile {
       subjective?: string;
       objective?: string;
       assessment?: string;
+      plan?: string;
     };
   }[];
   vitals?: {
