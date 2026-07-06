@@ -21,6 +21,7 @@ interface Props {
   onAccept?: (id: string) => void;
   onDecline?: (id: string) => void;
   onRebook?: (id: string) => void;
+  onClick?: (appointment: Appointment) => void;
   showActions?: boolean;
   compact?: boolean;
   userType?: "patient" | "practitioner";
@@ -34,6 +35,7 @@ export default function AppointmentCard({
   onAccept,
   onDecline,
   onRebook,
+  onClick,
   showActions = true,
   compact = false,
   userType = "practitioner",
@@ -96,7 +98,10 @@ export default function AppointmentCard({
   return (
     <>
       <div
-        onClick={() => setShowDetails(true)}
+        onClick={() => {
+          if (onClick) onClick(appointment);
+          else setShowDetails(true);
+        }}
         className={`relative flex items-center gap-4 p-2 border border-slate-100 rounded-lg bg-white hover:shadow-md transition-shadow cursor-pointer ${showMenu ? "z-50" : "z-0"} ${compact ? "py-3" : ""}`}
       >
         <div className="flex items-center gap-4 min-w-0 flex-1 h-full">
