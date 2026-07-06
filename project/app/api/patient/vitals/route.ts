@@ -58,10 +58,10 @@ export async function POST(req: Request) {
     const userId = payload.userId as string;
 
     const data = await req.json();
-    const { vitalType, value, height } = data;
+    const { heartRate, bloodPressure, bodyMass, glucose, vitalType, value, height } = data;
 
-    if (!vitalType || !value) {
-      return NextResponse.json({ error: 'Missing vitalType or value' }, { status: 400 });
+    if (!vitalType && !heartRate && !bloodPressure && !bodyMass && !glucose) {
+      return NextResponse.json({ error: 'No vital data provided' }, { status: 400 });
     }
 
     // Get the latest anthropometric record or create a new one for today
@@ -89,28 +89,43 @@ export async function POST(req: Request) {
     if (!record.vitalSigns) {
         record.vitalSigns = {};
     }
-
-    switch (vitalType) {
-      case 'heartRate':
-        record.vitalSigns.heartRateBpm = Number(value);
-        break;
-      case 'bloodPressure':
-        const [sys, dia] = value.split('/').map(Number);
-        if (sys && dia) {
-          record.vitalSigns.systolicBP = sys;
-          record.vitalSigns.diastolicBP = dia;
-        }
-        break;
-      case 'weight':
-        record.weightKg = Number(value);
-        if (height) record.heightCm = Number(height);
-        break;
-      case 'glucose':
-        (record as any).glucoseMmol = Number(value);
-        break;
-      default:
-        return NextResponse.json({ error: 'Invalid vital type' }, { status: 400 });
+    
+    // Support legacy single vitalType format
+    if (vitalType && value) {
+      switch (vitalType) {
+        case 'heartRate':
+          record.vitalSigns.heartRateBpm = Number(value);
+          break;
+        case 'bloodPressure':
+          const [sys, dia] = value.split('/').map(Number);
+          if (sys && dia) {
+            record.vitalSigns.systolicBP = sys;
+            record.vitalSigns.diastolicBP = dia;
+          }
+          break;
+        case 'weight':
+          record.weightKg = Number(value);
+          if (height) record.heightCm = Number(height);
+          break;
+        case 'glucose':
+          (record as any).glucoseMmol = Number(value);
+          break;
+        default:
+          return NextResponse.json({ error: 'Invalid vital type' }, { status: 400 });
+      }
     }
+
+    // Support new bulk update format
+    if (heartRate) record.vitalSigns.heartRateBpm = Number(heartRate);
+    if (bloodPressure && bloodPressure.includes('/')) {
+      const [sys, dia] = bloodPressure.split('/').map(Number);
+      if (sys && dia) {
+        record.vitalSigns.systolicBP = sys;
+        record.vitalSigns.diastolicBP = dia;
+      }
+    }
+    if (bodyMass) record.weightKg = Number(bodyMass);
+    if (glucose) (record as any).glucoseMmol = Number(glucose);
 
     // Auto-calculate BMI if both are available
     if (record.weightKg && record.heightCm) {

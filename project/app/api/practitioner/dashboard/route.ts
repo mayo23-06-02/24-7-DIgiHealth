@@ -21,15 +21,15 @@ export async function GET(req: NextRequest) {
     const todayEnd = new Date(now);
     todayEnd.setHours(23, 59, 59, 999);
 
-    // Fetch upcoming consultations for today + next 24h
-    const upcomingWindow = new Date(now.getTime() + 24 * 3600000);
+    // Fetch upcoming consultations for the next 60 days
+    const upcomingWindow = new Date(now.getTime() + 60 * 24 * 3600000);
 
     const [consultations, pendingConsultations] = await Promise.all([
       Consultation.find({
         practitionerId,
         scheduledStartTime: { $gte: now, $lte: upcomingWindow },
         status: { $in: ['scheduled', 'in_progress', 'pending', 'requested'] },
-      }).sort({ scheduledStartTime: 1 }).limit(10).lean(),
+      }).sort({ scheduledStartTime: 1 }).limit(500).lean(),
       Consultation.find({
         practitionerId,
         status: { $in: ['pending', 'requested'] },

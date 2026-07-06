@@ -75,9 +75,16 @@ interface PatientProfile {
       subjective?: string;
       objective?: string;
       assessment?: string;
-      plan?: string;
     };
   }[];
+  vitals?: {
+    heartRate?: number | string;
+    bloodPressure?: string;
+    weight?: number | string;
+    height?: number | string;
+    glucose?: number | string;
+    dateRecorded?: string | Date;
+  };
 }
 
 export default function PatientProfilePage() {
@@ -181,6 +188,14 @@ export default function PatientProfilePage() {
         allergies: patient.allergies.join(", "),
         currentMedications: patient.currentMedications.join(", "),
       });
+      if (patient.vitals) {
+        setVitalsFormData({
+          heartRate: patient.vitals.heartRate?.toString() || "",
+          bloodPressure: patient.vitals.bloodPressure || "",
+          bodyMass: patient.vitals.weight?.toString() || "",
+          glucose: patient.vitals.glucose?.toString() || "",
+        });
+      }
     }
   }, [patient]);
 
@@ -237,10 +252,24 @@ export default function PatientProfilePage() {
 
   const handleVitalsSubmit = async () => {
     setActionLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Vitals updated successfully");
-    setIsVitalsModalOpen(false);
+    try {
+      const res = await fetch(`/api/practitioner/patients/${id}/vitals`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(vitalsFormData),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success("Vitals updated successfully");
+        setIsVitalsModalOpen(false);
+        setPatient((prev) => (prev ? { ...prev, vitals: data.data } : null));
+      } else {
+        toast.error("Failed to update vitals");
+      }
+    } catch {
+      toast.error("Network error while updating");
+    }
     setActionLoading(false);
   };
 
@@ -361,7 +390,7 @@ export default function PatientProfilePage() {
         </div>
       </div>
 
-      <VitalCardsGrid onCardClick={() => setIsVitalsModalOpen(true)} />
+      <VitalCardsGrid onCardClick={() => setIsVitalsModalOpen(true)} vitalsData={patient?.vitals} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Content Area */}
@@ -370,8 +399,8 @@ export default function PatientProfilePage() {
           <Card className="p-0 overflow-hidden h-[600px] relative">
             <MedicalManikin
               gender={(patient.gender as any) || "female"}
-              heightCm={170}
-              weightKg={70}
+              heightCm={patient.vitals?.height ? Number(patient.vitals.height) : 170}
+              weightKg={patient.vitals?.weight ? Number(patient.vitals.weight) : 70}
               readOnly={true}
               patientId={patient.id}
             />
@@ -545,10 +574,7 @@ export default function PatientProfilePage() {
                   <h1 className=" font-bold text-white">Blood Glucose</h1>
                 </div>
                 <p className="text-lg font-bold text-white">
-                  5.8{" "}
-                  <span className="text-sm font-normal text-white/80">
-                    mmol/L
-                  </span>
+                  {patient.vitals?.glucose || "---"} <span className="text-sm font-normal text-white/80">mmol/L</span>
                 </p>
               </div>
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -559,8 +585,7 @@ export default function PatientProfilePage() {
                   <h1 className=" font-bold text-white">Heart Rate</h1>
                 </div>
                 <p className="text-lg font-bold text-rose-800">
-                  82{" "}
-                  <span className="text-sm font-normal text-white/80">BPM</span>
+                  {patient.vitals?.heartRate || "---"} <span className="text-sm font-normal text-white/80">BPM</span>
                 </p>
               </div>
               <div className="flex items-center justify-between">

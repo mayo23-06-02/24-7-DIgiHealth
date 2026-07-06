@@ -4,16 +4,25 @@ import KPICard from "@/components/ui/KPICard";
 
 interface VitalCardsGridProps {
   onCardClick?: (vital: string) => void;
+  vitalsData?: {
+    heartRate?: number | string;
+    bloodPressure?: string;
+    weight?: number | string;
+    glucose?: number | string;
+    dateRecorded?: string | Date;
+  };
 }
 
-const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick }) => {
+const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick, vitalsData }) => {
+  const isUpToDate = vitalsData?.dateRecorded ? true : false;
+  
   const vitals = [
     {
       id: "heart-rate",
       label: "Heart Rate",
-      value: "---",
+      value: vitalsData?.heartRate || "---",
       unit: "bpm",
-      description: "Update required",
+      description: vitalsData?.heartRate ? "Recent reading" : "Update required",
       trend: 0,
       icon: <BiHeart size={24} />,
       color: "slate",
@@ -21,9 +30,9 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick }) => {
     {
       id: "blood-pressure",
       label: "Blood Pressure",
-      value: "---/---",
+      value: vitalsData?.bloodPressure || "---/---",
       unit: "",
-      description: "Update required",
+      description: vitalsData?.bloodPressure ? "Recent reading" : "Update required",
       trend: 0,
       icon: <BiPulse size={24} />,
       color: "slate",
@@ -31,9 +40,9 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick }) => {
     {
       id: "body-mass",
       label: "Body Mass",
-      value: "70",
+      value: vitalsData?.weight || "---",
       unit: "kg",
-      description: "Latest weight",
+      description: vitalsData?.weight ? "Latest weight" : "Update required",
       trend: 0,
       icon: <BiUser size={24} />,
       color: "slate",
@@ -41,9 +50,9 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick }) => {
     {
       id: "glucose",
       label: "Glucose",
-      value: "0",
-      unit: "mmol",
-      description: "Update required",
+      value: vitalsData?.glucose || "---",
+      unit: "mmol/L",
+      description: vitalsData?.glucose ? "Recent reading" : "Update required",
       trend: 0,
       icon: <BiDroplet size={24} />,
       color: "slate",

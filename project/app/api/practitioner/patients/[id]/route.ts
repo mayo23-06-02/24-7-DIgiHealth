@@ -58,6 +58,11 @@ export async function GET(
     const prescriptions = await Prescription.find({ patientId: patientUserId })
       .sort({ prescribedDate: -1 })
       .lean();
+    // Fetch latest vitals for the patient
+    const { Anthropometric } = require('@/lib/models/ClinicalData');
+    const latestVitals = await Anthropometric.findOne({ patientId: patientUserId })
+      .sort({ dateRecorded: -1 })
+      .lean();
 
     return NextResponse.json({
       success: true,
@@ -94,6 +99,14 @@ export async function GET(
           riskColor: c.clinicalRisk?.color,
           soapNotes: c.soapNotes,
         })),
+        vitals: latestVitals ? {
+          heartRate: latestVitals.vitalSigns?.heartRateBpm,
+          bloodPressure: (latestVitals.vitalSigns?.systolicBP && latestVitals.vitalSigns?.diastolicBP) ? `${latestVitals.vitalSigns.systolicBP}/${latestVitals.vitalSigns.diastolicBP}` : undefined,
+          weight: latestVitals.weightKg,
+          height: latestVitals.heightCm,
+          glucose: (latestVitals as any).glucoseMmol || undefined,
+          dateRecorded: latestVitals.dateRecorded
+        } : null,
       },
     });
   } catch (err) {
