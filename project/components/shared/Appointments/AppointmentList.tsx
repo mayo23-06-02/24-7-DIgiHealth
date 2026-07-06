@@ -14,6 +14,7 @@ interface Props {
   showActions?: boolean;
   compact?: boolean;
   emptyMessage?: string;
+  userType?: "patient" | "practitioner";
 }
 
 export default function AppointmentList({
@@ -28,6 +29,7 @@ export default function AppointmentList({
   showActions = true,
   compact = false,
   emptyMessage = "No appointments found.",
+  userType = "practitioner",
 }: Props) {
   if (appointments.length === 0) {
     return (
@@ -51,6 +53,7 @@ export default function AppointmentList({
           onClick={onClick}
           showActions={showActions}
           compact={compact}
+          userType={userType}
         />
       ))}
     </div>

@@ -14,13 +14,7 @@ import {
 import Select from "@/components/ui/Select";
 
 export type AppointmentTab =
-  | "all"
-  | "upcoming"
-  | "ongoing"
-  | "past"
-  | "missed"
-  | "cancelled"
-  | "requests";
+  "all" | "upcoming" | "ongoing" | "past" | "missed" | "cancelled" | "requests";
 
 export const ALL_TABS: AppointmentTab[] = [
   "all",
@@ -37,7 +31,7 @@ const tabConfig: Record<
   {
     label1: string;
     label2: string;
-    icon: React.ElementType;
+    icon: React.ComponentType<{ className?: string }>;
     bgColor: string;
     iconColor: string;
   }
@@ -53,14 +47,14 @@ const tabConfig: Record<
     label1: "Upcoming",
     label2: "Appointments",
     icon: BiCalendarEvent,
-    bgColor: "#fef9e7",
+    bgColor: "#d6e8f4",
     iconColor: "text-yellow-600",
   },
   ongoing: {
     label1: "Ongoing",
     label2: "Appointments",
     icon: BiCalendarEdit,
-    bgColor: "#e8f5e9",
+    bgColor: "#d6e8f4",
     iconColor: "text-green-600",
   },
   past: {
@@ -74,21 +68,21 @@ const tabConfig: Record<
     label1: "Missed",
     label2: "Appointments",
     icon: BiCalendarExclamation,
-    bgColor: "#fff3e0",
+    bgColor: "#d6e8f4",
     iconColor: "text-orange-500",
   },
   cancelled: {
     label1: "Cancelled",
     label2: "Appointments",
     icon: BiCalendarX,
-    bgColor: "#fdecea",
+    bgColor: "#d6e8f4",
     iconColor: "text-red-500",
   },
   requests: {
     label1: "Appointment",
     label2: "Requests",
     icon: BiCalendarPlus,
-    bgColor: "#fef9e7",
+    bgColor: "#d6e8f4",
     iconColor: "text-yellow-700",
   },
 };
@@ -130,7 +124,7 @@ export default function AppointmentTabs({
             <button
               key={t}
               onClick={() => onChange(t)}
-              className={`flex items-center gap-3 cursor-pointer px-4 py-4 rounded-lg transition-all ease-in-out duration-300 min-w-[180px] text-left border-2 ${
+              className={`flex items-center gap-3 cursor-pointer px-4 py-4 rounded-md transition-all ease-in-out duration-300 min-w-[180px] text-left border-2 ${
                 activeTab === t
                   ? "border-gray-400 opacity-100"
                   : "border-transparent opacity-80 hover:opacity-100 hover:scale-[1.02]"

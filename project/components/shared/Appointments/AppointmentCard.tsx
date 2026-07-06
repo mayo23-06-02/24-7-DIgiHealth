@@ -23,6 +23,7 @@ interface Props {
   onRebook?: (id: string) => void;
   showActions?: boolean;
   compact?: boolean;
+  userType?: "patient" | "practitioner";
 }
 
 export default function AppointmentCard({
@@ -35,6 +36,7 @@ export default function AppointmentCard({
   onRebook,
   showActions = true,
   compact = false,
+  userType = "practitioner",
 }: Props) {
   const start = new Date(appointment.scheduledStart);
   const dateStr = start.toLocaleDateString("en-ZA", {
@@ -115,7 +117,9 @@ export default function AppointmentCard({
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-slate-700 text-md truncate">
-              {appointment.patientName}
+              {userType === "patient" 
+                ? appointment.practitionerName || appointment.patientName 
+                : appointment.patientName}
             </p>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
               <span className="flex items-center gap-1">
@@ -279,13 +283,13 @@ export default function AppointmentCard({
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <Avatar
-              name={appointment.patientName}
-              src={appointment.patientAvatar}
+              name={userType === "patient" ? appointment.practitionerName || appointment.patientName : appointment.patientName}
+              src={userType === "patient" ? appointment.practitionerAvatar : appointment.patientAvatar}
               size="lg"
             />
             <div>
               <h4 className="text-xl font-bold text-slate-900">
-                {appointment.patientName}
+                {userType === "patient" ? appointment.practitionerName || appointment.patientName : appointment.patientName}
               </h4>
               <p className="text-sm text-slate-500 capitalize">
                 {appointment.type} Consultation

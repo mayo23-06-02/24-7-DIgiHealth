@@ -1,7 +1,7 @@
 "use client";
 
-import DoctorsView from "@/components/dashboard/patient/DoctorsView";
+import DoctorsViewRefactored from "@/components/dashboard/patient/doctors/DoctorsViewRefactored";
 
 export default function PatientDoctorsPage() {
-  return <DoctorsView />;
+  return <DoctorsViewRefactored />;
 }
