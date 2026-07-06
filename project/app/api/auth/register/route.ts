@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       lastName: formData.lastName || formData.fullName?.split(" ").slice(1).join(" ") || formData.adminName?.split(" ").slice(1).join(" ") || "Registry",
       saId: formData.saId,
       mobile: formData.mobile,
-      status: "active",
+      status: "active" as any,
     };
 
     const newUser = await User.create(userData);
