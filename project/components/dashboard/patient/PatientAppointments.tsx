@@ -19,7 +19,7 @@ export default function PatientAppointments() {
   const { appointments, loading, fetchAppointments } = useAppointments(
     "/api/patient/appointments",
   );
-  const [activeTab, setActiveTab] = useState<Tab>("upcoming");
+  const [activeTab, setActiveTab] = useState<AppointmentTab>("upcoming");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -62,7 +62,7 @@ export default function PatientAppointments() {
 
   // Counts per tab
   const counts = useMemo(() => {
-    const result: Record<Tab, number> = {} as any;
+    const result: Record<AppointmentTab, number> = {} as any;
     tabs.forEach((t) => {
       let list = appointments;
       if (t !== "all") list = list.filter((a) => a.computedStatus === t);
