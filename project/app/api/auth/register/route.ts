@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       status: "active" as any,
     };
 
-    const newUser = await User.create(userData);
+    const newUser = await User.create(userData as any);
 
     // 5. Create Profile based on role
     if (wizardRole === "patient") {

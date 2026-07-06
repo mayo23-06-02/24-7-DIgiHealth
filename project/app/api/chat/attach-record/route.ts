@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       consultationId: conversation.consultationId,
       patientId,
       practitionerId,
-      type,
+      type: type as any,
       title,
       description,
       fileUrl,
