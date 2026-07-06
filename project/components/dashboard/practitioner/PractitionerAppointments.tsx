@@ -331,8 +331,8 @@ export default function PractitionerAppointments() {
         }
       />
 
-      {/* Tabs - Universal Dropdown */}
-      <div className="pb-4">
+      {/* Tabs - Mobile Dropdown */}
+      <div className="md:hidden pb-4">
         <Select
           value={activeTab}
           onChange={(val) => setActiveTab(val as Tab)}
@@ -342,6 +342,38 @@ export default function PractitionerAppointments() {
           }))}
           icon={<BiCalendar className="text-slate-500 text-lg" />}
         />
+      </div>
+
+      {/* Tabs - Desktop Cards */}
+      <div className="hidden md:flex gap-2 overflow-x-auto custom-scrollbar pb-4 w-full">
+        {tabs.map((t) => {
+          const config = tabConfig[t];
+          const Icon = config.icon;
+          return (
+            <button
+              key={t}
+              onClick={() => setActiveTab(t)}
+              className={`flex items-center gap-3 cursor-pointer p-3 ease-in-out duration-300 py-4 rounded-lg transition-all min-w-[180px] text-left border-2 ${
+                activeTab === t
+                  ? "border-gray-400 opacity-100"
+                  : "border-transparent opacity-80 hover:opacity-100 hover:scale-[1.02]"
+              }`}
+              style={{ backgroundColor: config.bgColor }}
+            >
+              <Icon className={`${config.iconColor} text-2xl shrink-0`} />
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-slate-900 leading-none">
+                  {counts[t] || 0}
+                </span>
+                <span className="text-xs font-medium text-slate-600 leading-tight mt-0.5">
+                  {config.label1}
+                  <br />
+                  {config.label2}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Filters */}

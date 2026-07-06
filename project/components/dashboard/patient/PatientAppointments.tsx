@@ -7,7 +7,8 @@ import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BookingModal from "@/components/doctor/BookingModal";
-import { BiPlus } from "react-icons/bi";
+import { BiPlus, BiCalendar, BiCalendarCheck, BiCalendarExclamation, BiCalendarX, BiCalendarPlus, BiGridAlt } from "react-icons/bi";
+import Select from "@/components/ui/Select";
 import { toast } from "react-hot-toast";
 import { useAppointments } from "@/lib/hooks/useAppointments";
 
@@ -19,6 +20,58 @@ type Tab =
   | "missed"
   | "cancelled"
   | "requests";
+
+const tabConfig: Record<Tab, { label1: string; label2: string; icon: React.ElementType; bgColor: string; iconColor: string }> = {
+  all: {
+    label1: "All",
+    label2: "Appointments",
+    icon: BiGridAlt,
+    bgColor: "#e8f0f4",
+    iconColor: "text-slate-600",
+  },
+  upcoming: {
+    label1: "Upcoming",
+    label2: "Appointments",
+    icon: BiCalendar,
+    bgColor: "#fef9e7",
+    iconColor: "text-yellow-600",
+  },
+  ongoing: {
+    label1: "Ongoing",
+    label2: "Appointments",
+    icon: BiCalendarCheck,
+    bgColor: "#e8f5e9",
+    iconColor: "text-green-600",
+  },
+  past: {
+    label1: "Completed",
+    label2: "Appointments",
+    icon: BiCalendarCheck,
+    bgColor: "#d6e8f4",
+    iconColor: "text-blue-600",
+  },
+  missed: {
+    label1: "Missed",
+    label2: "Appointments",
+    icon: BiCalendarExclamation,
+    bgColor: "#fff3e0",
+    iconColor: "text-orange-500",
+  },
+  cancelled: {
+    label1: "Cancelled",
+    label2: "Appointments",
+    icon: BiCalendarX,
+    bgColor: "#fdecea",
+    iconColor: "text-red-500",
+  },
+  requests: {
+    label1: "Appointment",
+    label2: "Requests",
+    icon: BiCalendarPlus,
+    bgColor: "#fef9e7",
+    iconColor: "text-yellow-700",
+  },
+};
 
 export default function PatientAppointments() {
   const { appointments, loading, fetchAppointments } = useAppointments(
@@ -209,26 +262,49 @@ export default function PatientAppointments() {
         }
       />
 
-      {/* Tabs */}
-      <div className="flex gap-1.5 bg-slate-50 rounded-2xl p-1 overflow-x-auto custom-scrollbar w-fit max-w-full">
-        {tabs.map((t) => (
-          <button
-            key={t}
-            onClick={() => setActiveTab(t)}
-            className={`px-4 py-2 h-auto text-xs font-bold rounded-xl transition-all flex items-center gap-1 whitespace-nowrap ${
-              activeTab === t
-                ? "bg-primary text-white shadow-primary/20"
-                : "text-slate-500 hover:text-slate-600"
-            }`}
-          >
-            <span className="capitalize">{t}</span>
-            <span
-              className={`ml-1 px-2 py-0.5 rounded-lg text-[9px] font-bold border ${activeTab === t ? "bg-white/20 border-white/20 text-white" : "bg-white border-slate-100 text-slate-500"}`}
+      {/* Tabs - Mobile Dropdown */}
+      <div className="md:hidden pb-4">
+        <Select
+          value={activeTab}
+          onChange={(val) => setActiveTab(val as Tab)}
+          options={tabs.map((t) => ({
+            value: t,
+            label: `${tabConfig[t].label1} ${tabConfig[t].label2} (${counts[t] || 0})`,
+          }))}
+          icon={<BiCalendar className="text-slate-500 text-lg" />}
+        />
+      </div>
+
+      {/* Tabs - Desktop Cards */}
+      <div className="hidden md:flex gap-2 overflow-x-auto custom-scrollbar pb-4 w-full">
+        {tabs.map((t) => {
+          const config = tabConfig[t];
+          const Icon = config.icon;
+          return (
+            <button
+              key={t}
+              onClick={() => setActiveTab(t)}
+              className={`flex items-center gap-3 cursor-pointer p-3 ease-in-out duration-300 py-4 rounded-lg transition-all min-w-[180px] text-left border-2 ${
+                activeTab === t
+                  ? "border-gray-400 opacity-100"
+                  : "border-transparent opacity-80 hover:opacity-100 hover:scale-[1.02]"
+              }`}
+              style={{ backgroundColor: config.bgColor }}
             >
-              {counts[t] || 0}
-            </span>
-          </button>
-        ))}
+              <Icon className={`${config.iconColor} text-2xl shrink-0`} />
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-slate-900 leading-none">
+                  {counts[t] || 0}
+                </span>
+                <span className="text-xs font-medium text-slate-600 leading-tight mt-0.5">
+                  {config.label1}
+                  <br />
+                  {config.label2}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Filters */}

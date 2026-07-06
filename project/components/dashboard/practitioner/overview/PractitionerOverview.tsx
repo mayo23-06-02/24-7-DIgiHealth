@@ -17,8 +17,8 @@ export default function PractitionerOverview() {
     usePractitionerDashboard();
   const [viewDate, setViewDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState(new Date());
-  const [chartPeriod, setChartPeriod] = React.useState('current');
-const router = useRouter();
+  const [chartPeriod, setChartPeriod] = React.useState("current");
+  const router = useRouter();
   const handleRescheduleSuccess = () => {
     refetch();
   };
@@ -45,7 +45,7 @@ const router = useRouter();
     setSelectedDate(
       isCurrentMonth
         ? today
-        : new Date(viewDate.getFullYear(), viewDate.getMonth(), 1)
+        : new Date(viewDate.getFullYear(), viewDate.getMonth(), 1),
     );
   }, [viewDate]);
 
@@ -63,7 +63,6 @@ const router = useRouter();
       </div>
     );
   }
-  
 
   // Helper to get start of current week (Monday)
   const getWeekStart = () => {
@@ -71,7 +70,7 @@ const router = useRouter();
     const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(today.setDate(diff));
-    return monday.toISOString().split('T')[0];
+    return monday.toISOString().split("T")[0];
   };
 
   // Helper to get end of current week (Sunday)
@@ -80,18 +79,19 @@ const router = useRouter();
     const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? 0 : 7);
     const sunday = new Date(today.setDate(diff));
-    return sunday.toISOString().split('T')[0];
+    return sunday.toISOString().split("T")[0];
   };
 
- const handlePendingAppointmentsClick = () => {
+  const handlePendingAppointmentsClick = () => {
     const weekStart = getWeekStart();
     const weekEnd = getWeekEnd();
-    router.push(`/practitioner/appointments?tab=requests&dateFrom=${weekStart}&dateTo=${weekEnd}`);
+    router.push(
+      `/practitioner/appointments?tab=requests&dateFrom=${weekStart}&dateTo=${weekEnd}`,
+    );
   };
 
   return (
     <div className="w-full pb-10">
-
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
         {/* LEFT COLUMN */}
         <div className="xl:col-span-8 flex flex-col gap-4">
@@ -112,7 +112,11 @@ const router = useRouter();
                 <h3 className="text-lg font-bold text-slate-800 font-grotesk">
                   Pending Requests
                 </h3>
-                <Button onClick={handlePendingAppointmentsClick} variant="ghost" size="sm">
+                <Button
+                  onClick={handlePendingAppointmentsClick}
+                  variant="ghost"
+                  size="sm"
+                >
                   View All
                 </Button>
               </div>
@@ -141,7 +145,10 @@ const router = useRouter();
               onViewDateChange={setViewDate}
               onSelectedDateChange={setSelectedDate}
             />
-            <ScheduleList items={filteredSchedule} selectedDate={selectedDate} />
+            <ScheduleList
+              items={filteredSchedule}
+              selectedDate={selectedDate}
+            />
           </Card>
         </div>
 

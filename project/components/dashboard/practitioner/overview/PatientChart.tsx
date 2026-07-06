@@ -1,8 +1,8 @@
 "use client";
-import React from 'react';
-import Card from '@/components/ui/Card';
-import { BiChevronDown } from 'react-icons/bi';
-import { ChartDataPoint } from './types';
+import React from "react";
+import Card from "@/components/ui/Card";
+import { BiChevronDown } from "react-icons/bi";
+import { ChartDataPoint } from "./types";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,8 +11,8 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -20,7 +20,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 interface PatientChartProps {
@@ -29,31 +29,35 @@ interface PatientChartProps {
   onPeriodChange?: (period: string) => void;
 }
 
-export default function PatientChart({ data, selectedPeriod = 'current', onPeriodChange }: PatientChartProps) {
+export default function PatientChart({
+  data,
+  selectedPeriod = "current",
+  onPeriodChange,
+}: PatientChartProps) {
   const monthOptions = [
-    { value: 'current', label: 'This Month' },
-    { value: 'last', label: 'Last Month' },
-    { value: '2months', label: 'Last 2 Months' },
-    { value: '3months', label: 'Last 3 Months' },
-    { value: '6months', label: 'Last 6 Months' },
-    { value: 'year', label: 'This Year' },
+    { value: "current", label: "This Month" },
+    { value: "last", label: "Last Month" },
+    { value: "2months", label: "Last 2 Months" },
+    { value: "3months", label: "Last 3 Months" },
+    { value: "6months", label: "Last 6 Months" },
+    { value: "year", label: "This Year" },
   ];
 
   const chartData = {
-    labels: data.map(d => d.label),
+    labels: data.map((d) => d.label),
     datasets: [
       {
-        label: 'New Patients',
-        data: data.map(d => d.value),
-        backgroundColor: data.map(d => 
-          d.value === Math.max(...data.map(item => item.value)) && d.value > 0
-            ? '#2b617a'
-            : 'rgba(43, 97, 122, 0.2)'
+        label: "New Patients",
+        data: data.map((d) => d.value),
+        backgroundColor: data.map((d) =>
+          d.value === Math.max(...data.map((item) => item.value)) && d.value > 0
+            ? "#2b617a"
+            : "rgba(43, 97, 122, 0.2)",
         ),
-        borderColor: data.map(d => 
-          d.value === Math.max(...data.map(item => item.value)) && d.value > 0
-            ? '#2b617a'
-            : 'rgba(43, 97, 122, 0.5)'
+        borderColor: data.map((d) =>
+          d.value === Math.max(...data.map((item) => item.value)) && d.value > 0
+            ? "#2b617a"
+            : "rgba(43, 97, 122, 0.5)",
         ),
         borderWidth: 1,
         borderRadius: 4,
@@ -69,9 +73,9 @@ export default function PatientChart({ data, selectedPeriod = 'current', onPerio
         display: false,
       },
       tooltip: {
-        backgroundColor: '#1e293b',
-        titleColor: '#ffffff',
-        bodyColor: '#ffffff',
+        backgroundColor: "#1e293b",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
         padding: 12,
         cornerRadius: 8,
         displayColors: false,
@@ -84,11 +88,11 @@ export default function PatientChart({ data, selectedPeriod = 'current', onPerio
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(148, 163, 184, 0.1)',
+          color: "rgba(148, 163, 184, 0.1)",
           borderDash: [5, 5],
         },
         ticks: {
-          color: '#64748b',
+          color: "#64748b",
           font: {
             size: 11,
           },
@@ -102,7 +106,7 @@ export default function PatientChart({ data, selectedPeriod = 'current', onPerio
           display: false,
         },
         ticks: {
-          color: '#64748b',
+          color: "#64748b",
           font: {
             size: 11,
           },
@@ -120,20 +124,10 @@ export default function PatientChart({ data, selectedPeriod = 'current', onPerio
         <h3 className="text-lg font-bold text-slate-800 font-grotesk">
           Patient Growth
         </h3>
-        <div className="relative">
-          <select
-            value={selectedPeriod}
-            onChange={(e) => onPeriodChange?.(e.target.value)}
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-500 border border-slate-200 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors appearance-none pr-8 cursor-pointer"
-          >
-            {monthOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <BiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={14} />
-        </div>
+        {/*add a percentage growth label*/}
+        <span className="text-xs font-bold text-slate-500">
+          +{data[data.length - 1].value - data[data.length - 2].value}%
+        </span>
       </div>
 
       <div className="flex-1 w-full relative min-h-[200px]">
