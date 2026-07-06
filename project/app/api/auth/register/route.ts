@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const userData = {
       email: (formData.email || formData.adminEmail || "").toLowerCase(),
       passwordHash,
-      role: modelRole,
+      role: modelRole as any,
       firstName: formData.firstName || formData.fullName?.split(" ")[0] || formData.adminName?.split(" ")[0] || "User",
       lastName: formData.lastName || formData.fullName?.split(" ").slice(1).join(" ") || formData.adminName?.split(" ").slice(1).join(" ") || "Registry",
       saId: formData.saId,

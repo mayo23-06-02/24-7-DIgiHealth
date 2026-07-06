@@ -19,7 +19,7 @@ export default function NotificationBell({
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedNotif, setSelectedNotif] = useState<Notification | null>(null);
-  const [previousUnreadCount, setPreviousUnreadCount] = useState(0);
+  const previousUnreadCount = useRef(0);
   const ref = useRef<HTMLDivElement>(null);
 
   const playNotificationSound = () => {
@@ -37,10 +37,10 @@ export default function NotificationBell({
         setUnreadCount(newUnreadCount);
         if (isInitialLoad && newUnreadCount > 0) {
           playNotificationSound();
-        } else if (newUnreadCount > previousUnreadCount) {
+        } else if (!isInitialLoad && newUnreadCount > previousUnreadCount.current) {
           playNotificationSound();
         }
-        setPreviousUnreadCount(newUnreadCount);
+        previousUnreadCount.current = newUnreadCount;
       }
     } catch {
       /* silent */
