@@ -29,6 +29,8 @@ async function getPractitionerId(req: NextRequest): Promise<string> {
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    const { expireStaleBookingRequests } = await import('@/lib/booking/expire');
+    await expireStaleBookingRequests();
     const practitionerId = await getPractitionerId(req);
     const { searchParams } = new URL(req.url);
 
@@ -115,16 +117,36 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const body = await req.json();
     const practitionerId = await getPractitionerId(req);
+    const { notifyBookingEvent } = await import('@/lib/booking/notifications');
+
+    const start = new Date(body.scheduledStart);
+    const end = new Date(body.scheduledEnd);
+    const reason = body.reason || body.chiefComplaint || '';
 
     const consultation = await Consultation.create({
       practitionerId,
       patientId: body.patientId,
       type: body.type || 'video',
-      status: 'pending',
-      scheduledStartTime: new Date(body.scheduledStart),
-      scheduledEndTime: new Date(body.scheduledEnd),
-      chiefComplaint: body.reason || body.chiefComplaint,
+      status: body.status || 'pending',
+      scheduledStartTime: start,
+      scheduledEndTime: end,
+      chiefComplaint: reason,
+      source: 'practitioner_schedule',
     });
+
+    // Patient gets notified of the scheduled/pending booking
+    await notifyBookingEvent(
+      consultation.status === 'scheduled' ? 'scheduled_created' : 'request_created',
+      {
+        consultationId: consultation._id,
+        patientId: body.patientId,
+        practitionerId,
+        scheduledStart: start,
+        reason,
+        type: body.type || 'video',
+        actorUserId: practitionerId,
+      },
+    );
 
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {

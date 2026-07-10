@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
-import { Notification } from "@/lib/models/Communications";
-import User from "@/lib/models/User";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
+import { notifyBookingEvent } from "@/lib/booking/notifications";
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -42,26 +41,34 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const isPractitioner =
+      consultation.practitionerId.toString() === userId;
     const isPatient = consultation.patientId.toString() === userId;
-    const otherPartyId = isPatient ? consultation.practitionerId : consultation.patientId;
-    const currentUser = await User.findById(userId);
 
-    // Delete the consultation
-    await Consultation.findByIdAndDelete(id);
+    // Snapshot before cancel/delete for notifications
+    const snap = {
+      consultationId: consultation._id,
+      patientId: consultation.patientId,
+      practitionerId: consultation.practitionerId,
+      scheduledStart: consultation.scheduledStartTime,
+      reason: consultation.chiefComplaint,
+      type: consultation.type,
+      actorUserId: userId,
+    };
 
-    // Notify the other party
-    await Notification.create({
-      userId: otherPartyId,
-      type: "appointment_declined",
-      title: "Appointment Declined",
-      body: `${isPatient ? "Patient" : `Dr. ${currentUser?.firstName} ${currentUser?.lastName}`} has declined the consultation request for ${new Date(consultation.scheduledStartTime).toLocaleString()}.`,
-      data: { consultationId: consultation._id },
-      isRead: false,
-    });
+    // Prefer cancel over hard-delete so history remains
+    consultation.status = "cancelled";
+    await consultation.save();
+
+    if (isPractitioner) {
+      await notifyBookingEvent("declined", snap);
+    } else if (isPatient) {
+      await notifyBookingEvent("cancelled", snap);
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Appointment declined and deleted",
+      message: "Appointment declined",
     });
   } catch (error) {
     console.error("Decline API Error:", error);

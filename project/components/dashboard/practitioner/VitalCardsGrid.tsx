@@ -1,9 +1,14 @@
 import React from "react";
-import { BiHeart, BiPulse, BiUser, BiDroplet } from "react-icons/bi";
+import { BiHeart, BiPulse, BiUser } from "react-icons/bi";
 import KPICard from "@/components/ui/KPICard";
+import EditableRiskScoreCard from "./EditableRiskScoreCard";
+import type { RiskBand } from "@/lib/riskScore";
 
 interface VitalCardsGridProps {
   onCardClick?: (vital: string) => void;
+  patientId?: string;
+  riskScore?: number;
+  onRiskSaved?: (score: number, band: RiskBand) => void;
   vitalsData?: {
     heartRate?: number | string;
     bloodPressure?: string;
@@ -13,9 +18,13 @@ interface VitalCardsGridProps {
   };
 }
 
-const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick, vitalsData }) => {
-  const isUpToDate = vitalsData?.dateRecorded ? true : false;
-  
+const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({
+  onCardClick,
+  vitalsData,
+  patientId,
+  riskScore = 0,
+  onRiskSaved,
+}) => {
   const vitals = [
     {
       id: "heart-rate",
@@ -32,7 +41,9 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick, vitalsData
       label: "Blood Pressure",
       value: vitalsData?.bloodPressure || "---/---",
       unit: "",
-      description: vitalsData?.bloodPressure ? "Recent reading" : "Update required",
+      description: vitalsData?.bloodPressure
+        ? "Recent reading"
+        : "Update required",
       trend: 0,
       icon: <BiPulse size={24} />,
       color: "slate",
@@ -45,16 +56,6 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick, vitalsData
       description: vitalsData?.weight ? "Latest weight" : "Update required",
       trend: 0,
       icon: <BiUser size={24} />,
-      color: "slate",
-    },
-    {
-      id: "glucose",
-      label: "Glucose",
-      value: vitalsData?.glucose || "---",
-      unit: "mmol/L",
-      description: vitalsData?.glucose ? "Recent reading" : "Update required",
-      trend: 0,
-      icon: <BiDroplet size={24} />,
       color: "slate",
     },
   ];
@@ -74,6 +75,20 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({ onCardClick, vitalsData
           onClick={() => onCardClick?.(vital.id)}
         />
       ))}
+
+      {/* Risk score replaces glucose — solid band colour, white text, slider edit */}
+      {patientId ? (
+        <EditableRiskScoreCard
+          patientId={patientId}
+          initialScore={riskScore}
+          onSaved={onRiskSaved}
+        />
+      ) : (
+        <div className="rounded-2xl bg-slate-500 p-4 min-h-[148px] text-white flex flex-col justify-end">
+          <p className="text-3xl font-bold">—</p>
+          <p className="text-sm font-semibold text-white/90">Clinical risk score</p>
+        </div>
+      )}
     </div>
   );
 };

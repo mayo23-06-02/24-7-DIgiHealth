@@ -64,6 +64,17 @@ export async function GET(
       .sort({ dateRecorded: -1 })
       .lean();
 
+    // Latest clinical risk score
+    const RiskScore = (await import('@/lib/models/RiskScore')).default;
+    const { calcAge, riskBandFromScore, riskBandStyle } = await import('@/lib/riskScore');
+    const latestRisk = await RiskScore.findOne({ patientId: patientUserId })
+      .sort({ calculatedAt: -1 })
+      .lean();
+    const consultRisk = pastConsultations.find((c: any) => c.clinicalRisk?.score != null)?.clinicalRisk;
+    const riskScore = latestRisk?.score ?? consultRisk?.score ?? 0;
+    const riskColor = riskBandFromScore(riskScore);
+    const dob = patientProfile?.dateOfBirth || (user as any).dateOfBirth;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -72,8 +83,13 @@ export async function GET(
         email: user.email,
         mobile: user.mobile,
         bloodType: patientBase?.bloodType || 'Unknown',
-        dateOfBirth: patientProfile?.dateOfBirth,
-        gender: patientProfile?.gender,
+        dateOfBirth: dob,
+        age: calcAge(dob),
+        dateJoined: (user as any).createdAt || null,
+        gender: patientProfile?.gender || (user as any).gender,
+        riskScore,
+        riskColor,
+        riskLabel: riskBandStyle(riskScore).label,
         subscriptionTier: patientProfile?.subscriptionTier,
         emergencyContact: patientProfile?.emergencyContact,
         medicalHistory: medicalContext?.chronicConditions || [],
@@ -104,7 +120,6 @@ export async function GET(
           bloodPressure: (latestVitals.vitalSigns?.systolicBP && latestVitals.vitalSigns?.diastolicBP) ? `${latestVitals.vitalSigns.systolicBP}/${latestVitals.vitalSigns.diastolicBP}` : undefined,
           weight: latestVitals.weightKg,
           height: latestVitals.heightCm,
-          glucose: (latestVitals as any).glucoseMmol || undefined,
           dateRecorded: latestVitals.dateRecorded
         } : null,
       },

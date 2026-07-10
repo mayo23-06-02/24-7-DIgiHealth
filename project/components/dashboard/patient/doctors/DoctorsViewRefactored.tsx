@@ -74,14 +74,26 @@ export default function DoctorsViewRefactored() {
   const popularDoctors = useMemo(() => [...filteredDoctors].sort((a, b) => (b.rating || 0) - (a.rating || 0)), [filteredDoctors]);
 
   const handleStartMessage = async (doc: any) => {
+    if (!doc?.id) return;
     try {
       const res = await fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ practitionerId: doc.id }),
+        body: JSON.stringify({
+          practitionerId: doc.id,
+          contactId: doc.id,
+        }),
       });
-      if (res.ok) router.push("/patient/messages");
-    } catch { /* silent */ }
+      const data = res.ok ? await res.json() : null;
+      const conversationId = data?.conversationId;
+      if (conversationId) {
+        router.push(`/patient/messages?chatId=${conversationId}`);
+      } else {
+        router.push(`/patient/messages?doctorId=${doc.id}`);
+      }
+    } catch {
+      router.push(`/patient/messages?doctorId=${doc.id}`);
+    }
   };
 
   return (

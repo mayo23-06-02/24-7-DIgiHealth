@@ -18,6 +18,20 @@ import { toast } from "react-hot-toast";
 import Card from "../ui/Card";
 import Avatar from "../ui/Avatar";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import {
+  createBooking,
+  updateBooking,
+  formToCreateInput,
+  validateBookingForm,
+  fetchDaySlots,
+  todayDateString,
+  upcomingDateStrings,
+  type BookingFormState,
+  type BookingSlot,
+  type ConsultationMethod,
+} from "@/lib/booking";
+import TimeSlotPicker from "@/components/booking/TimeSlotPicker";
+import { useAuthContext } from "@/components/auth/AuthProvider";
 
 interface Doctor {
   id: string;
@@ -53,19 +67,6 @@ interface BookingModalProps {
   onSuccess?: () => void;
 }
 
-const generateTimeSlots = (): string[] => {
-  const slots: string[] = [];
-  for (let hour = 8; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      if (hour === 23 && minute > 30) break;
-      const h = String(hour).padStart(2, "0");
-      const m = String(minute).padStart(2, "0");
-      slots.push(`${h}:${m}`);
-    }
-  }
-  return slots;
-};
-
 export default function BookingModal({
   isOpen,
   onClose,
@@ -77,20 +78,28 @@ export default function BookingModal({
   onSuccess,
 }: BookingModalProps) {
   const isPractitionerMode = mode === "practitioner";
+  const { user } = useAuthContext();
 
   const [step, setStep] = useState(1);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const [selectedDate, setSelectedDate] = useState(todayDateString());
   const [selectedTime, setSelectedTime] = useState("");
   const [concern, setConcern] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [durationMinutes, setDurationMinutes] = useState(30);
   const [consultType, setConsultType] = useState("video");
+  const [daySlots, setDaySlots] = useState<BookingSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const [selectedDoctorState, setSelectedDoctorState] = useState<Doctor | null>(
     null,
   );
+
+  const dateOptions = useMemo(() => upcomingDateStrings(14), []);
+
+  /** Practitioner whose calendar we check for free slots */
+  const slotsPractitionerId = isPractitionerMode
+    ? user?.id || null
+    : selectedDoctorState?.id || doctor?.id || null;
   const [availableDocs, setAvailableDocs] = useState<Doctor[]>([]);
   const [doctorSearch, setDoctorSearch] = useState("");
 
@@ -116,15 +125,14 @@ export default function BookingModal({
   useEffect(() => {
     if (isOpen) {
       setStep(1);
-      setSelectedDate(
-        initialForm?.date || new Date().toISOString().split("T")[0],
-      );
+      setSelectedDate(initialForm?.date || todayDateString());
       setSelectedTime(initialForm?.time || "");
       setConcern(initialForm?.reason || "");
       setDurationMinutes(initialForm?.durationMinutes || 30);
       setConsultType(initialForm?.type || "video");
       setDoctorSearch("");
       setPatientSearch(patient?.name || "");
+      setDaySlots([]);
       if (isPractitionerMode) {
         setSelectedPatientState(patient || null);
       } else {
@@ -132,6 +140,57 @@ export default function BookingModal({
       }
     }
   }, [isOpen, doctor, patient, isPractitionerMode, initialForm]);
+
+  // Real schedule-based slots (8am–midnight); past + booked are greyed out
+  useEffect(() => {
+    if (!isOpen || !showDateTime) return;
+    if (!slotsPractitionerId || !selectedDate) {
+      setDaySlots([]);
+      return;
+    }
+
+    let cancelled = false;
+    setSlotsLoading(true);
+    void (async () => {
+      try {
+        const result = await fetchDaySlots({
+          practitionerId: slotsPractitionerId,
+          date: selectedDate,
+          durationMinutes: isPractitionerMode ? durationMinutes : 30,
+          excludeBookingId: editingApptId,
+        });
+        if (cancelled) return;
+        if (result.success && result.data?.slots) {
+          setDaySlots(result.data.slots);
+          // Clear selection if that slot is no longer bookable
+          setSelectedTime((prev) => {
+            if (!prev) return prev;
+            const stillOk = result.data!.slots.some(
+              (s) => s.time === prev && s.available,
+            );
+            return stillOk ? prev : "";
+          });
+        } else {
+          setDaySlots([]);
+        }
+      } finally {
+        if (!cancelled) setSlotsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // showDateTime depends on step — listed via step + hasPreSelected
+  }, [
+    isOpen,
+    showDateTime,
+    slotsPractitionerId,
+    selectedDate,
+    durationMinutes,
+    isPractitionerMode,
+    editingApptId,
+  ]);
 
   useEffect(() => {
     if (isOpen && !isPractitionerMode && !doctor) {
@@ -205,16 +264,6 @@ export default function BookingModal({
     return () => clearTimeout(timer);
   }, [patientSearch, selectedPatientState, isPractitionerMode]);
 
-  const allSlots = useMemo(() => generateTimeSlots(), []);
-  const availableTimes = useMemo(() => {
-    if (!isPractitionerMode && selectedDoctorState?.schedule?.length) {
-      return allSlots.filter((slot) =>
-        selectedDoctorState.schedule!.includes(slot),
-      );
-    }
-    return allSlots;
-  }, [selectedDoctorState, allSlots, isPractitionerMode]);
-
   const handleClose = () => onClose();
 
   const handleNext = () => {
@@ -231,9 +280,20 @@ export default function BookingModal({
         return;
       }
     }
-    if (showDateTime && !selectedTime) {
-      toast.error("Please select a time slot.");
-      return;
+    if (showDateTime) {
+      if (!selectedTime) {
+        toast.error("Please select a time slot.");
+        return;
+      }
+      const slot = daySlots.find((s) => s.time === selectedTime);
+      if (slot && !slot.available) {
+        toast.error(
+          slot.reason === "Past"
+            ? "That time has already passed. Choose a later slot."
+            : "That slot is no longer available. Choose another time.",
+        );
+        return;
+      }
     }
     if (showConcern && !concern.trim()) {
       toast.error("Please describe the reason for this consultation.");
@@ -245,107 +305,50 @@ export default function BookingModal({
   const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleSubmit = async () => {
-    // 1. Validate fields
-    if (!selectedDate || !selectedTime) {
-      toast.error("Missing date or time.");
-      return;
-    }
-    if (!concern.trim()) {
-      toast.error("Please describe the reason for consultation.");
-      return;
-    }
-
-    // 2. Build a valid Date using local time (no timezone shifting)
-    const dateTimeString = `${selectedDate}T${selectedTime}:00`;
-    const localDate = new Date(dateTimeString);
-    if (isNaN(localDate.getTime())) {
-      toast.error("The selected date or time is invalid. Please try again.");
-      return;
-    }
-
-    // 3. Prevent booking in the past (optional but helpful)
-    if (localDate.getTime() < Date.now()) {
-      toast.error(
-        "Cannot book an appointment in the past. Please choose a future time.",
-      );
-      return;
-    }
-
-    // 4. Calculate end time (duration: default 30 min for patients)
-    const duration = isPractitionerMode ? durationMinutes : 30;
-    const endDate = new Date(localDate.getTime() + duration * 60000);
-    if (isNaN(endDate.getTime())) {
-      toast.error("Invalid end time calculated. Please try again.");
-      return;
-    }
-
-    // 5. Prepare payload with ISO strings (UTC)
-    const payload = {
-      scheduledStart: localDate.toISOString(),
-      scheduledEnd: endDate.toISOString(),
+    const form: BookingFormState = {
+      date: selectedDate,
+      time: selectedTime,
+      reason: concern,
+      durationMinutes: isPractitionerMode ? durationMinutes : 30,
+      type: (isPractitionerMode ? consultType : "video") as ConsultationMethod,
+      patientId: selectedPatientState?.id,
+      practitionerId: selectedDoctorState?.id,
     };
 
-    // Add role-specific fields
-    if (isPractitionerMode) {
-      if (!selectedPatientState) {
-        toast.error("No patient selected.");
-        return;
-      }
-      Object.assign(payload, {
-        patientId: selectedPatientState.id,
-        type: consultType,
-        reason: concern,
-        chiefComplaint: concern,
-        status: editingApptId ? undefined : "pending",
-      });
-    } else {
-      if (!selectedDoctorState) {
-        toast.error("No practitioner selected.");
-        return;
-      }
-      Object.assign(payload, {
-        practitionerId: selectedDoctorState.id,
-        type: "video",
-        reason: concern,
-        chiefComplaint: concern,
-      });
+    const validation = validateBookingForm(form, {
+      mode: isPractitionerMode ? "practitioner" : "patient",
+      requirePerson: true,
+    });
+    if (!validation.ok) {
+      toast.error(validation.error);
+      return;
     }
+
+    const input = formToCreateInput(form, {
+      mode: isPractitionerMode ? "practitioner" : "patient",
+      bookingId: editingApptId,
+    });
 
     setIsSubmitting(true);
     try {
-      const url = isPractitionerMode
-        ? editingApptId
-          ? `/api/practitioner/appointments/${editingApptId}`
-          : "/api/practitioner/appointments"
-        : "/api/consultations/book";
+      // Unified platform booking API (works for patient + practitioner)
+      const result = editingApptId
+        ? await updateBooking(editingApptId, input)
+        : await createBooking(input);
 
-      const method = isPractitionerMode
-        ? editingApptId
-          ? "PUT"
-          : "POST"
-        : "POST";
-
-      console.log("📤 Booking payload:", JSON.stringify(payload, null, 2));
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-      if (json.success || res.ok) {
-        toast.success(
-          isPractitionerMode
-            ? editingApptId
-              ? "Appointment updated!"
-              : "Appointment scheduled!"
-            : "Appointment confirmed and synced!",
-        );
-        onSuccess?.();
-        handleClose();
-      } else {
-        throw new Error(json.error || json.message || "Booking failed");
+      if (!result.success) {
+        throw new Error(result.error || "Booking failed");
       }
+
+      toast.success(
+        isPractitionerMode
+          ? editingApptId
+            ? "Appointment updated!"
+            : "Appointment scheduled!"
+          : "Appointment confirmed and synced!",
+      );
+      onSuccess?.();
+      handleClose();
     } catch (error: any) {
       toast.error(error?.message || "Process failed. Please try again.");
     } finally {
@@ -616,73 +619,44 @@ export default function BookingModal({
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
             <div className="space-y-3">
               <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
-                <BiCalendar size={14} className="text-primary" /> Select Date
+                <BiCalendar size={14} className="text-primary" /> Select date
               </label>
-              <div className="flex gap-2 overflow-x-auto py-3 px-1 -mx-4 custom-scrollbar">
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(
-                  (offset) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() + offset);
-                    const dateStr = d.toISOString().split("T")[0];
-                    const dayName = d.toLocaleDateString("en-US", {
-                      weekday: "short",
-                    });
-                    const dayNum = d.getDate();
-                    const isSelected = selectedDate === dateStr;
-                    return (
-                      <button
-                        key={dateStr}
-                        onClick={() => setSelectedDate(dateStr)}
-                        className={`flex flex-col items-center justify-center rounded-xl border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${
-                          isSelected
-                            ? "border-primary bg-primary text-white shadow-primary/30 scale-105"
-                            : "border-slate-200 bg-white text-slate-500 hover:border-primary/30"
-                        }`}
-                      >
-                        <span
-                          className={`text-[9px] font-bold tracking-normal ${isSelected ? "text-white/70" : "text-slate-500"}`}
-                        >
-                          {dayName}
-                        </span>
-                        <span
-                          className={`text-2xl font-bold tabular-nums tracking-tighter ${isSelected ? "text-white" : "text-slate-800"}`}
-                        >
-                          {dayNum}
-                        </span>
-                      </button>
-                    );
-                  },
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
-                <BiTime size={14} className="text-primary" /> Select Time
-                (30-minute slots)
-              </label>
-              <div className="max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {availableTimes.map((time) => (
+              <div className="flex gap-2 overflow-x-auto py-3 px-1 -mx-1 custom-scrollbar">
+                {dateOptions.map((dateStr) => {
+                  const d = new Date(dateStr + "T12:00:00");
+                  const dayName = d.toLocaleDateString("en-US", {
+                    weekday: "short",
+                  });
+                  const dayNum = d.getDate();
+                  const isSelected = selectedDate === dateStr;
+                  return (
                     <button
-                      key={time}
-                      onClick={() => setSelectedTime(time)}
-                      className={`py-3 rounded-xl text-xs font-bold transition-all duration-200 border-2 ${
-                        selectedTime === time
-                          ? "border-primary bg-primary text-white shadow-primary/20"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-primary/30 hover:bg-primary/5"
+                      key={dateStr}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDate(dateStr);
+                        setSelectedTime("");
+                      }}
+                      className={`flex flex-col items-center justify-center rounded-xl border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${
+                        isSelected
+                          ? "border-primary bg-primary text-white shadow-primary/30 scale-105"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-primary/30"
                       }`}
                     >
-                      {time}
+                      <span
+                        className={`text-[9px] font-bold tracking-normal ${isSelected ? "text-white/70" : "text-slate-500"}`}
+                      >
+                        {dayName}
+                      </span>
+                      <span
+                        className={`text-2xl font-bold tabular-nums tracking-tighter ${isSelected ? "text-white" : "text-slate-800"}`}
+                      >
+                        {dayNum}
+                      </span>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-              {availableTimes.length === 0 && (
-                <p className="text-sm text-rose-500 font-bold px-1">
-                  No available slots for this date.
-                </p>
-              )}
             </div>
 
             {isPractitionerMode && (
@@ -693,7 +667,10 @@ export default function BookingModal({
                   </label>
                   <select
                     value={durationMinutes}
-                    onChange={(e) => setDurationMinutes(Number(e.target.value))}
+                    onChange={(e) => {
+                      setDurationMinutes(Number(e.target.value));
+                      setSelectedTime("");
+                    }}
                     className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary"
                   >
                     <option value={15}>15 min</option>
@@ -717,6 +694,20 @@ export default function BookingModal({
                   </select>
                 </div>
               </div>
+            )}
+
+            {!slotsPractitionerId ? (
+              <p className="text-sm text-slate-500 font-medium px-1">
+                Select a practitioner first to see open times.
+              </p>
+            ) : (
+              <TimeSlotPicker
+                slots={daySlots}
+                selectedTime={selectedTime}
+                onSelect={setSelectedTime}
+                loading={slotsLoading}
+                durationMinutes={isPractitionerMode ? durationMinutes : 30}
+              />
             )}
           </div>
         )}

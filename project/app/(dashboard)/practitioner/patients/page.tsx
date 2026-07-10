@@ -3,29 +3,22 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Card from "@/components/ui/Card";
 import Avatar from "@/components/ui/Avatar";
-import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   BiSearch,
   BiLoaderAlt,
   BiDownload,
   BiMessageDetail,
-  BiPhone,
   BiCalendar,
   BiFilter,
   BiX,
 } from "react-icons/bi";
-
-const RISK_LABELS = { green: "Low", gray: "Medium", red: "High" };
-const RISK_STYLES: Record<string, string> = {
-  green: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  gray: "bg-gray-50 text-gray-700 border-gray-200",
-  red: "bg-rose-50 text-rose-700 border-rose-200",
-};
+import { riskBandStyle } from "@/lib/riskScore";
 
 export default function PractitionerPatientsPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -35,7 +28,33 @@ export default function PractitionerPatientsPage() {
   const [sortField, setSortField] = useState("fullName");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
+  const [chatLoadingId, setChatLoadingId] = useState<string | null>(null);
   const PAGE_SIZE = 12;
+
+  /** Open (or create) a direct message thread with this patient */
+  const handleStartChat = async (patientId: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!patientId || chatLoadingId) return;
+    setChatLoadingId(patientId);
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patientId, contactId: patientId }),
+      });
+      const data = res.ok ? await res.json() : null;
+      if (data?.conversationId) {
+        router.push(`/practitioner/messages?chatId=${data.conversationId}`);
+      } else {
+        router.push(`/practitioner/messages?patientId=${patientId}`);
+      }
+    } catch {
+      router.push(`/practitioner/messages?patientId=${patientId}`);
+    } finally {
+      setChatLoadingId(null);
+    }
+  };
 
   const fetchPatients = useCallback(async () => {
     setLoading(true);
@@ -78,13 +97,13 @@ export default function PractitionerPatientsPage() {
   const sorted = [...patients].sort((a, b) => {
     let aVal = a[sortField];
     let bVal = b[sortField];
-    if (sortField === "lastVisit") {
+    if (sortField === "lastVisit" || sortField === "dateJoined") {
       aVal = aVal ? new Date(aVal).getTime() : 0;
       bVal = bVal ? new Date(bVal).getTime() : 0;
     }
-    if (sortField === "riskScore") {
-      aVal = a.riskScore || 0;
-      bVal = b.riskScore || 0;
+    if (sortField === "riskScore" || sortField === "age") {
+      aVal = a[sortField] ?? 0;
+      bVal = b[sortField] ?? 0;
     }
     if (typeof aVal === "string")
       return sortDir === "asc"
@@ -101,19 +120,19 @@ export default function PractitionerPatientsPage() {
       "Name",
       "Age",
       "Gender",
-      "Blood Type",
+      "Date Joined",
       "Last Visit",
       "Risk Score",
       "Risk Level",
     ];
     const rows = patients.map((p) => [
       p.fullName,
-      p.age || "",
+      p.age ?? "",
       p.gender || "",
-      p.bloodType || "",
+      p.dateJoined ? new Date(p.dateJoined).toLocaleDateString("en-ZA") : "",
       p.lastVisit ? new Date(p.lastVisit).toLocaleDateString("en-ZA") : "",
       p.riskScore || 0,
-      RISK_LABELS[p.riskColor as keyof typeof RISK_LABELS] || "",
+      p.riskLabel || riskBandStyle(p.riskScore || 0).label,
     ]);
     const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
@@ -193,9 +212,10 @@ export default function PractitionerPatientsPage() {
             className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
           >
             <option value="">All Risk Levels</option>
-            <option value="green">Low Risk</option>
-            <option value="gray">Medium Risk</option>
-            <option value="red">High Risk</option>
+            <option value="green">Low (0–35)</option>
+            <option value="gray">Mild (36–50)</option>
+            <option value="orange">Moderate (51–75)</option>
+            <option value="red">High (76–100)</option>
           </select>
         </div>
         <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
@@ -240,24 +260,24 @@ export default function PractitionerPatientsPage() {
                 <tr className="bg-slate-50 border-b border-slate-100">
                   <SortTh field="fullName" label="Patient" />
                   <SortTh field="age" label="Age" />
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
-                    Conditions
-                  </th>
+                  <SortTh field="dateJoined" label="Date Joined" />
                   <SortTh field="lastVisit" label="Last Visit" />
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider">
                     Next Appt
                   </th>
                   <SortTh field="riskScore" label="Risk" />
-                  <th className="py-3 px-5 text-xs font-bold text-slate-500  tracking-wider text-right">
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider text-right">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 bg-white">
-                {paginated.map((p, i) => (
+                {paginated.map((p) => {
+                  const risk = riskBandStyle(p.riskScore || 0);
+                  return (
                   <tr
-                    key={i}
-                    className="hover:bg-slate-50/50 transition-colors group"
+                    key={p.id}
+                    className="hover:bg-slate-50/50 transition-colors"
                   >
                     <td className="py-4 px-5">
                       <div className="flex items-center gap-3">
@@ -267,32 +287,22 @@ export default function PractitionerPatientsPage() {
                             {p.fullName}
                           </p>
                           <p className="text-xs text-slate-500 capitalize">
-                            {p.gender}
+                            {p.gender || "—"}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-5 text-sm text-slate-600">
-                      {p.age || "—"}
+                    <td className="py-4 px-5 text-sm font-semibold text-slate-700 tabular-nums">
+                      {p.age != null ? p.age : "—"}
                     </td>
-                    <td className="py-4 px-5">
-                      <div className="flex flex-wrap gap-1 max-w-[200px]">
-                        {(p.medicalHistory || [])
-                          .slice(0, 2)
-                          .map((h: string, idx: number) => (
-                            <span
-                              key={idx}
-                              className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full font-medium"
-                            >
-                              {h}
-                            </span>
-                          ))}
-                        {(p.medicalHistory || []).length > 2 && (
-                          <span className="text-xs px-2 py-1 bg-slate-100 text-slate-500 rounded-full font-medium">
-                            +{p.medicalHistory.length - 2}
-                          </span>
-                        )}
-                      </div>
+                    <td className="py-4 px-5 text-xs text-slate-500">
+                      {p.dateJoined
+                        ? new Date(p.dateJoined).toLocaleDateString("en-ZA", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "—"}
                     </td>
                     <td className="py-4 px-5 text-xs text-slate-500">
                       {p.lastVisit
@@ -312,40 +322,42 @@ export default function PractitionerPatientsPage() {
                         : "—"}
                     </td>
                     <td className="py-4 px-5">
-                      <div className="flex items-center gap-2">
-                        <RiskScoreCard
-                          score={p.riskScore || 0}
-                          color={p.riskColor || "green"}
-                          size="sm"
-                          showRing={false}
-                        />
-                        <span
-                          className={`text-xs font-bold px-2 py-1 rounded-full border ${RISK_STYLES[p.riskColor] || RISK_STYLES.green}`}
-                        >
-                          {RISK_LABELS[
-                            p.riskColor as keyof typeof RISK_LABELS
-                          ] || "Low"}
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border text-white ${risk.bgClass} ${risk.borderClass}`}
+                        style={{ backgroundColor: risk.bg }}
+                      >
+                        <span className="tabular-nums">{p.riskScore ?? 0}</span>
+                        <span className="opacity-90 font-medium">
+                          {risk.label}
                         </span>
-                      </div>
+                      </span>
                     </td>
                     <td className="py-4 px-5 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-1.5">
                         <Link
                           href={`/practitioner/patients/${p.id}`}
                           className="px-3 py-2 text-xs font-bold bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                         >
                           View
                         </Link>
-                        <button className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary transition-colors">
-                          <BiMessageDetail size={14} />
-                        </button>
-                        <button className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors">
-                          <BiCalendar size={14} />
+                        <button
+                          type="button"
+                          title="Message patient"
+                          disabled={chatLoadingId === p.id}
+                          onClick={(e) => handleStartChat(p.id, e)}
+                          className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:text-primary hover:border-primary bg-white transition-colors disabled:opacity-50"
+                        >
+                          {chatLoadingId === p.id ? (
+                            <BiLoaderAlt size={14} className="animate-spin" />
+                          ) : (
+                            <BiMessageDetail size={14} />
+                          )}
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
                 {paginated.length === 0 && (
                   <tr>
                     <td

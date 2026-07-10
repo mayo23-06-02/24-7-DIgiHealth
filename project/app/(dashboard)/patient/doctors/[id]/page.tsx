@@ -153,9 +153,28 @@ export default function DoctorProfilePage() {
             <Button
               variant="outline"
               className=""
-              onClick={() =>
-                router.push(`/patient/messages?doctorId=${doc.id}`)
-              }
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/conversations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      practitionerId: doc.id,
+                      contactId: doc.id,
+                    }),
+                  });
+                  const data = res.ok ? await res.json() : null;
+                  if (data?.conversationId) {
+                    router.push(
+                      `/patient/messages?chatId=${data.conversationId}`,
+                    );
+                    return;
+                  }
+                } catch {
+                  /* fall through */
+                }
+                router.push(`/patient/messages?doctorId=${doc.id}`);
+              }}
               icon={<BiMessageDetail className="text-xl" />}
               iconPosition="left"
             >

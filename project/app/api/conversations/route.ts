@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Conversation from '@/lib/models/Conversation';
-import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import Message from '@/lib/models/Message';
 import { cookies } from 'next/headers';
@@ -17,82 +16,140 @@ async function getUserInfo() {
   try {
     const { payload } = await jwtVerify(token, SECRET);
     await connectToDatabase();
-    const user = await User.findById(payload.userId).lean();
+    const user = await User.findById(payload.userId).select('_id role').lean();
     return user ? { userId: user._id.toString(), role: user.role } : null;
-  } catch (err) { 
+  } catch (err) {
     console.error('getUserInfo Auth Error:', err);
-    return null; 
+    return null;
   }
 }
 
-/** GET /api/conversations — list all conversations for the logged-in user */
+/** GET /api/conversations — list conversations (batched last-message + unread) */
 export async function GET() {
   const userInfo = await getUserInfo();
   if (!userInfo) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { userId } = userInfo;
+  const userOid = new mongoose.Types.ObjectId(userId);
 
   await connectToDatabase();
 
   const convs = await Conversation.find({
     $and: [
       {
-        $or: [
-          { patientId: new mongoose.Types.ObjectId(userId) },
-          { practitionerId: new mongoose.Types.ObjectId(userId) }
-        ]
+        $or: [{ patientId: userOid }, { practitionerId: userOid }],
       },
       {
         $or: [
           { consultationId: { $exists: false } },
-          { consultationId: null }
-        ]
-      }
-    ]
+          { consultationId: null },
+        ],
+      },
+    ],
   })
     .populate({ path: 'patientId', model: User, select: 'firstName lastName role' })
     .populate({ path: 'practitionerId', model: User, select: 'firstName lastName role' })
     .sort({ lastActivityAt: -1 })
+    .limit(100)
     .lean();
 
-  // Get the last message for each conversation
-  const result = await Promise.all(
-    convs.map(async (conv: any) => {
-      const lastMsg = await Message.findOne({ conversationId: conv._id }).sort({ createdAt: -1 }).lean();
-      
-      const unreadCount = await Message.countDocuments({
-        conversationId: conv._id,
-        receiverId: new mongoose.Types.ObjectId(userId),
-        isRead: false
-      });
+  if (convs.length === 0) {
+    return NextResponse.json([]);
+  }
 
-      const other = conv.patientId?._id?.toString() === userId
+  const convOids = convs.map((c: any) => c._id);
+  const convIdStrs = convOids.map((id: any) => id.toString());
+
+  // Batch last messages + unread counts (avoids 2N queries)
+  const [lastMessages, unreadCounts] = await Promise.all([
+    Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { conversationId: { $in: convOids } },
+            { conversationId: { $in: convIdStrs } },
+          ],
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: { $toString: '$conversationId' },
+          content: { $first: '$content' },
+          createdAt: { $first: '$createdAt' },
+        },
+      },
+    ]),
+    Message.aggregate([
+      {
+        $match: {
+          isRead: false,
+          $and: [
+            {
+              $or: [
+                { conversationId: { $in: convOids } },
+                { conversationId: { $in: convIdStrs } },
+              ],
+            },
+            {
+              $or: [{ receiverId: userOid }, { receiverId: userId }],
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: { $toString: '$conversationId' },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+  ]);
+
+  const lastByConv = new Map(
+    lastMessages.map((m: any) => [String(m._id), m]),
+  );
+  const unreadByConv = new Map(
+    unreadCounts.map((u: any) => [String(u._id), u.count as number]),
+  );
+
+  const result = convs.map((conv: any) => {
+    const idStr = conv._id.toString();
+    const lastMsg = lastByConv.get(idStr);
+    const unreadCount = unreadByConv.get(idStr) || 0;
+
+    const other =
+      conv.patientId?._id?.toString() === userId
         ? conv.practitionerId
         : conv.patientId;
 
-      const contactName = other 
-        ? (other.role === 'practitioner' 
-            ? `Dr. ${other.firstName} ${other.lastName}` 
-            : `${other.firstName} ${other.lastName}`)
-        : 'Unknown';
+    const contactName = other
+      ? other.role === 'practitioner'
+        ? `Dr. ${other.firstName} ${other.lastName}`
+        : `${other.firstName} ${other.lastName}`
+      : 'Unknown';
 
-      return {
-        id: conv._id,
-        consultationId: conv.consultationId,
-        contactId: other?._id?.toString() || '',
-        contactName,
-        practitionerId: conv.practitionerId?._id || conv.practitionerId,
-        doctor: contactName, // Backwards compatibility
-        avatar: other ? `https://ui-avatars.com/api/?name=${other.firstName}+${other.lastName}&background=0052cc&color=fff` : '',
-        lastMessage: lastMsg?.content || 'No messages yet.',
-        timestamp: conv.lastActivityAt
-          ? new Date(conv.lastActivityAt).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })
-          : '',
-        online: false,  // real-time presence handled separately
-        unread: unreadCount,
-        status: conv.status,
-      };
-    })
-  );
+    return {
+      id: conv._id,
+      consultationId: conv.consultationId,
+      contactId: other?._id?.toString() || '',
+      contactName,
+      practitionerId: conv.practitionerId?._id || conv.practitionerId,
+      doctor: contactName,
+      avatar: other
+        ? `https://ui-avatars.com/api/?name=${encodeURIComponent(other.firstName || '')}+${encodeURIComponent(other.lastName || '')}&background=0052cc&color=fff`
+        : '',
+      lastMessage: lastMsg?.content || 'No messages yet.',
+      timestamp: conv.lastActivityAt
+        ? new Date(conv.lastActivityAt).toLocaleTimeString('en-ZA', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : '',
+      online: false,
+      unread: unreadCount,
+      status: conv.status,
+    };
+  });
 
   return NextResponse.json(result);
 }
@@ -109,7 +166,6 @@ export async function POST(request: Request) {
   let targetPractitionerId = practitionerId;
   let targetPatientId = patientId;
 
-  // If using the generic `contactId` approach
   if (contactId) {
     if (role === 'patient') {
       targetPractitionerId = contactId;
@@ -119,7 +175,6 @@ export async function POST(request: Request) {
       targetPatientId = contactId;
     }
   } else {
-    // Backwards compatibility
     if (role === 'patient') {
       targetPractitionerId = practitionerId;
       targetPatientId = userId;
@@ -133,18 +188,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required participant IDs' }, { status: 400 });
   }
 
-  // Check for existing persistent conversation
   let conv;
   if (consultationId) {
     conv = await Conversation.findOne({ consultationId });
   } else {
-    conv = await Conversation.findOne({ 
-      patientId: targetPatientId, 
-      practitionerId: targetPractitionerId, 
-      $or: [
-        { consultationId: { $exists: false } },
-        { consultationId: null }
-      ]
+    conv = await Conversation.findOne({
+      patientId: targetPatientId,
+      practitionerId: targetPractitionerId,
+      $or: [{ consultationId: { $exists: false } }, { consultationId: null }],
     });
   }
 
@@ -154,12 +205,12 @@ export async function POST(request: Request) {
       patientId: targetPatientId,
       practitionerId: targetPractitionerId,
       status: 'active',
-      minutesAllocated: 600, // Large default for persistent channels
+      minutesAllocated: 600,
     });
   }
 
-  return NextResponse.json({ 
-    conversationId: conv._id, 
-    consultationId: conv.consultationId 
+  return NextResponse.json({
+    conversationId: conv._id,
+    consultationId: conv.consultationId,
   });
 }

@@ -14,16 +14,25 @@ import {
 import Select from "@/components/ui/Select";
 
 export type AppointmentTab =
-  "all" | "upcoming" | "ongoing" | "past" | "missed" | "cancelled" | "requests";
+  | "all"
+  | "requests"
+  | "upcoming"
+  | "ongoing"
+  | "past"
+  | "missed"
+  | "cancelled";
 
+/**
+ * Requests sit right after All so pending items stay visible without scrolling.
+ */
 export const ALL_TABS: AppointmentTab[] = [
   "all",
+  "requests",
   "upcoming",
   "ongoing",
   "past",
   "missed",
   "cancelled",
-  "requests",
 ];
 
 const tabConfig: Record<
@@ -31,9 +40,11 @@ const tabConfig: Record<
   {
     label1: string;
     label2: string;
-    icon: React.ComponentType<{ className?: string }>;
+    icon: React.ComponentType<{ className?: string; size?: number }>;
     bgColor: string;
     iconColor: string;
+    /** Highlight requests so they stand out in the strip */
+    emphasize?: boolean;
   }
 > = {
   all: {
@@ -42,6 +53,14 @@ const tabConfig: Record<
     icon: BiGridAlt,
     bgColor: "#d6e8f4",
     iconColor: "text-purple-600",
+  },
+  requests: {
+    label1: "Appointment",
+    label2: "Requests",
+    icon: BiCalendarPlus,
+    bgColor: "#fef3c7",
+    iconColor: "text-amber-700",
+    emphasize: true,
   },
   upcoming: {
     label1: "Upcoming",
@@ -78,13 +97,6 @@ const tabConfig: Record<
     bgColor: "#d6e8f4",
     iconColor: "text-red-500",
   },
-  requests: {
-    label1: "Appointment",
-    label2: "Requests",
-    icon: BiCalendarPlus,
-    bgColor: "#d6e8f4",
-    iconColor: "text-yellow-700",
-  },
 };
 
 interface AppointmentTabsProps {
@@ -102,7 +114,7 @@ export default function AppointmentTabs({
 }: AppointmentTabsProps) {
   return (
     <>
-      {/* Mobile Dropdown */}
+      {/* Mobile Dropdown — same order (Requests near top) */}
       <div className="md:hidden pb-4">
         <Select
           value={activeTab}
@@ -115,31 +127,45 @@ export default function AppointmentTabs({
         />
       </div>
 
-      {/* Desktop Card Tabs */}
-      <div className="hidden md:flex gap-2 overflow-x-auto custom-scrollbar pb-4 w-full">
+      {/* Desktop: compact cards so all tabs fit without assuming horizontal scroll */}
+      <div className="hidden md:grid grid-cols-4 xl:grid-cols-7 gap-2 pb-4 w-full">
         {tabs.map((t) => {
           const config = tabConfig[t];
           const Icon = config.icon;
+          const count = counts[t] ?? 0;
+          const isActive = activeTab === t;
+          const hasItems = count > 0 && t === "requests";
+
           return (
             <button
               key={t}
+              type="button"
               onClick={() => onChange(t)}
-              className={`flex items-center gap-3 cursor-pointer px-4 py-4 rounded-md transition-all ease-in-out duration-300 min-w-[180px] text-left border-2 ${
-                activeTab === t
-                  ? "border-gray-400 opacity-100"
-                  : "border-transparent opacity-80 hover:opacity-100 hover:scale-[1.02]"
+              className={`flex items-center gap-2 cursor-pointer px-2.5 py-2.5 rounded-md transition-all ease-in-out duration-200 min-w-0 text-left border-2 ${
+                isActive
+                  ? "border-slate-500 opacity-100 shadow-sm ring-1 ring-slate-300/60"
+                  : config.emphasize
+                    ? "border-amber-200/80 opacity-95 hover:opacity-100 hover:border-amber-300"
+                    : "border-transparent opacity-85 hover:opacity-100 hover:scale-[1.01]"
               }`}
               style={{ backgroundColor: config.bgColor }}
             >
-              <Icon className={`${config.iconColor} text-2xl shrink-0`} />
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-slate-900 leading-none">
-                  {counts[t] ?? 0}
+              <Icon
+                className={`${config.iconColor} shrink-0`}
+                size={20}
+              />
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-lg font-bold text-slate-900 leading-none tabular-nums flex items-center gap-1.5">
+                  {count}
+                  {hasItems && (
+                    <span
+                      className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"
+                      title="Pending requests"
+                    />
+                  )}
                 </span>
-                <span className="text-xs font-medium text-slate-600 leading-tight mt-0.5">
-                  {config.label1}
-                  <br />
-                  {config.label2}
+                <span className="text-[10px] font-medium text-slate-600 leading-tight mt-0.5 truncate">
+                  {config.label1} {config.label2}
                 </span>
               </div>
             </button>

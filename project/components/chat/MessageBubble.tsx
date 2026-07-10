@@ -6,13 +6,14 @@ import {
   BiFileBlank,
   BiPhoneCall,
 } from "react-icons/bi";
+import { ChatMessage } from "./types";
 
 export default function MessageBubble({
   message,
   isOwn,
   onSeen,
 }: {
-  message: any;
+  message: ChatMessage;
   isOwn: boolean;
   onSeen: () => void;
 }) {
@@ -33,7 +34,7 @@ export default function MessageBubble({
     return () => observer.disconnect();
   }, [onSeen]);
 
-  const formatTime = (dateStr: string) => {
+  const formatTime = (dateStr: string | Date) => {
     const d = new Date(dateStr);
     return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };

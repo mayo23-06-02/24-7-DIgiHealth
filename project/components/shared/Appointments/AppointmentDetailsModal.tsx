@@ -182,55 +182,127 @@ export default function AppointmentDetailsModal({
         )}
 
         {/* Action Buttons */}
-        {isDoctor && (
-          <div className="flex flex-col gap-3 pt-4 border-t border-slate-200">
-            {appointment.status === 'requested' && (
+        <div className="flex flex-col gap-3 pt-4 border-t border-slate-200">
+          {/* Practitioner: can accept/decline inbound requests */}
+          {isDoctor &&
+            (appointment.status === "requested" ||
+              appointment.status === "pending" ||
+              appointment.computedStatus === "requests") && (
               <>
                 <Button
                   fullWidth
-                  onClick={() => onAccept?.(appointment.id || appointment.consultationId || '')}
-                  loading={actionLoading === (appointment.id || appointment.consultationId)}
+                  onClick={() =>
+                    onAccept?.(
+                      appointment.id || appointment.consultationId || "",
+                    )
+                  }
+                  loading={
+                    actionLoading ===
+                    (appointment.id || appointment.consultationId)
+                  }
                 >
                   Accept Request
                 </Button>
                 <Button
                   fullWidth
                   variant="secondary"
-                  onClick={() => onDecline?.(appointment.id || appointment.consultationId || '')}
-                  loading={actionLoading === (appointment.id || appointment.consultationId)}
+                  onClick={() =>
+                    onDecline?.(
+                      appointment.id || appointment.consultationId || "",
+                    )
+                  }
+                  loading={
+                    actionLoading ===
+                    (appointment.id || appointment.consultationId)
+                  }
                 >
                   Decline Request
                 </Button>
                 <Button
                   fullWidth
                   variant="outline"
-                  onClick={() => onReschedule?.(appointment.id || appointment.consultationId || '')}
+                  onClick={() =>
+                    onReschedule?.(
+                      appointment.id || appointment.consultationId || "",
+                    )
+                  }
                 >
                   Reschedule
                 </Button>
               </>
             )}
-            {appointment.status === 'scheduled' && (
+
+          {/* Patient: cannot accept their own request — only reschedule or cancel */}
+          {!isDoctor &&
+            (appointment.status === "requested" ||
+              appointment.status === "pending" ||
+              appointment.computedStatus === "requests") && (
               <>
+                <p className="text-xs text-slate-500 text-center -mt-1 mb-1">
+                  Waiting for the practitioner to accept. You can reschedule or
+                  cancel this request.
+                </p>
                 <Button
                   fullWidth
                   variant="outline"
-                  onClick={() => onReschedule?.(appointment.id || appointment.consultationId || '')}
+                  onClick={() =>
+                    onReschedule?.(
+                      appointment.id || appointment.consultationId || "",
+                    )
+                  }
                 >
                   Reschedule
                 </Button>
                 <Button
                   fullWidth
                   variant="secondary"
-                  onClick={() => onCancel?.(appointment.id || appointment.consultationId || '')}
-                  loading={actionLoading === (appointment.id || appointment.consultationId)}
+                  onClick={() =>
+                    onCancel?.(
+                      appointment.id || appointment.consultationId || "",
+                    )
+                  }
+                  loading={
+                    actionLoading ===
+                    (appointment.id || appointment.consultationId)
+                  }
                 >
-                  Cancel Appointment
+                  Cancel request
                 </Button>
               </>
             )}
-          </div>
-        )}
+
+          {(appointment.status === "scheduled" ||
+            appointment.computedStatus === "upcoming") && (
+            <>
+              <Button
+                fullWidth
+                variant="outline"
+                onClick={() =>
+                  onReschedule?.(
+                    appointment.id || appointment.consultationId || "",
+                  )
+                }
+              >
+                Reschedule
+              </Button>
+              <Button
+                fullWidth
+                variant="secondary"
+                onClick={() =>
+                  onCancel?.(
+                    appointment.id || appointment.consultationId || "",
+                  )
+                }
+                loading={
+                  actionLoading ===
+                  (appointment.id || appointment.consultationId)
+                }
+              >
+                Cancel Appointment
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </Modal>
   );

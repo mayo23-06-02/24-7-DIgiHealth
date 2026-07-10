@@ -1,20 +1,22 @@
 "use client";
 
+import { useCallback } from "react";
 import MessagesView, {
   ConversationContact,
 } from "@/components/chat/MessagesView";
-import CallWrapper from "@/components/providers/CallWrapper";
 
 export default function PractitionerMessagesPage() {
-  const fetchEnrichedContacts = async (
+  const fetchEnrichedContacts = useCallback(async (
     existingConvs: any[],
   ): Promise<ConversationContact[]> => {
     const convData: ConversationContact[] = [
       ...existingConvs.map((c) => ({
         ...c,
-        contactId: c.contactId || c.patientId, // for practitioner, the other person is patient
-        contactName: c.contactName || c.doctor, // backend gives 'doctor' arbitrarily in backup route mapping
-        tab: "contacts",
+        id: String(c.id || c._id || ""),
+        // For practitioner, the other party is the patient
+        contactId: String(c.contactId || c.patientId || ""),
+        contactName: c.contactName || c.doctor || "Patient",
+        tab: "contacts" as const,
       })),
     ];
 
@@ -52,17 +54,16 @@ export default function PractitionerMessagesPage() {
     }
 
     return convData;
-  };
+  }, []);
 
+  // CallWrapper already wraps the dashboard layout
   return (
-    <CallWrapper>
-      <MessagesView
-        pageTitle="Messages"
-        pageSubtitle="Secure communication with your patients."
-        emptyStateTitle="No Active Channels"
-        emptyStateDesc="Select a patient from your clinical list to continue Secure Direct Messaging."
-        fetchEnrichedContacts={fetchEnrichedContacts}
-      />
-    </CallWrapper>
+    <MessagesView
+      pageTitle="Messages"
+      pageSubtitle="Secure communication with your patients."
+      emptyStateTitle="No Active Channels"
+      emptyStateDesc="Select a patient from your clinical list to continue Secure Direct Messaging."
+      fetchEnrichedContacts={fetchEnrichedContacts}
+    />
   );
 }

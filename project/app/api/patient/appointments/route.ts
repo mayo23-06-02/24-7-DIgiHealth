@@ -8,6 +8,10 @@ import { jwtVerify } from 'jose';
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    // Auto-cancel unaccepted requests past their start time
+    const { expireStaleBookingRequests } = await import('@/lib/booking/expire');
+    await expireStaleBookingRequests();
+
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

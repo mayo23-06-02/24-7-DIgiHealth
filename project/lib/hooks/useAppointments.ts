@@ -74,7 +74,11 @@ export function useAppointments(fetchUrl: string) {
     if (appt.status === 'cancelled') return 'cancelled';
     if (appt.status === 'completed') return 'past';
     if (appt.status === 'missed') return 'missed';
-    if (appt.status === 'requested' || appt.status === 'pending') return 'requests';
+    // Unaccepted requests past their start time surface as cancelled (server also persists this)
+    if (appt.status === 'requested' || appt.status === 'pending') {
+      if (now >= start) return 'cancelled';
+      return 'requests';
+    }
     if (appt.status === 'in_progress') {
       if (now < end) return 'ongoing';
       return 'past';

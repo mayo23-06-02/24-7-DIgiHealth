@@ -113,18 +113,27 @@ export default function DoctorsView() {
   ];
 
   const handleStartMessage = async (doc: any) => {
+    if (!doc?.id) return;
     setIsInitiating(true);
     try {
       const res = await fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ practitionerId: doc.id }),
+        body: JSON.stringify({
+          practitionerId: doc.id,
+          contactId: doc.id,
+        }),
       });
-      if (res.ok) {
-        router.push("/patient/messages");
+      const data = res.ok ? await res.json() : null;
+      const conversationId = data?.conversationId;
+      // Open messages with this doctor — not the full list alone
+      if (conversationId) {
+        router.push(`/patient/messages?chatId=${conversationId}`);
+      } else {
+        router.push(`/patient/messages?doctorId=${doc.id}`);
       }
     } catch {
-      /* silent */
+      router.push(`/patient/messages?doctorId=${doc.id}`);
     }
     setIsInitiating(false);
     setSelectedDoctor(null);

@@ -140,40 +140,8 @@ export default function PatientAppointments() {
     }
   };
 
-  const handleAccept = async (id: string) => {
-    try {
-      const res = await fetch(`/api/consultations/${id}/approve`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        toast.success("Appointment accepted");
-        fetchAppointments(false);
-      } else {
-        const err = await res.json();
-        toast.error(err.error || "Failed to accept");
-      }
-    } catch {
-      toast.error("Error accepting");
-    }
-  };
-
-  const handleDecline = async (id: string) => {
-    if (!confirm("Decline this appointment request?")) return;
-    try {
-      const res = await fetch(`/api/consultations/${id}/decline`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        toast.success("Appointment declined");
-        fetchAppointments(false);
-      } else {
-        const err = await res.json();
-        toast.error(err.error || "Failed to decline");
-      }
-    } catch {
-      toast.error("Error declining");
-    }
-  };
+  // Patients cannot accept their own booking requests — only the practitioner can.
+  // Patient actions for requests: reschedule or cancel (see handleReschedule / handleCancel).
 
   const handleViewDoctorProfile = (doctorId: string) => {
     window.location.href = `/patient/doctors/${doctorId}`;
@@ -233,8 +201,6 @@ export default function PatientAppointments() {
             onJoin={handleJoin}
             onEdit={handleReschedule}
             onCancel={handleCancel}
-            onAccept={handleAccept}
-            onDecline={handleDecline}
             onClick={handleAppointmentClick}
             emptyMessage={`No ${activeTab} appointments`}
             userType="patient"
@@ -264,6 +230,14 @@ export default function PatientAppointments() {
         appointment={selectedAppointment}
         userType="patient"
         onViewProfile={handleViewDoctorProfile}
+        onReschedule={(id) => {
+          setShowDetailsModal(false);
+          handleReschedule(id);
+        }}
+        onCancel={(id) => {
+          setShowDetailsModal(false);
+          handleCancel(id);
+        }}
       />
     </div>
   );

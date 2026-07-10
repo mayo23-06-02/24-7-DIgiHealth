@@ -80,8 +80,23 @@ export default function DoctorCarousel() {
     }
   };
 
-  const handleMessage = (doctorId: string, e?: React.MouseEvent) => {
+  const handleMessage = async (doctorId: string, e?: React.MouseEvent) => {
     e?.stopPropagation(); // Prevent modal open
+    if (!doctorId) return;
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ practitionerId: doctorId, contactId: doctorId }),
+      });
+      const data = res.ok ? await res.json() : null;
+      if (data?.conversationId) {
+        router.push(`/patient/messages?chatId=${data.conversationId}`);
+        return;
+      }
+    } catch {
+      /* fall through */
+    }
     router.push(`/patient/messages?doctorId=${doctorId}`);
   };
 

@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
-import { Notification } from "@/lib/models/Communications";
-import User from "@/lib/models/User";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
+import { notifyBookingEvent } from "@/lib/booking/notifications";
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
+/**
+ * Accept an appointment request.
+ * Only the assigned **practitioner** may accept.
+ * Patients who submitted the request can reschedule or cancel — not accept.
+ */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -34,29 +38,47 @@ export async function POST(
       );
     }
 
-    // Verify current user is either the patient or practitioner for this consultation
-    if (
-      consultation.patientId.toString() !== userId &&
-      consultation.practitionerId.toString() !== userId
-    ) {
+    const isPractitioner =
+      consultation.practitionerId.toString() === userId;
+    const isPatient = consultation.patientId.toString() === userId;
+
+    if (isPatient && !isPractitioner) {
+      return NextResponse.json(
+        {
+          error:
+            "You cannot accept an appointment you requested. Please wait for the practitioner, or reschedule / cancel instead.",
+        },
+        { status: 403 },
+      );
+    }
+
+    if (!isPractitioner) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const isPatient = consultation.patientId.toString() === userId;
-    const otherPartyId = isPatient ? consultation.practitionerId : consultation.patientId;
-    const currentUser = await User.findById(userId);
+    if (
+      consultation.status !== "requested" &&
+      consultation.status !== "pending"
+    ) {
+      return NextResponse.json(
+        {
+          error: `Cannot accept a consultation with status "${consultation.status}".`,
+        },
+        { status: 400 },
+      );
+    }
 
     consultation.status = "scheduled";
     await consultation.save();
 
-    // Notify the other party
-    await Notification.create({
-      userId: otherPartyId,
-      type: "appointment_approved",
-      title: "Appointment Accepted",
-      body: `${isPatient ? "Patient" : `Dr. ${currentUser?.firstName} ${currentUser?.lastName}`} has accepted the consultation for ${new Date(consultation.scheduledStartTime).toLocaleString()}.`,
-      data: { consultationId: consultation._id },
-      isRead: false,
+    await notifyBookingEvent("accepted", {
+      consultationId: consultation._id,
+      patientId: consultation.patientId,
+      practitionerId: consultation.practitionerId,
+      scheduledStart: consultation.scheduledStartTime,
+      reason: consultation.chiefComplaint,
+      type: consultation.type,
+      actorUserId: userId,
     });
 
     return NextResponse.json({

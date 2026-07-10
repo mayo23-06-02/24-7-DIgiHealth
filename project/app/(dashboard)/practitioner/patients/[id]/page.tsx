@@ -12,7 +12,7 @@ import {
   BiArrowBack,
   BiLoader,
   BiPulse,
-  BiCalendar,
+
   BiPhone,
   BiUser,
   BiDroplet,
@@ -62,6 +62,11 @@ interface PatientProfile {
     prescribedDate: string;
     refillsRemaining: number;
   }[];
+  age?: number | null;
+  dateJoined?: string | null;
+  riskScore?: number;
+  riskColor?: string;
+  riskLabel?: string;
   pastConsultations: {
     id: string;
     scheduledStartTime: string;
@@ -83,7 +88,6 @@ interface PatientProfile {
     bloodPressure?: string;
     weight?: number | string;
     height?: number | string;
-    glucose?: number | string;
     dateRecorded?: string | Date;
   };
 }
@@ -194,7 +198,7 @@ export default function PatientProfilePage() {
           heartRate: patient.vitals.heartRate?.toString() || "",
           bloodPressure: patient.vitals.bloodPressure || "",
           bodyMass: patient.vitals.weight?.toString() || "",
-          glucose: patient.vitals.glucose?.toString() || "",
+          glucose: "",
         });
       }
     }
@@ -281,13 +285,21 @@ export default function PatientProfilePage() {
       const res = await fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patientId: patient.id }),
+        body: JSON.stringify({
+          patientId: patient.id,
+          contactId: patient.id,
+        }),
       });
-      if (res.ok) {
-        router.push("/practitioner/messages");
+      const data = res.ok ? await res.json() : null;
+      if (data?.conversationId) {
+        router.push(
+          `/practitioner/messages?chatId=${data.conversationId}`,
+        );
+      } else {
+        router.push(`/practitioner/messages?patientId=${patient.id}`);
       }
     } catch {
-      /* error handling */
+      router.push(`/practitioner/messages?patientId=${patient.id}`);
     }
     setActionLoading(false);
   };
@@ -364,9 +376,23 @@ export default function PatientProfilePage() {
                 />
               </div>
               <p className="text-slate-500 font-medium mt-1">
-                {patient.gender.charAt(0).toUpperCase() +
-                  patient.gender.slice(1)}{" "}
-                · {age} Years Old · Ref: #{patient.id.slice(-6)}
+                {(patient.gender
+                  ? patient.gender.charAt(0).toUpperCase() +
+                    patient.gender.slice(1)
+                  : "—")}{" "}
+                · {patient.age ?? age} Years Old · Ref: #
+                {patient.id.slice(-6)}
+                {patient.dateJoined && (
+                  <>
+                    {" "}
+                    · Joined{" "}
+                    {new Date(patient.dateJoined).toLocaleDateString("en-ZA", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -391,7 +417,31 @@ export default function PatientProfilePage() {
         </div>
       </div>
 
-      <VitalCardsGrid onCardClick={() => setIsVitalsModalOpen(true)} vitalsData={patient?.vitals} />
+      <VitalCardsGrid
+        patientId={patient.id}
+        riskScore={patient.riskScore || 0}
+        onCardClick={() => setIsVitalsModalOpen(true)}
+        vitalsData={patient?.vitals}
+        onRiskSaved={(score, band) => {
+          setPatient((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  riskScore: score,
+                  riskColor: band,
+                  riskLabel:
+                    band === "green"
+                      ? "Low risk"
+                      : band === "gray"
+                        ? "Mild risk"
+                        : band === "orange"
+                          ? "Moderate risk"
+                          : "High risk",
+                }
+              : null,
+          );
+        }}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Content Area */}
@@ -570,23 +620,25 @@ export default function PatientProfilePage() {
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                    <BiDroplet size={16} />
+                    <BiPulse size={16} />
                   </div>
-                  <h1 className=" font-bold text-white">Blood Glucose</h1>
+                  <h1 className=" font-bold text-white">Heart Rate</h1>
                 </div>
                 <p className="text-lg font-bold text-white">
-                  {patient.vitals?.glucose || "---"} <span className="text-sm font-normal text-white/80">mmol/L</span>
+                  {patient.vitals?.heartRate || "---"}{" "}
+                  <span className="text-sm font-normal text-white/80">BPM</span>
                 </p>
               </div>
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                    <BiPulse size={16} />
+                    <BiCheckShield size={16} />
                   </div>
-                  <h1 className=" font-bold text-white">Heart Rate</h1>
+                  <h1 className=" font-bold text-white">Risk Score</h1>
                 </div>
-                <p className="text-lg font-bold text-rose-800">
-                  {patient.vitals?.heartRate || "---"} <span className="text-sm font-normal text-white/80">BPM</span>
+                <p className="text-lg font-bold text-white tabular-nums">
+                  {patient.riskScore ?? 0}
+                  <span className="text-sm font-normal text-white/80"> / 100</span>
                 </p>
               </div>
               <div className="flex items-center justify-between">
@@ -596,8 +648,8 @@ export default function PatientProfilePage() {
                   </div>
                   <h1 className=" font-bold text-white">Risk Status</h1>
                 </div>
-                <span className="px-2 py-1 rounded-lg bg-emerald-500 text-emerald-100 text-xs font-bold ">
-                  Normal
+                <span className="px-2 py-1 rounded-lg bg-white/20 text-white text-xs font-bold">
+                  {patient.riskLabel || "—"}
                 </span>
               </div>
             </div>

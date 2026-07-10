@@ -1,33 +1,28 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document, Types, Model } from 'mongoose';
 
-export interface IMessage extends Document {
-  consultationId?: Types.ObjectId;
-  senderId: Types.ObjectId;
-  receiverId: Types.ObjectId;
-  content: string;
-  imageUrl?: string;
-  isRead: boolean;
-  readAt?: Date;
-}
-const MessageSchema = new Schema<IMessage>({
-  consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation' },
-  senderId: { type: Schema.Types.ObjectId, ref: 'User' },
-  receiverId: { type: Schema.Types.ObjectId, ref: 'User' },
-  content: String,
-  imageUrl: String,
-  isRead: { type: Boolean, default: false },
-  readAt: Date
-}, { timestamps: true });
+/**
+ * Notification model only.
+ *
+ * IMPORTANT: Do NOT register a `Message` model here.
+ * A legacy schema used to define Message with `consultationId` only.
+ * Importing Notification would register that schema first via:
+ *   mongoose.models.Message || mongoose.model('Message', ...)
+ * and then lib/models/Message.ts would reuse the wrong schema.
+ * Queries by conversationId then fail to cast ObjectIds → empty chat history.
+ *
+ * Use `@/lib/models/Message` for chat messages.
+ */
 
 export interface INotification extends Document {
   userId: Types.ObjectId;
   type: string;
   title: string;
   body: string;
-  data?: any;
+  data?: unknown;
   isRead: boolean;
   deliveredVia: string[];
 }
+
 const NotificationSchema = new Schema<INotification>({
   userId: { type: Schema.Types.ObjectId, ref: 'User' },
   type: String,
@@ -35,8 +30,9 @@ const NotificationSchema = new Schema<INotification>({
   body: String,
   data: Schema.Types.Mixed,
   isRead: { type: Boolean, default: false },
-  deliveredVia: [{ type: String }]
+  deliveredVia: [{ type: String }],
 }, { timestamps: true });
 
-export const Message = mongoose.models.Message || mongoose.model<IMessage>('Message', MessageSchema);
-export const Notification = mongoose.models.Notification || mongoose.model<INotification>('Notification', NotificationSchema);
+export const Notification: Model<INotification> =
+  mongoose.models.Notification ||
+  mongoose.model<INotification>('Notification', NotificationSchema);

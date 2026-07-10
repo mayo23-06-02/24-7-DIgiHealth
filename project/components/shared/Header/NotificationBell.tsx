@@ -23,8 +23,14 @@ export default function NotificationBell({
   const ref = useRef<HTMLDivElement>(null);
 
   const playNotificationSound = () => {
-    const audio = new Audio("/notification.m4a");
-    audio.play().catch(() => {});
+    // Shared sound helper (same asset as message badge)
+    try {
+      const audio = new Audio("/notification.m4a");
+      audio.volume = 0.7;
+      void audio.play().catch(() => {});
+    } catch {
+      /* silent */
+    }
   };
 
   const fetchNotifications = async (isInitialLoad = false) => {
@@ -139,8 +145,9 @@ export default function NotificationBell({
                             : "bg-primary/10 text-primary"
                         }`}
                       >
-                        {notif.type === "new_appointment" ||
-                        notif.type === "appointment" ? (
+                        {notif.type?.includes("appointment") ||
+                        notif.type === "new_appointment" ||
+                        notif.type?.includes("booking") ? (
                           <BiCalendar />
                         ) : notif.type === "message" ||
                           notif.type === "new_message" ? (

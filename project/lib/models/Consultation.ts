@@ -12,6 +12,8 @@ export interface IConsultation extends Document {
   clinicalRisk?: { score: number; color: 'green' | 'gray' | 'red'; factors: string[] };
   soapNotes?: { subjective?: string; objective?: string; assessment?: string; plan?: string; signedAt?: Date };
   callMinutesUsed: number;
+  /** Unified booking origin */
+  source?: 'patient_self_serve' | 'practitioner_schedule' | 'hospital_desk' | 'system';
 }
 
 const ConsultationSchema = new Schema<IConsultation>({
@@ -26,6 +28,10 @@ const ConsultationSchema = new Schema<IConsultation>({
   clinicalRisk: { score: Number, color: { type: String, enum: ['green', 'gray', 'red'] }, factors: [String] },
   soapNotes: { subjective: String, objective: String, assessment: String, plan: String, signedAt: Date },
   callMinutesUsed: { type: Number, default: 0 },
+  source: {
+    type: String,
+    enum: ['patient_self_serve', 'practitioner_schedule', 'hospital_desk', 'system'],
+  },
 }, { timestamps: true });
 
 ConsultationSchema.index({ patientId: 1, scheduledStartTime: -1 });

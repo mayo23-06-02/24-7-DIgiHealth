@@ -193,30 +193,57 @@ export default function AppointmentCard({
                     >
                       View Details
                     </button>
-                    {appointment.computedStatus === "requests" && (
-                      <>
-                        <button
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-emerald-600 font-medium"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onAccept?.(appointment.id);
-                            setShowMenu(false);
-                          }}
-                        >
-                          Accept
-                        </button>
-                        <button
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-rose-500 font-medium"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDecline?.(appointment.id);
-                            setShowMenu(false);
-                          }}
-                        >
-                          Decline
-                        </button>
-                      </>
-                    )}
+                    {/* Practitioners accept/decline requests; patients may only reschedule or cancel theirs */}
+                    {appointment.computedStatus === "requests" &&
+                      userType === "practitioner" && (
+                        <>
+                          <button
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-emerald-600 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAccept?.(appointment.id);
+                              setShowMenu(false);
+                            }}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-rose-500 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDecline?.(appointment.id);
+                              setShowMenu(false);
+                            }}
+                          >
+                            Decline
+                          </button>
+                        </>
+                      )}
+                    {appointment.computedStatus === "requests" &&
+                      userType === "patient" && (
+                        <>
+                          <button
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-slate-700 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEdit?.(appointment.id);
+                              setShowMenu(false);
+                            }}
+                          >
+                            Reschedule
+                          </button>
+                          <button
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-rose-500 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onCancel?.(appointment.id);
+                              setShowMenu(false);
+                            }}
+                          >
+                            Cancel request
+                          </button>
+                        </>
+                      )}
                     {isJoinable && (
                       <button
                         className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-primary font-bold"
@@ -239,18 +266,20 @@ export default function AppointmentCard({
                             setShowMenu(false);
                           }}
                         >
-                          Edit
+                          {userType === "patient" ? "Reschedule" : "Edit"}
                         </button>
-                        <button
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-slate-700 font-medium"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRebook?.(appointment.id);
-                            setShowMenu(false);
-                          }}
-                        >
-                          Re-book
-                        </button>
+                        {userType === "practitioner" && (
+                          <button
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-slate-700 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRebook?.(appointment.id);
+                              setShowMenu(false);
+                            }}
+                          >
+                            Re-book
+                          </button>
+                        )}
                         <button
                           className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-rose-500 font-medium border-t border-slate-50"
                           onClick={(e) => {
@@ -263,7 +292,6 @@ export default function AppointmentCard({
                         </button>
                       </>
                     )}
-                    {/* If no actions are available and it's not a request, maybe no need for placeholder since View Details is always there */}
                     {appointment.computedStatus !== "requests" &&
                       !isJoinable &&
                       appointment.computedStatus !== "upcoming" && (
@@ -350,28 +378,52 @@ export default function AppointmentCard({
           <div className="flex flex-wrap justify-end gap-3 pt-6 mt-4 border-t border-slate-100">
             {showActions && (
               <>
-                {appointment.computedStatus === "requests" && (
-                  <>
-                    <Button
-                      variant="danger"
-                      onClick={() => {
-                        onDecline?.(appointment.id);
-                        setShowDetails(false);
-                      }}
-                    >
-                      Decline
-                    </Button>
-                    <Button
-                      variant="primary"
-                      onClick={() => {
-                        onAccept?.(appointment.id);
-                        setShowDetails(false);
-                      }}
-                    >
-                      Accept
-                    </Button>
-                  </>
-                )}
+                {appointment.computedStatus === "requests" &&
+                  userType === "practitioner" && (
+                    <>
+                      <Button
+                        variant="danger"
+                        onClick={() => {
+                          onDecline?.(appointment.id);
+                          setShowDetails(false);
+                        }}
+                      >
+                        Decline
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          onAccept?.(appointment.id);
+                          setShowDetails(false);
+                        }}
+                      >
+                        Accept
+                      </Button>
+                    </>
+                  )}
+                {appointment.computedStatus === "requests" &&
+                  userType === "patient" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          onEdit?.(appointment.id);
+                          setShowDetails(false);
+                        }}
+                      >
+                        Reschedule
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => {
+                          onCancel?.(appointment.id);
+                          setShowDetails(false);
+                        }}
+                      >
+                        Cancel request
+                      </Button>
+                    </>
+                  )}
                 {isJoinable && (
                   <Button
                     variant="primary"
@@ -401,17 +453,19 @@ export default function AppointmentCard({
                         setShowDetails(false);
                       }}
                     >
-                      Edit
+                      {userType === "patient" ? "Reschedule" : "Edit"}
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        onRebook?.(appointment.id);
-                        setShowDetails(false);
-                      }}
-                    >
-                      Re-book
-                    </Button>
+                    {userType === "practitioner" && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          onRebook?.(appointment.id);
+                          setShowDetails(false);
+                        }}
+                      >
+                        Re-book
+                      </Button>
+                    )}
                   </>
                 )}
               </>
