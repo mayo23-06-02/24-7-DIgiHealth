@@ -15,12 +15,28 @@ const nextConfig: NextConfig = {
       "chart.js",
     ],
   },
-  // Avoid pulling server-only modules into client accidentally via wrong imports
-  serverExternalPackages: ["mongoose", "mongodb"],
+  // Avoid pulling server-only modules into client accidentally via wrong imports.
+  // pdfkit MUST be external — bundling breaks AFM font paths (ENOENT C:\ROOT\...).
+  serverExternalPackages: [
+    "mongoose",
+    "mongodb",
+    "pdfkit",
+    "fontkit",
+    "linebreak",
+    "png-js",
+    "jay-peg",
+  ],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "ui-avatars.com" },
+      // Legacy assets (existing files left as-is)
       { protocol: "https", hostname: "res.cloudinary.com" },
+      // Supabase storage (project ref subdomain)
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/**",
+      },
     ],
   },
 };

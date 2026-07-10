@@ -1,42 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { MedicalDocument as DigitalDocument } from '@/lib/models/ReviewsDocs';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
-import { storage, ref, deleteObject, isFirebaseConfigured } from '@/lib/firebase';
-
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-
-async function getUserId(req: NextRequest): Promise<string | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
-  if (!token) return null;
-  try {
-    const { payload } = await jwtVerify(token, SECRET);
-    return payload.userId as string;
-  } catch {
-    return null;
-  }
-}
+import { NextRequest, NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { MedicalDocument as DigitalDocument } from "@/lib/models/ReviewsDocs";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { deleteMedia, isSupabaseConfigured } from "@/lib/supabase/media";
+import { isLegacyMediaUrl } from "@/lib/supabase/media-validation";
 
 // DELETE /api/user/documents/[id]
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     await connectToDatabase();
-    const userId = await getUserId(req);
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getRequestUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { id } = await params;
-    const doc = await DigitalDocument.findOneAndDelete({ _id: id, userId });
-    if (!doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    const doc = await DigitalDocument.findOneAndDelete({
+      _id: id,
+      userId: user.userId,
+    });
+    if (!doc) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
 
-    // If it was stored in Firebase, delete the storage object
-    if (doc.cloudinaryUrl?.includes('firebasestorage.googleapis.com') && isFirebaseConfigured) {
+    // Supabase media
+    const mediaId = (doc as any).mediaId || (doc as any).publicId;
+    if (
+      mediaId &&
+      isSupabaseConfigured() &&
+      !isLegacyMediaUrl((doc as any).cloudinaryUrl)
+    ) {
       try {
-        const storageRef = ref(storage, doc.publicId);
-        await deleteObject(storageRef);
+        // publicId for new docs is media uuid
+        if (
+          typeof mediaId === "string" &&
+          mediaId.length > 20 &&
+          !mediaId.includes("/")
+        ) {
+          await deleteMedia(mediaId);
+        }
       } catch (err) {
-        console.error('Failed to delete document from Firebase Storage:', err);
+        console.warn("[documents DELETE] media cleanup failed", err);
       }
     }
 
@@ -47,25 +54,35 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 }
 
 // PATCH /api/user/documents/[id] – update document type/label
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     await connectToDatabase();
-    const userId = await getUserId(req);
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getRequestUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { id } = await params;
     const body = await req.json();
     const { type } = body;
 
     const doc = await DigitalDocument.findOneAndUpdate(
-      { _id: id, userId },
+      { _id: id, userId: user.userId },
       { type },
-      { new: true }
+      { new: true },
     ).lean();
 
-    if (!doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    if (!doc) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
 
-    return NextResponse.json({ success: true, data: { id: (doc as any)._id.toString(), type: (doc as any).type } });
+    return NextResponse.json({
+      success: true,
+      data: { id: (doc as any)._id.toString(), type: (doc as any).type },
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

@@ -5,6 +5,18 @@ export interface Notification {
   type: string;
   isRead: boolean;
   createdAt: string;
+  data?: {
+    conversationId?: string;
+    messageId?: string;
+    prescriptionId?: string;
+    patientId?: string;
+    documentUrl?: string | null;
+    medicationName?: string;
+    recordId?: string;
+    fileUrl?: string;
+    type?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface WeatherData {

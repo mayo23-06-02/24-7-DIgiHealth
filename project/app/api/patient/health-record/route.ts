@@ -74,10 +74,14 @@ export async function GET(req: NextRequest) {
         type: 'medication',
         date: p.prescribedDate.toISOString(),
         title: `Prescription: ${p.medicationName}`,
-        description: `${p.dosage} - ${p.instructions}`,
+        description: p.documentUrl
+          ? `${p.dosage || ''} — Formal pharmacy script available for download`.trim()
+          : `${p.dosage || ''} - ${p.instructions || ''}`.trim(),
         metadata: {
           dosage: p.dosage,
-          status: p.status
+          status: p.status,
+          documentUrl: p.documentUrl || null,
+          documentName: p.documentName || null,
         }
       });
     });
@@ -152,7 +156,10 @@ export async function GET(req: NextRequest) {
           instructions: p.instructions,
           prescribedDate: p.prescribedDate.toISOString(),
           refillsLeft: p.refillsRemaining,
-          status: p.status
+          status: p.status,
+          documentUrl: p.documentUrl || null,
+          documentName: p.documentName || null,
+          canDownload: !!p.documentUrl,
         })),
         allergies: medContext?.allergies || [],
         immunizations: immunizations.map((i: any) => ({

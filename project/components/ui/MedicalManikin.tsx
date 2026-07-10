@@ -7,8 +7,10 @@ import React, {
   Suspense,
   useEffect,
   useCallback,
+  forwardRef,
+  useImperativeHandle,
 } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   Environment,
@@ -151,6 +153,7 @@ interface Note {
   description: string;
   part: string;
   point: { x: number; y: number; z: number };
+  createdAt?: string | Date;
 }
 
 interface MedicalManikinProps {
@@ -162,12 +165,34 @@ interface MedicalManikinProps {
   onUpdateHeightWeight?: () => void;
 }
 
+export type MedicalManikinHandle = {
+  /** PNG data URL of the current 3D canvas (for clinical PDF) */
+  captureSnapshot: () => string | null;
+  /** Annotations in stable citation order (oldest → newest), 1-indexed externally */
+  getAnnotations: () => Array<Note & { citationNumber: number }>;
+};
+
+// Bridge so parent can snapshot WebGL canvas
+function GlCaptureBridge({
+  onReady,
+}: {
+  onReady: (gl: THREE.WebGLRenderer) => void;
+}) {
+  const { gl } = useThree();
+  useEffect(() => {
+    onReady(gl);
+  }, [gl, onReady]);
+  return null;
+}
+
 // ==================== HIGHLIGHT MARKER ====================
 function HighlightMarker({
   note,
+  index,
   onClick,
 }: {
   note: Note;
+  index: number;
   onClick: () => void;
 }) {
   const point = useMemo(
@@ -184,19 +209,18 @@ function HighlightMarker({
           onClick();
         }}
       >
-        <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)] flex items-center justify-center transition-transform duration-300 group-hover:scale-125 z-20">
-          <div className="w-1.5 h-1.5 bg-white rounded-full flex items-center justify-center">
-            <div className="w-4 h-4 rounded-full border border-red-500 animate-ping opacity-50 absolute" />
-          </div>
+        <div className="w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow-[0_0_10px_rgba(239,68,68,0.6)] flex items-center justify-center transition-transform duration-300 group-hover:scale-125 z-20 text-[10px] font-bold text-white">
+          {index}
+          <div className="w-6 h-6 rounded-full border border-red-500 animate-ping opacity-40 absolute" />
         </div>
 
-        <div className="absolute top-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col items-center z-50">
+        <div className="absolute top-7 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col items-center z-50">
           <div
             style={{ padding: "10px" }}
             className="bg-primary text-white text-xs px-3 py-2 rounded-lg whitespace-normal min-w-[140px] max-w-[200px] shadow-none"
           >
-            <div className="text-[9px] font-bold  text-gray-400 tracking-normal mb-1.5 border-b border-white/10 pb-1">
-              {note.part || "Surface Mapping"}
+            <div className="text-[9px] font-bold text-gray-300 tracking-normal mb-1.5 border-b border-white/10 pb-1">
+              [{index}] {note.part || "Surface Mapping"}
             </div>
             <div className="font-medium text-slate-50 leading-relaxed break-words">
               {note.description || "No observation recorded."}
@@ -275,14 +299,18 @@ function Model({
 }
 
 // ==================== MAIN COMPONENT ====================
-export default function MedicalManikin({
-  gender: rawGender,
-  heightCm,
-  weightKg,
-  readOnly = false,
-  patientId,
-  onUpdateHeightWeight,
-}: MedicalManikinProps) {
+const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
+  function MedicalManikin(
+    {
+      gender: rawGender,
+      heightCm,
+      weightKg,
+      readOnly = false,
+      patientId,
+      onUpdateHeightWeight,
+    },
+    ref,
+  ) {
   const gender = rawGender.toLowerCase() === "female" ? "female" : "male";
   const [activePart, setActivePart] = useState<{
     name: string;
@@ -294,6 +322,43 @@ export default function MedicalManikin({
   const [customPartName, setCustomPartName] = useState("Select a part");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const glRef = useRef<THREE.WebGLRenderer | null>(null);
+
+  // Stable citation order: oldest first (matches PDF section 9)
+  const orderedNotes = useMemo(() => {
+    return [...notes].sort((a, b) => {
+      const ta = (a as any).createdAt
+        ? new Date((a as any).createdAt).getTime()
+        : 0;
+      const tb = (b as any).createdAt
+        ? new Date((b as any).createdAt).getTime()
+        : 0;
+      return ta - tb;
+    });
+  }, [notes]);
+
+  const handleGlReady = useCallback((gl: THREE.WebGLRenderer) => {
+    glRef.current = gl;
+  }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      captureSnapshot: () => {
+        try {
+          const gl = glRef.current;
+          if (!gl?.domElement) return null;
+          return gl.domElement.toDataURL("image/png");
+        } catch (e) {
+          console.warn("[MedicalManikin] capture failed", e);
+          return null;
+        }
+      },
+      getAnnotations: () =>
+        orderedNotes.map((n, i) => ({ ...n, citationNumber: i + 1 })),
+    }),
+    [orderedNotes],
+  );
 
   // Choose model based on gender
   const modelUrl = useMemo(() => {
@@ -495,8 +560,14 @@ export default function MedicalManikin({
           </div>
         )}
 
-        {/* Canvas */}
-        <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 8], fov: 40 }}>
+        {/* Canvas — preserveDrawingBuffer so clinical PDF can snapshot the 3D twin */}
+        <Canvas
+          shadows
+          dpr={[1, 2]}
+          camera={{ position: [0, 0, 8], fov: 40 }}
+          gl={{ preserveDrawingBuffer: true }}
+        >
+          <GlCaptureBridge onReady={handleGlReady} />
           <ambientLight intensity={0.4} />
           <spotLight
             position={[10, 10, 10]}
@@ -532,10 +603,11 @@ export default function MedicalManikin({
                   readOnly={readOnly}
                   gender={gender}
                 />
-                {notes.map((note) => (
+                {orderedNotes.map((note, i) => (
                   <HighlightMarker
                     key={note._id || note.id}
                     note={note}
+                    index={i + 1}
                     onClick={() => {
                       setEditingNote(note);
                       setCustomPartName(note.part);
@@ -679,15 +751,17 @@ export default function MedicalManikin({
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30">
           <div className="flex gap-4 items-center bg-white px-8 py-2 rounded-full  transition-all duration-500">
             <span className="text-sm whitespace-nowrap  text-slate-500">
-              Drag/Zoom & click to Map Body Nodes
+              Drag/Zoom & click numbered pins to Map Body Nodes
             </span>
           </div>
         </div>
       </div>
     </div>
   );
-}
+});
 
-// Preload both models for zero-latency loading (done inside useEffect, but also keep static preload for immediate start)
+export default MedicalManikin;
+
+// Preload both models for zero-latency loading
 useGLTF.preload("/human_glb.glb");
 useGLTF.preload("/female.glb");

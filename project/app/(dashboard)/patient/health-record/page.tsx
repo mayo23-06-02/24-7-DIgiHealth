@@ -54,6 +54,8 @@ interface TimelineEvent {
     dosage?: string;
     duration?: string;
     status?: string;
+    documentUrl?: string | null;
+    documentName?: string | null;
   };
 }
 
@@ -87,6 +89,9 @@ interface Medication {
   prescribedDate: string;
   refillsLeft: number;
   status: "active" | "completed" | "discontinued";
+  documentUrl?: string | null;
+  documentName?: string | null;
+  canDownload?: boolean;
 }
 
 interface Allergy {
@@ -121,7 +126,6 @@ export default function HealthRecordPage() {
   const [selectedVital, setSelectedVital] = useState<
     "weight" | "bp" | "heartRate"
   >("weight");
-  const [isMfaOpen, setIsMfaOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isRefillModalOpen, setIsRefillModalOpen] = useState(false);
   const [selectedMedForRefill, setSelectedMedForRefill] =
@@ -152,6 +156,24 @@ export default function HealthRecordPage() {
   const [immunizations, setImmunizations] = useState<Immunization[]>([]);
   const [loadingRecords, setLoadingRecords] = useState(true);
 
+  // Deep-link from notifications: /patient/health-record?tab=medications
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    const allowed = [
+      "timeline",
+      "body_map",
+      "vitals",
+      "labs",
+      "medications",
+      "allergies",
+      "immunizations",
+    ] as const;
+    if (tab && (allowed as readonly string[]).includes(tab)) {
+      setActiveTab(tab as (typeof allowed)[number]);
+    }
+  }, []);
+
   React.useEffect(() => {
     if (!user) return;
     setLoadingRecords(true);
@@ -181,24 +203,30 @@ export default function HealthRecordPage() {
       .finally(() => setLoadingRecords(false));
   }, [user]);
 
+  /** One-click health profile PDF — no MFA / verification */
   const handleDownloadReport = async () => {
     if (!user) return;
     setIsDownloading(true);
-    const toastId = toast.loading(
-      "Verifying identity & generating secure report...",
-    );
+    const toastId = toast.loading("Generating health profile PDF…");
 
     try {
-      const response = await fetch(`/api/chat/report/${user.id}`);
-      if (!response.ok) throw new Error("Failed to generate report");
+      const response = await fetch("/api/patient/health-record/report");
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to generate report");
+      }
 
       const blob = await response.blob();
+      // Guard against JSON error returned with 200
+      if (blob.type?.includes("application/json")) {
+        throw new Error("Server returned an error instead of a PDF");
+      }
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
 
       const contentDisposition = response.headers.get("Content-Disposition");
-      let filename = "Clinical_Report.pdf";
+      let filename = "Health_Profile.pdf";
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="(.+)"/);
         if (match && match[1]) filename = match[1];
@@ -210,11 +238,12 @@ export default function HealthRecordPage() {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      toast.success("Health Record downloaded securely", { id: toastId });
-      setIsMfaOpen(false);
-    } catch (error) {
+      toast.success("Health profile downloaded", { id: toastId });
+    } catch (error: any) {
       console.error(error);
-      toast.error("Failed to download PDF report", { id: toastId });
+      toast.error(error?.message || "Failed to download PDF report", {
+        id: toastId,
+      });
     } finally {
       setIsDownloading(false);
     }
@@ -333,11 +362,14 @@ export default function HealthRecordPage() {
         right={
           <div className="flex items-center gap-3">
             <Button
-              onClick={() => setIsMfaOpen(true)}
+              onClick={handleDownloadReport}
+              disabled={isDownloading}
               className="bg-primary text-white p-2.5 rounded-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 px-5 text-sm font-semibold"
             >
               <Download size={20} />
-              <span className="hidden sm:inline">Download PDF</span>
+              <span className="hidden sm:inline">
+                {isDownloading ? "Generating…" : "Download PDF"}
+              </span>
             </Button>
           </div>
         }
@@ -452,19 +484,37 @@ export default function HealthRecordPage() {
                                 )}
                               </div>
                             )}
-                            <div className="mt-5 flex gap-3">
-                              <Button
-                                variant="ghost"
-                                className="!p-0 !min-w-0 !h-auto text-xs font-bold text-primary flex items-center gap-1.5 hover:underline bg-transparent"
-                              >
-                                <FileText size={16} /> View Details
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                className="!p-0 !min-w-0 !h-auto text-xs font-bold text-slate-500 flex items-center gap-1.5 hover:text-primary transition-colors bg-transparent"
-                              >
-                                <Download size={16} /> Summary
-                              </Button>
+                            <div className="mt-5 flex flex-wrap gap-3">
+                              {event.type === "medication" &&
+                              event.metadata?.documentUrl ? (
+                                <a
+                                  href={event.metadata.documentUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  download={
+                                    event.metadata.documentName || undefined
+                                  }
+                                  className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                                >
+                                  <Download size={16} /> Download pharmacy script
+                                </a>
+                              ) : null}
+                              {event.type === "medication" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTab("medications")}
+                                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors"
+                                >
+                                  <Pill size={16} /> Open Meds tab
+                                </button>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  className="!p-0 !min-w-0 !h-auto text-xs font-bold text-primary flex items-center gap-1.5 hover:underline bg-transparent"
+                                >
+                                  <FileText size={16} /> View Details
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -690,22 +740,40 @@ export default function HealthRecordPage() {
                           <p className="text-sm text-slate-500 mb-6 leading-relaxed italic">
                             "{med.instructions}"
                           </p>
-                          <div className="flex justify-between items-center pt-4 border-t border-slate-50">
+                          <div className="flex flex-wrap justify-between items-center gap-2 pt-4 border-t border-slate-50">
                             <span className="text-xs text-slate-500">
                               Prescribed {formatDate(med.prescribedDate)}
                             </span>
-                            {med.refillsLeft > 0 && (
-                              <Button
-                                variant="ghost"
-                                onClick={() => {
-                                  setSelectedMedForRefill(med);
-                                  setIsRefillModalOpen(true);
-                                }}
-                                className="!p-0 !min-w-0 !h-auto text-xs font-bold text-primary hover:underline bg-transparent"
-                              >
-                                Request Refill ({med.refillsLeft} left)
-                              </Button>
-                            )}
+                            <div className="flex items-center gap-3">
+                              {(med.canDownload || med.documentUrl) &&
+                              med.documentUrl ? (
+                                <a
+                                  href={med.documentUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  download={med.documentName || undefined}
+                                  className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                                >
+                                  <Download size={14} /> Pharmacy script
+                                </a>
+                              ) : (
+                                <span className="text-[10px] text-slate-400 font-medium">
+                                  No script file
+                                </span>
+                              )}
+                              {med.refillsLeft > 0 && (
+                                <Button
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setSelectedMedForRefill(med);
+                                    setIsRefillModalOpen(true);
+                                  }}
+                                  className="!p-0 !min-w-0 !h-auto text-xs font-bold text-primary hover:underline bg-transparent"
+                                >
+                                  Request Refill ({med.refillsLeft} left)
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))
@@ -1004,55 +1072,6 @@ export default function HealthRecordPage() {
               loading={isSavingRefill}
             >
               Submit Request
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* MFA PROMPT MODAL */}
-      <Modal
-        isOpen={isMfaOpen}
-        onClose={() => setIsMfaOpen(false)}
-        title="Identity Verification"
-        width="md"
-      >
-        <div className="space-y-6">
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-6">
-              <CheckCircle size={32} />
-            </div>
-            <p className="text-sm text-slate-500 mb-2 leading-relaxed">
-              Please enter the 6-digit MFA code sent to your registered device
-              to access sensitive health data.
-            </p>
-          </div>
-
-          <div className="flex gap-2 mb-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <input
-                key={i}
-                type="text"
-                maxLength={1}
-                className="w-full h-14 border border-slate-200 rounded-xl text-center font-bold text-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-              />
-            ))}
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button
-              onClick={() => setIsMfaOpen(false)}
-              variant="outline"
-              className="flex-1"
-              disabled={isDownloading}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDownloadReport}
-              disabled={isDownloading}
-              className="flex-1 shadow-none shadow-primary/20"
-            >
-              {isDownloading ? "Generating..." : "Verify Access"}
             </Button>
           </div>
         </div>

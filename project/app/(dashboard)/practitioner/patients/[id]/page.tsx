@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
@@ -29,15 +29,20 @@ import {
   BiDownload,
   BiEditAlt,
   BiCloudUpload,
+  BiCalendarPlus,
+  BiTrash,
 } from "react-icons/bi";
 import Link from "next/link";
-import MedicalManikin from "@/components/ui/MedicalManikin";
+import MedicalManikin, {
+  type MedicalManikinHandle,
+} from "@/components/ui/MedicalManikin";
 import { toast } from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import VitalCardsGrid from "@/components/dashboard/practitioner/VitalCardsGrid";
 import PatientHealthRecord from "@/components/dashboard/shared/PatientHealthRecord";
+import BookingModal from "@/components/doctor/BookingModal";
 
 
 interface PatientProfile {
@@ -61,6 +66,9 @@ interface PatientProfile {
     status: "active" | "completed" | "discontinued";
     prescribedDate: string;
     refillsRemaining: number;
+    documentUrl?: string | null;
+    documentName?: string | null;
+    canDownload?: boolean;
   }[];
   age?: number | null;
   dateJoined?: string | null;
@@ -113,6 +121,7 @@ export default function PatientProfilePage() {
     instructions: "",
     refillsRemaining: 0,
   });
+  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const [updateFormData, setUpdateFormData] = useState({
     medicalHistory: "",
     allergies: "",
@@ -125,22 +134,56 @@ export default function PatientProfilePage() {
     bodyMass: "70",
     glucose: "0",
   });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
+  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const manikinRef = useRef<MedicalManikinHandle>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [menuOpen]);
 
   const handlePrescriptionSubmit = async () => {
     if (!patient || !prescriptionForm.medicationName) return;
+    if (!prescriptionFile) {
+      toast.error(
+        "Attach the formal prescription PDF/image (letterhead) so the patient can take it to a pharmacy.",
+      );
+      return;
+    }
     setActionLoading(true);
     try {
+      // Multipart so formal script PDF can be attached
+      const formData = new FormData();
+      formData.append("patientId", patient.id);
+      formData.append("medicationName", prescriptionForm.medicationName);
+      formData.append("dosage", prescriptionForm.dosage || "");
+      formData.append("instructions", prescriptionForm.instructions || "");
+      formData.append(
+        "refillsRemaining",
+        String(prescriptionForm.refillsRemaining || 0),
+      );
+      formData.append("notifyChat", "true");
+      formData.append("file", prescriptionFile);
+
       const res = await fetch("/api/practitioner/prescriptions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId: patient.id,
-          ...prescriptionForm,
-        }),
+        body: formData,
       });
+      const json = await res.json().catch(() => ({}));
 
-      if (res.ok) {
-        toast.success("Prescription issued successfully");
+      if (res.ok && json.success) {
+        toast.success(
+          "Prescription issued — patient notified with downloadable script in Messages & Meds",
+        );
         setIsPrescriptionModalOpen(false);
         setPrescriptionForm({
           medicationName: "",
@@ -148,12 +191,12 @@ export default function PatientProfilePage() {
           instructions: "",
           refillsRemaining: 0,
         });
-        // Refresh patient data
+        setPrescriptionFile(null);
         const refreshRes = await fetch(`/api/practitioner/patients/${id}`);
         const refreshData = await refreshRes.json();
         if (refreshData.success) setPatient(refreshData.data);
       } else {
-        toast.error("Failed to issue prescription");
+        toast.error(json.error || "Failed to issue prescription");
       }
     } catch {
       toast.error("Network error");
@@ -204,17 +247,61 @@ export default function PatientProfilePage() {
     }
   }, [patient]);
 
+  /** One-click health profile PDF — no verification step */
   const handleDownloadReport = async () => {
     if (!patient) return;
-    toast.loading("Generating Clinical PDF Report...", { id: "pdf-gen" });
+    toast.loading("Generating health profile PDF…", { id: "pdf-gen" });
+    try {
+      const res = await fetch(
+        `/api/practitioner/patients/${patient.id}/report`,
+        { method: "GET" },
+      );
 
-    // Simulate generation
-    setTimeout(() => {
-      toast.success("Clinical Report Generated: " + patient.fullName + ".pdf", {
-        id: "pdf-gen",
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Report generation failed");
+      }
+
+      const blob = await res.blob();
+      if (blob.type?.includes("application/json")) {
+        throw new Error("Server returned an error instead of a PDF");
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const cd = res.headers.get("Content-Disposition") || "";
+      const match = cd.match(/filename="?([^"]+)"?/);
+      a.href = url;
+      a.download =
+        match?.[1] ||
+        `${patient.fullName.replace(/\s+/g, "_")}_Health_Profile.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Health profile downloaded", { id: "pdf-gen" });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to download report", { id: "pdf-gen" });
+    }
+  };
+
+  const handleRemovePatient = async () => {
+    if (!patient) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/practitioner/patients/${patient.id}`, {
+        method: "DELETE",
       });
-      // In a real app, we'd trigger a window.open or fetch to a PDF-server
-    }, 2000);
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Could not remove patient");
+      }
+      toast.success("Patient removed from your practice list");
+      setRemoveConfirmOpen(false);
+      router.push("/practitioner/patients");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to remove patient");
+    }
+    setActionLoading(false);
   };
 
   const handleUpdateClinicalData = async () => {
@@ -407,13 +494,78 @@ export default function PatientProfilePage() {
           <Button
             variant="outline"
             onClick={handleDownloadReport}
-            title="Download PDF Report"
+            title="Download full clinical PDF report"
           >
             <BiDownload size={22} />
           </Button>
-          <Button variant="outline">
-            <BiDotsVerticalRounded size={24} />
-          </Button>
+
+          <div className="relative" ref={menuRef}>
+            <Button
+              variant="outline"
+              onClick={() => setMenuOpen((o) => !o)}
+              title="More actions"
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+            >
+              <BiDotsVerticalRounded size={24} />
+            </Button>
+            {menuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 animate-in fade-in zoom-in-95 duration-150"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 text-left"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setShowBooking(true);
+                  }}
+                >
+                  <BiCalendarPlus className="text-primary" size={18} />
+                  Book appointment
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 text-left"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void handleDownloadReport();
+                  }}
+                >
+                  <BiDownload className="text-primary" size={18} />
+                  Download full report
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 text-left"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void handleStartChat();
+                  }}
+                >
+                  <BiChat className="text-primary" size={18} />
+                  Message patient
+                </button>
+                <div className="my-1 border-t border-slate-100" />
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 text-left"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setRemoveConfirmOpen(true);
+                  }}
+                >
+                  <BiTrash size={18} />
+                  Remove from practice
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -446,9 +598,10 @@ export default function PatientProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Content Area */}
         <div className="lg:col-span-8 space-y-8">
-          {/* 3D Body Mapping - Primary focus */}
+          {/* 3D Body Mapping - Primary focus (numbered annotations → PDF citations) */}
           <Card className="p-0 overflow-hidden h-[600px] relative">
             <MedicalManikin
+              ref={manikinRef}
               gender={(patient.gender as any) || "female"}
               heightCm={patient.vitals?.height ? Number(patient.vitals.height) : 170}
               weightKg={patient.vitals?.weight ? Number(patient.vitals.weight) : 70}
@@ -766,13 +919,24 @@ export default function PatientProfilePage() {
                         <p className="text-sm text-slate-500 font-medium mb-2">
                           {p.dosage}
                         </p>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-100/50 gap-2">
                           <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
                             Refills: {p.refillsRemaining}
                           </p>
-                          <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
-                            {new Date(p.prescribedDate).toLocaleDateString()}
-                          </p>
+                          {p.documentUrl || p.canDownload ? (
+                            <a
+                              href={p.documentUrl || "#"}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[10px] font-bold text-primary hover:underline"
+                            >
+                              Download script
+                            </a>
+                          ) : (
+                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+                              {new Date(p.prescribedDate).toLocaleDateString()}
+                            </p>
+                          )}
                         </div>
                       </div>
                     ))
@@ -831,10 +995,14 @@ export default function PatientProfilePage() {
       {/* Prescription Modal */}
       <Modal
         isOpen={isPrescriptionModalOpen}
-        onClose={() => setIsPrescriptionModalOpen(false)}
+        onClose={() => {
+          setIsPrescriptionModalOpen(false);
+          setPrescriptionFile(null);
+        }}
         title="Issue New Prescription"
       >
         <div className="space-y-6">
+         
           <div className="grid grid-cols-1 gap-6">
             <Input
               label="Medication Name"
@@ -887,20 +1055,47 @@ export default function PatientProfilePage() {
                 }))
               }
             />
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-500 uppercase tracking-widest ml-1">
+                Formal script (PDF / image) *
+              </label>
+              <input
+                type="file"
+                accept=".pdf,image/*,.doc,.docx"
+                onChange={(e) =>
+                  setPrescriptionFile(e.target.files?.[0] || null)
+                }
+                className="block w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary/10 file:text-primary file:font-bold hover:file:bg-primary/20"
+                required
+              />
+              {prescriptionFile && (
+                <p className="text-xs text-primary font-semibold">
+                  Attached: {prescriptionFile.name}
+                </p>
+              )}
+              
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">
             <Button
               className="flex-1"
               onClick={handlePrescriptionSubmit}
-              disabled={actionLoading || !prescriptionForm.medicationName}
+              disabled={
+                actionLoading ||
+                !prescriptionForm.medicationName ||
+                !prescriptionFile
+              }
             >
               {actionLoading ? "Issuing..." : "Confirm & Issue Prescription"}
             </Button>
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => setIsPrescriptionModalOpen(false)}
+              onClick={() => {
+                setIsPrescriptionModalOpen(false);
+                setPrescriptionFile(null);
+              }}
             >
               Cancel
             </Button>
@@ -1047,6 +1242,54 @@ export default function PatientProfilePage() {
               variant="outline"
               className="flex-1"
               onClick={() => setIsUpdateModalOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Book appointment for this patient */}
+      <BookingModal
+        isOpen={showBooking}
+        mode="practitioner"
+        patient={
+          patient
+            ? { id: patient.id, name: patient.fullName, email: patient.email }
+            : null
+        }
+        onClose={() => setShowBooking(false)}
+        onSuccess={() => {
+          setShowBooking(false);
+          toast.success("Appointment booked");
+        }}
+      />
+
+      {/* Remove from practice confirmation */}
+      <Modal
+        isOpen={removeConfirmOpen}
+        onClose={() => setRemoveConfirmOpen(false)}
+        title="Remove patient from practice"
+      >
+        <div className="space-y-5">
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Remove <strong>{patient?.fullName}</strong> from your assigned
+            patient list? Their account and clinical records are kept — they
+            will only leave your practice roster.
+          </p>
+          <div className="flex gap-3">
+            <Button
+              className="flex-1 !bg-red-600 hover:!bg-red-700"
+              onClick={handleRemovePatient}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Removing…" : "Yes, remove"}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setRemoveConfirmOpen(false)}
+              disabled={actionLoading}
             >
               Cancel
             </Button>

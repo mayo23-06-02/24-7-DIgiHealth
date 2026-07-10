@@ -103,6 +103,9 @@ export async function GET(
           status: p.status,
           prescribedDate: p.prescribedDate,
           refillsRemaining: p.refillsRemaining,
+          documentUrl: p.documentUrl || null,
+          documentName: p.documentName || null,
+          canDownload: !!p.documentUrl,
         })),
         pastConsultations: pastConsultations.map((c: any) => ({
           id: c._id.toString(),
@@ -127,5 +130,52 @@ export async function GET(
   } catch (err) {
     console.error('[GET /api/practitioner/patients/[id]]', err);
     return NextResponse.json({ success: false, error: 'Failed to load patient detail' }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE — remove patient from this practitioner's assigned list
+ * (does not delete the patient account or clinical records)
+ */
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    await connectToDatabase();
+    const userPayload = await getRequestUser();
+    if (!userPayload || (userPayload.role !== 'practitioner' && userPayload.role !== 'mega_admin')) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    const practitionerId = userPayload.userId;
+    const { id: patientUserId } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(patientUserId)) {
+      return NextResponse.json({ success: false, error: 'Invalid patient ID' }, { status: 400 });
+    }
+
+    const result = await PractitionerProfile.findOneAndUpdate(
+      { userId: practitionerId },
+      { $pull: { assignedPatientIds: new mongoose.Types.ObjectId(patientUserId) } },
+      { new: true },
+    );
+
+    if (!result) {
+      return NextResponse.json(
+        { success: false, error: 'Practitioner profile not found' },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Patient removed from your practice list',
+    });
+  } catch (err) {
+    console.error('[DELETE /api/practitioner/patients/[id]]', err);
+    return NextResponse.json(
+      { success: false, error: 'Failed to remove patient' },
+      { status: 500 },
+    );
   }
 }

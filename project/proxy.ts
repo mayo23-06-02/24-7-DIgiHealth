@@ -83,7 +83,8 @@ export default auth(async function middleware(request: NextRequest & { auth: any
   // ---------- 2. Public routes ----------
   if (
     pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api/upload/temp')
+    pathname.startsWith('/api/media/sign-upload-public') ||
+    pathname.startsWith('/api/media/complete-public')
   ) {
     return NextResponse.next();
   }

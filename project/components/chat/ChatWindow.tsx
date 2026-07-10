@@ -95,6 +95,19 @@ export default function ChatWindow({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // When doctor attaches a clinical record / prescription from AttachRecordModal
+  useEffect(() => {
+    const onAttached = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail) return;
+      setMessages((prev) => upsertMessage(prev, detail));
+      notifyChatUnreadChanged();
+    };
+    window.addEventListener("chat:message-attached", onAttached);
+    return () =>
+      window.removeEventListener("chat:message-attached", onAttached);
+  }, [setMessages]);
+
   const handleSend = useCallback(
     async (
       content: string,

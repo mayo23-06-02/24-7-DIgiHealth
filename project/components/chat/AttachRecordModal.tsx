@@ -73,10 +73,24 @@ export default function AttachRecordModal({
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error("Upload failed");
-      toast.success("Record attached.", { id: toastId });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || "Upload failed");
+      toast.success(
+        type === "prescription"
+          ? "Prescription sent — patient notified in chat & Health Records."
+          : "Record attached — patient notified.",
+        { id: toastId },
+      );
       onClose();
       resetForm();
+      // Soft refresh so latest message appears without full page reload
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("chat:message-attached", {
+            detail: json.message,
+          }),
+        );
+      }
     } catch (err) {
       console.error(err);
       toast.error("Upload failed.", { id: toastId });

@@ -1,47 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { MedicalDocument as DigitalDocument } from '@/lib/models/ReviewsDocs';
-import User from '@/lib/models/User';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
-import { v2 as cloudinary } from 'cloudinary';
-import { storage, ref, uploadString, getDownloadURL, isFirebaseConfigured } from '@/lib/firebase';
-
-// Configure cloudinary with fallback defaults if env vars are malformed
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'dmvgc1ktj',
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY || '445174386726859',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'hQVkKbA_kvuRlj6MioPdIrZVTIE',
-});
-
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-
-async function getUserId(req: NextRequest): Promise<string | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
-  if (!token) return null;
-  try {
-    const { payload } = await jwtVerify(token, SECRET);
-    return payload.userId as string;
-  } catch {
-    return null;
-  }
-}
+import { NextRequest, NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { MedicalDocument as DigitalDocument } from "@/lib/models/ReviewsDocs";
+import User from "@/lib/models/User";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
+import {
+  durableUrl,
+  isSupabaseConfigured,
+  MediaValidationError,
+  uploadBuffer,
+} from "@/lib/supabase/media";
 
 // GET /api/user/documents – list all documents for the current user
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     await connectToDatabase();
-    const userId = await getUserId(req);
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getRequestUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const docs = await DigitalDocument.find({ userId }).sort({ createdAt: -1 }).lean();
+    const docs = await DigitalDocument.find({ userId: user.userId })
+      .sort({ createdAt: -1 })
+      .lean();
     return NextResponse.json({
       success: true,
       data: docs.map((d: any) => ({
         id: d._id.toString(),
         type: d.type,
         url: d.cloudinaryUrl,
+        mediaId: d.mediaId || d.publicId || null,
         mimeType: d.mimeType,
         status: d.status,
         createdAt: d.createdAt,
@@ -52,55 +39,98 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/user/documents – upload a new document (base64 encoded)
+/**
+ * POST /api/user/documents
+ * Accepts:
+ * - multipart `file` (preferred), or
+ * - JSON `{ dataUrl, mimeType, type, isAvatar }` (legacy profile page)
+ */
 export async function POST(req: NextRequest) {
   try {
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json(
+        { error: "Media storage is not configured" },
+        { status: 503 },
+      );
+    }
+
     await connectToDatabase();
-    const userId = await getUserId(req);
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const body = await req.json();
-    const { type, dataUrl, mimeType, isAvatar } = body;
-
-    if (!dataUrl || !mimeType) {
-      return NextResponse.json({ error: 'dataUrl and mimeType are required' }, { status: 400 });
+    const user = await getRequestUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let fileUrl = "";
-    let publicId = "";
+    const contentType = req.headers.get("content-type") || "";
+    let buffer: Buffer;
+    let mimeType: string;
+    let fileName: string;
+    let type = "general";
+    let isAvatar = false;
 
-    if (isFirebaseConfigured) {
-      // Upload to Firebase Storage
-      const fileName = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-      const storagePath = `digihealth_user_docs/${userId}/${fileName}`;
-      const storageRef = ref(storage, storagePath);
-      await uploadString(storageRef, dataUrl, 'data_url');
-      fileUrl = await getDownloadURL(storageRef);
-      publicId = storagePath;
+    if (contentType.includes("multipart/form-data")) {
+      const form = await req.formData();
+      const file = form.get("file");
+      if (!(file instanceof File) || file.size === 0) {
+        return NextResponse.json({ error: "No file provided" }, { status: 400 });
+      }
+      buffer = Buffer.from(await file.arrayBuffer());
+      mimeType = file.type || "application/octet-stream";
+      fileName = file.name || "document";
+      type = String(form.get("type") || "general");
+      isAvatar = form.get("isAvatar") === "true";
     } else {
-      // Upload to Cloudinary
-      const uploadRes = await cloudinary.uploader.upload(dataUrl, {
-        folder: 'digihealth_user_docs',
-        resource_type: 'auto', // Auto-detect image vs raw (pdf, doc)
-      });
-      fileUrl = uploadRes.secure_url;
-      publicId = uploadRes.public_id;
+      const body = await req.json();
+      const { dataUrl, mimeType: mt, type: t, isAvatar: av } = body;
+      if (!dataUrl || !mt) {
+        return NextResponse.json(
+          { error: "dataUrl and mimeType are required (or use multipart file)" },
+          { status: 400 },
+        );
+      }
+      mimeType = mt;
+      type = t || "general";
+      isAvatar = !!av;
+      const base64 = String(dataUrl).includes("base64,")
+        ? String(dataUrl).split("base64,")[1]
+        : String(dataUrl);
+      buffer = Buffer.from(base64, "base64");
+      const ext = mimeType.includes("pdf")
+        ? "pdf"
+        : mimeType.includes("png")
+          ? "png"
+          : "jpg";
+      fileName = isAvatar ? `avatar.${ext}` : `document.${ext}`;
     }
 
-    // If this is an avatar upload, update the user's avatarUrl directly
+    const asset = await uploadBuffer({
+      buffer,
+      fileName,
+      mimeType,
+      userId: user.userId,
+      purpose: isAvatar ? "avatar" : "document",
+      relatedType: isAvatar ? "avatar" : "user_document",
+      isPublic: false,
+    });
+
+    const fileUrl = durableUrl(asset);
+
     if (isAvatar) {
-      await User.findByIdAndUpdate(userId, { avatarUrl: fileUrl });
-      return NextResponse.json({ success: true, data: { url: fileUrl } });
+      await User.findByIdAndUpdate(user.userId, { avatarUrl: fileUrl });
+      return NextResponse.json({
+        success: true,
+        data: { url: fileUrl, mediaId: asset.id },
+      });
     }
 
     const doc = await DigitalDocument.create({
-      userId,
-      uploadedBy: userId,
-      type: type || 'general',
-      cloudinaryUrl: fileUrl,   
-      publicId: publicId,
+      userId: user.userId,
+      uploadedBy: user.userId,
+      type,
+      cloudinaryUrl: fileUrl,
+      publicId: asset.id,
+      mediaId: asset.id,
       mimeType,
-      status: 'pending_review',
+      status: "pending_review",
     });
 
     return NextResponse.json({
@@ -109,12 +139,15 @@ export async function POST(req: NextRequest) {
         id: doc._id.toString(),
         type: doc.type,
         url: doc.cloudinaryUrl,
+        mediaId: asset.id,
         mimeType: doc.mimeType,
         status: doc.status,
         createdAt: doc.createdAt,
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const status = err instanceof MediaValidationError ? 400 : 500;
+    console.error("[POST /api/user/documents]", err);
+    return NextResponse.json({ error: err.message }, { status });
   }
 }

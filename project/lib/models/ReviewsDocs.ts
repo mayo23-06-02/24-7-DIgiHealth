@@ -24,8 +24,10 @@ export interface IMedicalDocument extends Document {
   userId: Types.ObjectId;
   uploadedBy: Types.ObjectId;
   type: string;
+  /** Durable media proxy URL or legacy CDN URL */
   cloudinaryUrl: string;
   publicId: string;
+  mediaId?: string;
   mimeType: string;
   status: string;
   verifiedAt?: Date;
@@ -37,6 +39,7 @@ const MedicalDocumentSchema = new Schema<IMedicalDocument>({
   type: String,
   cloudinaryUrl: String,
   publicId: String,
+  mediaId: String,
   mimeType: String,
   status: String,
   verifiedAt: Date

@@ -55,6 +55,20 @@ export async function POST(request: Request) {
 
     const newUser = await User.create(userData as any);
 
+    // Claim any Supabase registration-pending media for this user
+    try {
+      const regToken =
+        formData.registrationMediaToken ||
+        formData.registrationToken ||
+        undefined;
+      if (regToken) {
+        const { claimRegistrationMedia } = await import("@/lib/supabase/media");
+        await claimRegistrationMedia(String(regToken), newUser._id.toString());
+      }
+    } catch (e) {
+      console.warn("[register] media claim skipped:", e);
+    }
+
     // 5. Create Profile based on role
     if (wizardRole === "patient") {
       // Create Main Profile

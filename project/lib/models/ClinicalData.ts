@@ -64,6 +64,13 @@ export interface IPrescription extends Document {
   status: 'active' | 'completed' | 'discontinued';
   prescribedDate: Date;
   refillsRemaining: number;
+  /** Formal script PDF / image (letterhead) for pharmacy */
+  documentUrl?: string;
+  documentMime?: string;
+  documentName?: string;
+  mediaId?: string;
+  conversationId?: Types.ObjectId;
+  messageId?: Types.ObjectId;
 }
 const PrescriptionSchema = new Schema<IPrescription>({
   patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -73,8 +80,16 @@ const PrescriptionSchema = new Schema<IPrescription>({
   instructions: String,
   status: { type: String, enum: ['active', 'completed', 'discontinued'], default: 'active' },
   prescribedDate: { type: Date, default: Date.now },
-  refillsRemaining: { type: Number, default: 0 }
-});
+  refillsRemaining: { type: Number, default: 0 },
+  documentUrl: String,
+  documentMime: String,
+  documentName: String,
+  mediaId: String,
+  conversationId: { type: Schema.Types.ObjectId, ref: 'Conversation' },
+  messageId: { type: Schema.Types.ObjectId, ref: 'Message' },
+}, { timestamps: true });
+
+PrescriptionSchema.index({ patientId: 1, prescribedDate: -1 });
 
 // ==== LabResult ====
 export interface ILabResult extends Document {

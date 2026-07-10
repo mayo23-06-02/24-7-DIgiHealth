@@ -59,15 +59,30 @@ export default function MessageBubble({
           />
         )}
 
+        {/* File / prescription script */}
         {message.type === "file" && (
-          <a
-            href={message.fileUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="underline font-bold"
-          >
-            Download File
-          </a>
+          <div className="space-y-2">
+            <p className="whitespace-pre-wrap break-words text-sm font-medium">
+              {message.content}
+            </p>
+            {message.fileUrl ? (
+              <a
+                href={message.fileUrl}
+                target="_blank"
+                rel="noreferrer"
+                download
+                className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold border transition-colors ${
+                  isOwn
+                    ? "bg-white/15 hover:bg-white/25 border-white/25 text-white"
+                    : "bg-primary/10 hover:bg-primary/15 border-primary/20 text-primary"
+                }`}
+              >
+                <BiDownload size={14} /> Download prescription / file
+              </a>
+            ) : (
+              <p className="text-xs opacity-70">Attachment unavailable</p>
+            )}
+          </div>
         )}
 
         {/* Quick phrase badge styling */}
@@ -80,7 +95,7 @@ export default function MessageBubble({
         {/* Record Attachment Styling */}
         {message.type === "record_attachment" && (
           <div
-            className={`mb-2 p-3 rounded-xl border ${isOwn ? "bg-primary-600 border-primary-400" : "bg-slate-50 border-slate-200"} flex items-start gap-3 w-64`}
+            className={`mb-2 p-3 rounded-xl border ${isOwn ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"} flex items-start gap-3 w-64`}
           >
             <div
               className={`w-10 h-10 rounded-lg shrink-0 flex items-center justify-center ${isOwn ? "bg-white/20 text-white" : "bg-primary/10 text-primary"}`}
@@ -91,10 +106,12 @@ export default function MessageBubble({
               <p
                 className={`text-xs font-bold leading-tight ${isOwn ? "text-white" : "text-slate-800"}`}
               >
-                Clinical Record Attached
+                {message.content?.toLowerCase().includes("prescription")
+                  ? "Prescription script"
+                  : "Clinical record attached"}
               </p>
               <p
-                className={`text-xs mt-1 ${isOwn ? "text-primary-100" : "text-slate-500"} line-clamp-2`}
+                className={`text-xs mt-1 ${isOwn ? "text-white/80" : "text-slate-500"} line-clamp-2`}
               >
                 {message.content}
               </p>
@@ -113,24 +130,32 @@ export default function MessageBubble({
         )}
 
         {message.type !== "record_attachment" &&
-          message.type !== "call_log" && (
+          message.type !== "call_log" &&
+          message.type !== "file" && (
             <p className="whitespace-pre-wrap break-words">{message.content}</p>
           )}
 
         {message.type === "record_attachment" && (
-          <a
-            href={message.fileUrl}
-            target="_blank"
-            rel="noreferrer"
-            className={`flex items-center justify-center gap-1.5 mt-2 py-2 rounded-lg text-xs font-bold border transition-colors
+          message.fileUrl ? (
+            <a
+              href={message.fileUrl}
+              target="_blank"
+              rel="noreferrer"
+              download
+              className={`flex items-center justify-center gap-1.5 mt-2 py-2 rounded-lg text-xs font-bold border transition-colors
                    ${
                      isOwn
                        ? "bg-white/10 hover:bg-white/20 border-white/20 text-white"
                        : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
                    }`}
-          >
-            <BiDownload size={14} /> Download File
-          </a>
+            >
+              <BiDownload size={14} /> Download file
+            </a>
+          ) : (
+            <p className={`text-xs mt-2 ${isOwn ? "text-white/70" : "text-slate-400"}`}>
+              No file attached
+            </p>
+          )
         )}
 
         <div

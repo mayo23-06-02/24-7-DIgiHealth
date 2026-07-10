@@ -7,6 +7,7 @@ export interface IMessage extends Document {
   content: string;
   type: 'text' | 'image' | 'file' | 'audio' | 'quick_phrase' | 'record_attachment' | 'call_log';
   fileUrl?: string;
+  mediaId?: string;
   fileMime?: string;
   recordId?: Types.ObjectId;
   clientId?: string; // For idempotent message operations with Ably
@@ -29,6 +30,7 @@ const MessageSchema = new Schema<IMessage>({
   },
   fileUrl: { type: String },
   fileMime: { type: String },
+  mediaId: { type: String },
   recordId: { type: Schema.Types.ObjectId, ref: 'AttachedRecord' },
   clientId: { type: String, index: true, sparse: true },
   isRead: { type: Boolean, default: false },

@@ -78,6 +78,9 @@ interface Medication {
   prescribedDate: string;
   refillsLeft: number;
   status: "active" | "completed" | "discontinued";
+  documentUrl?: string | null;
+  documentName?: string | null;
+  canDownload?: boolean;
 }
 
 interface Allergy {
@@ -370,8 +373,23 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                   <h3 className="text-sm font-bold text-slate-800 font-grotesk">{med.name}</h3>
                   <p className="text-xs font-semibold text-primary mb-2">{med.dosage}</p>
                   <p className="text-xs text-slate-500 leading-relaxed italic">"{med.instructions}"</p>
-                  <div className="mt-4 pt-3 border-t border-slate-50 flex justify-between items-center">
+                  <div className="mt-4 pt-3 border-t border-slate-50 flex justify-between items-center gap-2">
                     <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">{formatDate(med.prescribedDate)}</span>
+                    {(med.canDownload || med.documentUrl) && med.documentUrl ? (
+                      <a
+                        href={med.documentUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        download={med.documentName || undefined}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
+                      >
+                        <Download size={12} /> Pharmacy script
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        No script file
+                      </span>
+                    )}
                   </div>
                 </div>
               ))

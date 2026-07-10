@@ -279,9 +279,8 @@ export default function PractitionerPatientsPage() {
                     key={p.id}
                     className="hover:bg-slate-50/50 transition-colors"
                   >
-                    <td className="py-4 px-5">
+                    <td className="py-2 px-5">
                       <div className="flex items-center gap-3">
-                        <Avatar name={p.fullName} size="sm" />
                         <div>
                           <p className="text-sm font-bold text-slate-800">
                             {p.fullName}
@@ -293,33 +292,33 @@ export default function PractitionerPatientsPage() {
                       </div>
                     </td>
                     <td className="py-4 px-5 text-sm font-semibold text-slate-700 tabular-nums">
-                      {p.age != null ? p.age : "—"}
+                      <p>{p.age != null ? p.age : "—"}</p>
                     </td>
                     <td className="py-4 px-5 text-xs text-slate-500">
-                      {p.dateJoined
+                      <p>{p.dateJoined
                         ? new Date(p.dateJoined).toLocaleDateString("en-ZA", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
                           })
-                        : "—"}
+                        : "—"}</p>
                     </td>
                     <td className="py-4 px-5 text-xs text-slate-500">
-                      {p.lastVisit
+                     <p> {p.lastVisit
                         ? new Date(p.lastVisit).toLocaleDateString("en-ZA", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
                           })
-                        : "—"}
+                        : "—"}</p>
                     </td>
                     <td className="py-4 px-5 text-xs text-slate-500">
-                      {p.nextAppointment
+                      <p>{p.nextAppointment
                         ? new Date(p.nextAppointment).toLocaleDateString(
                             "en-ZA",
                             { day: "numeric", month: "short" },
                           )
-                        : "—"}
+                        : "—"}</p>
                     </td>
                     <td className="py-4 px-5">
                       <span

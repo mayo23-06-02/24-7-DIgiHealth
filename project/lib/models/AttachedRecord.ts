@@ -8,9 +8,10 @@ export interface IAttachedRecord extends Document {
   type: 'lab_result' | 'prescription' | 'imaging' | 'soap_note' | 'other';
   title: string;
   description?: string;
-  fileUrl: string;               // Cloudinary URL
+  fileUrl: string;               // durable app proxy or legacy CDN URL
   fileMime: string;
   fileSize: number;
+  mediaId?: string;              // Supabase media_assets id
   uploadedAt: Date;
   isRead: boolean;               // patient has viewed it
   createdAt: Date;
@@ -28,6 +29,7 @@ const AttachedRecordSchema = new Schema<IAttachedRecord>({
   fileUrl: { type: String, required: true },
   fileMime: { type: String, required: true },
   fileSize: { type: Number, required: true },
+  mediaId: { type: String },
   uploadedAt: { type: Date, default: Date.now },
   isRead: { type: Boolean, default: false }
 }, { timestamps: true });

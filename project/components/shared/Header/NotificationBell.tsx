@@ -55,7 +55,8 @@ export default function NotificationBell({
 
   useEffect(() => {
     fetchNotifications(true);
-    const interval = setInterval(fetchNotifications, 60000);
+    // Poll often so patients see prescription/appointment pings quickly
+    const interval = setInterval(() => fetchNotifications(false), 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -149,6 +150,9 @@ export default function NotificationBell({
                         notif.type === "new_appointment" ||
                         notif.type?.includes("booking") ? (
                           <BiCalendar />
+                        ) : notif.type?.includes("prescription") ||
+                          notif.type?.includes("clinical_record") ? (
+                          <BiChat />
                         ) : notif.type === "message" ||
                           notif.type === "new_message" ? (
                           <BiChat />
@@ -255,7 +259,49 @@ export default function NotificationBell({
                       </Button>
                     </Link>
                   )}
-                  {selectedNotif.type?.includes("message") && (
+                  {(selectedNotif.type?.includes("prescription") ||
+                    selectedNotif.type?.includes("clinical_record")) && (
+                    <>
+                      <Link
+                        href={
+                          selectedNotif.data?.conversationId
+                            ? `/${user?.role}/messages?chatId=${selectedNotif.data.conversationId}`
+                            : `/${user?.role}/messages`
+                        }
+                        className="w-full"
+                        onClick={() => {
+                          setIsDetailOpen(false);
+                          setIsOpen(false);
+                        }}
+                      >
+                        <Button className="py-2" fullWidth size="lg">
+                          Open in Messages
+                        </Button>
+                      </Link>
+                      {user?.role === "patient" && (
+                        <Link
+                          href="/patient/health-record?tab=medications"
+                          className="w-full"
+                          onClick={() => {
+                            setIsDetailOpen(false);
+                            setIsOpen(false);
+                          }}
+                        >
+                          <Button
+                            variant="white"
+                            className="py-2"
+                            fullWidth
+                            size="lg"
+                          >
+                            View in Health Records → Meds
+                          </Button>
+                        </Link>
+                      )}
+                    </>
+                  )}
+                  {selectedNotif.type?.includes("message") &&
+                    !selectedNotif.type?.includes("prescription") &&
+                    !selectedNotif.type?.includes("clinical_record") && (
                     <Link
                       href={`/${user?.role}/messages`}
                       className="w-full"
@@ -270,7 +316,9 @@ export default function NotificationBell({
                     </Link>
                   )}
                   {!selectedNotif.type?.includes("appointment") &&
-                    !selectedNotif.type?.includes("message") && (
+                    !selectedNotif.type?.includes("message") &&
+                    !selectedNotif.type?.includes("prescription") &&
+                    !selectedNotif.type?.includes("clinical_record") && (
                       <Link
                         href={`/${user?.role}/dashboard`}
                         className="w-full"
