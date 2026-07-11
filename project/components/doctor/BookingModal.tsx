@@ -396,7 +396,7 @@ export default function BookingModal({
       }
       width="md"
     >
-      <div className="space-y-6 py-2 pb-8 lg:pb-0">
+      <div className="space-y-6 py-2 ">
         <BookingStepIndicator step={step} totalSteps={totalSteps} />
 
         {/* Selected person card */}
@@ -588,7 +588,7 @@ export default function BookingModal({
 
         {/* STEP: Date & Time */}
         {showDateTime && (
-          <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+          <div className="space-y-6  animate-in slide-in-from-right-4 duration-300">
             <div className="space-y-3">
               <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
                 <BiCalendar size={14} className="text-primary" /> Select date
@@ -788,7 +788,7 @@ export default function BookingModal({
         )}
 
         {/* Navigation */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100">
+        <div className="flex pb-16 lg:pb-0 flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100">
           {step > 1 ? (
             <Button
               variant="ghost"
