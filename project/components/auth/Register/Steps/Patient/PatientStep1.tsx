@@ -2,11 +2,18 @@
 import React from "react";
 import Input from "@/components/ui/Input";
 
-const countryCodes = [{ code: "+27", label: "ZA (+27)" }];
+const countryCodes = [
+  { code: "+27", label: "ZA (+27)", placeholder: "82 123 4567" },
+  { code: "+268", label: "SZ (+268)", placeholder: "76 123 456" },
+];
 
 const genders = ["Male", "Female"];
 
 export default function PatientStep1({ formData, updateData, errors }: any) {
+  const countryCode = formData.countryCode || "+27";
+  const selectedCc =
+    countryCodes.find((c) => c.code === countryCode) || countryCodes[0];
+
   return (
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
       <div className="inline-flex items-center gap-2 rounded-full">
@@ -43,17 +50,17 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
           }
         />
 
-        {/* Phone with country code */}
+        {/* Phone with country code — ZA (+27) or Eswatini (+268) */}
         <div className="space-y-2">
           <label className="block text-sm font-bold text-slate-700">
             Mobile Number *
           </label>
           <div className="flex gap-2">
-            <div className="w-32">
+            <div className="w-36 shrink-0">
               <select
-                value={formData.countryCode || "+27"}
+                value={countryCode}
                 onChange={(e) => updateData("countryCode", e.target.value)}
-                className="w-full px-3 py-4 bg-slate-50/80 border-none rounded-full focus:ring-4 focus:ring-primary/10 focus:bg-white text-slate-900 outline-none transition-all duration-500 font-medium"
+                className="w-full px-3 py-4 bg-slate-50/80 border-none rounded-full focus:ring-4 focus:ring-primary/10 focus:bg-white text-slate-900 outline-none transition-all duration-500 font-medium text-sm"
               >
                 {countryCodes.map((cc) => (
                   <option key={cc.code} value={cc.code}>
@@ -65,7 +72,7 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
             <Input
               type="tel"
               value={formData.mobile || ""}
-              placeholder="71 000 0000"
+              placeholder={selectedCc.placeholder}
               error={errors?.mobile}
               onChange={(e) =>
                 updateData("mobile", e.target.value.replace(/\D/g, ""))
@@ -73,6 +80,9 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
               className="flex-1"
             />
           </div>
+          <p className="text-[11px] text-slate-400 px-1">
+            South Africa (+27) or Eswatini (+268)
+          </p>
           {errors?.mobile && (
             <p className="text-xs text-red-500 font-medium mt-1">
               {errors.mobile}

@@ -15,9 +15,11 @@ import {
   BiDownload,
   BiChevronDown,
   BiSearch,
+  BiReceipt,
 } from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BillingTabProps {
@@ -126,6 +128,7 @@ const TIERS = [
 function MiniTransactionTable({ transactions }: { transactions: any[] }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const PER_PAGE = 5;
 
   const filtered = useMemo(
@@ -170,9 +173,9 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
         <table className="w-full text-left min-w-[480px]">
           <thead>
             <tr className="bg-slate-50">
-              {["Date", "Description", "Amount", "Status"].map((h) => (
+              {["Date", "Description", "Amount", "Status", ""].map((h) => (
                 <th
-                  key={h}
+                  key={h || "actions"}
                   className="px-4 py-3 text-xs font-bold text-slate-500 tracking-normal"
                 >
                   {h}
@@ -197,6 +200,37 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <StatusPill status={t.status} />
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <button
+                    type="button"
+                    title="Download receipt PDF"
+                    disabled={loadingId === String(t._id || t.id)}
+                    onClick={async () => {
+                      const id = t._id || t.id;
+                      if (!id) return;
+                      setLoadingId(String(id));
+                      try {
+                        await downloadBillingPdf(
+                          {
+                            type:
+                              t.status === "completed"
+                                ? "receipt"
+                                : "invoice",
+                            transactionId: String(id),
+                          },
+                          "receipt.pdf",
+                        );
+                      } catch (e: any) {
+                        alert(e?.message || "Download failed");
+                      } finally {
+                        setLoadingId(null);
+                      }
+                    }}
+                    className="inline-flex w-8 h-8 items-center justify-center rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-all disabled:opacity-40"
+                  >
+                    <BiDownload size={15} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -726,31 +760,50 @@ export default function BillingTab({
             Payment History
           </h3>
           {transactions.length > 0 && (
-            <button
-              onClick={() => {
-                const csv = [
-                  ["Date", "Description", "Amount", "Status"].join(","),
-                  ...transactions.map((t) =>
-                    [
-                      fmtDate(t.timestamp),
-                      `"${t.description}"`,
-                      t.amount,
-                      t.status,
-                    ].join(","),
-                  ),
-                ].join("\n");
-                const blob = new Blob([csv], { type: "text/csv" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "transactions.csv";
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-              className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
-            >
-              <BiDownload size={14} /> Export CSV
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await downloadBillingPdf(
+                      { type: "report", reportKind: "statement" },
+                      "billing_statement.pdf",
+                    );
+                  } catch (e: any) {
+                    alert(e?.message || "Download failed");
+                  }
+                }}
+                className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+              >
+                <BiReceipt size={14} /> Statement PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const csv = [
+                    ["Date", "Description", "Amount", "Status"].join(","),
+                    ...transactions.map((t) =>
+                      [
+                        fmtDate(t.timestamp),
+                        `"${t.description}"`,
+                        t.amount,
+                        t.status,
+                      ].join(","),
+                    ),
+                  ].join("\n");
+                  const blob = new Blob([csv], { type: "text/csv" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "transactions.csv";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:underline"
+              >
+                <BiDownload size={14} /> CSV
+              </button>
+            </div>
           )}
         </div>
         <Card>

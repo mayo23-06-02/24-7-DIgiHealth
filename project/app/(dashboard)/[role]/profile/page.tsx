@@ -46,6 +46,9 @@ interface UserProfile {
   lastName: string;
   email: string;
   mobile: string;
+  /** E.164 for Firebase phone MFA (+27 / +268) */
+  phoneE164?: string;
+  phoneMasked?: string;
   saId: string;
   role: string;
   mfaEnabled: boolean;
@@ -219,10 +222,25 @@ export default function ProfilePage() {
           firstName: user.firstName,
           lastName: user.lastName,
           mobile: user.mobile,
-          mfaEnabled: user.mfaEnabled,
         }),
       });
       if (res.ok) {
+        const json = await res.json().catch(() => null);
+        if (json?.data) {
+          setUser((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  ...json.data,
+                  id: prev.id,
+                  email: prev.email,
+                  saId: prev.saId,
+                  role: prev.role,
+                  status: prev.status,
+                }
+              : prev,
+          );
+        }
         setToast({
           message: "Profile synchronized successfully.",
           type: "success",
@@ -869,7 +887,8 @@ export default function ProfilePage() {
               handleSavePassword={handleSavePassword}
               devices={devices}
               handleRevokeDevice={handleRevokeDevice}
-              mfaEnabled={user.mfaEnabled}
+              mfaEnabled={false}
+              email={user.email}
             />
           )}
 

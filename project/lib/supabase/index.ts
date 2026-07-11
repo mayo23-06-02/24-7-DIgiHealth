@@ -17,3 +17,13 @@ export {
   isSupabasePublicConfigured,
   isSupabaseAdminConfigured,
 } from "./env";
+export {
+  isSupabaseAuthConfigured,
+  sendMagicLink,
+  sendEmailOtp,
+  issueDigiHealthToken,
+  normalizeEmail,
+  isValidEmail,
+  getAppOrigin,
+  type OtpPurpose,
+} from "./auth";

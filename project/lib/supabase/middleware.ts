@@ -3,11 +3,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getSupabasePublishableKey, getSupabaseUrl } from "./env";
 
 /**
- * Optional Supabase client for middleware / proxy.
+ * Supabase client for middleware / proxy (session refresh).
  * Returns { supabase, response } — always use the returned response so cookie updates apply.
  *
- * Note: DigiHealth primary auth is Mongo JWT (proxy.ts), not Supabase Auth.
- * This helper is available if you add Supabase Auth later.
+ * DigiHealth APIs still authorize via app JWT cookie `token` (issued after Email OTP).
+ * Supabase cookies hold the Auth session for OTP / signOut.
  */
 export function createClient(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

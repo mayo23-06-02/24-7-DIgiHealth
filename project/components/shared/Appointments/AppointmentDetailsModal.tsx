@@ -58,25 +58,65 @@ export default function AppointmentDetailsModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Appointment Details" width="lg">
       <div className="space-y-6">
-        {/* Profile Section */}
-        <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+        {/* Profile Section — clickable when onViewProfile is provided */}
+        <div
+          className={`flex items-center gap-4 p-4 bg-slate-50 rounded-lg ${
+            onViewProfile && profileId
+              ? "cursor-pointer hover:bg-primary/5 hover:ring-1 hover:ring-primary/20 transition-all group"
+              : ""
+          }`}
+          role={onViewProfile && profileId ? "button" : undefined}
+          tabIndex={onViewProfile && profileId ? 0 : undefined}
+          onClick={() => {
+            if (onViewProfile && profileId) onViewProfile(profileId);
+          }}
+          onKeyDown={(e) => {
+            if (
+              onViewProfile &&
+              profileId &&
+              (e.key === "Enter" || e.key === " ")
+            ) {
+              e.preventDefault();
+              onViewProfile(profileId);
+            }
+          }}
+          aria-label={
+            onViewProfile && profileId
+              ? `View ${profileLabel.toLowerCase()} details for ${profileName}`
+              : undefined
+          }
+        >
           <Avatar
             name={profileName || "Unknown"}
             src={profileAvatar}
             size="lg"
           />
-          <div className="flex-1">
-            <p className="font-bold text-slate-800 text-lg">{profileName}</p>
-            <p className="text-sm text-slate-500">{profileLabel}</p>
+          <div className="flex-1 min-w-0">
+            <p
+              className={`font-bold text-slate-800 text-lg truncate ${
+                onViewProfile && profileId
+                  ? "group-hover:text-primary transition-colors"
+                  : ""
+              }`}
+            >
+              {profileName}
+            </p>
+            <p className="text-sm text-slate-500">
+              {profileLabel}
+              {onViewProfile && profileId ? " · Click to open profile" : ""}
+            </p>
           </div>
           {onViewProfile && profileId && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onViewProfile(profileId)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewProfile(profileId);
+              }}
               icon={isDoctor ? <BiUser size={16} /> : <BiUserPlus size={16} />}
             >
-              View {profileLabel} Profile
+              View {profileLabel}
             </Button>
           )}
         </div>

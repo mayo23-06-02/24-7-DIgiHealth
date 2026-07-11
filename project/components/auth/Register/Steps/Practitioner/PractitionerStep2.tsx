@@ -61,14 +61,41 @@ export default function PractitionerStep2({
           }
           placeholder="Optional"
         />
-        <Input
-          label="Mobile Number *"
-          type="tel"
-          value={formData.mobile || ""}
-          error={errors?.mobile}
-          onChange={(e) => updateData("mobile", e.target.value)}
-          placeholder="+27 71 000 0000"
-        />
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-slate-700">
+            Mobile Number *
+          </label>
+          <div className="flex gap-2">
+            <div className="w-36 shrink-0">
+              <select
+                value={formData.countryCode || "+27"}
+                onChange={(e) => updateData("countryCode", e.target.value)}
+                className="w-full px-3 py-4 bg-slate-50/80 border-none rounded-full focus:ring-4 focus:ring-primary/10 focus:bg-white text-slate-900 outline-none transition-all duration-500 font-medium text-sm"
+              >
+                <option value="+27">ZA (+27)</option>
+                <option value="+268">SZ (+268)</option>
+              </select>
+            </div>
+            <Input
+              type="tel"
+              value={formData.mobile || ""}
+              error={errors?.mobile}
+              onChange={(e) =>
+                updateData("mobile", e.target.value.replace(/\D/g, ""))
+              }
+              placeholder={
+                formData.countryCode === "+268" ? "76 123 456" : "82 123 4567"
+              }
+              className="flex-1"
+            />
+          </div>
+          <p className="text-[11px] text-slate-400 px-1">
+            South Africa (+27) or Eswatini (+268)
+          </p>
+          {errors?.mobile && (
+            <p className="text-xs text-red-500 font-medium">{errors.mobile}</p>
+          )}
+        </div>
         <Input
           label="Work Email *"
           type="email"

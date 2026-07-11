@@ -3,7 +3,8 @@ import { getSupabasePublishableKey, getSupabaseUrl } from "./env";
 
 /**
  * Browser Supabase client (publishable / anon key).
- * Use for optional client-side Storage helpers; app auth remains Mongo JWT.
+ * Used for Storage helpers and optional client-side Auth session reads.
+ * Primary OTP send/verify goes through /api/auth/otp/* (sets cookies server-side).
  */
 export function createClient() {
   const supabaseUrl = getSupabaseUrl();

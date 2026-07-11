@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, KeyboardEvent } from "react";
-import Avatar from "@/components/ui/Avatar";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { toast } from "react-hot-toast";
 import { PendingRequest } from "./types";
@@ -23,9 +23,22 @@ export default function PendingRequests({
   actionLoading,
   onRescheduleSuccess,
 }: PendingRequestsProps) {
+  const router = useRouter();
   const [selectedRequest, setSelectedRequest] = useState<PendingRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+
+  const handleViewPatient = useCallback(
+    (patientId: string) => {
+      if (!patientId) {
+        toast.error("Patient profile unavailable for this request");
+        return;
+      }
+      setShowDetailsModal(false);
+      router.push(`/practitioner/patients/${patientId}`);
+    },
+    [router],
+  );
 
   // Memoize the current date for "New" badge calculation
   const now = useMemo(() => Date.now(), []);
@@ -217,6 +230,7 @@ export default function PendingRequests({
             : null
         }
         userType="practitioner"
+        onViewProfile={handleViewPatient}
         onAccept={onAccept}
         onDecline={onDecline}
         onReschedule={(id) => handleReschedule(selectedRequest!)}

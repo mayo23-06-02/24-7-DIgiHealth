@@ -1,4 +1,5 @@
 import { roleConfig } from "./constants";
+import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
 
 export function validateStep(role: string, step: number, formData: any): Record<string, string> {
   const err: Record<string, string> = {};
@@ -40,12 +41,14 @@ export function validateStep(role: string, step: number, formData: any): Record<
         }
       }
 
-      // Phone with country code: validate the number part
-      const mobile = formData.mobile?.replace(/\s+/g, "");
-      if (!mobile || mobile.length < 4) {
-        err.mobile = "Please enter a valid phone number.";
-      } else if (!/^\d+$/.test(mobile)) {
-        err.mobile = "Phone number must contain only digits.";
+      // Phone: South Africa (+27) or Eswatini (+268)
+      const phone = composeRegistrationPhone(
+        formData.countryCode,
+        formData.mobile,
+      );
+      if (!phone) {
+        err.mobile =
+          "Enter a valid South Africa (+27) or Eswatini (+268) mobile number.";
       }
 
       if (!formData.email?.trim() || !formData.email.includes("@")) {
@@ -63,8 +66,7 @@ export function validateStep(role: string, step: number, formData: any): Record<
     // Step 6: Preview – not validated here.
   }
 
-  // Password validation – for patient, step 4 (since steps: 1,2,3,4,5,6; password is step 4)
-  const totalSteps = roleConfig[role]?.steps.length;
+  // Security: password + email OTP – patient step 4
   if (role === "patient" && step === 4) {
     if (!formData.password) {
       err.password = "Password is required.";
@@ -115,7 +117,7 @@ export function validateStep(role: string, step: number, formData: any): Record<
 
     // Step 4: Facility Media – no validation (all uploads optional)
 
-    // Step 5: Password (since hospital steps are 6 total, password is step 5)
+    // Step 5: password + email OTP
     if (step === 5) {
       if (!formData.password) {
         err.password = "Password is required.";
@@ -151,9 +153,13 @@ if (role === "practitioner") {
   if (step === 2) {
     if (!formData.fullName?.trim()) err.fullName = "Full name is required.";
     // SA ID is optional – skip validation
-    const cleanMobile = formData.mobile?.replace(/\s+/g, "");
-    if (!cleanMobile?.match(/^(\+27|0)[6-8][0-9]{8}$/)) {
-      err.mobile = "Enter a valid SA mobile number.";
+    const phone = composeRegistrationPhone(
+      formData.countryCode,
+      formData.mobile,
+    );
+    if (!phone) {
+      err.mobile =
+        "Enter a valid South Africa (+27) or Eswatini (+268) mobile number.";
     }
     if (!formData.email?.trim() || !formData.email.includes("@")) {
       err.email = "A valid email address is required.";
@@ -181,7 +187,7 @@ if (role === "practitioner") {
     }
   }
 
-  // Step 5: Password (since total steps = 6, password is step 5)
+  // Step 5: password + email OTP
   if (step === 5) {
     if (!formData.password) {
       err.password = "Password is required.";

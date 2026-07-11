@@ -4,6 +4,13 @@ import User from "@/lib/models/User";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 
+/**
+ * POST /api/auth/login
+ * Password login. Blocks when emailVerified === false
+ * (new accounts must complete /verify-email first).
+ *
+ * Legacy users without emailVerified field are treated as verified.
+ */
 export async function POST(request: Request) {
   try {
     await connectToDatabase();
@@ -16,14 +23,50 @@ export async function POST(request: Request) {
       );
     }
 
-    // Try finding by email or SA ID
     const user = await User.findOne({
       $or: [{ email: identifier.trim() }, { saId: identifier.trim() }],
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: `User with email or ID '${identifier.trim()}' not found` },
+        {
+          error: `User with email or ID '${identifier.trim()}' not found`,
+        },
+        { status: 401 },
+      );
+    }
+
+    if (user.status === "suspended") {
+      return NextResponse.json(
+        { error: "Account is suspended. Contact support." },
+        { status: 403 },
+      );
+    }
+
+    // Explicit false only — undefined/null (legacy seed users) allowed through
+    if (user.emailVerified === false) {
+      return NextResponse.json(
+        {
+          error:
+            "Please verify your email before signing in. Check your inbox for a code, or request a new one.",
+          emailVerified: false,
+          requiresEmailVerification: true,
+          email: user.email,
+          userId: user._id.toString(),
+        },
+        { status: 403 },
+      );
+    }
+
+    if (
+      !user.passwordHash ||
+      user.passwordHash.startsWith("otp_only:")
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "This account has no password set. Complete registration with a password, or contact support.",
+        },
         { status: 401 },
       );
     }
@@ -36,8 +79,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const responsePayload = {
-      mfaRequired: user.mfaEnabled,
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const token = await new SignJWT({
+      userId: user._id.toString(),
+      role: user.role,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime("24h")
+      .sign(secret);
+
+    const response = NextResponse.json({
+      mfaRequired: false,
+      emailVerified: true,
       userId: user._id.toString(),
       user: {
         id: user._id.toString(),
@@ -45,42 +101,21 @@ export async function POST(request: Request) {
         email: user.email,
         firstName: user.firstName,
       },
-    };
+    });
 
-    const response = NextResponse.json(responsePayload);
-
-    // Set secure cookie if MFA is bypassed or disabled
-    if (!user.mfaEnabled) {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-      const token = await new SignJWT({
-        userId: user._id.toString(),
-        role: user.role,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      })
-        .setProtectedHeader({ alg: "HS256" })
-        .setExpirationTime("24h") // or '15m' if implementing refresh flow
-        .sign(secret);
-
-      response.cookies.set("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 86400, // 1 day
-      });
-    }
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 86400,
+    });
 
     return response;
   } catch (error: any) {
     console.error("Login Error:", error);
     return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error.message,
-        stack: String(error.stack),
-      },
+      { error: "Internal server error", details: error.message },
       { status: 500 },
     );
   }

@@ -8,6 +8,7 @@ import {
   BiLoaderAlt,
   BiShieldQuarter,
   BiCheckCircle,
+  BiEnvelope,
 } from "react-icons/bi";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -28,6 +29,14 @@ interface SecurityTabProps {
   devices: Device[];
   handleRevokeDevice: (id: string) => void;
   mfaEnabled?: boolean;
+  phoneE164?: string | null;
+  mobile?: string | null;
+  onMfaUpdated?: (data: {
+    mfaEnabled: boolean;
+    phoneE164?: string;
+    phoneMasked?: string;
+  }) => void;
+  email?: string | null;
 }
 
 export default function SecurityTab({
@@ -37,10 +46,40 @@ export default function SecurityTab({
   handleSavePassword,
   devices,
   handleRevokeDevice,
-  mfaEnabled,
+  email,
 }: SecurityTabProps) {
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
+      <ProfileSection
+        icon={<BiEnvelope size={22} />}
+        title="Email verification"
+        description="Email OTP is used once during registration, not on every sign-in"
+        color="emerald"
+      >
+        <div className="rounded-lg border border-emerald-100 bg-emerald-50/80 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <BiShieldQuarter className="text-emerald-600 shrink-0" size={22} />
+            <div>
+              <p className="text-sm font-bold text-slate-800">
+                Password login
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Sign in with email (or SA ID) and password. Email OTP was only
+                required when you registered.
+              </p>
+              {email && (
+                <p className="text-xs font-semibold text-slate-600 mt-1">
+                  {email}
+                </p>
+              )}
+            </div>
+          </div>
+          <span className="shrink-0 text-xs font-bold px-3 py-2 rounded-full bg-emerald-600 text-white">
+            Active
+          </span>
+        </div>
+      </ProfileSection>
+
       <ProfileSection
         icon={<BiLockAlt size={22} />}
         title="Password"
@@ -102,41 +141,6 @@ export default function SecurityTab({
           >
             {isSaving ? "Updating…" : "Update password"}
           </Button>
-        </div>
-      </ProfileSection>
-
-      <ProfileSection
-        icon={<BiShieldQuarter size={22} />}
-        title="Multi-factor authentication"
-        description="An extra layer of protection on sign-in"
-        color={mfaEnabled ? "emerald" : "amber"}
-      >
-        <div
-          className={`rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-            mfaEnabled
-              ? "bg-emerald-50/80 border-emerald-100"
-              : "bg-amber-50/80 border-amber-100"
-          }`}
-        >
-          <div>
-            <p className="text-sm font-bold text-slate-800">
-              {mfaEnabled ? "MFA is enabled" : "MFA is not enabled"}
-            </p>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {mfaEnabled
-                ? "Your account requires a second factor when signing in."
-                : "Enable MFA from identity settings or ask support to strengthen your account."}
-            </p>
-          </div>
-          <span
-            className={`shrink-0 text-xs font-bold px-3 py-2 rounded-full ${
-              mfaEnabled
-                ? "bg-emerald-600 text-white"
-                : "bg-amber-500 text-white"
-            }`}
-          >
-            {mfaEnabled ? "Protected" : "Recommended"}
-          </span>
         </div>
       </ProfileSection>
 

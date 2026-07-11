@@ -23,6 +23,18 @@ export async function PUT(req: NextRequest) {
     const user = await User.findById(userId);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+    // OTP-only accounts never had a usable password
+    if (!user.passwordHash || user.passwordHash.startsWith('otp_only:')) {
+      return NextResponse.json(
+        {
+          error:
+            'This account signs in with email OTP only. Password change is not available.',
+          code: 'AUTH_OTP_ONLY',
+        },
+        { status: 400 },
+      );
+    }
+
     const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isMatch) {
       return NextResponse.json({ error: 'Invalid current password' }, { status: 401 });

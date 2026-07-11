@@ -15,7 +15,7 @@ import HospitalStep2 from "./Steps/Hospital/HospitalStep2";
 import HospitalStep3 from "./Steps/Hospital/HospitalStep3";
 import HospitalStep4 from "./Steps/Hospital/HospitalStep4";
 
-import PasswordCreationStep from "./Shared/PasswordCreationStep";
+import EmailOtpStep from "./Shared/EmailOtpStep";
 import PreviewStep from "./PreviewStep";
 
 type StepComponent = React.ComponentType<any>;
@@ -25,7 +25,7 @@ export const stepComponents: Record<string, StepComponent[]> = {
     PatientStep1,
     PatientStep2,
     PatientStep3,
-    PatientStep4,
+    EmailOtpStep, // was PatientStep4 password
     PatientStep5,
     PreviewStep,
   ],
@@ -34,7 +34,7 @@ export const stepComponents: Record<string, StepComponent[]> = {
     PractitionerStep2,
     PractitionerStep3,
     PractitionerStep4,
-    PasswordCreationStep,
+    EmailOtpStep, // was password
     PreviewStep,
   ],
   hospital: [
@@ -42,7 +42,7 @@ export const stepComponents: Record<string, StepComponent[]> = {
     HospitalStep2,
     HospitalStep3,
     HospitalStep4,
-    PasswordCreationStep,
+    EmailOtpStep, // was password
     PreviewStep,
   ],
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { BiRefresh, BiDollarCircle, BiLoaderAlt } from "react-icons/bi";
+import { BiRefresh, BiDollarCircle, BiLoaderAlt, BiReceipt } from "react-icons/bi";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Badge from "@/components/ui/Badge";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
+import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 export default function AdminFinancePage() {
   const [data, setData] = useState<any>(null);
@@ -77,6 +78,28 @@ export default function AdminFinancePage() {
                 </button>
               ))}
             </div>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={async () => {
+                try {
+                  await downloadBillingPdf(
+                    { type: "report", reportKind: "full" },
+                    "platform_finance_report.pdf",
+                  );
+                  toast.success("Report downloaded");
+                } catch (e: unknown) {
+                  toast.error(
+                    e instanceof Error ? e.message : "PDF download failed",
+                  );
+                }
+              }}
+              icon={<BiReceipt size={16} />}
+              iconPosition="left"
+              className="!rounded-lg !max-w-none normal-case !tracking-normal"
+            >
+              Report PDF
+            </Button>
             <Button
               size="sm"
               variant="outline"

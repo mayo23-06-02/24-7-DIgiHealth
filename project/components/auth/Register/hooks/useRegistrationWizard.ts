@@ -134,7 +134,19 @@ export function useRegistrationWizard(role: string) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Registration failed");
       await clearDraft();
-      router.push("/login?registered=true");
+      const email = (
+        formData.email ||
+        formData.adminEmail ||
+        data.email ||
+        ""
+      )
+        .toString()
+        .trim()
+        .toLowerCase();
+      // Account created — user must verify email before login
+      router.push(
+        `/verify-email?email=${encodeURIComponent(email)}&registered=1`,
+      );
     } catch (err: any) {
       setGlobalError(err.message ?? "Submission failed. Please try again.");
       setSubmitting(false);

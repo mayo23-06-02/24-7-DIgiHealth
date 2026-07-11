@@ -1,11 +1,25 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
-import { PatientProfile, PractitionerProfile, HospitalAdminProfile } from "@/lib/models/RoleProfiles";
+import {
+  PatientProfile,
+  PractitionerProfile,
+  HospitalAdminProfile,
+} from "@/lib/models/RoleProfiles";
 import { Anthropometric, MedicalContext } from "@/lib/models/ClinicalData";
 import Facility from "@/lib/models/Facility";
 import bcrypt from "bcryptjs";
+import { normalizeEmail } from "@/lib/supabase/auth";
+import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
 
+/**
+ * POST /api/auth/register
+ * Creates DigiHealth account (password). Email is unverified until
+ * the user clicks the Supabase magic/sign-in link from /verify-email.
+ *
+ * Body: { role, formData }
+ * Does NOT issue a session JWT — user must verify email then login.
+ */
 export async function POST(request: Request) {
   try {
     await connectToDatabase();
@@ -14,48 +28,84 @@ export async function POST(request: Request) {
     if (!wizardRole || !formData) {
       return NextResponse.json(
         { error: "Missing registration data" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // 1. Check if user already exists
+    const formEmail = normalizeEmail(
+      formData.email || formData.adminEmail || "",
+    );
+
+    if (!formEmail || !formEmail.includes("@")) {
+      return NextResponse.json(
+        { error: "A valid email address is required" },
+        { status: 400 },
+      );
+    }
+
     const existingUser = await User.findOne({
       $or: [
-        { email: formData.email?.toLowerCase() || formData.adminEmail?.toLowerCase() },
-        { saId: formData.saId }
-      ].filter(cond => cond.email || cond.saId)
+        { email: formEmail },
+        formData.saId ? { saId: formData.saId } : null,
+      ].filter(Boolean) as any[],
     });
 
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email or SA ID already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
-    // 2. Hash password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(formData.password, salt);
+    if (!formData.password || String(formData.password).length < 8) {
+      return NextResponse.json(
+        { error: "A password of at least 8 characters is required." },
+        { status: 400 },
+      );
+    }
 
-    // 3. Map wizard role to model role
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(String(formData.password), salt);
+
+    const phone = composeRegistrationPhone(
+      formData.countryCode,
+      formData.mobile,
+    );
+    if (formData.mobile && !phone) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid mobile number. Use a South Africa (+27) or Eswatini (+268) number.",
+        },
+        { status: 400 },
+      );
+    }
+
     let modelRole: string = wizardRole;
     if (wizardRole === "hospital") modelRole = "hospital_admin";
 
-    // 4. Create User
-    const userData = {
-      email: (formData.email || formData.adminEmail || "").toLowerCase(),
+    const newUser = await User.create({
+      email: formEmail,
       passwordHash,
       role: modelRole as any,
-      firstName: formData.firstName || formData.fullName?.split(" ")[0] || formData.adminName?.split(" ")[0] || "User",
-      lastName: formData.lastName || formData.fullName?.split(" ").slice(1).join(" ") || formData.adminName?.split(" ").slice(1).join(" ") || "Registry",
+      firstName:
+        formData.firstName ||
+        formData.fullName?.split(" ")[0] ||
+        formData.adminName?.split(" ")[0] ||
+        "User",
+      lastName:
+        formData.lastName ||
+        formData.fullName?.split(" ").slice(1).join(" ") ||
+        formData.adminName?.split(" ").slice(1).join(" ") ||
+        "Registry",
       saId: formData.saId,
-      mobile: formData.mobile,
-      status: "active" as any,
-    };
+      mobile: phone?.e164 || formData.mobile,
+      phoneE164: phone?.e164,
+      status: "pending_verification" as any,
+      emailVerified: false,
+      mfaEnabled: false,
+    } as any);
 
-    const newUser = await User.create(userData as any);
-
-    // Claim any Supabase registration-pending media for this user
     try {
       const regToken =
         formData.registrationMediaToken ||
@@ -69,9 +119,7 @@ export async function POST(request: Request) {
       console.warn("[register] media claim skipped:", e);
     }
 
-    // 5. Create Profile based on role
     if (wizardRole === "patient") {
-      // Create Main Profile
       await PatientProfile.create({
         userId: newUser._id,
         dateOfBirth: formData.dob ? new Date(formData.dob) : new Date(),
@@ -79,31 +127,32 @@ export async function POST(request: Request) {
         emergencyContact: {
           name: formData.emergencyName || "N/A",
           phone: formData.emergencyPhone || "N/A",
-          relationship: "N/A"
+          relationship: "N/A",
         },
         popiaConsentDate: new Date(),
-        subscriptionTier: "pro", 
+        subscriptionTier: "pro",
         profilePhoto: formData.profilePhoto,
-        medicalDocuments: formData.medicalDocument ? [formData.medicalDocument] : [],
+        medicalDocuments: formData.medicalDocument
+          ? [formData.medicalDocument]
+          : [],
       });
 
-      // Create Initial Vitals (if provided)
       if (formData.heightCm || formData.weightKg) {
         const height = parseFloat(formData.heightCm) || 0;
         const weight = parseFloat(formData.weightKg) || 0;
-        const bmi = height > 0 ? (weight / (height / 100) ** 2).toFixed(1) : 0;
-        
+        const bmi =
+          height > 0 ? (weight / (height / 100) ** 2).toFixed(1) : 0;
+
         await Anthropometric.create({
           patientId: newUser._id,
           heightCm: height,
           weightKg: weight,
           bmi: parseFloat(bmi as string),
           bloodType: formData.bloodType || "Unknown",
-          dateRecorded: new Date()
+          dateRecorded: new Date(),
         });
       }
 
-      // Create Medical Context (Allergies & Conditions)
       await MedicalContext.create({
         patientId: newUser._id,
         chronicConditions: formData.chronicConditions || [],
@@ -111,10 +160,10 @@ export async function POST(request: Request) {
           allergen: a,
           severity: "moderate",
           reaction: "Unknown",
-          source: "patient"
+          source: "patient",
         })),
         currentMedications: [],
-        familyHistory: []
+        familyHistory: [],
       });
     } else if (wizardRole === "practitioner") {
       await PractitionerProfile.create({
@@ -140,7 +189,10 @@ export async function POST(request: Request) {
     } else if (wizardRole === "hospital") {
       const newFacility = await Facility.create({
         name: formData.facilityName,
-        type: formData.facilityType === "NGO / Clinic" ? "ngo" : (formData.facilityType?.toLowerCase() || "private"),
+        type:
+          formData.facilityType === "NGO / Clinic"
+            ? "ngo"
+            : formData.facilityType?.toLowerCase() || "private",
         location: {
           address: formData.street,
           city: formData.city,
@@ -158,7 +210,6 @@ export async function POST(request: Request) {
         status: "active",
       });
 
-      // Link admin user to the new facility — CRITICAL for dashboard to work
       await HospitalAdminProfile.create({
         userId: newUser._id,
         hospitalId: newFacility._id,
@@ -166,24 +217,33 @@ export async function POST(request: Request) {
         permissions: ["all"],
       });
 
-      // Also update the user record with the facilityId for quick lookups
-      await User.findByIdAndUpdate(newUser._id, { facilityId: newFacility._id });
+      await User.findByIdAndUpdate(newUser._id, {
+        facilityId: newFacility._id,
+      });
     }
 
     return NextResponse.json({
       success: true,
-      message: "Registration successful",
-      userId: newUser._id
+      message: "Account created. Please verify your email to continue.",
+      requiresEmailVerification: true,
+      userId: newUser._id.toString(),
+      email: formEmail,
+      user: {
+        id: newUser._id.toString(),
+        role: newUser.role,
+        email: formEmail,
+        firstName: newUser.firstName,
+        emailVerified: false,
+      },
     });
-
   } catch (error: any) {
     console.error("Registration Error:", error);
     return NextResponse.json(
       {
         error: "Registration failed",
-        details: error.message
+        details: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

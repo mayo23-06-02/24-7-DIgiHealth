@@ -1,25 +1,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-interface LoginResponse {
-  user?: { role: string };
-  mfaRequired?: boolean;
-  userId?: string;
-  error?: string;
-}
-
 export function useLogin() {
   const router = useRouter();
-  const [role, setRole] = useState<"Patient" | "Practitioner" | "Admin">("Patient");
+  const [role, setRole] = useState<"Patient" | "Practitioner" | "Admin">(
+    "Patient",
+  );
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // MFA state
-  const [mfaRequired, setMfaRequired] = useState(false);
-  const [mfaToken, setMfaToken] = useState("");
-  const [tempUserId, setTempUserId] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,54 +26,31 @@ export function useLogin() {
           role: role.toLowerCase(),
         }),
       });
-      const data: LoginResponse = await res.json();
-
-      if (res.ok) {
-        if (data.mfaRequired) {
-          setMfaRequired(true);
-          setTempUserId(data.userId || "");
-        } else {
-          router.push(`/${data.user?.role}`);
-        }
-      } else {
-        setError(data.error || "Login failed");
-      }
-    } catch {
-      setError("Network error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMfaVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/auth/mfa/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: tempUserId, token: mfaToken }),
-      });
       const data = await res.json();
 
       if (res.ok) {
         router.push(`/${data.user?.role}`);
-      } else {
-        setError(data.error || "MFA verification failed");
+        return;
       }
+
+      // Unverified email — send user to verify page
+      if (
+        res.status === 403 &&
+        (data.requiresEmailVerification || data.emailVerified === false)
+      ) {
+        const email = (data.email || identifier || "").toString().trim();
+        router.push(
+          `/verify-email?email=${encodeURIComponent(email)}&from=login`,
+        );
+        return;
+      }
+
+      setError(data.error || "Login failed");
     } catch {
       setError("Network error");
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetMfa = () => {
-    setMfaRequired(false);
-    setMfaToken("");
-    setTempUserId("");
   };
 
   return {
@@ -95,11 +62,6 @@ export function useLogin() {
     setPassword,
     loading,
     error,
-    mfaRequired,
-    mfaToken,
-    setMfaToken,
     handleLogin,
-    handleMfaVerify,
-    resetMfa,
   };
 }

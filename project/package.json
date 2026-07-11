@@ -32,7 +32,6 @@
     "ably": "^2.24.0",
     "chart.js": "^4.5.1",
     "cloudinary": "^2.9.0",
-    "firebase": "^12.14.0",
     "jose": "^6.2.2",
     "jsonwebtoken": "^9.0.3",
     "livekit-client": "^2.18.7",

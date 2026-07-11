@@ -10,8 +10,10 @@ import {
   BiDownload,
   BiCalendar,
   BiFilter,
+  BiReceipt,
 } from "react-icons/bi";
 import Avatar from "@/components/ui/Avatar";
+import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 const STATUS_BADGE: Record<string, string> = {
   paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -97,12 +99,30 @@ export default function PractitionerBillingPage() {
             Track your consultation fees and payouts
           </p>
         </div>
-        <button
-          onClick={exportCSV}
-          className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors w-fit"
-        >
-          <BiDownload size={18} /> Export CSV
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await downloadBillingPdf(
+                  { type: "report", reportKind: "full" },
+                  "earnings_report.pdf",
+                );
+              } catch (e: any) {
+                alert(e?.message || "PDF download failed");
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors w-fit"
+          >
+            <BiReceipt size={18} /> Report PDF
+          </button>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors w-fit"
+          >
+            <BiDownload size={18} /> Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Summary KPIs */}
@@ -237,8 +257,33 @@ export default function PractitionerBillingPage() {
                       </span>
                     </td>
                     <td className="py-4 px-5 text-right">
-                      <button className="text-xs font-bold text-primary hover:underline">
-                        Invoice
+                      <button
+                        type="button"
+                        className="text-xs font-bold text-primary hover:underline"
+                        onClick={async () => {
+                          const id = t._id || t.id;
+                          if (!id) {
+                            alert("No transaction id for this row");
+                            return;
+                          }
+                          try {
+                            await downloadBillingPdf(
+                              {
+                                type:
+                                  t.status === "paid" ||
+                                  t.status === "completed"
+                                    ? "receipt"
+                                    : "invoice",
+                                transactionId: String(id),
+                              },
+                              "invoice.pdf",
+                            );
+                          } catch (e: any) {
+                            alert(e?.message || "PDF download failed");
+                          }
+                        }}
+                      >
+                        PDF
                       </button>
                     </td>
                   </tr>

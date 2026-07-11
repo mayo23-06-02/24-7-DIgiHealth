@@ -83,6 +83,7 @@ export default auth(async function middleware(request: NextRequest & { auth: any
   // ---------- 2. Public routes ----------
   if (
     pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/api/media/sign-upload-public') ||
     pathname.startsWith('/api/media/complete-public')
   ) {
@@ -96,10 +97,12 @@ export default auth(async function middleware(request: NextRequest & { auth: any
   const token = request.cookies.get('token')?.value;
   const user = session?.user || null;
 
-  // Login / register pages
+  // Login / register / verify-email / auth callback pages
   if (
     pathname === '/login' ||
-    pathname.startsWith('/register')
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/verify-email') ||
+    pathname.startsWith('/auth/')
   ) {
     if (token || user) {
       try {

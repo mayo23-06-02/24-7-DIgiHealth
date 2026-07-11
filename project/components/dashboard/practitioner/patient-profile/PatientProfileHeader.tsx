@@ -51,16 +51,7 @@ export default function PatientProfileHeader({
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div className="space-y-4">
-        <Link
-          href="/practitioner"
-          className="inline-flex items-center gap-2 text-xs font-bold tracking-normal text-slate-500 hover:text-primary transition-all group"
-        >
-          <BiArrowBack
-            className="group-hover:-translate-x-1 transition-transform"
-            size={14}
-          />
-          Back to Patients
-        </Link>
+        
         <div className="flex items-center gap-5">
           <Avatar name={patient.fullName} size="xl" />
           <div>

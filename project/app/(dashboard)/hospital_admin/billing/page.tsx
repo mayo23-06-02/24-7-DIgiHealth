@@ -10,7 +10,9 @@ import {
   BiDownload,
   BiLoaderAlt,
   BiCalendar,
+  BiReceipt,
 } from "react-icons/bi";
+import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 export default function BillingPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -106,12 +108,30 @@ export default function BillingPage() {
             Revenue tracking and payment records
           </p>
         </div>
-        <button
-          onClick={exportCSV}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-        >
-          <BiDownload size={18} /> Export CSV
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await downloadBillingPdf(
+                  { type: "report", reportKind: "full" },
+                  "facility_billing_report.pdf",
+                );
+              } catch (e: any) {
+                alert(e?.message || "PDF download failed");
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
+          >
+            <BiReceipt size={18} /> Report PDF
+          </button>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <BiDownload size={18} /> Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Summary KPIs */}
@@ -219,6 +239,9 @@ export default function BillingPage() {
                         : "↓"
                       : ""}
                   </th>
+                  <th className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider text-right">
+                    PDF
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 bg-white">
@@ -247,12 +270,42 @@ export default function BillingPage() {
                     <td className="py-4 px-5 text-xs text-slate-500">
                       {new Date(t.timestamp).toLocaleDateString("en-ZA")}
                     </td>
+                    <td className="py-4 px-5 text-right">
+                      <button
+                        type="button"
+                        className="text-xs font-bold text-primary hover:underline"
+                        onClick={async () => {
+                          const id = t._id || t.id;
+                          if (!id) {
+                            alert("No transaction id");
+                            return;
+                          }
+                          try {
+                            await downloadBillingPdf(
+                              {
+                                type:
+                                  t.status === "paid" ||
+                                  t.status === "completed"
+                                    ? "receipt"
+                                    : "invoice",
+                                transactionId: String(id),
+                              },
+                              "invoice.pdf",
+                            );
+                          } catch (e: any) {
+                            alert(e?.message || "PDF download failed");
+                          }
+                        }}
+                      >
+                        Download
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {paginated.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="py-10 text-center text-slate-500"
                     >
                       No transactions found.

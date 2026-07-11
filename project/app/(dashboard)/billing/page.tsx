@@ -38,6 +38,7 @@ import {
 } from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BillingData {
@@ -157,6 +158,8 @@ function TransactionTable({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
+  const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
   const PER_PAGE = 10;
 
   const filtered = useMemo(() => {
@@ -172,6 +175,36 @@ function TransactionTable({
 
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
+
+  const downloadTxnPdf = async (t: any, kind: "receipt" | "invoice") => {
+    const id = t._id || t.id;
+    if (!id) return;
+    setPdfLoadingId(String(id));
+    try {
+      await downloadBillingPdf(
+        { type: kind, transactionId: String(id) },
+        `${kind}.pdf`,
+      );
+    } catch (e: any) {
+      alert(e?.message || "Could not download PDF");
+    } finally {
+      setPdfLoadingId(null);
+    }
+  };
+
+  const downloadReportPdf = async () => {
+    setReportLoading(true);
+    try {
+      await downloadBillingPdf(
+        { type: "report", reportKind: "statement" },
+        "billing_report.pdf",
+      );
+    } catch (e: any) {
+      alert(e?.message || "Could not download report");
+    } finally {
+      setReportLoading(false);
+    }
+  };
 
   return (
     <Card noPadding>
@@ -211,40 +244,52 @@ function TransactionTable({
             ))}
           </select>
           {showDownload && (
-            <button
-              onClick={() => {
-                const csv = [
-                  [
-                    "Date",
-                    "Description",
-                    "Category",
-                    "Amount",
-                    "Status",
-                    "Provider",
-                  ].join(","),
-                  ...filtered.map((t) =>
+            <>
+              <button
+                type="button"
+                onClick={() => void downloadReportPdf()}
+                disabled={reportLoading}
+                className="flex items-center gap-2 px-4 py-3 rounded-lg bg-primary text-white text-xs font-bold tracking-normal hover:bg-primary/80 transition-all shadow-none active:scale-95 disabled:opacity-50"
+              >
+                <BiReceipt size={14} />
+                {reportLoading ? "PDF…" : "Report PDF"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const csv = [
                     [
-                      fmtDate(t.timestamp),
-                      `"${t.description}"`,
-                      t.category,
-                      t.amount,
-                      t.status,
-                      t.provider,
+                      "Date",
+                      "Description",
+                      "Category",
+                      "Amount",
+                      "Status",
+                      "Provider",
                     ].join(","),
-                  ),
-                ].join("\n");
-                const blob = new Blob([csv], { type: "text/csv" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "transactions.csv";
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-              className="flex items-center gap-2 px-4 py-3 rounded-lg bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all shadow-none active:scale-95"
-            >
-              <BiDownload size={14} /> Export CSV
-            </button>
+                    ...filtered.map((t) =>
+                      [
+                        fmtDate(t.timestamp),
+                        `"${t.description}"`,
+                        t.category,
+                        t.amount,
+                        t.status,
+                        t.provider,
+                      ].join(","),
+                    ),
+                  ].join("\n");
+                  const blob = new Blob([csv], { type: "text/csv" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "transactions.csv";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 text-slate-600 text-xs font-bold tracking-normal hover:border-primary/30 hover:text-primary transition-all active:scale-95"
+              >
+                <BiDownload size={14} /> CSV
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -324,9 +369,35 @@ function TransactionTable({
                     <StatusPill status={t.status} />
                   </td>
                   <td className="px-6 py-4">
-                    <button className="w-8 h-8 rounded-lg text-slate-300 hover:text-primary hover:bg-primary/5 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
-                      <BiDownload size={16} />
-                    </button>
+                    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        title="Download receipt / invoice PDF"
+                        disabled={
+                          pdfLoadingId === String(t._id || t.id)
+                        }
+                        onClick={() =>
+                          void downloadTxnPdf(
+                            t,
+                            t.status === "completed" ? "receipt" : "invoice",
+                          )
+                        }
+                        className="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 flex items-center justify-center transition-all disabled:opacity-40"
+                      >
+                        <BiDownload size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        title="Download invoice PDF"
+                        disabled={
+                          pdfLoadingId === String(t._id || t.id)
+                        }
+                        onClick={() => void downloadTxnPdf(t, "invoice")}
+                        className="hidden md:flex w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 items-center justify-center transition-all disabled:opacity-40"
+                      >
+                        <BiReceipt size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -945,27 +1016,36 @@ function PractitionerBillingView({
               <BiBuildings size={18} /> Update Bank Account
             </button>
             <button
-              onClick={() => {
-                const csv =
-                  ["Date,Amount,Status,Consultations,Period"].join("\n") +
-                  "\n" +
-                  payoutRequests
-                    .map(
-                      (p: any) =>
-                        `${fmtDate(p.requestedAt)},${p.amount},${p.status},${p.consultationCount},${fmtDate(p.periodFrom)}-${fmtDate(p.periodTo)}`,
-                    )
-                    .join("\n");
-                const blob = new Blob([csv], { type: "text/csv" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "payout_report.csv";
-                a.click();
-                URL.revokeObjectURL(url);
+              type="button"
+              onClick={async () => {
+                try {
+                  await downloadBillingPdf(
+                    { type: "report", reportKind: "payouts" },
+                    "payout_report.pdf",
+                  );
+                } catch (e: any) {
+                  alert(e?.message || "Failed to download payout report");
+                }
               }}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs tracking-normal hover:bg-slate-200 transition-all"
             >
-              <BiDownload size={18} /> Download Payout Report
+              <BiDownload size={18} /> Download Payout Report (PDF)
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await downloadBillingPdf(
+                    { type: "report", reportKind: "full" },
+                    "earnings_report.pdf",
+                  );
+                } catch (e: any) {
+                  alert(e?.message || "Failed to download earnings report");
+                }
+              }}
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs tracking-normal hover:bg-slate-200 transition-all"
+            >
+              <BiReceipt size={18} /> Full Earnings Report (PDF)
             </button>
           </div>
         </Card>
@@ -1270,32 +1350,53 @@ function HospitalAdminBillingView({
           <h3 className="text-lg font-bold text-slate-800 font-grotesk">
             Practitioner Payouts
           </h3>
-          <button
-            onClick={() => {
-              const csv =
-                ["Practitioner,Amount,Status,Period,Consultations"].join("\n") +
-                "\n" +
-                payoutRequests
-                  .map((p: any) => {
-                    const pract = p.practitionerId;
-                    const name = pract?.firstName
-                      ? `${pract.firstName} ${pract.lastName}`
-                      : "—";
-                    return `"${name}",${p.amount},${p.status},"${fmtDate(p.periodFrom)}-${fmtDate(p.periodTo)}",${p.consultationCount}`;
-                  })
-                  .join("\n");
-              const blob = new Blob([csv], { type: "text/csv" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "payouts.csv";
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            className="flex items-center gap-2 text-xs font-bold text-primary hover:underline"
-          >
-            <BiDownload size={14} /> Export Report
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await downloadBillingPdf(
+                    { type: "report", reportKind: "full" },
+                    "facility_billing_report.pdf",
+                  );
+                } catch (e: any) {
+                  alert(e?.message || "Failed to download PDF");
+                }
+              }}
+              className="flex items-center gap-2 text-xs font-bold text-primary hover:underline"
+            >
+              <BiReceipt size={14} /> Export PDF
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const csv =
+                  ["Practitioner,Amount,Status,Period,Consultations"].join(
+                    "\n",
+                  ) +
+                  "\n" +
+                  payoutRequests
+                    .map((p: any) => {
+                      const pract = p.practitionerId;
+                      const name = pract?.firstName
+                        ? `${pract.firstName} ${pract.lastName}`
+                        : "—";
+                      return `"${name}",${p.amount},${p.status},"${fmtDate(p.periodFrom)}-${fmtDate(p.periodTo)}",${p.consultationCount}`;
+                    })
+                    .join("\n");
+                const blob = new Blob([csv], { type: "text/csv" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "payouts.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:underline"
+            >
+              <BiDownload size={14} /> CSV
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left min-w-[800px]">
@@ -1875,14 +1976,35 @@ export default function BillingPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={fetchData}
-          disabled={loading}
-          className="flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-200 text-slate-500 font-bold text-xs  tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
-        >
-          <BiRefresh size={16} className={loading ? "animate-spin" : ""} />{" "}
-          Refresh
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {data && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await downloadBillingPdf(
+                    { type: "report", reportKind: "full" },
+                    "billing_report.pdf",
+                  );
+                } catch (e: any) {
+                  alert(e?.message || "Failed to download report");
+                }
+              }}
+              className="flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-white font-bold text-xs tracking-normal hover:bg-primary/90 transition-all"
+            >
+              <BiReceipt size={16} />
+              Download report PDF
+            </button>
+          )}
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-200 text-slate-500 font-bold text-xs tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
+          >
+            <BiRefresh size={16} className={loading ? "animate-spin" : ""} />{" "}
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Content */}
