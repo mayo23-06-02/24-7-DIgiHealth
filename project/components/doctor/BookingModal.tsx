@@ -396,7 +396,7 @@ export default function BookingModal({
       }
       width="md"
     >
-      <div className="space-y-6 py-2">
+      <div className="space-y-6 py-2 pb-8 lg:pb-0">
         <BookingStepIndicator step={step} totalSteps={totalSteps} />
 
         {/* Selected person card */}
