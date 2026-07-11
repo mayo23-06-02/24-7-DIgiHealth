@@ -128,7 +128,7 @@ export default function DoctorCarousel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center px-2">
-        <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex flex-col lg:flex-row  justify-between w-full gap-2">
           <div className="mb-4 px-2">
             <h3 className="font-bold text-2xl text-slate-900 font-grotesk">
               Available Doctors
@@ -137,7 +137,7 @@ export default function DoctorCarousel() {
               Connect with our medical professionals for expert advice and care.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end gap-3">
             <div className="text-xs text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full border border-emerald-100 font-bold whitespace-nowrap">
               <span className="flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
