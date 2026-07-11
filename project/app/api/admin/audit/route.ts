@@ -1,0 +1,66 @@
+import { NextRequest, NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import AuditLog from "@/lib/models/AuditLog";
+import { requirePlatformAdmin } from "@/lib/auth/admin";
+
+export const runtime = "nodejs";
+
+export async function GET(req: NextRequest) {
+  try {
+    const gate = await requirePlatformAdmin();
+    if (gate.error) return gate.error;
+    await connectToDatabase();
+
+    const sp = req.nextUrl.searchParams;
+    const action = sp.get("action") || "";
+    const search = sp.get("search") || "";
+    const page = Math.max(1, parseInt(sp.get("page") || "1", 10));
+    const limit = Math.min(100, Math.max(10, parseInt(sp.get("limit") || "40", 10)));
+
+    const q: any = {};
+    if (action) q.action = new RegExp(action, "i");
+    if (search) {
+      q.$or = [
+        { actorEmail: new RegExp(search, "i") },
+        { action: new RegExp(search, "i") },
+        { targetId: new RegExp(search, "i") },
+      ];
+    }
+
+    const [total, rows] = await Promise.all([
+      AuditLog.countDocuments(q),
+      AuditLog.find(q)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        logs: (rows as any[]).map((a) => ({
+          id: a._id.toString(),
+          action: a.action,
+          actorRole: a.actorRole,
+          actorEmail: a.actorEmail || "",
+          targetType: a.targetType || "",
+          targetId: a.targetId || "",
+          metadata: a.metadata || {},
+          createdAt: a.createdAt,
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.max(1, Math.ceil(total / limit)),
+        },
+      },
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 },
+    );
+  }
+}

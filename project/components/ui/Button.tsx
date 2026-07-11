@@ -30,7 +30,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex lg:hover:scale-105 items-center flex cursor-pointer max-w-[400px] text-sm font-grotesk uppercase   justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
+    "inline-flex lg:hover:scale-105 items-center flex cursor-pointer max-w-[400px] lg:max-w-[800px] text-sm font-grotesk uppercase   justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
 
   const variants = {
     primary: "bg-primary text-white hover:bg-[#326E8A] ",

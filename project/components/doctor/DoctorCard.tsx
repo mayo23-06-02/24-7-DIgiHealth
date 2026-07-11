@@ -134,6 +134,7 @@ export default function DoctorCard({
           <Button
             variant="outline"
             size="sm"
+            fullWidth={true}
             onClick={(e) => onMessage(doctor.id, e)}
             className="w-full relative z-10 !min-w-0"
             icon={<BiMessageRounded className="text-xl" />}

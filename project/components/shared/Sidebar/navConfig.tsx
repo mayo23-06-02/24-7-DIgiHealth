@@ -136,6 +136,12 @@ export const MAIN_NAV: SidebarItem[] = [
     roles: ["super_admin", "mega_admin"],
   },
   {
+    icon: BiBuildingHouse,
+    label: "Facilities",
+    href: "/[role]/facilities",
+    roles: ["super_admin", "mega_admin"],
+  },
+  {
     icon: BiBarChartAlt2,
     label: "System Analytics",
     href: "/[role]/analytics",
@@ -148,9 +154,27 @@ export const MAIN_NAV: SidebarItem[] = [
     roles: ["super_admin", "mega_admin"],
   },
   {
+    icon: BiFile,
+    label: "Platform Reports",
+    href: "/[role]/reports",
+    roles: ["super_admin", "mega_admin"],
+  },
+  {
     icon: BiBell,
     label: "Alerts",
     href: "/[role]/alerts",
+    roles: ["super_admin", "mega_admin"],
+  },
+  {
+    icon: BiClipboard,
+    label: "Audit Log",
+    href: "/[role]/audit",
+    roles: ["super_admin", "mega_admin"],
+  },
+  {
+    icon: BiShieldQuarter,
+    label: "System Settings",
+    href: "/[role]/settings",
     roles: ["super_admin", "mega_admin"],
   },
   // COMMON
