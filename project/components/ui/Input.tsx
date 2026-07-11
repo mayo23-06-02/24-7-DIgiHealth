@@ -44,7 +44,7 @@ const Input: React.FC<InputProps> = ({
     ${error ? "border-red-400 bg-red-50 border" : "border border-slate-200 bg-slate-50"}
     ${paddingClass}
     ${className}
-    ${textarea ? "rounded-2xl" : "rounded-full"}
+    ${textarea ? "rounded-lg" : "rounded-full"}
   `;
 
   const inputType = isPassword ? (showPassword ? "text" : "password") : type;
@@ -81,7 +81,7 @@ const Input: React.FC<InputProps> = ({
           <input
             id={id}
             type={inputType}
-            className={`${commonStyles} py-2.5 md:py-4`}
+            className={`${commonStyles} p-2 md:py-4`}
             {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
           />
         )}

@@ -453,7 +453,7 @@ export default function StaffManagement() {
                     setShowDoctorDropdown(true);
                   }}
                   onFocus={() => setShowDoctorDropdown(true)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  className="w-full pl-10 pr-4 p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
                 {isSearchingDoctor && (
                   <BiLoaderAlt
@@ -466,7 +466,7 @@ export default function StaffManagement() {
               {showDoctorDropdown &&
                 doctorResults.length > 0 &&
                 !selectedDoctor && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                     {doctorResults.map((dr) => (
                       <button
                         key={dr._id}
@@ -498,7 +498,7 @@ export default function StaffManagement() {
               <label className="block text-xs font-bold text-slate-500 tracking-wider mb-1 uppercase">
                 Staff Member
               </label>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm font-bold text-slate-700">
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm font-bold text-slate-700">
                 {editingStaff.userId
                   ? `${editingStaff.userId.firstName} ${editingStaff.userId.lastName}`
                   : "Unassigned"}
@@ -512,7 +512,7 @@ export default function StaffManagement() {
               Role
             </label>
             <select
-              className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
               value={formData.role}
               onChange={(e) =>
                 setFormData({ ...formData, role: e.target.value })
@@ -532,7 +532,7 @@ export default function StaffManagement() {
             </label>
             <input
               type="text"
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full border border-slate-200 rounded-lg px-3 p-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
               value={formData.department}
               onChange={(e) =>
                 setFormData({ ...formData, department: e.target.value })
@@ -549,7 +549,7 @@ export default function StaffManagement() {
               </label>
               <input
                 type="time"
-                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                className="w-full border border-slate-200 rounded-lg px-3 p-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 value={formData.shiftStart}
                 onChange={(e) =>
                   setFormData({ ...formData, shiftStart: e.target.value })
@@ -562,7 +562,7 @@ export default function StaffManagement() {
               </label>
               <input
                 type="time"
-                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                className="w-full border border-slate-200 rounded-lg px-3 p-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 value={formData.shiftEnd}
                 onChange={(e) =>
                   setFormData({ ...formData, shiftEnd: e.target.value })
@@ -578,7 +578,7 @@ export default function StaffManagement() {
             </label>
             <input
               type="number"
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full border border-slate-200 rounded-lg px-3 p-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
               value={formData.hourlyRate}
               onChange={(e) =>
                 setFormData({ ...formData, hourlyRate: Number(e.target.value) })

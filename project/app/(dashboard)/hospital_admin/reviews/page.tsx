@@ -79,7 +79,7 @@ export default function HospitalReviewsPage() {
             Moderate and view all patient feedback
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-primary/10 text-primary font-bold px-4 py-2 rounded-xl">
+        <div className="flex items-center gap-2 bg-primary/10 text-primary font-bold px-4 py-2 rounded-lg">
           <BiStar size={20} className="text-gray-400" />
           <span className="text-xl">{avgRating}</span>
           <span className="text-sm font-medium text-slate-500">/ 5.0</span>
@@ -92,7 +92,7 @@ export default function HospitalReviewsPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize border transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize border transition-all ${
               filter === f
                 ? "bg-primary text-white border-primary"
                 : "bg-white text-slate-500 border-slate-200 hover:border-primary/50"

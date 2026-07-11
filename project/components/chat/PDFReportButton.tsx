@@ -64,7 +64,7 @@ export default function PDFReportButton({
       onClick={handleDownload}
       disabled={loading}
       title="Download Clinical Report"
-      className="w-10 h-10 rounded-xl bg-slate-100/50 border border-slate-200 text-slate-500 flex items-center justify-center hover:text-primary hover:border-primary/30 transition-all shadow-none active:scale-95 disabled:opacity-50 group"
+      className="w-10 h-10 rounded-lg bg-slate-100/50 border border-slate-200 text-slate-500 flex items-center justify-center hover:text-primary hover:border-primary/30 transition-all shadow-none active:scale-95 disabled:opacity-50 group"
     >
       {loading ? (
         <BiLoaderAlt className="animate-spin" size={18} />

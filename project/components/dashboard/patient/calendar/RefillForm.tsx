@@ -47,7 +47,7 @@ const RefillForm: React.FC<RefillFormProps> = ({
                 prescriptionId: e.target.value,
               })
             }
-            className="w-full p-3 rounded-xl border border-slate-200 bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full p-3 rounded-lg border border-slate-200 bg-white focus:border-primary focus:ring-1 focus:ring-primary"
           >
             <option value="">-- Select a prescription --</option>
             {prescriptionOptions.map((opt) => (
@@ -60,7 +60,7 @@ const RefillForm: React.FC<RefillFormProps> = ({
       </div>
 
       {addForm.prescriptionId === "new" && (
-        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
           <p className="text-xs font-bold text-gray-700">
             Request new prescription? Please contact your doctor directly or use
             the "Message" feature.
@@ -175,7 +175,7 @@ const RefillForm: React.FC<RefillFormProps> = ({
               reminderDays: parseInt(e.target.value),
             })
           }
-          className="w-full p-3 rounded-xl border border-slate-200 bg-white"
+          className="w-full p-3 rounded-lg border border-slate-200 bg-white"
         >
           <option value={1}>1 day before</option>
           <option value={2}>2 days before</option>

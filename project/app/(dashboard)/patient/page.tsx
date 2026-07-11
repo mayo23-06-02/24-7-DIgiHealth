@@ -123,7 +123,7 @@ export default function PatientDashboard() {
       <div className="space-y-10 p-4 pb-24 max-w-4xl mx-auto">
         {/* Hero Welcome */}
         <div className="text-center py-12 space-y-4">
-          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto">
+          <div className="w-20 h-20 bg-primary/10 rounded-lg flex items-center justify-center text-primary mx-auto">
             <BiHeart size={40} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 font-grotesk">
@@ -139,8 +139,8 @@ export default function PatientDashboard() {
         {/* Onboarding Steps */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <Link href="/patient/health-record">
-            <div className="group p-7 rounded-2xl border-2 border-slate-100 hover:border-primary bg-white cursor-pointer transition-all duration-200 h-full flex flex-col">
-              <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4">
+            <div className="group p-7 rounded-lg border-2 border-slate-100 hover:border-primary bg-white cursor-pointer transition-all duration-200 h-full flex flex-col">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-4">
                 <BiFile size={24} />
               </div>
               <h3 className="text-base font-bold text-slate-800 font-grotesk mb-2">
@@ -156,10 +156,10 @@ export default function PatientDashboard() {
           </Link>
 
           <div
-            className="group p-7 rounded-2xl border-2 border-slate-100 hover:border-emerald-400 bg-white cursor-pointer transition-all duration-200 h-full flex flex-col"
+            className="group p-7 rounded-lg border-2 border-slate-100 hover:border-emerald-400 bg-white cursor-pointer transition-all duration-200 h-full flex flex-col"
             onClick={() => handleUpdateClick("heartRate", "Heart Rate")}
           >
-            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mb-4">
+            <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 mb-4">
               <BiPulse size={24} />
             </div>
             <h3 className="text-base font-bold text-slate-800 font-grotesk mb-2">
@@ -174,8 +174,8 @@ export default function PatientDashboard() {
           </div>
 
           <Link href="/patient/appointments">
-            <div className="group p-7 rounded-2xl border-2 border-slate-100 hover:border-blue-400 bg-white cursor-pointer transition-all duration-200 h-full flex flex-col">
-              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 mb-4">
+            <div className="group p-7 rounded-lg border-2 border-slate-100 hover:border-blue-400 bg-white cursor-pointer transition-all duration-200 h-full flex flex-col">
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 mb-4">
                 <BiTime size={24} />
               </div>
               <h3 className="text-base font-bold text-slate-800 font-grotesk mb-2">
@@ -342,7 +342,7 @@ export default function PatientDashboard() {
       >
         <form onSubmit={handleUpdateVitalSubmit} className="space-y-6">
           {/* Educational Explanation */}
-          <div className=" rounded-xl p-5 border border-primary/10">
+          <div className=" rounded-lg p-5 border border-primary/10">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0 mt-0.5">
                 <BiPlus size={18} />
@@ -379,7 +379,7 @@ export default function PatientDashboard() {
                         value={updateVitalValue}
                         onChange={(e) => setUpdateVitalValue(e.target.value)}
                         placeholder="e.g. 70"
-                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
                         required
                       />
                       <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold">
@@ -397,7 +397,7 @@ export default function PatientDashboard() {
                         value={updateHeightValue}
                         onChange={(e) => setUpdateHeightValue(e.target.value)}
                         placeholder="e.g. 175"
-                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
                         required
                       />
                       <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 font-bold">
@@ -410,7 +410,7 @@ export default function PatientDashboard() {
                 {/* Live BMI Indicator */}
                 {Number(updateVitalValue) > 0 &&
                   Number(updateHeightValue) > 0 && (
-                    <div className=" rounded-xl p-4 flex items-center justify-between border border-primary/20 animate-in zoom-in-95 duration-300">
+                    <div className=" rounded-lg p-4 flex items-center justify-between border border-primary/20 animate-in zoom-in-95 duration-300">
                       <div>
                         <p className="text-sm  text-primary ">
                           BMI Calculation
@@ -454,7 +454,7 @@ export default function PatientDashboard() {
                         ? "e.g. 120/80"
                         : "Enter value..."
                     }
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-5 py-4 text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:bg-white transition-all placeholder:text-slate-300"
                     required
                   />
                   <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 ">

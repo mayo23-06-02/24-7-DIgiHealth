@@ -1,10 +1,17 @@
 "use client";
 
 import React from "react";
-import { BiBuilding, BiCertification, BiClipboard, BiCheckCircle } from "react-icons/bi";
-import Card from "@/components/ui/Card";
+import {
+  BiBuilding,
+  BiCertification,
+  BiClipboard,
+  BiCheckCircle,
+  BiUserVoice,
+  BiStar,
+} from "react-icons/bi";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
+import ProfileSection from "./ProfileSection";
 
 interface PractitionerRoleData {
   specialisation: string;
@@ -27,158 +34,174 @@ interface PractitionerRoleData {
 
 interface PractitionerPracticeFormProps {
   practitionerData: PractitionerRoleData;
-  setPractitionerData: React.Dispatch<React.SetStateAction<PractitionerRoleData | null>>;
-}
-
-function SectionHead({
-  icon,
-  title,
-  sub,
-  color = "primary",
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  color?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    rose: "bg-rose-500/10 text-rose-500",
-    emerald: "bg-emerald-500/10 text-emerald-500",
-    blue: "bg-blue-500/10 text-blue-500",
-    gray: "bg-slate-500/10 text-slate-500",
-  };
-  return (
-    <div className="flex items-center gap-5">
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-          colorMap[color] || colorMap.primary
-        }`}
-      >
-        {icon}
-      </div>
-      <div className="gap-1 flex flex-col">
-        <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-600 uppercase opacity-70">{sub}</p>
-      </div>
-    </div>
-  );
+  setPractitionerData: React.Dispatch<
+    React.SetStateAction<PractitionerRoleData | null>
+  >;
 }
 
 export default function PractitionerPracticeForm({
   practitionerData,
   setPractitionerData,
 }: PractitionerPracticeFormProps) {
+  const update = (patch: Partial<PractitionerRoleData>) =>
+    setPractitionerData((prev) => (prev ? { ...prev, ...patch } : null));
+
+  const updateBank = (patch: Partial<PractitionerRoleData["bankAccount"]>) =>
+    setPractitionerData((prev) =>
+      prev
+        ? { ...prev, bankAccount: { ...prev.bankAccount, ...patch } }
+        : null,
+    );
+
   return (
     <>
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
-        <SectionHead
-          icon={<BiBuilding size={24} />}
-          title="Revenue Disbursement"
-          sub="Commercial banking and tax integration"
-          color="emerald"
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          <Input
-            label="Account Holder"
-            value={practitionerData.bankAccount.accountHolder}
-            onChange={(e) =>
-              setPractitionerData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      bankAccount: {
-                        ...prev.bankAccount,
-                        accountHolder: e.target.value,
-                      },
-                    }
-                  : null
-              )
-            }
-          />
-          <Input
-            label="Banking Institution"
-            value={practitionerData.bankAccount.bankName}
-            onChange={(e) =>
-              setPractitionerData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      bankAccount: {
-                        ...prev.bankAccount,
-                        bankName: e.target.value,
-                      },
-                    }
-                  : null
-              )
-            }
-          />
-          <Input
-            label="Account Reference"
-            value={practitionerData.bankAccount.accountNumber}
-            onChange={(e) =>
-              setPractitionerData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      bankAccount: {
-                        ...prev.bankAccount,
-                        accountNumber: e.target.value,
-                      },
-                    }
-                  : null
-              )
-            }
-          />
-          <Input
-            label="Branch/Tax ID"
-            value={practitionerData.bankAccount.branchCode}
-            onChange={(e) =>
-              setPractitionerData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      bankAccount: {
-                        ...prev.bankAccount,
-                        branchCode: e.target.value,
-                      },
-                    }
-                  : null
-              )
-            }
-          />
-        </div>
-      </Card>
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100">
-        <SectionHead
-          icon={<BiCertification size={24} />}
-          title="Clinical Protocol"
-          sub="HPCSA validation and professional bio"
-        />
-        <div className="p-8 bg-primary/5 rounded-lg border border-primary/10 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-primary border border-primary/10">
-              <BiClipboard size={32} />
+      <ProfileSection
+        icon={<BiCertification size={22} />}
+        title="Professional credentials"
+        description="How patients and the platform identify your practice"
+        color="primary"
+      >
+        <div
+          className={`mb-6 rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+            practitionerData.hpcsaVerified
+              ? "bg-emerald-50/80 border-emerald-100"
+              : "bg-primary/5 border-primary/15"
+          }`}
+        >
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-12 h-12 rounded-lg bg-white border border-slate-200 text-primary flex items-center justify-center shrink-0">
+              <BiClipboard size={24} />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-800 font-grotesk">
-                {practitionerData.hpcsaNumber}
-              </h1>
-              <p className="text-sm text-slate-500">HPCSA Registration</p>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                HPCSA registration
+              </p>
+              <p className="text-lg font-bold text-slate-800 font-mono tracking-wide truncate">
+                {practitionerData.hpcsaNumber || "—"}
+              </p>
             </div>
           </div>
           {practitionerData.hpcsaVerified ? (
-            <div className="flex items-center gap-2 bg-emerald-500/10 px-6 py-3 rounded-2xl border border-emerald-500/20">
-              <BiCheckCircle className="text-emerald-500" size={20} />
-              <h1 className="text-xs font-bold text-emerald-600 st">Verified</h1>
-            </div>
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-2 rounded-full shrink-0">
+              <BiCheckCircle size={16} />
+              Verified
+            </span>
           ) : (
-            <Badge label="Verification Pending" status="warning" />
+            <Badge label="Verification pending" status="warning" />
           )}
         </div>
-      </Card>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <Input
+            label="Specialisation"
+            value={practitionerData.specialisation || ""}
+            onChange={(e) => update({ specialisation: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="Years of experience"
+            type="number"
+            value={String(practitionerData.experienceYears ?? "")}
+            onChange={(e) =>
+              update({ experienceYears: Number(e.target.value) || 0 })
+            }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <div className="md:col-span-2 space-y-1.5">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">
+              Professional bio
+            </label>
+            <textarea
+              value={practitionerData.bio || ""}
+              onChange={(e) => update({ bio: e.target.value })}
+              rows={4}
+              placeholder="Share your clinical focus, approach, and languages for patients…"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50/60 focus:bg-white focus:border-primary focus:outline-none px-4 py-3 text-sm text-slate-800 transition-colors resize-y min-h-[100px]"
+            />
+          </div>
+          <Input
+            label="Languages (comma-separated)"
+            value={(practitionerData.languages || []).join(", ")}
+            onChange={(e) =>
+              update({
+                languages: e.target.value
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
+            placeholder="English, Afrikaans, isiZulu"
+            icon={<BiUserVoice />}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="Accepted medical aids"
+            value={(practitionerData.acceptedMedicalAids || []).join(", ")}
+            onChange={(e) =>
+              update({
+                acceptedMedicalAids: e.target.value
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
+            placeholder="Discovery, Bonitas, …"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+        </div>
+
+        {practitionerData.rating > 0 && (
+          <div className="mt-5 flex items-center gap-2 text-sm text-slate-600">
+            <BiStar className="text-amber-500" size={18} />
+            <span className="font-bold text-slate-800">
+              {practitionerData.rating}/5
+            </span>
+            <span className="text-slate-400">
+              · {practitionerData.reviewCount || 0} patient reviews
+            </span>
+          </div>
+        )}
+      </ProfileSection>
+
+      <ProfileSection
+        icon={<BiBuilding size={22} />}
+        title="Payout banking"
+        description="Where teleclinic earnings are disbursed"
+        color="emerald"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <Input
+            label="Account holder"
+            value={practitionerData.bankAccount?.accountHolder || ""}
+            onChange={(e) => updateBank({ accountHolder: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="Bank"
+            value={practitionerData.bankAccount?.bankName || ""}
+            onChange={(e) => updateBank({ bankName: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="Account number"
+            value={practitionerData.bankAccount?.accountNumber || ""}
+            onChange={(e) => updateBank({ accountNumber: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="Branch code"
+            value={practitionerData.bankAccount?.branchCode || ""}
+            onChange={(e) => updateBank({ branchCode: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="Tax number"
+            value={practitionerData.bankAccount?.taxNumber || ""}
+            onChange={(e) => updateBank({ taxNumber: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
+          />
+        </div>
+      </ProfileSection>
     </>
   );
 }

@@ -125,13 +125,13 @@ const EntityModal: React.FC<EntityModalProps> = ({
           <div className="flex gap-2">
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-500 hover:text-rose-500 hover:bg-rose-50 transition-all min-w-0!"
+              className="w-12 h-12 p-0 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 hover:text-rose-500 hover:bg-rose-50 transition-all min-w-0!"
             >
               <BiHeart size={20} />
             </Button>
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/5 transition-all min-w-0!"
+              className="w-12 h-12 p-0 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/5 transition-all min-w-0!"
             >
               <BiShareAlt size={20} />
             </Button>
@@ -142,7 +142,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
         {entity.stats && entity.stats.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {entity.stats.map((stat, i) => (
-              <div key={i} className="bg-slate-50 p-6 rounded-3xl text-center">
+              <div key={i} className="bg-slate-50 p-6 rounded-lg text-center">
                 <p className="text-2xl font-bold text-slate-900 tracking-tight">
                   {stat.value}
                 </p>
@@ -174,7 +174,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
                 {entity.tags?.map((tag, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2 rounded-xl bg-slate-100/50 text-slate-500 text-xs font-bold -normal"
+                    className="px-4 py-2 rounded-lg bg-slate-100/50 text-slate-500 text-xs font-bold -normal"
                   >
                     {tag}
                   </span>
@@ -247,7 +247,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
               )}
             </div>
 
-            <div className="p-4 bg-red-50/50 rounded-2xl flex items-start gap-4 mt-6">
+            <div className="p-4 bg-red-50/50 rounded-lg flex items-start gap-4 mt-6">
               <BiFlag className="text-red-400 shrink-0 mt-1" />
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-red-900 uppercase">

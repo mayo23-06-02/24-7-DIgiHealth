@@ -1,10 +1,18 @@
 "use client";
 
 import React from "react";
-import { BiUser, BiMobileAlt, BiEnvelope, BiLoaderAlt } from "react-icons/bi";
-import Card from "@/components/ui/Card";
+import {
+  BiUser,
+  BiMobileAlt,
+  BiEnvelope,
+  BiLoaderAlt,
+  BiLockAlt,
+  BiIdCard,
+  BiCheckCircle,
+} from "react-icons/bi";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import ProfileSection from "./ProfileSection";
 
 interface UserProfile {
   id: string;
@@ -26,43 +34,6 @@ interface IdentityTabProps {
   handleSaveProfile: () => void;
 }
 
-function SectionHead({
-  icon,
-  title,
-  sub,
-  color = "primary",
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  color?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    rose: "bg-rose-500/10 text-rose-500",
-    emerald: "bg-emerald-500/10 text-emerald-500",
-    blue: "bg-blue-500/10 text-blue-500",
-    gray: "bg-slate-500/10 text-slate-500",
-  };
-  return (
-    <div className="flex items-center gap-5">
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-          colorMap[color] || colorMap.primary
-        }`}
-      >
-        {icon}
-      </div>
-      <div className="gap-1 flex flex-col">
-        <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-600 uppercase opacity-70">{sub}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function IdentityTab({
   user,
   setUser,
@@ -70,72 +41,116 @@ export default function IdentityTab({
   handleSaveProfile,
 }: IdentityTabProps) {
   return (
-    <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5 animate-in slide-in-from-left-4 duration-500">
-      <SectionHead
-        icon={<BiUser size={24} />}
-        title="Biological Identity"
-        sub="Primary account coordinates and access keys"
-      />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-        <Input
-          label="First Name"
-          value={user.firstName}
-          onChange={(e) =>
-            setUser((prev) =>
-              prev ? { ...prev, firstName: e.target.value } : null,
-            )
-          }
-          className="bg-slate-50/50 border-slate-100 focus:bg-white transition-all"
-        />
-        <Input
-          label="Last Name"
-          value={user.lastName}
-          onChange={(e) =>
-            setUser((prev) =>
-              prev ? { ...prev, lastName: e.target.value } : null,
-            )
-          }
-          className="bg-slate-50/50 border-slate-100 focus:bg-white"
-        />
-        <Input
-          label="Mobile Connectivity"
-          icon={<BiMobileAlt />}
-          value={user.mobile}
-          onChange={(e) =>
-            setUser((prev) =>
-              prev ? { ...prev, mobile: e.target.value } : null,
-            )
-          }
-          placeholder="+27 XX XXX XXXX"
-          className="bg-slate-50/50 border-slate-100 focus:bg-white"
-        />
-        <Input
-          label="Verified Email"
-          icon={<BiEnvelope />}
-          value={user.email}
-          disabled
-          className="opacity-60 bg-slate-100 border-slate-200 cursor-not-allowed font-medium"
-        />
-        <Input
-          label="National Identification"
-          value={user.saId || "LOCKED / ENCRYPTED"}
-          disabled
-          className="opacity-60 bg-slate-100 border-slate-200 cursor-not-allowed"
-        />
-      </div>
-      <div className="flex justify-end mt-8 pt-6 border-t border-slate-50">
-        <Button
-          onClick={handleSaveProfile}
-          disabled={isSaving}
-          className="h-14 rounded-2xl px-10 text-sm font-bold bg-primary text-white"
-        >
-          {isSaving ? (
-            <BiLoaderAlt className="animate-spin" size={20} />
-          ) : (
-            "Update Profile"
-          )}
-        </Button>
-      </div>
-    </Card>
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
+      <ProfileSection
+        icon={<BiUser size={22} />}
+        title="Personal identity"
+        description="Your legal name and contact details used across DigiHealth"
+        color="primary"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <Input
+            label="First name"
+            value={user.firstName}
+            onChange={(e) =>
+              setUser((prev) =>
+                prev ? { ...prev, firstName: e.target.value } : null,
+              )
+            }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white transition-colors"
+          />
+          <Input
+            label="Last name"
+            value={user.lastName}
+            onChange={(e) =>
+              setUser((prev) =>
+                prev ? { ...prev, lastName: e.target.value } : null,
+              )
+            }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white transition-colors"
+          />
+          <Input
+            label="Mobile number"
+            icon={<BiMobileAlt />}
+            value={user.mobile}
+            onChange={(e) =>
+              setUser((prev) =>
+                prev ? { ...prev, mobile: e.target.value } : null,
+              )
+            }
+            placeholder="+27 XX XXX XXXX"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white transition-colors"
+          />
+          <div className="space-y-1.5">
+            <Input
+              label="Email address"
+              icon={<BiEnvelope />}
+              value={user.email}
+              disabled
+              className="opacity-70 bg-slate-100 border-slate-200 cursor-not-allowed"
+            />
+            <p className="text-[11px] text-slate-400 flex items-center gap-1 px-1">
+              <BiLockAlt size={12} />
+              Email is verified and locked for security
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-xs text-slate-500">
+            Changes apply to consultations, prescriptions, and messages.
+          </p>
+          <Button
+            onClick={handleSaveProfile}
+            disabled={isSaving}
+            className="!rounded-lg !h-11 !px-6 !max-w-none normal-case !tracking-normal shrink-0"
+            icon={
+              isSaving ? (
+                <BiLoaderAlt className="animate-spin" size={18} />
+              ) : (
+                <BiCheckCircle size={18} />
+              )
+            }
+            iconPosition="left"
+          >
+            {isSaving ? "Saving…" : "Save identity"}
+          </Button>
+        </div>
+      </ProfileSection>
+
+      <ProfileSection
+        icon={<BiIdCard size={22} />}
+        title="Verified credentials"
+        description="Government ID and role identifiers on file"
+        color="slate"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+              National ID
+            </p>
+            <p className="text-sm font-semibold text-slate-700 font-mono tracking-wide">
+              {user.saId
+                ? `${user.saId.slice(0, 6)}••••${user.saId.slice(-2)}`
+                : "Not on file"}
+            </p>
+            <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
+              <BiLockAlt size={12} /> Encrypted · read-only
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+              Account role
+            </p>
+            <p className="text-sm font-semibold text-slate-700 capitalize">
+              {user.role?.replace(/_/g, " ") || "—"}
+            </p>
+            <p className="text-[11px] text-slate-400 mt-2 capitalize">
+              Status: {user.status || "active"}
+            </p>
+          </div>
+        </div>
+      </ProfileSection>
+    </div>
   );
 }

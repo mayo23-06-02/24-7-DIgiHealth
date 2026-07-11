@@ -9,7 +9,6 @@ import {
   BiCheckCircle,
   BiLoaderAlt,
   BiX,
-  BiCheck,
   BiSearch,
   BiVideo,
   BiChat,
@@ -32,6 +31,7 @@ import {
 } from "@/lib/booking";
 import TimeSlotPicker from "@/components/booking/TimeSlotPicker";
 import { useAuthContext } from "@/components/auth/AuthProvider";
+import BookingStepIndicator from "@/components/doctor/BookingStepIndicator";
 
 interface Doctor {
   id: string;
@@ -383,34 +383,6 @@ export default function BookingModal({
     ? selectedPatientState?.email || "Patient"
     : selectedDoctorState?.specialisation || "";
 
-  const StepIndicator = () => {
-    const stepsArray = Array.from({ length: totalSteps }, (_, i) => i + 1);
-    return (
-      <div className="flex items-center justify-center gap-4 mb-6">
-        {stepsArray.map((s) => (
-          <div key={s} className="flex items-center gap-2">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                step === s
-                  ? "bg-primary text-white"
-                  : step > s
-                    ? "bg-emerald-500 text-white"
-                    : "bg-slate-100 text-slate-400"
-              }`}
-            >
-              {step > s ? <BiCheck size={16} /> : s}
-            </div>
-            {s < totalSteps && (
-              <div
-                className={`w-12 h-0.5 ${step > s ? "bg-emerald-500" : "bg-slate-200"}`}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <Modal
       isOpen={isOpen}
@@ -425,7 +397,7 @@ export default function BookingModal({
       width="md"
     >
       <div className="space-y-6 py-2">
-        <StepIndicator />
+        <BookingStepIndicator step={step} totalSteps={totalSteps} />
 
         {/* Selected person card */}
         {selectedPerson && (
@@ -489,7 +461,7 @@ export default function BookingModal({
                       setSelectedPatientState(null);
                       setShowDropdown(true);
                     }}
-                    className={`w-full pl-9 pr-9 py-3 border rounded-xl text-sm focus:outline-none transition-colors ${
+                    className={`w-full pl-9 pr-9 py-3 border rounded-lg text-sm focus:outline-none transition-colors ${
                       selectedPatientState
                         ? "border-primary bg-primary/5 font-medium"
                         : "border-slate-200 focus:border-primary"
@@ -508,7 +480,7 @@ export default function BookingModal({
                   )}
                 </div>
                 {showDropdown && !selectedPatientState && (
-                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-2xl shadow-lg z-50 overflow-hidden max-h-64 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-lg shadow-lg z-50 overflow-hidden max-h-64 overflow-y-auto">
                     {patientLoading ? (
                       <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-500">
                         <BiLoaderAlt className="animate-spin" size={14} />{" "}
@@ -583,7 +555,7 @@ export default function BookingModal({
                             setSelectedDoctorState(doc);
                             setStep(2);
                           }}
-                          className={`group p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                          className={`group p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
                             isSelected
                               ? "border-primary bg-primary/5 shadow-none shadow-primary/10"
                               : "border-slate-100 bg-white hover:border-primary/20 hover:bg-slate-50/20"
@@ -637,7 +609,7 @@ export default function BookingModal({
                         setSelectedDate(dateStr);
                         setSelectedTime("");
                       }}
-                      className={`flex flex-col items-center justify-center rounded-xl border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${
+                      className={`flex flex-col items-center justify-center rounded-lg border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${
                         isSelected
                           ? "border-primary bg-primary text-white shadow-primary/30 scale-105"
                           : "border-slate-200 bg-white text-slate-500 hover:border-primary/30"
@@ -671,7 +643,7 @@ export default function BookingModal({
                       setDurationMinutes(Number(e.target.value));
                       setSelectedTime("");
                     }}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:border-primary"
                   >
                     <option value={15}>15 min</option>
                     <option value={30}>30 min</option>
@@ -687,7 +659,7 @@ export default function BookingModal({
                   <select
                     value={consultType}
                     onChange={(e) => setConsultType(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-primary"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:border-primary"
                   >
                     <option value="video">Video Call</option>
                     <option value="chat">Chat</option>
@@ -726,7 +698,7 @@ export default function BookingModal({
                   placeholder="Briefly describe the clinical symptoms or reason for this consultation..."
                   value={concern}
                   onChange={(e) => setConcern(e.target.value)}
-                  className="w-full h-40 rounded-xl bg-slate-50/50 border border-slate-100 p-4 text-slate-700 focus:outline-none focus:bg-white focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all resize-none placeholder:text-slate-400"
+                  className="w-full h-40 rounded-lg bg-slate-50/50 border border-slate-100 p-4 text-slate-700 focus:outline-none focus:bg-white focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all resize-none placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -736,7 +708,7 @@ export default function BookingModal({
         {/* STEP: Confirm */}
         {showConfirm && selectedPerson && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-            <div className="bg-slate-50/50 rounded-xl p-6 space-y-4 border border-slate-100">
+            <div className="bg-slate-50/50 rounded-lg p-6 space-y-4 border border-slate-100">
               <h4 className="text-sm font-bold text-slate-500 tracking-normal uppercase">
                 Booking Summary
               </h4>
@@ -801,7 +773,7 @@ export default function BookingModal({
                 </div>
               </div>
             </div>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-start gap-3">
               <BiCheckCircle
                 className="text-emerald-600 shrink-0 mt-0.5"
                 size={20}
@@ -844,7 +816,7 @@ export default function BookingModal({
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="h-12 rounded-xl text-sm font-bold tracking-normal bg-emerald-500 text-white shadow-emerald-300"
+              className="h-12 rounded-lg text-sm font-bold tracking-normal bg-emerald-500 text-white shadow-emerald-300"
               icon={
                 isSubmitting ? (
                   <BiLoaderAlt className="animate-spin" size={18} />

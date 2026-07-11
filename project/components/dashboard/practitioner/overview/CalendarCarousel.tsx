@@ -54,7 +54,7 @@ export default function CalendarCarousel({
             <BiChevronDown className={`transition-transform duration-200 ${isMonthOpen ? 'rotate-180' : ''}`} />
           </button>
           {isMonthOpen && (
-            <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-slate-100 rounded-xl shadow-lg z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-slate-100 rounded-lg shadow-lg z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
               {monthOptions.map((m, idx) => (
                 <button
                   key={idx}
@@ -88,7 +88,7 @@ export default function CalendarCarousel({
             <button
               key={i}
               onClick={() => onSelectedDateChange(new Date(date))}
-              className={`flex flex-col items-center gap-1 shrink-0 w-14 py-3 rounded-xl border font-bold transition-all duration-200 ${
+              className={`flex flex-col items-center gap-1 shrink-0 w-14 py-3 rounded-lg border font-bold transition-all duration-200 ${
                 isActive
                   ? 'border-primary bg-primary/5 text-primary shadow-none ring-1 ring-primary/20'
                   : 'border-slate-100 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'

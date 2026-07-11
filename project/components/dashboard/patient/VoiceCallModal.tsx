@@ -158,9 +158,9 @@ export default function VoiceCallModal({
             <div className="flex justify-center gap-6 border-t border-slate-50 pt-8 pb-4">
               <Button
                 variant="ghost"
-                className="flex flex-col items-center gap-2 group p-2 rounded-2xl hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
+                className="flex flex-col items-center gap-2 group p-2 rounded-lg hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiPlus />
                 </div>
                 <span className="text-[9px] font-bold text-slate-500  tracking-normal group-hover:text-primary transition-colors">
@@ -169,9 +169,9 @@ export default function VoiceCallModal({
               </Button>
               <Button
                 variant="ghost"
-                className="flex flex-col items-center gap-2 group p-2 rounded-2xl hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
+                className="flex flex-col items-center gap-2 group p-2 rounded-lg hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiUser />
                 </div>
                 <span className="text-[9px] font-bold text-slate-500  tracking-normal group-hover:text-primary transition-colors">
@@ -180,9 +180,9 @@ export default function VoiceCallModal({
               </Button>
               <Button
                 variant="ghost"
-                className="flex flex-col items-center gap-2 group p-2 rounded-2xl hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
+                className="flex flex-col items-center gap-2 group p-2 rounded-lg hover:bg-slate-50 transition-all active:scale-95 !h-auto !min-w-0 border-none bg-transparent"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <BiDotsVerticalRounded size={20} />
                 </div>
                 <span className="text-[9px] font-bold text-slate-500  tracking-normal group-hover:text-primary transition-colors">

@@ -173,7 +173,7 @@ export default function HospitalSLAPage() {
               key={sla.id}
               className="px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                 <BiTime size={20} />
               </div>
               <div className="flex-1 min-w-0">

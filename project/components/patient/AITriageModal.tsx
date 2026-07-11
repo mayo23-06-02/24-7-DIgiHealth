@@ -126,7 +126,7 @@ export default function AITriageModal({
               className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl p-4 shadow-none ${
+                className={`max-w-[85%] rounded-lg p-4 shadow-none ${
                   message.sender === "user"
                     ? "bg-primary text-white rounded-br-none"
                     : "bg-white text-slate-700 border border-slate-100 rounded-tl-none shadow-none"
@@ -148,7 +148,7 @@ export default function AITriageModal({
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-none p-4 shadow-none inline-flex items-center gap-3">
+              <div className="bg-white border border-slate-100 rounded-lg rounded-tl-none p-4 shadow-none inline-flex items-center gap-3">
                 <BiLoaderCircle className="animate-spin text-primary text-2xl" />
                 <span className="text-xs font-bold text-slate-500  tracking-normal">
                   Analyzing symptoms...
@@ -167,13 +167,13 @@ export default function AITriageModal({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             placeholder="Describe your symptoms..."
-            className="flex-1 border bg-slate-50 border-slate-100 rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-sm font-medium"
+            className="flex-1 border bg-slate-50 border-slate-100 rounded-lg px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-sm font-medium"
           />
           <Button
             onClick={handleSendMessage}
             disabled={isLoading || !inputValue.trim()}
             variant="primary"
-            className="w-14 h-14 p-0 rounded-xl flex items-center justify-center shadow-none shadow-primary/20 active:scale-95 transition-all !min-w-0"
+            className="w-14 h-14 p-0 rounded-lg flex items-center justify-center shadow-none shadow-primary/20 active:scale-95 transition-all !min-w-0"
           >
             <BiSend size={24} className="ml-1" />
           </Button>

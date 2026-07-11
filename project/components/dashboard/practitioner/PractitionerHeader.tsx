@@ -152,7 +152,7 @@ export default function PractitionerHeader({
       <Button
         variant="ghost"
         onClick={onMenuClick}
-        className="w-10 h-10 p-0 rounded-2xl bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all lg:hidden shrink-0 border-none !min-w-0"
+        className="w-10 h-10 p-0 rounded-lg bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all lg:hidden shrink-0 border-none !min-w-0"
       >
         <BiMenuAltLeft size={22} />
       </Button>
@@ -187,7 +187,7 @@ export default function PractitionerHeader({
 
       {/* Search - Growing to fill space */}
       <div className="flex-1 max-w-lg hidden md:block">
-        <div className="bg-slate-50 border border-slate-100 rounded-2xl px-5 py-2.5 flex items-center gap-3 group focus-within:bg-white focus-within:shadow-none focus-within:shadow-primary/5 focus-within:border-primary/20 transition-all duration-300">
+        <div className="bg-slate-50 border border-slate-100 rounded-lg px-5 p-2 flex items-center gap-3 group focus-within:bg-white focus-within:shadow-none focus-within:shadow-primary/5 focus-within:border-primary/20 transition-all duration-300">
           <BiSearch
             className="text-slate-500 group-focus-within:text-primary shrink-0 transition-colors"
             size={18}
@@ -204,14 +204,14 @@ export default function PractitionerHeader({
       <div className="flex items-center gap-3 ml-auto shrink-0">
         {/* Live Stats */}
         <div className="hidden xl:flex items-center gap-2 pr-4 mr-4 border-r border-slate-100">
-          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100 shadow-none animate-in fade-in duration-500">
+          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-lg border border-emerald-100 shadow-none animate-in fade-in duration-500">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-sm font-bold  tracking-normal leading-none">
               {upcomingCount} SESSIONS
             </span>
           </div>
           {riskAlertCount > 0 && (
-            <div className="flex items-center gap-2 bg-rose-50 text-rose-600 px-4 py-2 rounded-2xl border border-rose-100 shadow-none">
+            <div className="flex items-center gap-2 bg-rose-50 text-rose-600 px-4 py-2 rounded-lg border border-rose-100 shadow-none">
               <BiPulse size={14} className="animate-pulse" />
               <span className="text-sm font-bold  tracking-normal leading-none">
                 {riskAlertCount} ALERTS
@@ -228,7 +228,7 @@ export default function PractitionerHeader({
               setIsNotifOpen(!isNotifOpen);
               setIsProfileOpen(false);
             }}
-            className={`w-11 h-11 p-0 rounded-2xl flex items-center justify-center transition-all relative border-none !min-w-0 ${isNotifOpen ? "bg-primary text-white shadow-none shadow-primary/30" : "bg-slate-50 text-slate-500 hover:bg-primary/5 hover:text-primary"}`}
+            className={`w-11 h-11 p-0 rounded-lg flex items-center justify-center transition-all relative border-none !min-w-0 ${isNotifOpen ? "bg-primary text-white shadow-none shadow-primary/30" : "bg-slate-50 text-slate-500 hover:bg-primary/5 hover:text-primary"}`}
           >
             <BiBell size={20} />
             {riskAlertCount > 0 && (
@@ -255,10 +255,10 @@ export default function PractitionerHeader({
                 {mockNotifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 ${n.urgent ? "bg-rose-50/50 border border-rose-100 hover:bg-rose-50" : "bg-slate-50/50 border border-transparent hover:bg-slate-50 hover:border-slate-100"}`}
+                    className={`flex items-start gap-4 p-4 rounded-lg cursor-pointer transition-all duration-200 ${n.urgent ? "bg-rose-50/50 border border-rose-100 hover:bg-rose-50" : "bg-slate-50/50 border border-transparent hover:bg-slate-50 hover:border-slate-100"}`}
                   >
                     <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-sm shadow-none ${n.color}`}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-sm shadow-none ${n.color}`}
                     >
                       {n.urgent ? "⚠️" : "🔔"}
                     </div>
@@ -290,9 +290,9 @@ export default function PractitionerHeader({
               setIsProfileOpen(!isProfileOpen);
               setIsNotifOpen(false);
             }}
-            className="flex items-center gap-3 bg-slate-50 hover:bg-primary/5 p-1.5 pr-4 rounded-2xl transition-all duration-300 border-none h-auto !min-w-0"
+            className="flex items-center gap-3 bg-slate-50 hover:bg-primary/5 p-1.5 pr-4 rounded-lg transition-all duration-300 border-none h-auto !min-w-0"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shadow-none shadow-primary/20 overflow-hidden shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shadow-none shadow-primary/20 overflow-hidden shrink-0">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -337,14 +337,14 @@ export default function PractitionerHeader({
                 (item) => (
                   <button
                     key={item}
-                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold  tracking-normal text-slate-600 hover:bg-slate-50 hover:text-primary transition-all"
+                    className="w-full text-left px-4 p-2 rounded-lg text-sm font-bold  tracking-normal text-slate-600 hover:bg-slate-50 hover:text-primary transition-all"
                   >
                     {item}
                   </button>
                 ),
               )}
               <div className="h-px bg-slate-50 my-2" />
-              <button className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold  tracking-normal text-rose-500 hover:bg-rose-50 transition-all flex items-center gap-2">
+              <button className="w-full text-left px-4 p-2 rounded-lg text-sm font-bold  tracking-normal text-rose-500 hover:bg-rose-50 transition-all flex items-center gap-2">
                 Sign Out Clinical Portal
               </button>
             </div>

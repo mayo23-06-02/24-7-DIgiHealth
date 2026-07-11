@@ -115,7 +115,7 @@ export default function ReviewModal({
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Tell us about the consultation, the doctor's professionalism, etc..."
-            className="w-full h-32 p-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all outline-none text-slate-700 text-sm font-medium resize-none"
+            className="w-full h-32 p-4 rounded-lg bg-slate-50 border border-slate-100 focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all outline-none text-slate-700 text-sm font-medium resize-none"
           />
           <div className="flex justify-between items-center px-1">
             <span className="text-[10px] text-slate-400 font-bold">
@@ -127,13 +127,13 @@ export default function ReviewModal({
         <div className="flex gap-3 pt-4">
           <Button
             variant="outline"
-            className="flex-1 rounded-xl h-12"
+            className="flex-1 rounded-lg h-12"
             onClick={onClose}
           >
             Cancel
           </Button>
           <Button
-            className="flex-[2] rounded-xl h-12 bg-primary shadow-lg shadow-primary/20"
+            className="flex-[2] rounded-lg h-12 bg-primary shadow-lg shadow-primary/20"
             onClick={handleSubmit}
             disabled={submitting}
             icon={submitting ? <BiLoaderAlt className="animate-spin" /> : <BiSend />}

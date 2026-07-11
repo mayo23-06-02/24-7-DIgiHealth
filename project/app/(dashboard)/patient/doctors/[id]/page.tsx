@@ -70,7 +70,7 @@ export default function DoctorProfilePage() {
       {/* HERO SECTION */}
       <div className="flex flex-col lg:flex-row gap-12 items-start">
         <div className="relative shrink-0">
-          <div className="w-48 h-48 rounded-2xl bg-white p-2 border-4 border-primary/10  overflow-hidden group">
+          <div className="w-48 h-48 rounded-lg bg-white p-2 border-4 border-primary/10  overflow-hidden group">
             <div className="w-full h-full flex items-center justify-center rounded-lg overflow-hidden bg-slate-100 relative">
               {doc.avatar ? (
                 <Avatar
@@ -88,7 +88,7 @@ export default function DoctorProfilePage() {
               )}
             </div>
           </div>
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white px-6 py-2 rounded-2xl  border border-slate-100 flex items-center gap-2">
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white px-6 py-2 rounded-lg  border border-slate-100 flex items-center gap-2">
             <BiStar className="text-gray-400" />
             <span className="text-sm font-bold text-slate-800">
               {doc.rating?.toFixed(1) || "5.0"}
@@ -254,7 +254,7 @@ export default function DoctorProfilePage() {
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
+                        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
                           {rev.patientName?.charAt(0) || "P"}
                         </div>
                         <div>
@@ -286,7 +286,7 @@ export default function DoctorProfilePage() {
                   </Card>
                 ))
               ) : (
-                <div className="col-span-2 text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <div className="col-span-2 text-center py-10 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                   <p className="text-xs font-bold text-slate-500">
                     No patient feedback yet.
                   </p>
@@ -347,7 +347,7 @@ export default function DoctorProfilePage() {
                 (slot: string) => (
                   <div
                     key={slot}
-                    className="flex items-center justify-between p-3 bg-slate-50/50 rounded-xl border border-slate-100/50 group hover:border-primary/20 transition-all cursor-pointer"
+                    className="flex items-center justify-between p-3 bg-slate-50/50 rounded-lg border border-slate-100/50 group hover:border-primary/20 transition-all cursor-pointer"
                   >
                     <span className="text-xs font-bold text-slate-600 tabular-nums">
                       {slot}

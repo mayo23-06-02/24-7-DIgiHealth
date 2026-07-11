@@ -122,17 +122,17 @@ const PractitionerDiscovery: React.FC = () => {
   const SkeletonCard = () => (
     <div className="bg-white rounded-lg p-8 border border-slate-100 animate-pulse space-y-6">
       <div className="flex items-start gap-4">
-        <div className="w-16 h-16 bg-slate-100 rounded-2xl" />
+        <div className="w-16 h-16 bg-slate-100 rounded-lg" />
         <div className="flex-1 space-y-2">
           <div className="h-4 bg-slate-100 rounded w-3/4" />
           <div className="h-3 bg-slate-100 rounded w-1/2" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <div className="h-10 bg-slate-50 rounded-xl" />
-        <div className="h-10 bg-slate-50 rounded-xl" />
+        <div className="h-10 bg-slate-50 rounded-lg" />
+        <div className="h-10 bg-slate-50 rounded-lg" />
       </div>
-      <div className="h-12 bg-slate-100 rounded-2xl" />
+      <div className="h-12 bg-slate-100 rounded-lg" />
     </div>
   );
 
@@ -159,7 +159,7 @@ const PractitionerDiscovery: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search by name..."
-                className="w-full h-12 pl-10 pr-4 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20"
+                className="w-full h-12 pl-10 pr-4 bg-slate-50 border-none rounded-lg text-sm font-bold focus:ring-2 focus:ring-primary/20"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -214,7 +214,7 @@ const PractitionerDiscovery: React.FC = () => {
               Language Spoken
             </h1>
             <select
-              className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20"
+              className="w-full h-12 px-4 bg-slate-50 border-none rounded-lg text-sm font-bold focus:ring-2 focus:ring-primary/20"
               value={activeFilters.language}
               onChange={(e) =>
                 setFilters({ ...activeFilters, language: e.target.value })
@@ -332,7 +332,7 @@ const PractitionerDiscovery: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 bg-slate-50 rounded-2xl">
+                    <div className="p-4 bg-slate-50 rounded-lg">
                       <p className="text-xs font-bold text-slate-500  tracking-normal mb-1">
                         Fee
                       </p>
@@ -340,7 +340,7 @@ const PractitionerDiscovery: React.FC = () => {
                         R{doc.consultationFee}
                       </p>
                     </div>
-                    <div className="p-4 bg-slate-50 rounded-2xl">
+                    <div className="p-4 bg-slate-50 rounded-lg">
                       <p className="text-xs font-bold text-slate-500  tracking-normal mb-1">
                         Status
                       </p>
@@ -396,7 +396,7 @@ const PractitionerDiscovery: React.FC = () => {
       >
         {selectedDoc && (
           <div className="space-y-8">
-            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-3xl">
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
               <Avatar
                 src={selectedDoc.avatar}
                 name={selectedDoc.name}
@@ -419,7 +419,7 @@ const PractitionerDiscovery: React.FC = () => {
                 </h1>
                 <input
                   type="date"
-                  className="w-full h-14 px-6 rounded-2xl bg-slate-50 border-none font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 shadow-inner"
+                  className="w-full h-14 px-6 rounded-lg bg-slate-50 border-none font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 shadow-inner"
                   value={bookingData.date}
                   onChange={(e) =>
                     setBookingData({ ...bookingData, date: e.target.value })
@@ -438,7 +438,7 @@ const PractitionerDiscovery: React.FC = () => {
                       onClick={() =>
                         setBookingData({ ...bookingData, time: slot })
                       }
-                      className={`h-12 rounded-xl text-xs font-bold transition-all ${bookingData.time === slot ? "bg-primary text-white shadow-none" : "bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
+                      className={`h-12 rounded-lg text-xs font-bold transition-all ${bookingData.time === slot ? "bg-primary text-white shadow-none" : "bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
                     >
                       {slot}
                     </button>
@@ -453,7 +453,7 @@ const PractitionerDiscovery: React.FC = () => {
                 <textarea
                   rows={3}
                   placeholder="e.g. Regular prescription refill, chest pain..."
-                  className="w-full p-6 rounded-3xl bg-slate-50 border-none font-medium text-sm focus:ring-2 focus:ring-primary/20 shadow-inner"
+                  className="w-full p-6 rounded-lg bg-slate-50 border-none font-medium text-sm focus:ring-2 focus:ring-primary/20 shadow-inner"
                   value={bookingData.reason}
                   onChange={(e) =>
                     setBookingData({ ...bookingData, reason: e.target.value })

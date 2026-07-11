@@ -246,7 +246,7 @@ export default function PatientStep2({ formData, updateData }: any) {
         <div className="space-y-2">
           <h1 className="block text-sm font-bold text-slate-700">BMI (auto)</h1>
           <div
-            className={`px-5 py-4 rounded-xl flex items-center justify-between transition-all duration-500 min-h-[54px] ${
+            className={`px-5 py-4 rounded-lg flex items-center justify-between transition-all duration-500 min-h-[54px] ${
               bmiCategory
                 ? bmiCategory.color + " shadow-inner"
                 : "bg-slate-50 border-2 border-slate-100"
@@ -298,7 +298,7 @@ export default function PatientStep2({ formData, updateData }: any) {
               key={level}
               type="button"
               onClick={() => updateData("activityLevel", level)}
-              className={`px-4 py-4 rounded-xl text-left text-sm font-semibold transition-all border-2 flex items-center justify-between group ${
+              className={`px-4 py-4 rounded-lg text-left text-sm font-semibold transition-all border-2 flex items-center justify-between group ${
                 formData.activityLevel === level
                   ? "bg-primary border-primary text-white"
                   : "bg-white border-slate-100 text-slate-500"

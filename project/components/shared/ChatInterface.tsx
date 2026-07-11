@@ -46,7 +46,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {title && (
         <div className="p-6 bg-white border-b border-slate-50 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <BiBot size={20} />
             </div>
             <div>
@@ -71,7 +71,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           >
             <div
               className={`
-              w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+              w-10 h-10 rounded-lg flex items-center justify-center shrink-0
               ${m.sender === "user" ? "bg-primary text-white" : "bg-white border border-slate-100 text-slate-500 shadow-none"}
             `}
             >
@@ -80,7 +80,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
             <div
               className={`
-              max-w-[75%] p-4 rounded-2xl text-sm font-medium leading-relaxed
+              max-w-[75%] p-4 rounded-lg text-sm font-medium leading-relaxed
               ${m.sender === "user" ? "bg-primary text-white" : "bg-white border border-slate-100 text-slate-700 shadow-none"}
             `}
             >
@@ -99,10 +99,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
         {isTyping && (
           <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 text-slate-500 flex items-center justify-center shrink-0 shadow-none">
+            <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 text-slate-500 flex items-center justify-center shrink-0 shadow-none">
               <BiBot />
             </div>
-            <div className="bg-white border border-slate-100 p-4 rounded-2xl flex gap-1">
+            <div className="bg-white border border-slate-100 p-4 rounded-lg flex gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-bounce" />
               <span className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-bounce [animation-delay:0.2s]" />
               <span className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-bounce [animation-delay:0.4s]" />
@@ -121,7 +121,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <Button
             type="button"
             variant="ghost"
-            className="w-12 h-12 p-0 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-primary/5 hover:text-primary transition-all !min-w-0"
+            className="w-12 h-12 p-0 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-primary/5 hover:text-primary transition-all !min-w-0"
           >
             <BiPaperclip size={20} />
           </Button>
@@ -131,12 +131,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
-            className="flex-1 bg-slate-50 border-none rounded-2xl py-4 px-6 text-sm font-medium text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-primary/5 transition-all outline-none"
+            className="flex-1 bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-medium text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-primary/5 transition-all outline-none"
           />
 
           <Button
             type="submit"
-            className="w-12 h-12 p-0 rounded-2xl bg-primary text-white flex items-center justify-center shadow-none shadow-primary/20 hover:scale-105 transition-all !min-w-0"
+            className="w-12 h-12 p-0 rounded-lg bg-primary text-white flex items-center justify-center shadow-none shadow-primary/20 hover:scale-105 transition-all !min-w-0"
           >
             <BiSend size={20} />
           </Button>

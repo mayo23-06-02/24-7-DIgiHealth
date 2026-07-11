@@ -32,7 +32,7 @@ interface QueueItem {
   scheduledEnd: string;
   reason: string;
   riskScore: number;
-  riskColor: "green" | "gray" | "red";
+  riskColor: "green" | "gray" | "orange" | "red";
   riskFactors: string[];
   aiRecommendations: string[];
   status: string;
@@ -158,15 +158,15 @@ export default function FullQueuePage() {
             </div>
             <button
               onClick={() => fetchQueue(pagination.page)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-50 transition-all shadow-none"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:bg-slate-50 transition-all shadow-none"
             >
               <BiRefresh size={16} /> Refresh
             </button>
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-2xl border border-slate-100 p-4 mb-6 shadow-none flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex items-center gap-2.5 bg-slate-50 rounded-xl px-4 py-3 focus-within:bg-white focus-within:border focus-within:border-[#0052CC]/30 border border-transparent transition-all">
+          <div className="bg-white rounded-lg border border-slate-100 p-4 mb-6 shadow-none flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 flex items-center gap-2.5 bg-slate-50 rounded-lg px-4 py-3 focus-within:bg-white focus-within:border focus-within:border-[#0052CC]/30 border border-transparent transition-all">
               <BiSearch className="text-slate-500 shrink-0" size={16} />
               <input
                 type="text"
@@ -198,7 +198,7 @@ export default function FullQueuePage() {
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-none overflow-hidden">
+          <div className="bg-white rounded-lg border border-slate-100 shadow-none overflow-hidden">
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-500  tracking-normal">
               <div className="col-span-3">Patient</div>
@@ -310,7 +310,7 @@ export default function FullQueuePage() {
                       {/* Actions */}
                       <div className="col-span-2 flex items-center justify-end gap-1.5">
                         <button
-                          className={`p-2 rounded-xl text-white text-xs transition-all active:scale-95 shadow-none
+                          className={`p-2 rounded-lg text-white text-xs transition-all active:scale-95 shadow-none
                             ${item.type === "chat" ? "bg-[#00A3BF] hover:bg-[#008FA8]" : "bg-[#0052CC] hover:bg-[#0047B3]"}
                           `}
                           title={
@@ -331,13 +331,13 @@ export default function FullQueuePage() {
                               patientName: item.patientName,
                             })
                           }
-                          className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs transition-all active:scale-95 border border-purple-100"
+                          className="p-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs transition-all active:scale-95 border border-purple-100"
                           title="SOAP Note"
                         >
                           <BiNote size={14} />
                         </button>
                         <button
-                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs transition-all active:scale-95"
+                          className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs transition-all active:scale-95"
                           title="Patient Profile"
                         >
                           <BiUser size={14} />
@@ -356,7 +356,7 @@ export default function FullQueuePage() {
               <button
                 disabled={pagination.page === 1}
                 onClick={() => fetchQueue(pagination.page - 1)}
-                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#0052CC] hover:border-[#0052CC]/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#0052CC] hover:border-[#0052CC]/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <BiChevronLeft size={18} />
               </button>
@@ -367,7 +367,7 @@ export default function FullQueuePage() {
                 <button
                   key={pg}
                   onClick={() => fetchQueue(pg)}
-                  className={`w-9 h-9 rounded-xl text-sm font-bold transition-all
+                  className={`w-9 h-9 rounded-lg text-sm font-bold transition-all
                     ${pg === pagination.page ? "bg-[#0052CC] text-white  shadow-blue-300" : "bg-white border border-slate-200 text-slate-600 hover:border-[#0052CC]/30 hover:text-[#0052CC]"}
                   `}
                 >
@@ -377,7 +377,7 @@ export default function FullQueuePage() {
               <button
                 disabled={pagination.page === pagination.totalPages}
                 onClick={() => fetchQueue(pagination.page + 1)}
-                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#0052CC] hover:border-[#0052CC]/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#0052CC] hover:border-[#0052CC]/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <BiChevronRight size={18} />
               </button>

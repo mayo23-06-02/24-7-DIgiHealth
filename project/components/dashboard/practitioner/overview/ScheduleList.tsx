@@ -55,7 +55,7 @@ export default function ScheduleList({ items, selectedDate }: ScheduleListProps)
           <tbody className="divide-y divide-slate-50">
             {items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-slate-500 text-sm font-medium bg-slate-50/30 rounded-xl">
+                <td colSpan={5} className="py-12 text-center text-slate-500 text-sm font-medium bg-slate-50/30 rounded-lg">
                   No appointments scheduled for this day
                 </td>
               </tr>

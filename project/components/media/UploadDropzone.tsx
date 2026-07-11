@@ -95,7 +95,7 @@ export default function UploadDropzone({
           if (uploading) return;
           void handleFile(e.dataTransfer.files?.[0] || null);
         }}
-        className={`relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${
+        className={`relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
           uploading
             ? "border-primary/40 bg-primary/5"
             : "border-slate-200 bg-slate-50 hover:border-primary/50 hover:bg-slate-100"
@@ -125,7 +125,7 @@ export default function UploadDropzone({
           </div>
         ) : value || fileName ? (
           <div className="flex items-center justify-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <BiFile size={22} />
             </div>
             <div className="text-left min-w-0">

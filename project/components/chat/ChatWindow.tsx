@@ -186,7 +186,7 @@ export default function ChatWindow({
 
   if (loading || !user) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white rounded-2xl h-full">
+      <div className="flex-1 flex items-center justify-center bg-white rounded-lg h-full">
         <BiLoaderAlt className="animate-spin text-4xl text-primary" />
       </div>
     );
@@ -194,7 +194,7 @@ export default function ChatWindow({
 
   if (!conversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-2xl h-full gap-2 px-6 text-center">
+      <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-lg h-full gap-2 px-6 text-center">
         <p className="text-slate-700 font-medium">
           Unable to load this conversation
         </p>
@@ -231,14 +231,14 @@ export default function ChatWindow({
       : null;
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden rounded-none">
+    <div className="flex flex-col h-full overflow-hidden rounded-none">
       <div className="flex justify-between items-center px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-slate-100 bg-white shrink-0 gap-2">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {onBack && (
             <button
               type="button"
               onClick={onBack}
-              className="md:hidden flex items-center justify-center w-10 h-10 -ml-1 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-primary transition-colors shrink-0"
+              className="md:hidden flex items-center justify-center w-10 h-10 -ml-1 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-primary transition-colors shrink-0"
               aria-label="Back to conversations"
               title="Back to conversations"
             >
@@ -300,17 +300,8 @@ export default function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-slate-100 bg-white flex items-end gap-2 shrink-0">
-        {user.role === "practitioner" && (
-          <button
-            type="button"
-            onClick={() => setIsAttachModalOpen(true)}
-            className="mb-1 w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center shrink-0"
-            title="Attach Clinical Record"
-          >
-            <BiPlus size={22} />
-          </button>
-        )}
+      <div className="border-t border-slate-100 bg-white flex items-end gap-2 p-2 shrink-0">
+        
         <div className="flex-1 flex flex-col overflow-hidden">
           {user.role === "patient" && (
             <div className="mb-2">
@@ -331,6 +322,6 @@ export default function ChatWindow({
         onClose={() => setIsAttachModalOpen(false)}
         conversationId={conversation._id}
       />
-    </Card>
+    </div>
   );
 }

@@ -138,7 +138,7 @@ export default function PractitionerStep2({
                         : [...current, lang];
                       updateData("languages", next);
                     }}
-                    className={`flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border text-sm font-bold transition-all ${
                       isSelected
                         ? "border-primary bg-primary/5 text-primary shadow-none"
                         : "border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200"

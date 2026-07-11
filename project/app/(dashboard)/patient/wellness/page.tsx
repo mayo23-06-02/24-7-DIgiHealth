@@ -336,7 +336,7 @@ export default function WellnessHub() {
 
           <Card className="flex items-center justify-between p-6 bg-gray-50 border-gray-100 border-2">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gray-500 rounded-2xl flex items-center justify-center text-white shadow-none shadow-gray-200">
+              <div className="w-12 h-12 bg-gray-500 rounded-lg flex items-center justify-center text-white shadow-none shadow-gray-200">
                 <HiFire size={24} />
               </div>
               <div>
@@ -475,9 +475,9 @@ export default function WellnessHub() {
               {tips.map((tip, i) => (
                 <div
                   key={tip.id || tip._id || i}
-                  className="group bg-white p-5 rounded-3xl border border-slate-100 flex items-start gap-5 hover:border-primary/20 transition-all hover:shadow-none hover:shadow-slate-900/5"
+                  className="group bg-white p-5 rounded-lg border border-slate-100 flex items-start gap-5 hover:border-primary/20 transition-all hover:shadow-none hover:shadow-slate-900/5"
                 >
-                  <div className="w-12 h-12 bg-slate-50 group-hover:bg-primary/5 rounded-2xl flex items-center justify-center text-2xl transition-all">
+                  <div className="w-12 h-12 bg-slate-50 group-hover:bg-primary/5 rounded-lg flex items-center justify-center text-2xl transition-all">
                     {tip.icon}
                   </div>
                   <div>
@@ -523,7 +523,7 @@ export default function WellnessHub() {
               <Button
                 variant="ghost"
                 onClick={() => setSelectedArticle(articles[0])}
-                className="w-full bg-slate-50 text-sm font-bold  tracking-normal text-primary hover:bg-primary hover:text-white transition-all rounded-xl py-3 border-none"
+                className="w-full bg-slate-50 text-sm font-bold  tracking-normal text-primary hover:bg-primary hover:text-white transition-all rounded-lg py-3 border-none"
               >
                 Review Full Analysis
               </Button>

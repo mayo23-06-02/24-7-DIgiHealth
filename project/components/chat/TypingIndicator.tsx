@@ -9,7 +9,7 @@ export default function TypingIndicator({
 
   return (
     <div className="flex items-center gap-2 p-2 mb-2 animate-in fade-in">
-      <div className="bg-slate-200 px-3 py-2 rounded-2xl rounded-tl-sm flex items-center gap-1 w-fit">
+      <div className="bg-slate-200 px-3 py-2 rounded-lg rounded-tl-sm flex items-center gap-1 w-fit">
         <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
         <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
         <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" />

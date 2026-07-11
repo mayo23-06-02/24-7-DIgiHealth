@@ -41,51 +41,14 @@ import PageHeader from "@/components/ui/PageHeader";
 import PatientCalendar from "./PatientCalendar";
 import BookingModal from "@/components/doctor/BookingModal";
 
-type AppointmentStatus =
-  | "all"
-  | "upcoming"
-  | "past"
-  | "cancelled"
-  | "ongoing"
-  | "missed"
-  | "completed"
-  | "scheduled"
-  | "in_progress"
-  | "requested"
-  | "pending";
-type ViewType = "list" | "calendar";
-
-interface Appointment {
-  id: string;
-  title: string;
-  time: string;
-  duration: string;
-  color: string;
-  doctor: string;
-  practitionerId?: string;
-  doctorAvatar?: string;
-  specialization?: string;
-  type: "video" | "chat" | "in_person";
-  status: string;
-  date: string;
-  scheduledStartTime: string;
-  description?: string;
-  reason?: string;
-  cancelledBy?: string;
-  isNew?: boolean;
-  computedStatus?: AppointmentStatus;
-}
-
-// Helper to parse duration string (e.g. "1h" -> 60, "30" -> 30)
-const parseDuration = (durationStr: string | undefined): number => {
-  if (!durationStr) return 30;
-  const val = parseInt(durationStr);
-  if (isNaN(val)) return 30;
-  if (durationStr.toLowerCase().includes("h")) {
-    return val * 60;
-  }
-  return val;
-};
+import type { Appointment, AppointmentStatus, ViewType } from "./appointments/types";
+import { parseDuration } from "./appointments/types";
+import AppointmentsToolbar from "./appointments/AppointmentsToolbar";
+import {
+  WaitingRoomModal,
+  RescheduleModal,
+  CancelAppointmentModal,
+} from "./appointments/AppointmentActionModals";
 
 const AppointmentsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppointmentStatus>("upcoming");
@@ -528,95 +491,17 @@ const AppointmentsView: React.FC = () => {
       />
 
       {/* TABS & TOOLS */}
-      <Card className="flex flex-col gap-4 border border-slate-100 sticky top-0 z-30 p-3">
-        <div className="flex gap-1.5 bg-slate-50 rounded-2xl p-1 overflow-x-auto custom-scrollbar">
-          {(
-            [
-              "all",
-              "upcoming",
-              "ongoing",
-              "past",
-              "missed",
-              "cancelled",
-            ] as AppointmentStatus[]
-          ).map((tab) => (
-            <Button
-              key={tab}
-              onClick={() => handleTabChange(tab)}
-              variant={activeTab === tab ? "primary" : "ghost"}
-              className={`px-4 py-2 h-auto text-xs lg:telg font-bold tracking-normal rounded-xl transition-all flex items-center gap-1 whitespace-nowrap ${
-                activeTab === tab
-                  ? "shadow-primary/20"
-                  : "text-slate-500 hover:text-slate-600"
-              }`}
-            >
-              {tab}
-              <span
-                className={`ml-1 px-2 py-0.5 rounded-lg text-[9px] font-bold border ${
-                  activeTab === tab
-                    ? "bg-white/20 border-white/20 text-white"
-                    : "bg-white border-slate-100 text-slate-500"
-                }`}
-              >
-                {counts[tab]?.total || 0}
-              </span>
-              {counts[tab]?.new > 0 && (
-                <span className="ml-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-              )}
-            </Button>
-          ))}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          <div className="flex flex-1 flex-wrap gap-2 items-center">
-            <div className="hidden sm:flex flex-1 min-w-[140px]">
-              <Input
-                type="text"
-                placeholder="Search all fields..."
-                icon={<BiSearch size={18} />}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="hidden md:flex flex-wrap gap-2 items-center">
-              <Select
-                value={sortBy}
-                onChange={(v) => setSortBy(v)}
-                options={[
-                  { value: "newest", label: "Newest" },
-                  { value: "oldest", label: "Oldest" },
-                ]}
-                className="w-36"
-              />
-            </div>
-            <div className="hidden sm:flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200/50 self-start sm:self-auto">
-              <Button
-                variant="ghost"
-                onClick={() => setViewType("list")}
-                className={`w-10 h-10 p-0 rounded-xl border-none min-w-0! transition-all ${
-                  viewType === "list"
-                    ? "bg-white shadow-none text-primary"
-                    : "text-slate-500 hover:text-slate-600"
-                }`}
-              >
-                <BiListUl size={20} />
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => setViewType("calendar")}
-                className={`w-10 h-10 p-0 rounded-xl border-none min-w-0! transition-all ${
-                  viewType === "calendar"
-                    ? "bg-white shadow-none text-primary"
-                    : "text-slate-500 hover:text-slate-600"
-                }`}
-              >
-                <BiCalendar size={20} />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <AppointmentsToolbar
+        activeTab={activeTab}
+        viewType={viewType}
+        searchQuery={searchQuery}
+        sortBy={sortBy}
+        counts={counts}
+        onTabChange={handleTabChange}
+        onSearchChange={setSearchQuery}
+        onSortChange={setSortBy}
+        onViewTypeChange={setViewType}
+      />
 
       {/* APPOINTMENTS LIST / EMPTY STATE */}
       {loading ? (
@@ -697,7 +582,7 @@ const AppointmentsView: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-5">
-                          <div className="space-y-1.5">
+                          <div className="space-y-2">
                             <p className="text-sm font-bold text-slate-700 tracking-tight">
                               {appt.date}
                             </p>
@@ -758,7 +643,7 @@ const AppointmentsView: React.FC = () => {
                               appt.computedStatus === "ongoing") && (
                               <Button
                                 size="sm"
-                                className="h-10 px-4 rounded-xl text-sm font-bold tracking-normal bg-emerald-500 hover:bg-emerald-600 shadow-none shadow-emerald-100"
+                                className="h-10 px-4 rounded-lg text-sm font-bold tracking-normal bg-emerald-500 hover:bg-emerald-600 shadow-none shadow-emerald-100"
                                 onClick={() => handleJoinCell(appt)}
                                 icon={<BiVideo size={14} />}
                               >
@@ -772,7 +657,7 @@ const AppointmentsView: React.FC = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-10 px-4 rounded-xl text-xs font-bold border-slate-200 text-primary hover:bg-primary/5"
+                                className="h-10 px-4 rounded-lg text-xs font-bold border-slate-200 text-primary hover:bg-primary/5"
                                 onClick={() => {
                                   setRebookDoctor({
                                     id: appt.practitionerId || "",
@@ -791,7 +676,7 @@ const AppointmentsView: React.FC = () => {
                               <Button
                                 variant="ghost"
                                 onClick={() => setSelectedAppt(appt)}
-                                className="w-10 h-10 p-0 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all border-none min-w-0!"
+                                className="w-10 h-10 p-0 rounded-lg flex items-center justify-center bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all border-none min-w-0!"
                               >
                                 <BiChevronRight size={22} />
                               </Button>
@@ -822,7 +707,7 @@ const AppointmentsView: React.FC = () => {
               return (
                 <Card
                   key={appt.id}
-                  className="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-shadow"
+                  className="p-4 border border-slate-100 rounded-lg hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start gap-4">
                     <Avatar
@@ -901,7 +786,7 @@ const AppointmentsView: React.FC = () => {
                           appt.computedStatus === "ongoing") && (
                           <Button
                             size="sm"
-                            className="h-8 px-3 text-xs font-bold rounded-xl bg-emerald-500 hover:bg-emerald-600"
+                            className="h-8 px-3 text-xs font-bold rounded-lg bg-emerald-500 hover:bg-emerald-600"
                             onClick={() => handleJoinCell(appt)}
                             icon={<BiVideo size={12} />}
                           >
@@ -915,7 +800,7 @@ const AppointmentsView: React.FC = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-8 px-3 text-xs font-bold rounded-xl border-slate-200 text-primary hover:bg-primary/5"
+                              className="h-8 px-3 text-xs font-bold rounded-lg border-slate-200 text-primary hover:bg-primary/5"
                               onClick={() => {
                                 setRebookDoctor({
                                   id: appt.practitionerId || "",
@@ -935,7 +820,7 @@ const AppointmentsView: React.FC = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => setSelectedAppt(appt)}
-                          className="h-8 px-3 text-xs font-bold rounded-xl border border-slate-200"
+                          className="h-8 px-3 text-xs font-bold rounded-lg border border-slate-200"
                         >
                           Details
                         </Button>
@@ -1027,7 +912,7 @@ const AppointmentsView: React.FC = () => {
                 <>
                   <Button
                     fullWidth
-                    className="h-14 sm:h-16 justify-between px-6 bg-primary hover:bg-primary/95 text-white shadow-none shadow-primary/20 rounded-2xl"
+                    className="h-14 sm:h-16 justify-between px-6 bg-primary hover:bg-primary/95 text-white shadow-none shadow-primary/20 rounded-lg"
                     onClick={() => {
                       const appt = selectedAppt!;
                       setSelectedAppt(null);
@@ -1045,7 +930,7 @@ const AppointmentsView: React.FC = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       variant="outline"
-                      className="h-12 border-slate-100 text-[11px] font-bold tracking-normal rounded-2xl hover:bg-slate-50"
+                      className="h-12 border-slate-100 text-[11px] font-bold tracking-normal rounded-lg hover:bg-slate-50"
                       onClick={() => {
                         const appt = selectedAppt!;
                         setSelectedAppt(null);
@@ -1057,7 +942,7 @@ const AppointmentsView: React.FC = () => {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="h-12 bg-rose-50 hover:bg-rose-100 text-rose-500 text-[11px] font-bold tracking-normal rounded-2xl border-none"
+                      className="h-12 bg-rose-50 hover:bg-rose-100 text-rose-500 text-[11px] font-bold tracking-normal rounded-lg border-none"
                       onClick={() => {
                         const appt = selectedAppt!;
                         setSelectedAppt(null);
@@ -1074,7 +959,7 @@ const AppointmentsView: React.FC = () => {
                 <>
                   <Button
                     fullWidth
-                    className="h-14 sm:h-16 justify-between px-6 bg-emerald-500 hover:bg-emerald-600 text-white shadow-none shadow-emerald-100 rounded-2xl"
+                    className="h-14 sm:h-16 justify-between px-6 bg-emerald-500 hover:bg-emerald-600 text-white shadow-none shadow-emerald-100 rounded-lg"
                     icon={<BiFile size={20} />}
                     iconPosition="right"
                   >
@@ -1084,7 +969,7 @@ const AppointmentsView: React.FC = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-12 justify-between px-6 border-slate-100 rounded-2xl hover:bg-slate-50"
+                    className="h-12 justify-between px-6 border-slate-100 rounded-lg hover:bg-slate-50"
                   >
                     <span className="text-[11px] font-bold tracking-normal text-slate-600">
                       View Encrypted SOAP Logs
@@ -1100,7 +985,7 @@ const AppointmentsView: React.FC = () => {
                         <Button
                           key={s}
                           variant="ghost"
-                          className="w-12 h-12 sm:w-14 sm:h-14 p-0 bg-slate-50 hover:text-gray-400 hover:bg-gray-50 rounded-2xl border-none transition-all duration-300 transform hover:scale-110 active:scale-90"
+                          className="w-12 h-12 sm:w-14 sm:h-14 p-0 bg-slate-50 hover:text-gray-400 hover:bg-gray-50 rounded-lg border-none transition-all duration-300 transform hover:scale-110 active:scale-90"
                         >
                           <BiStar
                             size={22}
@@ -1118,7 +1003,7 @@ const AppointmentsView: React.FC = () => {
               ) : (
                 <Button
                   fullWidth
-                  className="h-14 shadow-none shadow-primary/20 rounded-2xl text-sm font-bold tracking-normal"
+                  className="h-14 shadow-none shadow-primary/20 rounded-lg text-sm font-bold tracking-normal"
                   onClick={() => {
                     const appt = selectedAppt!;
                     setSelectedAppt(null); // Close the detail modal
@@ -1151,211 +1036,32 @@ const AppointmentsView: React.FC = () => {
         onSuccess={() => fetchAppointments(false)}
       />
 
-      {/* ─── VIRTUAL WAITING ROOM ─── */}
-      <Modal
-        isOpen={!!waitingRoomAppt}
+      {/* Action modals */}
+      <WaitingRoomModal
+        appt={waitingRoomAppt}
+        timeLeft={
+          waitingRoomAppt
+            ? getWaitingRoomTimeLeft(waitingRoomAppt)
+            : { hours: 0, minutes: 0, seconds: 0 }
+        }
         onClose={() => setWaitingRoomAppt(null)}
-        title="Clinical Waiting Room"
-        width="md"
-      >
-        {waitingRoomAppt &&
-          (() => {
-            const tl = getWaitingRoomTimeLeft(waitingRoomAppt);
-            const hh = String(tl.hours).padStart(2, "0");
-            const mm = String(tl.minutes).padStart(2, "0");
-            const ss = String(tl.seconds).padStart(2, "0");
-            return (
-              <div className="space-y-6 text-center py-2">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="relative">
-                    <Avatar
-                      src={waitingRoomAppt.doctorAvatar}
-                      name={waitingRoomAppt.doctor}
-                      size="xl"
-                      className="border-4 border-primary/10 shadow-lg"
-                    />
-                    <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white rounded-full animate-pulse" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-800 font-grotesk">
-                      {waitingRoomAppt.doctor}
-                    </h3>
-                    <p className="text-sm font-semibold text-slate-500 mt-0.5">
-                      {waitingRoomAppt.specialization || "Clinical Specialist"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 shadow-inner space-y-4">
-                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
-                    Session Starts In
-                  </p>
-                  <div className="flex justify-center items-end gap-3">
-                    <div className="flex flex-col items-center">
-                      <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-slate-800">
-                        {hh}
-                      </span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
-                        Hrs
-                      </span>
-                    </div>
-                    <span className="text-4xl font-extrabold text-slate-300 mb-5">
-                      :
-                    </span>
-                    <div className="flex flex-col items-center">
-                      <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-primary">
-                        {mm}
-                      </span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
-                        Min
-                      </span>
-                    </div>
-                    <span className="text-4xl font-extrabold text-slate-300 mb-5">
-                      :
-                    </span>
-                    <div className="flex flex-col items-center">
-                      <span className="text-4xl font-extrabold tabular-nums tracking-tighter text-slate-800">
-                        {ss}
-                      </span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
-                        Sec
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed font-medium pt-2 border-t border-slate-100">
-                    You will be automatically redirected to the consultation
-                    room when the session begins.
-                  </p>
-                </div>
-
-                <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-center justify-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-                  <span className="text-xs font-bold text-emerald-700">
-                    Secure encrypted line active — standby
-                  </span>
-                </div>
-
-                <Button
-                  variant="ghost"
-                  fullWidth
-                  onClick={() => setWaitingRoomAppt(null)}
-                  className="h-12 border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-xl font-bold text-sm tracking-normal"
-                >
-                  Return to Dashboard
-                </Button>
-              </div>
-            );
-          })()}
-      </Modal>
-
-      {/* ─── RESCHEDULE MODAL ─── */}
-      <Modal
-        isOpen={!!rescheduleAppt}
+      />
+      <RescheduleModal
+        appt={rescheduleAppt}
+        date={rescheduleDate}
+        time={rescheduleTime}
+        loading={rescheduling}
+        onDateChange={setRescheduleDate}
+        onTimeChange={setRescheduleTime}
         onClose={() => setRescheduleAppt(null)}
-        title="Reschedule Appointment"
-        width="sm"
-      >
-        {rescheduleAppt && (
-          <div className="space-y-5 py-2">
-            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <Avatar
-                src={rescheduleAppt.doctorAvatar}
-                name={rescheduleAppt.doctor}
-                size="md"
-              />
-              <div>
-                <p className="font-bold text-slate-800 text-sm">
-                  {rescheduleAppt.doctor}
-                </p>
-                <p className="text-xs text-slate-500 font-medium">
-                  {rescheduleAppt.specialization || "Clinical Specialist"}
-                </p>
-              </div>
-            </div>
-
-            <Input
-              type="date"
-              label="New Date"
-              value={rescheduleDate}
-              onChange={(e) => setRescheduleDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-            />
-            <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700">
-                New Time
-              </label>
-              <input
-                type="time"
-                min="08:00"
-                max="23:30"
-                step="1800"
-                value={rescheduleTime}
-                onChange={(e) => setRescheduleTime(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-primary outline-none transition-all text-slate-900 font-medium text-sm"
-              />
-            </div>
-
-            <Button
-              fullWidth
-              className="h-13 rounded-2xl font-bold text-sm tracking-normal"
-              disabled={!rescheduleDate || !rescheduleTime || rescheduling}
-              onClick={handleConfirmReschedule}
-              icon={<BiCalendarEdit size={18} />}
-            >
-              {rescheduling ? "Rescheduling..." : "Confirm New Time"}
-            </Button>
-          </div>
-        )}
-      </Modal>
-
-      {/* ─── CANCEL CONFIRMATION MODAL ─── */}
-      <Modal
-        isOpen={!!cancelAppt}
+        onConfirm={handleConfirmReschedule}
+      />
+      <CancelAppointmentModal
+        appt={cancelAppt}
+        loading={cancelling}
         onClose={() => setCancelAppt(null)}
-        title="Cancel Appointment"
-        width="sm"
-      >
-        {cancelAppt && (
-          <div className="space-y-5 py-2">
-            <div className="flex items-center gap-4 p-4 bg-rose-50/60 rounded-xl border border-rose-100">
-              <Avatar
-                src={cancelAppt.doctorAvatar}
-                name={cancelAppt.doctor}
-                size="md"
-              />
-              <div>
-                <p className="font-bold text-slate-800 text-sm">
-                  {cancelAppt.doctor}
-                </p>
-                <p className="text-xs text-slate-500 font-medium">
-                  {cancelAppt.date} · {cancelAppt.time}
-                </p>
-              </div>
-            </div>
-            <p className="text-sm text-slate-600 leading-relaxed font-medium text-center">
-              Are you sure you want to cancel this appointment? This action
-              cannot be undone.
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                className="h-12 rounded-xl font-bold text-sm border-slate-200"
-                onClick={() => setCancelAppt(null)}
-              >
-                Keep It
-              </Button>
-              <Button
-                className="h-12 rounded-xl font-bold text-sm bg-rose-500 hover:bg-rose-600 text-white border-none"
-                disabled={cancelling}
-                onClick={handleConfirmCancel}
-                icon={<BiTrash size={16} />}
-              >
-                {cancelling ? "Cancelling..." : "Yes, Cancel"}
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
+        onConfirm={handleConfirmCancel}
+      />
     </div>
   );
 };

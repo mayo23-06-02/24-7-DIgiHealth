@@ -50,9 +50,9 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex gap-4 items-center">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl border border-primary/5 shadow-inner">
+        <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center text-3xl border border-primary/5 shadow-inner">
           {appt.img ? (
-            <img src={appt.img} className="w-full h-full object-cover rounded-2xl" alt="" />
+            <img src={appt.img} className="w-full h-full object-cover rounded-lg" alt="" />
           ) : appt.type === "refill" ? (
             "💊"
           ) : appt.type === "reminder" ? (
@@ -76,7 +76,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
       </div>
 
       {(appt.concern || appt.notes) && (
-        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+        <div className="bg-slate-50 p-5 rounded-lg border border-slate-100">
           <p className="text-sm font-bold text-slate-600 leading-relaxed italic">
             "{appt.concern || appt.notes}"
           </p>
@@ -84,7 +84,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
       )}
 
       {appt.type === "refill" && (
-        <div className="bg-slate-50 p-4 rounded-xl space-y-2">
+        <div className="bg-slate-50 p-4 rounded-lg space-y-2">
           {appt.prescriptionName && (
             <div className="flex justify-between text-sm">
               <span className="text-slate-500">Medication:</span>
@@ -106,7 +106,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl">
+      <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-lg">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
           <BiMap className="text-primary text-lg" />
           {appt.location ||
@@ -125,7 +125,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
       <div className="flex gap-3">
         {appt.status === "confirmed" && isJoinable && (
           <Button
-            className="flex-1 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-none shadow-primary/30"
+            className="flex-1 rounded-lg bg-primary hover:bg-primary/90 text-white shadow-none shadow-primary/30"
             onClick={() => {
               window.location.href = `/patient/messages?autoStart=true&consultationId=${appt.id}`;
             }}
@@ -137,13 +137,13 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
           <>
             <Button
               variant="outline"
-              className="flex-1 rounded-xl"
+              className="flex-1 rounded-lg"
               onClick={() => onEdit(appt)}
             >
               <BiPencil className="mr-2" /> Edit
             </Button>
             <Button
-              className="flex-1 rounded-xl"
+              className="flex-1 rounded-lg"
               disabled={isDeleting}
               onClick={() => onDelete(appt)}
             >
@@ -157,7 +157,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
           </>
         )}
         {!isPersonalEvent && (
-          <Button className="flex-1 rounded-xl" onClick={onClose}>
+          <Button className="flex-1 rounded-lg" onClick={onClose}>
             Close
           </Button>
         )}

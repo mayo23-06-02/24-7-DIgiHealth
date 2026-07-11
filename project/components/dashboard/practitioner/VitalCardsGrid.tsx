@@ -61,7 +61,7 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
       {vitals.map((vital) => (
         <KPICard
           key={vital.id}
@@ -84,7 +84,7 @@ const VitalCardsGrid: React.FC<VitalCardsGridProps> = ({
           onSaved={onRiskSaved}
         />
       ) : (
-        <div className="rounded-2xl bg-slate-500 p-4 min-h-[148px] text-white flex flex-col justify-end">
+        <div className="rounded-lg bg-slate-500 p-4 min-h-[148px] text-white flex flex-col justify-end">
           <p className="text-3xl font-bold">—</p>
           <p className="text-sm font-semibold text-white/90">Clinical risk score</p>
         </div>

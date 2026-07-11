@@ -175,9 +175,9 @@ export default function CallButton({
   return (
     <div className="relative flex gap-2">
       {incomingAlertOpen && pendingRoomInfo && (
-        <div className="absolute top-14 right-0 z-30 w-80 rounded-3xl border border-rose-200 bg-white p-4  shadow-rose-900/10">
+        <div className="absolute top-14 right-0 z-30 w-80 rounded-lg border border-rose-200 bg-white p-4  shadow-rose-900/10">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
               <BiPhoneCall size={22} />
             </div>
             <div className="min-w-0">
@@ -204,7 +204,7 @@ export default function CallButton({
                   setIncomingAlertOpen(false);
                 }
               }}
-              className="flex-1 rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               Decline
             </button>
@@ -242,7 +242,7 @@ export default function CallButton({
                   setStatusLoading(false);
                 }
               }}
-              className="flex-1 rounded-2xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              className="flex-1 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
             >
               Join now
             </button>
@@ -285,7 +285,7 @@ export default function CallButton({
               setStatusLoading(false);
             }
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white font-bold text-xs -normal rounded-xl hover:bg-rose-600 transition-all animate-pulse"
+          className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white font-bold text-xs -normal rounded-lg hover:bg-rose-600 transition-all animate-pulse"
         >
           {pendingRoomInfo.initiatedBy === user?.id
             ? "RETURN TO CALL"
@@ -298,7 +298,7 @@ export default function CallButton({
           <button
             onClick={() => startCall("voice")}
             disabled={statusLoading || callActive}
-            className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+            className="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-primary hover:text-white transition-all disabled:opacity-50"
             title="Voice Call"
           >
             {statusLoading ? (
@@ -310,7 +310,7 @@ export default function CallButton({
           <button
             onClick={() => startCall("video")}
             disabled={statusLoading || callActive}
-            className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+            className="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-primary hover:text-white transition-all disabled:opacity-50"
             title="Video Call"
           >
             {statusLoading ? (

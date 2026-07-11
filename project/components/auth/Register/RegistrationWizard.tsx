@@ -120,7 +120,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
 
         {/* Global error */}
         {globalError && (
-          <div className="mb-10 p-5 bg-red-50 border-2 border-red-200 rounded-2xl flex items-center gap-4 text-red-600">
+          <div className="mb-10 p-5 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-4 text-red-600">
             <span className="text-2xl">⚠</span>
             <p className="text-sm font-bold">{globalError}</p>
           </div>

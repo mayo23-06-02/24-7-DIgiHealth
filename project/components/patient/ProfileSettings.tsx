@@ -31,7 +31,7 @@ export default function ProfileSettings({
           <h3 className="text-xs font-bold text-slate-500  tracking-normal mb-4 font-grotesk">
             Identity Details
           </h3>
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
+          <div className="bg-slate-50 rounded-lg p-6 border border-slate-100 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-medium text-sm">
                 Full Name
@@ -81,7 +81,7 @@ export default function ProfileSettings({
             <Button
               variant="white"
               fullWidth
-              className="flex justify-between items-center p-5 pl-4 rounded-2xl border border-slate-200 hover:border-primary/20 hover:shadow-none transition-all group bg-white h-auto"
+              className="flex justify-between items-center p-5 pl-4 rounded-lg border border-slate-200 hover:border-primary/20 hover:shadow-none transition-all group bg-white h-auto"
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
@@ -96,7 +96,7 @@ export default function ProfileSettings({
               </span>
             </Button>
 
-            <div className="w-full flex justify-between items-center p-5 pl-4 rounded-2xl border border-slate-200 bg-white">
+            <div className="w-full flex justify-between items-center p-5 pl-4 rounded-lg border border-slate-200 bg-white">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
                   <FiShield />
@@ -123,7 +123,7 @@ export default function ProfileSettings({
         </div>
 
         {/* POPIA */}
-        <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-100">
+        <div className="bg-emerald-50 rounded-lg p-6 border border-emerald-100">
           <h4 className="font-bold text-emerald-600 flex items-center gap-2 mb-2  tracking-wide text-xs font-grotesk">
             <FiCheck /> POPIA Compliant
           </h4>
@@ -142,7 +142,7 @@ export default function ProfileSettings({
         <Button
           variant="ghost"
           fullWidth
-          className="flex justify-center items-center gap-2 p-4 rounded-xl text-rose-500 font-bold hover:bg-rose-50 transition-colors border-none bg-transparent h-auto text-xs  tracking-normal"
+          className="flex justify-center items-center gap-2 p-4 rounded-lg text-rose-500 font-bold hover:bg-rose-50 transition-colors border-none bg-transparent h-auto text-xs  tracking-normal"
         >
           <FiLogOut /> Sign Out Securely
         </Button>

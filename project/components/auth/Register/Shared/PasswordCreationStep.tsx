@@ -10,8 +10,8 @@ export default function PasswordCreationStep({
 }: any) {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
-      <div className="bg-primary/5 p-8 rounded-2xl border border-primary/10">
-        <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white mb-6">
+      <div className="bg-primary/5 p-8 rounded-lg border border-primary/10">
+        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white mb-6">
           <BiLockAlt size={24} />
         </div>
         <h3 className="text-2xl font-bold text-slate-900 mb-2 font-grotesk">

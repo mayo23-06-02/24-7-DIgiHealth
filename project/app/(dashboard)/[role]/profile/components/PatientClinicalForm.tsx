@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { BiCreditCard, BiFirstAid } from "react-icons/bi";
-import Card from "@/components/ui/Card";
+import { BiCreditCard, BiFirstAid, BiUser } from "react-icons/bi";
 import Input from "@/components/ui/Input";
+import ProfileSection from "./ProfileSection";
 
 interface PatientRoleData {
   medicalAid: { provider: string; planName: string; memberNumber: string };
@@ -18,173 +18,103 @@ interface PatientClinicalFormProps {
   setPatientData: React.Dispatch<React.SetStateAction<PatientRoleData | null>>;
 }
 
-function SectionHead({
-  icon,
-  title,
-  sub,
-  color = "primary",
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  color?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    rose: "bg-rose-500/10 text-rose-500",
-    emerald: "bg-emerald-500/10 text-emerald-500",
-    blue: "bg-blue-500/10 text-blue-500",
-    gray: "bg-slate-500/10 text-slate-500",
-  };
-  return (
-    <div className="flex items-center gap-5">
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-          colorMap[color] || colorMap.primary
-        }`}
-      >
-        {icon}
-      </div>
-      <div className="gap-1 flex flex-col">
-        <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-600 uppercase opacity-70">{sub}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function PatientClinicalForm({
   patientData,
   setPatientData,
 }: PatientClinicalFormProps) {
+  const updateAid = (
+    patch: Partial<PatientRoleData["medicalAid"]>,
+  ) =>
+    setPatientData((prev) =>
+      prev
+        ? { ...prev, medicalAid: { ...prev.medicalAid, ...patch } }
+        : null,
+    );
+
+  const updateEmergency = (
+    patch: Partial<PatientRoleData["emergencyContact"]>,
+  ) =>
+    setPatientData((prev) =>
+      prev
+        ? {
+            ...prev,
+            emergencyContact: { ...prev.emergencyContact, ...patch },
+          }
+        : null,
+    );
+
   return (
     <>
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
-        <SectionHead
-          icon={<BiCreditCard size={24} />}
-          title="Clinical Coverage"
-          sub="Medical aid and insurance synchronization"
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <ProfileSection
+        icon={<BiCreditCard size={22} />}
+        title="Medical aid"
+        description="Coverage used for claims and eligibility checks"
+        color="primary"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <Input
-            label="Scheme Provider"
-            value={patientData.medicalAid.provider}
-            onChange={(e) =>
-              setPatientData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      medicalAid: {
-                        ...prev.medicalAid,
-                        provider: e.target.value,
-                      },
-                    }
-                  : null,
-              )
-            }
+            label="Scheme provider"
+            value={patientData.medicalAid?.provider || ""}
+            onChange={(e) => updateAid({ provider: e.target.value })}
             placeholder="e.g. Discovery"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Plan Classification"
-            value={patientData.medicalAid.planName}
-            onChange={(e) =>
-              setPatientData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      medicalAid: {
-                        ...prev.medicalAid,
-                        planName: e.target.value,
-                      },
-                    }
-                  : null,
-              )
-            }
-            placeholder="e.g. Executive"
+            label="Plan name"
+            value={patientData.medicalAid?.planName || ""}
+            onChange={(e) => updateAid({ planName: e.target.value })}
+            placeholder="e.g. Classic Saver"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Member Identification"
-            value={patientData.medicalAid.memberNumber}
-            onChange={(e) =>
-              setPatientData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      medicalAid: {
-                        ...prev.medicalAid,
-                        memberNumber: e.target.value,
-                      },
-                    }
-                  : null,
-              )
-            }
-            className="md:col-span-2"
+            label="Member number"
+            value={patientData.medicalAid?.memberNumber || ""}
+            onChange={(e) => updateAid({ memberNumber: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
           />
         </div>
-      </Card>
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
-        <SectionHead
-          icon={<BiFirstAid size={24} />}
-          title="Emergency Contact"
-          sub="Primary contact for critical clinical events"
-          color="rose"
-        />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {patientData.subscriptionTier && (
+          <p className="mt-4 text-xs text-slate-500">
+            DigiHealth plan:{" "}
+            <span className="font-bold text-slate-700 capitalize">
+              {patientData.subscriptionTier}
+            </span>
+          </p>
+        )}
+      </ProfileSection>
+
+      <ProfileSection
+        icon={<BiFirstAid size={22} />}
+        title="Emergency contact"
+        description="Who we should reach in an urgent clinical situation"
+        color="rose"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <Input
-            label=" Name"
-            value={patientData.emergencyContact.name}
-            onChange={(e) =>
-              setPatientData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      emergencyContact: {
-                        ...prev.emergencyContact,
-                        name: e.target.value,
-                      },
-                    }
-                  : null,
-              )
-            }
+            label="Full name"
+            value={patientData.emergencyContact?.name || ""}
+            onChange={(e) => updateEmergency({ name: e.target.value })}
+            icon={<BiUser />}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Phone Number"
-            value={patientData.emergencyContact.phone}
+            label="Relationship"
+            value={patientData.emergencyContact?.relationship || ""}
             onChange={(e) =>
-              setPatientData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      emergencyContact: {
-                        ...prev.emergencyContact,
-                        phone: e.target.value,
-                      },
-                    }
-                  : null,
-              )
+              updateEmergency({ relationship: e.target.value })
             }
+            placeholder="e.g. Spouse, Parent"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Kinship"
-            value={patientData.emergencyContact.relationship}
-            onChange={(e) =>
-              setPatientData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      emergencyContact: {
-                        ...prev.emergencyContact,
-                        relationship: e.target.value,
-                      },
-                    }
-                  : null,
-              )
-            }
+            label="Phone number"
+            value={patientData.emergencyContact?.phone || ""}
+            onChange={(e) => updateEmergency({ phone: e.target.value })}
+            placeholder="+27 …"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
           />
         </div>
-      </Card>
+      </ProfileSection>
     </>
   );
 }

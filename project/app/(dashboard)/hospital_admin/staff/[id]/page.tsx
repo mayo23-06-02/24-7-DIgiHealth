@@ -110,7 +110,7 @@ export default function StaffProfilePage() {
       <div className="flex items-start gap-4">
         <button
           onClick={() => router.back()}
-          className="mt-1 p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors"
+          className="mt-1 p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
         >
           <BiArrowBack size={20} />
         </button>
@@ -205,7 +205,7 @@ export default function StaffProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-slate-100 rounded-xl w-fit">
+      <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
         {TABS.map((t) => (
           <Button
             key={t.key}
@@ -482,20 +482,20 @@ export default function StaffProfilePage() {
               Revenue Summary
             </h3>
             <div className="space-y-4">
-              <div className="p-4 bg-primary/5 rounded-2xl">
+              <div className="p-4 bg-primary/5 rounded-lg">
                 <p className="text-xs text-slate-500 ">Total Earned</p>
                 <p className="text-2xl font-bold text-primary font-grotesk">
                   R {kpi.totalRevenue.toLocaleString()}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-slate-50 rounded-xl">
+                <div className="p-3 bg-slate-50 rounded-lg">
                   <p className="text-xs text-slate-500 ">Rate/hr</p>
                   <p className="text-base font-bold text-slate-800">
                     R {staff.hourlyRate}
                   </p>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-xl">
+                <div className="p-3 bg-slate-50 rounded-lg">
                   <p className="text-xs text-slate-500 ">Paid Consults</p>
                   <p className="text-base font-bold text-slate-800">
                     {kpi.completedConsultations}
@@ -576,7 +576,7 @@ export default function StaffProfilePage() {
               <Card key={m.label} className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <div
-                    className={`w-10 h-10 rounded-xl ${m.bg} ${m.color} flex items-center justify-center`}
+                    className={`w-10 h-10 rounded-lg ${m.bg} ${m.color} flex items-center justify-center`}
                   >
                     {m.icon}
                   </div>

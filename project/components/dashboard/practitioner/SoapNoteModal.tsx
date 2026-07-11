@@ -19,6 +19,8 @@ interface SoapNoteModalProps {
   consultationId: string;
   patientName: string;
   existingNotes?: SoapNotes;
+  /** Called after a successful save with the persisted notes (no page reload needed). */
+  onSaved?: (notes: SoapNotes) => void;
 }
 
 type ToastState = { type: "success" | "error"; message: string } | null;
@@ -66,6 +68,7 @@ export default function SoapNoteModal({
   consultationId,
   patientName,
   existingNotes,
+  onSaved,
 }: SoapNoteModalProps) {
   const [notes, setNotes] = useState<SoapNotes>({
     subjective: "",
@@ -114,11 +117,13 @@ export default function SoapNoteModal({
       );
       const data = await res.json();
       if (data.success) {
+        const saved: SoapNotes = data.data?.soapNotes || notes;
+        onSaved?.(saved);
         setToast({ type: "success", message: "SOAP note saved successfully" });
         setTimeout(() => {
           setToast(null);
           onClose();
-        }, 1800);
+        }, 900);
       } else {
         throw new Error(data.error);
       }
@@ -218,7 +223,7 @@ export default function SoapNoteModal({
         {toast && (
           <div
             className={`
-              fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl text-sm font-bold shadow-none z-[1000]
+              fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg text-sm font-bold shadow-none z-[1000]
               animate-in slide-in-from-bottom-4 zoom-in-95 duration-300
               ${toast.type === "success" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}
             `}

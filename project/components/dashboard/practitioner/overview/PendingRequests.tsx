@@ -90,7 +90,7 @@ export default function PendingRequests({
   if (requests.length === 0) {
     return (
       <div
-        className="p-8 text-center text-slate-500 font-medium text-sm bg-slate-50/50 rounded-xl border border-slate-100 border-dashed"
+        className="p-8 text-center text-slate-500 font-medium text-sm bg-slate-50/50 rounded-lg border border-slate-100 border-dashed"
         role="status"
         aria-live="polite"
       >
@@ -110,7 +110,7 @@ export default function PendingRequests({
           return (
             <div
               key={req.consultationId}
-              className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-1"
+              className="p-4 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-1"
               role="button"
               tabIndex={0}
               onClick={() => handleCardClick(req)}

@@ -20,13 +20,13 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onPrev, onNext }) => {
       <div className="flex gap-2">
         <button
           onClick={onPrev}
-          className="w-10 h-10 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+          className="w-10 h-10 hover:bg-primary hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
         >
           <BiChevronLeft size={24} />
         </button>
         <button
           onClick={onNext}
-          className="w-10 h-10 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+          className="w-10 h-10 hover:bg-primary hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
         >
           <BiChevronRight size={24} />
         </button>

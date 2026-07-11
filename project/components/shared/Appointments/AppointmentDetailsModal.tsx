@@ -59,7 +59,7 @@ export default function AppointmentDetailsModal({
     <Modal isOpen={isOpen} onClose={onClose} title="Appointment Details" width="lg">
       <div className="space-y-6">
         {/* Profile Section */}
-        <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+        <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
           <Avatar
             name={profileName || "Unknown"}
             src={profileAvatar}
@@ -86,7 +86,7 @@ export default function AppointmentDetailsModal({
           <h4 className="font-bold text-slate-800 text-sm">Appointment Information</h4>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
               <BiCalendar className="text-primary" size={20} />
               <div>
                 <p className="text-xs text-slate-500 font-medium">Date</p>
@@ -94,7 +94,7 @@ export default function AppointmentDetailsModal({
               </div>
             </div>
             
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
               <BiTime className="text-primary" size={20} />
               <div>
                 <p className="text-xs text-slate-500 font-medium">Time</p>
@@ -103,7 +103,7 @@ export default function AppointmentDetailsModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
             {appointment.type === "video" ? (
               <BiVideo className="text-primary" size={20} />
             ) : (
@@ -115,7 +115,7 @@ export default function AppointmentDetailsModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
             <Badge
               label={appointment.computedStatus || appointment.status}
               status={
@@ -145,7 +145,7 @@ export default function AppointmentDetailsModal({
         {appointment.reason && (
           <div className="space-y-2">
             <h4 className="font-bold text-slate-800 text-sm">Reason for Visit</h4>
-            <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl">
+            <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
               <BiNote className="text-slate-400 mt-0.5" size={20} />
               <p className="text-sm text-slate-700 leading-relaxed">{appointment.reason}</p>
             </div>
@@ -154,12 +154,12 @@ export default function AppointmentDetailsModal({
 
         {/* Additional Info */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 bg-slate-50 rounded-xl">
+          <div className="p-3 bg-slate-50 rounded-lg">
             <p className="text-xs text-slate-500 font-medium">Consultation ID</p>
             <p className="text-sm font-bold text-slate-800 font-mono">{appointment.consultationId || appointment.id}</p>
           </div>
           {appointment.duration && (
-            <div className="p-3 bg-slate-50 rounded-xl">
+            <div className="p-3 bg-slate-50 rounded-lg">
               <p className="text-xs text-slate-500 font-medium">Duration</p>
               <p className="text-sm font-bold text-slate-800">{appointment.duration}</p>
             </div>
@@ -168,7 +168,7 @@ export default function AppointmentDetailsModal({
 
         {/* Risk Score if available */}
         {appointment.riskScore !== undefined && (
-          <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl">
+          <div className="p-4 bg-rose-50 border border-rose-100 rounded-lg">
             <p className="text-sm font-bold text-rose-700 mb-1">Risk Score: {appointment.riskScore}/100</p>
             {appointment.riskColor && (
               <Badge

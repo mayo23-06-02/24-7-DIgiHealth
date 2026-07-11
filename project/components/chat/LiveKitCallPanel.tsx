@@ -263,7 +263,7 @@ export default function LiveKitCallPanel({
           </span>
         </div>
         <div className="flex items-center gap-3 pointer-events-auto">
-          <div className="bg-primary px-3 py-1.5 rounded-full border border-white/10">
+          <div className="bg-primary px-3 py-2 rounded-full border border-white/10">
             <span className="text-white text-xs font-bold tabular-nums">{fmt(elapsed)}</span>
           </div>
           <button
@@ -336,7 +336,7 @@ export default function LiveKitCallPanel({
         </div>
 
         <div className="absolute bottom-4 left-5 z-10">
-          <div className="flex items-center gap-3 bg-primary px-4 py-2.5 rounded-2xl border border-white/10">
+          <div className="flex items-center gap-3 bg-primary px-4 p-2 rounded-lg border border-white/10">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-white text-xs font-bold tracking-tight">
               {callInfo.participantName || "Participant"}
@@ -345,7 +345,7 @@ export default function LiveKitCallPanel({
         </div>
 
         {callInfo.type === "video" && (
-          <div className="absolute top-20 right-4 w-24 h-36 md:w-48 md:h-72 rounded-xl md:rounded-2xl overflow-hidden bg-slate-800 border border-white/10">
+          <div className="absolute top-20 right-4 w-24 h-36 md:w-48 md:h-72 rounded-lg md:rounded-lg overflow-hidden bg-slate-800 border border-white/10">
             <video
               ref={localVideoRef}
               autoPlay
@@ -364,7 +364,7 @@ export default function LiveKitCallPanel({
       <div className="p-5 bg-primary border-t border-white/5 flex items-center justify-center gap-4 shrink-0">
         <button
           onClick={handleToggleMic}
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${micOn ? "bg-white/10 text-white hover:bg-white/20" : "bg-rose-500 text-white"}`}
+          className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${micOn ? "bg-white/10 text-white hover:bg-white/20" : "bg-rose-500 text-white"}`}
         >
           {micOn ? <BiMicrophone size={20} /> : <BiMicrophoneOff size={20} />}
         </button>
@@ -372,7 +372,7 @@ export default function LiveKitCallPanel({
         {callInfo.type === "video" && (
           <button
             onClick={handleToggleVideo}
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${videoOn ? "bg-white/10 text-white hover:bg-white/20" : "bg-rose-500 text-white"}`}
+            className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${videoOn ? "bg-white/10 text-white hover:bg-white/20" : "bg-rose-500 text-white"}`}
           >
             {videoOn ? <BiVideo size={20} /> : <BiVideoOff size={20} />}
           </button>
@@ -380,7 +380,7 @@ export default function LiveKitCallPanel({
 
         <button
           onClick={handleEnd}
-          className="w-16 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center transition-all shadow-rose-900/30"
+          className="w-16 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-lg flex items-center justify-center transition-all shadow-rose-900/30"
         >
           <BiPhoneOff size={22} />
         </button>

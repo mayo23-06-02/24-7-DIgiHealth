@@ -75,7 +75,7 @@ export default function HospitalDashboard() {
     return (
       <div className="w-full pb-10 flex flex-col gap-8 max-w-4xl mx-auto py-12">
         <div className="text-center space-y-4">
-          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto mb-6">
+          <div className="w-20 h-20 bg-primary/10 rounded-lg flex items-center justify-center text-primary mx-auto mb-6">
             <BiPlus size={40} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 font-grotesk">
@@ -222,7 +222,7 @@ export default function HospitalDashboard() {
               {upcomingAppointments.map((app: any, i: number) => (
                 <div
                   key={i}
-                  className="flex flex-col p-3 rounded-xl border border-slate-100 bg-slate-50 gap-1"
+                  className="flex flex-col p-3 rounded-lg border border-slate-100 bg-slate-50 gap-1"
                 >
                   <p className="text-xs font-bold text-slate-700">
                     {(app.patientId as any)?.firstName}{" "}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import {
@@ -11,11 +11,17 @@ import {
   BiBriefcase,
   BiFile,
   BiLoaderAlt,
+  BiStar,
+  BiIdCard,
+  BiBuildings,
+  BiLockAlt,
+  BiEnvelope,
+  BiPhone,
+  BiCheckCircle,
 } from "react-icons/bi";
 
 import Toast from "@/components/ui/Toast";
 
-// Components
 import ProfileHero from "./components/ProfileHero";
 import ProfileNavigation from "./components/ProfileNavigation";
 import IdentityTab from "./components/IdentityTab";
@@ -23,8 +29,8 @@ import RoleDataTab from "./components/RoleDataTab";
 const DocumentsTab = dynamic(() => import("./components/DocumentsTab"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center py-20">
-      <BiLoaderAlt className="animate-spin text-primary" size={32} />
+    <div className="flex items-center justify-center py-16 rounded-lg border border-slate-100 bg-white">
+      <BiLoaderAlt className="animate-spin text-primary" size={28} />
     </div>
   ),
 });
@@ -287,76 +293,170 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const ALLOWED_DOC = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ...ALLOWED_IMAGE,
+  ];
+
+  const uploadOneFile = async (
+    file: File,
+    opts: { isAvatar?: boolean; type?: string },
+  ) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (opts.isAvatar) form.append("isAvatar", "true");
+    if (opts.type) form.append("type", opts.type);
+    const res = await fetch("/api/user/documents", {
+      method: "POST",
+      body: form,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || `Failed to upload ${file.name}`);
+    }
+    return data.data as {
+      id?: string;
+      url: string;
+      type?: string;
+      mimeType?: string;
+      status?: string;
+      createdAt?: string;
+      mediaId?: string;
+    };
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setToast({ message: "Please select an image file.", type: "error" });
+    if (!ALLOWED_IMAGE.includes(file.type)) {
+      setToast({
+        message: "Use JPG, PNG, WebP or GIF for your photo.",
+        type: "error",
+      });
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const dataUrl = reader.result as string;
-      setIsUploadingDoc(true);
-      try {
-        const res = await fetch("/api/user/documents", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            dataUrl,
-            mimeType: file.type,
-            isAvatar: true,
-          }),
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          setUser((prev) => (prev ? { ...prev, avatarUrl: dataUrl } : prev));
-          setToast({ message: "Profile photo updated.", type: "success" });
-        } else {
-          setToast({ message: data.error || "Upload failed.", type: "error" });
-        }
-      } catch {
-        setToast({ message: "Network error.", type: "error" });
-      }
+    if (file.size > 10 * 1024 * 1024) {
+      setToast({ message: "Photo must be under 10MB.", type: "error" });
+      return;
+    }
+    setIsUploadingDoc(true);
+    try {
+      const data = await uploadOneFile(file, { isAvatar: true });
+      // Prefer durable server URL; fall back to local preview
+      const previewUrl = data.url || URL.createObjectURL(file);
+      setUser((prev) => (prev ? { ...prev, avatarUrl: previewUrl } : prev));
+      setToast({ message: "Profile photo updated.", type: "success" });
+    } catch (err: unknown) {
+      setToast({
+        message: err instanceof Error ? err.message : "Photo upload failed.",
+        type: "error",
+      });
+    } finally {
       setIsUploadingDoc(false);
-    };
-    reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFilesUpload = async (
+    files: FileList | File[],
+    kind: "photo" | "document" | "auto" = "auto",
+  ) => {
+    const list = Array.from(files || []);
+    if (!list.length) return;
+
+    const valid: File[] = [];
+    for (const file of list) {
+      const isImage = ALLOWED_IMAGE.includes(file.type);
+      const isDoc = ALLOWED_DOC.includes(file.type);
+      if (kind === "photo" && !isImage) {
+        setToast({
+          message: `"${file.name}" is not a supported photo (JPG/PNG/WebP/GIF).`,
+          type: "error",
+        });
+        continue;
+      }
+      if (kind === "document" && !isDoc) {
+        setToast({
+          message: `"${file.name}" is not supported. Use PDF, Word, or images.`,
+          type: "error",
+        });
+        continue;
+      }
+      if (!isImage && !isDoc) {
+        setToast({
+          message: `"${file.name}" type is not allowed.`,
+          type: "error",
+        });
+        continue;
+      }
+      const max = isImage ? 10 * 1024 * 1024 : 15 * 1024 * 1024;
+      if (file.size > max) {
+        setToast({
+          message: `"${file.name}" is too large (max ${isImage ? 10 : 15}MB).`,
+          type: "error",
+        });
+        continue;
+      }
+      valid.push(file);
+    }
+    if (!valid.length) return;
+
+    setIsUploadingDoc(true);
+    let ok = 0;
+    const errors: string[] = [];
+    for (const file of valid) {
+      try {
+        const isImage = ALLOWED_IMAGE.includes(file.type);
+        const label =
+          kind === "photo" || (kind === "auto" && isImage)
+            ? file.name.replace(/\.[^.]+$/, "") || "Photo"
+            : file.name.replace(/\.[^.]+$/, "") || "Document";
+        const data = await uploadOneFile(file, { type: label });
+        setDocuments((prev) => [
+          {
+            id: data.id!,
+            type: data.type || label,
+            url: data.url,
+            mimeType: data.mimeType || file.type,
+            status: data.status || "pending_review",
+            createdAt: data.createdAt || new Date().toISOString(),
+          },
+          ...prev,
+        ]);
+        ok += 1;
+      } catch (err: unknown) {
+        errors.push(
+          err instanceof Error ? err.message : `Failed: ${file.name}`,
+        );
+      }
+    }
+    setIsUploadingDoc(false);
+    if (docInputRef.current) docInputRef.current.value = "";
+
+    if (ok > 0) {
+      setToast({
+        message:
+          ok === 1
+            ? "File uploaded successfully."
+            : `${ok} files uploaded successfully.`,
+        type: "success",
+      });
+    }
+    if (errors.length) {
+      setToast({
+        message: errors[0],
+        type: "error",
+      });
+    }
   };
 
   const handleDocUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const dataUrl = reader.result as string;
-      setIsUploadingDoc(true);
-      try {
-        const res = await fetch("/api/user/documents", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            dataUrl,
-            mimeType: file.type,
-            type: file.type.startsWith("image/") ? "Image" : "Document",
-          }),
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          setDocuments((prev) => [data.data, ...prev]);
-          setToast({
-            message: `"${file.name}" uploaded successfully.`,
-            type: "success",
-          });
-        } else {
-          setToast({ message: data.error || "Upload failed.", type: "error" });
-        }
-      } catch {
-        setToast({ message: "Network error.", type: "error" });
-      }
-      setIsUploadingDoc(false);
-      if (docInputRef.current) docInputRef.current.value = "";
-    };
-    reader.readAsDataURL(file);
+    const files = e.target.files;
+    e.target.value = "";
+    if (files?.length) void handleFilesUpload(files, "auto");
   };
 
   const handleDeleteDoc = async (id: string) => {
@@ -440,23 +540,186 @@ export default function ProfilePage() {
     setIsSaving(false);
   };
 
+  const health = useMemo(() => {
+    if (!user) {
+      return {
+        completeness: 0,
+        identity: 0,
+        role: 0,
+        security: 0,
+        documents: 0,
+        tips: [] as string[],
+      };
+    }
+
+    let identityPts = 0;
+    const identityMax = 4;
+    if (user.firstName?.trim()) identityPts += 1;
+    if (user.lastName?.trim()) identityPts += 1;
+    if (user.mobile?.trim()) identityPts += 1;
+    if (user.email?.trim()) identityPts += 1;
+    const identity = Math.round((identityPts / identityMax) * 100);
+
+    let rolePts = 0;
+    let roleMax = 3;
+    const tips: string[] = [];
+    if (currentRole === "practitioner" && practitionerData) {
+      roleMax = 5;
+      if (practitionerData.specialisation) rolePts += 1;
+      if (practitionerData.hpcsaNumber) rolePts += 1;
+      if (practitionerData.bio?.trim()) rolePts += 1;
+      else tips.push("Add a professional bio for patients to review.");
+      if (practitionerData.languages?.length) rolePts += 1;
+      if (practitionerData.bankAccount?.accountNumber) rolePts += 1;
+      else tips.push("Complete bank details for payouts.");
+    } else if (currentRole === "patient" && patientData) {
+      roleMax = 4;
+      if (patientData.emergencyContact?.name) rolePts += 1;
+      else tips.push("Add an emergency contact.");
+      if (patientData.emergencyContact?.phone) rolePts += 1;
+      if (patientData.medicalAid?.provider) rolePts += 1;
+      if (patientData.dateOfBirth || patientData.gender) rolePts += 1;
+    } else if (currentRole === "hospital_admin" && hospitalData) {
+      roleMax = 4;
+      if (hospitalData.facility?.name) rolePts += 1;
+      if (hospitalData.facility?.contactInfo?.phone) rolePts += 1;
+      if (hospitalData.facility?.address?.city) rolePts += 1;
+      if (hospitalData.department) rolePts += 1;
+    }
+    const role = Math.round((rolePts / Math.max(roleMax, 1)) * 100);
+
+    let securityPts = 0;
+    if (user.mfaEnabled) securityPts += 60;
+    else tips.push("Enable multi-factor authentication.");
+    if (user.mobile?.trim()) securityPts += 20;
+    securityPts += 20; // password exists if logged in
+    const security = Math.min(100, securityPts);
+
+    const documentsScore =
+      documents.length === 0
+        ? 15
+        : Math.min(100, 40 + documents.length * 15);
+    if (documents.length === 0) {
+      tips.push("Upload verification documents.");
+    }
+
+    const completeness = Math.round(
+      identity * 0.3 + role * 0.3 + security * 0.25 + documentsScore * 0.15,
+    );
+
+    return {
+      completeness,
+      identity,
+      role,
+      security,
+      documents: documentsScore,
+      tips: tips.slice(0, 4),
+    };
+  }, [
+    user,
+    currentRole,
+    practitionerData,
+    patientData,
+    hospitalData,
+    documents.length,
+  ]);
+
   if (isLoading || !user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-slate-100 border-t-primary rounded-full animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <BiUser className="text-primary animate-pulse" size={24} />
+      <div className="w-full max-w-6xl mx-auto pb-16 space-y-6 animate-pulse">
+        <div className="h-48 rounded-lg bg-gradient-to-br from-primary/30 to-slate-200" />
+        <div className="h-28 -mt-14 mx-4 rounded-lg bg-white border border-slate-100 shadow-sm" />
+        <div className="h-14 rounded-lg bg-slate-100" />
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          <div className="xl:col-span-8 space-y-4">
+            <div className="h-64 rounded-lg bg-white border border-slate-100" />
+            <div className="h-40 rounded-lg bg-white border border-slate-100" />
           </div>
+          <div className="xl:col-span-4 h-80 rounded-lg bg-white border border-slate-100" />
         </div>
-        <h1 className="text-sm font-bold text-slate-500 animate-pulse">
-          Accessing Neural Profile...
-        </h1>
+        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-400 pt-4">
+          <BiLoaderAlt className="animate-spin text-primary" size={18} />
+          Loading your profile…
+        </div>
       </div>
     );
   }
 
-  const fullName = `${user.firstName} ${user.lastName}`;
+  const fullName = `${user.firstName} ${user.lastName}`.trim();
+
+  const roleLabel =
+    currentRole === "practitioner"
+      ? "Practitioner"
+      : currentRole === "hospital_admin"
+        ? "Hospital admin"
+        : currentRole === "patient"
+          ? "Patient"
+          : user.role?.replace(/_/g, " ") || "Member";
+
+  const subtitle =
+    currentRole === "practitioner" && practitionerData
+      ? [
+          practitionerData.specialisation,
+          practitionerData.experienceYears
+            ? `${practitionerData.experienceYears} yrs experience`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : currentRole === "hospital_admin" && hospitalData?.facility?.name
+        ? hospitalData.facility.name
+        : currentRole === "patient" && patientData?.subscriptionTier
+          ? `${patientData.subscriptionTier} plan`
+          : undefined;
+
+  const metaChips: { icon?: React.ReactNode; label: string }[] = [];
+  if (currentRole === "practitioner" && practitionerData) {
+    if (practitionerData.hpcsaNumber) {
+      metaChips.push({
+        icon: <BiIdCard size={13} className="text-slate-400" />,
+        label: `HPCSA ${practitionerData.hpcsaNumber}`,
+      });
+    }
+    if (practitionerData.rating > 0) {
+      metaChips.push({
+        icon: <BiStar size={13} className="text-amber-500" />,
+        label: `${practitionerData.rating}/5 · ${practitionerData.reviewCount || 0} reviews`,
+      });
+    }
+    if (practitionerData.hpcsaVerified) {
+      metaChips.push({
+        icon: <BiCheckCircle size={13} className="text-emerald-500" />,
+        label: "HPCSA verified",
+      });
+    }
+    if (practitionerData.languages?.length) {
+      metaChips.push({
+        label: practitionerData.languages.slice(0, 3).join(", "),
+      });
+    }
+  }
+  if (currentRole === "hospital_admin" && hospitalData?.facility) {
+    metaChips.push({
+      icon: <BiBuildings size={13} className="text-slate-400" />,
+      label: hospitalData.facility.facilityType || "Facility",
+    });
+    if (hospitalData.facility.address?.city) {
+      metaChips.push({
+        label: [
+          hospitalData.facility.address.city,
+          hospitalData.facility.address.province,
+        ]
+          .filter(Boolean)
+          .join(", "),
+      });
+    }
+  }
+  if (currentRole === "patient" && patientData?.medicalAid?.provider) {
+    metaChips.push({
+      label: patientData.medicalAid.provider,
+    });
+  }
+
   const tabs = [
     { id: "general", label: "Identity", icon: BiUser },
     {
@@ -472,39 +735,92 @@ export default function ProfilePage() {
     { id: "documents", label: "Documents", icon: BiFile },
     { id: "security", label: "Security", icon: BiShieldQuarter },
     { id: "notifications", label: "Alerts", icon: BiBell },
-    { id: "billing", label: "Subscriptions", icon: BiWallet },
+    { id: "billing", label: "Billing", icon: BiWallet },
+  ];
+
+  const healthItems = [
+    {
+      label: "Identity",
+      value: health.identity,
+      color: "bg-emerald-500",
+      icon: <BiUser size={14} />,
+    },
+    {
+      label:
+        currentRole === "patient"
+          ? "Clinical"
+          : currentRole === "hospital_admin"
+            ? "Facility"
+            : "Practice",
+      value: health.role,
+      color: "bg-primary",
+      icon: <BiBriefcase size={14} />,
+    },
+    {
+      label: "Security",
+      value: health.security,
+      color: "bg-amber-500",
+      icon: <BiLockAlt size={14} />,
+    },
+    {
+      label: "Documents",
+      value: health.documents,
+      color: "bg-violet-500",
+      icon: <BiFile size={14} />,
+    },
+  ];
+
+  const accountFacts = [
+    {
+      label: "Email",
+      value: user.email,
+      icon: <BiEnvelope size={14} />,
+    },
+    {
+      label: "Mobile",
+      value: user.mobile || "Not set",
+      icon: <BiPhone size={14} />,
+    },
+    {
+      label: "Role",
+      value: roleLabel,
+      icon: <BiBriefcase size={14} />,
+    },
+    {
+      label: "MFA",
+      value: user.mfaEnabled ? "Enabled" : "Off",
+      icon: <BiShieldQuarter size={14} />,
+    },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-1000 pb-20 max-w-[1800px] mx-auto">
-      {/* ── PROFILE HERO ─────────────────────────────────────────────── */}
+    <div className="w-full max-w-[1400px] mx-auto space-y-6 md:space-y-7 pb-16 animate-in fade-in duration-500">
       <ProfileHero
         fullName={fullName}
         user={user}
         currentRole={currentRole}
-        hospitalData={hospitalData}
+        roleLabel={roleLabel}
+        subtitle={subtitle}
+        metaChips={metaChips}
+        completeness={health.completeness}
         activeTab={activeTab}
         isUploadingDoc={isUploadingDoc}
         isSaving={isSaving}
         avatarInputRef={avatarInputRef}
-        docInputRef={docInputRef}
         handleAvatarUpload={handleAvatarUpload}
-        handleDocUpload={handleDocUpload}
         handleSaveNotifications={handleSaveNotifications}
         handleSaveRoleData={handleSaveRoleData}
         handleSaveProfile={handleSaveProfile}
       />
 
-      {/* ── COMMAND NAV ─────────────────────────────────────────────── */}
       <ProfileNavigation
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
 
-      {/* ── MAIN CONTENT GRID ────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <div className="xl:col-span-8 space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+        <div className="xl:col-span-8 min-w-0 space-y-5">
           {activeTab === "general" && (
             <IdentityTab
               user={user}
@@ -535,6 +851,7 @@ export default function ProfilePage() {
               isUploadingDoc={isUploadingDoc}
               docInputRef={docInputRef}
               handleDocUpload={handleDocUpload}
+              handleFilesUpload={handleFilesUpload}
               handleDeleteDoc={handleDeleteDoc}
               handleRenameDoc={handleRenameDoc}
               editDocId={editDocId}
@@ -552,6 +869,7 @@ export default function ProfilePage() {
               handleSavePassword={handleSavePassword}
               devices={devices}
               handleRevokeDevice={handleRevokeDevice}
+              mfaEnabled={user.mfaEnabled}
             />
           )}
 
@@ -575,8 +893,13 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* ── SIDEBAR STATS ────────────────────────────────────────────── */}
-        <ProfileSidebar setToast={setToast} />
+        <ProfileSidebar
+          setToast={setToast}
+          completeness={health.completeness}
+          healthItems={healthItems}
+          accountFacts={accountFacts}
+          tips={health.tips}
+        />
       </div>
 
       {toast && (

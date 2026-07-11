@@ -58,7 +58,7 @@ export default function ProfileMenu({ user }: { user: User | null }) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/60 py-3 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
+        <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-lg border border-slate-200 shadow-xl shadow-slate-200/60 py-3 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
           <div className="px-5 py-3 border-b border-slate-100 mb-2">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Quick Actions

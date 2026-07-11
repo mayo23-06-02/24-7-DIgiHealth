@@ -125,7 +125,7 @@ export default function Header({
         <button
           type="button"
           onClick={onMenuClick}
-          className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 hover:text-primary transition-colors"
+          className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center text-slate-500 hover:text-primary transition-colors"
         >
           <BiMenuAltLeft size={24} />
         </button>
@@ -149,7 +149,7 @@ export default function Header({
           <Link href={`/${user?.role}/messages`}>
             <button
               type="button"
-              className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center cursor-pointer transition-all relative bg-white text-slate-500 hover:text-primary hover:bg-primary/5"
+              className="w-10 h-10 rounded-lg border border-slate-100 flex items-center justify-center cursor-pointer transition-all relative bg-white text-slate-500 hover:text-primary hover:bg-primary/5"
               aria-label={
                 unreadMessagesCount > 0
                   ? `${unreadMessagesCount} unread chat${unreadMessagesCount === 1 ? "" : "s"}`

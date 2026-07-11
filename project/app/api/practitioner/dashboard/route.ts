@@ -6,6 +6,7 @@ import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { PaymentTransaction, PayoutRequest } from '@/lib/models/Billing';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { apiLogger } from '@/lib/apiLogger';
+import { riskBandFromScore } from '@/lib/riskScore';
 
 export async function GET(req: NextRequest) {
   try {
@@ -56,8 +57,8 @@ export async function GET(req: NextRequest) {
           scheduledStart: c.scheduledStartTime,
           scheduledEnd: c.scheduledEndTime,
           reason: c.chiefComplaint,
-          riskScore: c.clinicalRisk?.score,
-          riskColor: c.clinicalRisk?.color,
+          riskScore: c.clinicalRisk?.score ?? 0,
+          riskColor: riskBandFromScore(c.clinicalRisk?.score ?? 0),
           riskFactors: c.clinicalRisk?.factors || [],
           aiRecommendations: c.aiRecommendations || [],
           status: c.status,

@@ -40,7 +40,7 @@ export default function HealthSummary({
           {(expanded ? visits : visits.slice(0, 1)).map((v: any, i: number) => (
             <div
               key={i}
-              className="p-4 rounded-2xl bg-slate-50 mb-3 border border-slate-100"
+              className="p-4 rounded-lg bg-slate-50 mb-3 border border-slate-100"
             >
               <div className="flex justify-between items-start mb-2">
                 <span className="font-bold text-trust-blue">{v.doctor}</span>
@@ -65,7 +65,7 @@ export default function HealthSummary({
           {prescriptions.map((p: any, i: number) => (
             <div
               key={i}
-              className="flex justify-between items-center p-4 rounded-2xl border border-slate-200"
+              className="flex justify-between items-center p-4 rounded-lg border border-slate-200"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-supportive-teal/10 flex items-center justify-center text-supportive-teal">
@@ -84,7 +84,7 @@ export default function HealthSummary({
         </div>
       </div>
 
-      <button className="mt-6 w-full py-4 border-2 border-slate-200 text-slate-600 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 hover:text-trust-blue hover:border-trust-blue/30 transition-all">
+      <button className="mt-6 w-full py-4 border-2 border-slate-200 text-slate-600 font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-slate-50 hover:text-trust-blue hover:border-trust-blue/30 transition-all">
         <FiEyeOff /> View Complete Record (Requires MFA)
       </button>
     </div>

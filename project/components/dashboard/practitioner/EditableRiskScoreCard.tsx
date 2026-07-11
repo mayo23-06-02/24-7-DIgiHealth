@@ -84,18 +84,18 @@ export default function EditableRiskScoreCard({
 
   return (
     <div
-      className={`rounded-2xl p-4 flex flex-col justify-between min-h-[148px] shadow-sm transition-colors duration-300 ${style.bgClass} ${style.textClass}`}
+      className={`rounded-lg p-4 flex flex-col justify-between min-h-[148px] shadow-sm transition-colors duration-300 ${style.bgClass} ${style.textClass}`}
       style={{ backgroundColor: style.bg }}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white">
+        <div className="w-11 h-11 rounded-lg bg-white/20 flex items-center justify-center text-white">
           <BiShield size={22} />
         </div>
         {!editing ? (
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1 text-xs font-bold text-white/90 hover:text-white bg-white/15 hover:bg-white/25 px-2.5 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1 text-xs font-bold text-white/90 hover:text-white bg-white/15 hover:bg-white/25 px-2 py-2 rounded-lg transition-colors"
             title="Edit risk score"
           >
             <BiEditAlt size={14} />
@@ -110,7 +110,7 @@ export default function EditableRiskScoreCard({
                 setDraft(score);
                 setEditing(false);
               }}
-              className="text-xs font-bold text-white/90 bg-white/15 hover:bg-white/25 px-2.5 py-1.5 rounded-lg"
+              className="text-xs font-bold text-white/90 bg-white/15 hover:bg-white/25 px-2 py-2 rounded-lg"
             >
               Cancel
             </button>
@@ -118,7 +118,7 @@ export default function EditableRiskScoreCard({
               type="button"
               disabled={saving}
               onClick={handleSave}
-              className="flex items-center gap-1 text-xs font-bold text-emerald-900 bg-white hover:bg-white/90 px-2.5 py-1.5 rounded-lg disabled:opacity-60"
+              className="flex items-center gap-1 text-xs font-bold text-emerald-900 bg-white hover:bg-white/90 px-2 py-2 rounded-lg disabled:opacity-60"
             >
               {saving ? (
                 <BiLoaderAlt className="animate-spin" size={14} />

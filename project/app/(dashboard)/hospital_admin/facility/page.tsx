@@ -262,11 +262,11 @@ export default function FacilitySettings() {
           Media
         </h3>
         <div className="flex items-center gap-4">
-          <div className="w-32 h-32 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-500 cursor-pointer hover:bg-slate-200 hover:text-primary transition-colors">
+          <div className="w-32 h-32 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-500 cursor-pointer hover:bg-slate-200 hover:text-primary transition-colors">
             <BiImageAdd size={32} />
             <span className="text-xs font-bold mt-2">Upload Photo</span>
           </div>
-          <div className="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-xl text-sm text-slate-500">
+          <div className="flex-1 bg-slate-50 border border-slate-100 p-4 rounded-lg text-sm text-slate-500">
             Upload a cover image representing your facility. Supported formats:
             .JPG, .PNG. Max size: 5MB.
           </div>

@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { BiBuilding, BiEnvelope } from "react-icons/bi";
-import Card from "@/components/ui/Card";
+import { BiBuilding, BiEnvelope, BiMap } from "react-icons/bi";
 import Input from "@/components/ui/Input";
+import ProfileSection from "./ProfileSection";
 
 interface HospitalAdminRoleData {
   department: string;
@@ -25,218 +25,143 @@ interface HospitalAdminRoleData {
 
 interface HospitalFacilityFormProps {
   hospitalData: HospitalAdminRoleData;
-  setHospitalData: React.Dispatch<React.SetStateAction<HospitalAdminRoleData | null>>;
-}
-
-function SectionHead({
-  icon,
-  title,
-  sub,
-  color = "primary",
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  color?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    rose: "bg-rose-500/10 text-rose-500",
-    emerald: "bg-emerald-500/10 text-emerald-500",
-    blue: "bg-blue-500/10 text-blue-500",
-    gray: "bg-slate-500/10 text-slate-500",
-  };
-  return (
-    <div className="flex items-center gap-5">
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-          colorMap[color] || colorMap.primary
-        }`}
-      >
-        {icon}
-      </div>
-      <div className="gap-1 flex flex-col">
-        <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-600 uppercase opacity-70">{sub}</p>
-      </div>
-    </div>
-  );
+  setHospitalData: React.Dispatch<
+    React.SetStateAction<HospitalAdminRoleData | null>
+  >;
 }
 
 export default function HospitalFacilityForm({
   hospitalData,
   setHospitalData,
 }: HospitalFacilityFormProps) {
+  const fac = hospitalData.facility;
+
+  const updateFacility = (patch: Partial<typeof fac>) =>
+    setHospitalData((prev) =>
+      prev ? { ...prev, facility: { ...prev.facility, ...patch } } : null,
+    );
+
+  const updateBeds = (patch: Partial<typeof fac.bedCapacity>) =>
+    setHospitalData((prev) =>
+      prev
+        ? {
+            ...prev,
+            facility: {
+              ...prev.facility,
+              bedCapacity: { ...prev.facility.bedCapacity, ...patch },
+            },
+          }
+        : null,
+    );
+
+  const updateContact = (patch: Partial<typeof fac.contactInfo>) =>
+    setHospitalData((prev) =>
+      prev
+        ? {
+            ...prev,
+            facility: {
+              ...prev.facility,
+              contactInfo: { ...prev.facility.contactInfo, ...patch },
+            },
+          }
+        : null,
+    );
+
   return (
     <>
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
-        <SectionHead
-          icon={<BiBuilding size={24} />}
-          title="Facility Infrastructure"
-          sub="Manage hospital coordinates and clinical capacity"
-          color="primary"
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <ProfileSection
+        icon={<BiBuilding size={22} />}
+        title="Facility infrastructure"
+        description="Hospital identity and clinical capacity"
+        color="primary"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <Input
-            label="Facility Name"
-            value={hospitalData.facility.name}
-            onChange={(e) =>
-              setHospitalData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      facility: {
-                        ...prev.facility,
-                        name: e.target.value,
-                      },
-                    }
-                  : null
-              )
-            }
+            label="Facility name"
+            value={fac?.name || ""}
+            onChange={(e) => updateFacility({ name: e.target.value })}
             placeholder="e.g. City Central Hospital"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Department / Office"
-            value={hospitalData.department}
+            label="Department / office"
+            value={hospitalData.department || ""}
             onChange={(e) =>
               setHospitalData((prev) =>
-                prev ? { ...prev, department: e.target.value } : null
+                prev ? { ...prev, department: e.target.value } : null,
               )
             }
             placeholder="e.g. Administration"
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Input
-              label="Total Bed Capacity"
-              type="number"
-              value={hospitalData.facility.bedCapacity.total}
-              onChange={(e) =>
-                setHospitalData((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        facility: {
-                          ...prev.facility,
-                          bedCapacity: {
-                            ...prev.facility.bedCapacity,
-                            total: parseInt(e.target.value) || 0,
-                          },
-                        },
-                      }
-                    : null
-                )
-              }
-            />
-            <Input
-              label="General Available"
-              type="number"
-              value={hospitalData.facility.bedCapacity.generalAvailable}
-              onChange={(e) =>
-                setHospitalData((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        facility: {
-                          ...prev.facility,
-                          bedCapacity: {
-                            ...prev.facility.bedCapacity,
-                            generalAvailable: parseInt(e.target.value) || 0,
-                          },
-                        },
-                      }
-                    : null
-                )
-              }
-            />
-            <Input
-              label="ICU Available"
-              type="number"
-              value={hospitalData.facility.bedCapacity.icuAvailable}
-              onChange={(e) =>
-                setHospitalData((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        facility: {
-                          ...prev.facility,
-                          bedCapacity: {
-                            ...prev.facility.bedCapacity,
-                            icuAvailable: parseInt(e.target.value) || 0,
-                          },
-                        },
-                      }
-                    : null
-                )
-              }
-            />
-          </div>
+          <Input
+            label="Total bed capacity"
+            type="number"
+            value={String(fac?.bedCapacity?.total ?? "")}
+            onChange={(e) =>
+              updateBeds({ total: parseInt(e.target.value, 10) || 0 })
+            }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="General available"
+            type="number"
+            value={String(fac?.bedCapacity?.generalAvailable ?? "")}
+            onChange={(e) =>
+              updateBeds({
+                generalAvailable: parseInt(e.target.value, 10) || 0,
+              })
+            }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+          />
+          <Input
+            label="ICU available"
+            type="number"
+            value={String(fac?.bedCapacity?.icuAvailable ?? "")}
+            onChange={(e) =>
+              updateBeds({
+                icuAvailable: parseInt(e.target.value, 10) || 0,
+              })
+            }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
+          />
         </div>
-      </Card>
+      </ProfileSection>
 
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
-        <SectionHead
-          icon={<BiEnvelope size={24} />}
-          title="Contact Signals"
-          sub="Direct clinical and emergency communication lines"
-          color="emerald"
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <ProfileSection
+        icon={<BiEnvelope size={22} />}
+        title="Contact & location"
+        description="Lines patients and staff use to reach the facility"
+        color="emerald"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <Input
-            label="General Phone"
-            value={hospitalData.facility.contactInfo.phone}
-            onChange={(e) =>
-              setHospitalData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      facility: {
-                        ...prev.facility,
-                        contactInfo: {
-                          ...prev.facility.contactInfo,
-                          phone: e.target.value,
-                        },
-                      },
-                    }
-                  : null
-              )
-            }
+            label="General phone"
+            value={fac?.contactInfo?.phone || ""}
+            onChange={(e) => updateContact({ phone: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Official Email"
-            value={hospitalData.facility.contactInfo.email}
-            onChange={(e) =>
-              setHospitalData((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      facility: {
-                        ...prev.facility,
-                        contactInfo: {
-                          ...prev.facility.contactInfo,
-                          email: e.target.value,
-                        },
-                      },
-                    }
-                  : null
-              )
-            }
+            label="Official email"
+            value={fac?.contactInfo?.email || ""}
+            onChange={(e) => updateContact({ email: e.target.value })}
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Facility Type"
-            value={hospitalData.facility.facilityType}
+            label="Facility type"
+            value={fac?.facilityType || ""}
             disabled
-            className="opacity-60 bg-slate-100"
+            className="opacity-70 bg-slate-100 border-slate-200"
           />
           <Input
             label="Province"
-            value={hospitalData.facility.address.province}
+            value={fac?.address?.province || ""}
             disabled
-            className="opacity-60 bg-slate-100"
+            icon={<BiMap />}
+            className="opacity-70 bg-slate-100 border-slate-200"
           />
         </div>
-      </Card>
+      </ProfileSection>
     </>
   );
 }

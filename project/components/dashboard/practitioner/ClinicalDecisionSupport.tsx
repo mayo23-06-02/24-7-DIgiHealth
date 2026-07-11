@@ -200,7 +200,7 @@ export default function ClinicalDecisionSupport() {
     <div className="h-full flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
       {/* Header */}
       <div className="flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center  shadow-primary/20">
+        <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center  shadow-primary/20">
           <BiShield className="text-white text-lg" />
         </div>
         <div>
@@ -216,7 +216,7 @@ export default function ClinicalDecisionSupport() {
       {/* Drug Interaction Checker */}
       <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-none shadow-slate-900/5 shrink-0">
         <div className="flex items-center gap-3 mb-6 px-1">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
             <BiPulse size={20} />
           </div>
           <h4 className="text-sm font-bold text-slate-500  tracking-normal font-grotesk">
@@ -230,7 +230,7 @@ export default function ClinicalDecisionSupport() {
             value={drug1}
             onChange={(e) => setDrug1(e.target.value)}
             placeholder="Analytical Subject 1 (e.g. Warfarin)"
-            className="rounded-2xl border-slate-100 font-bold text-xs"
+            className="rounded-lg border-slate-100 font-bold text-xs"
           />
           <Input
             type="text"
@@ -238,12 +238,12 @@ export default function ClinicalDecisionSupport() {
             onChange={(e) => setDrug2(e.target.value)}
             placeholder="Analytical Subject 2 (e.g. Aspirin)"
             onKeyDown={(e) => e.key === "Enter" && handleCheckInteraction()}
-            className="rounded-2xl border-slate-100 font-bold text-xs"
+            className="rounded-lg border-slate-100 font-bold text-xs"
           />
           <Button
             onClick={handleCheckInteraction}
             fullWidth
-            className="h-14 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all shadow-none shadow-primary/20"
+            className="h-14 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold  tracking-normal rounded-lg transition-all shadow-none shadow-primary/20"
             icon={<BiSearch size={16} />}
           >
             Execute Intelligence Check
@@ -257,7 +257,7 @@ export default function ClinicalDecisionSupport() {
           </p>
         )}
         {interactionResult === "none" && (
-          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
             <BiCheckCircle className="text-emerald-600 text-base shrink-0" />
             <div>
               <p className="text-sm font-bold text-emerald-700  tracking-normal">
@@ -273,7 +273,7 @@ export default function ClinicalDecisionSupport() {
           interactionResult !== "none" &&
           interactionResult !== "empty" && (
             <div
-              className={`border rounded-xl p-3 ${severityConfig[interactionResult.severity].bg} ${severityConfig[interactionResult.severity].border}`}
+              className={`border rounded-lg p-3 ${severityConfig[interactionResult.severity].bg} ${severityConfig[interactionResult.severity].border}`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span
@@ -334,7 +334,7 @@ export default function ClinicalDecisionSupport() {
             return (
               <div
                 key={g.id}
-                className={`bg-white rounded-2xl border transition-all duration-300 ${isOpen ? "border-primary/20 " : "border-slate-100 shadow-none"}`}
+                className={`bg-white rounded-lg border transition-all duration-300 ${isOpen ? "border-primary/20 " : "border-slate-100 shadow-none"}`}
               >
                 <Button
                   variant="ghost"

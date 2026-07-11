@@ -279,7 +279,7 @@ export default function PatientQueueTable() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-4 text-sm font-bold text-gray-700  tracking-normal">
+        <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-lg p-4 mb-4 text-sm font-bold text-gray-700  tracking-normal">
           <BiError size={16} className="shrink-0" />
           {error}
         </div>
@@ -325,7 +325,7 @@ export default function PatientQueueTable() {
               >
                 <div className="flex items-center gap-4 mb-4">
                   <div className="relative shrink-0">
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-xs font-bold shadow-none shadow-primary/20">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-xs font-bold shadow-none shadow-primary/20">
                       {item.initials}
                     </div>
                     {isOngoing && (
@@ -338,7 +338,7 @@ export default function PatientQueueTable() {
                         {item.patientName}
                       </p>
                       <span
-                        className={`text-[9px] px-2.5 py-1 rounded-full font-bold  tracking-normal shrink-0 ${sc.bg} ${sc.text}`}
+                        className={`text-[9px] px-2 py-1 rounded-full font-bold  tracking-normal shrink-0 ${sc.bg} ${sc.text}`}
                       >
                         {sc.label}
                       </span>
@@ -377,7 +377,7 @@ export default function PatientQueueTable() {
                 </div>
 
                 {item.riskScore > 70 && item.aiRecommendations.length > 0 && (
-                  <div className="ml-15 mb-4 p-3 bg-rose-50 border border-rose-100 rounded-2xl shadow-none">
+                  <div className="ml-15 mb-4 p-3 bg-rose-50 border border-rose-100 rounded-lg shadow-none">
                     <p className="text-sm font-bold text-rose-600  tracking-normal mb-1.5 flex items-center gap-2">
                       <BiError size={14} /> AI Clinical Alert
                     </p>
@@ -392,7 +392,7 @@ export default function PatientQueueTable() {
                     <>
                       <Button
                         onClick={() => handleApprove(item.consultationId)}
-                        className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-200"
+                        className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto shadow-none shadow-emerald-200"
                         icon={<BiCheckCircle size={14} />}
                       >
                         Accept
@@ -400,7 +400,7 @@ export default function PatientQueueTable() {
                       <Button
                         onClick={() => handleDecline(item.consultationId)}
                         variant="ghost"
-                        className="flex-1 py-4 bg-rose-50 hover:bg-rose-100 text-rose-500 text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto border-none"
+                        className="flex-1 py-4 bg-rose-50 hover:bg-rose-100 text-rose-500 text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto border-none"
                       >
                         Decline
                       </Button>
@@ -411,7 +411,7 @@ export default function PatientQueueTable() {
                         setVideoModal({ isOpen: true, consultation: item })
                       }
                       className={`
-                        flex-1 py-4 text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto
+                        flex-1 py-4 text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto
                         ${
                           item.type === "chat"
                             ? "bg-secondary hover:bg-secondary/90 text-white shadow-none shadow-secondary/20"
@@ -438,14 +438,14 @@ export default function PatientQueueTable() {
                       })
                     }
                     variant="ghost"
-                    className="flex-1 py-4 text-[11px] font-bold  tracking-normal bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary rounded-2xl transition-all h-auto border-none !min-w-0"
+                    className="flex-1 py-4 text-[11px] font-bold  tracking-normal bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary rounded-lg transition-all h-auto border-none !min-w-0"
                     icon={<BiNote size={14} />}
                   >
                     SOAP
                   </Button>
                   <Button
                     variant="ghost"
-                    className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all flex items-center justify-center border-none !min-w-0"
+                    className="w-12 h-12 p-0 rounded-lg bg-slate-50 hover:bg-primary/5 text-slate-500 hover:text-primary transition-all flex items-center justify-center border-none !min-w-0"
                   >
                     <BiUser size={18} />
                   </Button>
@@ -479,7 +479,7 @@ export default function PatientQueueTable() {
                 <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                 Live Connection Syncing…
               </div>
-              <div className="absolute bottom-4 right-4 w-20 h-16 bg-slate-700/50 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-center text-slate-300">
+              <div className="absolute bottom-4 right-4 w-20 h-16 bg-slate-700/50 backdrop-blur-md rounded-lg border border-white/10 flex items-center justify-center text-slate-300">
                 <BiVideo size={24} />
               </div>
             </div>
@@ -495,7 +495,7 @@ export default function PatientQueueTable() {
               <div className="flex gap-3">
                 <Button
                   fullWidth
-                  className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-500/20"
+                  className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto shadow-none shadow-emerald-500/20"
                 >
                   Join Clinical Session
                 </Button>
@@ -504,7 +504,7 @@ export default function PatientQueueTable() {
                   onClick={() =>
                     setVideoModal({ isOpen: false, consultation: null })
                   }
-                  className="flex-1 py-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto border-none !min-w-0"
+                  className="flex-1 py-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto border-none !min-w-0"
                 >
                   Disconnect
                 </Button>

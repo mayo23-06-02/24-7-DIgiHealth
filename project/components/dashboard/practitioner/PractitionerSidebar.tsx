@@ -84,7 +84,7 @@ export default function PractitionerSidebar({
         <div
           className={`flex items-center gap-3 p-5 border-b border-white/5 shrink-0 ${isCollapsed ? "justify-center px-3" : ""}`}
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-supportive-teal flex items-center justify-center shadow-none shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-supportive-teal flex items-center justify-center shadow-none shrink-0">
             <BiShieldPlus className="text-white text-lg" />
           </div>
           {!isCollapsed && (
@@ -112,7 +112,7 @@ export default function PractitionerSidebar({
                   onClose?.();
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm  tracking-normal
+                  w-full flex items-center gap-3 px-3 py-3 rounded-lg font-bold text-sm  tracking-normal
                   transition-all duration-200 group border-none h-auto !min-w-0
                   ${isCollapsed ? "justify-center" : "justify-start"}
                   ${
@@ -144,8 +144,8 @@ export default function PractitionerSidebar({
         {/* Profile + Collapse */}
         <div className="p-3 border-t border-white/5 space-y-3 shrink-0">
           {!isCollapsed && (
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-supportive-teal flex items-center justify-center text-white text-xs font-bold shadow-none shadow-primary/20 shrink-0">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/5">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-supportive-teal flex items-center justify-center text-white text-xs font-bold shadow-none shadow-primary/20 shrink-0">
                 {initials}
               </div>
               <div className="flex-1 min-w-0 animate-in fade-in duration-300">
@@ -162,7 +162,7 @@ export default function PractitionerSidebar({
             <Button
               variant="ghost"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-500 hover:text-white transition-all text-sm font-bold  tracking-normal border-none h-auto !min-w-0 hidden lg:flex"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-slate-500 hover:text-white transition-all text-sm font-bold  tracking-normal border-none h-auto !min-w-0 hidden lg:flex"
             >
               {isCollapsed ? (
                 <BiChevronRight size={18} />
@@ -175,7 +175,7 @@ export default function PractitionerSidebar({
             </Button>
             <Button
               variant="ghost"
-              className="w-10 h-10 p-0 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-500 transition-all border-none h-auto !min-w-0"
+              className="w-10 h-10 p-0 rounded-lg bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-500 transition-all border-none h-auto !min-w-0"
             >
               <BiLogOut size={18} />
             </Button>

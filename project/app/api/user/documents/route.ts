@@ -74,9 +74,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
       }
       buffer = Buffer.from(await file.arrayBuffer());
-      mimeType = file.type || "application/octet-stream";
       fileName = file.name || "document";
-      type = String(form.get("type") || "general");
+      // Some browsers leave file.type empty — infer from extension
+      mimeType = file.type || "";
+      if (!mimeType) {
+        const lower = fileName.toLowerCase();
+        if (lower.endsWith(".pdf")) mimeType = "application/pdf";
+        else if (lower.endsWith(".png")) mimeType = "image/png";
+        else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))
+          mimeType = "image/jpeg";
+        else if (lower.endsWith(".webp")) mimeType = "image/webp";
+        else if (lower.endsWith(".gif")) mimeType = "image/gif";
+        else if (lower.endsWith(".doc")) mimeType = "application/msword";
+        else if (lower.endsWith(".docx"))
+          mimeType =
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        else mimeType = "application/octet-stream";
+      }
+      type = String(form.get("type") || fileName.replace(/\.[^.]+$/, "") || "Document");
       isAvatar = form.get("isAvatar") === "true";
     } else {
       const body = await req.json();

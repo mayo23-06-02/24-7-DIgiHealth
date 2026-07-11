@@ -316,13 +316,13 @@ export default function AboutPage() {
                 <span className="text-[#36b1d4]">accessibility.</span>
               </p>
               <div className="flex flex-wrap gap-4">
-                <div className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 font-medium text-slate-200 hover:bg-white/10 transition-colors">
+                <div className="px-6 py-3 rounded-lg bg-white/5 border border-white/10 font-medium text-slate-200 hover:bg-white/10 transition-colors">
                   Peach Payments
                 </div>
-                <div className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 font-medium text-slate-200 hover:bg-white/10 transition-colors">
+                <div className="px-6 py-3 rounded-lg bg-white/5 border border-white/10 font-medium text-slate-200 hover:bg-white/10 transition-colors">
                   PayFast
                 </div>
-                <div className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 font-medium text-slate-200 hover:bg-white/10 transition-colors">
+                <div className="px-6 py-3 rounded-lg bg-white/5 border border-white/10 font-medium text-slate-200 hover:bg-white/10 transition-colors">
                   Ozow
                 </div>
               </div>

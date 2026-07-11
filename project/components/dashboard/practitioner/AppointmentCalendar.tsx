@@ -25,7 +25,7 @@ interface CalendarEvent {
   type: string;
   reason: string;
   riskScore: number;
-  riskColor: "green" | "gray" | "red";
+  riskColor: "green" | "gray" | "orange" | "red";
   riskFactors: string[];
   aiRecommendations: string[];
   patientId: string;
@@ -59,13 +59,14 @@ function toMinutes(dt: string) {
 }
 
 const eventColor = (status: string, riskColor: string) => {
+  // High risk always stands out
   if (riskColor === "red")
     return {
       bg: "bg-red-100 border-red-300 hover:bg-red-200",
       text: "text-red-800",
-      dot: "bg-red-500",
+      dot: "bg-red-600",
     };
-  if (status === "ongoing")
+  if (status === "ongoing" || status === "in_progress")
     return {
       bg: "bg-emerald-100 border-emerald-300 hover:bg-emerald-200",
       text: "text-emerald-800",
@@ -77,17 +78,30 @@ const eventColor = (status: string, riskColor: string) => {
       text: "text-slate-500",
       dot: "bg-slate-400",
     };
-  if (status === "requested")
+  if (status === "requested" || status === "pending")
     return {
       bg: "bg-gray-50 border-gray-200 hover:bg-gray-100",
       text: "text-gray-700",
       dot: "bg-gray-500",
     };
-  if (riskColor === "gray")
+  // Score-derived bands (0–35 green · 36–50 gray · 51–75 orange · 76–100 red)
+  if (riskColor === "orange")
     return {
       bg: "bg-orange-50 border-orange-200 hover:bg-orange-100",
-      text: "text-orange-700",
-      dot: "bg-orange-500",
+      text: "text-orange-800",
+      dot: "bg-orange-600",
+    };
+  if (riskColor === "gray")
+    return {
+      bg: "bg-slate-50 border-slate-200 hover:bg-slate-100",
+      text: "text-slate-700",
+      dot: "bg-slate-500",
+    };
+  if (riskColor === "green")
+    return {
+      bg: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100",
+      text: "text-emerald-800",
+      dot: "bg-emerald-600",
     };
   return {
     bg: "bg-blue-50 border-blue-200 hover:bg-blue-100",
@@ -216,7 +230,7 @@ export default function AppointmentCalendar() {
 
   return (
     <>
-      <div className="h-full flex flex-col bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-none">
+      <div className="h-full flex flex-col bg-white rounded-lg border border-slate-100 overflow-hidden shadow-none">
         {/* Calendar Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
@@ -243,7 +257,7 @@ export default function AppointmentCalendar() {
             <Button
               variant="ghost"
               onClick={() => setCurrentDate(new Date())}
-              className="text-sm font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-full transition-all border-none bg-transparent h-auto !min-w-0  tracking-normal"
+              className="text-sm font-bold text-primary hover:bg-primary/5 px-3 py-2 rounded-full transition-all border-none bg-transparent h-auto !min-w-0  tracking-normal"
             >
               Today
             </Button>
@@ -346,7 +360,7 @@ export default function AppointmentCalendar() {
                           key={evt.id}
                           variant="ghost"
                           onClick={() => setSelectedEvent(evt)}
-                          className={`absolute inset-x-0.5 rounded-xl border px-2 py-1.5 text-left overflow-hidden transition-all hover:z-10 hover:shadow-none hover:scale-[1.02] active:scale-[0.98] ${col.bg} ${col.text} flex flex-col items-start !justify-start normal-case !min-w-0 h-auto`}
+                          className={`absolute inset-x-0.5 rounded-lg border px-2 py-2 text-left overflow-hidden transition-all hover:z-10 hover:shadow-none hover:scale-[1.02] active:scale-[0.98] ${col.bg} ${col.text} flex flex-col items-start !justify-start normal-case !min-w-0 h-auto`}
                           style={{ top: `${top}px`, height: `${height}px` }}
                           title={`${evt.patientName} — ${evt.reason}`}
                         >
@@ -386,7 +400,7 @@ export default function AppointmentCalendar() {
           <div className="pointer-events-auto w-full max-w-sm bg-white rounded-lg shadow-none border border-slate-100 overflow-hidden animate-in slide-in-from-right-8 duration-500">
             <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between bg-gradient-to-r from-primary/5 to-primary/0">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                   {typeIcon(selectedEvent.type, 20)}
                 </div>
                 <div>
@@ -408,7 +422,7 @@ export default function AppointmentCalendar() {
             </div>
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
+                <div className="bg-slate-50/80 rounded-lg p-3 border border-slate-100">
                   <p className="text-[9px] text-slate-500 font-bold  tracking-normal mb-1">
                     Time Window
                   </p>
@@ -424,7 +438,7 @@ export default function AppointmentCalendar() {
                     })}
                   </p>
                 </div>
-                <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-100">
+                <div className="bg-slate-50/80 rounded-lg p-3 border border-slate-100">
                   <p className="text-[9px] text-slate-500 font-bold  tracking-normal mb-1">
                     Session Type
                   </p>
@@ -476,7 +490,7 @@ export default function AppointmentCalendar() {
                   <Button
                     onClick={() => handleApprove(selectedEvent.consultationId)}
                     fullWidth
-                    className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-emerald-200"
+                    className="py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto shadow-none shadow-emerald-200"
                     icon={<BiCheckCircle size={14} />}
                   >
                     Approve Clinical Session
@@ -484,7 +498,7 @@ export default function AppointmentCalendar() {
                 ) : (
                   <Button
                     fullWidth
-                    className="py-4 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto shadow-none shadow-primary/20"
+                    className="py-4 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto shadow-none shadow-primary/20"
                     icon={typeIcon(selectedEvent.type, 14)}
                   >
                     Join Session
@@ -501,7 +515,7 @@ export default function AppointmentCalendar() {
                   }}
                   variant="outline"
                   fullWidth
-                  className="py-4 bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-bold  tracking-normal rounded-2xl transition-all h-auto border-slate-200"
+                  className="py-4 bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-bold  tracking-normal rounded-lg transition-all h-auto border-slate-200"
                   icon={<BiNote size={14} />}
                 >
                   Document SOAP Note

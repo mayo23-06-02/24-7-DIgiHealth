@@ -72,7 +72,7 @@ export default function MessageInput({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-end gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200"
+      className="flex items-end gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200"
     >
       <input
         type="file"
@@ -113,7 +113,7 @@ export default function MessageInput({
       <button
         type="submit"
         disabled={!text.trim()}
-        className="p-3 bg-primary text-white rounded-xl shadow-none shadow-primary/30 hover:bg-primary-600 disabled:opacity-40 disabled:shadow-none transition-all"
+        className="p-3 bg-primary text-white rounded-lg shadow-none shadow-primary/30 hover:bg-primary-600 disabled:opacity-40 disabled:shadow-none transition-all"
       >
         <BiPaperPlane size={20} />
       </button>

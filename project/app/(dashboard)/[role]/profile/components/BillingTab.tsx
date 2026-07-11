@@ -163,10 +163,10 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
             setPage(1);
           }}
           placeholder="Search transactions..."
-          className="w-full pl-9 pr-4 py-2.5 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white outline-none transition-all"
+          className="w-full pl-9 pr-4 p-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white outline-none transition-all"
         />
       </div>
-      <div className="overflow-x-auto rounded-xl border border-slate-100">
+      <div className="overflow-x-auto rounded-lg border border-slate-100">
         <table className="w-full text-left min-w-[480px]">
           <thead>
             <tr className="bg-slate-50">
@@ -263,7 +263,7 @@ export default function BillingTab({
           <div className="flex flex-wrap gap-4">
             <Button
               variant="white"
-              className="h-16 rounded-3xl px-10 text-xs font-bold text-slate-900"
+              className="h-16 rounded-lg px-10 text-xs font-bold text-slate-900"
               onClick={() =>
                 setToast({
                   message: "Enterprise licenses cannot be self-cancelled.",
@@ -275,7 +275,7 @@ export default function BillingTab({
             </Button>
             <a
               href="/billing"
-              className="h-16 rounded-3xl px-10 text-xs font-bold text-white/70 border border-white/10 hover:text-white hover:bg-white/5 flex items-center justify-center transition-all"
+              className="h-16 rounded-lg px-10 text-xs font-bold text-white/70 border border-white/10 hover:text-white hover:bg-white/5 flex items-center justify-center transition-all"
             >
               Billing Ledger
             </a>
@@ -451,7 +451,7 @@ export default function BillingTab({
           </div>
 
           {/* Days counter */}
-          <div className="flex flex-col gap-3 bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 text-center items-center justify-center">
+          <div className="flex flex-col gap-3 bg-white/5 backdrop-blur-md p-6 rounded-lg border border-white/10 text-center items-center justify-center">
             <BiCalendar size={28} className="text-primary animate-pulse" />
             <div>
               <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
@@ -486,7 +486,7 @@ export default function BillingTab({
           </div>
           <div className="space-y-5">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-primary/10">
+              <div className="w-14 h-14 rounded-lg flex items-center justify-center bg-primary/10">
                 <BiWallet size={26} className="text-primary" />
               </div>
               <div>
@@ -502,7 +502,7 @@ export default function BillingTab({
               </div>
             </div>
 
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {currentTier.features.map((f) => (
                 <li
                   key={f}
@@ -570,7 +570,7 @@ export default function BillingTab({
               paymentMethods.map((pm: any, i: number) => (
                 <div
                   key={pm._id || i}
-                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                  className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
                     pm.isDefault
                       ? "border-primary/30 bg-primary/[0.02]"
                       : "border-slate-100 hover:border-slate-200"
@@ -649,7 +649,7 @@ export default function BillingTab({
                   Telehealth Sessions
                 </h4>
               </div>
-              <div className="p-3 bg-primary/10 text-primary rounded-xl">
+              <div className="p-3 bg-primary/10 text-primary rounded-lg">
                 <BiCheckCircle size={22} />
               </div>
             </div>
@@ -690,7 +690,7 @@ export default function BillingTab({
                   AI Symptom Triage Checks
                 </h4>
               </div>
-              <div className="p-3 bg-indigo-50 text-indigo-500 rounded-xl">
+              <div className="p-3 bg-indigo-50 text-indigo-500 rounded-lg">
                 <BiMessageRoundedDetail size={22} />
               </div>
             </div>
@@ -759,9 +759,9 @@ export default function BillingTab({
       </div>
 
       {/* ── Footer banner ────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-6 rounded-2xl border border-slate-100 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-6 rounded-lg border border-slate-100 gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+          <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
             <BiWallet size={24} />
           </div>
           <div>
@@ -776,7 +776,7 @@ export default function BillingTab({
         </div>
         <a
           href="/patient/billing"
-          className="px-6 h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-xs flex items-center justify-center shadow-sm shrink-0 transition-all"
+          className="px-6 h-12 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-xs flex items-center justify-center shadow-sm shrink-0 transition-all"
         >
           Open Billing Portal
         </a>
@@ -789,7 +789,7 @@ export default function BillingTab({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setUpgradeModal(false)}
           />
-          <div className="relative w-full max-w-5xl bg-white rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-5xl bg-white rounded-lg overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-xl font-bold text-slate-800 font-grotesk">
@@ -801,7 +801,7 @@ export default function BillingTab({
               </div>
               <button
                 onClick={() => setUpgradeModal(false)}
-                className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all font-bold"
+                className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all font-bold"
               >
                 ✕
               </button>
@@ -815,7 +815,7 @@ export default function BillingTab({
                   <button
                     key={tier.id}
                     onClick={() => setSelectedTier(tier.id)}
-                    className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-200 ${
+                    className={`relative text-left p-5 rounded-lg border-2 transition-all duration-200 ${
                       isSelected
                         ? "border-primary bg-primary/[0.03]"
                         : "border-slate-100 hover:border-slate-200 bg-white"
@@ -826,7 +826,7 @@ export default function BillingTab({
                         Current
                       </span>
                     )}
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                       <BiWallet size={18} className="text-primary" />
                     </div>
                     <p className="text-base font-bold text-slate-800 mb-0.5">
@@ -868,7 +868,7 @@ export default function BillingTab({
               <button
                 onClick={() => handleUpgrade(selectedTier)}
                 disabled={actionLoading || currentTier.id === selectedTier}
-                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-sm shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full py-4 rounded-lg bg-primary text-white font-bold text-sm shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {actionLoading
                   ? "Processing..."

@@ -133,7 +133,7 @@ export function ArticleModal({
           <Button
             onClick={onClose}
             variant="white"
-            className="absolute top-6 right-6 w-12 h-12 p-0 rounded-2xl bg-black/20 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-black/40 hover:scale-105 active:scale-95 transition-all shadow-none !min-w-0"
+            className="absolute top-6 right-6 w-12 h-12 p-0 rounded-lg bg-black/20 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-black/40 hover:scale-105 active:scale-95 transition-all shadow-none !min-w-0"
           >
             <BiX size={28} />
           </Button>
@@ -181,7 +181,7 @@ export function ArticleModal({
             <Button
               onClick={() => onBookmark(article._id)}
               variant="ghost"
-              className={`w-11 h-11 p-0 rounded-2xl flex items-center justify-center transition-all min-w-0 ${
+              className={`w-11 h-11 p-0 rounded-lg flex items-center justify-center transition-all min-w-0 ${
                 isBookmarked
                   ? "bg-gray-100 text-gray-600 shadow-inner"
                   : "bg-slate-50 text-slate-500 hover:bg-primary/10 hover:text-primary border border-slate-100"
@@ -278,7 +278,7 @@ function ArticleCard({
           <Button
             onClick={onQuickBookmark}
             variant="ghost"
-            className={`absolute top-4 right-4 w-10 h-10 backdrop-blur-md rounded-xl flex items-center justify-center transition-all duration-300 shadow-none border border-white/20 !min-w-0 p-0 ${
+            className={`absolute top-4 right-4 w-10 h-10 backdrop-blur-md rounded-lg flex items-center justify-center transition-all duration-300 shadow-none border border-white/20 !min-w-0 p-0 ${
               isBookmarked
                 ? "bg-gray-400 text-white scale-100 opacity-100"
                 : "bg-white/30 text-white opacity-0 group-hover:opacity-100 hover:bg-primary scale-90 group-hover:scale-100"
@@ -300,7 +300,7 @@ function ArticleCard({
 
           <div className="mt-auto pt-5 flex items-center justify-between border-t border-slate-50/50">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-xs font-bold text-white  shadow-none shadow-primary/20">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-xs font-bold text-white  shadow-none shadow-primary/20">
                 {article.author
                   .split(" ")
                   .map((n) => n[0])
@@ -428,7 +428,7 @@ export default function HealthBlog() {
                 onClick={() =>
                   setCarouselIndex((prev) => Math.max(0, prev - 1))
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </button>
@@ -438,7 +438,7 @@ export default function HealthBlog() {
                     Math.min(articles.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </button>

@@ -112,9 +112,8 @@ export function drawBrandLogo(
     }
   }
 
-  // PNG fallback
+  // PNG fallback if SVG renderer unavailable
   const pngCandidates = [
-    path.join(process.cwd(), "public", "Logo-Main-pdf.png"),
     path.join(process.cwd(), "public", "Logo-Main.png"),
   ];
   for (const p of pngCandidates) {

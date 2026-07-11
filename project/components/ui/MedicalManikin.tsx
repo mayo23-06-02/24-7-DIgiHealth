@@ -477,7 +477,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
 
   if (isLoading) {
     return (
-      <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-xl">
+      <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-lg">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-slate-500">Loading 3D model...</p>
@@ -499,7 +499,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
         </p>
       </div>
 
-      <div className="flex flex-1 relative group bg-linear-to-b from-slate-50 to-white rounded-xl overflow-hidden select-none">
+      <div className="flex flex-1 relative group bg-linear-to-b from-slate-50 to-white rounded-lg overflow-hidden select-none">
         {/* HUD Metrics */}
         <div className="absolute top-5 left-5 z-30 pointer-events-none">
           <div className="space-y-4">
@@ -533,8 +533,8 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
         {/* Missing Data Prompt (Non-blocking) */}
         {(heightCm === 0 || weightKg === 0) && (
           <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 w-[90%] ">
-            <div className="bg-white/80 backdrop-blur-xl border shadow border-primary/20 rounded-2xl p-5  shadow-primary/10 flex items-center gap-4 animate-in slide-in-from-bottom-4 duration-700">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
+            <div className="bg-white/80 backdrop-blur-xl border shadow border-primary/20 rounded-lg p-5  shadow-primary/10 flex items-center gap-4 animate-in slide-in-from-bottom-4 duration-700">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
                 <BiBody size={24} />
               </div>
               <div className="flex-1 min-w-0">
@@ -657,7 +657,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
                       <button
                         onClick={handleDelete}
                         disabled={isSaving}
-                        className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-none"
+                        className="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-none"
                       >
                         <BiTrash size={18} />
                       </button>
@@ -667,7 +667,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
                         setActivePart(null);
                         setEditingNote(null);
                       }}
-                      className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 shadow-none"
+                      className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-slate-100 shadow-none"
                     >
                       <BiX size={24} />
                     </button>
@@ -700,7 +700,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
                 </div>
 
                 {readOnly ? (
-                  <div className="w-full bg-slate-50 border border-slate-100 rounded-3xl p-8 py-10 mb-8 min-h-[140px]">
+                  <div className="w-full bg-slate-50 border border-slate-100 rounded-lg p-8 py-10 mb-8 min-h-[140px]">
                     <p className="text-sm font-bold text-slate-700 leading-relaxed italic">
                       "{description}"
                     </p>

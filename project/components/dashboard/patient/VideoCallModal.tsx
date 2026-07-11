@@ -126,7 +126,7 @@ export default function VideoCallModal({
                   {specialisation}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-white/5 overflow-hidden ring-2 ring-white/10 shadow-none">
+              <div className="w-12 h-12 rounded-lg bg-white/5 overflow-hidden ring-2 ring-white/10 shadow-none">
                 <img
                   src={
                     practitionerAvatar ||

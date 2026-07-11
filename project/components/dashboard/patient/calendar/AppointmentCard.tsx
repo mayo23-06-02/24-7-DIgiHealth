@@ -50,7 +50,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       >
         <div className="flex h-full justify-between items-start mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-slate-100 overflow-hidden relative rounded-xl">
+            <div className="w-14 h-14 bg-slate-100 overflow-hidden relative rounded-lg">
               {appt.img ? (
                 <Avatar name={appt.dr || ""} size="md" />
               ) : (
@@ -136,7 +136,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
                 ? "Refill Details"
                 : "Appointment Details"}
             </p>
-            <div className="bg-white p-4 rounded-xl border border-slate-100 w-full text-xs text-slate-500 leading-relaxed text-left">
+            <div className="bg-white p-4 rounded-lg border border-slate-100 w-full text-xs text-slate-500 leading-relaxed text-left">
               {appt.concern ? (
                 `"${appt.concern}"`
               ) : appt.prescriptionName ? (

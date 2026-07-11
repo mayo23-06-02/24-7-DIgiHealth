@@ -276,7 +276,7 @@ export default function TelehealthConsultModal({
         <div className="w-full md:w-[400px] h-full bg-white flex flex-col shadow-3xl animate-in slide-in-from-right-20 duration-500 relative z-50">
           <div className="p-6 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <BiMessageDetail size={24} />
               </div>
               <div>
@@ -338,7 +338,7 @@ export default function TelehealthConsultModal({
               <Button
                 type="submit"
                 variant="primary"
-                className="w-10 h-10 p-0 bg-primary text-white rounded-xl flex items-center justify-center shadow-none shadow-primary/20 active:scale-90 transition-transform !min-w-0"
+                className="w-10 h-10 p-0 bg-primary text-white rounded-lg flex items-center justify-center shadow-none shadow-primary/20 active:scale-90 transition-transform !min-w-0"
               >
                 <BiSend size={20} />
               </Button>
@@ -354,13 +354,13 @@ export default function TelehealthConsultModal({
             Patient Intelligence
           </h5>
           <div className="space-y-4">
-            <div className="flex justify-between items-center bg-white/5 p-3 rounded-2xl">
+            <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
               <span className="text-xs font-bold text-white/60">
                 Heart Rate
               </span>
               <span className="text-sm font-bold text-rose-400">102 BPM</span>
             </div>
-            <div className="flex justify-between items-center bg-white/5 p-3 rounded-2xl">
+            <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
               <span className="text-xs font-bold text-white/60">B.P</span>
               <span className="text-sm font-bold text-emerald-400">120/80</span>
             </div>

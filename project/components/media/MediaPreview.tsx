@@ -95,7 +95,7 @@ export default function MediaPreview({
       <img
         src={resolved}
         alt={fileName || "attachment"}
-        className={`rounded-xl max-w-full h-auto ${className}`}
+        className={`rounded-lg max-w-full h-auto ${className}`}
       />
     );
   }
@@ -109,7 +109,7 @@ export default function MediaPreview({
       <video
         controls
         src={resolved}
-        className={`rounded-xl max-w-full ${className}`}
+        className={`rounded-lg max-w-full ${className}`}
       />
     );
   }

@@ -68,7 +68,7 @@ const ScheduleFeed: React.FC<ScheduleFeedProps> = ({
               onClick={() =>
                 setLiveCarouselIndex(Math.max(0, liveCarouselIndex - 1))
               }
-              className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+              className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
             >
               <BiChevronLeft size={24} />
             </button>
@@ -81,7 +81,7 @@ const ScheduleFeed: React.FC<ScheduleFeedProps> = ({
                   ),
                 )
               }
-              className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+              className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
             >
               <BiChevronRight size={24} />
             </button>
@@ -120,7 +120,7 @@ const ScheduleFeed: React.FC<ScheduleFeedProps> = ({
             })}
           </Carousel>
         ) : (
-          <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200 h-full flex flex-col items-center justify-center">
+          <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-200 h-full flex flex-col items-center justify-center">
             <BiCalendar size={32} className="mx-auto mb-3 opacity-30" />
             <h1 className=" font-semibold">
               No events scheduled for this day.

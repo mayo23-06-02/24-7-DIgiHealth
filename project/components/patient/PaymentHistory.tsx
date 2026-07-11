@@ -53,7 +53,7 @@ export default function PaymentHistory() {
         {(expanded ? mockHistory : mockHistory.slice(0, 1)).map((tx, idx) => (
           <div
             key={tx.id}
-            className={`flex items-center justify-between p-4 rounded-2xl ${idx % 2 === 0 ? "bg-slate-50" : "bg-white border border-slate-100"}`}
+            className={`flex items-center justify-between p-4 rounded-lg ${idx % 2 === 0 ? "bg-slate-50" : "bg-white border border-slate-100"}`}
           >
             <div className="flex flex-col">
               <span className="font-bold text-slate-800">{tx.desc}</span>

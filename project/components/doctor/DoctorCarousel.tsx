@@ -150,7 +150,7 @@ export default function DoctorCarousel() {
                 onClick={() =>
                   setCarouselIndex((prev) => Math.max(0, prev - 1))
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </button>
@@ -160,7 +160,7 @@ export default function DoctorCarousel() {
                     Math.min(doctors.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </button>

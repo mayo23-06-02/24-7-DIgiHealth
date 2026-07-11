@@ -45,7 +45,7 @@ export default function MessageBubble({
       className={`flex flex-col ${isOwn ? "items-end" : "items-start"} animate-in fade-in slide-in-from-bottom-2`}
     >
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-2 ${isOwn ? "bg-primary text-white rounded-tr-sm" : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm shadow-none"}`}
+        className={`max-w-[75%] rounded-lg px-4 py-2 ${isOwn ? "bg-primary text-white rounded-tr-sm" : "bg-white border border-slate-200 text-slate-800 rounded-tl-sm shadow-none"}`}
       >
         {message.type === "audio" && (
           <audio controls src={message.fileUrl} className="w-48 h-10" />
@@ -55,7 +55,7 @@ export default function MessageBubble({
           <img
             src={message.fileUrl}
             alt="attachment"
-            className="rounded-xl max-w-full h-auto mb-2"
+            className="rounded-lg max-w-full h-auto mb-2"
           />
         )}
 
@@ -71,7 +71,7 @@ export default function MessageBubble({
                 target="_blank"
                 rel="noreferrer"
                 download
-                className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold border transition-colors ${
+                className={`flex items-center justify-center gap-1.5 p-2 px-3 rounded-lg text-xs font-bold border transition-colors ${
                   isOwn
                     ? "bg-white/15 hover:bg-white/25 border-white/25 text-white"
                     : "bg-primary/10 hover:bg-primary/15 border-primary/20 text-primary"
@@ -95,7 +95,7 @@ export default function MessageBubble({
         {/* Record Attachment Styling */}
         {message.type === "record_attachment" && (
           <div
-            className={`mb-2 p-3 rounded-xl border ${isOwn ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"} flex items-start gap-3 w-64`}
+            className={`mb-2 p-3 rounded-lg border ${isOwn ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"} flex items-start gap-3 w-64`}
           >
             <div
               className={`w-10 h-10 rounded-lg shrink-0 flex items-center justify-center ${isOwn ? "bg-white/20 text-white" : "bg-primary/10 text-primary"}`}

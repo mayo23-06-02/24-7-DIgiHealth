@@ -80,7 +80,7 @@ const DayCard: React.FC<DayCardProps> = ({
               e.stopPropagation();
               onSelect(day.dateStr);
             }}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
               day.isUnavailable
                 ? "bg-slate-100 text-slate-300 pointer-events-none"
                 : "text-slate-500 bg-slate-200 hover:text-primary hover:bg-primary/10"
@@ -107,7 +107,7 @@ const DayCard: React.FC<DayCardProps> = ({
                 e.stopPropagation();
                 onToggleUnavailable(day.dateStr);
               }}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
                 day.isUnavailable
                   ? "bg-primary text-white"
                   : "text-slate-500 bg-slate-100 hover:text-primary"

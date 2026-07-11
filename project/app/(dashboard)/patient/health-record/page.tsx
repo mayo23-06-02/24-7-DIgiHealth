@@ -41,87 +41,25 @@ import { useAuthContext } from "@/components/auth/AuthProvider";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 
-// --- Types ---
-interface TimelineEvent {
-  id: string;
-  type: "consultation" | "medication" | "lab" | "immunization" | "ai_triage";
-  date: string;
-  title: string;
-  description: string;
-  metadata?: {
-    doctor?: string;
-    department?: string;
-    dosage?: string;
-    duration?: string;
-    status?: string;
-    documentUrl?: string | null;
-    documentName?: string | null;
-  };
-}
-
-interface VitalsDataPoint {
-  date: string;
-  weight?: number;
-  systolicBP?: number;
-  diastolicBP?: number;
-  heartRate?: number;
-}
-
-interface LabResult {
-  id: string;
-  name: string;
-  date: string;
-  orderedBy: string;
-  values: {
-    parameter: string;
-    value: string;
-    unit: string;
-    referenceRange: string;
-    status: "normal" | "high" | "low";
-  }[];
-}
-
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  instructions: string;
-  prescribedDate: string;
-  refillsLeft: number;
-  status: "active" | "completed" | "discontinued";
-  documentUrl?: string | null;
-  documentName?: string | null;
-  canDownload?: boolean;
-}
-
-interface Allergy {
-  id: string;
-  allergen: string;
-  severity: "mild" | "moderate" | "severe";
-  reaction: string;
-  source: "patient" | "clinician";
-}
-
-interface Immunization {
-  id: string;
-  vaccine: string;
-  date: string;
-  dose: string;
-  batch: string;
-  administeredBy: string;
-  nextDue?: string;
-}
+import TimelineTab from "@/components/dashboard/patient/health-record/TimelineTab";
+import MedicationsTab from "@/components/dashboard/patient/health-record/MedicationsTab";
+import VitalsTab from "@/components/dashboard/patient/health-record/VitalsTab";
+import LabsTab from "@/components/dashboard/patient/health-record/LabsTab";
+import AllergiesTab from "@/components/dashboard/patient/health-record/AllergiesTab";
+import ImmunizationsTab from "@/components/dashboard/patient/health-record/ImmunizationsTab";
+import type {
+  Allergy,
+  HealthRecordTab,
+  Immunization,
+  LabResult,
+  Medication,
+  TimelineEvent,
+  VitalsDataPoint,
+} from "@/components/dashboard/patient/health-record/types";
+import { formatHealthDate } from "@/components/dashboard/patient/health-record/types";
 
 export default function HealthRecordPage() {
-  const [activeTab, setActiveTab] = useState<
-    | "timeline"
-    | "body_map"
-    | "vitals"
-    | "labs"
-    | "medications"
-    | "allergies"
-    | "immunizations"
-  >("timeline");
+  const [activeTab, setActiveTab] = useState<HealthRecordTab>("timeline");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVital, setSelectedVital] = useState<
     "weight" | "bp" | "heartRate"
@@ -328,31 +266,6 @@ export default function HealthRecordPage() {
     );
   }, [searchQuery, timeline]);
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "consultation":
-        return <Calendar className="text-primary" size={24} />;
-      case "medication":
-        return <Pill className="text-primary" size={24} />;
-      case "lab":
-        return <Lab className="text-primary" size={24} />;
-      case "immunization":
-        return <Syringe className="text-primary" size={24} />;
-      case "ai_triage":
-        return <Brain className="text-primary" size={24} />;
-      default:
-        return <FileText size={24} />;
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-ZA", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       {/* HEADER SECTION */}
@@ -429,481 +342,49 @@ export default function HealthRecordPage() {
               <>
                 {/* TIMELINE TAB */}
                 {activeTab === "timeline" && (
-                  <Card className="space-y-6 animate-dissolve">
-                    {filteredEvents.length === 0 ? (
-                      <div className="text-center py-10 text-slate-500">
-                        No events found in your medical history.
-                      </div>
-                    ) : (
-                      filteredEvents.map((event, idx) => (
-                        <div key={event.id} className="relative group">
-                          {idx !== filteredEvents.length - 1 && (
-                            <div className="absolute left-7 top-10 bottom-0 w-[0.5px] bg-slate-200" />
-                          )}
-                          <div className="absolute left-3 top-3 flex items-center gap-2 z-10 group-hover:border-primary/40 transition-colors">
-                            <p className="text-primary w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center">
-                              {getIcon(event.type)}
-                            </p>
-                            <div className="bg-slate-100 px-3 py-1 rounded-full text-slate-500">
-                              <p className="whitespace-nowrap font-bold text-xs tracking-normal">
-                                {event.type.replace("_", " ")}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="bg-white border border-slate-200 rounded-lg pl-12 pr-6 pt-8 pb-6 hover:border-primary/20 transition-all">
-                            <div className="flex justify-end items-start mb-2">
-                              <span className="text-xs font-medium text-slate-500">
-                                {formatDate(event.date)}
-                              </span>
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-800 mb-1 font-grotesk">
-                              {event.title}
-                            </h3>
-                            <p className="text-sm text-slate-500 leading-relaxed mb-4">
-                              {event.description}
-                            </p>
-                            {event.metadata && (
-                              <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-50">
-                                {event.metadata.doctor && (
-                                  <div className="flex items-center gap-2 text-xs text-slate-600">
-                                    <UserIcon
-                                      size={14}
-                                      className="text-primary"
-                                    />
-                                    <span>{event.metadata.doctor}</span>
-                                  </div>
-                                )}
-                                {event.metadata.status && (
-                                  <div className="flex items-center gap-2 text-xs text-slate-600">
-                                    <CheckCircle
-                                      size={14}
-                                      className="text-green-500"
-                                    />
-                                    <span>{event.metadata.status}</span>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            <div className="mt-5 flex flex-wrap gap-3">
-                              {event.type === "medication" &&
-                              event.metadata?.documentUrl ? (
-                                <a
-                                  href={event.metadata.documentUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  download={
-                                    event.metadata.documentName || undefined
-                                  }
-                                  className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
-                                >
-                                  <Download size={16} /> Download pharmacy script
-                                </a>
-                              ) : null}
-                              {event.type === "medication" ? (
-                                <button
-                                  type="button"
-                                  onClick={() => setActiveTab("medications")}
-                                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors"
-                                >
-                                  <Pill size={16} /> Open Meds tab
-                                </button>
-                              ) : (
-                                <Button
-                                  variant="ghost"
-                                  className="!p-0 !min-w-0 !h-auto text-xs font-bold text-primary flex items-center gap-1.5 hover:underline bg-transparent"
-                                >
-                                  <FileText size={16} /> View Details
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </Card>
+                  <TimelineTab
+                    events={filteredEvents}
+                    onOpenMedsTab={() => setActiveTab("medications")}
+                  />
                 )}
+
 
                 {/* VITALS TAB */}
                 {activeTab === "vitals" && (
-                  <div className="bg-white border border-slate-200 rounded-lg p-8 animate-dissolve">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-                      <div>
-                        <h3 className="text-xl font-bold text-slate-800 font-grotesk">
-                          Biometric Trends
-                        </h3>
-                        <p className="text-sm text-slate-500">
-                          Historical observations from clinical visits
-                        </p>
-                      </div>
-                      <div className="flex bg-slate-100 p-1 rounded-lg">
-                        {[
-                          { id: "weight", label: "Weight" },
-                          { id: "bp", label: "Blood Pressure" },
-                          { id: "heartRate", label: "Heart Rate" },
-                        ].map((v) => (
-                          <Button
-                            key={v.id}
-                            onClick={() => setSelectedVital(v.id as any)}
-                            variant={selectedVital === v.id ? "white" : "ghost"}
-                            className={`!px-4 !py-2 !h-auto !min-w-0 rounded-lg text-xs font-bold transition-all border-none ${
-                              selectedVital === v.id
-                                ? "text-primary shadow-none"
-                                : "text-slate-500 hover:text-slate-800"
-                            }`}
-                          >
-                            {v.label}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="h-[400px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={vitals}>
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            vertical={false}
-                            stroke="#f1f5f9"
-                          />
-                          <XAxis
-                            dataKey="date"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#94a3b8", fontSize: 12 }}
-                            dy={10}
-                          />
-                          <YAxis
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#94a3b8", fontSize: 12 }}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              borderRadius: "8px",
-                              border: "none",
-                            }}
-                          />
-                          {selectedVital === "weight" && (
-                            <Line
-                              type="monotone"
-                              dataKey="weight"
-                              stroke="#4493b8"
-                              strokeWidth={4}
-                              dot={{
-                                r: 6,
-                                fill: "#4493b8",
-                                strokeWidth: 3,
-                                stroke: "#fff",
-                              }}
-                              activeDot={{ r: 8 }}
-                            />
-                          )}
-                          {selectedVital === "bp" && (
-                            <>
-                              <Line
-                                type="monotone"
-                                dataKey="systolicBP"
-                                stroke="#E03A3A"
-                                strokeWidth={3}
-                                dot={{ r: 4 }}
-                                name="Systolic"
-                              />
-                              <Line
-                                type="monotone"
-                                dataKey="diastolicBP"
-                                stroke="#53CBF3"
-                                strokeWidth={3}
-                                dot={{ r: 4 }}
-                                name="Diastolic"
-                              />
-                            </>
-                          )}
-                          {selectedVital === "heartRate" && (
-                            <Line
-                              type="monotone"
-                              dataKey="heartRate"
-                              stroke="#FFDE42"
-                              strokeWidth={4}
-                              dot={{
-                                r: 6,
-                                fill: "#FFDE42",
-                                strokeWidth: 3,
-                                stroke: "#fff",
-                              }}
-                            />
-                          )}
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
+                  <VitalsTab
+                    vitals={vitals}
+                    selectedVital={selectedVital}
+                    onSelectVital={setSelectedVital}
+                  />
                 )}
 
                 {/* LABS TAB */}
-                {activeTab === "labs" && (
-                  <div className="space-y-6 animate-dissolve">
-                    {labs.length === 0 ? (
-                      <div className="text-center py-10 text-slate-500">
-                        No laboratory results on record.
-                      </div>
-                    ) : (
-                      labs.map((lab) => (
-                        <Card key={lab.id}>
-                          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                            <div>
-                              <h3 className="text-xl font-bold text-slate-800 font-grotesk">
-                                {lab.name}
-                              </h3>
-                              <p className="text-sm text-slate-500">
-                                Reported on {formatDate(lab.date)} · Ordered by{" "}
-                                {lab.orderedBy}
-                              </p>
-                            </div>
-                            <Button
-                              variant="white"
-                              className="flex items-center gap-2 font-bold text-sm bg-slate-50 border-none hover:bg-primary hover:text-white"
-                            >
-                              <FileText size={20} /> Full Lab Report
-                            </Button>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {lab.values.map((v, i) => (
-                              <div
-                                key={i}
-                                className="bg-slate-50/50 border border-slate-100 p-4 rounded-lg"
-                              >
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-xs font-semibold text-slate-500 tracking-normal">
-                                    {v.parameter}
-                                  </span>
-                                  {v.status === "normal" ? (
-                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">
-                                      NORMAL
-                                    </span>
-                                  ) : (
-                                    <span className="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full font-bold">
-                                      ABNORMAL
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-baseline gap-1">
-                                  <span className="text-xl font-bold text-slate-800">
-                                    {v.value}
-                                  </span>
-                                  <span className="text-xs text-slate-500 font-medium">
-                                    {v.unit}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-slate-500 mt-2 font-medium">
-                                  Ref: {v.referenceRange}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </Card>
-                      ))
-                    )}
-                  </div>
-                )}
+                {activeTab === "labs" && <LabsTab labs={labs} />}
 
                 {/* MEDICATIONS TAB */}
                 {activeTab === "medications" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-dissolve">
-                    {medications.length === 0 ? (
-                      <div className="col-span-full text-center py-10 text-slate-500">
-                        No prescribed medications found.
-                      </div>
-                    ) : (
-                      medications.map((med) => (
-                        <div
-                          key={med.id}
-                          className="bg-white border border-slate-200 rounded-lg p-6 border-l-4 border-l-supportive-teal"
-                        >
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center text-supportive-teal">
-                              <Pill size={24} />
-                            </div>
-                            <span
-                              className={`text-xs font-bold px-3 py-1 rounded-full tracking-tighter ${
-                                med.status === "active"
-                                  ? "bg-teal-100 text-teal-700"
-                                  : "bg-slate-100 text-slate-600"
-                              }`}
-                            >
-                              {med.status}
-                            </span>
-                          </div>
-                          <h3 className="text-lg font-bold text-slate-800 font-grotesk">
-                            {med.name}
-                          </h3>
-                          <p className="text-sm font-semibold text-primary mb-2">
-                            {med.dosage}
-                          </p>
-                          <p className="text-sm text-slate-500 mb-6 leading-relaxed italic">
-                            "{med.instructions}"
-                          </p>
-                          <div className="flex flex-wrap justify-between items-center gap-2 pt-4 border-t border-slate-50">
-                            <span className="text-xs text-slate-500">
-                              Prescribed {formatDate(med.prescribedDate)}
-                            </span>
-                            <div className="flex items-center gap-3">
-                              {(med.canDownload || med.documentUrl) &&
-                              med.documentUrl ? (
-                                <a
-                                  href={med.documentUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  download={med.documentName || undefined}
-                                  className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
-                                >
-                                  <Download size={14} /> Pharmacy script
-                                </a>
-                              ) : (
-                                <span className="text-[10px] text-slate-400 font-medium">
-                                  No script file
-                                </span>
-                              )}
-                              {med.refillsLeft > 0 && (
-                                <Button
-                                  variant="ghost"
-                                  onClick={() => {
-                                    setSelectedMedForRefill(med);
-                                    setIsRefillModalOpen(true);
-                                  }}
-                                  className="!p-0 !min-w-0 !h-auto text-xs font-bold text-primary hover:underline bg-transparent"
-                                >
-                                  Request Refill ({med.refillsLeft} left)
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                  <MedicationsTab
+                    medications={medications}
+                    onRequestRefill={(med) => {
+                      setSelectedMedForRefill(med);
+                      setIsRefillModalOpen(true);
+                    }}
+                  />
                 )}
+
 
                 {/* ALLERGIES TAB */}
                 {activeTab === "allergies" && (
-                  <div className="space-y-4 animate-dissolve">
-                    {allergies.length === 0 ? (
-                      <div className="text-center py-10 text-slate-500">
-                        No allergies recorded.
-                      </div>
-                    ) : (
-                      allergies.map((allergy) => (
-                        <div
-                          key={allergy.id}
-                          className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 group"
-                        >
-                          <div className="flex items-center gap-5">
-                            <div
-                              className={`w-14 h-14 rounded-lg flex items-center justify-center shrink-0 ${
-                                allergy.severity === "severe"
-                                  ? "bg-rose-50 text-rose-500"
-                                  : allergy.severity === "moderate"
-                                    ? "bg-amber-50 text-amber-500"
-                                    : "bg-slate-50 text-slate-500"
-                              }`}
-                            >
-                              <FilterIcon size={28} />
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-bold text-slate-800 font-grotesk">
-                                {allergy.allergen}
-                              </h3>
-                              <p className="text-sm text-slate-500">
-                                {allergy.reaction}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                                allergy.severity === "severe"
-                                  ? "border-rose-100 bg-rose-50 text-rose-600"
-                                  : allergy.severity === "moderate"
-                                    ? "border-amber-100 bg-amber-50 text-amber-600"
-                                    : "border-slate-100 bg-slate-50 text-slate-500"
-                              }`}
-                            >
-                              {allergy.severity.toUpperCase()}
-                            </span>
-                            <span className="text-xs font-bold text-slate-500">
-                              {allergy.source}
-                            </span>
-                            <button
-                              onClick={() => handleDeleteAllergy(allergy.id)}
-                              className="ml-2 p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100"
-                              title="Remove allergy"
-                            >
-                              <BiPlus size={16} className="rotate-45" />
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                    <button
-                      onClick={() => setIsAllergyModalOpen(true)}
-                      className="w-full py-5 rounded-xl border-2 border-dashed border-slate-200 text-slate-500 font-bold text-sm hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
-                    >
-                      <BiPlus size={20} /> Report New Allergy
-                    </button>
-                  </div>
+                  <AllergiesTab
+                    allergies={allergies}
+                    onAdd={() => setIsAllergyModalOpen(true)}
+                    onRemove={handleDeleteAllergy}
+                  />
                 )}
 
                 {/* IMMUNIZATIONS TAB */}
                 {activeTab === "immunizations" && (
-                  <Card className="overflow-x-auto custom-scrollbar animate-dissolve">
-                    <table className="w-full text-left border-collapse min-w-[800px]">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-500 text-xs font-bold tracking-normal">
-                          <th className="px-8 py-5">Vaccine</th>
-                          <th className="px-8 py-5">Status</th>
-                          <th className="px-8 py-5">Date</th>
-                          <th className="px-8 py-5">Administered By</th>
-                          <th className="px-8 py-5">Next Due</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-sm">
-                        {immunizations.length === 0 ? (
-                          <tr>
-                            <td
-                              colSpan={5}
-                              className="text-center py-10 text-slate-500"
-                            >
-                              No immunization records found.
-                            </td>
-                          </tr>
-                        ) : (
-                          immunizations.map((imm) => (
-                            <tr
-                              key={imm.id}
-                              className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors"
-                            >
-                              <td className="px-8 py-6 font-bold text-slate-800 underline decoration-primary/20">
-                                {imm.vaccine}
-                              </td>
-                              <td className="px-8 py-6">
-                                <span className="flex items-center gap-1.5 text-green-600 font-bold">
-                                  <CheckCircle size={14} /> {imm.dose}
-                                </span>
-                              </td>
-                              <td className="px-8 py-6 text-slate-500">
-                                {formatDate(imm.date)}
-                              </td>
-                              <td className="px-8 py-6">
-                                <span className="text-xs font-medium text-slate-500">
-                                  {imm.administeredBy}
-                                </span>
-                              </td>
-                              <td className="px-8 py-6 text-primary font-bold">
-                                {imm.nextDue ? formatDate(imm.nextDue) : "-"}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </Card>
+                  <ImmunizationsTab immunizations={immunizations} />
                 )}
               </>
             )}
@@ -924,7 +405,7 @@ export default function HealthRecordPage() {
               readOnly={false}
             />
             <div className="absolute bottom-10 inset-x-10 z-40 pointer-events-none">
-              <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-100 shadow-none">
+              <div className="bg-white/80 backdrop-blur-xl p-4 rounded-lg border border-slate-100 shadow-none">
                 <p className="text-xs font-bold text-slate-500 tracking-normal mb-1">
                   Health Tip
                 </p>
@@ -949,9 +430,9 @@ export default function HealthRecordPage() {
         }
       >
         <div className="space-y-6">
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary shadow-none">
+              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-primary shadow-none">
                 <Pill size={24} />
               </div>
               <div>
@@ -978,7 +459,7 @@ export default function HealthRecordPage() {
                     deliveryMethod: "pickup",
                   }))
                 }
-                className={`p-4 h-auto rounded-xl border flex flex-col items-center gap-2 transition-all !min-w-0 ${
+                className={`p-4 h-auto rounded-lg border flex flex-col items-center gap-2 transition-all !min-w-0 ${
                   refillForm.deliveryMethod === "pickup"
                     ? ""
                     : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
@@ -999,7 +480,7 @@ export default function HealthRecordPage() {
                     deliveryMethod: "delivery",
                   }))
                 }
-                className={`p-4 h-auto rounded-xl border flex flex-col items-center gap-2 transition-all !min-w-0 ${
+                className={`p-4 h-auto rounded-lg border flex flex-col items-center gap-2 transition-all !min-w-0 ${
                   refillForm.deliveryMethod === "delivery"
                     ? ""
                     : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
@@ -1048,7 +529,7 @@ export default function HealthRecordPage() {
                 Additional Notes
               </h1>
               <textarea
-                className="w-full h-24 p-4 rounded-xl border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white transition-all outline-none text-xs font-medium"
+                className="w-full h-24 p-4 rounded-lg border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white transition-all outline-none text-xs font-medium"
                 placeholder="Any special instructions for the pharmacist?"
                 value={refillForm.notes}
                 onChange={(e) =>
@@ -1090,7 +571,7 @@ export default function HealthRecordPage() {
           }}
           className="space-y-5"
         >
-          <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 text-xs text-rose-700 leading-relaxed">
+          <div className="bg-rose-50 border border-rose-100 rounded-lg p-4 text-xs text-rose-700 leading-relaxed">
             <strong>Important:</strong> Please provide accurate details about
             your allergy. This will be immediately visible to any practitioner
             treating you.
@@ -1105,7 +586,7 @@ export default function HealthRecordPage() {
                 type="text"
                 required
                 placeholder="What are you allergic to?"
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
                 value={allergyForm.allergen}
                 onChange={(e) =>
                   setAllergyForm({ ...allergyForm, allergen: e.target.value })
@@ -1119,7 +600,7 @@ export default function HealthRecordPage() {
                   Severity
                 </label>
                 <select
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
                   value={allergyForm.severity}
                   onChange={(e) =>
                     setAllergyForm({
@@ -1141,7 +622,7 @@ export default function HealthRecordPage() {
                   type="text"
                   required
                   placeholder="e.g. Rash, Swelling"
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
                   value={allergyForm.reaction}
                   onChange={(e) =>
                     setAllergyForm({ ...allergyForm, reaction: e.target.value })

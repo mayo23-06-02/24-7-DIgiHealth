@@ -81,7 +81,7 @@ export default function ConversationList({
               <button
                 type="button"
                 onClick={onOpenActiveChat}
-                className="md:hidden h-10 px-3 rounded-xl bg-primary/10 text-primary text-sm font-bold flex items-center gap-1.5 hover:bg-primary/15 transition-all"
+                className="md:hidden h-10 px-3 rounded-lg bg-primary/10 text-primary text-sm font-bold flex items-center gap-1.5 hover:bg-primary/15 transition-all"
                 title="Back to conversation"
               >
                 <BiMessageRoundedDetail size={18} />
@@ -92,7 +92,7 @@ export default function ConversationList({
               <button
                 type="button"
                 onClick={onNewChat}
-                className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center hover:scale-105 transition-all"
+                className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-105 transition-all"
                 title="Start New Chat"
               >
                 <BiPlus size={24} />
@@ -106,7 +106,7 @@ export default function ConversationList({
           <button
             type="button"
             onClick={onOpenActiveChat}
-            className="md:hidden w-full mb-3 flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/15 text-left hover:bg-primary/10 transition-colors"
+            className="md:hidden w-full mb-3 flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/15 text-left hover:bg-primary/10 transition-colors"
           >
             <div className="w-9 h-9 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
               <BiMessageRoundedDetail size={18} />
@@ -123,7 +123,7 @@ export default function ConversationList({
           </button>
         )}
 
-        <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+        <div className="flex bg-slate-100 p-1 rounded-lg mb-4">
           {(["contacts", "pending"] as const).map((tab) => (
             <button
               key={tab}

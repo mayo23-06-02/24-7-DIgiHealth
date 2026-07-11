@@ -88,7 +88,7 @@ export default function AITriageAssistant() {
             </h1>
             <textarea
               rows={3}
-              className="w-full border-2 border-slate-100 bg-slate-50 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-0 focus:border-primary transition-all resize-none shadow-inner"
+              className="w-full border-2 border-slate-100 bg-slate-50 rounded-lg p-4 text-sm font-medium focus:outline-none focus:ring-0 focus:border-primary transition-all resize-none shadow-inner"
               placeholder="e.g., persistent cough, fever, shortness of breath"
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
@@ -102,7 +102,7 @@ export default function AITriageAssistant() {
               </h1>
               <input
                 type="number"
-                className="w-full border-2 border-slate-100 bg-slate-50 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-0 focus:border-primary transition-all shadow-inner"
+                className="w-full border-2 border-slate-100 bg-slate-50 rounded-lg p-4 text-sm font-medium focus:outline-none focus:ring-0 focus:border-primary transition-all shadow-inner"
                 value={age}
                 placeholder="Years"
                 onChange={(e) => setAge(e.target.value)}
@@ -113,7 +113,7 @@ export default function AITriageAssistant() {
                 Gender
               </h1>
               <select
-                className="w-full border-2 border-slate-100 bg-slate-50 rounded-2xl p-4 text-sm font-medium text-slate-700 focus:outline-none focus:ring-0 focus:border-primary transition-all shadow-inner appearance-none"
+                className="w-full border-2 border-slate-100 bg-slate-50 rounded-lg p-4 text-sm font-medium text-slate-700 focus:outline-none focus:ring-0 focus:border-primary transition-all shadow-inner appearance-none"
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
               >
@@ -134,7 +134,7 @@ export default function AITriageAssistant() {
           <button
             onClick={handleDiagnose}
             disabled={isLoading}
-            className="w-full bg-primary text-white py-4 rounded-2xl font-bold  tracking-normal hover:bg-[#0041a3] hover:shadow-none hover:shadow-primary/30 disabled:opacity-50 disabled:shadow-none transition-all flex items-center justify-center gap-3 active:scale-95"
+            className="w-full bg-primary text-white py-4 rounded-lg font-bold  tracking-normal hover:bg-[#0041a3] hover:shadow-none hover:shadow-primary/30 disabled:opacity-50 disabled:shadow-none transition-all flex items-center justify-center gap-3 active:scale-95"
           >
             {isLoading ? (
               <BiLoaderCircle className="animate-spin text-xl" />
@@ -157,7 +157,7 @@ export default function AITriageAssistant() {
                 {diagnoses.map((dx, idx) => (
                   <div
                     key={idx}
-                    className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center justify-between group hover:border-primary/30 transition-colors"
+                    className="bg-slate-50 border border-slate-100 p-4 rounded-lg flex items-center justify-between group hover:border-primary/30 transition-colors"
                   >
                     <div>
                       <span className="font-bold text-slate-800 block text-sm mb-1">
@@ -176,7 +176,7 @@ export default function AITriageAssistant() {
                 ))}
               </div>
 
-              <div className="mt-6 text-xs font-bold text-slate-500 italic text-center p-4 bg-slate-50 rounded-xl">
+              <div className="mt-6 text-xs font-bold text-slate-500 italic text-center p-4 bg-slate-50 rounded-lg">
                 ⚠️ <span className="text-slate-500">Clinical Disclaimer:</span>{" "}
                 This is an AI-powered preliminary analysis and is not a
                 substitute for professional medical advice. Always consult a

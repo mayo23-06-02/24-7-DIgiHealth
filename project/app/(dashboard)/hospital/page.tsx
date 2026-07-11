@@ -146,13 +146,13 @@ function KPI({
     violet: "bg-violet-50 text-violet-600",
   };
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col gap-4 hover:shadow-md hover:border-slate-200 transition-all duration-200">
+    <div className="bg-white rounded-lg border border-slate-100 p-6 flex flex-col gap-4 hover:shadow-md hover:border-slate-200 transition-all duration-200">
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold text-slate-500 tracking-wider uppercase">
           {label}
         </p>
         <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center ${colors[color]}`}
+          className={`w-10 h-10 rounded-lg flex items-center justify-center ${colors[color]}`}
         >
           {icon}
         </div>
@@ -252,7 +252,7 @@ export default function HospitalOverviewPage() {
     <div className="w-full pb-16 flex flex-col gap-8">
       {/* Error Banner */}
       {error && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 text-sm text-amber-700 font-medium flex items-center gap-2">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-5 py-3 text-sm text-amber-700 font-medium flex items-center gap-2">
           ⚠️ {error}
         </div>
       )}
@@ -269,12 +269,12 @@ export default function HospitalOverviewPage() {
         </div>
         <div className="flex gap-3 flex-wrap">
           <Link href="/hospital_admin/staff">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all">
+            <button className="flex items-center gap-2 px-4 p-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all">
               <BiUserPlus size={18} /> Manage Staff
             </button>
           </Link>
           <Link href="/hospital_admin/reports">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0052CC] text-white text-sm font-bold hover:bg-[#0047B3] transition-all shadow-md shadow-blue-200">
+            <button className="flex items-center gap-2 px-4 p-2 rounded-lg bg-[#0052CC] text-white text-sm font-bold hover:bg-[#0047B3] transition-all shadow-md shadow-blue-200">
               <BiBarChartAlt2 size={18} /> Performance Reports
             </button>
           </Link>
@@ -316,7 +316,7 @@ export default function HospitalOverviewPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         {/* Bar Chart – Monthly Consultations */}
-        <div className="xl:col-span-3 bg-white rounded-2xl border border-slate-100 p-6">
+        <div className="xl:col-span-3 bg-white rounded-lg border border-slate-100 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-sm font-bold text-slate-800 font-grotesk">
@@ -324,7 +324,7 @@ export default function HospitalOverviewPage() {
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">Last 6 months</p>
             </div>
-            <span className="text-xs font-bold text-slate-500 border border-slate-100 px-3 py-1.5 rounded-lg">
+            <span className="text-xs font-bold text-slate-500 border border-slate-100 px-3 py-2 rounded-lg">
               Today: {s.consultationsToday}
             </span>
           </div>
@@ -370,7 +370,7 @@ export default function HospitalOverviewPage() {
         </div>
 
         {/* Line Chart – Revenue & Satisfaction */}
-        <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-100 p-6">
+        <div className="xl:col-span-2 bg-white rounded-lg border border-slate-100 p-6">
           <div className="mb-6">
             <h2 className="text-sm font-bold text-slate-800 font-grotesk">
               Revenue & Satisfaction
@@ -449,7 +449,7 @@ export default function HospitalOverviewPage() {
       {/* Bottom Row: Reviews + SLA + Quick Actions */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Recent Reviews */}
-        <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-100 p-6 flex flex-col gap-5">
+        <div className="xl:col-span-2 bg-white rounded-lg border border-slate-100 p-6 flex flex-col gap-5">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-800 font-grotesk">
               Recent Patient Reviews
@@ -466,9 +466,9 @@ export default function HospitalOverviewPage() {
             {reviews.map((r) => (
               <div
                 key={r._id}
-                className="flex items-start gap-4 p-4 rounded-xl border border-slate-50 bg-slate-50/60 hover:bg-slate-100/40 transition-colors"
+                className="flex items-start gap-4 p-4 rounded-lg border border-slate-50 bg-slate-50/60 hover:bg-slate-100/40 transition-colors"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#0052CC]/10 text-[#0052CC] flex items-center justify-center font-bold text-sm shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[#0052CC]/10 text-[#0052CC] flex items-center justify-center font-bold text-sm shrink-0">
                   {r.patientName.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -499,7 +499,7 @@ export default function HospitalOverviewPage() {
         {/* SLA & Quick Actions */}
         <div className="flex flex-col gap-5">
           {/* SLA Card */}
-          <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col gap-5">
+          <div className="bg-white rounded-lg border border-slate-100 p-6 flex flex-col gap-5">
             <h2 className="text-sm font-bold text-slate-800 font-grotesk">
               SLA Status
             </h2>
@@ -567,7 +567,7 @@ export default function HospitalOverviewPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col gap-3">
+          <div className="bg-white rounded-lg border border-slate-100 p-6 flex flex-col gap-3">
             <h2 className="text-sm font-bold text-slate-800 font-grotesk">
               Quick Actions
             </h2>
@@ -598,7 +598,7 @@ export default function HospitalOverviewPage() {
               },
             ].map((a) => (
               <Link key={a.href} href={a.href}>
-                <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group cursor-pointer">
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group cursor-pointer">
                   <div className="w-9 h-9 rounded-lg bg-[#0052CC]/10 text-[#0052CC] flex items-center justify-center shrink-0 group-hover:bg-[#0052CC] group-hover:text-white transition-all">
                     {a.icon}
                   </div>

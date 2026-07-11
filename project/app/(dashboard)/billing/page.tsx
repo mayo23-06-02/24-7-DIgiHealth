@@ -125,7 +125,7 @@ function SummaryCard({
   return (
     <Card className="flex items-center gap-4">
       <div
-        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-xl ${accents[accent] ?? accents.primary}`}
+        className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 text-xl ${accents[accent] ?? accents.primary}`}
       >
         {icon}
       </div>
@@ -192,7 +192,7 @@ function TransactionTable({
                 setPage(1);
               }}
               placeholder="Search transactions..."
-              className="pl-9 pr-4 py-3 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white outline-none w-48 transition-all"
+              className="pl-9 pr-4 py-3 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white outline-none w-48 transition-all"
             />
           </div>
           <select
@@ -201,7 +201,7 @@ function TransactionTable({
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="text-xs font-bold rounded-xl border border-slate-200 bg-slate-50 focus:border-primary outline-none px-3 py-3 transition-all"
+            className="text-xs font-bold rounded-lg border border-slate-200 bg-slate-50 focus:border-primary outline-none px-3 py-3 transition-all"
           >
             <option value="">All Statuses</option>
             {["completed", "pending", "failed", "refunded"].map((s) => (
@@ -241,7 +241,7 @@ function TransactionTable({
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all shadow-none active:scale-95"
+              className="flex items-center gap-2 px-4 py-3 rounded-lg bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all shadow-none active:scale-95"
             >
               <BiDownload size={14} /> Export CSV
             </button>
@@ -489,7 +489,7 @@ function OrderTable({ orders }: { orders: any[] }) {
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md ">
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md ">
                       {o.category}
                     </span>
                   </td>
@@ -607,7 +607,7 @@ function PatientBillingView({
             <div className="space-y-5">
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold ${
+                  className={`w-16 h-16 rounded-lg flex items-center justify-center text-2xl font-bold ${
                     subscription.tier === "family"
                       ? "bg-purple-50 text-purple-600"
                       : subscription.tier === "pro"
@@ -640,7 +640,7 @@ function PatientBillingView({
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={() => setUpgradeModal(true)}
-                  className="flex-1 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
+                  className="flex-1 py-3 rounded-lg bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
                 >
                   Upgrade Plan
                 </button>
@@ -651,7 +651,7 @@ function PatientBillingView({
                       onAction("cancel_subscription")
                     }
                     disabled={actionLoading}
-                    className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold  tracking-normal hover:bg-red-50 hover:text-red-500 transition-all"
+                    className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-500 text-xs font-bold  tracking-normal hover:bg-red-50 hover:text-red-500 transition-all"
                   >
                     Cancel
                   </button>
@@ -665,7 +665,7 @@ function PatientBillingView({
               </p>
               <button
                 onClick={() => setUpgradeModal(true)}
-                className="px-6 py-3 rounded-xl bg-primary text-white text-xs font-bold  tracking-normal  shadow-primary/20 hover:bg-primary/80 transition-all"
+                className="px-6 py-3 rounded-lg bg-primary text-white text-xs font-bold  tracking-normal  shadow-primary/20 hover:bg-primary/80 transition-all"
               >
                 Get Started
               </button>
@@ -692,7 +692,7 @@ function PatientBillingView({
               paymentMethods.map((pm: any, i: number) => (
                 <div
                   key={pm._id || i}
-                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${pm.isDefault ? "border-primary/30 bg-primary/[0.02]" : "border-slate-100 hover:border-slate-200"}`}
+                  className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${pm.isDefault ? "border-primary/30 bg-primary/[0.02]" : "border-slate-100 hover:border-slate-200"}`}
                 >
                   <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-xl shrink-0">
                     {pm.type === "card"
@@ -801,14 +801,14 @@ function PatientBillingView({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setUpgradeModal(false)}
           />
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 ">
+          <div className="relative w-full max-w-2xl bg-white rounded-lg overflow-hidden animate-in zoom-in-95 duration-300 ">
             <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
               <h3 className="text-xl font-bold text-slate-800 font-grotesk">
                 Choose Your Plan
               </h3>
               <button
                 onClick={() => setUpgradeModal(false)}
-                className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all"
+                className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all"
               >
                 ✕
               </button>
@@ -818,7 +818,7 @@ function PatientBillingView({
                 <button
                   key={t.id}
                   onClick={() => setSelectedTier(t.id)}
-                  className={`p-5 rounded-2xl border-2 text-left transition-all ${
+                  className={`p-5 rounded-lg border-2 text-left transition-all ${
                     selectedTier === t.id
                       ? "border-primary bg-primary/[0.03]"
                       : "border-slate-100 hover:border-slate-200"
@@ -830,7 +830,7 @@ function PatientBillingView({
                   <p className="text-2xl font-bold text-slate-800 mb-3">
                     {t.price === 0 ? "Free" : `R${t.price}/mo`}
                   </p>
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-2">
                     {t.features.map((f) => (
                       <li
                         key={f}
@@ -854,7 +854,7 @@ function PatientBillingView({
                   setUpgradeModal(false);
                 }}
                 disabled={actionLoading}
-                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal shadow-none shadow-primary/20 hover:bg-primary/80 transition-all disabled:opacity-50"
+                className="w-full py-4 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal shadow-none shadow-primary/20 hover:bg-primary/80 transition-all disabled:opacity-50"
               >
                 {actionLoading
                   ? "Processing..."
@@ -934,13 +934,13 @@ function PractitionerBillingView({
           <div className="space-y-3">
             <button
               onClick={() => setRequestModal(true)}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
             >
               <BiTransfer size={18} /> Request Payout
             </button>
             <button
               onClick={() => setBankModal(true)}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
             >
               <BiBuildings size={18} /> Update Bank Account
             </button>
@@ -963,7 +963,7 @@ function PractitionerBillingView({
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="w-full flex items-center gap-3 px-5 py-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
             >
               <BiDownload size={18} /> Download Payout Report
             </button>
@@ -1059,7 +1059,7 @@ function PractitionerBillingView({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setRequestModal(false)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-2xl p-8  animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-lg p-8  animate-in zoom-in-95 duration-200">
             <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
               Request Payout
             </h3>
@@ -1072,7 +1072,7 @@ function PractitionerBillingView({
                   type="number"
                   value={requestAmount}
                   onChange={(e) => setRequestAmount(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none font-bold"
+                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none font-bold"
                   placeholder="0.00"
                 />
               </div>
@@ -1084,11 +1084,11 @@ function PractitionerBillingView({
                   type="text"
                   value={requestNotes}
                   onChange={(e) => setRequestNotes(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
+                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
                   placeholder="Monthly payout request"
                 />
               </div>
-              <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
                 Platform fee of 12% will be deducted. Net amount:{" "}
                 <strong>
                   {fmtZAR(parseFloat(requestAmount || "0") * 0.88)}
@@ -1098,7 +1098,7 @@ function PractitionerBillingView({
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setRequestModal(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
+                className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
               >
                 Cancel
               </button>
@@ -1116,7 +1116,7 @@ function PractitionerBillingView({
                   setRequestModal(false);
                 }}
                 disabled={!requestAmount || actionLoading}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal  disabled:opacity-50 hover:bg-primary/80 transition-all"
+                className="flex-1 py-3 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal  disabled:opacity-50 hover:bg-primary/80 transition-all"
               >
                 {actionLoading ? "Submitting..." : "Submit Request"}
               </button>
@@ -1132,7 +1132,7 @@ function PractitionerBillingView({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setBankModal(false)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-2xl p-8  animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-lg p-8  animate-in zoom-in-95 duration-200">
             <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
               Bank Account Details
             </h3>
@@ -1149,7 +1149,7 @@ function PractitionerBillingView({
                     {field}
                   </h1>
                   <input
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
+                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
                     placeholder={field}
                   />
                 </div>
@@ -1158,13 +1158,13 @@ function PractitionerBillingView({
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setBankModal(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
+                className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={() => setBankModal(false)}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all"
+                className="flex-1 py-3 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all"
               >
                 Save Account
               </button>
@@ -1526,7 +1526,7 @@ function AdminBillingView({
       </div>
 
       {/* Sub-tabs */}
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-lg border border-slate-100 overflow-hidden">
         <div className="flex border-b border-slate-100">
           {(["transactions", "payouts", "audit"] as const).map((tab) => (
             <button
@@ -1656,7 +1656,7 @@ function AdminBillingView({
                     key={log._id || i}
                     className="flex items-start gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 text-slate-500 text-sm">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 text-slate-500 text-sm">
                       <BiHistory />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -1694,7 +1694,7 @@ function AdminBillingView({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setFeeModal(false)}
           />
-          <div className="relative w-full max-w-sm bg-white rounded-2xl p-8  animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-sm bg-white rounded-lg p-8  animate-in zoom-in-95 duration-200">
             <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
               Adjust Platform Fees
             </h3>
@@ -1721,18 +1721,18 @@ function AdminBillingView({
                         [key]: parseFloat(e.target.value) || 0,
                       }))
                     }
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold focus:border-primary outline-none"
+                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm font-bold focus:border-primary outline-none"
                   />
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-xl p-3 mt-4">
+            <p className="text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-3 mt-4">
               ⚠️ Changes apply to all future transactions.
             </p>
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setFeeModal(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
+                className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
               >
                 Cancel
               </button>
@@ -1742,7 +1742,7 @@ function AdminBillingView({
                   setFeeModal(false);
                 }}
                 disabled={actionLoading}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all disabled:opacity-50"
+                className="flex-1 py-3 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all disabled:opacity-50"
               >
                 {actionLoading ? "Saving..." : "Save Config"}
               </button>
@@ -1850,7 +1850,7 @@ export default function BillingPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
             {data ? (
               (roleIcon[data.role] ?? <BiWallet size={22} />)
             ) : (
@@ -1878,7 +1878,7 @@ export default function BillingPage() {
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-xs  tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
+          className="flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-200 text-slate-500 font-bold text-xs  tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
         >
           <BiRefresh size={16} className={loading ? "animate-spin" : ""} />{" "}
           Refresh
@@ -1944,7 +1944,7 @@ export default function BillingPage() {
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 rounded-xl font-bold text-sm  animate-in slide-in-from-bottom-4 duration-300 flex items-center gap-3 ${
+          className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 rounded-lg font-bold text-sm  animate-in slide-in-from-bottom-4 duration-300 flex items-center gap-3 ${
             toast.type === "success"
               ? "bg-emerald-600 text-white"
               : "bg-red-500 text-white"

@@ -184,7 +184,7 @@ export default function AppointmentCard({
                   />
                   <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-slate-100 z-50 py-1 flex flex-col overflow-hidden">
                     <button
-                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-slate-700 font-medium border-b border-slate-50"
+                      className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-slate-700 font-medium border-b border-slate-50"
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowDetails(true);
@@ -198,7 +198,7 @@ export default function AppointmentCard({
                       userType === "practitioner" && (
                         <>
                           <button
-                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-emerald-600 font-medium"
+                            className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-emerald-600 font-medium"
                             onClick={(e) => {
                               e.stopPropagation();
                               onAccept?.(appointment.id);
@@ -208,7 +208,7 @@ export default function AppointmentCard({
                             Accept
                           </button>
                           <button
-                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-rose-500 font-medium"
+                            className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-rose-500 font-medium"
                             onClick={(e) => {
                               e.stopPropagation();
                               onDecline?.(appointment.id);
@@ -223,7 +223,7 @@ export default function AppointmentCard({
                       userType === "patient" && (
                         <>
                           <button
-                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-slate-700 font-medium"
+                            className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-slate-700 font-medium"
                             onClick={(e) => {
                               e.stopPropagation();
                               onEdit?.(appointment.id);
@@ -233,7 +233,7 @@ export default function AppointmentCard({
                             Reschedule
                           </button>
                           <button
-                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-rose-500 font-medium"
+                            className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-rose-500 font-medium"
                             onClick={(e) => {
                               e.stopPropagation();
                               onCancel?.(appointment.id);
@@ -246,7 +246,7 @@ export default function AppointmentCard({
                       )}
                     {isJoinable && (
                       <button
-                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-primary font-bold"
+                        className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-primary font-bold"
                         onClick={(e) => {
                           e.stopPropagation();
                           onJoin?.(appointment.id);
@@ -259,7 +259,7 @@ export default function AppointmentCard({
                     {appointment.computedStatus === "upcoming" && (
                       <>
                         <button
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-slate-700 font-medium"
+                          className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-slate-700 font-medium"
                           onClick={(e) => {
                             e.stopPropagation();
                             onEdit?.(appointment.id);
@@ -270,7 +270,7 @@ export default function AppointmentCard({
                         </button>
                         {userType === "practitioner" && (
                           <button
-                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-slate-700 font-medium"
+                            className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-slate-700 font-medium"
                             onClick={(e) => {
                               e.stopPropagation();
                               onRebook?.(appointment.id);
@@ -281,7 +281,7 @@ export default function AppointmentCard({
                           </button>
                         )}
                         <button
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 text-rose-500 font-medium border-t border-slate-50"
+                          className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-rose-500 font-medium border-t border-slate-50"
                           onClick={(e) => {
                             e.stopPropagation();
                             onCancel?.(appointment.id);
@@ -331,7 +331,7 @@ export default function AppointmentCard({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                 Date & Time
               </span>
@@ -342,7 +342,7 @@ export default function AppointmentCard({
                 {timeStr} - {endTimeStr}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                 Status
               </span>
@@ -369,7 +369,7 @@ export default function AppointmentCard({
               <h5 className="text-sm font-semibold text-slate-900 mb-2">
                 Reason for Visit
               </h5>
-              <p className="text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <p className="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-100">
                 {appointment.reason}
               </p>
             </div>

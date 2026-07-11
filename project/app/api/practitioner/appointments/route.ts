@@ -4,6 +4,7 @@ import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { riskBandFromScore } from '@/lib/riskScore';
 
 async function getPractitionerId(req: NextRequest): Promise<string> {
   // 1. Try JWT token from cookie
@@ -56,6 +57,11 @@ export async function GET(req: NextRequest) {
           filter.scheduledStartTime = { $lt: now };
           filter.status = { $in: ['completed', 'cancelled'] };
           break;
+        case 'completed':
+        case 'honored':
+          // Successful / honored consultations only
+          filter.status = 'completed';
+          break;
         case 'cancelled':
           filter.status = 'cancelled';
           break;
@@ -84,20 +90,32 @@ export async function GET(req: NextRequest) {
 
         if (search && !patientName.toLowerCase().includes(search.toLowerCase())) return null;
 
+        const start = new Date((c as any).scheduledStartTime || c.scheduledStart);
+        const end = new Date((c as any).scheduledEndTime || c.scheduledEnd);
+        const durationMinutes = Math.max(
+          0,
+          Math.round((end.getTime() - start.getTime()) / 60000) ||
+            (c as any).callMinutesUsed ||
+            0,
+        );
+
         return {
           id: c._id.toString(),
           consultationId: c._id.toString(),
           patientId: c.patientId.toString(),
           patientName,
-          scheduledStart: (c as any).scheduledStartTime || c.scheduledStart,
-          scheduledEnd: (c as any).scheduledEndTime || c.scheduledEnd,
+          scheduledStart: start,
+          scheduledEnd: end,
+          durationMinutes,
+          callMinutesUsed: (c as any).callMinutesUsed || 0,
           status: c.status,
           type: c.type,
           reason: c.chiefComplaint,
           riskScore: c.clinicalRisk?.score || 0,
-          riskColor: c.clinicalRisk?.color || 'green',
+          riskColor: riskBandFromScore(c.clinicalRisk?.score || 0),
           riskFactors: c.clinicalRisk?.factors || [],
           soapNotes: c.soapNotes,
+          aiRecommendations: (c as any).aiRecommendations || [],
         };
       })
     );

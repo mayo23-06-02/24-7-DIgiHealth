@@ -136,7 +136,7 @@ const EventModal: React.FC<EventModalProps> = ({
           {addForm.type === "appointment" && (
             <>
               {doctors.length === 0 ? (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center space-y-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center space-y-4">
                   <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-600">
                     <BiUser size={24} />
                   </div>

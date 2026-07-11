@@ -114,7 +114,7 @@ export default function DoctorModal({
 
           <div className="text-right space-y-4">
             <p className="text-xs text-slate-500  ">Consultation</p>
-            <p className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl inline-block mt-1">
+            <p className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg inline-block mt-1">
               INCLUDED IN PLAN
             </p>
           </div>
@@ -142,7 +142,7 @@ export default function DoctorModal({
               {doctor.achievements.map((achieve, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100"
+                  className="flex items-start gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100"
                 >
                   <BiMedal className="text-gray-500 shrink-0 text-lg mt-0.5" />
                   <span className="font-medium">{achieve}</span>
@@ -163,7 +163,7 @@ export default function DoctorModal({
                 <Button
                   key={i}
                   variant="ghost"
-                  className="px-4 py-2 h-auto bg-primary/5 text-primary border border-primary/20 rounded-xl text-sm font-bold hover:bg-primary hover:text-white transition-all !min-w-0"
+                  className="px-4 py-2 h-auto bg-primary/5 text-primary border border-primary/20 rounded-lg text-sm font-bold hover:bg-primary hover:text-white transition-all !min-w-0"
                 >
                   {time}
                 </Button>
@@ -209,7 +209,7 @@ export default function DoctorModal({
               {doctor.reviews.map((review, i) => (
                 <div
                   key={i}
-                  className="bg-slate-50 p-4 rounded-2xl border border-slate-100"
+                  className="bg-slate-50 p-4 rounded-lg border border-slate-100"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">

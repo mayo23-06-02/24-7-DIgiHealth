@@ -27,10 +27,10 @@ export default function RiskAlertsBanner({
   if (alerts.length === 0) return null;
 
   return (
-    <div className="bg-gradient-to-r from-rose-50 to-orange-50 border border-rose-100 rounded-2xl p-4 shrink-0 shadow-none relative overflow-hidden group">
+    <div className="bg-gradient-to-r from-rose-50 to-orange-50 border border-rose-100 rounded-lg p-4 shrink-0 shadow-none relative overflow-hidden group">
       <div className="flex items-center justify-between mb-3 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-rose-500 rounded-xl flex items-center justify-center shadow-none shadow-rose-200">
+          <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center shadow-none shadow-rose-200">
             <BiError className="text-white" size={16} />
           </div>
           <div>
@@ -47,7 +47,7 @@ export default function RiskAlertsBanner({
           <Button
             variant="ghost"
             onClick={onViewQueue}
-            className="flex items-center gap-1 text-sm font-bold text-rose-600 hover:bg-rose-100/50 rounded-full py-1.5 px-3 h-auto !min-w-0 border-none bg-transparent  tracking-normal shadow-none"
+            className="flex items-center gap-1 text-sm font-bold text-rose-600 hover:bg-rose-100/50 rounded-full py-2 px-3 h-auto !min-w-0 border-none bg-transparent  tracking-normal shadow-none"
           >
             View Queue <BiChevronRight size={14} />
           </Button>
@@ -58,7 +58,7 @@ export default function RiskAlertsBanner({
         {alerts.map((alert) => (
           <div
             key={alert.consultationId}
-            className="bg-white rounded-xl border border-red-100 p-3 shrink-0 min-w-[180px] shadow-none hover: transition-shadow"
+            className="bg-white rounded-lg border border-red-100 p-3 shrink-0 min-w-[180px] shadow-none hover: transition-shadow"
           >
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-xs font-bold text-slate-800 truncate max-w-[100px]">

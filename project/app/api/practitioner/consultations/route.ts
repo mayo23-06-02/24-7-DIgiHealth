@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import Patient from '@/lib/models/Patient';
+import { riskBandFromScore } from '@/lib/riskScore';
 
 function getPractitionerId(req: NextRequest): string {
   return (
@@ -52,8 +53,8 @@ export async function GET(req: NextRequest) {
           status: c.status,
           type: c.type,
           reason: c.chiefComplaint,
-          riskScore: c.clinicalRisk?.score,
-          riskColor: c.clinicalRisk?.color,
+          riskScore: c.clinicalRisk?.score ?? 0,
+          riskColor: riskBandFromScore(c.clinicalRisk?.score ?? 0),
           riskFactors: c.clinicalRisk?.factors || [],
           aiRecommendations: c.aiRecommendations || [],
           patientId: c.patientId.toString(),

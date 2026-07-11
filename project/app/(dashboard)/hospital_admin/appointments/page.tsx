@@ -270,7 +270,7 @@ export default function AppointmentsPage() {
       {/* Create Appointment Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-none p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-lg w-full max-w-md shadow-none p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold font-grotesk">
                 New Appointment

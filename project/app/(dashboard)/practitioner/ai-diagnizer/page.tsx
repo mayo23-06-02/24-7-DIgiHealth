@@ -24,6 +24,7 @@ import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import SectionHeader from "@/components/ui/SectionHeader";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
+import { riskBandStyle } from "@/lib/riskScore";
 
 // --- Types ---
 
@@ -187,17 +188,8 @@ export default function AIDiagnizerPage() {
     }
   };
 
-  const getRiskColor = (score: number) => {
-    if (score < 30) return "bg-emerald-500";
-    if (score < 70) return "bg-amber-500";
-    return "bg-red-500";
-  };
-
-  const getRiskText = (score: number) => {
-    if (score < 30) return "Low Risk";
-    if (score < 70) return "Moderate Risk";
-    return "High Risk / Critical";
-  };
+  const getRiskColor = (score: number) => riskBandStyle(score).bgClass;
+  const getRiskText = (score: number) => riskBandStyle(score).label;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -293,7 +285,7 @@ export default function AIDiagnizerPage() {
             </h3>
             <div className="space-y-4">
               {history.length > 0 ? history.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group cursor-pointer">
+                <div key={item.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors group cursor-pointer">
                   <div>
                     <p className="text-sm font-bold text-slate-700">{item.topCondition}</p>
                     <p className="text-xs text-slate-400">{item.patientName || "Anonymous Patient"} • {new Date(item.date).toLocaleDateString()}</p>
@@ -361,7 +353,7 @@ export default function AIDiagnizerPage() {
                 </h3>
                 <div className="space-y-4">
                   {results.differentialDiagnosis.map((diag, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-white border border-slate-100 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                    <div key={i} className="p-4 rounded-lg bg-white border border-slate-100 hover:shadow-lg hover:shadow-primary/5 transition-all">
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-bold text-slate-800">{diag.condition}</h4>
                         <Badge 
@@ -454,7 +446,7 @@ export default function AIDiagnizerPage() {
               />
               
               {patients.length > 0 && !selectedPatient && (
-                <div className="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                <div className="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                   {patients.map((p) => (
                     <button
                       key={p.id}
@@ -482,7 +474,7 @@ export default function AIDiagnizerPage() {
           </div>
 
           {selectedPatient && (
-            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-between animate-in zoom-in-95">
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-between animate-in zoom-in-95">
               <div className="flex items-center gap-3">
                 <BiUser className="text-primary text-xl" />
                 <div>
@@ -494,7 +486,7 @@ export default function AIDiagnizerPage() {
             </div>
           )}
 
-          <div className="bg-slate-50 p-4 rounded-2xl">
+          <div className="bg-slate-50 p-4 rounded-lg">
             <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Content Preview</h4>
             <p className="text-xs text-slate-600 line-clamp-3 italic">
               AI Diagnosis Summary: {results?.differentialDiagnosis[0].condition} ({results?.differentialDiagnosis[0].confidence}%). 

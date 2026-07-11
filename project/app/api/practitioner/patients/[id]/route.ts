@@ -114,8 +114,8 @@ export async function GET(
           status: c.status,
           type: c.type,
           chiefComplaint: c.chiefComplaint,
-          riskScore: c.clinicalRisk?.score,
-          riskColor: c.clinicalRisk?.color,
+          riskScore: c.clinicalRisk?.score ?? 0,
+          riskColor: riskBandFromScore(c.clinicalRisk?.score ?? 0),
           soapNotes: c.soapNotes,
         })),
         vitals: latestVitals ? {

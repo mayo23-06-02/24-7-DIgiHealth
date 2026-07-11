@@ -55,6 +55,8 @@ export default function StatsGrid({
     router.push(`/practitioner/appointments?tab=all&dateFrom=${today}&dateTo=${today}`);
   };
 
+ 
+
   const handleNewPatientsClick = () => {
     const today = getCurrentDate();
     router.push(`/practitioner/appointments?tab=requests&dateFrom=${today}&dateTo=${today}`);
@@ -74,7 +76,7 @@ export default function StatsGrid({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2 w-full">
+      <div className="grid grid-cols-2 gap-2">
         <KPICard
         label="Appointments Today"
         value={upcomingCount.toString()}

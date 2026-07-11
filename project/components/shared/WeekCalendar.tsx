@@ -71,7 +71,7 @@ const WeekCalendar: React.FC<WeekCalendarProps> = ({
             key={i}
             onClick={() => onDateSelect(day)}
             className={`
-              flex-1 flex flex-col items-center py-4 rounded-2xl transition-all duration-300
+              flex-1 flex flex-col items-center py-4 rounded-lg transition-all duration-300
               ${isSelected(day) ? "bg-primary text-white shadow-none shadow-primary/30 scale-105" : "hover:bg-slate-50 text-slate-500"}
             `}
           >

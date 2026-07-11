@@ -1,9 +1,16 @@
 "use client";
 
 import React from "react";
-import { BiBell, BiEnvelope, BiShieldQuarter, BiMobileAlt, BiLoaderAlt } from "react-icons/bi";
-import Card from "@/components/ui/Card";
+import {
+  BiBell,
+  BiEnvelope,
+  BiMobileAlt,
+  BiLoaderAlt,
+  BiCheckCircle,
+  BiDesktop,
+} from "react-icons/bi";
 import Button from "@/components/ui/Button";
+import ProfileSection from "./ProfileSection";
 
 interface NotifPrefs {
   email: boolean;
@@ -18,42 +25,35 @@ interface NotificationsTabProps {
   handleSaveNotifications: () => void;
 }
 
-function SectionHead({
-  icon,
-  title,
-  sub,
-  color = "primary",
-}: {
-  icon: React.ReactNode;
+const CHANNELS: {
+  key: keyof NotifPrefs;
   title: string;
-  sub: string;
-  color?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    rose: "bg-rose-500/10 text-rose-500",
-    emerald: "bg-emerald-500/10 text-emerald-500",
-    blue: "bg-blue-500/10 text-blue-500",
-    gray: "bg-slate-500/10 text-slate-500",
-  };
-  return (
-    <div className="flex items-center gap-5">
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-          colorMap[color] || colorMap.primary
-        }`}
-      >
-        {icon}
-      </div>
-      <div className="gap-1 flex flex-col">
-        <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-600 uppercase opacity-70">{sub}</p>
-      </div>
-    </div>
-  );
-}
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+}[] = [
+  {
+    key: "email",
+    title: "Email",
+    description: "Appointments, prescriptions, and account notices",
+    icon: <BiEnvelope size={20} />,
+    color: "bg-sky-500/10 text-sky-600",
+  },
+  {
+    key: "push",
+    title: "Push notifications",
+    description: "Real-time alerts in the app and browser",
+    icon: <BiDesktop size={20} />,
+    color: "bg-violet-500/10 text-violet-600",
+  },
+  {
+    key: "sms",
+    title: "SMS",
+    description: "Critical reminders when you may be offline",
+    icon: <BiMobileAlt size={20} />,
+    color: "bg-emerald-500/10 text-emerald-600",
+  },
+];
 
 export default function NotificationsTab({
   notifications,
@@ -61,84 +61,83 @@ export default function NotificationsTab({
   isSaving,
   handleSaveNotifications,
 }: NotificationsTabProps) {
-  const togglePrefs = [
-    {
-      key: "email",
-      label: "Email",
-      sub: "Reports, billing, and permanent records",
-      icon: BiEnvelope,
-    },
-    {
-      key: "push",
-      label: "Real-time Push",
-      sub: "Instant clinical consultation signals",
-      icon: BiShieldQuarter,
-    },
-    {
-      key: "sms",
-      label: "Mobile SMS",
-      sub: "Quick updates such as schedule reminders",
-      icon: BiMobileAlt,
-    },
-  ] as const;
-
   return (
-    <Card className="p-8 space-y-8 border-slate-100 shadow-slate-900/5 animate-in slide-in-from-left-4 duration-500">
-      <SectionHead
-        icon={<BiBell size={24} />}
-        title="Neural Alerts"
-        sub="Synchronization channels for clinical events"
-      />
-      <div className="space-y-4">
-        {togglePrefs.map((notif) => (
-          <div
-            key={notif.key}
-            className="flex items-center justify-between p-8 bg-slate-50 rounded-lg border border-slate-100 group hover:bg-white transition-all duration-500"
-          >
-            <div className="flex items-center gap-6">
-              <div className="w-14 h-14 bg-slate-100 rounded-lg flex items-center justify-center text-primary group-hover:text-primary transition-all border border-slate-50">
-                <notif.icon size={26} />
-              </div>
-              <div>
-                <h1 className="text-md font-bold text-slate-800">
-                  {notif.label}
-                </h1>
-                <p className="text-sm text-slate-600">{notif.sub}</p>
-              </div>
-            </div>
-            <button
-              onClick={() =>
-                setNotifications((prev) => ({
-                  ...prev,
-                  [notif.key]: !prev[notif.key],
-                }))
-              }
-              className={`w-16 h-9 rounded-full transition-all relative shrink-0 ${
-                notifications[notif.key] ? "bg-primary" : "bg-slate-200"
-              }`}
-            >
-              <div
-                className={`absolute top-1.5 w-6 h-6 bg-white rounded-full shadow-lg transition-all ${
-                  notifications[notif.key] ? "left-8.5" : "left-1.5"
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
+      <ProfileSection
+        icon={<BiBell size={22} />}
+        title="Alert preferences"
+        description="Choose how DigiHealth keeps you informed"
+        color="amber"
+      >
+        <div className="space-y-3">
+          {CHANNELS.map((ch) => {
+            const on = notifications[ch.key];
+            return (
+              <button
+                key={ch.key}
+                type="button"
+                onClick={() =>
+                  setNotifications((prev) => ({
+                    ...prev,
+                    [ch.key]: !prev[ch.key],
+                  }))
+                }
+                className={`w-full flex items-center gap-4 p-4 rounded-lg border text-left transition-all ${
+                  on
+                    ? "border-primary/30 bg-primary/[0.04] shadow-sm shadow-primary/5"
+                    : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
-              />
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-end mt-8 pt-6 border-t border-slate-50">
-        <Button
-          onClick={handleSaveNotifications}
-          disabled={isSaving}
-          className="h-14 rounded-2xl px-10 text-sm font-bold bg-primary text-white"
-        >
-          {isSaving ? (
-            <BiLoaderAlt className="animate-spin" size={20} />
-          ) : (
-            "Save Preferences"
-          )}
-        </Button>
-      </div>
-    </Card>
+              >
+                <div
+                  className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${ch.color}`}
+                >
+                  {ch.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-800">{ch.title}</p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                    {ch.description}
+                  </p>
+                </div>
+                <div
+                  className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
+                    on ? "bg-primary" : "bg-slate-200"
+                  }`}
+                  aria-hidden
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                      on ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-xs text-slate-500">
+            You can change these anytime. Critical security alerts may still be
+            sent by email.
+          </p>
+          <Button
+            onClick={handleSaveNotifications}
+            disabled={isSaving}
+            className="!rounded-lg !h-11 !px-6 !max-w-none normal-case !tracking-normal shrink-0"
+            icon={
+              isSaving ? (
+                <BiLoaderAlt className="animate-spin" size={18} />
+              ) : (
+                <BiCheckCircle size={18} />
+              )
+            }
+            iconPosition="left"
+          >
+            {isSaving ? "Saving…" : "Save preferences"}
+          </Button>
+        </div>
+      </ProfileSection>
+    </div>
   );
 }

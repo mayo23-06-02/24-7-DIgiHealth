@@ -190,7 +190,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
   return (
     <div className="space-y-6">
       {/* Tabs Row */}
-      <div className="flex p-1 gap-2 overflow-x-auto custom-scrollbar no-scrollbar bg-slate-50 rounded-xl">
+      <div className="flex p-1 gap-2 overflow-x-auto custom-scrollbar no-scrollbar bg-slate-50 rounded-lg">
         {[
           { id: "timeline", label: "Timeline", icon: <Clock size={16} /> },
           { id: "vitals", label: "Vitals", icon: <LineChartIcon size={16} /> },
@@ -281,7 +281,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                   <button
                     key={v.id}
                     onClick={() => setSelectedVital(v.id as any)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                       selectedVital === v.id
                         ? "bg-white text-primary shadow-sm"
                         : "text-slate-500 hover:text-slate-800"
@@ -336,7 +336,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                       <div key={i} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{v.parameter}</span>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${v.status === "normal" ? "bg-green-100 text-green-700" : "bg-rose-100 text-rose-700"}`}>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${v.status === "normal" ? "bg-green-100 text-green-700" : "bg-rose-100 text-rose-700"}`}>
                             {v.status.toUpperCase()}
                           </span>
                         </div>
@@ -361,7 +361,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
               <div className="col-span-full text-center py-10 text-slate-500">No prescribed medications found.</div>
             ) : (
               medications.map((med) => (
-                <div key={med.id} className="bg-white border border-slate-200 rounded-xl p-5 border-l-4 border-l-primary">
+                <div key={med.id} className="bg-white border border-slate-200 rounded-lg p-5 border-l-4 border-l-primary">
                   <div className="flex justify-between items-start mb-3">
                     <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-primary">
                       <Pill size={20} />

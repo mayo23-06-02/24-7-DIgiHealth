@@ -1,10 +1,17 @@
 "use client";
 
 import React from "react";
-import { BiLockAlt, BiDevices, BiTrash } from "react-icons/bi";
-import Card from "@/components/ui/Card";
+import {
+  BiLockAlt,
+  BiDevices,
+  BiTrash,
+  BiLoaderAlt,
+  BiShieldQuarter,
+  BiCheckCircle,
+} from "react-icons/bi";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import ProfileSection from "./ProfileSection";
 
 interface Device {
   id: string;
@@ -20,43 +27,7 @@ interface SecurityTabProps {
   handleSavePassword: () => void;
   devices: Device[];
   handleRevokeDevice: (id: string) => void;
-}
-
-function SectionHead({
-  icon,
-  title,
-  sub,
-  color = "primary",
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  color?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    rose: "bg-rose-500/10 text-rose-500",
-    emerald: "bg-emerald-500/10 text-emerald-500",
-    blue: "bg-blue-500/10 text-blue-500",
-    gray: "bg-slate-500/10 text-slate-500",
-  };
-  return (
-    <div className="flex items-center gap-5">
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-          colorMap[color] || colorMap.primary
-        }`}
-      >
-        {icon}
-      </div>
-      <div className="gap-1 flex flex-col">
-        <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-600 uppercase opacity-70">{sub}</p>
-      </div>
-    </div>
-  );
+  mfaEnabled?: boolean;
 }
 
 export default function SecurityTab({
@@ -66,109 +37,167 @@ export default function SecurityTab({
   handleSavePassword,
   devices,
   handleRevokeDevice,
+  mfaEnabled,
 }: SecurityTabProps) {
   return (
-    <div className="space-y-6 animate-in slide-in-from-left-4 duration-500">
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
-        <SectionHead
-          icon={<BiLockAlt size={24} />}
-          title="Credential Rotation"
-          sub="Update your primary access password"
-          color="rose"
-        />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
+      <ProfileSection
+        icon={<BiLockAlt size={22} />}
+        title="Password"
+        description="Rotate your credentials regularly for account safety"
+        color="rose"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <Input
-            label="Active Password"
+            label="Current password"
             type="password"
-            className="bg-slate-50/50"
             value={passwordState.currentPassword}
             onChange={(e) =>
-              setPasswordState((prev: any) => ({
-                ...prev,
+              setPasswordState((p: any) => ({
+                ...p,
                 currentPassword: e.target.value,
               }))
             }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Target Password"
+            label="New password"
             type="password"
-            className="bg-slate-50/50"
             value={passwordState.newPassword}
             onChange={(e) =>
-              setPasswordState((prev: any) => ({
-                ...prev,
+              setPasswordState((p: any) => ({
+                ...p,
                 newPassword: e.target.value,
               }))
             }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
-            label="Confirm Target"
+            label="Confirm new password"
             type="password"
-            className="bg-slate-50/50"
             value={passwordState.confirmPassword}
             onChange={(e) =>
-              setPasswordState((prev: any) => ({
-                ...prev,
+              setPasswordState((p: any) => ({
+                ...p,
                 confirmPassword: e.target.value,
               }))
             }
+            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
         </div>
-        <Button
-          onClick={handleSavePassword}
-          disabled={isSaving}
-          variant="outline"
-          className="h-14 rounded-2xl px-8 border-rose-100 text-rose-500 hover:bg-rose-50 font-bold st text-sm"
-        >
-          {isSaving ? "Authorizing..." : "Authorize Rotation"}
-        </Button>
-      </Card>
-
-      <Card className="p-8 space-y-8 rounded-lg border-slate-100 shadow-slate-900/5">
-        <SectionHead
-          icon={<BiDevices size={24} />}
-          title="Authorized Terminals"
-          sub="Active sessions and trusted hardware"
-          color="blue"
-        />
-        <div className="space-y-4">
-          {devices.map((device) => (
-            <div
-              key={device.id}
-              className="group p-6 bg-slate-50/50 rounded-lg border border-slate-100 flex items-center justify-between hover:bg-white transition-all duration-500"
-            >
-              <div className="flex items-center gap-5">
-                <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                    device.active
-                      ? "bg-emerald-500/10 text-emerald-500"
-                      : "bg-slate-200 text-slate-500"
-                  }`}
-                >
-                  <BiDevices size={24} />
-                </div>
-                <div>
-                  <h1 className="text-sm font-bold text-slate-800">
-                    {device.name}
-                  </h1>
-                  <p className="text-sm font-bold text-slate-500">
-                    LAST USED: {device.lastUsed}
-                  </p>
-                </div>
-              </div>
-              {!device.active && (
-                <Button
-                  variant="ghost"
-                  onClick={() => handleRevokeDevice(device.id)}
-                  className="w-12 h-12 p-0 rounded-2xl bg-transparent border-none text-slate-300 hover:bg-rose-50 hover:text-rose-500"
-                >
-                  <BiTrash size={20} />
-                </Button>
-              )}
-            </div>
-          ))}
+        <div className="mt-6 pt-5 border-t border-slate-100 flex justify-end">
+          <Button
+            onClick={handleSavePassword}
+            disabled={isSaving}
+            variant="primary"
+            className="!rounded-lg !h-11 !px-6 !max-w-none normal-case !tracking-normal"
+            icon={
+              isSaving ? (
+                <BiLoaderAlt className="animate-spin" size={18} />
+              ) : (
+                <BiCheckCircle size={18} />
+              )
+            }
+            iconPosition="left"
+          >
+            {isSaving ? "Updating…" : "Update password"}
+          </Button>
         </div>
-      </Card>
+      </ProfileSection>
+
+      <ProfileSection
+        icon={<BiShieldQuarter size={22} />}
+        title="Multi-factor authentication"
+        description="An extra layer of protection on sign-in"
+        color={mfaEnabled ? "emerald" : "amber"}
+      >
+        <div
+          className={`rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+            mfaEnabled
+              ? "bg-emerald-50/80 border-emerald-100"
+              : "bg-amber-50/80 border-amber-100"
+          }`}
+        >
+          <div>
+            <p className="text-sm font-bold text-slate-800">
+              {mfaEnabled ? "MFA is enabled" : "MFA is not enabled"}
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {mfaEnabled
+                ? "Your account requires a second factor when signing in."
+                : "Enable MFA from identity settings or ask support to strengthen your account."}
+            </p>
+          </div>
+          <span
+            className={`shrink-0 text-xs font-bold px-3 py-2 rounded-full ${
+              mfaEnabled
+                ? "bg-emerald-600 text-white"
+                : "bg-amber-500 text-white"
+            }`}
+          >
+            {mfaEnabled ? "Protected" : "Recommended"}
+          </span>
+        </div>
+      </ProfileSection>
+
+      <ProfileSection
+        icon={<BiDevices size={22} />}
+        title="Trusted devices"
+        description="Sessions that can access your DigiHealth account"
+        color="blue"
+      >
+        {devices.length === 0 ? (
+          <div className="text-center py-10 rounded-lg bg-slate-50 border border-dashed border-slate-200">
+            <BiDevices className="mx-auto text-slate-300 mb-2" size={32} />
+            <p className="text-sm font-semibold text-slate-500">
+              No other devices registered
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Active sessions will appear here
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 overflow-hidden">
+            {devices.map((d) => (
+              <li
+                key={d.id}
+                className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white hover:bg-slate-50/80 transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+                    <BiDevices size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-800 truncate">
+                      {d.name}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      Last used{" "}
+                      {d.lastUsed
+                        ? new Date(d.lastUsed).toLocaleString("en-ZA", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—"}
+                      {d.active ? " · Active" : ""}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRevokeDevice(d.id)}
+                  className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg transition-colors"
+                >
+                  <BiTrash size={14} />
+                  Revoke
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </ProfileSection>
     </div>
   );
 }

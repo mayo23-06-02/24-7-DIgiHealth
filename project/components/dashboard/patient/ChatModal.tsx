@@ -138,7 +138,7 @@ export default function ChatModal({
             <Button
               onClick={onClose}
               variant="secondary"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 group transition-all !min-w-0"
+              className="w-12 h-12 p-0 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 group transition-all !min-w-0"
             >
               <BiX
                 size={28}
@@ -146,7 +146,7 @@ export default function ChatModal({
               />
             </Button>
             <div className="relative">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 overflow-hidden ring-4 ring-white shadow-none transition-transform hover:scale-105">
+              <div className="w-14 h-14 rounded-lg bg-primary/10 overflow-hidden ring-4 ring-white shadow-none transition-transform hover:scale-105">
                 <img
                   src={
                     practitionerAvatar ||
@@ -176,7 +176,7 @@ export default function ChatModal({
           <div className="flex gap-2">
             <Button
               variant="white"
-              className="w-12 h-12 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-all active:scale-90 shadow-none !min-w-0"
+              className="w-12 h-12 p-0 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-all active:scale-90 shadow-none !min-w-0"
             >
               <BiDotsVerticalRounded size={24} />
             </Button>
@@ -204,7 +204,7 @@ export default function ChatModal({
                 }`}
               >
                 {msg.imageUrl && (
-                  <div className="relative mb-4 rounded-2xl overflow-hidden border-2 border-white/20 shadow-none">
+                  <div className="relative mb-4 rounded-lg overflow-hidden border-2 border-white/20 shadow-none">
                     <img
                       src={msg.imageUrl}
                       alt="Shared attachment"
@@ -254,13 +254,13 @@ export default function ChatModal({
               <Button
                 variant="white"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-14 h-14 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
+                className="w-14 h-14 p-0 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
               >
                 <BiImageAdd size={24} />
               </Button>
               <Button
                 variant="white"
-                className="w-14 h-14 p-0 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
+                className="w-14 h-14 p-0 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary transition-all active:scale-95 shadow-none !min-w-0"
               >
                 <BiMicrophone size={24} />
               </Button>
@@ -285,7 +285,7 @@ export default function ChatModal({
                 variant="primary"
                 onClick={() => sendMessage(inputText)}
                 disabled={isSending || !inputText.trim()}
-                className={`w-12 h-12 p-0 rounded-2xl flex items-center justify-center transition-all !min-w-0 ${
+                className={`w-12 h-12 p-0 rounded-lg flex items-center justify-center transition-all !min-w-0 ${
                   inputText.trim()
                     ? "bg-primary text-white shadow-none shadow-primary/20 hover:scale-105 active:scale-90"
                     : "bg-slate-200 text-white cursor-not-allowed"

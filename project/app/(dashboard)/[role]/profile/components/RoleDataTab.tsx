@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BiLoaderAlt } from "react-icons/bi";
+import { BiLoaderAlt, BiCheckCircle } from "react-icons/bi";
 import Button from "@/components/ui/Button";
 
 import PatientClinicalForm from "./PatientClinicalForm";
@@ -81,7 +81,7 @@ export default function RoleDataTab({
   handleSaveRoleData,
 }: RoleDataTabProps) {
   return (
-    <div className="space-y-6 animate-in slide-in-from-left-4 duration-500">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
       {currentRole === "patient" && patientData && (
         <PatientClinicalForm
           patientData={patientData}
@@ -103,17 +103,38 @@ export default function RoleDataTab({
         />
       )}
 
-      <div className="flex justify-end pt-4">
+      {!patientData && !practitionerData && !hospitalData && (
+        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 py-16 text-center">
+          <p className="text-sm font-semibold text-slate-500">
+            Loading role configuration…
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
+        <p className="text-xs text-slate-500">
+          Save updates to keep your{" "}
+          {currentRole === "patient"
+            ? "clinical"
+            : currentRole === "hospital_admin"
+              ? "facility"
+              : "practice"}{" "}
+          profile in sync.
+        </p>
         <Button
           onClick={handleSaveRoleData}
           disabled={isSaving}
-          className="h-14 rounded-2xl px-10 text-sm font-bold bg-primary text-white"
+          className="!rounded-lg !h-11 !px-6 !max-w-none normal-case !tracking-normal shrink-0"
+          icon={
+            isSaving ? (
+              <BiLoaderAlt className="animate-spin" size={18} />
+            ) : (
+              <BiCheckCircle size={18} />
+            )
+          }
+          iconPosition="left"
         >
-          {isSaving ? (
-            <BiLoaderAlt className="animate-spin" size={20} />
-          ) : (
-            "Update "
-          )}
+          {isSaving ? "Saving…" : "Save configuration"}
         </Button>
       </div>
     </div>

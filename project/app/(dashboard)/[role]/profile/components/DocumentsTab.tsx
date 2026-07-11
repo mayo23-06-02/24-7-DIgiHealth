@@ -1,11 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { BiFile, BiUpload, BiLoaderAlt, BiImage, BiEditAlt, BiTrash, BiCheckCircle, BiX, BiDownload } from "react-icons/bi";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  BiFile,
+  BiUpload,
+  BiLoaderAlt,
+  BiImage,
+  BiEditAlt,
+  BiTrash,
+  BiCheckCircle,
+  BiX,
+  BiDownload,
+  BiCloudUpload,
+  BiImages,
+} from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-
-// Import react-pdf and configure worker
 import { Document, Page, pdfjs } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -25,6 +35,10 @@ interface DocumentsTabProps {
   isUploadingDoc: boolean;
   docInputRef: React.RefObject<HTMLInputElement | null>;
   handleDocUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFilesUpload: (
+    files: FileList | File[],
+    kind?: "photo" | "document" | "auto",
+  ) => void | Promise<void>;
   handleDeleteDoc: (id: string) => void;
   handleRenameDoc: (id: string) => void;
   editDocId: string | null;
@@ -33,49 +47,18 @@ interface DocumentsTabProps {
   setEditDocLabel: (label: string) => void;
 }
 
-function SectionHead({
-  icon,
-  title,
-  sub,
-  color = "primary",
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  color?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    primary: "bg-primary/10 text-primary",
-    rose: "bg-rose-500/10 text-rose-500",
-    emerald: "bg-emerald-500/10 text-emerald-500",
-    blue: "bg-blue-500/10 text-blue-500",
-    gray: "bg-slate-500/10 text-slate-500",
-  };
-  return (
-    <div className="flex items-center gap-5">
-      <div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-          colorMap[color] || colorMap.primary
-        }`}
-      >
-        {icon}
-      </div>
-      <div className="gap-1 flex flex-col">
-        <h4 className="text-xl font-bold text-slate-800 tracking-tight font-grotesk">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-600 uppercase opacity-70">{sub}</p>
-      </div>
-    </div>
-  );
-}
+const ACCEPT_ALL =
+  "image/jpeg,image/png,image/webp,image/gif,application/pdf,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+const ACCEPT_PHOTOS = "image/jpeg,image/png,image/webp,image/gif";
+const ACCEPT_DOCS =
+  "application/pdf,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp,image/gif";
 
 export default function DocumentsTab({
   documents,
-  setDocuments,
   isUploadingDoc,
   docInputRef,
   handleDocUpload,
+  handleFilesUpload,
   handleDeleteDoc,
   handleRenameDoc,
   editDocId,
@@ -86,8 +69,11 @@ export default function DocumentsTab({
   const [selectedDoc, setSelectedDoc] = useState<UserDocument | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [pdfScale, setPdfScale] = useState<number>(0.9);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pdfScale, setPdfScale] = useState(0.9);
+  const [dragOver, setDragOver] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const localDocInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -98,274 +84,507 @@ export default function DocumentsTab({
     setPageNumber(1);
   }
 
-  /**
-   * Route PDF URLs through our server-side proxy to avoid Cloudinary 401/CORS errors.
-   * Images load fine directly; only PDFs need the proxy.
-   */
   function getViewUrl(doc: UserDocument): string {
     const isPdf =
-      doc.mimeType.includes("pdf") || doc.url.toLowerCase().endsWith(".pdf");
+      doc.mimeType?.includes("pdf") || doc.url?.toLowerCase().endsWith(".pdf");
     if (!isPdf) return doc.url;
-    if (doc.url.includes("firebasestorage.googleapis.com")) {
-      return doc.url;
-    }
+    if (doc.url?.includes("firebasestorage.googleapis.com")) return doc.url;
+    if (doc.url?.startsWith("/api/media/")) return doc.url;
     return `/api/user/documents/proxy?url=${encodeURIComponent(doc.url)}`;
   }
 
+  const isImage = (doc: UserDocument) =>
+    !!doc.mimeType?.startsWith("image/") ||
+    /\.(jpe?g|png|webp|gif)$/i.test(doc.url || "");
+
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragOver(false);
+      if (isUploadingDoc) return;
+      const files = e.dataTransfer.files;
+      if (files?.length) void handleFilesUpload(files, "auto");
+    },
+    [handleFilesUpload, isUploadingDoc],
+  );
+
+  const photos = documents.filter(isImage);
+  const otherDocs = documents.filter((d) => !isImage(d));
+
   return (
-    <div className="space-y-6 animate-in slide-in-from-left-4 duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <SectionHead
-          icon={<BiFile size={24} />}
-          title="Document Repository"
-          sub="Manage clinical records and identity assets"
-        />
-        <Button
-          onClick={() => docInputRef.current?.click()}
-          disabled={isUploadingDoc}
-          className="rounded-2xl px-8 h-14 bg-primary text-white flex items-center gap-2"
-        >
-          {isUploadingDoc ? (
-            <BiLoaderAlt className="animate-spin" size={20} />
-          ) : (
-            <BiUpload size={20} />
-          )}
-          Upload Document
-        </Button>
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
+      {/* Hidden inputs */}
+      <input
+        ref={docInputRef}
+        type="file"
+        accept={ACCEPT_ALL}
+        multiple
+        className="hidden"
+        onChange={handleDocUpload}
+      />
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept={ACCEPT_PHOTOS}
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          const files = e.target.files;
+          e.target.value = "";
+          if (files?.length) void handleFilesUpload(files, "photo");
+        }}
+      />
+      <input
+        ref={localDocInputRef}
+        type="file"
+        accept={ACCEPT_DOCS}
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          const files = e.target.files;
+          e.target.value = "";
+          if (files?.length) void handleFilesUpload(files, "document");
+        }}
+      />
+
+      {/* Upload zone */}
+      <div
+        onDragEnter={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+          setDragOver(false);
+        }}
+        onDrop={onDrop}
+        className={`rounded-2xl border-2 border-dashed transition-all ${
+          dragOver
+            ? "border-primary bg-primary/5 scale-[1.01]"
+            : "border-slate-200 bg-white"
+        } shadow-sm shadow-slate-200/40 overflow-hidden`}
+      >
+        <div className="px-5 sm:px-7 py-6 sm:py-8">
+          <div className="flex flex-col items-center text-center max-w-lg mx-auto">
+            <div
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-colors ${
+                dragOver
+                  ? "bg-primary text-white"
+                  : "bg-primary/10 text-primary"
+              }`}
+            >
+              {isUploadingDoc ? (
+                <BiLoaderAlt size={28} className="animate-spin" />
+              ) : (
+                <BiCloudUpload size={28} />
+              )}
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+              {isUploadingDoc
+                ? "Uploading…"
+                : dragOver
+                  ? "Drop files to upload"
+                  : "Upload photos & documents"}
+            </h3>
+            <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+              Drag and drop files here, or choose a type below. Photos: JPG,
+              PNG, WebP, GIF (max 10MB). Documents: PDF or Word (max 15MB).
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-2.5 mt-5">
+              <Button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={isUploadingDoc}
+                className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
+                icon={<BiImages size={18} />}
+                iconPosition="left"
+              >
+                Upload photos
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => localDocInputRef.current?.click()}
+                disabled={isUploadingDoc}
+                className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
+                icon={<BiFile size={18} />}
+                iconPosition="left"
+              >
+                Upload documents
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => docInputRef.current?.click()}
+                disabled={isUploadingDoc}
+                className="!rounded-xl !h-11 !px-4 !max-w-none normal-case !tracking-normal text-slate-600"
+                icon={<BiUpload size={18} />}
+                iconPosition="left"
+              >
+                Any file
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {documents.length === 0 ? (
-        <Card className="p-20 flex flex-col items-center justify-center text-center border-dashed border-2 border-slate-100 bg-slate-50/30">
-          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-slate-200 mb-6">
-            <BiUpload size={40} />
+      {/* Photos gallery */}
+      <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center">
+              <BiImage size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">Photos</h3>
+              <p className="text-xs text-slate-500">
+                {photos.length} image{photos.length === 1 ? "" : "s"}
+              </p>
+            </div>
           </div>
-          <h3 className="text-xl font-bold text-slate-800 font-grotesk mb-2">
-            No documents synchronized
-          </h3>
-          <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
-            Upload your clinical reports, identity documents or medical
-            certificates for secure cloud access.
-          </p>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {documents.map((doc) => (
-            <Card
-              key={doc.id}
-              className="group p-6 bg-white border-slate-100 shadow-slate-900/5 hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                    doc.mimeType.startsWith("image/")
-                      ? "bg-primary/10 text-primary"
-                      : "bg-amber-100 text-amber-600"
-                  }`}
-                >
-                  {doc.mimeType.startsWith("image/") ? (
-                    <BiImage size={28} />
-                  ) : (
-                    <BiFile size={28} />
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      setEditDocId(doc.id);
-                      setEditDocLabel(doc.type);
-                    }}
-                    className="p-2 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
-                  >
-                    <BiEditAlt size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteDoc(doc.id)}
-                    className="p-2 text-slate-500 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                  >
-                    <BiTrash size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {editDocId === doc.id ? (
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    autoFocus
-                    className="flex-1 bg-slate-50 border-none rounded-lg px-3 py-1 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none"
-                    value={editDocLabel}
-                    onChange={(e) => setEditDocLabel(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handleRenameDoc(doc.id)
-                    }
-                  />
-                  <button
-                    onClick={() => handleRenameDoc(doc.id)}
-                    className="p-1.5 bg-emerald-500 text-white rounded-lg"
-                  >
-                    <BiCheckCircle size={16} />
-                  </button>
-                  <button
-                    onClick={() => setEditDocId(null)}
-                    className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"
-                  >
-                    <BiX size={16} />
-                  </button>
-                </div>
-              ) : (
-                <h3 className="text-lg font-bold text-slate-800 truncate mb-1 pr-10">
-                  {doc.type}
-                </h3>
-              )}
-
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
-                <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-                  {new Date(doc.createdAt).toLocaleDateString("en-ZA", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </span>
-                <button
-                  onClick={() => setSelectedDoc(doc)}
-                  className="flex items-center gap-1.5 text-sm font-bold text-primary uppercase tracking-widest hover:underline cursor-pointer font-sans"
-                >
-                  <BiDownload size={14} /> View File
-                </button>
-              </div>
-            </Card>
-          ))}
+          <button
+            type="button"
+            onClick={() => photoInputRef.current?.click()}
+            disabled={isUploadingDoc}
+            className="text-xs font-bold text-primary hover:bg-primary/5 px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+          >
+            + Add photos
+          </button>
         </div>
-      )}
+        <div className="p-4 sm:p-5">
+          {photos.length === 0 ? (
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={isUploadingDoc}
+              className="w-full py-10 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+            >
+              <BiImages className="mx-auto text-slate-300 mb-2" size={32} />
+              <p className="text-sm font-semibold text-slate-500">
+                No photos yet
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Click to upload profile or clinical photos
+              </p>
+            </button>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {photos.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={doc.url}
+                    alt={doc.type}
+                    className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                    onClick={() => setSelectedDoc(doc)}
+                  />
+                  <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-[11px] font-semibold text-white truncate">
+                      {doc.type}
+                    </p>
+                  </div>
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDoc(doc)}
+                      className="w-8 h-8 rounded-lg bg-white/95 text-slate-700 flex items-center justify-center shadow"
+                      title="View"
+                    >
+                      <BiDownload size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteDoc(doc.id)}
+                      className="w-8 h-8 rounded-lg bg-white/95 text-rose-600 flex items-center justify-center shadow"
+                      title="Delete"
+                    >
+                      <BiTrash size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
-      {/* Document Preview Modal */}
+      {/* Documents list */}
+      <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+              <BiFile size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">Documents</h3>
+              <p className="text-xs text-slate-500">
+                {otherDocs.length} file{otherDocs.length === 1 ? "" : "s"}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => localDocInputRef.current?.click()}
+            disabled={isUploadingDoc}
+            className="text-xs font-bold text-primary hover:bg-primary/5 px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+          >
+            + Add documents
+          </button>
+        </div>
+        <div className="p-4 sm:p-5">
+          {otherDocs.length === 0 ? (
+            <button
+              type="button"
+              onClick={() => localDocInputRef.current?.click()}
+              disabled={isUploadingDoc}
+              className="w-full py-10 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+            >
+              <BiFile className="mx-auto text-slate-300 mb-2" size={32} />
+              <p className="text-sm font-semibold text-slate-500">
+                No documents yet
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                PDFs, Word files, or scanned certificates
+              </p>
+            </button>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {otherDocs.map((doc) => (
+                <Card
+                  key={doc.id}
+                  className="group p-4 bg-white border-slate-200/80 shadow-sm hover:shadow-md hover:border-primary/20 transition-all !rounded-xl"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                      <BiFile size={24} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {editDocId === doc.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            autoFocus
+                            className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none"
+                            value={editDocLabel}
+                            onChange={(e) => setEditDocLabel(e.target.value)}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && handleRenameDoc(doc.id)
+                            }
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRenameDoc(doc.id)}
+                            className="p-1.5 bg-emerald-500 text-white rounded-lg"
+                          >
+                            <BiCheckCircle size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditDocId(null)}
+                            className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"
+                          >
+                            <BiX size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <h4 className="text-sm font-bold text-slate-800 truncate">
+                          {doc.type}
+                        </h4>
+                      )}
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {new Date(doc.createdAt).toLocaleDateString("en-ZA", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                        {doc.status ? ` · ${doc.status.replace(/_/g, " ")}` : ""}
+                      </p>
+                      <div className="flex items-center gap-1 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDoc(doc)}
+                          className="text-xs font-bold text-primary hover:bg-primary/5 px-2 py-1 rounded-lg"
+                        >
+                          View
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditDocId(doc.id);
+                            setEditDocLabel(doc.type);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-primary rounded-lg"
+                        >
+                          <BiEditAlt size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDoc(doc.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg"
+                        >
+                          <BiTrash size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Preview modal */}
       {selectedDoc && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setSelectedDoc(null)}
           />
-          <div className="relative w-full max-w-5xl bg-white rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[95vh]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800 font-grotesk truncate max-w-lg">
+          <div className="relative w-full max-w-5xl bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50 gap-3">
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold text-slate-800 font-grotesk truncate">
                   {selectedDoc.type}
                 </h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Uploaded on {new Date(selectedDoc.createdAt).toLocaleDateString("en-ZA", {
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Uploaded{" "}
+                  {new Date(selectedDoc.createdAt).toLocaleDateString("en-ZA", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
                   })}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 shrink-0">
                 <a
                   href={selectedDoc.url}
                   download
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all border border-slate-200"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 border border-slate-200"
                 >
-                  <BiDownload size={14} /> Download File
+                  <BiDownload size={14} /> Download
                 </a>
                 <button
+                  type="button"
                   onClick={() => setSelectedDoc(null)}
-                  className="w-10 h-10 rounded-xl bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center border border-slate-150 hover:border-rose-100 transition-all font-bold font-sans"
+                  className="w-10 h-10 rounded-xl bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center border border-slate-200"
                 >
-                  ✕
+                  <BiX size={20} />
                 </button>
               </div>
             </div>
-            
-            <div className="p-6 overflow-y-auto bg-slate-100/50 flex-1 flex items-center justify-center min-h-[60vh]">
-              {selectedDoc.mimeType.startsWith("image/") ? (
+
+            <div className="p-6 overflow-y-auto bg-slate-100/50 flex-1 flex items-center justify-center min-h-[50vh]">
+              {isImage(selectedDoc) ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={selectedDoc.url}
                   alt={selectedDoc.type}
                   className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-md bg-white p-2"
                 />
-              ) : selectedDoc.mimeType.includes("pdf") || selectedDoc.url.endsWith(".pdf") ? (
-                <div className="flex flex-col items-center gap-4 w-full h-full">
-                  <div className="flex items-center justify-between w-full max-w-2xl bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm text-xs font-bold text-slate-700">
+              ) : selectedDoc.mimeType?.includes("pdf") ||
+                selectedDoc.url?.endsWith(".pdf") ? (
+                <div className="flex flex-col items-center gap-4 w-full">
+                  <div className="flex items-center justify-between w-full max-w-2xl bg-white px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
                     <div className="flex gap-2">
                       <button
+                        type="button"
                         disabled={pageNumber <= 1}
                         onClick={() => setPageNumber((p) => p - 1)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-250 rounded-lg disabled:opacity-40 transition-colors"
+                        className="px-3 py-1.5 bg-slate-100 rounded-lg disabled:opacity-40"
                       >
-                        ◀ Previous
+                        ← Prev
                       </button>
                       <button
+                        type="button"
                         disabled={numPages ? pageNumber >= numPages : true}
                         onClick={() => setPageNumber((p) => p + 1)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-250 rounded-lg disabled:opacity-40 transition-colors"
+                        className="px-3 py-1.5 bg-slate-100 rounded-lg disabled:opacity-40"
                       >
-                        Next ▶
+                        Next →
                       </button>
                     </div>
                     <span>
-                      Page {pageNumber} of {numPages || "..."}
+                      Page {pageNumber} of {numPages || "…"}
                     </span>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setPdfScale((s) => Math.max(0.5, s - 0.1))}
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-250 rounded-lg"
+                        type="button"
+                        onClick={() =>
+                          setPdfScale((s) => Math.max(0.5, s - 0.1))
+                        }
+                        className="px-2 py-1 bg-slate-100 rounded-lg"
                       >
-                        ➖
+                        −
                       </button>
                       <button
-                        onClick={() => setPdfScale((s) => Math.min(1.5, s + 0.1))}
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-250 rounded-lg"
+                        type="button"
+                        onClick={() =>
+                          setPdfScale((s) => Math.min(1.5, s + 0.1))
+                        }
+                        className="px-2 py-1 bg-slate-100 rounded-lg"
                       >
-                        ➕
+                        +
                       </button>
                     </div>
                   </div>
-
-                  <div className="w-full flex-1 min-h-[60vh] flex items-center justify-center p-4 bg-slate-200/40 rounded-2xl overflow-auto border border-slate-200 max-h-[70vh]">
-                    <div className="shadow-lg rounded-xl overflow-hidden bg-white p-4">
-                      {isMounted && (
-                        <Document
-                          file={getViewUrl(selectedDoc)}
-                          onLoadSuccess={onDocumentLoadSuccess}
-                          loading={
-                            <div className="flex flex-col items-center justify-center py-20 gap-3">
-                              <BiLoaderAlt className="animate-spin text-primary animate-duration-1000" size={36} />
-                              <p className="text-sm font-bold text-slate-500">Decrypting document pages...</p>
-                            </div>
-                          }
-                          error={
-                            <div className="text-center py-20 text-rose-500 font-bold text-sm">
-                              Failed to render PDF. Please use the Download button in the header.
-                            </div>
-                          }
-                        >
-                          <Page
-                            pageNumber={pageNumber}
-                            scale={pdfScale}
-                            renderAnnotationLayer={false}
-                            renderTextLayer={false}
-                          />
-                        </Document>
-                      )}
-                    </div>
+                  <div className="w-full flex justify-center overflow-auto max-h-[65vh] p-2">
+                    {isMounted && (
+                      <Document
+                        file={getViewUrl(selectedDoc)}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                        loading={
+                          <div className="flex flex-col items-center py-16 gap-3">
+                            <BiLoaderAlt
+                              className="animate-spin text-primary"
+                              size={32}
+                            />
+                            <p className="text-sm font-semibold text-slate-500">
+                              Loading PDF…
+                            </p>
+                          </div>
+                        }
+                        error={
+                          <div className="text-center py-16 text-rose-500 text-sm font-semibold">
+                            Could not preview PDF. Use Download instead.
+                          </div>
+                        }
+                      >
+                        <Page
+                          pageNumber={pageNumber}
+                          scale={pdfScale}
+                          renderAnnotationLayer={false}
+                          renderTextLayer={false}
+                        />
+                      </Document>
+                    )}
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-12 space-y-4">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-amber-500 mx-auto shadow-sm">
-                    <BiFile size={32} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Preview not supported for this file format</p>
-                    <p className="text-xs text-slate-500 mt-1">You can download the file to view its content.</p>
-                  </div>
+                  <BiFile className="mx-auto text-amber-500" size={40} />
+                  <p className="text-sm font-bold text-slate-800">
+                    Preview not available for this format
+                  </p>
                   <a
                     href={selectedDoc.url}
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-primary text-white font-bold text-xs rounded-xl shadow-sm hover:bg-primary/95 transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-bold text-xs rounded-xl"
                   >
-                    <BiDownload size={16} /> Download File
+                    <BiDownload size={16} /> Download file
                   </a>
                 </div>
               )}

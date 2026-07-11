@@ -142,7 +142,7 @@ export default function TimeSlotPicker({
                     onClick={() => {
                       if (!disabled) onSelect(slot.time);
                     }}
-                    className={`relative py-2.5 px-1 rounded-xl text-xs font-bold transition-all duration-200 border-2 ${
+                    className={`relative p-2 px-1 rounded-lg text-xs font-bold transition-all duration-200 border-2 ${
                       isSelected && !disabled ? styles.selected : styles.idle
                     } ${styles.cursor}`}
                   >
@@ -173,7 +173,7 @@ export default function TimeSlotPicker({
       </div>
 
       {summary.available === 0 && (
-        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 font-medium">
+        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 font-medium">
           No open slots left today. Try another date.
         </p>
       )}

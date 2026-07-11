@@ -134,13 +134,13 @@ export default function NotificationBell({
                   notifications.map((notif) => (
                     <div
                       key={notif._id}
-                      className={`flex gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group ${
+                      className={`flex gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer group ${
                         !notif.isRead ? "bg-primary/[0.03]" : ""
                       }`}
                       onClick={() => handleNotifClick(notif)}
                     >
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                           notif.isRead
                             ? "bg-slate-50 text-slate-500"
                             : "bg-primary/10 text-primary"
@@ -209,7 +209,7 @@ export default function NotificationBell({
 
                 <div className="flex items-center gap-4 mb-6">
                   <div
-                    className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-sm ${
+                    className={`w-14 h-14 rounded-lg flex items-center justify-center text-2xl shadow-sm ${
                       selectedNotif.type?.includes("appointment")
                         ? "bg-emerald-50 text-emerald-500 border border-emerald-100"
                         : selectedNotif.type?.includes("message")
@@ -238,7 +238,7 @@ export default function NotificationBell({
                   </div>
                 </div>
 
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-6">
+                <div className="bg-slate-50 rounded-lg p-6 border border-slate-100 mb-6">
                   <p className="text-sm text-slate-700 leading-relaxed font-medium">
                     {selectedNotif.body}
                   </p>

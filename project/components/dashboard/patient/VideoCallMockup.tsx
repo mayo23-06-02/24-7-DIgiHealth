@@ -35,7 +35,7 @@ export default function VideoCallMockup({
       {/* Header */}
       <div className="absolute top-0 inset-x-0 p-6 z-50 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary/20 backdrop-blur-xl border border-white/10 flex items-center justify-center overflow-hidden">
+          <div className="w-12 h-12 rounded-lg bg-primary/20 backdrop-blur-xl border border-white/10 flex items-center justify-center overflow-hidden">
             <BiVideo className="text-primary text-2xl" />
           </div>
           <div>
@@ -53,7 +53,7 @@ export default function VideoCallMockup({
             onClick={() =>
               setLayout(layout === "overlay" ? "side-by-side" : "overlay")
             }
-            className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/5 flex items-center justify-center text-white hover:bg-white/20 transition-all hidden md:flex"
+            className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-xl border border-white/5 flex items-center justify-center text-white hover:bg-white/20 transition-all hidden md:flex"
             title="Switch Layout"
           >
             {layout === "overlay" ? (
@@ -64,7 +64,7 @@ export default function VideoCallMockup({
           </button>
           <button
             onClick={onClose}
-            className="w-12 h-12 rounded-2xl bg-rose-500/20 backdrop-blur-xl border border-rose-500/30 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+            className="w-12 h-12 rounded-lg bg-rose-500/20 backdrop-blur-xl border border-rose-500/30 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
           >
             <BiX size={28} />
           </button>
@@ -94,7 +94,7 @@ export default function VideoCallMockup({
                 </div>
               )}
               {/* Doctor Identity Tag */}
-              <div className="absolute bottom-10 left-10 py-3 px-6 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10">
+              <div className="absolute bottom-10 left-10 py-3 px-6 bg-black/40 backdrop-blur-xl rounded-lg border border-white/10">
                 <p className="text-white font-bold text-sm">{doctorName}</p>
                 <p className="text-primary text-[9px] font-bold  tracking-normal mt-1">
                   Specialist Practitioner
@@ -103,7 +103,7 @@ export default function VideoCallMockup({
             </div>
 
             {/* Small Overlay (Patient - You) */}
-            <div className="absolute top-10 right-10 w-48 h-64 md:w-64 md:h-80 rounded-3xl overflow-hidden bg-slate-800 border-2 border-white/20  z-40">
+            <div className="absolute top-10 right-10 w-48 h-64 md:w-64 md:h-80 rounded-lg overflow-hidden bg-slate-800 border-2 border-white/20  z-40">
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
                 <BiUser size={48} />
                 <p className="text-xs font-bold  mt-2 tracking-normal">You</p>
@@ -129,7 +129,7 @@ export default function VideoCallMockup({
                 </div>
                 <p className="text-white font-bold text-lg">{doctorName}</p>
               </div>
-              <div className="absolute bottom-8 left-8 py-2 px-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10">
+              <div className="absolute bottom-8 left-8 py-2 px-4 bg-black/40 backdrop-blur-md rounded-lg border border-white/10">
                 <p className="text-white font-bold text-xs">{doctorName}</p>
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function VideoCallMockup({
                 </div>
                 <p className="text-slate-500 font-bold">You</p>
               </div>
-              <div className="absolute bottom-8 left-8 py-2 px-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-white">
+              <div className="absolute bottom-8 left-8 py-2 px-4 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 text-white">
                 {isMuted && <BiMicrophoneOff size={14} />}
               </div>
             </div>

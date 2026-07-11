@@ -92,7 +92,7 @@ export default function HealthActionCenter() {
       {/* HEADER - Consistent with others */}
       <div className="p-8 border-b border-slate-50 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-xl z-20">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+          <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner">
             <BiShieldPlus size={28} />
           </div>
           <div>
@@ -110,7 +110,7 @@ export default function HealthActionCenter() {
         </div>
         <Button
           variant="ghost"
-          className="w-10 h-10 p-0 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+          className="w-10 h-10 p-0 bg-slate-50 hover:bg-slate-100 rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
         >
           <BiCaretDown size={20} />
         </Button>
@@ -130,7 +130,7 @@ export default function HealthActionCenter() {
               <Button
                 variant="ghost"
                 onClick={() => setDoctorIndex((prev) => Math.max(0, prev - 1))}
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </Button>
@@ -141,7 +141,7 @@ export default function HealthActionCenter() {
                     Math.min(doctorsData.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-primary hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </Button>
@@ -201,7 +201,7 @@ export default function HealthActionCenter() {
                 onClick={() =>
                   setFacilityIndex((prev) => Math.max(0, prev - 1))
                 }
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronLeft size={24} />
               </Button>
@@ -212,7 +212,7 @@ export default function HealthActionCenter() {
                     Math.min(facilitiesData.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-xl transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                className="w-10 h-10 p-0 bg-slate-50 hover:bg-emerald-500 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
               >
                 <BiChevronRight size={24} />
               </Button>
@@ -260,7 +260,7 @@ export default function HealthActionCenter() {
         {/* INSIGHTS CTA */}
         <Button
           variant="ghost"
-          className="w-full !h-auto bg-linear-to-r from-primary/5 to-transparent border border-primary/10 rounded-2xl p-6 text-xs font-bold text-primary  tracking-normal hover:bg-primary hover:text-white transition-all duration-700 flex items-center justify-center gap-3 active:scale-95 shadow-none group"
+          className="w-full !h-auto bg-linear-to-r from-primary/5 to-transparent border border-primary/10 rounded-lg p-6 text-xs font-bold text-primary  tracking-normal hover:bg-primary hover:text-white transition-all duration-700 flex items-center justify-center gap-3 active:scale-95 shadow-none group"
         >
           <BiTrendingUp
             size={20}

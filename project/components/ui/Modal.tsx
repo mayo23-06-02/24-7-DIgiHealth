@@ -73,7 +73,7 @@ const Modal: React.FC<ModalProps> = ({
             </h3>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all"
+              className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all"
             >
               <BiX size={24} />
             </button>

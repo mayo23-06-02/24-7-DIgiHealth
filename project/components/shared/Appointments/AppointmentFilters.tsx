@@ -58,7 +58,7 @@ export default function AppointmentFilters({
             placeholder="Search patient name or fields..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary"
+            className="w-full pl-9 pr-4 p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -66,7 +66,7 @@ export default function AppointmentFilters({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilterModal(true)}
-            className="flex items-center justify-center  rounded-xl px-2  py-2.5  text-slate-500 cursor-pointer hover:text-slate-800 outline-none relative"
+            className="flex items-center justify-center  rounded-lg px-2  p-2  text-slate-500 cursor-pointer hover:text-slate-800 outline-none relative"
           >
             <BiFilter size={24} />
             {hasActiveFilters && (
@@ -77,7 +77,7 @@ export default function AppointmentFilters({
             onClick={() =>
               onSortChange(sortBy === "newest" ? "oldest" : "newest")
             }
-            className="flex items-center justify-center  rounded-xl px-2  py-2.5  text-slate-500 cursor-pointer hover:text-slate-800 outline-none"
+            className="flex items-center justify-center  rounded-lg px-2  p-2  text-slate-500 cursor-pointer hover:text-slate-800 outline-none"
           >
             {sortBy === "newest" ? (
               <BiSortDown size={24} />
@@ -115,7 +115,7 @@ export default function AppointmentFilters({
             <label className="text-sm font-bold text-slate-700">
               Start Date
             </label>
-            <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-3 bg-white">
+            <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-3 bg-white">
               <BiCalendar className="text-slate-500 shrink-0" size={18} />
               <input
                 type="date"
@@ -132,7 +132,7 @@ export default function AppointmentFilters({
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-slate-700">End Date</label>
-            <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-3 bg-white">
+            <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-3 bg-white">
               <BiCalendar className="text-slate-500 shrink-0" size={18} />
               <input
                 type="date"
@@ -154,7 +154,7 @@ export default function AppointmentFilters({
                 if (onTypeFilterChange) onTypeFilterChange("all");
                 setShowFilterModal(false);
               }}
-              className="mt-2 flex items-center justify-center gap-1 w-full px-4 py-3 text-sm font-bold text-red-500 border border-red-200 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"
+              className="mt-2 flex items-center justify-center gap-1 w-full px-4 py-3 text-sm font-bold text-red-500 border border-red-200 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
             >
               <BiX size={18} /> Clear Filters
             </button>
@@ -162,7 +162,7 @@ export default function AppointmentFilters({
 
           <button
             onClick={() => setShowFilterModal(false)}
-            className="w-full px-4 py-3 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors"
+            className="w-full px-4 py-3 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
           >
             Apply Filters
           </button>

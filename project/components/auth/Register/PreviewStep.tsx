@@ -113,7 +113,7 @@ export default function PreviewStep({ formData }: { formData: any }) {
             return (
               <div
                 key={key}
-                className="p-4 bg-slate-50 rounded-xl border border-slate-100"
+                className="p-4 bg-slate-50 rounded-lg border border-slate-100"
               >
                 <p className="text-xs font-bold text-slate-500 mb-1">
                   {formatKey(key)}

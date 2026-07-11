@@ -105,7 +105,7 @@ export default function AttachRecordModal({
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
         onClick={isUploading ? undefined : onClose}
       />
-      <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg bg-white rounded-lg p-6 animate-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
           disabled={isUploading}
@@ -115,7 +115,7 @@ export default function AttachRecordModal({
         </button>
 
         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3 font-grotesk">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <BiUpload size={22} />
           </div>
           Attach Clinical Record
@@ -129,7 +129,7 @@ export default function AttachRecordModal({
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none bg-slate-50 font-medium"
+              className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none bg-slate-50 font-medium"
             >
               <option value="lab_result">Lab Result</option>
               <option value="prescription">Prescription</option>
@@ -148,7 +148,7 @@ export default function AttachRecordModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Blood Work Results April 2026"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
+              className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
               required
             />
           </div>
@@ -161,7 +161,7 @@ export default function AttachRecordModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add any clinical notes regarding this attachment..."
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none h-20 resize-none"
+              className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none h-20 resize-none"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function AttachRecordModal({
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className="w-full border-2 border-dashed border-slate-200 bg-slate-50 rounded-2xl p-6 text-center hover:bg-slate-100 hover:border-primary/50 transition-all cursor-pointer flex flex-col items-center justify-center"
+              className="w-full border-2 border-dashed border-slate-200 bg-slate-50 rounded-lg p-6 text-center hover:bg-slate-100 hover:border-primary/50 transition-all cursor-pointer flex flex-col items-center justify-center"
             >
               {file ? (
                 <>
@@ -215,14 +215,14 @@ export default function AttachRecordModal({
               type="button"
               onClick={onClose}
               disabled={isUploading}
-              className="flex-1 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-all"
+              className="flex-1 py-3.5 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isUploading || !file || !title}
-              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50"
+              className="flex-1 py-3.5 rounded-lg bg-primary text-white font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50"
             >
               {isUploading ? (
                 <>

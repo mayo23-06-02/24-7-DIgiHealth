@@ -141,20 +141,20 @@ export default function AppointmentTabs({
               key={t}
               type="button"
               onClick={() => onChange(t)}
-              className={`flex items-center gap-2 cursor-pointer px-2.5 py-2.5 rounded-md transition-all ease-in-out duration-200 min-w-0 text-left border-2 ${
+              className={`flex items-center bg-white gap-2 cursor-pointer px-4 py-6 rounded-md transition-all ease-in-out duration-200 min-w-0 text-left border ${
                 isActive
-                  ? "border-slate-500 opacity-100 shadow-sm ring-1 ring-slate-300/60"
+                  ? "border-slate-500 opacity-100 "
                   : config.emphasize
-                    ? "border-amber-200/80 opacity-95 hover:opacity-100 hover:border-amber-300"
-                    : "border-transparent opacity-85 hover:opacity-100 hover:scale-[1.01]"
+                    ? "border-slate-200 opacity-95 hover:opacity-100 hover:border-amber-300"
+                    : "border-slate-200 opacity-85 hover:opacity-100 hover:scale-[1.01]"
               }`}
-              style={{ backgroundColor: config.bgColor }}
+              
             >
               <Icon
-                className={`${config.iconColor} shrink-0`}
+                className={`text-primary shrink-0`}
                 size={20}
               />
-              <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-end space-x-1 min-w-0 flex-1">
                 <span className="text-lg font-bold text-slate-900 leading-none tabular-nums flex items-center gap-1.5">
                   {count}
                   {hasItems && (
@@ -164,8 +164,8 @@ export default function AppointmentTabs({
                     />
                   )}
                 </span>
-                <span className="text-[10px] font-medium text-slate-600 leading-tight mt-0.5 truncate">
-                  {config.label1} {config.label2}
+                <span className="text-xs font-medium text-slate-600 leading-tight mt-0.5 truncate">
+                  {config.label1} 
                 </span>
               </div>
             </button>
