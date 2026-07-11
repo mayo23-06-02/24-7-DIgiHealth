@@ -204,7 +204,7 @@ export default function PatientDashboard() {
   }
 
   return (
-    <div className="space-y-8 p-2 pb-24">
+    <div className="space-y-8  pb-24">
       {/* WELCOME HEADER */}
       <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
