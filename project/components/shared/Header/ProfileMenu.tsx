@@ -76,16 +76,7 @@ export default function ProfileMenu({ user }: { user: User | null }) {
             <span className="text-sm font-bold">My Profile</span>
           </Link>
 
-          <Link
-            href={`/${user?.role}/settings`}
-            className="flex items-center gap-3 px-5 py-3 text-slate-700 hover:bg-primary/5 hover:text-primary transition-all group"
-            onClick={() => setIsOpen(false)}
-          >
-            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-primary/10">
-              <BiCog size={18} />
-            </div>
-            <span className="text-sm font-bold">Settings</span>
-          </Link>
+        
 
           <div className="h-px bg-slate-100 my-2" />
 
