@@ -17,6 +17,8 @@ interface Props {
   onDecline?: (id: string) => void;
   onReschedule?: (id: string) => void;
   onCancel?: (id: string) => void;
+  onJoin?: (id: string) => void;
+  onRebook?: (id: string) => void;
   actionLoading?: string | null;
 }
 
@@ -30,12 +32,22 @@ export default function AppointmentDetailsModal({
   onDecline,
   onReschedule,
   onCancel,
+  onJoin,
+  onRebook,
   actionLoading,
 }: Props) {
   if (!appointment) return null;
 
   const start = new Date(appointment.scheduledStart);
   const end = new Date(appointment.scheduledEnd);
+  const now = new Date();
+  const tenMinsBefore = new Date(start.getTime() - 10 * 60000);
+  const isAccepted =
+    appointment.status === "scheduled" ||
+    appointment.status === "in_progress" ||
+    appointment.status === "ongoing";
+  const isJoinable = isAccepted && now >= tenMinsBefore && now <= end;
+  const joinLabel = now < start ? "Enter Lobby" : "Join Room";
   const dateStr = start.toLocaleDateString("en-ZA", {
     day: "numeric",
     month: "long",
@@ -229,6 +241,17 @@ export default function AppointmentDetailsModal({
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 pt-4 border-t border-slate-200">
+          {isJoinable && (
+            <Button
+              fullWidth
+              onClick={() =>
+                onJoin?.(appointment.id || appointment.consultationId || "")
+              }
+            >
+              {joinLabel}
+            </Button>
+          )}
+
           {/* Practitioner: can accept/decline inbound requests */}
           {isDoctor &&
             (appointment.status === "requested" ||
@@ -329,8 +352,21 @@ export default function AppointmentDetailsModal({
                   )
                 }
               >
-                Reschedule
+                {userType === "practitioner" ? "Edit" : "Reschedule"}
               </Button>
+              {userType === "practitioner" && (
+                <Button
+                  fullWidth
+                  variant="outline"
+                  onClick={() =>
+                    onRebook?.(
+                      appointment.id || appointment.consultationId || "",
+                    )
+                  }
+                >
+                  Re-book
+                </Button>
+              )}
               <Button
                 fullWidth
                 variant="secondary"

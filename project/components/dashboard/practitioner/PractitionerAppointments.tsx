@@ -20,10 +20,13 @@ import {
 } from "react-icons/bi";
 import AppointmentList from "@/components/shared/Appointments/AppointmentList";
 import AppointmentFilters from "@/components/shared/Appointments/AppointmentFilters";
+import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
+import AppointmentCalendarView from "@/components/shared/Appointments/AppointmentCalendarView";
+import ViewToggle, { AppointmentView } from "@/components/shared/Appointments/ViewToggle";
 import AppointmentTabs, { AppointmentTab, ALL_TABS } from "@/components/shared/Appointments/AppointmentTabs";
 import BookingModal from "@/components/doctor/BookingModal";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
-import { useAppointments } from "@/lib/hooks/useAppointments";
+import { useAppointments, Appointment } from "@/lib/hooks/useAppointments";
 import { goToAppointmentRoom } from "@/lib/appointments/joinRoom";
 
 type Tab = AppointmentTab;
@@ -34,6 +37,7 @@ export default function PractitionerAppointments() {
     "/api/practitioner/appointments?tab=all",
   );
   const [activeTab, setActiveTab] = useState<Tab>("all");
+  const [view, setView] = useState<AppointmentView>("list");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -51,6 +55,9 @@ export default function PractitionerAppointments() {
     consultationId: "",
     patientName: "",
   });
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const tabs = ALL_TABS;
 
@@ -203,6 +210,11 @@ export default function PractitionerAppointments() {
     setShowBooking(true);
   };
 
+  const handleAppointmentClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setShowDetailsModal(true);
+  };
+
   const handleExport = () => {
     // Simple CSV export
     const headers = ["Patient", "Date", "Time", "Type", "Status", "Reason"];
@@ -266,28 +278,33 @@ export default function PractitionerAppointments() {
       />
 
       {/* Filters */}
-      <AppointmentFilters
-        searchQuery={search}
-        onSearchChange={setSearch}
-        dateFrom={dateFrom}
-        onDateFromChange={setDateFrom}
-        dateTo={dateTo}
-        onDateToChange={setDateTo}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        typeFilter={typeFilter}
-        onTypeFilterChange={setTypeFilter}
-        onClearDates={() => {
-          setDateFrom("");
-          setDateTo("");
-        }}
-      />
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <AppointmentFilters
+            searchQuery={search}
+            onSearchChange={setSearch}
+            dateFrom={dateFrom}
+            onDateFromChange={setDateFrom}
+            dateTo={dateTo}
+            onDateToChange={setDateTo}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            typeFilter={typeFilter}
+            onTypeFilterChange={setTypeFilter}
+            onClearDates={() => {
+              setDateFrom("");
+              setDateTo("");
+            }}
+          />
+        </div>
+        <ViewToggle view={view} onChange={setView} />
+      </div>
 
-      {/* List */}
+      {/* List / Calendar */}
       <div className="">
         {loading ? (
           <div className="animate-pulse space-y-3">Loading...</div>
-        ) : (
+        ) : view === "list" ? (
           <AppointmentList
             appointments={filtered}
             onJoin={handleJoin}
@@ -296,6 +313,13 @@ export default function PractitionerAppointments() {
             onAccept={handleAccept}
             onDecline={handleDecline}
             onRebook={handleRebook}
+            emptyMessage={`No ${activeTab} appointments`}
+          />
+        ) : (
+          <AppointmentCalendarView
+            appointments={filtered}
+            onAppointmentClick={handleAppointmentClick}
+            userType="practitioner"
             emptyMessage={`No ${activeTab} appointments`}
           />
         )}
@@ -325,6 +349,32 @@ export default function PractitionerAppointments() {
         }
         consultationId={soapModal.consultationId}
         patientName={soapModal.patientName}
+      />
+
+      {/* Appointment Details Modal (used by calendar view) */}
+      <AppointmentDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedAppointment(null);
+        }}
+        appointment={selectedAppointment}
+        userType="practitioner"
+        onJoin={handleJoin}
+        onAccept={handleAccept}
+        onDecline={handleDecline}
+        onReschedule={(id) => {
+          setShowDetailsModal(false);
+          handleEdit(id);
+        }}
+        onCancel={(id) => {
+          setShowDetailsModal(false);
+          handleCancel(id);
+        }}
+        onRebook={(id) => {
+          setShowDetailsModal(false);
+          handleRebook(id);
+        }}
       />
     </div>
   );
