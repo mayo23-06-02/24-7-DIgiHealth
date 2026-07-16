@@ -14,6 +14,17 @@ export interface IConsultation extends Document {
   callMinutesUsed: number;
   /** Unified booking origin */
   source?: 'patient_self_serve' | 'practitioner_schedule' | 'hospital_desk' | 'system';
+  /**
+   * A reschedule that hasn't been accepted by the other party yet.
+   * scheduledStartTime/scheduledEndTime stay untouched until accepted, so the
+   * confirmed slot never silently moves without the other party's consent.
+   */
+  pendingReschedule?: {
+    proposedStart: Date;
+    proposedEnd: Date;
+    proposedBy: Types.ObjectId;
+    proposedAt: Date;
+  };
 }
 
 const ConsultationSchema = new Schema<IConsultation>({
@@ -31,6 +42,15 @@ const ConsultationSchema = new Schema<IConsultation>({
   source: {
     type: String,
     enum: ['patient_self_serve', 'practitioner_schedule', 'hospital_desk', 'system'],
+  },
+  pendingReschedule: {
+    type: {
+      proposedStart: { type: Date, required: true },
+      proposedEnd: { type: Date, required: true },
+      proposedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+      proposedAt: { type: Date, required: true },
+    },
+    default: undefined,
   },
 }, { timestamps: true });
 

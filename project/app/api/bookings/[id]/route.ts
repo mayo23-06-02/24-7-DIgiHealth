@@ -5,7 +5,10 @@ import User from "@/lib/models/User";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import mongoose from "mongoose";
-import { notifyAppointmentChange } from "@/lib/booking/notifications";
+import {
+  notifyAppointmentChange,
+  notifyBookingEvent,
+} from "@/lib/booking/notifications";
 import { expireStaleBookingRequests } from "@/lib/booking/expire";
 
 const SECRET = new TextEncoder().encode(
@@ -71,6 +74,8 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const pendingReschedule = (c as any).pendingReschedule;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -83,6 +88,14 @@ export async function GET(
         status: (c as any).status,
         type: (c as any).type,
         reason: (c as any).chiefComplaint,
+        pendingReschedule: pendingReschedule
+          ? {
+              proposedStart: pendingReschedule.proposedStart,
+              proposedEnd: pendingReschedule.proposedEnd,
+              proposedByMe:
+                pendingReschedule.proposedBy?.toString() === auth.userId,
+            }
+          : null,
       },
     });
   } catch (err: unknown) {
@@ -133,6 +146,157 @@ export async function PATCH(
 
     if (!isParty) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ── Accept/decline a pending reschedule proposal ──────────────────
+    if (body.acceptReschedule === true || body.declineReschedule === true) {
+      const pending = c.pendingReschedule;
+      if (!pending) {
+        return NextResponse.json(
+          { success: false, error: "No pending reschedule to respond to." },
+          { status: 400 },
+        );
+      }
+      if (pending.proposedBy.toString() === auth.userId) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "You proposed this time — waiting on the other party.",
+          },
+          { status: 403 },
+        );
+      }
+
+      if (body.acceptReschedule === true) {
+        c.scheduledStartTime = pending.proposedStart;
+        c.scheduledEndTime = pending.proposedEnd;
+        c.pendingReschedule = undefined;
+        await c.save();
+
+        await notifyBookingEvent("reschedule_accepted", {
+          consultationId: c._id,
+          patientId: c.patientId,
+          practitionerId: c.practitionerId,
+          scheduledStart: c.scheduledStartTime,
+          type: c.type,
+          actorUserId: auth.userId,
+        });
+      } else {
+        const proposedStart = pending.proposedStart;
+        c.pendingReschedule = undefined;
+        await c.save();
+
+        await notifyBookingEvent("reschedule_declined", {
+          consultationId: c._id,
+          patientId: c.patientId,
+          practitionerId: c.practitionerId,
+          scheduledStart: proposedStart,
+          type: c.type,
+          actorUserId: auth.userId,
+        });
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: c._id.toString(),
+          consultationId: c._id.toString(),
+          patientId: c.patientId.toString(),
+          practitionerId: c.practitionerId.toString(),
+          scheduledStart: c.scheduledStartTime,
+          scheduledEnd: c.scheduledEndTime,
+          status: c.status,
+          type: c.type,
+          reason: c.chiefComplaint,
+          pendingReschedule: null,
+        },
+      });
+    }
+
+    // ── Rescheduling a confirmed appointment requires the other party's
+    // acceptance — store it as a proposal instead of applying it directly.
+    if (body.scheduledStart && c.status === "scheduled") {
+      const proposedStart = new Date(body.scheduledStart);
+      if (Number.isNaN(proposedStart.getTime())) {
+        return NextResponse.json(
+          { success: false, error: "Invalid date" },
+          { status: 400 },
+        );
+      }
+      let proposedEnd: Date;
+      if (body.scheduledEnd && !Number.isNaN(new Date(body.scheduledEnd).getTime())) {
+        proposedEnd = new Date(body.scheduledEnd);
+      } else {
+        const durationMs =
+          (c.scheduledEndTime
+            ? c.scheduledEndTime.getTime()
+            : c.scheduledStartTime.getTime() + 30 * 60000) -
+          c.scheduledStartTime.getTime();
+        proposedEnd = new Date(
+          proposedStart.getTime() + (durationMs > 0 ? durationMs : 30 * 60000),
+        );
+      }
+
+      const conflict = await Consultation.findOne({
+        _id: { $ne: c._id },
+        practitionerId: c.practitionerId,
+        status: { $in: ["requested", "pending", "scheduled", "in_progress"] },
+        scheduledStartTime: { $lt: proposedEnd },
+        scheduledEndTime: { $gt: proposedStart },
+      }).lean();
+      if (conflict) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "That time conflicts with another appointment. Choose a free slot.",
+          },
+          { status: 409 },
+        );
+      }
+
+      if (body.type) c.type = body.type;
+      if (body.reason || body.chiefComplaint) {
+        c.chiefComplaint = body.reason || body.chiefComplaint;
+      }
+      c.pendingReschedule = {
+        proposedStart,
+        proposedEnd,
+        proposedBy: new mongoose.Types.ObjectId(auth.userId),
+        proposedAt: new Date(),
+      };
+      await c.save();
+
+      await notifyBookingEvent("reschedule_requested", {
+        consultationId: c._id,
+        patientId: c.patientId,
+        practitionerId: c.practitionerId,
+        scheduledStart: proposedStart,
+        proposedEnd,
+        reason: c.chiefComplaint,
+        type: c.type,
+        actorUserId: auth.userId,
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: c._id.toString(),
+          consultationId: c._id.toString(),
+          patientId: c.patientId.toString(),
+          practitionerId: c.practitionerId.toString(),
+          scheduledStart: c.scheduledStartTime,
+          scheduledEnd: c.scheduledEndTime,
+          status: c.status,
+          type: c.type,
+          reason: c.chiefComplaint,
+          pendingReschedule: {
+            proposedStart,
+            proposedEnd,
+            proposedByMe: true,
+          },
+        },
+      });
     }
 
     const before = {
@@ -252,6 +416,7 @@ export async function PATCH(
         status: c.status,
         type: c.type,
         reason: c.chiefComplaint,
+        pendingReschedule: null,
       },
     });
   } catch (err: unknown) {

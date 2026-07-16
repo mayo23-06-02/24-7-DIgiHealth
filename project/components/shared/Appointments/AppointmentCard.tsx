@@ -12,6 +12,7 @@ import {
   BiDotsVerticalRounded,
 } from "react-icons/bi";
 import { Appointment } from "@/lib/hooks/useAppointments";
+import PendingRescheduleBanner from "./PendingRescheduleBanner";
 
 interface Props {
   appointment: Appointment;
@@ -146,6 +147,19 @@ export default function AppointmentCard({
         </div>
 
         <div className="flex items-center gap-3 shrink-0 relative z-10">
+          {appointment.pendingReschedule && (
+            <span
+              className={`hidden sm:inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+                appointment.pendingReschedule.proposedByMe
+                  ? "bg-slate-100 text-slate-500"
+                  : "bg-amber-100 text-amber-700"
+              }`}
+            >
+              {appointment.pendingReschedule.proposedByMe
+                ? "Reschedule sent"
+                : "New time proposed"}
+            </span>
+          )}
           {showActions && (
             <div className="relative flex items-center">
               <Badge
@@ -364,6 +378,11 @@ export default function AppointmentCard({
               />
             </div>
           </div>
+
+          <PendingRescheduleBanner
+            appointment={appointment}
+            onResponded={() => setShowDetails(false)}
+          />
 
           {appointment.reason && (
             <div>
