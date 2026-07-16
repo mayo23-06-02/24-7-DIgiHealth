@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import AppointmentList from "@/components/shared/Appointments/AppointmentList";
 import AppointmentFilters from "@/components/shared/Appointments/AppointmentFilters";
 import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
+import AppointmentCalendarView from "@/components/shared/Appointments/AppointmentCalendarView";
+import ViewToggle, { AppointmentView } from "@/components/shared/Appointments/ViewToggle";
 import AppointmentTabs, {
   AppointmentTab,
   ALL_TABS,
@@ -24,6 +26,7 @@ export default function PatientAppointments() {
     "/api/patient/appointments",
   );
   const [activeTab, setActiveTab] = useState<AppointmentTab>("upcoming");
+  const [view, setView] = useState<AppointmentView>("list");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -211,26 +214,31 @@ export default function PatientAppointments() {
       />
 
       {/* Filters */}
-      <AppointmentFilters
-        searchQuery={search}
-        onSearchChange={setSearch}
-        dateFrom={dateFrom}
-        onDateFromChange={setDateFrom}
-        dateTo={dateTo}
-        onDateToChange={setDateTo}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        onClearDates={() => {
-          setDateFrom("");
-          setDateTo("");
-        }}
-      />
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <AppointmentFilters
+            searchQuery={search}
+            onSearchChange={setSearch}
+            dateFrom={dateFrom}
+            onDateFromChange={setDateFrom}
+            dateTo={dateTo}
+            onDateToChange={setDateTo}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            onClearDates={() => {
+              setDateFrom("");
+              setDateTo("");
+            }}
+          />
+        </div>
+        <ViewToggle view={view} onChange={setView} />
+      </div>
 
-      {/* List */}
+      {/* List / Calendar */}
       <div className="">
         {loading ? (
           <div className="animate-pulse space-y-3">Loading...</div>
-        ) : (
+        ) : view === "list" ? (
           <AppointmentList
             appointments={filtered}
             onJoin={handleJoin}
@@ -241,6 +249,13 @@ export default function PatientAppointments() {
             onClick={handleAppointmentClick}
             emptyMessage={`No ${activeTab} appointments`}
             userType="patient"
+          />
+        ) : (
+          <AppointmentCalendarView
+            appointments={filtered}
+            onAppointmentClick={handleAppointmentClick}
+            userType="patient"
+            emptyMessage={`No ${activeTab} appointments`}
           />
         )}
       </div>
