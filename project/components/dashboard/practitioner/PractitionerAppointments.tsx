@@ -364,7 +364,6 @@ export default function PractitionerAppointments() {
         }}
         appointment={selectedAppointment}
         userType="practitioner"
-        onJoin={handleJoin}
         onAccept={handleAccept}
         onDecline={handleDecline}
         onReschedule={(id) => {
@@ -374,10 +373,6 @@ export default function PractitionerAppointments() {
         onCancel={(id) => {
           setShowDetailsModal(false);
           handleCancel(id);
-        }}
-        onRebook={(id) => {
-          setShowDetailsModal(false);
-          handleRebook(id);
         }}
       />
     </div>

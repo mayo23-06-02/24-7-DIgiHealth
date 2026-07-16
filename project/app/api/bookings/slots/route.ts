@@ -66,11 +66,16 @@ export async function GET(req: NextRequest) {
       .select("_id scheduledStartTime scheduledEndTime")
       .lean();
 
+    console.log("[GET /api/bookings/slots] Found consultations:", consultations.length);
+    console.log("[GET /api/bookings/slots] excludeBookingId:", excludeBookingId);
+
     const bookings = consultations.map((c: any) => ({
       id: c._id.toString(),
       start: c.scheduledStartTime,
       end: c.scheduledEndTime,
     }));
+
+    console.log("[GET /api/bookings/slots] Bookings before exclusion:", bookings.map(b => ({ id: b.id, start: b.start, end: b.end })));
 
     const slots = buildScheduleSlots({
       date,
