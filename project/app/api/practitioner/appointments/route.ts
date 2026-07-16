@@ -5,6 +5,7 @@ import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { riskBandFromScore } from '@/lib/riskScore';
+import { getBlockedAcceptorId } from '@/lib/booking/requester';
 
 async function getPractitionerId(req: NextRequest): Promise<string> {
   // 1. Try JWT token from cookie
@@ -99,6 +100,15 @@ export async function GET(req: NextRequest) {
             0,
         );
         const pending = (c as any).pendingReschedule;
+        const blockedAcceptorId = getBlockedAcceptorId({
+          source: (c as any).source,
+          patientId: c.patientId,
+          practitionerId: c.practitionerId,
+          pendingReschedule: pending,
+        });
+        const canAccept =
+          (c.status === 'requested' || c.status === 'pending') &&
+          practitionerId !== blockedAcceptorId;
 
         return {
           id: c._id.toString(),
@@ -117,6 +127,7 @@ export async function GET(req: NextRequest) {
           riskFactors: c.clinicalRisk?.factors || [],
           soapNotes: c.soapNotes,
           aiRecommendations: (c as any).aiRecommendations || [],
+          canAccept,
           pendingReschedule: pending
             ? {
                 proposedStart: pending.proposedStart,

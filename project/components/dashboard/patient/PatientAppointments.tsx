@@ -132,8 +132,45 @@ export default function PatientAppointments() {
     }
   };
 
-  // Patients cannot accept their own booking requests — only the practitioner can.
-  // Patient actions for requests: reschedule or cancel (see handleReschedule / handleCancel).
+  // Whoever didn't make the last move (a practitioner-initiated request, or
+  // a reschedule the practitioner proposed) is the one who can accept it.
+  const handleAccept = async (id: string) => {
+    try {
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "scheduled" }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success("Appointment accepted");
+        fetchAppointments(false);
+      } else {
+        toast.error(json.error || "Failed to accept");
+      }
+    } catch {
+      toast.error("Error accepting appointment");
+    }
+  };
+
+  const handleDecline = async (id: string) => {
+    try {
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "cancelled" }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success("Request declined");
+        fetchAppointments(false);
+      } else {
+        toast.error(json.error || "Failed to decline");
+      }
+    } catch {
+      toast.error("Error declining appointment");
+    }
+  };
 
   const handleViewDoctorProfile = (doctorId: string) => {
     window.location.href = `/patient/doctors/${doctorId}`;
@@ -198,6 +235,8 @@ export default function PatientAppointments() {
             onJoin={handleJoin}
             onEdit={handleReschedule}
             onCancel={handleCancel}
+            onAccept={handleAccept}
+            onDecline={handleDecline}
             onClick={handleAppointmentClick}
             emptyMessage={`No ${activeTab} appointments`}
             userType="patient"
@@ -231,6 +270,14 @@ export default function PatientAppointments() {
         appointment={selectedAppointment}
         userType="patient"
         onViewProfile={handleViewDoctorProfile}
+        onAccept={(id) => {
+          setShowDetailsModal(false);
+          handleAccept(id);
+        }}
+        onDecline={(id) => {
+          setShowDetailsModal(false);
+          handleDecline(id);
+        }}
         onReschedule={(id) => {
           setShowDetailsModal(false);
           handleReschedule(id);

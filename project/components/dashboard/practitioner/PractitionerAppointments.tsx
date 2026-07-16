@@ -116,18 +116,21 @@ export default function PractitionerAppointments() {
     });
   };
 
+  // Whoever didn't make the last move (a patient-initiated request, or a
+  // reschedule the patient proposed) is the one who can accept it.
   const handleAccept = async (id: string) => {
     try {
-      const res = await fetch(`/api/practitioner/appointments/${id}`, {
-        method: "PUT",
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "scheduled" }),
       });
-      if (res.ok) {
+      const json = await res.json();
+      if (res.ok && json.success) {
         toast.success("Appointment accepted");
         fetchAppointments(false);
       } else {
-        toast.error("Failed to accept");
+        toast.error(json.error || "Failed to accept");
       }
     } catch {
       toast.error("Error accepting appointment");
@@ -136,16 +139,17 @@ export default function PractitionerAppointments() {
 
   const handleDecline = async (id: string) => {
     try {
-      const res = await fetch(`/api/practitioner/appointments/${id}`, {
-        method: "PUT",
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "cancelled" }),
       });
-      if (res.ok) {
+      const json = await res.json();
+      if (res.ok && json.success) {
         toast.success("Appointment declined");
         fetchAppointments(false);
       } else {
-        toast.error("Failed to decline");
+        toast.error(json.error || "Failed to decline");
       }
     } catch {
       toast.error("Error declining appointment");
