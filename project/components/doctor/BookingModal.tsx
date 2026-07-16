@@ -143,7 +143,6 @@ export default function BookingModal({
       setDoctorSearch("");
       setPatientSearch(patient?.name || "");
       setDaySlots([]);
-      setSlotsError(null);
       if (isPractitionerMode) {
         setSelectedPatientState(patient || null);
       } else {
@@ -164,6 +163,7 @@ export default function BookingModal({
 
     let cancelled = false;
     setSlotsLoading(true);
+    setSlotsError(null);
     void (async () => {
       try {
         const result = await fetchDaySlots({
@@ -176,7 +176,6 @@ export default function BookingModal({
         if (cancelled) return;
         if (result.success && result.data?.slots) {
           setDaySlots(result.data.slots);
-          setSlotsError(null);
           setSelectedTime((prev) => {
             if (!prev) return prev;
             const norm = normaliseTime(prev);
@@ -186,19 +185,11 @@ export default function BookingModal({
             return stillOk ? norm : "";
           });
         } else {
-          // A failed fetch (auth expiry, network error, server error) is NOT
-          // the same as a genuinely empty day — don't lie and say there are
-          // no slots. Surface the real problem so the user can retry/re-login.
           setDaySlots([]);
-          const rawError = (!result.success && result.error) || "";
-          const message =
-            rawError.toLowerCase() === "unauthorized"
-              ? "Your session has expired. Please refresh and log in again."
-              : rawError
-                ? `Couldn't load availability: ${rawError}`
-                : "Couldn't load availability for this date. Please try again.";
-          setSlotsError(message);
-          console.warn("[BookingModal] slots:", rawError || message);
+          if (!result.success && result.error) {
+            console.warn("[BookingModal] slots:", result.error);
+            setSlotsError(result.error);
+          }
         }
       } finally {
         if (!cancelled) setSlotsLoading(false);
@@ -704,7 +695,11 @@ export default function BookingModal({
                 onSelect={setSelectedTime}
                 loading={slotsLoading}
                 durationMinutes={isPractitionerMode ? durationMinutes : 30}
-                emptyMessage={slotsError || undefined}
+                emptyMessage={
+                  slotsError
+                    ? `Couldn't load available times: ${slotsError}`
+                    : undefined
+                }
               />
             )}
           </div>

@@ -38,13 +38,13 @@ export function usePractitionerDashboard() {
         newStatus === "scheduled" ? "Accepting request..." : "Declining request..."
       );
       try {
-        const res = await fetch(`/api/practitioner/consultations/${id}`, {
+        const res = await fetch(`/api/bookings/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: newStatus }),
         });
         const json = await res.json();
-        if (json.success) {
+        if (res.ok && json.success) {
           toast.success(
             `Request ${newStatus === "scheduled" ? "Accepted" : "Declined"}!`,
             { id: toastId }

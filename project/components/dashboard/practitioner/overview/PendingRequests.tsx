@@ -142,6 +142,11 @@ export default function PendingRequests({
                         New
                       </span>
                     )}
+                    {req.canAccept === false && (
+                      <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                        Awaiting patient
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs font-medium text-slate-500 mb-1">
                     {formatDate(req.scheduledStart)}
@@ -162,21 +167,23 @@ export default function PendingRequests({
                 </div>
               </div>
 
-              {/* Actions */}
+              {/* Actions — only whoever isn't waiting on the other party can accept/decline */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAccept(req.consultationId);
-                  }}
-                  loading={isLoading}
-                  disabled={isLoading}
-                  aria-label={`Accept appointment for ${req.patientName}`}
-                >
-                  Accept
-                </Button>
+                {req.canAccept !== false && (
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAccept(req.consultationId);
+                    }}
+                    loading={isLoading}
+                    disabled={isLoading}
+                    aria-label={`Accept appointment for ${req.patientName}`}
+                  >
+                    Accept
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="outline"
@@ -189,19 +196,21 @@ export default function PendingRequests({
                 >
                   Reschedule
                 </Button>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDecline(req.consultationId);
-                  }}
-                  loading={isLoading}
-                  disabled={isLoading}
-                  aria-label={`Decline appointment for ${req.patientName}`}
-                >
-                  Decline
-                </Button>
+                {req.canAccept !== false && (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDecline(req.consultationId);
+                    }}
+                    loading={isLoading}
+                    disabled={isLoading}
+                    aria-label={`Decline appointment for ${req.patientName}`}
+                  >
+                    Decline
+                  </Button>
+                )}
               </div>
             </div>
           );
@@ -226,6 +235,7 @@ export default function PendingRequests({
                 type: selectedRequest.type,
                 status: "requested",
                 reason: selectedRequest.reason,
+                canAccept: selectedRequest.canAccept,
               }
             : null
         }

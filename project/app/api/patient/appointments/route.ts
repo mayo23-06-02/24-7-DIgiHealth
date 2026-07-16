@@ -4,6 +4,7 @@ import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { getBlockedAcceptorId } from '@/lib/booking/requester';
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,6 +28,15 @@ export async function GET(req: NextRequest) {
     const enriched = consultations.map(c => {
       const prac = c.practitionerId as any;
       const pending = (c as any).pendingReschedule;
+      const blockedAcceptorId = getBlockedAcceptorId({
+        source: (c as any).source,
+        patientId: userId,
+        practitionerId: prac ? prac._id : (c as any).practitionerId,
+        pendingReschedule: pending,
+      });
+      const canAccept =
+        (c.status === 'requested' || c.status === 'pending') &&
+        userId !== blockedAcceptorId;
       return {
         id: c._id.toString(),
         consultationId: c._id.toString(),
@@ -41,7 +51,7 @@ export async function GET(req: NextRequest) {
         type: c.type,
         reason: c.chiefComplaint,
         duration: '30 min',
-        requestedTo: c.requestedTo?.toString(),
+        canAccept,
         pendingReschedule: pending
           ? {
               proposedStart: pending.proposedStart,

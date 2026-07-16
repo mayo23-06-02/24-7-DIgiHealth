@@ -10,6 +10,8 @@ import {
   notifyBookingEvent,
 } from "@/lib/booking/notifications";
 import { expireStaleBookingRequests } from "@/lib/booking/expire";
+import { getRequesterId, getBlockedAcceptorId } from "@/lib/booking/requester";
+import { PatientProfile, PractitionerProfile } from "@/lib/models/RoleProfiles";
 
 const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "secret123!",
@@ -75,6 +77,16 @@ export async function GET(
     }
 
     const pendingReschedule = (c as any).pendingReschedule;
+    const status = (c as any).status;
+    const blockedAcceptorId = getBlockedAcceptorId({
+      source: (c as any).source,
+      patientId: pid,
+      practitionerId: prid,
+      pendingReschedule,
+    });
+    const canAccept =
+      (status === "requested" || status === "pending") &&
+      auth.userId !== blockedAcceptorId;
 
     return NextResponse.json({
       success: true,
@@ -85,10 +97,10 @@ export async function GET(
         practitionerId: prid,
         scheduledStart: (c as any).scheduledStartTime,
         scheduledEnd: (c as any).scheduledEndTime,
-        status: (c as any).status,
+        status,
         type: (c as any).type,
         reason: (c as any).chiefComplaint,
-        requestedTo: (c as any).requestedTo?.toString(),
+        canAccept,
         pendingReschedule: pendingReschedule
           ? {
               proposedStart: pendingReschedule.proposedStart,
@@ -169,11 +181,28 @@ export async function PATCH(
       }
 
       if (body.acceptReschedule === true) {
+        const wasUnconfirmed = c.status === "requested" || c.status === "pending";
         c.scheduledStartTime = pending.proposedStart;
         c.scheduledEndTime = pending.proposedEnd;
         c.pendingReschedule = undefined;
-        c.requestedTo = undefined;
+        // Accepting a proposed time on a still-pending request also confirms
+        // it — the accepting party is agreeing to the appointment happening,
+        // just at the newly proposed time.
+        if (wasUnconfirmed) c.status = "scheduled";
         await c.save();
+
+        if (wasUnconfirmed) {
+          await Promise.all([
+            PractitionerProfile.updateOne(
+              { userId: c.practitionerId },
+              { $addToSet: { assignedPatientIds: c.patientId } },
+            ),
+            PatientProfile.updateOne(
+              { userId: c.patientId },
+              { $addToSet: { myDoctorIds: c.practitionerId } },
+            ),
+          ]);
+        }
 
         await notifyBookingEvent("reschedule_accepted", {
           consultationId: c._id,
@@ -210,14 +239,21 @@ export async function PATCH(
           status: c.status,
           type: c.type,
           reason: c.chiefComplaint,
+          canAccept: false,
           pendingReschedule: null,
         },
       });
     }
 
-    // ── Rescheduling a confirmed appointment requires the other party's
-    // acceptance — store it as a proposal instead of applying it directly.
-    if (body.scheduledStart && c.status === "scheduled") {
+    // ── Rescheduling requires the other party's acceptance — store it as a
+    // proposal instead of applying it directly. Applies whether the booking
+    // is still awaiting its original accept (requested/pending) or already
+    // confirmed (scheduled); either way, whoever didn't propose the new
+    // time is the one who must accept it next.
+    if (
+      body.scheduledStart &&
+      ["requested", "pending", "scheduled"].includes(c.status)
+    ) {
       const proposedStart = new Date(body.scheduledStart);
       if (Number.isNaN(proposedStart.getTime())) {
         return NextResponse.json(
@@ -292,6 +328,7 @@ export async function PATCH(
           status: c.status,
           type: c.type,
           reason: c.chiefComplaint,
+          canAccept: false,
           pendingReschedule: {
             proposedStart,
             proposedEnd,
@@ -314,9 +351,6 @@ export async function PATCH(
       const start = new Date(body.scheduledStart);
       if (!Number.isNaN(start.getTime())) {
         c.scheduledStartTime = start;
-      }
-      if (c.status === "requested" || c.status === "pending") {
-        c.requestedTo = auth.userId === pid ? c.practitionerId : c.patientId;
       }
     }
     if (body.scheduledEnd) {
@@ -373,33 +407,40 @@ export async function PATCH(
       if (!allowed.includes(body.status)) {
         // ignore invalid
       } else if (
+        body.status === "scheduled" &&
         (c.status === "requested" || c.status === "pending") &&
-        body.status === "scheduled"
+        auth.userId === getRequesterId({ source: c.source, patientId: pid, practitionerId: prid })
       ) {
-        const isAllowedToAccept = c.requestedTo
-          ? c.requestedTo.toString() === auth.userId
-          : auth.userId !== pid;
-        if (!isAllowedToAccept) {
-          return NextResponse.json(
-            {
-              success: false,
-              error:
-                "You cannot accept this request. Please wait for the other party, or reschedule / cancel instead.",
-            },
-            { status: 403 },
-          );
-        }
-        c.status = body.status;
-        c.requestedTo = undefined;
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "You cannot accept an appointment you requested. Reschedule or cancel instead.",
+          },
+          { status: 403 },
+        );
       } else {
         c.status = body.status;
-        if (body.status === "cancelled" || body.status === "completed") {
-          c.requestedTo = undefined;
-        }
       }
     }
 
+    const becameScheduled =
+      body.status === "scheduled" && before.status !== "scheduled";
+
     await c.save();
+
+    if (becameScheduled) {
+      await Promise.all([
+        PractitionerProfile.updateOne(
+          { userId: c.practitionerId },
+          { $addToSet: { assignedPatientIds: c.patientId } },
+        ),
+        PatientProfile.updateOne(
+          { userId: c.patientId },
+          { $addToSet: { myDoctorIds: c.practitionerId } },
+        ),
+      ]);
+    }
 
     // Notify the *other* party of any meaningful change
     await notifyAppointmentChange({
@@ -429,6 +470,9 @@ export async function PATCH(
         status: c.status,
         type: c.type,
         reason: c.chiefComplaint,
+        canAccept:
+          (c.status === "requested" || c.status === "pending") &&
+          auth.userId !== getRequesterId({ source: c.source, patientId: pid, practitionerId: prid }),
         pendingReschedule: null,
       },
     });

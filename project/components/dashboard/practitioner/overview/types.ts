@@ -30,6 +30,9 @@ export interface PendingRequest {
   type: 'video' | 'phone' | 'in_person';
   createdAt: string;
   reason?: string;
+  /** False when this practitioner created the request themselves — the
+   * patient must accept it, not the practitioner. */
+  canAccept?: boolean;
 }
 
 export interface ChartDataPoint {

@@ -7,6 +7,7 @@ import { PaymentTransaction, PayoutRequest } from '@/lib/models/Billing';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { apiLogger } from '@/lib/apiLogger';
 import { riskBandFromScore } from '@/lib/riskScore';
+import { getBlockedAcceptorId } from '@/lib/booking/requester';
 
 export async function GET(req: NextRequest) {
   try {
@@ -54,6 +55,16 @@ export async function GET(req: NextRequest) {
           .slice(0, 2)
           .toUpperCase();
 
+        const canAccept =
+          !(c.status === 'requested' || c.status === 'pending') ||
+          practitionerId !==
+            getBlockedAcceptorId({
+              source: c.source,
+              patientId: c.patientId,
+              practitionerId: c.practitionerId,
+              pendingReschedule: c.pendingReschedule,
+            });
+
         return {
           consultationId: c._id.toString(),
           patientId: c.patientId.toString(),
@@ -69,6 +80,7 @@ export async function GET(req: NextRequest) {
           status: c.status,
           type: c.type,
           createdAt: c.createdAt,
+          canAccept,
         };
       })
     );

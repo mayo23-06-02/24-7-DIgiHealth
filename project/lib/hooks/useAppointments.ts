@@ -19,7 +19,11 @@ export interface Appointment {
   isNew?: boolean;
   computedStatus?: string;
   duration?: string;
-  requestedTo?: string;
+  /** True when the current user is the one who can accept/decline this
+   * request (i.e. they did not make the last move — the original request
+   * or a later reschedule proposal). Undefined for appointments where
+   * accept doesn't apply (already scheduled with no pending change, etc). */
+  canAccept?: boolean;
   pendingReschedule?: {
     proposedStart: string;
     proposedEnd: string;

@@ -4,10 +4,6 @@ import { useRouter } from "next/navigation";
 import AppointmentList from "@/components/shared/Appointments/AppointmentList";
 import AppointmentFilters from "@/components/shared/Appointments/AppointmentFilters";
 import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
-import AppointmentCalendarView from "@/components/shared/Appointments/AppointmentCalendarView";
-import ViewToggle, {
-  AppointmentView,
-} from "@/components/shared/Appointments/ViewToggle";
 import AppointmentTabs, {
   AppointmentTab,
   ALL_TABS,
@@ -28,7 +24,6 @@ export default function PatientAppointments() {
     "/api/patient/appointments",
   );
   const [activeTab, setActiveTab] = useState<AppointmentTab>("upcoming");
-  const [view, setView] = useState<AppointmentView>("list");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -137,8 +132,45 @@ export default function PatientAppointments() {
     }
   };
 
-  // Patients cannot accept their own booking requests — only the practitioner can.
-  // Patient actions for requests: reschedule or cancel (see handleReschedule / handleCancel).
+  // Whoever didn't make the last move (a practitioner-initiated request, or
+  // a reschedule the practitioner proposed) is the one who can accept it.
+  const handleAccept = async (id: string) => {
+    try {
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "scheduled" }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success("Appointment accepted");
+        fetchAppointments(false);
+      } else {
+        toast.error(json.error || "Failed to accept");
+      }
+    } catch {
+      toast.error("Error accepting appointment");
+    }
+  };
+
+  const handleDecline = async (id: string) => {
+    try {
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "cancelled" }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success("Request declined");
+        fetchAppointments(false);
+      } else {
+        toast.error(json.error || "Failed to decline");
+      }
+    } catch {
+      toast.error("Error declining appointment");
+    }
+  };
 
   const handleViewDoctorProfile = (doctorId: string) => {
     window.location.href = `/patient/doctors/${doctorId}`;
@@ -178,46 +210,36 @@ export default function PatientAppointments() {
       />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="flex-1 min-w-0">
-          <AppointmentFilters
-            searchQuery={search}
-            onSearchChange={setSearch}
-            dateFrom={dateFrom}
-            onDateFromChange={setDateFrom}
-            dateTo={dateTo}
-            onDateToChange={setDateTo}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            onClearDates={() => {
-              setDateFrom("");
-              setDateTo("");
-            }}
-          />
-        </div>
-        <ViewToggle view={view} onChange={setView} />
-      </div>
+      <AppointmentFilters
+        searchQuery={search}
+        onSearchChange={setSearch}
+        dateFrom={dateFrom}
+        onDateFromChange={setDateFrom}
+        dateTo={dateTo}
+        onDateToChange={setDateTo}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        onClearDates={() => {
+          setDateFrom("");
+          setDateTo("");
+        }}
+      />
 
-      {/* List / Calendar */}
+      {/* List */}
       <div className="">
         {loading ? (
           <div className="animate-pulse space-y-3">Loading...</div>
-        ) : view === "list" ? (
+        ) : (
           <AppointmentList
             appointments={filtered}
             onJoin={handleJoin}
             onEdit={handleReschedule}
             onCancel={handleCancel}
+            onAccept={handleAccept}
+            onDecline={handleDecline}
             onClick={handleAppointmentClick}
             emptyMessage={`No ${activeTab} appointments`}
             userType="patient"
-          />
-        ) : (
-          <AppointmentCalendarView
-            appointments={filtered}
-            onAppointmentClick={handleAppointmentClick}
-            userType="patient"
-            emptyMessage={`No ${activeTab} appointments`}
           />
         )}
       </div>
@@ -248,7 +270,14 @@ export default function PatientAppointments() {
         appointment={selectedAppointment}
         userType="patient"
         onViewProfile={handleViewDoctorProfile}
-        onJoin={handleJoin}
+        onAccept={(id) => {
+          setShowDetailsModal(false);
+          handleAccept(id);
+        }}
+        onDecline={(id) => {
+          setShowDetailsModal(false);
+          handleDecline(id);
+        }}
         onReschedule={(id) => {
           setShowDetailsModal(false);
           handleReschedule(id);
