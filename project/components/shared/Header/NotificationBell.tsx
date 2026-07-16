@@ -171,7 +171,7 @@ export default function NotificationBell({
       </button>
 
       {isOpen && (
-        <div className="absolute top-14 right-0 w-[350px] bg-white border border-slate-200 rounded-lg shadow-lg p-4 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
+        <div className="absolute top-14 lg:right-0 -right-10 w-[350px] bg-white border border-slate-200 rounded-lg shadow-lg p-4 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
           {!isDetailOpen ? (
             <>
               <div className="flex items-center justify-between mb-6">
