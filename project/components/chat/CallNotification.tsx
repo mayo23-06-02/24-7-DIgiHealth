@@ -1,58 +1,107 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BiPhoneCall, BiX, BiVolumeMute, BiVolumeFull } from "react-icons/bi";
 import { useCall } from "../context/CallContext";
 
 export default function CallNotification() {
   const { incomingCall, acceptCall, declineCall } = useCall();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isMuted, setIsMuted] = React.useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
 
-  // Create and manage audio
+  // Preload audio on component mount for all browsers/OS
   useEffect(() => {
-    // Only create audio if we have an incoming call
-    if (incomingCall) {
-      // If audio doesn't exist, create it
-      if (!audioRef.current) {
-        // You can replace this with your own sound file
-        // Place a ringtone.mp3 in your public/sounds/ folder
-        audioRef.current = new Audio("ringtone.m4a");
-        audioRef.current.loop = true;
-        audioRef.current.volume = 0.9;
+    if (!audioRef.current) {
+      // Create audio element with preloading
+      audioRef.current = new Audio();
+      audioRef.current.preload = "auto";
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.9;
+
+      // Try multiple formats for better browser compatibility
+      // MP3 is widely supported, M4A for Safari, OGG for Firefox
+      const audioSources = [
+        "ringtone.mp3",
+        "ringtone.m4a",
+        "ringtone.ogg",
+        "notification.mp3",
+        "notification.m4a",
+      ];
+
+      // Try to load the first available format
+      let loaded = false;
+      for (const src of audioSources) {
+        try {
+          audioRef.current.src = src;
+          audioRef.current.load();
+          loaded = true;
+          console.log(`[CallNotification] Preloaded audio: ${src}`);
+          break;
+        } catch (e) {
+          console.warn(`[CallNotification] Failed to load ${src}:`, e);
+        }
       }
 
-      // Try to play with user gesture fallback
-      const playAudio = () => {
-        if (audioRef.current && !isMuted) {
-          audioRef.current.play().catch((err) => {
-            // Auto-play was prevented; we'll try again on user click
-            console.warn("Ringtone autoplay blocked:", err);
-          });
-        }
+      if (loaded) {
+        setAudioReady(true);
+      }
+
+      // Handle audio loading events
+      const handleCanPlay = () => {
+        setAudioReady(true);
+        console.log("[CallNotification] Audio ready to play");
       };
 
-      // Play immediately
-      playAudio();
-
-      // Also play on any user interaction (click anywhere) if blocked
-      const handleUserInteraction = () => {
-        if (audioRef.current && !isMuted && audioRef.current.paused) {
-          audioRef.current.play().catch(() => {});
-        }
-        document.removeEventListener("click", handleUserInteraction);
+      const handleError = (e: Event) => {
+        console.error("[CallNotification] Audio load error:", e);
+        setAudioReady(false);
       };
-      document.addEventListener("click", handleUserInteraction);
+
+      audioRef.current.addEventListener("canplay", handleCanPlay);
+      audioRef.current.addEventListener("error", handleError);
 
       return () => {
-        document.removeEventListener("click", handleUserInteraction);
+        if (audioRef.current) {
+          audioRef.current.removeEventListener("canplay", handleCanPlay);
+          audioRef.current.removeEventListener("error", handleError);
+        }
       };
-    } else {
-      // No incoming call: stop and clean up audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        // Optionally, you can keep the audio instance for next call
+    }
+  }, []);
+
+  // Play/pause audio based on incoming call state
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    if (incomingCall && !isMuted) {
+      // Try to play the audio
+      const playPromise = audioRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log("[CallNotification] Ringtone playing successfully");
+          })
+          .catch((err) => {
+            console.warn("[CallNotification] Ringtone autoplay blocked:", err);
+            // Try to unlock audio on next user interaction
+            const unlockAudio = () => {
+              if (audioRef.current && incomingCall && !isMuted && audioRef.current.paused) {
+                audioRef.current.play().catch(() => {});
+              }
+              document.removeEventListener("click", unlockAudio);
+              document.removeEventListener("touchstart", unlockAudio);
+              document.removeEventListener("keydown", unlockAudio);
+            };
+            document.addEventListener("click", unlockAudio, { once: true });
+            document.addEventListener("touchstart", unlockAudio, { once: true });
+            document.addEventListener("keydown", unlockAudio, { once: true });
+          });
       }
+    } else {
+      // Stop audio when no incoming call or muted
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   }, [incomingCall, isMuted]);
 
@@ -71,8 +120,10 @@ export default function CallNotification() {
     setIsMuted(!isMuted);
     if (audioRef.current) {
       if (isMuted) {
-        // Unmute: try to play
-        audioRef.current.play().catch(() => {});
+        // Unmute: try to play if there's an incoming call
+        if (incomingCall) {
+          audioRef.current.play().catch(() => {});
+        }
       } else {
         // Mute: pause
         audioRef.current.pause();

@@ -28,16 +28,15 @@ export async function POST(req: Request) {
 
     const conversation = await Conversation.findById(call.conversationId);
     if (conversation) {
-        const receiverId = conversation.patientId.toString() === call.initiatedBy.toString() 
-            ? conversation.practitionerId 
-            : conversation.patientId;
+        // The receiver should be the person who initiated the call
+        const receiverId = call.initiatedBy;
 
         await Message.create({
             conversationId: conversation._id,
             senderId: user.userId,
-            receiverId: call.initiatedBy,
+            receiverId: receiverId,
             type: "call_log",
-            content: `${call.type === 'video' ? 'Video' : 'Voice'} call declined`,
+            content: `${call.type === 'video' ? 'Video' : 'Voice'} call was declined`,
         });
     }
 
