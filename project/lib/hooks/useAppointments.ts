@@ -19,6 +19,8 @@ export interface Appointment {
   isNew?: boolean;
   computedStatus?: string;
   duration?: string;
+  /** The user who received the appointment request (for two-party handshake) */
+  requestedTo?: string;
   /** True when the current user is the one who can accept/decline this
    * request (i.e. they did not make the last move — the original request
    * or a later reschedule proposal). Undefined for appointments where
