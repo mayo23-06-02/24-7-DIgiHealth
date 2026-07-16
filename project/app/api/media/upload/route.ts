@@ -14,6 +14,9 @@ import {
  */
 export async function POST(req: NextRequest) {
   try {
+    console.log("[POST /api/media/upload] Request received");
+    console.log("[POST /api/media/upload] Content-Type:", req.headers.get("content-type"));
+
     if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { error: "Media storage is not configured" },
@@ -27,7 +30,11 @@ export async function POST(req: NextRequest) {
     }
 
     const form = await req.formData();
+    console.log("[POST /api/media/upload] FormData parsed successfully");
+
     const file = form.get("file");
+    console.log("[POST /api/media/upload] File:", file, "size:", file instanceof File ? file.size : "not a file");
+
     if (!(file instanceof File) || file.size === 0) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
@@ -47,6 +54,7 @@ export async function POST(req: NextRequest) {
       : undefined;
     const isPublic = form.get("isPublic") === "true";
 
+    console.log("[POST /api/media/upload] Uploading to Supabase:", file.name, file.type);
     const buffer = Buffer.from(await file.arrayBuffer());
     const asset = await uploadBuffer({
       buffer,

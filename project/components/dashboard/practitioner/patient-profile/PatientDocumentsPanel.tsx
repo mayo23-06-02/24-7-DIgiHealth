@@ -14,6 +14,7 @@ import {
 } from "react-icons/bi";
 import { toast } from "react-hot-toast";
 import type { PatientDocument } from "./types";
+import { useMediaUpload } from "@/components/media/useMediaUpload";
 
 function isImageDoc(doc: PatientDocument) {
   return (
@@ -44,10 +45,13 @@ export default function PatientDocumentsPanel({
   const [preview, setPreview] = useState<PatientDocument | null>(null);
   const [imgError, setImgError] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [noteEditingId, setNoteEditingId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { upload: uploadMedia, error: mediaUploadError } = useMediaUpload();
 
   useEffect(() => {
     setDocuments(documentsProp);
@@ -58,27 +62,55 @@ export default function PatientDocumentsPanel({
 
   const handleAttach = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    e.target.value = "";
     if (!file || !patientId) return;
+    // Clear after processing
+    e.target.value = "";
+
     setUploading(true);
+    setUploadProgress(0);
     try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("type", file.name.replace(/\.[^.]+$/, "") || "Document");
-      const res = await fetch(`/api/practitioner/patients/${patientId}/documents`, {
-        method: "POST",
-        body: form,
+      console.log("[PatientDocumentsPanel] Uploading file via useMediaUpload:", file.name);
+      const uploadedMedia = await uploadMedia(file, {
+        purpose: "document",
+        patientId,
+        isPublic: false,
+        onProgress: (pct) => {
+          console.log("[PatientDocumentsPanel] Progress:", pct);
+          setUploadProgress(pct);
+        },
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "Failed to attach file");
+
+      console.log("[PatientDocumentsPanel] Upload successful:", uploadedMedia);
+
+      // Save document metadata to MongoDB
+      const docRes = await fetch(`/api/practitioner/patients/${patientId}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: file.name.replace(/\.[^.]+$/, "") || "Document",
+          url: uploadedMedia.url,
+          mediaId: uploadedMedia.id,
+          mimeType: file.type || "application/octet-stream",
+          status: "uploaded",
+        }),
+      });
+
+      if (!docRes.ok) {
+        const errorData = await docRes.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to save document metadata");
       }
-      setDocuments((prev) => [json.data, ...prev]);
+
+      const docData = await docRes.json();
+
+      setDocuments((prev) => [docData.data, ...prev]);
       toast.success("File attached to patient record.");
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to attach file");
+      console.error("[PatientDocumentsPanel] Upload error:", err);
+      const errorMsg = err instanceof Error ? err.message : "Failed to attach file";
+      toast.error(errorMsg);
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -173,7 +205,7 @@ export default function PatientDocumentsPanel({
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+    <section className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden">
       <input
         ref={fileInputRef}
         type="file"
@@ -183,7 +215,7 @@ export default function PatientDocumentsPanel({
       />
       <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
             <BiFile size={20} />
           </div>
           <div>
@@ -203,18 +235,23 @@ export default function PatientDocumentsPanel({
             className="flex items-center gap-1.5 text-xs font-bold text-primary hover:bg-primary/5 px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
           >
             {uploading ? (
-              <BiLoaderAlt size={14} className="animate-spin" />
+              <>
+                <BiLoaderAlt size={14} className="animate-spin" />
+                {uploadProgress > 0 ? `${uploadProgress}%` : "Attaching…"}
+              </>
             ) : (
-              <BiUpload size={14} />
+              <>
+                <BiUpload size={14} />
+                Attach file
+              </>
             )}
-            {uploading ? "Attaching…" : "Attach file"}
           </button>
         )}
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
         {documents.length === 0 ? (
-          <div className="py-10 text-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+          <div className="py-10 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
             <BiFile className="mx-auto text-slate-300 mb-2" size={32} />
             <p className="text-sm font-semibold text-slate-500">
               No documents uploaded yet
@@ -240,7 +277,7 @@ export default function PatientDocumentsPanel({
                           setImgError(false);
                           setPreview(doc);
                         }}
-                        className="group relative aspect-square w-full rounded-xl overflow-hidden border border-slate-200 bg-slate-100 text-left block"
+                        className="group relative aspect-square w-full rounded-lg overflow-hidden border border-slate-200 bg-slate-100 text-left block"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -271,9 +308,9 @@ export default function PatientDocumentsPanel({
                   {files.map((doc) => (
                     <li
                       key={doc.id}
-                      className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:border-primary/20 transition-colors"
+                      className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:border-primary/20 transition-colors"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                      <div className="w-11 h-11 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                         {isPdfDoc(doc) ? (
                           <BiFile size={22} />
                         ) : (
@@ -342,7 +379,7 @@ export default function PatientDocumentsPanel({
             aria-label="Close preview"
             onClick={() => setPreview(null)}
           />
-          <div className="relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+          <div className="relative w-full max-w-4xl bg-white rounded-lg overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50 gap-3">
               <div className="min-w-0">
                 <h3 className="text-lg font-bold text-slate-800 truncate">
@@ -359,14 +396,14 @@ export default function PatientDocumentsPanel({
                   href={preview.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1.5"
+                  className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1.5"
                 >
                   <BiDownload size={14} /> Open
                 </a>
                 <button
                   type="button"
                   onClick={() => setPreview(null)}
-                  className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center"
+                  className="w-10 h-10 rounded-lg bg-white border border-slate-200 text-slate-500 flex items-center justify-center"
                 >
                   <BiX size={20} />
                 </button>
@@ -378,14 +415,14 @@ export default function PatientDocumentsPanel({
                 <img
                   src={preview.url}
                   alt={preview.type}
-                  className="max-w-full max-h-[70vh] object-contain rounded-xl bg-white p-2 shadow"
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg bg-white p-2 shadow"
                   onError={() => setImgError(true)}
                 />
               ) : isPdfDoc(preview) ? (
                 <iframe
                   title={preview.type}
                   src={preview.url}
-                  className="w-full h-[70vh] rounded-xl bg-white border border-slate-200"
+                  className="w-full h-[70vh] rounded-lg bg-white border border-slate-200"
                 />
               ) : (
                 <div className="text-center space-y-3">
@@ -400,14 +437,14 @@ export default function PatientDocumentsPanel({
                     href={preview.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg"
                   >
                     <BiDownload size={14} /> Open file
                   </a>
                 </div>
               )}
               {preview.note && (
-                <div className="absolute inset-x-6 bottom-6 bg-white/95 border border-slate-200 rounded-xl px-4 py-3 shadow max-w-2xl mx-auto">
+                <div className="absolute inset-x-6 bottom-6 bg-white/95 border border-slate-200 rounded-lg px-4 py-3 shadow max-w-2xl mx-auto">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
                     Note
                   </p>

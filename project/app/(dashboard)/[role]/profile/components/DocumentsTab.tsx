@@ -259,7 +259,7 @@ export default function DocumentsTab({
           setDragOver(false);
         }}
         onDrop={onDrop}
-        className={`rounded-2xl border-2 border-dashed transition-all ${
+        className={`rounded-lg border-2 border-dashed transition-all ${
           uploadError ? "border-rose-300 bg-rose-50/50" :
           dragOver
             ? "border-primary bg-primary/5 scale-[1.01]"
@@ -269,7 +269,7 @@ export default function DocumentsTab({
         <div className="px-5 sm:px-7 py-6 sm:py-8">
           <div className="flex flex-col items-center text-center max-w-lg mx-auto">
             <div
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-colors ${
+              className={`w-14 h-14 rounded-lg flex items-center justify-center mb-4 transition-colors ${
                 dragOver
                   ? "bg-primary text-white"
                   : "bg-primary/10 text-primary"
@@ -304,7 +304,7 @@ export default function DocumentsTab({
                   photoInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
+                className="!rounded-lg !h-11 !px-5 !max-w-none normal-case !tracking-normal"
                 icon={<BiImages size={18} />}
                 iconPosition="left"
               >
@@ -318,7 +318,7 @@ export default function DocumentsTab({
                   localDocInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
+                className="!rounded-lg !h-11 !px-5 !max-w-none normal-case !tracking-normal"
                 icon={<BiFile size={18} />}
                 iconPosition="left"
               >
@@ -332,7 +332,7 @@ export default function DocumentsTab({
                   docInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                className="!rounded-xl !h-11 !px-4 !max-w-none normal-case !tracking-normal text-slate-600"
+                className="!rounded-lg !h-11 !px-4 !max-w-none normal-case !tracking-normal text-slate-600"
                 icon={<BiUpload size={18} />}
                 iconPosition="left"
               >
@@ -345,11 +345,11 @@ export default function DocumentsTab({
 
       {/* Upload queue: per-file progress + success/error */}
       {uploadQueue.length > 0 && (
-        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden divide-y divide-slate-100">
+        <div className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden divide-y divide-slate-100">
           {uploadQueue.map((item) => (
             <div key={item.id} className="flex items-center gap-3 px-4 py-3">
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                   item.status === "success"
                     ? "bg-emerald-50 text-emerald-600"
                     : item.status === "error"
@@ -417,10 +417,10 @@ export default function DocumentsTab({
       )}
 
       {/* Photos gallery */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+      <section className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center">
               <BiImage size={20} />
             </div>
             <div>
@@ -445,7 +445,7 @@ export default function DocumentsTab({
               type="button"
               onClick={() => photoInputRef.current?.click()}
               disabled={isUploadingDoc}
-              className="w-full py-10 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+              className="w-full py-10 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
             >
               <BiImages className="mx-auto text-slate-300 mb-2" size={32} />
               <p className="text-sm font-semibold text-slate-500">
@@ -459,7 +459,7 @@ export default function DocumentsTab({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {photos.map((doc) => (
                 <div key={doc.id} className="space-y-1.5">
-                  <div className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                  <div className="group relative aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={doc.url}
@@ -500,10 +500,10 @@ export default function DocumentsTab({
       </section>
 
       {/* Documents list */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+      <section className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
               <BiFile size={20} />
             </div>
             <div>
@@ -528,7 +528,7 @@ export default function DocumentsTab({
               type="button"
               onClick={() => localDocInputRef.current?.click()}
               disabled={isUploadingDoc}
-              className="w-full py-10 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+              className="w-full py-10 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
             >
               <BiFile className="mx-auto text-slate-300 mb-2" size={32} />
               <p className="text-sm font-semibold text-slate-500">
@@ -543,10 +543,10 @@ export default function DocumentsTab({
               {otherDocs.map((doc) => (
                 <Card
                   key={doc.id}
-                  className="group p-4 bg-white border-slate-200/80 shadow-sm hover:shadow-md hover:border-primary/20 transition-all !rounded-xl"
+                  className="group p-4 bg-white border-slate-200/80 shadow-sm hover:shadow-md hover:border-primary/20 transition-all !rounded-lg"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                       <BiFile size={24} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -632,7 +632,7 @@ export default function DocumentsTab({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={() => setSelectedDoc(null)}
           />
-          <div className="relative w-full max-w-5xl bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
+          <div className="relative w-full max-w-5xl bg-white rounded-lg overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50 gap-3">
               <div className="min-w-0">
                 <h3 className="text-lg font-bold text-slate-800 font-grotesk truncate">
@@ -653,14 +653,14 @@ export default function DocumentsTab({
                   download
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 border border-slate-200"
+                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-lg flex items-center gap-1.5 border border-slate-200"
                 >
                   <BiDownload size={14} /> Download
                 </a>
                 <button
                   type="button"
                   onClick={() => setSelectedDoc(null)}
-                  className="w-10 h-10 rounded-xl bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center border border-slate-200"
+                  className="w-10 h-10 rounded-lg bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center border border-slate-200"
                 >
                   <BiX size={20} />
                 </button>
@@ -673,12 +673,12 @@ export default function DocumentsTab({
                 <img
                   src={selectedDoc.url}
                   alt={selectedDoc.type}
-                  className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-md bg-white p-2"
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md bg-white p-2"
                 />
               ) : selectedDoc.mimeType?.includes("pdf") ||
                 selectedDoc.url?.endsWith(".pdf") ? (
                 <div className="flex flex-col items-center gap-4 w-full">
-                  <div className="flex items-center justify-between w-full max-w-2xl bg-white px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
+                  <div className="flex items-center justify-between w-full max-w-2xl bg-white px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-700">
                     <div className="flex gap-2">
                       <button
                         type="button"
@@ -764,7 +764,7 @@ export default function DocumentsTab({
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-bold text-xs rounded-xl"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-bold text-xs rounded-lg"
                   >
                     <BiDownload size={16} /> Download file
                   </a>

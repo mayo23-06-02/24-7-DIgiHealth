@@ -1,9 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
 import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
-import { BiClinic, BiNote, BiPlus, BiTime, BiVideo } from "react-icons/bi";
+import {
+  BiChevronLeft,
+  BiChevronRight,
+  BiClinic,
+  BiNote,
+  BiPlus,
+  BiTime,
+  BiVideo,
+} from "react-icons/bi";
 import type { PatientConsultation } from "./types";
 
 interface ClinicalTimelineProps {
@@ -14,6 +22,8 @@ interface ClinicalTimelineProps {
   onOpenSoap: (consultationId: string, patientName: string) => void;
 }
 
+const PAGE_SIZE = 5;
+
 export default function ClinicalTimeline({
   consultations,
   patientName,
@@ -21,6 +31,19 @@ export default function ClinicalTimeline({
   onToggle,
   onOpenSoap,
 }: ClinicalTimelineProps) {
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [consultations]);
+
+  const totalPages = Math.max(1, Math.ceil(consultations.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = consultations.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
@@ -49,7 +72,7 @@ export default function ClinicalTimeline({
             </p>
           </div>
         ) : (
-          consultations.map((c) => (
+          pageItems.map((c) => (
             <div key={c.id} className="group">
               <div
                 className="px-6 py-5 flex items-center gap-6 hover:bg-slate-50 transition-colors cursor-pointer"
@@ -149,6 +172,32 @@ export default function ClinicalTimeline({
           ))
         )}
       </div>
+
+      {consultations.length > PAGE_SIZE && (
+        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+          <p className="text-xs font-bold text-slate-500 tracking-normal">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="w-9 h-9 rounded-lg bg-white border border-slate-100 text-slate-500 hover:text-primary hover:border-primary/20 transition-all flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <BiChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="w-9 h-9 rounded-lg bg-white border border-slate-100 text-slate-500 hover:text-primary hover:border-primary/20 transition-all flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <BiChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

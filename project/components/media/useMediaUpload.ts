@@ -68,6 +68,7 @@ export function useMediaUpload() {
           ? "/api/media/sign-upload-public"
           : "/api/media/sign-upload";
 
+        console.log("[useMediaUpload] Attempting sign upload for:", file.name);
         const signRes = await fetch(signEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -87,8 +88,10 @@ export function useMediaUpload() {
         });
 
         const signJson = await signRes.json().catch(() => ({}));
+        console.log("[useMediaUpload] Sign response status:", signRes.status, "data:", signJson);
 
         if (!signRes.ok) {
+          console.log("[useMediaUpload] Sign upload failed, falling back to server upload");
           // Fallback: server multipart (auth only)
           if (!options.publicRegistration) {
             return await uploadViaServer(file, options, onProgress);
@@ -154,6 +157,7 @@ async function uploadViaServer(
   options: UploadOptions,
   onProgress: (p: number) => void,
 ): Promise<UploadedMedia> {
+  console.log("[uploadViaServer] Starting server upload for:", file.name, "size:", file.size, "type:", file.type);
   const form = new FormData();
   form.append("file", file);
   form.append("purpose", options.purpose);
@@ -166,6 +170,7 @@ async function uploadViaServer(
   onProgress(20);
   const res = await fetch("/api/media/upload", { method: "POST", body: form });
   const json = await res.json().catch(() => ({}));
+  console.log("[uploadViaServer] Response status:", res.status, "data:", json);
   if (!res.ok) throw new Error(json.error || "Server upload failed");
   onProgress(100);
   return json.data as UploadedMedia;

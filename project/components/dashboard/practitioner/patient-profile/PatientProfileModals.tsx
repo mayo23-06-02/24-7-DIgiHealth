@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { BiErrorCircle, BiInfoCircle } from "react-icons/bi";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -17,6 +18,7 @@ interface PatientProfileModalsProps {
   isPrescriptionOpen: boolean;
   prescriptionForm: PrescriptionFormState;
   prescriptionFile: File | null;
+  prescriptionFileError?: string | null;
   onPrescriptionFormChange: (next: PrescriptionFormState) => void;
   onPrescriptionFileChange: (file: File | null) => void;
   onClosePrescription: () => void;
@@ -45,6 +47,7 @@ export default function PatientProfileModals({
   isPrescriptionOpen,
   prescriptionForm,
   prescriptionFile,
+  prescriptionFileError,
   onPrescriptionFormChange,
   onPrescriptionFileChange,
   onClosePrescription,
@@ -129,21 +132,28 @@ export default function PatientProfileModals({
               </label>
               <input
                 type="file"
-                accept=".pdf,image/*,.doc,.docx"
+                accept=".pdf,image/jpeg,image/png,image/webp,image/gif,.doc,.docx"
                 onChange={(e) =>
                   onPrescriptionFileChange(e.target.files?.[0] || null)
                 }
                 className="block w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary/10 file:text-primary file:font-bold hover:file:bg-primary/20"
                 required
               />
-              {prescriptionFile && (
+              {prescriptionFileError ? (
+                <p className="flex items-start gap-1.5 text-xs text-rose-600 font-semibold">
+                  <BiErrorCircle size={14} className="shrink-0 mt-0.5" />
+                  {prescriptionFileError}
+                </p>
+              ) : prescriptionFile ? (
                 <p className="text-xs text-emerald-700 font-semibold">
                   Attached: {prescriptionFile.name}
                 </p>
-              )}
-              <p className="text-[11px] text-slate-500">
-                Required for pharmacy use (letterhead with registration / legal
-                details).
+              ) : null}
+              <p className="flex items-start gap-1.5 text-[11px] text-slate-500">
+                <BiInfoCircle size={13} className="shrink-0 mt-0.5" />
+                PDF, Word (.doc/.docx), or image (JPG/PNG/WebP/GIF). Max 15MB
+                (10MB for images). Required for pharmacy use (letterhead with
+                registration / legal details).
               </p>
             </div>
           </div>
@@ -155,7 +165,8 @@ export default function PatientProfileModals({
               disabled={
                 actionLoading ||
                 !prescriptionForm.medicationName ||
-                !prescriptionFile
+                !prescriptionFile ||
+                !!prescriptionFileError
               }
             >
               {actionLoading ? "Issuing..." : "Confirm & Issue Prescription"}

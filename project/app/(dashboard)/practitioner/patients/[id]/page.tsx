@@ -11,6 +11,7 @@ import PatientHealthRecord from "@/components/dashboard/shared/PatientHealthReco
 import BookingModal from "@/components/doctor/BookingModal";
 import { toast } from "react-hot-toast";
 import { BiLoader, BiUser } from "react-icons/bi";
+import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
 import {
   ClinicalTimeline,
   PatientClinicalSidebar,
@@ -47,6 +48,9 @@ export default function PatientProfilePage() {
       refillsRemaining: 0,
     });
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
+  const [prescriptionFileError, setPrescriptionFileError] = useState<
+    string | null
+  >(null);
   const [updateFormData, setUpdateFormData] = useState<ClinicalUpdateFormState>(
     {
       medicalHistory: "",
@@ -162,8 +166,54 @@ export default function PatientProfilePage() {
     setActionLoading(false);
   };
 
+  const PRESCRIPTION_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+  ];
+  const PRESCRIPTION_ALLOWED_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ...PRESCRIPTION_IMAGE_TYPES,
+  ];
+  const PRESCRIPTION_MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+  const PRESCRIPTION_MAX_DOC_SIZE = 15 * 1024 * 1024;
+
+  const handlePrescriptionFileChange = (file: File | null) => {
+    if (!file) {
+      setPrescriptionFile(null);
+      setPrescriptionFileError(null);
+      return;
+    }
+    const effectiveType = file.type || inferMimeFromFileName(file.name) || "";
+    const isImage = PRESCRIPTION_IMAGE_TYPES.includes(effectiveType);
+    if (!PRESCRIPTION_ALLOWED_TYPES.includes(effectiveType)) {
+      setPrescriptionFile(null);
+      setPrescriptionFileError(
+        "Unsupported file type. Use PDF, Word (.doc/.docx), or an image (JPG/PNG/WebP/GIF).",
+      );
+      return;
+    }
+    const max = isImage ? PRESCRIPTION_MAX_IMAGE_SIZE : PRESCRIPTION_MAX_DOC_SIZE;
+    if (file.size > max) {
+      setPrescriptionFile(null);
+      setPrescriptionFileError(
+        `File is too large — max ${isImage ? "10MB" : "15MB"} for this file type.`,
+      );
+      return;
+    }
+    setPrescriptionFile(file);
+    setPrescriptionFileError(null);
+  };
+
   const handlePrescriptionSubmit = async () => {
     if (!patient || !prescriptionForm.medicationName) return;
+    if (prescriptionFileError) {
+      toast.error(prescriptionFileError);
+      return;
+    }
     if (!prescriptionFile) {
       toast.error(
         "Attach the formal prescription PDF/image (letterhead) so the patient can take it to a pharmacy.",
@@ -201,6 +251,7 @@ export default function PatientProfilePage() {
           refillsRemaining: 0,
         });
         setPrescriptionFile(null);
+        setPrescriptionFileError(null);
         const refreshRes = await fetch(`/api/practitioner/patients/${id}`);
         const refreshData = await refreshRes.json();
         if (refreshData.success) setPatient(refreshData.data);
@@ -440,11 +491,13 @@ export default function PatientProfilePage() {
         isPrescriptionOpen={isPrescriptionModalOpen}
         prescriptionForm={prescriptionForm}
         prescriptionFile={prescriptionFile}
+        prescriptionFileError={prescriptionFileError}
         onPrescriptionFormChange={setPrescriptionForm}
-        onPrescriptionFileChange={setPrescriptionFile}
+        onPrescriptionFileChange={handlePrescriptionFileChange}
         onClosePrescription={() => {
           setIsPrescriptionModalOpen(false);
           setPrescriptionFile(null);
+          setPrescriptionFileError(null);
         }}
         onSubmitPrescription={handlePrescriptionSubmit}
         isVitalsOpen={isVitalsModalOpen}

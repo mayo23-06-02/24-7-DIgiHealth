@@ -58,7 +58,7 @@ export default function AdminAnalyticsPage() {
         subtitle="Trends across users, consultations, and revenue"
         right={
           <div className="flex gap-2 items-center">
-            <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
+            <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
               {[7, 30, 90].map((d) => (
                 <button
                   key={d}
