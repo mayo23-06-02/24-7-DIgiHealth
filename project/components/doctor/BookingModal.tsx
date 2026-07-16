@@ -89,6 +89,7 @@ export default function BookingModal({
   const [consultType, setConsultType] = useState("video");
   const [daySlots, setDaySlots] = useState<BookingSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
 
   const [selectedDoctorState, setSelectedDoctorState] = useState<Doctor | null>(
     null,
@@ -156,11 +157,13 @@ export default function BookingModal({
     if (!isOpen || !showDateTime) return;
     if (!slotsPractitionerId || !selectedDate) {
       setDaySlots([]);
+      setSlotsError(null);
       return;
     }
 
     let cancelled = false;
     setSlotsLoading(true);
+    setSlotsError(null);
     void (async () => {
       try {
         const result = await fetchDaySlots({
@@ -185,6 +188,7 @@ export default function BookingModal({
           setDaySlots([]);
           if (!result.success && result.error) {
             console.warn("[BookingModal] slots:", result.error);
+            setSlotsError(result.error);
           }
         }
       } finally {
@@ -691,6 +695,11 @@ export default function BookingModal({
                 onSelect={setSelectedTime}
                 loading={slotsLoading}
                 durationMinutes={isPractitionerMode ? durationMinutes : 30}
+                emptyMessage={
+                  slotsError
+                    ? `Couldn't load available times: ${slotsError}`
+                    : undefined
+                }
               />
             )}
           </div>
