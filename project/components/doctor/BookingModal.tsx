@@ -89,6 +89,7 @@ export default function BookingModal({
   const [consultType, setConsultType] = useState("video");
   const [daySlots, setDaySlots] = useState<BookingSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
 
   const [selectedDoctorState, setSelectedDoctorState] = useState<Doctor | null>(
     null,
@@ -142,6 +143,7 @@ export default function BookingModal({
       setDoctorSearch("");
       setPatientSearch(patient?.name || "");
       setDaySlots([]);
+      setSlotsError(null);
       if (isPractitionerMode) {
         setSelectedPatientState(patient || null);
       } else {
@@ -156,6 +158,7 @@ export default function BookingModal({
     if (!isOpen || !showDateTime) return;
     if (!slotsPractitionerId || !selectedDate) {
       setDaySlots([]);
+      setSlotsError(null);
       return;
     }
 
@@ -173,6 +176,7 @@ export default function BookingModal({
         if (cancelled) return;
         if (result.success && result.data?.slots) {
           setDaySlots(result.data.slots);
+          setSlotsError(null);
           setSelectedTime((prev) => {
             if (!prev) return prev;
             const norm = normaliseTime(prev);
@@ -182,10 +186,19 @@ export default function BookingModal({
             return stillOk ? norm : "";
           });
         } else {
+          // A failed fetch (auth expiry, network error, server error) is NOT
+          // the same as a genuinely empty day — don't lie and say there are
+          // no slots. Surface the real problem so the user can retry/re-login.
           setDaySlots([]);
-          if (!result.success && result.error) {
-            console.warn("[BookingModal] slots:", result.error);
-          }
+          const rawError = (!result.success && result.error) || "";
+          const message =
+            rawError.toLowerCase() === "unauthorized"
+              ? "Your session has expired. Please refresh and log in again."
+              : rawError
+                ? `Couldn't load availability: ${rawError}`
+                : "Couldn't load availability for this date. Please try again.";
+          setSlotsError(message);
+          console.warn("[BookingModal] slots:", rawError || message);
         }
       } finally {
         if (!cancelled) setSlotsLoading(false);
@@ -691,6 +704,7 @@ export default function BookingModal({
                 onSelect={setSelectedTime}
                 loading={slotsLoading}
                 durationMinutes={isPractitionerMode ? durationMinutes : 30}
+                emptyMessage={slotsError || undefined}
               />
             )}
           </div>
