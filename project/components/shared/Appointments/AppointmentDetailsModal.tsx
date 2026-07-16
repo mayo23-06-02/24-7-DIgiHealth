@@ -68,6 +68,18 @@ export default function AppointmentDetailsModal({
   const profileId = isDoctor ? appointment.patientId : appointment.practitionerId;
   const profileLabel = isDoctor ? "Patient" : "Doctor";
 
+  // Accept is a two-party handshake: only whoever didn't make the last move
+  // (the original request, or a later reschedule) can accept it.
+  const isRecipient = appointment.requestedTo
+    ? (userType === "patient" && appointment.requestedTo === appointment.patientId) ||
+      (userType === "practitioner" && appointment.requestedTo === appointment.practitionerId)
+    : userType === "practitioner"; // legacy default
+  const isRequestStage =
+    appointment.status === "requested" ||
+    appointment.status === "pending" ||
+    appointment.computedStatus === "requests";
+  const canAcceptNow = isRequestStage && isRecipient;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Appointment Details" width="lg">
       <div className="space-y-6">
@@ -252,93 +264,86 @@ export default function AppointmentDetailsModal({
             </Button>
           )}
 
-          {/* Practitioner: can accept/decline inbound requests */}
-          {isDoctor &&
-            (appointment.status === "requested" ||
-              appointment.status === "pending" ||
-              appointment.computedStatus === "requests") && (
-              <>
-                <Button
-                  fullWidth
-                  onClick={() =>
-                    onAccept?.(
-                      appointment.id || appointment.consultationId || "",
-                    )
-                  }
-                  loading={
-                    actionLoading ===
-                    (appointment.id || appointment.consultationId)
-                  }
-                >
-                  Accept Request
-                </Button>
-                <Button
-                  fullWidth
-                  variant="secondary"
-                  onClick={() =>
-                    onDecline?.(
-                      appointment.id || appointment.consultationId || "",
-                    )
-                  }
-                  loading={
-                    actionLoading ===
-                    (appointment.id || appointment.consultationId)
-                  }
-                >
-                  Decline Request
-                </Button>
-                <Button
-                  fullWidth
-                  variant="outline"
-                  onClick={() =>
-                    onReschedule?.(
-                      appointment.id || appointment.consultationId || "",
-                    )
-                  }
-                >
-                  Reschedule
-                </Button>
-              </>
-            )}
+          {/* Only whoever isn't waiting on the other party can accept/decline */}
+          {canAcceptNow && (
+            <>
+              <Button
+                fullWidth
+                onClick={() =>
+                  onAccept?.(
+                    appointment.id || appointment.consultationId || "",
+                  )
+                }
+                loading={
+                  actionLoading ===
+                  (appointment.id || appointment.consultationId)
+                }
+              >
+                Accept Request
+              </Button>
+              <Button
+                fullWidth
+                variant="secondary"
+                onClick={() =>
+                  onDecline?.(
+                    appointment.id || appointment.consultationId || "",
+                  )
+                }
+                loading={
+                  actionLoading ===
+                  (appointment.id || appointment.consultationId)
+                }
+              >
+                Decline Request
+              </Button>
+              <Button
+                fullWidth
+                variant="outline"
+                onClick={() =>
+                  onReschedule?.(
+                    appointment.id || appointment.consultationId || "",
+                  )
+                }
+              >
+                Reschedule
+              </Button>
+            </>
+          )}
 
-          {/* Patient: cannot accept their own request — only reschedule or cancel */}
-          {!isDoctor &&
-            (appointment.status === "requested" ||
-              appointment.status === "pending" ||
-              appointment.computedStatus === "requests") && (
-              <>
-                <p className="text-xs text-slate-500 text-center -mt-1 mb-1">
-                  Waiting for the practitioner to accept. You can reschedule or
-                  cancel this request.
-                </p>
-                <Button
-                  fullWidth
-                  variant="outline"
-                  onClick={() =>
-                    onReschedule?.(
-                      appointment.id || appointment.consultationId || "",
-                    )
-                  }
-                >
-                  Reschedule
-                </Button>
-                <Button
-                  fullWidth
-                  variant="secondary"
-                  onClick={() =>
-                    onCancel?.(
-                      appointment.id || appointment.consultationId || "",
-                    )
-                  }
-                  loading={
-                    actionLoading ===
-                    (appointment.id || appointment.consultationId)
-                  }
-                >
-                  Cancel request
-                </Button>
-              </>
-            )}
+          {isRequestStage && !canAcceptNow && (
+            <>
+              <p className="text-xs text-slate-500 text-center -mt-1 mb-1">
+                Waiting for the other party to accept. You can reschedule or
+                cancel this request.
+              </p>
+              <Button
+                fullWidth
+                variant="outline"
+                onClick={() =>
+                  onReschedule?.(
+                    appointment.id || appointment.consultationId || "",
+                  )
+                }
+              >
+                Reschedule
+              </Button>
+              <Button
+                fullWidth
+                variant="secondary"
+                onClick={() =>
+                  onCancel?.(
+                    appointment.id || appointment.consultationId || "",
+                  )
+                }
+                loading={
+                  actionLoading ===
+                  (appointment.id || appointment.consultationId)
+                }
+              >
+                Cancel request
+              </Button>
+            </>
+          )}
 
           {(appointment.status === "scheduled" ||
             appointment.computedStatus === "upcoming") && (
