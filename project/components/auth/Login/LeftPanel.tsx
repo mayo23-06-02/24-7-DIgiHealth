@@ -64,17 +64,13 @@ export default function LeftPanel({
         </div>
       )}
 
-      {/* Registration success (if they land here without verifying) */}
+      {/* Registration success */}
       {isRegistered && !isVerified && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm font-bold text-center animate-in fade-in zoom-in-95 duration-500">
-          Account created.{" "}
-          <Link
-            href={`/verify-email${prefillEmail ? `?email=${encodeURIComponent(prefillEmail)}` : ""}`}
-            className="underline text-primary"
-          >
-            Verify your email
-          </Link>{" "}
-          before signing in.
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 duration-500">
+          <span className="w-5 h-5 rounded-lg bg-emerald-100 flex items-center justify-center">
+            ✓
+          </span>
+          Account created! Sign in with your password to continue.
         </div>
       )}
 

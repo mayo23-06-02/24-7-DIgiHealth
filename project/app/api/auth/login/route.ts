@@ -6,10 +6,8 @@ import { SignJWT } from "jose";
 
 /**
  * POST /api/auth/login
- * Password login. Blocks when emailVerified === false
- * (new accounts must complete /verify-email first).
- *
- * Legacy users without emailVerified field are treated as verified.
+ * Password login. No email verification gate — any active account
+ * with a matching password can sign in.
  */
 export async function POST(request: Request) {
   try {
@@ -39,21 +37,6 @@ export async function POST(request: Request) {
     if (user.status === "suspended") {
       return NextResponse.json(
         { error: "Account is suspended. Contact support." },
-        { status: 403 },
-      );
-    }
-
-    // Explicit false only — undefined/null (legacy seed users) allowed through
-    if (user.emailVerified === false) {
-      return NextResponse.json(
-        {
-          error:
-            "Please verify your email before signing in. Check your inbox for a code, or request a new one.",
-          emailVerified: false,
-          requiresEmailVerification: true,
-          email: user.email,
-          userId: user._id.toString(),
-        },
         { status: 403 },
       );
     }

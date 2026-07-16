@@ -33,18 +33,6 @@ export function useLogin() {
         return;
       }
 
-      // Unverified email — send user to verify page
-      if (
-        res.status === 403 &&
-        (data.requiresEmailVerification || data.emailVerified === false)
-      ) {
-        const email = (data.email || identifier || "").toString().trim();
-        router.push(
-          `/verify-email?email=${encodeURIComponent(email)}&from=login`,
-        );
-        return;
-      }
-
       setError(data.error || "Login failed");
     } catch {
       setError("Network error");

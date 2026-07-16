@@ -14,11 +14,11 @@ import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
 
 /**
  * POST /api/auth/register
- * Creates DigiHealth account (password). Email is unverified until
- * the user clicks the Supabase magic/sign-in link from /verify-email.
+ * Creates DigiHealth account (password). No email verification step —
+ * the account is active immediately and can log in right away.
  *
  * Body: { role, formData }
- * Does NOT issue a session JWT — user must verify email then login.
+ * Does NOT issue a session JWT — user logs in separately after registering.
  */
 export async function POST(request: Request) {
   try {
@@ -101,8 +101,8 @@ export async function POST(request: Request) {
       saId: formData.saId,
       mobile: phone?.e164 || formData.mobile,
       phoneE164: phone?.e164,
-      status: "pending_verification" as any,
-      emailVerified: false,
+      status: "active" as any,
+      emailVerified: true,
       mfaEnabled: false,
     } as any);
 
@@ -224,8 +224,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Account created. Please verify your email to continue.",
-      requiresEmailVerification: true,
+      message: "Account created. You can now log in.",
       userId: newUser._id.toString(),
       email: formEmail,
       user: {
@@ -233,7 +232,7 @@ export async function POST(request: Request) {
         role: newUser.role,
         email: formEmail,
         firstName: newUser.firstName,
-        emailVerified: false,
+        emailVerified: true,
       },
     });
   } catch (error: any) {

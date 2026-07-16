@@ -143,9 +143,9 @@ export function useRegistrationWizard(role: string) {
         .toString()
         .trim()
         .toLowerCase();
-      // Account created — user must verify email before login
+      // Account created — no verification needed, go straight to login
       router.push(
-        `/verify-email?email=${encodeURIComponent(email)}&registered=1`,
+        `/login?email=${encodeURIComponent(email)}&registered=true`,
       );
     } catch (err: any) {
       setGlobalError(err.message ?? "Submission failed. Please try again.");
