@@ -11,62 +11,64 @@ export default function CallNotification() {
 
   // Preload audio on component mount for all browsers/OS
   useEffect(() => {
-    if (!audioRef.current) {
-      // Create audio element with preloading
-      audioRef.current = new Audio();
-      audioRef.current.preload = "auto";
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.9;
+    if (audioRef.current) return;
 
-      // Try multiple formats for better browser compatibility
-      // MP3 is widely supported, M4A for Safari, OGG for Firefox
-      const audioSources = [
-        "ringtone.mp3",
-        "ringtone.m4a",
-        "ringtone.ogg",
-        "notification.mp3",
-        "notification.m4a",
-      ];
+    // Create audio element with preloading
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.loop = true;
+    audio.volume = 0.9;
+    audioRef.current = audio;
 
-      // Try to load the first available format
-      let loaded = false;
-      for (const src of audioSources) {
-        try {
-          audioRef.current.src = src;
-          audioRef.current.load();
-          loaded = true;
-          console.log(`[CallNotification] Preloaded audio: ${src}`);
-          break;
-        } catch (e) {
-          console.warn(`[CallNotification] Failed to load ${src}:`, e);
-        }
-      }
+    // Absolute (site-root) paths so they resolve correctly from any route —
+    // a relative path like "ringtone.mp3" 404s on any page not served at "/".
+    // Ordered by what actually exists in /public first, with extra formats
+    // as future-proofing for browsers that reject the primary format.
+    const audioSources = [
+      "/ringtone.m4a",
+      "/notification.m4a",
+      "/ringtone.mp3",
+      "/ringtone.ogg",
+      "/notification.mp3",
+    ];
 
-      if (loaded) {
-        setAudioReady(true);
-      }
+    let sourceIndex = 0;
 
-      // Handle audio loading events
-      const handleCanPlay = () => {
-        setAudioReady(true);
-        console.log("[CallNotification] Audio ready to play");
-      };
-
-      const handleError = (e: Event) => {
-        console.error("[CallNotification] Audio load error:", e);
+    // Real fallback chain: on load failure, advance to the next candidate
+    // instead of silently giving up after the first (previously untested) source.
+    const tryNextSource = () => {
+      if (sourceIndex >= audioSources.length) {
+        console.error("[CallNotification] No playable ringtone source found");
         setAudioReady(false);
-      };
+        return;
+      }
+      const src = audioSources[sourceIndex];
+      sourceIndex += 1;
+      audio.src = src;
+      audio.load();
+    };
 
-      audioRef.current.addEventListener("canplay", handleCanPlay);
-      audioRef.current.addEventListener("error", handleError);
+    const handleCanPlay = () => {
+      setAudioReady(true);
+      console.log(`[CallNotification] Ringtone ready: ${audio.currentSrc || audio.src}`);
+    };
 
-      return () => {
-        if (audioRef.current) {
-          audioRef.current.removeEventListener("canplay", handleCanPlay);
-          audioRef.current.removeEventListener("error", handleError);
-        }
-      };
-    }
+    const handleError = () => {
+      console.warn(`[CallNotification] Failed to load ${audio.src}, trying next source`);
+      tryNextSource();
+    };
+
+    audio.addEventListener("canplaythrough", handleCanPlay);
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("error", handleError);
+
+    tryNextSource();
+
+    return () => {
+      audio.removeEventListener("canplaythrough", handleCanPlay);
+      audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("error", handleError);
+    };
   }, []);
 
   // Play/pause audio based on incoming call state
