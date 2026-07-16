@@ -19,6 +19,11 @@ export interface Appointment {
   isNew?: boolean;
   computedStatus?: string;
   duration?: string;
+  pendingReschedule?: {
+    proposedStart: string;
+    proposedEnd: string;
+    proposedByMe: boolean;
+  } | null;
 }
 
 export function useAppointments(fetchUrl: string) {

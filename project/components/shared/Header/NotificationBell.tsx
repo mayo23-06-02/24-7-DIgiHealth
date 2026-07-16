@@ -96,6 +96,47 @@ export default function NotificationBell({
     fetchNotifications();
   };
 
+  const handleRescheduleAction = async (
+    notif: Notification,
+    action: "accept" | "decline",
+  ) => {
+    const consultationId = notif.data?.consultationId;
+    if (!consultationId) return;
+    try {
+      const res = await fetch(`/api/bookings/${consultationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          action === "accept"
+            ? { acceptReschedule: true }
+            : { declineReschedule: true },
+        ),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(
+          action === "accept"
+            ? "New time confirmed"
+            : "Reschedule declined — original time kept",
+        );
+        window.dispatchEvent(new Event("appointments:changed"));
+      } else {
+        toast.error(json.error || "Unable to respond to reschedule");
+      }
+    } catch {
+      toast.error("Unable to respond to reschedule");
+    } finally {
+      if (!notif.isRead) {
+        await fetch("/api/notifications", {
+          method: "PATCH",
+          body: JSON.stringify({ id: notif._id }),
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      fetchNotifications();
+    }
+  };
+
   const handleNotifClick = async (notif: Notification) => {
     if (!notif.isRead) {
       await fetch("/api/notifications", {
@@ -199,6 +240,28 @@ export default function NotificationBell({
                         <p className="text-xs text-slate-500 truncate">
                           {notif.body}
                         </p>
+                        {notif.type === "appointment_reschedule_request" && (
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRescheduleAction(notif, "accept");
+                              }}
+                              className="flex-1 rounded-md bg-primary px-3 py-1.5 text-[11px] font-bold text-white hover:opacity-90 transition-opacity"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRescheduleAction(notif, "decline");
+                              }}
+                              className="flex-1 rounded-md border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))
@@ -265,19 +328,45 @@ export default function NotificationBell({
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  {selectedNotif.type?.includes("appointment") && (
-                    <Link
-                      href={`/${user?.role}/appointments?tab=requests`}
-                      className="w-full"
-                      onClick={() => {
-                        setIsDetailOpen(false);
-                        setIsOpen(false);
-                      }}
-                    >
-                      <Button className="py-2" fullWidth size="lg">
-                        Manage Appointment
+                  {selectedNotif.type === "appointment_reschedule_request" ? (
+                    <div className="flex gap-3">
+                      <Button
+                        variant="white"
+                        className="py-2"
+                        fullWidth
+                        size="lg"
+                        onClick={() =>
+                          handleRescheduleAction(selectedNotif, "decline")
+                        }
+                      >
+                        Decline
                       </Button>
-                    </Link>
+                      <Button
+                        className="py-2"
+                        fullWidth
+                        size="lg"
+                        onClick={() =>
+                          handleRescheduleAction(selectedNotif, "accept")
+                        }
+                      >
+                        Accept new time
+                      </Button>
+                    </div>
+                  ) : (
+                    selectedNotif.type?.includes("appointment") && (
+                      <Link
+                        href={`/${user?.role}/appointments?tab=requests`}
+                        className="w-full"
+                        onClick={() => {
+                          setIsDetailOpen(false);
+                          setIsOpen(false);
+                        }}
+                      >
+                        <Button className="py-2" fullWidth size="lg">
+                          Manage Appointment
+                        </Button>
+                      </Link>
+                    )
                   )}
                   {(selectedNotif.type?.includes("prescription") ||
                     selectedNotif.type?.includes("clinical_record")) && (

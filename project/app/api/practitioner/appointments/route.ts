@@ -98,6 +98,7 @@ export async function GET(req: NextRequest) {
             (c as any).callMinutesUsed ||
             0,
         );
+        const pending = (c as any).pendingReschedule;
 
         return {
           id: c._id.toString(),
@@ -116,6 +117,13 @@ export async function GET(req: NextRequest) {
           riskFactors: c.clinicalRisk?.factors || [],
           soapNotes: c.soapNotes,
           aiRecommendations: (c as any).aiRecommendations || [],
+          pendingReschedule: pending
+            ? {
+                proposedStart: pending.proposedStart,
+                proposedEnd: pending.proposedEnd,
+                proposedByMe: pending.proposedBy?.toString() === practitionerId,
+              }
+            : null,
         };
       })
     );

@@ -9,6 +9,9 @@ export type BookingNotificationEvent =
   | "declined"
   | "cancelled"
   | "rescheduled"
+  | "reschedule_requested"
+  | "reschedule_accepted"
+  | "reschedule_declined"
   | "updated"
   | "expired";
 
@@ -23,6 +26,8 @@ export interface BookingNotifyContext {
   type?: string;
   /** Optional extra detail for generic updates */
   changeSummary?: string;
+  /** Only set for reschedule_requested — the proposed end time */
+  proposedEnd?: Date | string;
 }
 
 function formatWhen(date: Date | string): string {
@@ -131,6 +136,12 @@ export async function notifyBookingEvent(
       practitionerId: String(ctx.practitionerId),
       event,
       type: ctx.type || "video",
+      ...(ctx.proposedEnd
+        ? {
+            proposedStart: ctx.scheduledStart,
+            proposedEnd: ctx.proposedEnd,
+          }
+        : {}),
     };
 
     switch (event) {
@@ -219,6 +230,42 @@ export async function notifyBookingEvent(
           type: "appointment_rescheduled",
           title: "Appointment rescheduled",
           body: `${actorLabel} rescheduled the consultation to ${when}.`,
+          data,
+        });
+        break;
+      }
+
+      case "reschedule_requested": {
+        const recipient = otherPartyId(ctx);
+        await createNotification({
+          userId: recipient,
+          type: "appointment_reschedule_request",
+          title: "Reschedule request",
+          body: `${actorLabel} proposed moving your consultation to ${when}. Accept to confirm the new time.`,
+          data,
+        });
+        break;
+      }
+
+      case "reschedule_accepted": {
+        const recipient = otherPartyId(ctx);
+        await createNotification({
+          userId: recipient,
+          type: "appointment_reschedule_accepted",
+          title: "Reschedule accepted",
+          body: `${actorLabel} accepted your reschedule to ${when}.`,
+          data,
+        });
+        break;
+      }
+
+      case "reschedule_declined": {
+        const recipient = otherPartyId(ctx);
+        await createNotification({
+          userId: recipient,
+          type: "appointment_reschedule_declined",
+          title: "Reschedule declined",
+          body: `${actorLabel} declined your reschedule request to ${when}. The appointment stays at its original time.`,
           data,
         });
         break;

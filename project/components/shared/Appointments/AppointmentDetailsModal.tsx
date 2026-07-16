@@ -5,6 +5,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { BiVideo, BiChat, BiCalendar, BiTime, BiUser, BiUserPlus, BiNote } from "react-icons/bi";
 import { Appointment } from "@/lib/hooks/useAppointments";
+import PendingRescheduleBanner from "./PendingRescheduleBanner";
 
 interface Props {
   isOpen: boolean;
@@ -180,6 +181,11 @@ export default function AppointmentDetailsModal({
             </div>
           </div>
         </div>
+
+        <PendingRescheduleBanner
+          appointment={appointment}
+          onResponded={onClose}
+        />
 
         {/* Reason/Chief Complaint */}
         {appointment.reason && (

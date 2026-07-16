@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
 
     const enriched = consultations.map(c => {
       const prac = c.practitionerId as any;
+      const pending = (c as any).pendingReschedule;
       return {
         id: c._id.toString(),
         consultationId: c._id.toString(),
@@ -40,6 +41,13 @@ export async function GET(req: NextRequest) {
         type: c.type,
         reason: c.chiefComplaint,
         duration: '30 min',
+        pendingReschedule: pending
+          ? {
+              proposedStart: pending.proposedStart,
+              proposedEnd: pending.proposedEnd,
+              proposedByMe: pending.proposedBy?.toString() === userId,
+            }
+          : null,
       };
     });
 

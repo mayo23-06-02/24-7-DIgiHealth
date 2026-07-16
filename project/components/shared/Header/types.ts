@@ -15,6 +15,10 @@ export interface Notification {
     recordId?: string;
     fileUrl?: string;
     type?: string;
+    /** Present on appointment_reschedule_request notifications */
+    consultationId?: string;
+    proposedStart?: string;
+    proposedEnd?: string;
     [key: string]: unknown;
   };
 }
