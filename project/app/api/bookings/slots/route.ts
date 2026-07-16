@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
-import { PractitionerSchedule } from "@/lib/models/Scheduling";
 import {
   buildScheduleSlots,
   combineLocalDateTime,
@@ -16,9 +15,10 @@ import mongoose from "mongoose";
  *   ?practitionerId=...
  *   &date=YYYY-MM-DD
  *   &durationMinutes=30
- *   &excludeBookingId=...   (optional, when editing)
+ *   &excludeBookingId=...   (optional, when editing/rescheduling)
  *
  * Returns 8am–midnight slots with status: available | past | booked | unavailable
+ * Booked = real consultations only (schedule "booked" flags are not capacity).
  */
 export async function GET(req: NextRequest) {
   try {
@@ -51,68 +51,20 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Wide range for UTC / SAST storage drift on scheduledStartTime
     const dayStart = combineLocalDateTime(date, "00:00");
     const dayEnd = combineLocalDateTime(date, "23:59");
-    // Expand day bounds slightly for UTC storage drift
-    const rangeStart = new Date(dayStart.getTime() - 12 * 60 * 60 * 1000);
-    const rangeEnd = new Date(dayEnd.getTime() + 12 * 60 * 60 * 1000);
+    const rangeStart = new Date(dayStart.getTime() - 14 * 60 * 60 * 1000);
+    const rangeEnd = new Date(dayEnd.getTime() + 14 * 60 * 60 * 1000);
 
-    const [consultations, schedules] = await Promise.all([
-      Consultation.find({
-        practitionerId: new mongoose.Types.ObjectId(practitionerId),
-        status: { $in: ["requested", "pending", "scheduled", "in_progress"] },
-        scheduledStartTime: { $lt: rangeEnd },
-        scheduledEndTime: { $gt: rangeStart },
-      })
-        .select("_id scheduledStartTime scheduledEndTime")
-        .lean(),
-      PractitionerSchedule.find({
-        practitionerId: new mongoose.Types.ObjectId(practitionerId),
-        date: {
-          $gte: dayStart,
-          $lte: dayEnd,
-        },
-      })
-        .select("slots date")
-        .lean(),
-    ]);
-
-    // Also match schedules stored with date-only UTC midnight for that calendar day
-    let scheduleWindows:
-      | { startTime: string; endTime: string; status?: string }[]
-      | undefined;
-
-    if (schedules.length > 0) {
-      scheduleWindows = schedules.flatMap(
-        (s: any) =>
-          (s.slots || []).map((sl: any) => ({
-            startTime: sl.startTime,
-            endTime: sl.endTime,
-            status: sl.status,
-          })),
-      );
-    } else {
-      // Fallback: match by local date string comparison on stored dates
-      const allForPrac = await PractitionerSchedule.find({
-        practitionerId: new mongoose.Types.ObjectId(practitionerId),
-        date: {
-          $gte: new Date(`${date}T00:00:00.000Z`),
-          $lte: new Date(`${date}T23:59:59.999Z`),
-        },
-      })
-        .select("slots")
-        .lean();
-      if (allForPrac.length > 0) {
-        scheduleWindows = allForPrac.flatMap(
-          (s: any) =>
-            (s.slots || []).map((sl: any) => ({
-              startTime: sl.startTime,
-              endTime: sl.endTime,
-              status: sl.status,
-            })),
-        );
-      }
-    }
+    const consultations = await Consultation.find({
+      practitionerId: new mongoose.Types.ObjectId(practitionerId),
+      status: { $in: ["requested", "pending", "scheduled", "in_progress"] },
+      scheduledStartTime: { $lt: rangeEnd },
+      scheduledEndTime: { $gt: rangeStart },
+    })
+      .select("_id scheduledStartTime scheduledEndTime")
+      .lean();
 
     const bookings = consultations.map((c: any) => ({
       id: c._id.toString(),
@@ -124,9 +76,7 @@ export async function GET(req: NextRequest) {
       date,
       durationMinutes: durationMinutes || DEFAULT_SLOT_MINUTES,
       bookings,
-      // If no schedule row exists, full 8–24 operating day is open (minus past/booked)
-      scheduleWindows: scheduleWindows?.length ? scheduleWindows : undefined,
-      excludeBookingId,
+      excludeBookingId: excludeBookingId || null,
     });
 
     const summary = {
@@ -148,6 +98,7 @@ export async function GET(req: NextRequest) {
         durationMinutes: durationMinutes || DEFAULT_SLOT_MINUTES,
         slots,
         summary,
+        excludeBookingId: excludeBookingId || null,
       },
     });
   } catch (err: unknown) {

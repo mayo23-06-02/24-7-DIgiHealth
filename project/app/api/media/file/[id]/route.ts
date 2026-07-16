@@ -43,10 +43,60 @@ export async function GET(
         allowed = p === user.userId || d === user.userId;
       }
     }
+    // Linked patient may view practitioner-owned profile documents (vice versa)
+    if (
+      !allowed &&
+      user.role === "patient" &&
+      (asset.relatedType === "user_document" ||
+        asset.filePath.includes("/documents/") ||
+        asset.filePath.includes("/avatars/") ||
+        asset.filePath.startsWith(`users/${asset.userId}/`))
+    ) {
+      await connectToDatabase();
+      const { canPractitionerAccessPatient } = await import(
+        "@/lib/auth/canAccessPatient"
+      );
+      // Reuse same link rules: patient ↔ practitioner who have a relationship
+      allowed = await canPractitionerAccessPatient(
+        asset.userId,
+        user.userId,
+        "practitioner",
+      );
+    }
     // Prescriptions path: allow if related_type prescription and user is patient in path
     if (!allowed && asset.filePath.startsWith("prescriptions/")) {
       const patientFromPath = asset.filePath.split("/")[1];
       if (patientFromPath === user.userId) allowed = true;
+      // Linked practitioners can view scripts they issued / patient scripts
+      if (!allowed && (user.role === "practitioner" || user.role === "mega_admin")) {
+        await connectToDatabase();
+        const { canPractitionerAccessPatient } = await import(
+          "@/lib/auth/canAccessPatient"
+        );
+        allowed = await canPractitionerAccessPatient(
+          user.userId,
+          patientFromPath,
+          user.role,
+        );
+      }
+    }
+    // Patient profile documents: practitioners linked to the patient may view
+    if (
+      !allowed &&
+      (user.role === "practitioner" || user.role === "mega_admin") &&
+      (asset.relatedType === "user_document" ||
+        asset.filePath.includes("/documents/") ||
+        asset.filePath.startsWith(`users/${asset.userId}/`))
+    ) {
+      await connectToDatabase();
+      const { canPractitionerAccessPatient } = await import(
+        "@/lib/auth/canAccessPatient"
+      );
+      allowed = await canPractitionerAccessPatient(
+        user.userId,
+        asset.userId,
+        user.role,
+      );
     }
 
     if (!allowed) {

@@ -55,7 +55,7 @@ const tabConfig: Record<
     iconColor: "text-purple-600",
   },
   requests: {
-    label1: "Appointment",
+    label1: "Requests",
     label2: "Requests",
     icon: BiCalendarPlus,
     bgColor: "#fef3c7",

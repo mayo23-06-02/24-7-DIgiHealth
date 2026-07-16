@@ -26,6 +26,7 @@ export async function GET() {
       return NextResponse.json({
         heartRate: 75,
         weight: 70,
+        height: null,
         bp: "120/80",
         spO2: 98,
         description: "No recent records found"
@@ -35,6 +36,7 @@ export async function GET() {
     return NextResponse.json({
       heartRate: latest.vitalSigns?.heartRateBpm || 75,
       weight: latest.weightKg || 70,
+      height: latest.heightCm || null,
       bp: `${latest.vitalSigns?.systolicBP || 120}/${latest.vitalSigns?.diastolicBP || 80}`,
       spO2: latest.vitalSigns?.spO2 || 98,
       description: `Last recorded: ${new Date(latest.dateRecorded).toLocaleDateString()}`
@@ -60,7 +62,7 @@ export async function POST(req: Request) {
     const data = await req.json();
     const { heartRate, bloodPressure, bodyMass, glucose, vitalType, value, height } = data;
 
-    if (!vitalType && !heartRate && !bloodPressure && !bodyMass && !glucose) {
+    if (!vitalType && !heartRate && !bloodPressure && !bodyMass && !glucose && !height) {
       return NextResponse.json({ error: 'No vital data provided' }, { status: 400 });
     }
 
@@ -126,6 +128,7 @@ export async function POST(req: Request) {
     }
     if (bodyMass) record.weightKg = Number(bodyMass);
     if (glucose) (record as any).glucoseMmol = Number(glucose);
+    if (height) record.heightCm = Number(height);
 
     // Auto-calculate BMI if both are available
     if (record.weightKg && record.heightCm) {

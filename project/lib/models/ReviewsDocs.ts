@@ -31,6 +31,8 @@ export interface IMedicalDocument extends Document {
   mimeType: string;
   status: string;
   verifiedAt?: Date;
+  /** Free-text note/caption attached by the patient or a practitioner */
+  note?: string;
 }
 
 const MedicalDocumentSchema = new Schema<IMedicalDocument>({
@@ -42,7 +44,8 @@ const MedicalDocumentSchema = new Schema<IMedicalDocument>({
   mediaId: String,
   mimeType: String,
   status: String,
-  verifiedAt: Date
+  verifiedAt: Date,
+  note: String
 }, { timestamps: true });
 
 export const Review = mongoose.models.Review || mongoose.model<IReview>('Review', ReviewSchema);

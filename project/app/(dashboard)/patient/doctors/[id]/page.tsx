@@ -25,6 +25,12 @@ import Card from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
 
 import BookingModal from "@/components/doctor/BookingModal";
+import PatientFeedbackSection, {
+  type ReviewItem,
+} from "@/components/dashboard/patient/doctors/PatientFeedbackSection";
+import { fetchDaySlots, todayDateString, periodOfDay } from "@/lib/booking";
+
+type PeriodCounts = { Morning: number; Afternoon: number; Evening: number };
 
 export default function DoctorProfilePage() {
   const { id } = useParams();
@@ -32,6 +38,12 @@ export default function DoctorProfilePage() {
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
+  const [slotCounts, setSlotCounts] = useState<PeriodCounts>({
+    Morning: 0,
+    Afternoon: 0,
+    Evening: 0,
+  });
+  const [slotsLoading, setSlotsLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
@@ -51,6 +63,33 @@ export default function DoctorProfilePage() {
         setDoc(null);
       })
       .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    setSlotsLoading(true);
+    fetchDaySlots({
+      practitionerId: String(id),
+      date: todayDateString(),
+      durationMinutes: 30,
+    })
+      .then((result) => {
+        if (cancelled || !result.success || !result.data?.slots) return;
+        const counts: PeriodCounts = { Morning: 0, Afternoon: 0, Evening: 0 };
+        for (const slot of result.data.slots) {
+          if (slot.status !== "available") continue;
+          counts[periodOfDay(slot.time)]++;
+        }
+        setSlotCounts(counts);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setSlotsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   if (loading)
@@ -239,61 +278,26 @@ export default function DoctorProfilePage() {
             </div>
           </Card>
 
-          {/* REVIEWS PREVIEW */}
-          <div className="space-y-6">
-            <h4 className="text-sm font-bold text-slate-500  tracking-normal px-2 font-grotesk">
-              Patient Feedback
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {doc.reviews?.length > 0 ? (
-                doc.reviews.map((rev: any, i: number) => (
-                  <Card
-                    key={i}
-                    className="p-6 transition-all hover:border-primary/20"
-                    variant="solid"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
-                          {rev.patientName?.charAt(0) || "P"}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-800 leading-none mb-1">
-                            {rev.patientName}
-                          </p>
-                          <p className="text-[9px] text-slate-500 font-bold  tracking-normal">
-                            {new Date(rev.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex text-amber-400 gap-0.5">
-                        {[...Array(5)].map((_, idx) => (
-                          <BiStar
-                            key={idx}
-                            className={
-                              idx < rev.rating
-                                ? "fill-current"
-                                : "text-slate-200"
-                            }
-                            size={12}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500 font-bold leading-relaxed italic">
-                      "{rev.comment}"
-                    </p>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-2 text-center py-10 bg-slate-50 rounded-lg border border-dashed border-slate-200">
-                  <p className="text-xs font-bold text-slate-500">
-                    No patient feedback yet.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* PATIENT FEEDBACK */}
+          <PatientFeedbackSection
+            practitionerId={String(id)}
+            reviews={doc.reviews || []}
+            onReviewsUpdated={(revs: ReviewItem[]) =>
+              setDoc((prev: any) =>
+                prev
+                  ? {
+                      ...prev,
+                      reviews: revs,
+                      reviewCount: revs.length,
+                      rating: revs.length
+                        ? revs.reduce((sum, r) => sum + (r.rating || 0), 0) /
+                          revs.length
+                        : prev.rating,
+                    }
+                  : prev,
+              )
+            }
+          />
         </div>
 
         {/* SIDEBAR: ACCESS & AVAILABILITY */}
@@ -343,35 +347,23 @@ export default function DoctorProfilePage() {
               />
             </div>
             <div className="space-y-3">
-              {["09:00 AM", "10:30 AM", "11:45 AM", "02:00 PM"].map(
-                (slot: string) => (
-                  <div
-                    key={slot}
-                    className="flex items-center justify-between p-3 bg-slate-50/50 rounded-lg border border-slate-100/50 group hover:border-primary/20 transition-all cursor-pointer"
-                  >
-                    <span className="text-xs font-bold text-slate-600 tabular-nums">
-                      {slot}
-                    </span>
-                    <span className="text-[9px] font-bold text-emerald-500  tracking-normal opacity-0 group-hover:opacity-100 transition-opacity">
-                      Available
-                    </span>
-                  </div>
-                ),
-              )}
+              {(["Morning", "Afternoon", "Evening"] as const).map((period) => (
+                <div
+                  key={period}
+                  className="flex items-center justify-between p-3 bg-slate-50/50 rounded-lg border border-slate-100/50 group hover:border-primary/20 transition-all"
+                >
+                  <span className="text-xs font-bold text-slate-600">
+                    {period}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-500 tracking-normal tabular-nums">
+                    {slotsLoading ? "…" : slotCounts[period]} slots
+                  </span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-2 justify-center py-2 border-t border-slate-50 pt-6">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="w-6 h-6 rounded-full border-2 border-white bg-slate-200"
-                  />
-                ))}
-              </div>
-              <p className="text-[9px] text-slate-500 font-bold  tracking-normal">
-                12 patients waiting
-              </p>
-            </div>
+            <Button fullWidth onClick={() => setShowBooking(true)}>
+              Schedule Now
+            </Button>
           </Card>
         </div>
       </div>

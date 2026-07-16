@@ -9,6 +9,7 @@ import {
   MediaValidationError,
   uploadBuffer,
 } from "@/lib/supabase/media";
+import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
 
 // GET /api/user/documents – list all documents for the current user
 export async function GET(_req: NextRequest) {
@@ -32,6 +33,7 @@ export async function GET(_req: NextRequest) {
         mimeType: d.mimeType,
         status: d.status,
         createdAt: d.createdAt,
+        note: d.note || "",
       })),
     });
   } catch (err: any) {
@@ -66,6 +68,7 @@ export async function POST(req: NextRequest) {
     let fileName: string;
     let type = "general";
     let isAvatar = false;
+    let note = "";
 
     if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
@@ -76,23 +79,15 @@ export async function POST(req: NextRequest) {
       buffer = Buffer.from(await file.arrayBuffer());
       fileName = file.name || "document";
       // Some browsers leave file.type empty — infer from extension
-      mimeType = file.type || "";
-      if (!mimeType) {
-        const lower = fileName.toLowerCase();
-        if (lower.endsWith(".pdf")) mimeType = "application/pdf";
-        else if (lower.endsWith(".png")) mimeType = "image/png";
-        else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))
-          mimeType = "image/jpeg";
-        else if (lower.endsWith(".webp")) mimeType = "image/webp";
-        else if (lower.endsWith(".gif")) mimeType = "image/gif";
-        else if (lower.endsWith(".doc")) mimeType = "application/msword";
-        else if (lower.endsWith(".docx"))
-          mimeType =
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        else mimeType = "application/octet-stream";
-      }
-      type = String(form.get("type") || fileName.replace(/\.[^.]+$/, "") || "Document");
+      mimeType =
+        file.type ||
+        inferMimeFromFileName(fileName) ||
+        "application/octet-stream";
+      type = String(
+        form.get("type") || fileName.replace(/\.[^.]+$/, "") || "Document",
+      );
       isAvatar = form.get("isAvatar") === "true";
+      note = String(form.get("note") || "");
     } else {
       const body = await req.json();
       const { dataUrl, mimeType: mt, type: t, isAvatar: av } = body;
@@ -145,7 +140,9 @@ export async function POST(req: NextRequest) {
       publicId: asset.id,
       mediaId: asset.id,
       mimeType,
-      status: "pending_review",
+      note,
+      // Visible immediately on patient profile + to linked doctors
+      status: "uploaded",
     });
 
     return NextResponse.json({
@@ -158,11 +155,18 @@ export async function POST(req: NextRequest) {
         mimeType: doc.mimeType,
         status: doc.status,
         createdAt: doc.createdAt,
+        note: doc.note || "",
       },
     });
   } catch (err: any) {
     const status = err instanceof MediaValidationError ? 400 : 500;
     console.error("[POST /api/user/documents]", err);
-    return NextResponse.json({ error: err.message }, { status });
+    // Surface a clear message when Supabase media env is missing / misconfigured
+    const msg =
+      err?.message?.includes("not configured") ||
+      err?.message?.includes("Supabase")
+        ? "Document storage is not configured. Contact support or check SUPABASE media env vars."
+        : err.message || "Upload failed";
+    return NextResponse.json({ error: msg }, { status });
   }
 }

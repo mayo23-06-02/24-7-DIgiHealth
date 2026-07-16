@@ -64,6 +64,12 @@ export async function GET(
       .sort({ dateRecorded: -1 })
       .lean();
 
+    // Patient-uploaded profile documents (from patient profile → Documents tab)
+    const { MedicalDocument } = await import('@/lib/models/ReviewsDocs');
+    const patientDocuments = await MedicalDocument.find({ userId: patientUserId })
+      .sort({ createdAt: -1 })
+      .lean();
+
     // Latest clinical risk score
     const RiskScore = (await import('@/lib/models/RiskScore')).default;
     const { calcAge, riskBandFromScore, riskBandStyle } = await import('@/lib/riskScore');
@@ -106,6 +112,17 @@ export async function GET(
           documentUrl: p.documentUrl || null,
           documentName: p.documentName || null,
           canDownload: !!p.documentUrl,
+        })),
+        documents: patientDocuments.map((d: any) => ({
+          id: d._id.toString(),
+          type: d.type || "Document",
+          url: d.cloudinaryUrl,
+          mediaId: d.mediaId || d.publicId || null,
+          mimeType: d.mimeType || "application/octet-stream",
+          status: d.status || "uploaded",
+          createdAt: d.createdAt,
+          note: d.note || "",
+          uploadedByPractitioner: String(d.uploadedBy) !== String(d.userId),
         })),
         pastConsultations: pastConsultations.map((c: any) => ({
           id: c._id.toString(),

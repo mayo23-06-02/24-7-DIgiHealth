@@ -112,6 +112,22 @@ export default function HealthRecordPage() {
     }
   }, []);
 
+  const fetchHealthRecord = React.useCallback(() => {
+    return fetch("/api/patient/health-record")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success) {
+          setTimeline(json.data.timeline);
+          setVitals(json.data.vitals);
+          setLabs(json.data.labs);
+          setMedications(json.data.medications);
+          setAllergies(json.data.allergies);
+          setImmunizations(json.data.immunizations);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   React.useEffect(() => {
     if (!user) return;
     setLoadingRecords(true);
@@ -125,21 +141,8 @@ export default function HealthRecordPage() {
       .catch(console.error);
 
     // Fetch full health record data
-    fetch("/api/patient/health-record")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success) {
-          setTimeline(json.data.timeline);
-          setVitals(json.data.vitals);
-          setLabs(json.data.labs);
-          setMedications(json.data.medications);
-          setAllergies(json.data.allergies);
-          setImmunizations(json.data.immunizations);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoadingRecords(false));
-  }, [user]);
+    fetchHealthRecord().finally(() => setLoadingRecords(false));
+  }, [user, fetchHealthRecord]);
 
   /** One-click health profile PDF — no MFA / verification */
   const handleDownloadReport = async () => {
@@ -355,6 +358,7 @@ export default function HealthRecordPage() {
                     vitals={vitals}
                     selectedVital={selectedVital}
                     onSelectVital={setSelectedVital}
+                    onVitalsUpdated={fetchHealthRecord}
                   />
                 )}
 

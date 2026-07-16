@@ -98,8 +98,16 @@ export default function BookingModal({
 
   /** Practitioner whose calendar we check for free slots */
   const slotsPractitionerId = isPractitionerMode
-    ? user?.id || null
+    ? user?.id || (user as any)?.userId || null
     : selectedDoctorState?.id || doctor?.id || null;
+
+  /** Normalise time to HH:mm for slot matching across locales */
+  const normaliseTime = (t?: string | null) => {
+    if (!t) return "";
+    const m = String(t).match(/(\d{1,2})[:.](\d{2})/);
+    if (!m) return String(t).trim();
+    return `${String(parseInt(m[1], 10)).padStart(2, "0")}:${m[2]}`;
+  };
   const [availableDocs, setAvailableDocs] = useState<Doctor[]>([]);
   const [doctorSearch, setDoctorSearch] = useState("");
 
@@ -126,8 +134,9 @@ export default function BookingModal({
     if (isOpen) {
       setStep(1);
       setSelectedDate(initialForm?.date || todayDateString());
-      setSelectedTime(initialForm?.time || "");
+      setSelectedTime(normaliseTime(initialForm?.time) || "");
       setConcern(initialForm?.reason || "");
+      // Keep reschedule duration aligned with standard 30-min slots unless set
       setDurationMinutes(initialForm?.durationMinutes || 30);
       setConsultType(initialForm?.type || "video");
       setDoctorSearch("");
@@ -141,7 +150,8 @@ export default function BookingModal({
     }
   }, [isOpen, doctor, patient, isPractitionerMode, initialForm]);
 
-  // Real schedule-based slots (8am–midnight); past + booked are greyed out
+  // Real schedule-based slots (8am–midnight); past + booked are greyed out.
+  // When editing/rescheduling, excludeBookingId frees the current appointment slot.
   useEffect(() => {
     if (!isOpen || !showDateTime) return;
     if (!slotsPractitionerId || !selectedDate) {
@@ -156,22 +166,26 @@ export default function BookingModal({
         const result = await fetchDaySlots({
           practitionerId: slotsPractitionerId,
           date: selectedDate,
-          durationMinutes: isPractitionerMode ? durationMinutes : 30,
-          excludeBookingId: editingApptId,
+          // Use same 30-min grid as patient booking unless doctor chose another
+          durationMinutes: durationMinutes || 30,
+          excludeBookingId: editingApptId || null,
         });
         if (cancelled) return;
         if (result.success && result.data?.slots) {
           setDaySlots(result.data.slots);
-          // Clear selection if that slot is no longer bookable
           setSelectedTime((prev) => {
             if (!prev) return prev;
+            const norm = normaliseTime(prev);
             const stillOk = result.data!.slots.some(
-              (s) => s.time === prev && s.available,
+              (s) => s.time === norm && s.available,
             );
-            return stillOk ? prev : "";
+            return stillOk ? norm : "";
           });
         } else {
           setDaySlots([]);
+          if (!result.success && result.error) {
+            console.warn("[BookingModal] slots:", result.error);
+          }
         }
       } finally {
         if (!cancelled) setSlotsLoading(false);
@@ -181,14 +195,12 @@ export default function BookingModal({
     return () => {
       cancelled = true;
     };
-    // showDateTime depends on step — listed via step + hasPreSelected
   }, [
     isOpen,
     showDateTime,
     slotsPractitionerId,
     selectedDate,
     durationMinutes,
-    isPractitionerMode,
     editingApptId,
   ]);
 

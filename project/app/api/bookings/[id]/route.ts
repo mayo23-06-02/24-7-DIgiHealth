@@ -166,6 +166,27 @@ export async function PATCH(
         );
       }
     }
+
+    // Conflict check when rescheduling — exclude this consultation
+    if (body.scheduledStart && c.scheduledStartTime && c.scheduledEndTime) {
+      const conflict = await Consultation.findOne({
+        _id: { $ne: c._id },
+        practitionerId: c.practitionerId,
+        status: { $in: ["requested", "pending", "scheduled", "in_progress"] },
+        scheduledStartTime: { $lt: c.scheduledEndTime },
+        scheduledEndTime: { $gt: c.scheduledStartTime },
+      }).lean();
+      if (conflict) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "That time conflicts with another appointment. Choose a free slot.",
+          },
+          { status: 409 },
+        );
+      }
+    }
     if (body.type) c.type = body.type;
     if (body.reason || body.chiefComplaint) {
       c.chiefComplaint = body.reason || body.chiefComplaint;

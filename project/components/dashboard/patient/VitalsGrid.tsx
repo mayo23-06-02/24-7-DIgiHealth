@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { BiPulse, BiPlanet, BiHeart, BiDroplet } from "react-icons/bi";
+import { BiPlanet, BiRuler } from "react-icons/bi";
 import KPICard from "@/components/ui/KPICard";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { toast } from "react-hot-toast";
 
-export default function VitalsGrid() {
+export default function VitalsGrid({
+  onUpdated,
+}: {
+  onUpdated?: () => void;
+}) {
   const [data, setData] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    heartRate: "",
-    bloodPressure: "",
     bodyMass: "",
-    glucose: "",
+    height: "",
   });
 
   const fetchVitals = () => {
@@ -31,10 +33,8 @@ export default function VitalsGrid() {
   useEffect(() => {
     if (data) {
       setFormData({
-        heartRate: data.heartRate?.toString() || "",
-        bloodPressure: data.bp || "",
         bodyMass: data.weight?.toString() || "",
-        glucose: data.glucose?.toString() || "",
+        height: data.height?.toString() || "",
       });
     }
   }, [data]);
@@ -52,6 +52,7 @@ export default function VitalsGrid() {
         toast.success("Vitals updated successfully");
         setIsModalOpen(false);
         fetchVitals(); // Refresh data
+        onUpdated?.();
       } else {
         toast.error("Failed to update vitals");
       }
@@ -63,13 +64,13 @@ export default function VitalsGrid() {
 
   const vitals = [
     {
-      label: "Heart Rate",
-      val: data?.heartRate || "--",
-      unit: "BPM",
-      icon: <BiPulse size={24} />,
-      trend: 2,
+      label: "Height",
+      val: data?.height || "--",
+      unit: "CM",
+      icon: <BiRuler size={24} />,
+      trend: 0,
       color: "primary",
-      description: data?.description || "Syncing...",
+      description: "Latest height",
     },
     {
       label: "Total Weight",
@@ -79,24 +80,6 @@ export default function VitalsGrid() {
       trend: -0.5,
       color: "primary",
       description: "Stable tracking",
-    },
-    {
-      label: "Blood Pressure",
-      val: data?.bp || "--/--",
-      unit: "mmHg",
-      icon: <BiHeart size={24} />,
-      trend: 0,
-      color: "emerald",
-      description: "Clinical grade",
-    },
-    {
-      label: "Blood Glucose",
-      val: data?.glucose || "--",
-      unit: "mmol/L",
-      icon: <BiDroplet size={24} />,
-      trend: 0,
-      color: "primary",
-      description: "Recent reading",
     },
   ];
 
@@ -114,7 +97,7 @@ export default function VitalsGrid() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {vitals.map((v) => (
           <KPICard
             key={v.label}
@@ -138,19 +121,11 @@ export default function VitalsGrid() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="Heart Rate (BPM)"
-              placeholder="e.g. 72"
-              value={formData.heartRate}
+              label="Height (cm)"
+              placeholder="e.g. 170"
+              value={formData.height}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, heartRate: e.target.value }))
-              }
-            />
-            <Input
-              label="Blood Pressure (mmHg)"
-              placeholder="e.g. 120/80"
-              value={formData.bloodPressure}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, bloodPressure: e.target.value }))
+                setFormData((prev) => ({ ...prev, height: e.target.value }))
               }
             />
             <Input
@@ -159,14 +134,6 @@ export default function VitalsGrid() {
               value={formData.bodyMass}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, bodyMass: e.target.value }))
-              }
-            />
-            <Input
-              label="Blood Glucose (mmol/L)"
-              placeholder="e.g. 5.5"
-              value={formData.glucose}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, glucose: e.target.value }))
               }
             />
           </div>

@@ -174,7 +174,11 @@ export default function TimeSlotPicker({
 
       {summary.available === 0 && (
         <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 font-medium">
-          No open slots left today. Try another date.
+          {summary.booked > 0 && summary.booked + summary.past >= summary.total
+            ? "This day is fully booked. Try another date."
+            : summary.past === summary.total
+              ? "All remaining times today have passed. Choose another date."
+              : "No open slots for this date. Try another day or a shorter duration."}
         </p>
       )}
     </div>

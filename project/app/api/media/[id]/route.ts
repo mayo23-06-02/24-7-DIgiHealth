@@ -15,8 +15,9 @@ import { connectToDatabase } from "@/lib/mongodb";
 async function canAccess(
   asset: NonNullable<Awaited<ReturnType<typeof getMediaById>>>,
   userId: string,
+  role?: string,
 ): Promise<boolean> {
-  if (asset.userId === userId) return true;
+  if (asset.userId === userId || role === "mega_admin") return true;
   if (asset.conversationId) {
     await connectToDatabase();
     const conv = await Conversation.findById(asset.conversationId).lean();
@@ -24,6 +25,18 @@ async function canAccess(
     const p = String((conv as any).patientId);
     const d = String((conv as any).practitionerId);
     return p === userId || d === userId;
+  }
+  // Linked practitioners may view patient profile documents
+  if (
+    role === "practitioner" &&
+    (asset.relatedType === "user_document" ||
+      asset.filePath.includes("/documents/"))
+  ) {
+    await connectToDatabase();
+    const { canPractitionerAccessPatient } = await import(
+      "@/lib/auth/canAccessPatient"
+    );
+    return canPractitionerAccessPatient(userId, asset.userId, role);
   }
   return false;
 }
@@ -42,7 +55,7 @@ export async function GET(
     const { id } = await params;
     const asset = await getMediaById(id);
     if (!asset) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    if (!(await canAccess(asset, user.userId))) {
+    if (!(await canAccess(asset, user.userId, user.role))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

@@ -16,6 +16,7 @@ import {
   PatientClinicalSidebar,
   PatientProfileHeader,
   PatientProfileModals,
+  PatientDocumentsPanel,
   type PatientProfile,
   type PrescriptionFormState,
   type VitalsFormState,
@@ -401,6 +402,12 @@ export default function PatientProfilePage() {
             onOpenSoap={(consultationId, patientName) =>
               setSoapModal({ isOpen: true, consultationId, patientName })
             }
+          />
+
+          <PatientDocumentsPanel
+            documents={patient.documents || []}
+            patientName={patient.fullName}
+            patientId={patient.id}
           />
 
           <div className="space-y-4">

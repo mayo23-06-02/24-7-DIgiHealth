@@ -182,11 +182,14 @@ export default function PractitionerAppointments() {
     const appt = appointments.find((a) => a.id === id);
     if (!appt) return;
     const start = new Date(appt.scheduledStart);
+    const y = start.getFullYear();
+    const m = String(start.getMonth() + 1).padStart(2, "0");
+    const day = String(start.getDate()).padStart(2, "0");
     setEditingApptId(id);
     setEditingPatient({ id: appt.patientId, name: appt.patientName });
     setEditingInitialForm({
-      date: start.toISOString().split("T")[0],
-      time: start.toTimeString().slice(0, 5),
+      date: `${y}-${m}-${day}`,
+      time: `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
       type: appt.type,
       reason: appt.reason,
       durationMinutes: 30,

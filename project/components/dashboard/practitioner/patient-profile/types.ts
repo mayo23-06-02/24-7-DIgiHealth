@@ -28,6 +28,18 @@ export interface PatientConsultation {
   };
 }
 
+export interface PatientDocument {
+  id: string;
+  type: string;
+  url: string;
+  mediaId?: string | null;
+  mimeType: string;
+  status: string;
+  createdAt: string;
+  note?: string;
+  uploadedByPractitioner?: boolean;
+}
+
 export interface PatientProfile {
   id: string;
   fullName: string;
@@ -42,6 +54,8 @@ export interface PatientProfile {
   currentMedications: string[];
   emergencyContact: { name: string; phone: string; relationship: string };
   prescriptions: PatientPrescription[];
+  /** Patient-uploaded files from profile → Documents */
+  documents?: PatientDocument[];
   age?: number | null;
   dateJoined?: string | null;
   riskScore?: number;

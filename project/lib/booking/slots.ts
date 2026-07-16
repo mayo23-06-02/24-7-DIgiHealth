@@ -113,52 +113,38 @@ export interface BuildSlotsInput {
   durationMinutes?: number;
   /** Existing consultations that block the calendar */
   bookings?: { start: Date | string; end: Date | string; id?: string }[];
-  /**
-   * Optional practitioner day schedule windows.
-   * If provided, times outside open windows become "unavailable".
-   * If empty/missing, full operating hours are open (subject to past/booked).
-   */
-  scheduleWindows?: { startTime: string; endTime: string; status?: string }[];
   /** Booking being edited — excluded from conflict checks */
   excludeBookingId?: string | null;
   now?: Date;
 }
 
 /**
- * Build full operating-day slots with past / booked / unavailable / available.
+ * Build full operating-day slots (8am-midnight) with past / booked / available.
+ *
+ * Source of truth for capacity is real consultations only — PractitionerSchedule
+ * rows are not consulted here. Operating hours are always the full platform day,
+ * so patient booking and practitioner self-reschedule see identical availability
+ * for the same practitioner/date instead of diverging based on stale schedule data.
  */
 export function buildScheduleSlots(input: BuildSlotsInput): BookingSlot[] {
   const duration = input.durationMinutes || DEFAULT_SLOT_MINUTES;
   const now = input.now || new Date();
   const times = generateTimeSlots();
 
+  const excludeId = input.excludeBookingId
+    ? String(input.excludeBookingId)
+    : null;
+
   const bookings = (input.bookings || [])
-    .filter((b) => !input.excludeBookingId || b.id !== input.excludeBookingId)
+    .filter((b) => {
+      if (!excludeId) return true;
+      const bid = b.id != null ? String(b.id) : "";
+      return bid !== excludeId;
+    })
     .map((b) => ({
       start: new Date(b.start).getTime(),
       end: new Date(b.end).getTime(),
     }));
-
-  const windows = input.scheduleWindows || [];
-  const hasSchedule = windows.length > 0;
-
-  // Pre-mark times that schedule marks as booked
-  const scheduleBookedTimes = new Set<string>();
-  if (hasSchedule) {
-    for (const w of windows) {
-      if (String(w.status || "").toLowerCase() === "booked") {
-        // Expand window to 30-min ticks
-        let t = timeToMinutes(w.startTime);
-        const end = timeToMinutes(w.endTime);
-        while (t < end) {
-          const hh = String(Math.floor(t / 60)).padStart(2, "0");
-          const mm = String(t % 60).padStart(2, "0");
-          scheduleBookedTimes.add(`${hh}:${mm}`);
-          t += DEFAULT_SLOT_MINUTES;
-        }
-      }
-    }
-  }
 
   return times.map((time) => {
     const start = combineLocalDateTime(input.date, time);
@@ -175,45 +161,8 @@ export function buildScheduleSlots(input: BuildSlotsInput): BookingSlot[] {
       reason = "Past";
     }
 
-    // 2) Outside practitioner open windows (if schedule defined)
-    if (status === "available" && hasSchedule) {
-      const open = windows.some((w) => {
-        const st = String(w.status || "available").toLowerCase();
-        if (st === "booked" || st === "blocked" || st === "closed") return false;
-        const wStart = timeToMinutes(w.startTime);
-        const wEnd = timeToMinutes(w.endTime);
-        const slotStart = timeToMinutes(time);
-        const slotEnd = slotStart + duration;
-        return slotStart >= wStart && slotEnd <= wEnd;
-      });
-      if (!open) {
-        // Still show slot, but greyed if not in an open window
-        // (schedule may only define partial day — rest is unavailable)
-        const coveredAtAll = windows.some((w) => {
-          const wStart = timeToMinutes(w.startTime);
-          const wEnd = timeToMinutes(w.endTime);
-          const slotStart = timeToMinutes(time);
-          return slotStart >= wStart && slotStart < wEnd;
-        });
-        if (!coveredAtAll) {
-          // No schedule coverage at this hour → still allow within operating hours
-          // when schedule is partial; only mark unavailable if schedule explicitly
-          // covers the day. Prefer open operating hours as default.
-        } else {
-          status = "unavailable";
-          reason = "Closed";
-        }
-      }
-    }
-
-    // 3) Schedule-marked booked
-    if (status === "available" && scheduleBookedTimes.has(time)) {
-      status = "booked";
-      reason = "Booked";
-    }
-
-    // 4) Existing consultations overlap
-    if (status === "available" || status === "unavailable") {
+    // 2) Real consultation conflicts (source of truth for capacity)
+    if (status === "available") {
       const conflict = bookings.some((b) =>
         rangesOverlap(startMs, endMs, b.start, b.end),
       );

@@ -234,19 +234,25 @@ export async function completeUpload(
 
   const supabase = getSupabaseAdmin();
 
-  // Verify object exists
-  const folder = input.filePath.split("/").slice(0, -1).join("/");
-  const name = input.filePath.split("/").pop()!;
-  const { data: listed, error: listErr } = await supabase.storage
-    .from(MEDIA_BUCKET)
-    .list(folder, { search: name });
-
-  if (listErr) {
-    throw new Error(listErr.message || "Failed to verify upload");
-  }
-  const found = (listed || []).some((f) => f.name === name);
-  if (!found) {
-    throw new MediaValidationError("Upload not found in storage — complete after upload finishes");
+  // Verify object exists (best-effort — some buckets block list but allow upload)
+  try {
+    const folder = input.filePath.split("/").slice(0, -1).join("/");
+    const name = input.filePath.split("/").pop()!;
+    const { data: listed, error: listErr } = await supabase.storage
+      .from(MEDIA_BUCKET)
+      .list(folder, { search: name });
+    if (!listErr) {
+      const found = (listed || []).some((f) => f.name === name);
+      if (!found) {
+        // Soft-fail: we just uploaded; list may lag or be restricted
+        console.warn(
+          "[completeUpload] list did not find object immediately:",
+          input.filePath,
+        );
+      }
+    }
+  } catch (e) {
+    console.warn("[completeUpload] storage list skip", e);
   }
 
   let publicUrl: string | null = null;

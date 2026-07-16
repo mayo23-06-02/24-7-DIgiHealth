@@ -254,19 +254,20 @@ export default function PendingRequests({
         initialForm={
           selectedRequest
             ? {
-                date: new Date(selectedRequest.scheduledStart)
-                  .toISOString()
-                  .split("T")[0],
-                time: new Date(selectedRequest.scheduledStart).toLocaleTimeString(
-                  "en-ZA",
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  }
-                ),
+                date: (() => {
+                  const d = new Date(selectedRequest.scheduledStart);
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, "0");
+                  const day = String(d.getDate()).padStart(2, "0");
+                  return `${y}-${m}-${day}`;
+                })(),
+                time: (() => {
+                  const d = new Date(selectedRequest.scheduledStart);
+                  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+                })(),
                 reason: selectedRequest.reason,
                 type: selectedRequest.type,
+                durationMinutes: 30,
               }
             : undefined
         }

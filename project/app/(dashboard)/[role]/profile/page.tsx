@@ -21,6 +21,7 @@ import {
 } from "react-icons/bi";
 
 import Toast from "@/components/ui/Toast";
+import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
 
 import ProfileHero from "./components/ProfileHero";
 import ProfileNavigation from "./components/ProfileNavigation";
@@ -115,12 +116,21 @@ interface UserDocument {
   mimeType: string;
   status: string;
   createdAt: string;
+  note?: string;
 }
 
 interface NotifPrefs {
   email: boolean;
   push: boolean;
   sms: boolean;
+}
+
+interface UploadQueueItem {
+  id: string;
+  name: string;
+  progress: number;
+  status: "uploading" | "success" | "error";
+  error?: string;
 }
 
 export default function ProfilePage() {
@@ -138,6 +148,8 @@ export default function ProfilePage() {
     message: string;
     type: "success" | "error" | "info";
   } | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
@@ -346,11 +358,57 @@ export default function ProfilePage() {
     };
   };
 
+  /** Same as uploadOneFile but reports real upload progress via XHR. */
+  const uploadOneFileWithProgress = (
+    file: File,
+    opts: { type?: string },
+    onProgress: (pct: number) => void,
+  ): Promise<{
+    id?: string;
+    url: string;
+    type?: string;
+    mimeType?: string;
+    status?: string;
+    createdAt?: string;
+    mediaId?: string;
+  }> => {
+    return new Promise((resolve, reject) => {
+      const form = new FormData();
+      form.append("file", file);
+      if (opts.type) form.append("type", opts.type);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/user/documents");
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          onProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+      xhr.onload = () => {
+        let data: any = {};
+        try {
+          data = JSON.parse(xhr.responseText || "{}");
+        } catch {
+          /* ignore parse error, handled below */
+        }
+        if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+          onProgress(100);
+          resolve(data.data);
+        } else {
+          reject(new Error(data.error || `Failed to upload ${file.name}`));
+        }
+      };
+      xhr.onerror = () => reject(new Error(`Network error uploading ${file.name}`));
+      xhr.send(form);
+    });
+  };
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (!ALLOWED_IMAGE.includes(file.type)) {
+    const effectiveType = file.type || inferMimeFromFileName(file.name) || "";
+    if (!ALLOWED_IMAGE.includes(effectiveType)) {
       setToast({
         message: "Use JPG, PNG, WebP or GIF for your photo.",
         type: "error",
@@ -385,10 +443,27 @@ export default function ProfilePage() {
     const list = Array.from(files || []);
     if (!list.length) return;
 
+    // Check if Supabase is configured before attempting upload
+    try {
+      const checkRes = await fetch("/api/user/documents");
+      if (checkRes.status === 503) {
+        const errorData = await checkRes.json().catch(() => ({}));
+        setUploadError(errorData.error || "Document storage is not configured. Please contact support.");
+        setToast({
+          message: errorData.error || "Document storage is not configured. Please contact support.",
+          type: "error",
+        });
+        return;
+      }
+    } catch {
+      // Continue with upload attempt
+    }
+
     const valid: File[] = [];
     for (const file of list) {
-      const isImage = ALLOWED_IMAGE.includes(file.type);
-      const isDoc = ALLOWED_DOC.includes(file.type);
+      const effectiveType = file.type || inferMimeFromFileName(file.name) || "";
+      const isImage = ALLOWED_IMAGE.includes(effectiveType);
+      const isDoc = ALLOWED_DOC.includes(effectiveType);
       if (kind === "photo" && !isImage) {
         setToast({
           message: `"${file.name}" is not a supported photo (JPG/PNG/WebP/GIF).`,
@@ -423,16 +498,38 @@ export default function ProfilePage() {
     if (!valid.length) return;
 
     setIsUploadingDoc(true);
+    setUploadError(null);
+    const queueIds = valid.map(
+      (file) => `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    );
+    setUploadQueue((prev) => [
+      ...valid.map((file, i) => ({
+        id: queueIds[i],
+        name: file.name,
+        progress: 0,
+        status: "uploading" as const,
+      })),
+      ...prev,
+    ]);
+
     let ok = 0;
     const errors: string[] = [];
-    for (const file of valid) {
+    for (let i = 0; i < valid.length; i++) {
+      const file = valid[i];
+      const queueId = queueIds[i];
       try {
-        const isImage = ALLOWED_IMAGE.includes(file.type);
+        const isImage = ALLOWED_IMAGE.includes(
+          file.type || inferMimeFromFileName(file.name) || "",
+        );
         const label =
           kind === "photo" || (kind === "auto" && isImage)
             ? file.name.replace(/\.[^.]+$/, "") || "Photo"
             : file.name.replace(/\.[^.]+$/, "") || "Document";
-        const data = await uploadOneFile(file, { type: label });
+        const data = await uploadOneFileWithProgress(file, { type: label }, (pct) => {
+          setUploadQueue((prev) =>
+            prev.map((q) => (q.id === queueId ? { ...q, progress: pct } : q)),
+          );
+        });
         setDocuments((prev) => [
           {
             id: data.id!,
@@ -444,11 +541,26 @@ export default function ProfilePage() {
           },
           ...prev,
         ]);
+        setUploadQueue((prev) =>
+          prev.map((q) =>
+            q.id === queueId ? { ...q, progress: 100, status: "success" } : q,
+          ),
+        );
+        setTimeout(() => {
+          setUploadQueue((prev) => prev.filter((q) => q.id !== queueId));
+        }, 4000);
         ok += 1;
       } catch (err: unknown) {
-        errors.push(
-          err instanceof Error ? err.message : `Failed: ${file.name}`,
+        const errorMsg = err instanceof Error ? err.message : `Failed: ${file.name}`;
+        errors.push(errorMsg);
+        setUploadQueue((prev) =>
+          prev.map((q) =>
+            q.id === queueId ? { ...q, status: "error", error: errorMsg } : q,
+          ),
         );
+        if (errorMsg.includes("not configured") || errorMsg.includes("Supabase")) {
+          setUploadError(errorMsg);
+        }
       }
     }
     setIsUploadingDoc(false);
@@ -469,6 +581,10 @@ export default function ProfilePage() {
         type: "error",
       });
     }
+  };
+
+  const handleDismissUploadItem = (id: string) => {
+    setUploadQueue((prev) => prev.filter((q) => q.id !== id));
   };
 
   const handleDocUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -510,6 +626,26 @@ export default function ProfilePage() {
         setEditDocId(null);
         setEditDocLabel("");
         setToast({ message: "Label updated.", type: "success" });
+      }
+    } catch {
+      setToast({ message: "Network error.", type: "error" });
+    }
+  };
+
+  const handleUpdateDocNote = async (id: string, note: string) => {
+    try {
+      const res = await fetch(`/api/user/documents/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note }),
+      });
+      if (res.ok) {
+        setDocuments((prev) =>
+          prev.map((d) => (d.id === id ? { ...d, note } : d)),
+        );
+        setToast({ message: "Note saved.", type: "success" });
+      } else {
+        setToast({ message: "Failed to save note.", type: "error" });
       }
     } catch {
       setToast({ message: "Network error.", type: "error" });
@@ -872,10 +1008,14 @@ export default function ProfilePage() {
               handleFilesUpload={handleFilesUpload}
               handleDeleteDoc={handleDeleteDoc}
               handleRenameDoc={handleRenameDoc}
+              handleUpdateDocNote={handleUpdateDocNote}
               editDocId={editDocId}
               setEditDocId={setEditDocId}
               editDocLabel={editDocLabel}
               setEditDocLabel={setEditDocLabel}
+              uploadError={uploadError}
+              uploadQueue={uploadQueue}
+              onDismissUploadItem={handleDismissUploadItem}
             />
           )}
 

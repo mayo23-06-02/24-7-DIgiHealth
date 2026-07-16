@@ -105,12 +105,16 @@ export default function NotificationBell({
       >
         <BiBell size={20} />
         {unreadCount > 0 && (
-          <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full" />
+          <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-500 border-2 border-white rounded-full flex items-center justify-center shadow-sm">
+            <span className="text-[10px] leading-none text-white font-bold tabular-nums">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          </div>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute top-[56px] right-0 w-[350px] bg-white border border-slate-200 rounded-lg shadow-lg p-6 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
+        <div className="absolute top-14 right-0 w-[350px] bg-white border border-slate-200 rounded-lg shadow-lg p-4 animate-in zoom-in-95 slide-in-from-top-4 duration-300 z-50">
           {!isDetailOpen ? (
             <>
               <div className="flex items-center justify-between mb-6">
@@ -134,8 +138,8 @@ export default function NotificationBell({
                   notifications.map((notif) => (
                     <div
                       key={notif._id}
-                      className={`flex gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer group ${
-                        !notif.isRead ? "bg-primary/[0.03]" : ""
+                      className={`flex gap-4 p-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer group ${
+                        !notif.isRead ? "bg-primary/20 hover:bg-primary/30" : ""
                       }`}
                       onClick={() => handleNotifClick(notif)}
                     >

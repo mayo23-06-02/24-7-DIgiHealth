@@ -26,13 +26,15 @@ export async function GET(
     // Fetch reviews
     const reviews = await Review.find({ practitionerId: id })
       .sort({ createdAt: -1 })
-      .limit(10)
-      .populate('patientId', 'firstName lastName')
+      .limit(50)
+      .populate('patientId', 'firstName lastName avatarUrl')
       .lean();
 
     const formattedReviews = reviews.map((r: any) => ({
       id: r._id.toString(),
-      patientName: `${r.patientId?.firstName} ${r.patientId?.lastName?.charAt(0)}.`,
+      patientId: r.patientId?._id?.toString() || '',
+      patientName: `${r.patientId?.firstName || 'Patient'} ${r.patientId?.lastName?.charAt(0) || ''}.`,
+      patientAvatar: r.patientId?.avatarUrl || null,
       rating: r.rating,
       comment: r.comment,
       date: r.createdAt

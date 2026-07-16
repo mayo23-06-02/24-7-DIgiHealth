@@ -13,6 +13,9 @@ import {
   BiDownload,
   BiCloudUpload,
   BiImages,
+  BiErrorCircle,
+  BiNote,
+  BiCheck,
 } from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -27,6 +30,15 @@ interface UserDocument {
   mimeType: string;
   status: string;
   createdAt: string;
+  note?: string;
+}
+
+interface UploadQueueItem {
+  id: string;
+  name: string;
+  progress: number;
+  status: "uploading" | "success" | "error";
+  error?: string;
 }
 
 interface DocumentsTabProps {
@@ -45,6 +57,10 @@ interface DocumentsTabProps {
   setEditDocId: (id: string | null) => void;
   editDocLabel: string;
   setEditDocLabel: (label: string) => void;
+  uploadError?: string | null;
+  uploadQueue?: UploadQueueItem[];
+  onDismissUploadItem?: (id: string) => void;
+  handleUpdateDocNote?: (id: string, note: string) => void | Promise<void>;
 }
 
 const ACCEPT_ALL =
@@ -65,8 +81,14 @@ export default function DocumentsTab({
   setEditDocId,
   editDocLabel,
   setEditDocLabel,
+  uploadError,
+  uploadQueue = [],
+  onDismissUploadItem,
+  handleUpdateDocNote,
 }: DocumentsTabProps) {
   const [selectedDoc, setSelectedDoc] = useState<UserDocument | null>(null);
+  const [noteEditingId, setNoteEditingId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -96,6 +118,69 @@ export default function DocumentsTab({
   const isImage = (doc: UserDocument) =>
     !!doc.mimeType?.startsWith("image/") ||
     /\.(jpe?g|png|webp|gif)$/i.test(doc.url || "");
+
+  const saveNote = (id: string) => {
+    handleUpdateDocNote?.(id, noteDraft);
+    setNoteEditingId(null);
+  };
+
+  const NoteBlock = ({ doc }: { doc: UserDocument }) => {
+    if (!handleUpdateDocNote) return null;
+    if (noteEditingId === doc.id) {
+      return (
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <input
+            autoFocus
+            className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-primary/20 outline-none"
+            placeholder="Add a note about this file..."
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && saveNote(doc.id)}
+          />
+          <button
+            type="button"
+            onClick={() => saveNote(doc.id)}
+            className="p-1.5 bg-emerald-500 text-white rounded-lg shrink-0"
+          >
+            <BiCheck size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setNoteEditingId(null)}
+            className="p-1.5 bg-slate-200 text-slate-600 rounded-lg shrink-0"
+          >
+            <BiX size={14} />
+          </button>
+        </div>
+      );
+    }
+    return doc.note ? (
+      <button
+        type="button"
+        onClick={() => {
+          setNoteEditingId(doc.id);
+          setNoteDraft(doc.note || "");
+        }}
+        className="mt-1.5 flex items-start gap-1 text-left w-full group/note"
+      >
+        <BiNote size={12} className="text-slate-400 mt-0.5 shrink-0" />
+        <span className="text-[11px] text-slate-500 group-hover/note:text-primary transition-colors">
+          {doc.note}
+        </span>
+      </button>
+    ) : (
+      <button
+        type="button"
+        onClick={() => {
+          setNoteEditingId(doc.id);
+          setNoteDraft("");
+        }}
+        className="mt-1.5 text-[11px] font-semibold text-primary/70 hover:text-primary"
+      >
+        + Add note
+      </button>
+    );
+  };
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
@@ -165,6 +250,7 @@ export default function DocumentsTab({
         }}
         onDrop={onDrop}
         className={`rounded-2xl border-2 border-dashed transition-all ${
+          uploadError ? "border-rose-300 bg-rose-50/50" :
           dragOver
             ? "border-primary bg-primary/5 scale-[1.01]"
             : "border-slate-200 bg-white"
@@ -188,20 +274,23 @@ export default function DocumentsTab({
             <h3 className="text-lg font-bold text-slate-800 font-grotesk">
               {isUploadingDoc
                 ? "Uploading…"
-                : dragOver
-                  ? "Drop files to upload"
-                  : "Upload photos & documents"}
+                : uploadError
+                  ? "Upload unavailable"
+                  : dragOver
+                    ? "Drop files to upload"
+                    : "Upload photos & documents"}
             </h3>
             <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-              Drag and drop files here, or choose a type below. Photos: JPG,
-              PNG, WebP, GIF (max 10MB). Documents: PDF or Word (max 15MB).
+              {uploadError
+                ? uploadError
+                : "Drag and drop files here, or choose a type below. Photos: JPG, PNG, WebP, GIF (max 10MB). Documents: PDF or Word (max 15MB)."}
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-2.5 mt-5">
               <Button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
-                disabled={isUploadingDoc}
+                disabled={isUploadingDoc || !!uploadError}
                 className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
                 icon={<BiImages size={18} />}
                 iconPosition="left"
@@ -212,7 +301,7 @@ export default function DocumentsTab({
                 type="button"
                 variant="outline"
                 onClick={() => localDocInputRef.current?.click()}
-                disabled={isUploadingDoc}
+                disabled={isUploadingDoc || !!uploadError}
                 className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
                 icon={<BiFile size={18} />}
                 iconPosition="left"
@@ -223,7 +312,7 @@ export default function DocumentsTab({
                 type="button"
                 variant="ghost"
                 onClick={() => docInputRef.current?.click()}
-                disabled={isUploadingDoc}
+                disabled={isUploadingDoc || !!uploadError}
                 className="!rounded-xl !h-11 !px-4 !max-w-none normal-case !tracking-normal text-slate-600"
                 icon={<BiUpload size={18} />}
                 iconPosition="left"
@@ -234,6 +323,79 @@ export default function DocumentsTab({
           </div>
         </div>
       </div>
+
+      {/* Upload queue: per-file progress + success/error */}
+      {uploadQueue.length > 0 && (
+        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden divide-y divide-slate-100">
+          {uploadQueue.map((item) => (
+            <div key={item.id} className="flex items-center gap-3 px-4 py-3">
+              <div
+                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                  item.status === "success"
+                    ? "bg-emerald-50 text-emerald-600"
+                    : item.status === "error"
+                      ? "bg-rose-50 text-rose-600"
+                      : "bg-primary/10 text-primary"
+                }`}
+              >
+                {item.status === "success" ? (
+                  <BiCheckCircle size={18} />
+                ) : item.status === "error" ? (
+                  <BiErrorCircle size={18} />
+                ) : (
+                  <BiLoaderAlt size={18} className="animate-spin" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-slate-800 truncate">
+                    {item.name}
+                  </p>
+                  <span
+                    className={`text-[10px] font-bold shrink-0 ${
+                      item.status === "success"
+                        ? "text-emerald-600"
+                        : item.status === "error"
+                          ? "text-rose-500"
+                          : "text-slate-400"
+                    }`}
+                  >
+                    {item.status === "success"
+                      ? "Uploaded"
+                      : item.status === "error"
+                        ? "Failed"
+                        : `${item.progress}%`}
+                  </span>
+                </div>
+                {item.status === "error" ? (
+                  <p className="text-[11px] text-rose-500 mt-1 truncate">
+                    {item.error || "Upload failed"}
+                  </p>
+                ) : (
+                  <div className="h-1.5 rounded-full bg-slate-100 mt-1.5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        item.status === "success" ? "bg-emerald-500" : "bg-primary"
+                      }`}
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+              {item.status === "error" && onDismissUploadItem && (
+                <button
+                  type="button"
+                  onClick={() => onDismissUploadItem(item.id)}
+                  className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg shrink-0"
+                  title="Dismiss"
+                >
+                  <BiX size={16} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Photos gallery */}
       <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
@@ -277,40 +439,40 @@ export default function DocumentsTab({
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {photos.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={doc.url}
-                    alt={doc.type}
-                    className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                    onClick={() => setSelectedDoc(doc)}
-                  />
-                  <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-[11px] font-semibold text-white truncate">
-                      {doc.type}
-                    </p>
-                  </div>
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      type="button"
+                <div key={doc.id} className="space-y-1.5">
+                  <div className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={doc.url}
+                      alt={doc.type}
+                      className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                       onClick={() => setSelectedDoc(doc)}
-                      className="w-8 h-8 rounded-lg bg-white/95 text-slate-700 flex items-center justify-center shadow"
-                      title="View"
-                    >
-                      <BiDownload size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteDoc(doc.id)}
-                      className="w-8 h-8 rounded-lg bg-white/95 text-rose-600 flex items-center justify-center shadow"
-                      title="Delete"
-                    >
-                      <BiTrash size={14} />
-                    </button>
+                    />
+                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-[11px] font-semibold text-white truncate">
+                        {doc.type}
+                      </p>
+                    </div>
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDoc(doc)}
+                        className="w-8 h-8 rounded-lg bg-white/95 text-slate-700 flex items-center justify-center shadow"
+                        title="View"
+                      >
+                        <BiDownload size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDoc(doc.id)}
+                        className="w-8 h-8 rounded-lg bg-white/95 text-rose-600 flex items-center justify-center shadow"
+                        title="Delete"
+                      >
+                        <BiTrash size={14} />
+                      </button>
+                    </div>
                   </div>
+                  <NoteBlock doc={doc} />
                 </div>
               ))}
             </div>
@@ -408,6 +570,7 @@ export default function DocumentsTab({
                         })}
                         {doc.status ? ` · ${doc.status.replace(/_/g, " ")}` : ""}
                       </p>
+                      <NoteBlock doc={doc} />
                       <div className="flex items-center gap-1 mt-2">
                         <button
                           type="button"

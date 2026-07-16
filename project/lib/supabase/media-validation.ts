@@ -23,19 +23,43 @@ export function inferFileType(mimeType: string): MediaFileType {
   throw new MediaValidationError(`Unsupported file type: ${mimeType || "unknown"}`);
 }
 
+/** Infer MIME from extension when browser leaves file.type empty */
+export function inferMimeFromFileName(fileName: string): string | null {
+  const lower = String(fileName || "").toLowerCase();
+  if (lower.endsWith(".pdf")) return "application/pdf";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".gif")) return "image/gif";
+  if (lower.endsWith(".doc")) return "application/msword";
+  if (lower.endsWith(".docx"))
+    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  if (lower.endsWith(".mp4")) return "video/mp4";
+  if (lower.endsWith(".webm")) return "video/webm";
+  if (lower.endsWith(".mp3")) return "audio/mpeg";
+  if (lower.endsWith(".wav")) return "audio/wav";
+  return null;
+}
+
 export function validateFileMeta(input: {
   fileName: string;
   mimeType: string;
   fileSize: number;
   purpose?: MediaPurpose;
 }): { fileType: MediaFileType; safeName: string; ext: string } {
-  const { fileName, mimeType, fileSize } = input;
+  const { fileName, fileSize } = input;
 
   if (!fileName?.trim()) {
     throw new MediaValidationError("File name is required");
   }
+  let mimeType = (input.mimeType || "").trim();
+  if (!mimeType || mimeType === "application/octet-stream") {
+    mimeType = inferMimeFromFileName(fileName) || mimeType;
+  }
   if (!mimeType) {
-    throw new MediaValidationError("MIME type is required");
+    throw new MediaValidationError(
+      "Could not detect file type. Use PDF, Word, JPG, or PNG.",
+    );
   }
   if (!fileSize || fileSize <= 0) {
     throw new MediaValidationError("File is empty");

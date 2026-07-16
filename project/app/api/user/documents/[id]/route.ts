@@ -67,11 +67,15 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await req.json();
-    const { type } = body;
+    const { type, note } = body;
+
+    const update: Record<string, string> = {};
+    if (type !== undefined) update.type = type;
+    if (note !== undefined) update.note = note;
 
     const doc = await DigitalDocument.findOneAndUpdate(
       { _id: id, userId: user.userId },
-      { type },
+      update,
       { new: true },
     ).lean();
 
@@ -81,7 +85,11 @@ export async function PATCH(
 
     return NextResponse.json({
       success: true,
-      data: { id: (doc as any)._id.toString(), type: (doc as any).type },
+      data: {
+        id: (doc as any)._id.toString(),
+        type: (doc as any).type,
+        note: (doc as any).note || "",
+      },
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
