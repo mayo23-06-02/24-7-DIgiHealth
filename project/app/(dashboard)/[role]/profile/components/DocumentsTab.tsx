@@ -216,8 +216,13 @@ export default function DocumentsTab({
         className="hidden"
         onChange={(e) => {
           const files = e.target.files;
+          console.log("[DocumentsTab] Photo input changed, files:", files, "length:", files?.length);
+          if (files && files.length > 0) {
+            console.log("[DocumentsTab] Calling handleFilesUpload for photos");
+            void handleFilesUpload(files, "photo");
+          }
+          // Clear after processing
           e.target.value = "";
-          if (files?.length) void handleFilesUpload(files, "photo");
         }}
       />
       <input
@@ -228,8 +233,13 @@ export default function DocumentsTab({
         className="hidden"
         onChange={(e) => {
           const files = e.target.files;
+          console.log("[DocumentsTab] Document input changed, files:", files, "length:", files?.length);
+          if (files && files.length > 0) {
+            console.log("[DocumentsTab] Calling handleFilesUpload for documents");
+            void handleFilesUpload(files, "document");
+          }
+          // Clear after processing
           e.target.value = "";
-          if (files?.length) void handleFilesUpload(files, "document");
         }}
       />
 
@@ -289,7 +299,10 @@ export default function DocumentsTab({
             <div className="flex flex-wrap items-center justify-center gap-2.5 mt-5">
               <Button
                 type="button"
-                onClick={() => photoInputRef.current?.click()}
+                onClick={() => {
+                  console.log("[DocumentsTab] Upload photos button clicked, ref:", photoInputRef.current);
+                  photoInputRef.current?.click();
+                }}
                 disabled={isUploadingDoc || !!uploadError}
                 className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
                 icon={<BiImages size={18} />}
@@ -300,7 +313,10 @@ export default function DocumentsTab({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => localDocInputRef.current?.click()}
+                onClick={() => {
+                  console.log("[DocumentsTab] Upload documents button clicked, ref:", localDocInputRef.current);
+                  localDocInputRef.current?.click();
+                }}
                 disabled={isUploadingDoc || !!uploadError}
                 className="!rounded-xl !h-11 !px-5 !max-w-none normal-case !tracking-normal"
                 icon={<BiFile size={18} />}
@@ -311,7 +327,10 @@ export default function DocumentsTab({
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => docInputRef.current?.click()}
+                onClick={() => {
+                  console.log("[DocumentsTab] Any file button clicked, ref:", docInputRef.current);
+                  docInputRef.current?.click();
+                }}
                 disabled={isUploadingDoc || !!uploadError}
                 className="!rounded-xl !h-11 !px-4 !max-w-none normal-case !tracking-normal text-slate-600"
                 icon={<BiUpload size={18} />}

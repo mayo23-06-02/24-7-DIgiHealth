@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
+import { useMediaUpload } from "@/components/media/useMediaUpload";
 import {
   BiUser,
   BiShieldQuarter,
@@ -152,6 +153,8 @@ export default function ProfilePage() {
   const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+
+  const { upload: uploadMedia, progress: mediaUploadProgress, uploading: mediaUploading, error: mediaUploadError } = useMediaUpload();
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [patientData, setPatientData] = useState<PatientRoleData | null>(null);
@@ -372,6 +375,7 @@ export default function ProfilePage() {
     createdAt?: string;
     mediaId?: string;
   }> => {
+    console.log("[uploadOneFileWithProgress] Starting upload for:", file.name, "opts:", opts);
     return new Promise((resolve, reject) => {
       const form = new FormData();
       form.append("file", file);
@@ -381,24 +385,33 @@ export default function ProfilePage() {
       xhr.open("POST", "/api/user/documents");
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
-          onProgress(Math.round((e.loaded / e.total) * 100));
+          const pct = Math.round((e.loaded / e.total) * 100);
+          console.log("[uploadOneFileWithProgress] Progress:", pct, "for", file.name);
+          onProgress(pct);
         }
       };
       xhr.onload = () => {
+        console.log("[uploadOneFileWithProgress] Upload complete for", file.name, "status:", xhr.status);
         let data: any = {};
         try {
           data = JSON.parse(xhr.responseText || "{}");
+          console.log("[uploadOneFileWithProgress] Response data:", data);
         } catch {
+          console.log("[uploadOneFileWithProgress] Failed to parse response");
           /* ignore parse error, handled below */
         }
         if (xhr.status >= 200 && xhr.status < 300 && data.success) {
           onProgress(100);
           resolve(data.data);
         } else {
+          console.error("[uploadOneFileWithProgress] Upload failed:", data.error || `Status ${xhr.status}`);
           reject(new Error(data.error || `Failed to upload ${file.name}`));
         }
       };
-      xhr.onerror = () => reject(new Error(`Network error uploading ${file.name}`));
+      xhr.onerror = () => {
+        console.error("[uploadOneFileWithProgress] Network error for", file.name);
+        reject(new Error(`Network error uploading ${file.name}`));
+      };
       xhr.send(form);
     });
   };
@@ -441,70 +454,25 @@ export default function ProfilePage() {
     kind: "photo" | "document" | "auto" = "auto",
   ) => {
     const list = Array.from(files || []);
-    if (!list.length) return;
-
-    // Check if Supabase is configured before attempting upload
-    try {
-      const checkRes = await fetch("/api/user/documents");
-      if (checkRes.status === 503) {
-        const errorData = await checkRes.json().catch(() => ({}));
-        setUploadError(errorData.error || "Document storage is not configured. Please contact support.");
-        setToast({
-          message: errorData.error || "Document storage is not configured. Please contact support.",
-          type: "error",
-        });
-        return;
-      }
-    } catch {
-      // Continue with upload attempt
+    if (!list.length) {
+      console.log("[handleFilesUpload] No files selected");
+      return;
     }
 
-    const valid: File[] = [];
-    for (const file of list) {
-      const effectiveType = file.type || inferMimeFromFileName(file.name) || "";
-      const isImage = ALLOWED_IMAGE.includes(effectiveType);
-      const isDoc = ALLOWED_DOC.includes(effectiveType);
-      if (kind === "photo" && !isImage) {
-        setToast({
-          message: `"${file.name}" is not a supported photo (JPG/PNG/WebP/GIF).`,
-          type: "error",
-        });
-        continue;
-      }
-      if (kind === "document" && !isDoc) {
-        setToast({
-          message: `"${file.name}" is not supported. Use PDF, Word, or images.`,
-          type: "error",
-        });
-        continue;
-      }
-      if (!isImage && !isDoc) {
-        setToast({
-          message: `"${file.name}" type is not allowed.`,
-          type: "error",
-        });
-        continue;
-      }
-      const max = isImage ? 10 * 1024 * 1024 : 15 * 1024 * 1024;
-      if (file.size > max) {
-        setToast({
-          message: `"${file.name}" is too large (max ${isImage ? 10 : 15}MB).`,
-          type: "error",
-        });
-        continue;
-      }
-      valid.push(file);
-    }
-    if (!valid.length) return;
-
-    setIsUploadingDoc(true);
+    console.log("[handleFilesUpload] Starting upload for", list.length, "files, kind:", kind);
     setUploadError(null);
-    const queueIds = valid.map(
-      (file) => `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    );
+    setIsUploadingDoc(true);
+
+    // Show a queue row for every selected file immediately — the user sees
+    // feedback the instant they pick a file, before any network call happens.
+    const entries = list.map((file) => ({
+      file,
+      queueId: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    }));
+    console.log("[handleFilesUpload] Created upload queue entries:", entries);
     setUploadQueue((prev) => [
-      ...valid.map((file, i) => ({
-        id: queueIds[i],
+      ...entries.map(({ file, queueId }) => ({
+        id: queueId,
         name: file.name,
         progress: 0,
         status: "uploading" as const,
@@ -513,31 +481,82 @@ export default function ProfilePage() {
     ]);
 
     let ok = 0;
-    const errors: string[] = [];
-    for (let i = 0; i < valid.length; i++) {
-      const file = valid[i];
-      const queueId = queueIds[i];
-      try {
-        const isImage = ALLOWED_IMAGE.includes(
-          file.type || inferMimeFromFileName(file.name) || "",
+    for (const { file, queueId } of entries) {
+      const effectiveType = file.type || inferMimeFromFileName(file.name) || "";
+      const isImage = ALLOWED_IMAGE.includes(effectiveType);
+      const isDoc = ALLOWED_DOC.includes(effectiveType);
+
+      let rejectReason: string | null = null;
+      if (kind === "photo" && !isImage) {
+        rejectReason = `Not a supported photo (JPG/PNG/WebP/GIF).`;
+      } else if (kind === "document" && !isDoc) {
+        rejectReason = `Not supported. Use PDF, Word, or images.`;
+      } else if (!isImage && !isDoc) {
+        rejectReason = `File type is not allowed.`;
+      } else {
+        const max = isImage ? 10 * 1024 * 1024 : 15 * 1024 * 1024;
+        if (file.size > max) {
+          rejectReason = `Too large (max ${isImage ? 10 : 15}MB).`;
+        }
+      }
+
+      if (rejectReason) {
+        setUploadQueue((prev) =>
+          prev.map((q) =>
+            q.id === queueId ? { ...q, status: "error", error: rejectReason! } : q,
+          ),
         );
+        continue;
+      }
+
+      try {
         const label =
           kind === "photo" || (kind === "auto" && isImage)
             ? file.name.replace(/\.[^.]+$/, "") || "Photo"
             : file.name.replace(/\.[^.]+$/, "") || "Document";
-        const data = await uploadOneFileWithProgress(file, { type: label }, (pct) => {
-          setUploadQueue((prev) =>
-            prev.map((q) => (q.id === queueId ? { ...q, progress: pct } : q)),
-          );
+
+        console.log("[handleFilesUpload] Uploading file via useMediaUpload:", file.name);
+        const uploadedMedia = await uploadMedia(file, {
+          purpose: "document",
+          isPublic: false,
+          onProgress: (pct) => {
+            console.log("[handleFilesUpload] Progress:", pct, "for", file.name);
+            setUploadQueue((prev) =>
+              prev.map((q) => (q.id === queueId ? { ...q, progress: pct } : q)),
+            );
+          },
         });
+
+        console.log("[handleFilesUpload] Upload successful:", uploadedMedia);
+
+        // Save document metadata to MongoDB
+        const docRes = await fetch("/api/user/documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: label,
+            url: uploadedMedia.url,
+            mediaId: uploadedMedia.id,
+            mimeType: effectiveType,
+            status: "uploaded",
+          }),
+        });
+
+        if (!docRes.ok) {
+          throw new Error("Failed to save document metadata");
+        }
+
+        const docData = await docRes.json();
+
         setDocuments((prev) => [
           {
-            id: data.id!,
-            type: data.type || label,
-            url: data.url,
-            mimeType: data.mimeType || file.type,
-            status: data.status || "pending_review",
-            createdAt: data.createdAt || new Date().toISOString(),
+            id: docData.data.id,
+            type: docData.data.type || label,
+            url: docData.data.url,
+            mimeType: docData.data.mimeType || effectiveType,
+            status: docData.data.status || "uploaded",
+            createdAt: docData.data.createdAt || new Date().toISOString(),
+            note: "",
           },
           ...prev,
         ]);
@@ -552,7 +571,7 @@ export default function ProfilePage() {
         ok += 1;
       } catch (err: unknown) {
         const errorMsg = err instanceof Error ? err.message : `Failed: ${file.name}`;
-        errors.push(errorMsg);
+        console.error("[handleFilesUpload] Upload error:", errorMsg);
         setUploadQueue((prev) =>
           prev.map((q) =>
             q.id === queueId ? { ...q, status: "error", error: errorMsg } : q,
@@ -575,12 +594,6 @@ export default function ProfilePage() {
         type: "success",
       });
     }
-    if (errors.length) {
-      setToast({
-        message: errors[0],
-        type: "error",
-      });
-    }
   };
 
   const handleDismissUploadItem = (id: string) => {
@@ -589,8 +602,12 @@ export default function ProfilePage() {
 
   const handleDocUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    console.log("[handleDocUpload] Files:", files, "length:", files?.length);
+    if (files && files.length > 0) {
+      void handleFilesUpload(files, "auto");
+    }
+    // Clear after processing
     e.target.value = "";
-    if (files?.length) void handleFilesUpload(files, "auto");
   };
 
   const handleDeleteDoc = async (id: string) => {
