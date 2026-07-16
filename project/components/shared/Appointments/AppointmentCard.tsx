@@ -73,12 +73,13 @@ export default function AppointmentCard({
   const [showDetails, setShowDetails] = useState(false);
 
   const now = new Date();
-  const fiveMinsBefore = new Date(start.getTime() - 5 * 60000);
+  const tenMinsBefore = new Date(start.getTime() - 10 * 60000);
   const isAccepted =
     appointment.status === "scheduled" ||
     appointment.status === "in_progress" ||
     appointment.status === "ongoing";
-  const isJoinable = isAccepted && now >= fiveMinsBefore && now <= end;
+  const isJoinable = isAccepted && now >= tenMinsBefore && now <= end;
+  const joinLabel = now < start ? "Enter Lobby" : "Join Room";
 
   const isMissed =
     appointment.computedStatus === "missed" ||
@@ -253,7 +254,7 @@ export default function AppointmentCard({
                           setShowMenu(false);
                         }}
                       >
-                        Join Room
+                        {joinLabel}
                       </button>
                     )}
                     {appointment.computedStatus === "upcoming" && (
@@ -432,7 +433,7 @@ export default function AppointmentCard({
                       setShowDetails(false);
                     }}
                   >
-                    Join Room
+                    {joinLabel}
                   </Button>
                 )}
                 {appointment.computedStatus === "upcoming" && (

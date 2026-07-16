@@ -62,6 +62,22 @@ export function useAppointments(fetchUrl: string) {
     fetchAppointments();
   }, [fetchAppointments]);
 
+  // Silently poll so changes made by the other party (reschedule, accept,
+  // cancel) show up without a manual reload.
+  useEffect(() => {
+    const interval = setInterval(() => fetchAppointments(false), 20000);
+    return () => clearInterval(interval);
+  }, [fetchAppointments]);
+
+  // Fast-path: NotificationBell dispatches this the moment a new
+  // appointment-related notification arrives, so we don't wait for the
+  // next 20s poll.
+  useEffect(() => {
+    const handler = () => fetchAppointments(false);
+    window.addEventListener("appointments:changed", handler);
+    return () => window.removeEventListener("appointments:changed", handler);
+  }, [fetchAppointments]);
+
   // Compute status based on current time
   const computeStatus = useCallback((appt: Appointment) => {
     const start = new Date(appt.scheduledStart);

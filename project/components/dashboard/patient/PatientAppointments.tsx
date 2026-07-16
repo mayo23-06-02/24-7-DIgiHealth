@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import AppointmentList from "@/components/shared/Appointments/AppointmentList";
 import AppointmentFilters from "@/components/shared/Appointments/AppointmentFilters";
 import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
@@ -14,8 +15,11 @@ import BookingModal from "@/components/doctor/BookingModal";
 import { BiPlus } from "react-icons/bi";
 import { toast } from "react-hot-toast";
 import { useAppointments } from "@/lib/hooks/useAppointments";
+import { cancelBooking } from "@/lib/booking/service";
+import { goToAppointmentRoom } from "@/lib/appointments/joinRoom";
 
 export default function PatientAppointments() {
+  const router = useRouter();
   const { appointments, loading, fetchAppointments } = useAppointments(
     "/api/patient/appointments",
   );
@@ -25,7 +29,14 @@ export default function PatientAppointments() {
   const [dateTo, setDateTo] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showBooking, setShowBooking] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<{
+    id: string;
+    name: string;
+    specialisation: string;
+    avatar?: string;
+  } | null>(null);
+  const [editingApptId, setEditingApptId] = useState<string | null>(null);
+  const [editingInitialForm, setEditingInitialForm] = useState<any>(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
@@ -74,69 +85,50 @@ export default function PatientAppointments() {
   // Actions
   const handleJoin = async (id: string) => {
     const appt = appointments.find((a) => a.id === id);
-    if (!appt) return;
-    try {
-      const res = await fetch("/api/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactId: appt.practitionerId }),
-      });
-      const data = await res.json();
-      if (res.ok && data.conversationId) {
-        window.location.href = `/patient/messages?chatId=${data.conversationId}&join=video`;
-      } else {
-        toast.error("Unable to join consultation room");
-      }
-    } catch {
-      toast.error("Unable to join consultation room");
-    }
+    if (!appt || !appt.practitionerId) return;
+    await goToAppointmentRoom({
+      appointmentId: id,
+      scheduledStart: appt.scheduledStart,
+      contactId: appt.practitionerId,
+      contactName: appt.practitionerName,
+      contactAvatar: appt.practitionerAvatar,
+      role: "patient",
+      router,
+    });
   };
 
-  const handleReschedule = async (id: string) => {
-    // Open reschedule modal (simplified: prompt for new time)
-    const newDate = prompt("Enter new date (YYYY-MM-DD)");
-    const newTime = prompt("Enter new time (HH:MM)");
-    if (newDate && newTime) {
-      const dt = new Date(`${newDate}T${newTime}`);
-      if (isNaN(dt.getTime())) {
-        toast.error("Invalid date/time");
-        return;
-      }
-      if (dt < new Date()) {
-        toast.error("Cannot reschedule to past");
-        return;
-      }
-      try {
-        const res = await fetch(`/api/consultations/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ scheduledStartTime: dt.toISOString() }),
-        });
-        if (res.ok) {
-          toast.success("Rescheduled!");
-          fetchAppointments(false);
-        } else {
-          const err = await res.json();
-          toast.error(err.error || "Failed to reschedule");
-        }
-      } catch {
-        toast.error("Error rescheduling");
-      }
-    }
+  const handleReschedule = (id: string) => {
+    const appt = appointments.find((a) => a.id === id);
+    if (!appt) return;
+    const start = new Date(appt.scheduledStart);
+    const y = start.getFullYear();
+    const m = String(start.getMonth() + 1).padStart(2, "0");
+    const day = String(start.getDate()).padStart(2, "0");
+    setEditingApptId(id);
+    setSelectedDoctor({
+      id: appt.practitionerId || "",
+      name: appt.practitionerName || "Practitioner",
+      specialisation: "",
+      avatar: appt.practitionerAvatar,
+    });
+    setEditingInitialForm({
+      date: `${y}-${m}-${day}`,
+      time: `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
+      type: appt.type,
+      reason: appt.reason,
+      durationMinutes: 30,
+    });
+    setShowBooking(true);
   };
 
   const handleCancel = async (id: string) => {
     if (!confirm("Cancel this appointment?")) return;
-    try {
-      const res = await fetch(`/api/consultations/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        toast.success("Cancelled");
-        fetchAppointments(false);
-      } else {
-        toast.error("Failed to cancel");
-      }
-    } catch {
-      toast.error("Error cancelling");
+    const result = await cancelBooking(id);
+    if (result.success) {
+      toast.success("Cancelled");
+      fetchAppointments(false);
+    } else {
+      toast.error(result.error || "Failed to cancel");
     }
   };
 
@@ -159,7 +151,12 @@ export default function PatientAppointments() {
         subtitle="Manage your scheduled consultations and medical history."
         right={
           <Button
-            onClick={() => setShowBooking(true)}
+            onClick={() => {
+              setEditingApptId(null);
+              setSelectedDoctor(null);
+              setEditingInitialForm(null);
+              setShowBooking(true);
+            }}
             icon={<BiPlus size={18} />}
             iconPosition="left"
           >
@@ -214,8 +211,12 @@ export default function PatientAppointments() {
         onClose={() => {
           setShowBooking(false);
           setSelectedDoctor(null);
+          setEditingApptId(null);
+          setEditingInitialForm(null);
         }}
         doctor={selectedDoctor}
+        editingApptId={editingApptId}
+        initialForm={editingInitialForm ?? undefined}
         onSuccess={() => fetchAppointments(false)}
         mode="patient"
       />

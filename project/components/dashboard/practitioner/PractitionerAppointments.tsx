@@ -24,6 +24,7 @@ import AppointmentTabs, { AppointmentTab, ALL_TABS } from "@/components/shared/A
 import BookingModal from "@/components/doctor/BookingModal";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
 import { useAppointments } from "@/lib/hooks/useAppointments";
+import { goToAppointmentRoom } from "@/lib/appointments/joinRoom";
 
 type Tab = AppointmentTab;
 
@@ -104,23 +105,15 @@ export default function PractitionerAppointments() {
   const handleJoin = async (id: string) => {
     const appt = appointments.find((a) => a.id === id);
     if (!appt) return;
-    try {
-      const res = await fetch("/api/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactId: appt.patientId }),
-      });
-      const data = await res.json();
-      if (res.ok && data.conversationId) {
-        router.push(
-          `/practitioner/messages?chatId=${data.conversationId}&join=video`,
-        );
-      } else {
-        toast.error("Unable to join consultation room");
-      }
-    } catch {
-      toast.error("Unable to join consultation room");
-    }
+    await goToAppointmentRoom({
+      appointmentId: id,
+      scheduledStart: appt.scheduledStart,
+      contactId: appt.patientId,
+      contactName: appt.patientName,
+      contactAvatar: appt.patientAvatar,
+      role: "practitioner",
+      router,
+    });
   };
 
   const handleAccept = async (id: string) => {
