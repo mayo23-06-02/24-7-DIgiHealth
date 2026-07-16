@@ -96,11 +96,29 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
 }
 
+const PRODUCTION_ORIGIN = "https://24-7-d-igi-health.vercel.app";
+
 /** Public site origin for magic-link redirects */
 export function getAppOrigin(requestUrl?: string): string {
   const fromEnv =
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||
     process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const isLocalOrigin = (origin: string) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+
+  if (requestUrl) {
+    try {
+      const requestOrigin = new URL(requestUrl).origin;
+      // A real (non-local) request is the source of truth — don't let a
+      // stale/misconfigured localhost env var override it and leak
+      // localhost links into production emails.
+      if (!isLocalOrigin(requestOrigin) && (!fromEnv || isLocalOrigin(fromEnv))) {
+        return requestOrigin;
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+
   if (fromEnv) return fromEnv.replace(/\/$/, "");
   if (requestUrl) {
     try {
@@ -109,7 +127,7 @@ export function getAppOrigin(requestUrl?: string): string {
       /* fall through */
     }
   }
-  return "http://localhost:3000";
+  return PRODUCTION_ORIGIN;
 }
 
 /**
