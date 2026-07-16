@@ -135,7 +135,18 @@ export async function notifyBookingEvent(
 
     switch (event) {
       case "request_created": {
-        // Always notify the practitioner of a new request
+        if (actorIsPractitioner) {
+          // Practitioner proposed a pending appointment — notify the patient, not themselves
+          await createNotification({
+            userId: ctx.patientId,
+            type: "appointment_proposed",
+            title: "New appointment proposed",
+            body: `${doctorName} proposed a consultation for ${when}.${reasonBit}`,
+            data,
+          });
+          break;
+        }
+        // Patient requested → notify the practitioner
         await createNotification({
           userId: ctx.practitionerId,
           type: "appointment_request",
