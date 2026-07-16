@@ -27,7 +27,8 @@ export default function PatientAppointments() {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
+  // Ascending by date so the closest/soonest appointment shows first.
+  const [sortBy, setSortBy] = useState("oldest");
   const [showBooking, setShowBooking] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<{
     id: string;

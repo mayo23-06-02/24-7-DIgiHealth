@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const consultations = await Consultation.find({ patientId: userId })
       .populate('practitionerId', 'firstName lastName avatarUrl')
-      .sort({ scheduledStartTime: -1 })
+      .sort({ scheduledStartTime: 1 })
       .lean();
 
     const enriched = consultations.map(c => {

@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
     console.log('[GET /api/practitioner/appointments] filter:', JSON.stringify(filter));
 
     const consultations = await Consultation.find(filter)
-      .sort({ scheduledStartTime: tab === 'upcoming' || tab === 'requests' ? 1 : -1 })
+      .sort({ scheduledStartTime: 1 })
       .lean();
 
     console.log('[GET /api/practitioner/appointments] consultations found:', consultations.length);

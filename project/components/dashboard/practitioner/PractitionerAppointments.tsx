@@ -41,7 +41,8 @@ export default function PractitionerAppointments() {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
+  // Ascending by date so the closest/soonest appointment shows first.
+  const [sortBy, setSortBy] = useState("oldest");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showBooking, setShowBooking] = useState(false);
   const [editingApptId, setEditingApptId] = useState<string | null>(null);
