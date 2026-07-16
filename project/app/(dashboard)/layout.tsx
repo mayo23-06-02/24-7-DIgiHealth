@@ -6,6 +6,7 @@ import User from "@/lib/models/User";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import DashboardShell from "@/components/shared/DashboardShell";
 import CallWrapper from "@/components/providers/CallWrapper";
+import AppointmentAlertWrapper from "@/components/providers/AppointmentAlertWrapper";
 
 export default async function DashboardLayout({
   children,
@@ -60,7 +61,10 @@ export default async function DashboardLayout({
     <AuthProvider user={user}>
       {/* Wrap everything with CallWrapper to enable global incoming call notifications */}
       <CallWrapper>
-        <DashboardShell>{children}</DashboardShell>
+        {/* Global pre-appointment countdown reminders (10/5/1 min before start) */}
+        <AppointmentAlertWrapper>
+          <DashboardShell>{children}</DashboardShell>
+        </AppointmentAlertWrapper>
       </CallWrapper>
     </AuthProvider>
   );

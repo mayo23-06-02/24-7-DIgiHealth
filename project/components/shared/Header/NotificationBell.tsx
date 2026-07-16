@@ -20,6 +20,7 @@ export default function NotificationBell({
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedNotif, setSelectedNotif] = useState<Notification | null>(null);
   const previousUnreadCount = useRef(0);
+  const previousNotifIds = useRef<Set<string>>(new Set());
   const ref = useRef<HTMLDivElement>(null);
 
   const playNotificationSound = () => {
@@ -47,6 +48,21 @@ export default function NotificationBell({
           playNotificationSound();
         }
         previousUnreadCount.current = newUnreadCount;
+
+        // Let appointment lists refresh immediately when a new
+        // reschedule/accept/cancel notification lands, instead of waiting
+        // for their own poll cycle.
+        if (!isInitialLoad) {
+          const hasNewAppointmentNotif = data.some(
+            (n: any) =>
+              !previousNotifIds.current.has(n._id) &&
+              String(n.type || "").startsWith("appointment"),
+          );
+          if (hasNewAppointmentNotif) {
+            window.dispatchEvent(new Event("appointments:changed"));
+          }
+        }
+        previousNotifIds.current = new Set(data.map((n: any) => n._id));
       }
     } catch {
       /* silent */
