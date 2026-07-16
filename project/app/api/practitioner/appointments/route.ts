@@ -117,6 +117,7 @@ export async function GET(req: NextRequest) {
           riskFactors: c.clinicalRisk?.factors || [],
           soapNotes: c.soapNotes,
           aiRecommendations: (c as any).aiRecommendations || [],
+          requestedTo: c.requestedTo?.toString(),
           pendingReschedule: pending
             ? {
                 proposedStart: pending.proposedStart,
@@ -158,6 +159,7 @@ export async function POST(req: NextRequest) {
       scheduledEndTime: end,
       chiefComplaint: reason,
       source: 'practitioner_schedule',
+      requestedTo: (body.status === 'scheduled') ? undefined : body.patientId,
     });
 
     // Patient gets notified of the scheduled/pending booking

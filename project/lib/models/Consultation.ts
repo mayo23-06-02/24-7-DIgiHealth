@@ -25,6 +25,7 @@ export interface IConsultation extends Document {
     proposedBy: Types.ObjectId;
     proposedAt: Date;
   };
+  requestedTo?: Types.ObjectId;
 }
 
 const ConsultationSchema = new Schema<IConsultation>({
@@ -43,6 +44,7 @@ const ConsultationSchema = new Schema<IConsultation>({
     type: String,
     enum: ['patient_self_serve', 'practitioner_schedule', 'hospital_desk', 'system'],
   },
+  requestedTo: { type: Schema.Types.ObjectId, ref: 'User' },
   pendingReschedule: {
     type: {
       proposedStart: { type: Date, required: true },

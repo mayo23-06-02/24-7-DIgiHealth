@@ -53,13 +53,13 @@ export default function HospitalIntelligence({
                   <Badge
                     label={item.metric}
                     status="neutral"
-                    className="!text-[10px] !px-2 !py-0.5 !bg-white/80"
+                    className="!text-[10px] !px-2 !py-1 !bg-white/80"
                   />
                 )}
                 <Badge
                   label={item.severity}
                   status={SEV_BADGE[item.severity] || "info"}
-                  className="!text-[10px] !px-2 !py-0.5 capitalize"
+                  className="!text-[10px] !px-2 !py-1 capitalize"
                 />
               </div>
             </div>

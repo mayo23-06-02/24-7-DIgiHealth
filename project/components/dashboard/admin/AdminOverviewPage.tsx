@@ -169,7 +169,7 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
                             ? "success"
                             : "info"
                     }
-                    className="!text-[10px] !px-2 !py-0.5 capitalize"
+                    className="!text-[10px] !px-2 !py-1 capitalize"
                   />
                 </div>
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">{item.detail}</p>
@@ -261,11 +261,11 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
                   <p className="text-xs text-slate-400 truncate">{u.email}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Badge label={u.role} status="neutral" className="!text-[10px] !px-2 !py-0.5 capitalize" />
+                  <Badge label={u.role} status="neutral" className="!text-[10px] !px-2 !py-1 capitalize" />
                   <Badge
                     label={u.status}
                     status={u.status === "suspended" ? "error" : "success"}
-                    className="!text-[10px] !px-2 !py-0.5"
+                    className="!text-[10px] !px-2 !py-1"
                   />
                 </div>
               </li>
@@ -288,7 +288,7 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
                 <Badge
                   label={f.isOpen ? "Open" : "Closed"}
                   status={f.isOpen ? "success" : "error"}
-                  className="!text-[10px] !px-2 !py-0.5"
+                  className="!text-[10px] !px-2 !py-1"
                 />
               </li>
             ))}

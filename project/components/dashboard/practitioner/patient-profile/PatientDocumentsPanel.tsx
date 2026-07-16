@@ -154,7 +154,7 @@ export default function PatientDocumentsPanel({
         <div className="mt-2 flex items-center gap-1.5">
           <input
             autoFocus
-            className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-primary/20 outline-none"
+            className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-primary/20 outline-none"
             placeholder="Add a note about this file..."
             value={noteDraft}
             onChange={(e) => setNoteDraft(e.target.value)}
@@ -321,7 +321,7 @@ export default function PatientDocumentsPanel({
                         <p className="text-sm font-bold text-slate-800 truncate">
                           {doc.type}
                           {doc.uploadedByPractitioner && (
-                            <span className="ml-1.5 text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full align-middle">
+                            <span className="ml-1.5 text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-full align-middle">
                               You
                             </span>
                           )}
@@ -348,7 +348,7 @@ export default function PatientDocumentsPanel({
                             setImgError(false);
                             setPreview(doc);
                           }}
-                          className="text-xs font-bold text-primary hover:bg-primary/5 px-2.5 py-1.5 rounded-lg"
+                          className="text-xs font-bold text-primary hover:bg-primary/5 px-3 py-2 rounded-lg"
                         >
                           View
                         </button>

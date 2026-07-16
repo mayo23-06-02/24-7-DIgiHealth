@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       scheduledEndTime: end,
       chiefComplaint: reason,
       source: 'patient_self_serve',
+      requestedTo: body.practitionerId,
     });
 
     await notifyBookingEvent('request_created', {

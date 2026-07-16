@@ -719,7 +719,7 @@ export default function HospitalReportsPage() {
                                 ? "success"
                                 : "info"
                         }
-                        className="!text-[10px] !px-2 !py-0.5 capitalize shrink-0"
+                        className="!text-[10px] !px-2 !py-1 capitalize shrink-0"
                       />
                     </div>
                     <p className="text-xs text-slate-600 mt-1 leading-relaxed">

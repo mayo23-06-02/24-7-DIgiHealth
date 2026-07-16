@@ -76,7 +76,7 @@ export default function UpcomingAppointments({
                 <Badge
                   label={a.type}
                   status="info"
-                  className="!text-[10px] !px-2 !py-0.5 capitalize"
+                  className="!text-[10px] !px-2 !py-1 capitalize"
                 />
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
                   <BiTime size={12} />

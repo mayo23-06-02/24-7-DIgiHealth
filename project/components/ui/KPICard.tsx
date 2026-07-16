@@ -55,7 +55,7 @@ const KPICard: React.FC<KPICardProps> = ({
           {trend !== undefined && (
             <div
               className={`
-            flex items-center gap-0.5 sm:gap-1 font-bold px-2 sm:px-2 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[10px] lg:text-xs
+            flex items-center gap-0.5 sm:gap-1 font-bold px-2 sm:px-2 py-1 sm:py-1 rounded-full text-[8px] sm:text-[10px] lg:text-xs
             ${trend >= 0 ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-600"}
           `}
             >

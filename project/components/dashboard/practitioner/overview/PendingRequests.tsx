@@ -138,7 +138,7 @@ export default function PendingRequests({
                       {req.patientName}
                     </h4>
                     {isNew && (
-                      <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-full font-bold uppercase tracking-wider">
                         New
                       </span>
                     )}

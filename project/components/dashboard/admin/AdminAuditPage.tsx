@@ -94,7 +94,7 @@ export default function AdminAuditPage() {
                         : "—"}
                     </td>
                     <td className="px-3 py-3">
-                      <Badge label={a.action} status="info" className="!text-[10px] !px-2 !py-0.5" />
+                      <Badge label={a.action} status="info" className="!text-[10px] !px-2 !py-1" />
                     </td>
                     <td className="px-3 py-3 text-slate-700">{a.actorEmail || "—"}</td>
                     <td className="px-3 py-3 text-xs capitalize text-slate-500">{a.actorRole}</td>

@@ -88,6 +88,7 @@ export async function GET(
         status: (c as any).status,
         type: (c as any).type,
         reason: (c as any).chiefComplaint,
+        requestedTo: (c as any).requestedTo?.toString(),
         pendingReschedule: pendingReschedule
           ? {
               proposedStart: pendingReschedule.proposedStart,
@@ -171,6 +172,7 @@ export async function PATCH(
         c.scheduledStartTime = pending.proposedStart;
         c.scheduledEndTime = pending.proposedEnd;
         c.pendingReschedule = undefined;
+        c.requestedTo = undefined;
         await c.save();
 
         await notifyBookingEvent("reschedule_accepted", {
@@ -313,6 +315,9 @@ export async function PATCH(
       if (!Number.isNaN(start.getTime())) {
         c.scheduledStartTime = start;
       }
+      if (c.status === "requested" || c.status === "pending") {
+        c.requestedTo = auth.userId === pid ? c.practitionerId : c.patientId;
+      }
     }
     if (body.scheduledEnd) {
       const end = new Date(body.scheduledEnd);
@@ -368,21 +373,29 @@ export async function PATCH(
       if (!allowed.includes(body.status)) {
         // ignore invalid
       } else if (
-        auth.role === "patient" &&
-        auth.userId === pid &&
         (c.status === "requested" || c.status === "pending") &&
         body.status === "scheduled"
       ) {
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              "You cannot accept an appointment you requested. Reschedule or cancel instead.",
-          },
-          { status: 403 },
-        );
+        const isAllowedToAccept = c.requestedTo
+          ? c.requestedTo.toString() === auth.userId
+          : auth.userId !== pid;
+        if (!isAllowedToAccept) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "You cannot accept this request. Please wait for the other party, or reschedule / cancel instead.",
+            },
+            { status: 403 },
+          );
+        }
+        c.status = body.status;
+        c.requestedTo = undefined;
       } else {
         c.status = body.status;
+        if (body.status === "cancelled" || body.status === "completed") {
+          c.requestedTo = undefined;
+        }
       }
     }
 

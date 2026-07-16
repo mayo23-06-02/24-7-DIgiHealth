@@ -336,7 +336,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                       <div key={i} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{v.parameter}</span>
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${v.status === "normal" ? "bg-green-100 text-green-700" : "bg-rose-100 text-rose-700"}`}>
+                          <span className={`text-[9px] font-bold px-2 py-1 rounded ${v.status === "normal" ? "bg-green-100 text-green-700" : "bg-rose-100 text-rose-700"}`}>
                             {v.status.toUpperCase()}
                           </span>
                         </div>
@@ -366,7 +366,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                     <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-primary">
                       <Pill size={20} />
                     </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${med.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${med.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
                       {med.status.toUpperCase()}
                     </span>
                   </div>
@@ -414,7 +414,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                       <p className="text-xs text-slate-500">{allergy.reaction}</p>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${allergy.severity === "severe" ? "border-rose-100 bg-rose-50 text-rose-600" : "border-slate-100 bg-slate-50 text-slate-500"}`}>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full border ${allergy.severity === "severe" ? "border-rose-100 bg-rose-50 text-rose-600" : "border-slate-100 bg-slate-50 text-slate-500"}`}>
                     {allergy.severity.toUpperCase()}
                   </span>
                 </div>

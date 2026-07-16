@@ -19,6 +19,7 @@ export interface Appointment {
   isNew?: boolean;
   computedStatus?: string;
   duration?: string;
+  requestedTo?: string;
   pendingReschedule?: {
     proposedStart: string;
     proposedEnd: string;

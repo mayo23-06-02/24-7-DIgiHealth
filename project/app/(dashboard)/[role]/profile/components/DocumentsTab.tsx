@@ -131,7 +131,7 @@ export default function DocumentsTab({
         <div className="mt-1.5 flex items-center gap-1.5">
           <input
             autoFocus
-            className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-primary/20 outline-none"
+            className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-primary/20 outline-none"
             placeholder="Add a note about this file..."
             value={noteDraft}
             onChange={(e) => setNoteDraft(e.target.value)}
@@ -554,7 +554,7 @@ export default function DocumentsTab({
                         <div className="flex items-center gap-2">
                           <input
                             autoFocus
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none"
+                            className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none"
                             value={editDocLabel}
                             onChange={(e) => setEditDocLabel(e.target.value)}
                             onKeyDown={(e) =>
@@ -684,7 +684,7 @@ export default function DocumentsTab({
                         type="button"
                         disabled={pageNumber <= 1}
                         onClick={() => setPageNumber((p) => p - 1)}
-                        className="px-3 py-1.5 bg-slate-100 rounded-lg disabled:opacity-40"
+                        className="px-3 py-2 bg-slate-100 rounded-lg disabled:opacity-40"
                       >
                         ← Prev
                       </button>
@@ -692,7 +692,7 @@ export default function DocumentsTab({
                         type="button"
                         disabled={numPages ? pageNumber >= numPages : true}
                         onClick={() => setPageNumber((p) => p + 1)}
-                        className="px-3 py-1.5 bg-slate-100 rounded-lg disabled:opacity-40"
+                        className="px-3 py-2 bg-slate-100 rounded-lg disabled:opacity-40"
                       >
                         Next →
                       </button>

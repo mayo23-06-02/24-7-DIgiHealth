@@ -56,7 +56,7 @@ export default function AppointmentsToolbar({
           >
             {tab}
             <span
-              className={`ml-1 px-2 py-0.5 rounded-lg text-[9px] font-bold border ${
+              className={`ml-1 px-2 py-1 rounded-lg text-[9px] font-bold border ${
                 activeTab === tab
                   ? "bg-white/20 border-white/20 text-white"
                   : "bg-white border-slate-100 text-slate-500"

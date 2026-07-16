@@ -405,7 +405,7 @@ export default function ClinicalInsightsPage() {
                               {item.title}
                             </p>
                             {item.metric && (
-                              <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-500 bg-white/70 px-2 py-0.5 rounded-full">
+                              <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-slate-500 bg-white/70 px-2 py-1 rounded-full">
                                 {item.metric}
                               </span>
                             )}

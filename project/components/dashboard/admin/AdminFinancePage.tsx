@@ -70,7 +70,7 @@ export default function AdminFinancePage() {
                   key={d}
                   type="button"
                   onClick={() => setDays(d)}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg ${
+                  className={`px-3 py-2 text-xs font-bold rounded-lg ${
                     days === d ? "bg-white text-primary shadow-sm" : "text-slate-500"
                   }`}
                 >
@@ -158,7 +158,7 @@ export default function AdminFinancePage() {
                           ? "error"
                           : "warning"
                     }
-                    className="!text-[10px] !px-2 !py-0.5 capitalize"
+                    className="!text-[10px] !px-2 !py-1 capitalize"
                   />
                   {p.status === "pending" && (
                     <>
@@ -218,7 +218,7 @@ export default function AdminFinancePage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <Badge label={t.status} status="neutral" className="!text-[10px] !px-2 !py-0.5" />
+                  <Badge label={t.status} status="neutral" className="!text-[10px] !px-2 !py-1" />
                   <p className="text-[10px] text-slate-400 mt-1">
                     {t.timestamp
                       ? new Date(t.timestamp).toLocaleDateString("en-ZA")

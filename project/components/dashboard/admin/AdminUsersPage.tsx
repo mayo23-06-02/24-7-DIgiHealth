@@ -227,7 +227,7 @@ export default function AdminUsersPage({
                         value={u.role}
                         disabled={busyId === u.id}
                         onChange={(e) => void changeRole(u.id, e.target.value)}
-                        className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white max-w-[140px]"
+                        className="text-xs border border-slate-200 rounded-lg px-2 py-2 bg-white max-w-[140px]"
                       >
                         {ROLES.filter((r) => canAssignRole(actorRole, r) || r === u.role).map(
                           (r) => (
@@ -242,7 +242,7 @@ export default function AdminUsersPage({
                       <Badge
                         label={u.status}
                         status={u.status === "suspended" ? "error" : "success"}
-                        className="!text-[10px] !px-2 !py-0.5"
+                        className="!text-[10px] !px-2 !py-1"
                       />
                     </td>
                     <td className="px-3 py-3 text-xs font-semibold text-slate-600">

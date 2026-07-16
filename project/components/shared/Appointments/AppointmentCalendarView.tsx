@@ -120,7 +120,7 @@ export default function AppointmentCalendarView({
               d.setHours(0, 0, 0, 0);
               setCursor(d);
             }}
-            className="px-3 py-1.5 text-xs font-bold uppercase rounded-full border border-slate-200 text-slate-600 hover:border-primary hover:text-primary transition-colors"
+            className="px-3 py-2 text-xs font-bold uppercase rounded-full border border-slate-200 text-slate-600 hover:border-primary hover:text-primary transition-colors"
           >
             Today
           </button>
@@ -214,7 +214,7 @@ export default function AppointmentCalendarView({
                           type="button"
                           onClick={() => onAppointmentClick(appt)}
                           title={`${time} · ${label}`}
-                          className={`w-full text-left truncate px-1.5 py-1 rounded text-[11px] font-semibold transition-colors ${chipClasses(appt)}`}
+                          className={`w-full text-left truncate px-2 py-1 rounded text-[11px] font-semibold transition-colors ${chipClasses(appt)}`}
                         >
                           {time} {label}
                         </button>
@@ -224,7 +224,7 @@ export default function AppointmentCalendarView({
                       <button
                         type="button"
                         onClick={() => setExpandedDay(key)}
-                        className="w-full text-left px-1.5 text-[11px] font-bold text-primary hover:underline"
+                        className="w-full text-left px-2 text-[11px] font-bold text-primary hover:underline"
                       >
                         +{hiddenCount} more
                       </button>
@@ -233,7 +233,7 @@ export default function AppointmentCalendarView({
                       <button
                         type="button"
                         onClick={() => setExpandedDay(null)}
-                        className="w-full text-left px-1.5 text-[11px] font-bold text-slate-400 hover:underline"
+                        className="w-full text-left px-2 text-[11px] font-bold text-slate-400 hover:underline"
                       >
                         Show less
                       </button>

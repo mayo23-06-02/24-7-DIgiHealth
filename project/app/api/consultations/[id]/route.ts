@@ -44,6 +44,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (consultation.status === 'scheduled' || consultation.status === 'requested') {
         consultation.status = 'pending';
       }
+      consultation.requestedTo = consultation.practitionerId;
     }
     if (body.chiefComplaint) consultation.chiefComplaint = body.chiefComplaint;
     await consultation.save();

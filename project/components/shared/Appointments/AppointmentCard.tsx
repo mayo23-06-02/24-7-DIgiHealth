@@ -82,6 +82,11 @@ export default function AppointmentCard({
   const isJoinable = isAccepted && now >= tenMinsBefore && now <= end;
   const joinLabel = now < start ? "Enter Lobby" : "Join Room";
 
+  const isRecipient = appointment.requestedTo
+    ? (userType === "patient" && appointment.requestedTo === appointment.patientId) ||
+      (userType === "practitioner" && appointment.requestedTo === appointment.practitionerId)
+    : userType === "practitioner"; // legacy default
+
   const isMissed =
     appointment.computedStatus === "missed" ||
     appointment.computedStatus === "cancelled";

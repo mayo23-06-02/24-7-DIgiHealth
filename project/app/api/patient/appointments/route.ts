@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
         type: c.type,
         reason: c.chiefComplaint,
         duration: '30 min',
+        requestedTo: c.requestedTo?.toString(),
         pendingReschedule: pending
           ? {
               proposedStart: pending.proposedStart,

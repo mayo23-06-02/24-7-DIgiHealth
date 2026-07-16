@@ -44,6 +44,7 @@ function toRecord(c: any, extras: Record<string, unknown> = {}) {
     type: c.type,
     reason: c.chiefComplaint,
     source: c.source,
+    requestedTo: c.requestedTo?.toString(),
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
     ...extras,
@@ -283,6 +284,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    let requestedTo: string | undefined = undefined;
+    if (status === "requested" || status === "pending") {
+      requestedTo = auth.role === "patient" ? practitionerId : patientId;
+    }
+
     const consultation = await Consultation.create({
       patientId,
       practitionerId,
@@ -293,6 +299,7 @@ export async function POST(req: NextRequest) {
       scheduledEndTime: end,
       chiefComplaint: body.reason || body.chiefComplaint || "",
       source,
+      requestedTo,
     });
 
     const patient = await User.findById(patientId, "firstName lastName").lean();

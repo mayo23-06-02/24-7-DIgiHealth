@@ -128,7 +128,7 @@ export default function AdminFacilitiesPage() {
                       <Badge
                         label={f.isOpen ? "Open" : "Closed"}
                         status={f.isOpen ? "success" : "error"}
-                        className="!text-[10px] !px-2 !py-0.5"
+                        className="!text-[10px] !px-2 !py-1"
                       />
                     </td>
                     <td className="px-3 py-3 text-right">

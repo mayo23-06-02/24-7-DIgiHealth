@@ -99,7 +99,7 @@ export default function TimeSlotPicker({
             · {durationMinutes}-min slots · 8:00 AM – 12:00 AM
           </span>
         </label>
-        <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+        <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full">
           {summary.available} open
         </span>
       </div>

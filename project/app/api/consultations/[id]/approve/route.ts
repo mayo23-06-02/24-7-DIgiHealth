@@ -69,6 +69,7 @@ export async function POST(
     }
 
     consultation.status = "scheduled";
+    consultation.requestedTo = undefined;
     await consultation.save();
 
     await notifyBookingEvent("accepted", {

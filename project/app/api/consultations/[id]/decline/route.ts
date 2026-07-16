@@ -58,6 +58,7 @@ export async function POST(
 
     // Prefer cancel over hard-delete so history remains
     consultation.status = "cancelled";
+    consultation.requestedTo = undefined;
     await consultation.save();
 
     if (isPractitioner) {

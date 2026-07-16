@@ -74,7 +74,7 @@ export default function DoctorsOverview({
                     <Badge
                       label={d.isOnDuty ? "On duty" : "Off duty"}
                       status={d.isOnDuty ? "success" : "neutral"}
-                      className="!text-[10px] !px-2 !py-0.5"
+                      className="!text-[10px] !px-2 !py-1"
                     />
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5 truncate">

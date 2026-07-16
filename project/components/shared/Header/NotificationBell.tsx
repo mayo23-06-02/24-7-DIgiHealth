@@ -247,7 +247,7 @@ export default function NotificationBell({
                                 e.stopPropagation();
                                 handleRescheduleAction(notif, "accept");
                               }}
-                              className="flex-1 rounded-md bg-primary px-3 py-1.5 text-[11px] font-bold text-white hover:opacity-90 transition-opacity"
+                              className="flex-1 rounded-md bg-primary px-3 py-2 text-[11px] font-bold text-white hover:opacity-90 transition-opacity"
                             >
                               Accept
                             </button>
@@ -256,7 +256,7 @@ export default function NotificationBell({
                                 e.stopPropagation();
                                 handleRescheduleAction(notif, "decline");
                               }}
-                              className="flex-1 rounded-md border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                              className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
                             >
                               Decline
                             </button>

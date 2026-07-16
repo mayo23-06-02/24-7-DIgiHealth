@@ -83,9 +83,9 @@ export default function AdminAlertsPage() {
                               ? "success"
                               : "info"
                       }
-                      className="!text-[10px] !px-2 !py-0.5 capitalize"
+                      className="!text-[10px] !px-2 !py-1 capitalize"
                     />
-                    <Badge label={a.source} status="neutral" className="!text-[10px] !px-2 !py-0.5" />
+                    <Badge label={a.source} status="neutral" className="!text-[10px] !px-2 !py-1" />
                   </div>
                   <p className="text-xs text-slate-600 mt-1">{a.detail}</p>
                   {a.metric && (

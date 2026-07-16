@@ -252,7 +252,7 @@ export default function AdminReportsPage() {
                   <div key={item.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                     <div className="flex justify-between gap-2">
                       <p className="text-sm font-bold text-slate-800">{item.title}</p>
-                      <Badge label={item.severity} status={item.severity === "critical" ? "error" : item.severity === "warning" ? "warning" : "info"} className="!text-[10px] !px-2 !py-0.5 capitalize" />
+                      <Badge label={item.severity} status={item.severity === "critical" ? "error" : item.severity === "warning" ? "warning" : "info"} className="!text-[10px] !px-2 !py-1 capitalize" />
                     </div>
                     <p className="text-xs text-slate-600 mt-1">{item.detail}</p>
                   </div>

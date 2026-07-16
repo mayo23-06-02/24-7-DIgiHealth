@@ -34,6 +34,11 @@ export async function GET(req: NextRequest) {
       Consultation.find({
         practitionerId,
         status: { $in: ['pending', 'requested'] },
+        $or: [
+          { requestedTo: practitionerId },
+          { requestedTo: { $exists: false } },
+          { requestedTo: null },
+        ],
       }).sort({ scheduledStartTime: 1 }).lean()
     ]);
 

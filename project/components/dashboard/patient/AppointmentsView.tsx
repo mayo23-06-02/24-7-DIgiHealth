@@ -763,7 +763,7 @@ const AppointmentsView: React.FC = () => {
                           label={appt.type.replace("_", " ")}
                           status="info"
                           variant="soft"
-                          className="text-[10px] font-bold px-2 py-0.5"
+                          className="text-[10px] font-bold px-2 py-1"
                         />
                       </div>
                       {showGreenTimer && (

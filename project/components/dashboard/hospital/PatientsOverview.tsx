@@ -90,7 +90,7 @@ export default function PatientsOverview({
                         <Badge
                           label={String(p.riskScore)}
                           status={RISK_STATUS[p.riskBand] || "neutral"}
-                          className="!text-xs !px-2 !py-0.5 tabular-nums"
+                          className="!text-xs !px-2 !py-1 tabular-nums"
                         />
                       </td>
                     </tr>
@@ -114,7 +114,7 @@ export default function PatientsOverview({
                     <Badge
                       label={String(p.riskScore)}
                       status={RISK_STATUS[p.riskBand] || "neutral"}
-                      className="!text-xs !px-2 !py-0.5"
+                      className="!text-xs !px-2 !py-1"
                     />
                   </div>
                   <p className="text-[11px] text-slate-500">
