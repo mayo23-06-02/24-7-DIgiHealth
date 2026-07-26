@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { BiPlusMedical, BiStar, BiChevronRight } from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -17,7 +17,7 @@ export default function DoctorsOverview({
 }: {
   doctors: HospitalOverviewData["doctors"];
 }) {
-  const router = useRouter();
+  const { navigate, isPending } = useNavigate();
 
   return (
     <Card noPadding className="!rounded-lg flex flex-col min-h-[360px] !p-0">
@@ -50,7 +50,8 @@ export default function DoctorsOverview({
             description='Add staff with role "doctor" to populate this view.'
             icon={<BiPlusMedical size={32} />}
             actionLabel="Add staff"
-            onAction={() => router.push("/hospital_admin/staff")}
+            onAction={() => navigate("/hospital_admin/staff")}
+            actionLoading={isPending}
             className="py-10"
           />
         ) : (

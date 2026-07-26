@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import Card from "@/components/ui/Card";
@@ -14,7 +14,7 @@ import DoctorsSortModal from "./DoctorsSortModal";
 import DoctorsCarouselSection from "./DoctorsCarouselSection";
 
 export default function DoctorsViewRefactored() {
-  const router = useRouter();
+  const { navigate } = useNavigate();
   const [doctors, setDoctors] = useState<any[]>([]);
   const [myDoctors, setMyDoctors] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,12 +87,12 @@ export default function DoctorsViewRefactored() {
       const data = res.ok ? await res.json() : null;
       const conversationId = data?.conversationId;
       if (conversationId) {
-        router.push(`/patient/messages?chatId=${conversationId}`);
+        navigate(`/patient/messages?chatId=${conversationId}`);
       } else {
-        router.push(`/patient/messages?doctorId=${doc.id}`);
+        navigate(`/patient/messages?doctorId=${doc.id}`);
       }
     } catch {
-      router.push(`/patient/messages?doctorId=${doc.id}`);
+      navigate(`/patient/messages?doctorId=${doc.id}`);
     }
   };
 

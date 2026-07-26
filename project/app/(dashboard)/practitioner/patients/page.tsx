@@ -5,7 +5,8 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import {
   BiSearch,
   BiLoaderAlt,
@@ -33,7 +34,7 @@ const SORT_OPTIONS: { value: string; label: string }[] = [
 
 export default function PractitionerPatientsPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const { navigate, beginNavigation } = useNavigate();
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -84,6 +85,7 @@ export default function PractitionerPatientsPage() {
     e?.stopPropagation();
     if (!patientId || chatLoadingId) return;
     setChatLoadingId(patientId);
+    beginNavigation(); // every branch navigates; cover the fetch too
     try {
       const res = await fetch("/api/conversations", {
         method: "POST",
@@ -92,12 +94,12 @@ export default function PractitionerPatientsPage() {
       });
       const data = res.ok ? await res.json() : null;
       if (data?.conversationId) {
-        router.push(`/practitioner/messages?chatId=${data.conversationId}`);
+        navigate(`/practitioner/messages?chatId=${data.conversationId}`);
       } else {
-        router.push(`/practitioner/messages?patientId=${patientId}`);
+        navigate(`/practitioner/messages?patientId=${patientId}`);
       }
     } catch {
-      router.push(`/practitioner/messages?patientId=${patientId}`);
+      navigate(`/practitioner/messages?patientId=${patientId}`);
     } finally {
       setChatLoadingId(null);
     }

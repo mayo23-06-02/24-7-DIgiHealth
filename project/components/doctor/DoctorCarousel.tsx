@@ -6,7 +6,7 @@ import DoctorModal from "./DoctorModal";
 import BookingModal from "./BookingModal";
 import { BiLoaderCircle } from "react-icons/bi";
 import Badge from "@/components/ui/Badge";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 
 interface Doctor {
@@ -28,7 +28,7 @@ export default function DoctorCarousel() {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [bookingDoctor, setBookingDoctor] = useState<Doctor | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const router = useRouter();
+  const { navigate, beginNavigation } = useNavigate();
 
   // Responsive carousel item calculation
   const [isClient, setIsClient] = useState(false);
@@ -83,6 +83,9 @@ export default function DoctorCarousel() {
   const handleMessage = async (doctorId: string, e?: React.MouseEvent) => {
     e?.stopPropagation(); // Prevent modal open
     if (!doctorId) return;
+    // This always ends in a navigation, so start the bar before the fetch —
+    // otherwise the button is completely dead for the whole round-trip.
+    beginNavigation();
     try {
       const res = await fetch("/api/conversations", {
         method: "POST",
@@ -91,13 +94,13 @@ export default function DoctorCarousel() {
       });
       const data = res.ok ? await res.json() : null;
       if (data?.conversationId) {
-        router.push(`/patient/messages?chatId=${data.conversationId}`);
+        navigate(`/patient/messages?chatId=${data.conversationId}`);
         return;
       }
     } catch {
       /* fall through */
     }
-    router.push(`/patient/messages?doctorId=${doctorId}`);
+    navigate(`/patient/messages?doctorId=${doctorId}`);
   };
 
   const visibleCount = isClient

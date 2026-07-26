@@ -10,11 +10,35 @@
   --animate-pulse-slow: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-medical-cross-pulse: medicalCrossPulse 1.5s ease-in-out infinite;
   --animate-shimmer: shimmer 2s linear infinite;
+  --animate-nav-progress-pulse: navProgressPulse 1.1s ease-in-out infinite;
 }
 
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
+}
+
+/* ── Global route-change progress bar (components/ui/TopProgressBar.tsx) ── */
+@keyframes navProgressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* Cursor affordance while a navigation is in flight.
+   Driven by NavigationProgressProvider via <html data-navigating="true">. */
+html[data-navigating="true"],
+html[data-navigating="true"] * {
+  cursor: progress !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress-bar {
+    transition: none !important;
+    animation: none !important;
+  }
+  .nav-progress-glow {
+    display: none !important;
+  }
 }
 
 @keyframes medicalCrossPulse {

@@ -1,5 +1,10 @@
 import React from "react";
-import { BiTrendingUp, BiTrendingDown, BiChevronRight } from "react-icons/bi";
+import {
+  BiTrendingUp,
+  BiTrendingDown,
+  BiChevronRight,
+  BiLoaderAlt,
+} from "react-icons/bi";
 import Card from "./Card";
 
 interface KPICardProps {
@@ -13,6 +18,8 @@ interface KPICardProps {
   onClick?: () => void;
   /** Force-hide footer chevron even when onClick is set */
   hideChevron?: boolean;
+  /** Navigation triggered by this card is in flight — swaps chevron for a spinner */
+  loading?: boolean;
 }
 
 const KPICard: React.FC<KPICardProps> = ({
@@ -25,6 +32,7 @@ const KPICard: React.FC<KPICardProps> = ({
   description,
   onClick,
   hideChevron,
+  loading = false,
 }) => {
   const clickable = typeof onClick === "function";
   const showChevron = clickable && !hideChevron;
@@ -34,9 +42,10 @@ const KPICard: React.FC<KPICardProps> = ({
       noPadding
       className={`
         flex justify-between flex-col h-full transition-transform group
-        ${clickable ? "hover:scale-[1.01] sm:hover:scale-[1.02] cursor-pointer" : "cursor-default"}
+        ${clickable && !loading ? "hover:scale-[1.01] sm:hover:scale-[1.02] cursor-pointer" : "cursor-default"}
+        ${loading ? "opacity-70 cursor-wait pointer-events-none" : ""}
       `}
-      onClick={onClick}
+      onClick={loading ? undefined : onClick}
     >
       <div className="flex flex-col h-full">
         <div className="p-3 sm:p-4 lg:py-4 lg:px-4 flex items-start justify-between gap-2">
@@ -93,7 +102,11 @@ const KPICard: React.FC<KPICardProps> = ({
           </p>
           {showChevron && (
             <div className="shrink-0">
-              <BiChevronRight className="text-slate-500" size={16} />
+              {loading ? (
+                <BiLoaderAlt className="text-primary animate-spin" size={16} />
+              ) : (
+                <BiChevronRight className="text-slate-500" size={16} />
+              )}
             </div>
           )}
         </div>

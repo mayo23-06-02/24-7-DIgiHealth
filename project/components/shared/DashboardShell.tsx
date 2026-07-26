@@ -5,6 +5,7 @@ import { useAuthContext } from "../auth/AuthProvider";
 import { BiBrain } from "react-icons/bi";
 import Header from "@/components/shared/Header";
 import Sidebar from "./Sidebar";
+import { useNavigationProgress } from "@/components/providers/NavigationProgressProvider";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isTriageOpen, setIsTriageOpen] = React.useState(false);
   const { user } = useAuthContext();
+  const { isNavigating } = useNavigationProgress();
 
   return (
     // Root container: fills screen, forbids body scroll
@@ -41,7 +43,10 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
         </div>
 
         {/* ── CONTENT AREA ── */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-2 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 custom-scrollbar">
+        <main
+          aria-busy={isNavigating || undefined}
+          className="flex-1 overflow-y-auto overflow-x-hidden p-2 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 custom-scrollbar"
+        >
           <div className="max-w-400 mx-auto">{children}</div>
         </main>
 

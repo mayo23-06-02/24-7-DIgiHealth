@@ -10,7 +10,7 @@ import ScheduleList from "./ScheduleList";
 import PendingRequests from "./PendingRequests";
 import { BiPlus } from "react-icons/bi";
 import Button from "@/components/ui/Button";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 
 export default function PractitionerOverview() {
   const { data, loading, actionLoading, handleRequestAction, refetch } =
@@ -18,7 +18,7 @@ export default function PractitionerOverview() {
   const [viewDate, setViewDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [chartPeriod, setChartPeriod] = React.useState("current");
-  const router = useRouter();
+  const { navigate } = useNavigate();
   const handleRescheduleSuccess = () => {
     refetch();
   };
@@ -85,7 +85,7 @@ export default function PractitionerOverview() {
   const handlePendingAppointmentsClick = () => {
     const weekStart = getWeekStart();
     const weekEnd = getWeekEnd();
-    router.push(
+    navigate(
       `/practitioner/appointments?tab=requests&dateFrom=${weekStart}&dateTo=${weekEnd}`,
     );
   };

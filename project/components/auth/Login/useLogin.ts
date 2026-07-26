@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 
 export function useLogin() {
-  const router = useRouter();
+  const { navigate, isPending } = useNavigate();
   const [role, setRole] = useState<"Patient" | "Practitioner" | "Admin">(
     "Patient",
   );
@@ -29,14 +29,18 @@ export function useLogin() {
       const data = await res.json();
 
       if (res.ok) {
-        router.push(`/${data.user?.role}`);
+        // Deliberately do NOT clear `loading` here. The dashboard layout does
+        // jwtVerify + a Mongo lookup, so the route takes a while; the button
+        // must keep spinning until it commits. This component unmounts on
+        // navigation, so the state cannot leak.
+        navigate(`/${data.user?.role}`);
         return;
       }
 
       setError(data.error || "Login failed");
+      setLoading(false);
     } catch {
       setError("Network error");
-    } finally {
       setLoading(false);
     }
   };
@@ -48,7 +52,7 @@ export function useLogin() {
     setIdentifier,
     password,
     setPassword,
-    loading,
+    loading: loading || isPending,
     error,
     handleLogin,
   };

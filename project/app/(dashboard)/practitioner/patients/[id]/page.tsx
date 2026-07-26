@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
@@ -26,7 +27,7 @@ import {
 
 export default function PatientProfilePage() {
   const params = useParams();
-  const router = useRouter();
+  const { navigate, beginNavigation } = useNavigate();
   const id = params?.id as string;
 
   const [patient, setPatient] = useState<PatientProfile | null>(null);
@@ -159,7 +160,7 @@ export default function PatientProfilePage() {
       }
       toast.success("Patient removed from your practice list");
       setRemoveConfirmOpen(false);
-      router.push("/practitioner/patients");
+      navigate("/practitioner/patients");
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed to remove patient");
     }
@@ -325,6 +326,7 @@ export default function PatientProfilePage() {
   const handleStartChat = async () => {
     if (!patient) return;
     setActionLoading(true);
+    beginNavigation(); // every branch navigates; cover the fetch too
     try {
       const res = await fetch("/api/conversations", {
         method: "POST",
@@ -336,12 +338,12 @@ export default function PatientProfilePage() {
       });
       const data = res.ok ? await res.json() : null;
       if (data?.conversationId) {
-        router.push(`/practitioner/messages?chatId=${data.conversationId}`);
+        navigate(`/practitioner/messages?chatId=${data.conversationId}`);
       } else {
-        router.push(`/practitioner/messages?patientId=${patient.id}`);
+        navigate(`/practitioner/messages?patientId=${patient.id}`);
       }
     } catch {
-      router.push(`/practitioner/messages?patientId=${patient.id}`);
+      navigate(`/practitioner/messages?patientId=${patient.id}`);
     }
     setActionLoading(false);
   };

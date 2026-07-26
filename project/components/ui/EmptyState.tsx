@@ -8,6 +8,8 @@ interface EmptyStateProps {
   actionLabel?: string;
   onAction?: () => void;
   className?: string;
+  /** Show a pending spinner on the action button (e.g. it navigates) */
+  actionLoading?: boolean;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
@@ -17,6 +19,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   actionLabel,
   onAction,
   className = "",
+  actionLoading = false,
 }) => {
   return (
     <div
@@ -37,6 +40,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           variant="white"
           size="sm"
           className="px-8 py-3"
+          loading={actionLoading}
         >
           {actionLabel}
         </Button>

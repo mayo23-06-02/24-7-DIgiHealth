@@ -3,7 +3,7 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from '@/hooks/useNavigate';
 import KPICard from '@/components/ui/KPICard';
 import { BiCalendarEvent, BiShow, BiPulse, BiCalendarX, BiUserPlus } from 'react-icons/bi';
 
@@ -24,7 +24,7 @@ export default function StatsGrid({
   riskAlerts,
   canceledThisWeek = 0,
 }: StatsGridProps) {
-  const router = useRouter();
+  const { navigate, isPending, pendingHref } = useNavigate();
 
   // Helper to get current date in YYYY-MM-DD format
   const getCurrentDate = () => {
@@ -50,29 +50,17 @@ export default function StatsGrid({
     return sunday.toISOString().split('T')[0];
   };
 
-  const handleAppointmentsTodayClick = () => {
-    const today = getCurrentDate();
-    router.push(`/practitioner/appointments?tab=all&dateFrom=${today}&dateTo=${today}`);
-  };
+  const today = getCurrentDate();
+  const weekStart = getWeekStart();
+  const weekEnd = getWeekEnd();
 
- 
+  // Hrefs are hoisted so each card can tell whether *it* is the pending one.
+  const appointmentsTodayHref = `/practitioner/appointments?tab=all&dateFrom=${today}&dateTo=${today}`;
+  const newPatientsHref = `/practitioner/appointments?tab=requests&dateFrom=${today}&dateTo=${today}`;
+  const highRiskHref = `/practitioner/patients?dateFrom=${weekStart}&dateTo=${weekEnd}`;
+  const canceledHref = `/practitioner/appointments?tab=cancelled&dateFrom=${weekStart}&dateTo=${weekEnd}`;
 
-  const handleNewPatientsClick = () => {
-    const today = getCurrentDate();
-    router.push(`/practitioner/appointments?tab=requests&dateFrom=${today}&dateTo=${today}`);
-  };
-
-  const handleHighRiskPatientsClick = () => {
-    const weekStart = getWeekStart();
-    const weekEnd = getWeekEnd();
-    router.push(`/practitioner/patients?dateFrom=${weekStart}&dateTo=${weekEnd}`);
-  };
-
-  const handleCanceledAppointmentsClick = () => {
-    const weekStart = getWeekStart();
-    const weekEnd = getWeekEnd();
-    router.push(`/practitioner/appointments?tab=cancelled&dateFrom=${weekStart}&dateTo=${weekEnd}`);
-  };
+  const isLoadingHref = (href: string) => isPending && pendingHref === href;
 
   return (
     <div className="flex flex-col gap-2">
@@ -84,7 +72,8 @@ export default function StatsGrid({
         description="vs. Yesterday"
         icon={<BiCalendarEvent size={24} />}
         color="primary"
-        onClick={handleAppointmentsTodayClick}
+        onClick={() => navigate(appointmentsTodayHref)}
+        loading={isLoadingHref(appointmentsTodayHref)}
       />
       <KPICard
         label="Total Visitors"
@@ -93,7 +82,8 @@ export default function StatsGrid({
         description="Total unique patients"
         icon={<BiUserPlus size={24} />}
         color="emerald"
-        onClick={handleNewPatientsClick}
+        onClick={() => navigate(newPatientsHref)}
+        loading={isLoadingHref(newPatientsHref)}
       />
       </div>
      <div className="flex gap-2 w-full">
@@ -104,7 +94,8 @@ export default function StatsGrid({
         description="This week"
         icon={<BiPulse size={24} />}
         color="red"
-        onClick={handleHighRiskPatientsClick}
+        onClick={() => navigate(highRiskHref)}
+        loading={isLoadingHref(highRiskHref)}
       />
       <KPICard
         label="Canceled Appointments"
@@ -113,7 +104,8 @@ export default function StatsGrid({
         description="This week"
         icon={<BiCalendarX size={24} />}
         color="slate"
-        onClick={handleCanceledAppointmentsClick}
+        onClick={() => navigate(canceledHref)}
+        loading={isLoadingHref(canceledHref)}
       />
      </div>
     </div>

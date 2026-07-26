@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import {
   BiCalendar,
   BiTime,
@@ -66,7 +66,7 @@ const AppointmentsView: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("newest");
-  const router = useRouter();
+  const { navigate } = useNavigate();
   const [waitingRoomAppt, setWaitingRoomAppt] = useState<Appointment | null>(
     null,
   );
@@ -110,7 +110,7 @@ const AppointmentsView: React.FC = () => {
         const data = await res.json();
         if (res.ok && data.conversationId) {
           setWaitingRoomAppt(null);
-          router.push(
+          navigate(
             `/patient/messages?chatId=${data.conversationId}&join=video`,
           );
         } else {
@@ -121,7 +121,7 @@ const AppointmentsView: React.FC = () => {
         joiningRef.current = false;
       }
     },
-    [router],
+    [navigate],
   );
 
   // Navigate to the consultation room when the waiting room countdown reaches zero

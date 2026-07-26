@@ -1,7 +1,7 @@
 import React from "react";
 import Carousel from "@/components/ui/Carousel";
 import DoctorCard from "@/components/doctor/DoctorCard";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 
 interface DoctorsCarouselSectionProps {
   title: string;
@@ -16,7 +16,7 @@ export default function DoctorsCarouselSection({
   onBook,
   onMessage,
 }: DoctorsCarouselSectionProps) {
-  const router = useRouter();
+  const { navigate } = useNavigate();
 
   if (doctors.length === 0) return null;
 
@@ -47,7 +47,7 @@ export default function DoctorsCarouselSection({
                 e.stopPropagation();
                 onMessage(doc);
               }}
-              onClick={() => router.push(`/patient/doctors/${doc.id}`)}
+              onClick={() => navigate(`/patient/doctors/${doc.id}`)}
             />
           </div>
         ))}

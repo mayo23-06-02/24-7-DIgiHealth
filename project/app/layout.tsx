@@ -3,6 +3,7 @@ import { Space_Grotesk, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import AuthProvider from "@/components/AuthProvider";
+import NavigationProgressProvider from "@/components/providers/NavigationProgressProvider";
 
 const grotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -31,7 +32,12 @@ export default function RootLayout({
       className={`${grotesk.variable} ${outfit.variable} antialiased`}
     >
       <body className="font-outfit">
-        <AuthProvider>{children}</AuthProvider>
+        {/* Mounted at the root so the bar also covers the (auth) group, which
+            has no client boundary of its own, and the slow login -> dashboard
+            transition. */}
+        <NavigationProgressProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </NavigationProgressProvider>
         <Toaster position="top-right" />
       </body>
     </html>

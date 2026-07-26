@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import {
   BiChevronLeft,
   BiStar,
@@ -34,7 +35,7 @@ type PeriodCounts = { Morning: number; Afternoon: number; Evening: number };
 
 export default function DoctorProfilePage() {
   const { id } = useParams();
-  const router = useRouter();
+  const { navigate, beginNavigation } = useNavigate();
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
@@ -193,6 +194,7 @@ export default function DoctorProfilePage() {
               variant="outline"
               className=""
               onClick={async () => {
+                beginNavigation(); // every branch navigates; cover the fetch too
                 try {
                   const res = await fetch("/api/conversations", {
                     method: "POST",
@@ -204,7 +206,7 @@ export default function DoctorProfilePage() {
                   });
                   const data = res.ok ? await res.json() : null;
                   if (data?.conversationId) {
-                    router.push(
+                    navigate(
                       `/patient/messages?chatId=${data.conversationId}`,
                     );
                     return;
@@ -212,7 +214,7 @@ export default function DoctorProfilePage() {
                 } catch {
                   /* fall through */
                 }
-                router.push(`/patient/messages?doctorId=${doc.id}`);
+                navigate(`/patient/messages?doctorId=${doc.id}`);
               }}
               icon={<BiMessageDetail className="text-xl" />}
               iconPosition="left"

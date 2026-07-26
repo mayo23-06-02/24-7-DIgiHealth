@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, KeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import Button from "@/components/ui/Button";
 import { toast } from "react-hot-toast";
 import { PendingRequest } from "./types";
@@ -23,7 +23,7 @@ export default function PendingRequests({
   actionLoading,
   onRescheduleSuccess,
 }: PendingRequestsProps) {
-  const router = useRouter();
+  const { navigate } = useNavigate();
   const [selectedRequest, setSelectedRequest] = useState<PendingRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
@@ -35,9 +35,9 @@ export default function PendingRequests({
         return;
       }
       setShowDetailsModal(false);
-      router.push(`/practitioner/patients/${patientId}`);
+      navigate(`/practitioner/patients/${patientId}`);
     },
-    [router],
+    [navigate],
   );
 
   // Memoize the current date for "New" badge calculation

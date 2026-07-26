@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import {
   BiSearch,
   BiFilterAlt,
@@ -43,7 +43,7 @@ const LANGUAGES = ["All", "English", "isiZulu", "Afrikaans", "Xhosa", "French"];
 const MEDICAL_AIDS = ["All", "Discovery", "Momentum", "Bonitas", "Medihelp"];
 
 const PractitionerDiscovery: React.FC = () => {
-  const router = useRouter();
+  const { navigate } = useNavigate();
   const [doctors, setDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -367,7 +367,7 @@ const PractitionerDiscovery: React.FC = () => {
                   <Button
                     variant="white"
                     className="flex-1 border-slate-200 text-xs font-bold  tracking-normal h-12"
-                    onClick={() => router.push(`/patient/doctors/${doc.id}`)}
+                    onClick={() => navigate(`/patient/doctors/${doc.id}`)}
                   >
                     View Profile
                   </Button>

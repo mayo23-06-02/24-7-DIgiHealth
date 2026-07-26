@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -20,7 +21,8 @@ function formatCountdown(msLeft: number): string {
 
 export default function AppointmentLobby({ userType }: Props) {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
+  const { navigate, beginNavigation, done, isPending, pendingHref } =
+    useNavigate();
   const searchParams = useSearchParams();
   const appointmentId = params.id as string;
 
@@ -81,8 +83,18 @@ export default function AppointmentLobby({ userType }: Props) {
   const enterChatroom = useCallback(() => {
     if (redirecting || !contactId) return;
     setRedirecting(true);
-    void joinChatroomNow({ contactId, role: userType, router });
-  }, [redirecting, contactId, userType, router]);
+    void joinChatroomNow({
+      contactId,
+      role: userType,
+      router: { push: (href: string) => navigate(href) },
+      onStart: beginNavigation,
+      onSettle: () => {
+        // The room couldn't be opened — clear the bar and let them retry.
+        done();
+        setRedirecting(false);
+      },
+    });
+  }, [redirecting, contactId, userType, navigate, beginNavigation, done]);
 
   // Auto-redirect the instant the scheduled start time is reached (or already past).
   useEffect(() => {
@@ -142,7 +154,10 @@ export default function AppointmentLobby({ userType }: Props) {
                 variant="ghost"
                 icon={<BiArrowBack size={16} />}
                 iconPosition="left"
-                onClick={() => router.push(`/${userType}/appointments`)}
+                onClick={() => navigate(`/${userType}/appointments`)}
+                loading={
+                  isPending && pendingHref === `/${userType}/appointments`
+                }
                 fullWidth
               >
                 Leave lobby
@@ -151,7 +166,7 @@ export default function AppointmentLobby({ userType }: Props) {
                 variant="outline"
                 icon={<BiCalendarEdit size={16} />}
                 iconPosition="left"
-                onClick={() => router.push(`/${userType}/appointments`)}
+                onClick={() => navigate(`/${userType}/appointments`)}
                 fullWidth
               >
                 Reschedule instead

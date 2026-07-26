@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { BiArrowToRight } from "react-icons/bi";
+import { useNavigate } from "@/hooks/useNavigate";
+import { BiArrowToRight, BiLoaderAlt } from "react-icons/bi";
 
 export default function RegisterRoleSelection() {
-  const router = useRouter();
+  const { navigate, isPending, pendingHref } = useNavigate();
   const [hoveredRole, setHoveredRole] = useState<string | null>(null);
 
   const roles = [
@@ -88,7 +88,8 @@ export default function RegisterRoleSelection() {
               type="button"
               onMouseEnter={() => setHoveredRole(role.id)}
               onMouseLeave={() => setHoveredRole(null)}
-              onClick={() => router.push(`/register/${role.id}`)}
+              onClick={() => navigate(`/register/${role.id}`)}
+              disabled={isPending}
               className={`group border-b border-slate-100 flex items-center pb-4 justify-between transition-all duration-500 cursor-pointer relative bg-transparent w-full text-left outline-none ${
                 hoveredRole === role.id ? "px-6 md:px-10 bg-slate-50/50" : ""
               }`}
@@ -131,7 +132,11 @@ export default function RegisterRoleSelection() {
                       : "scale-90 opacity-40 border-slate-200 text-slate-200"
                   }`}
                 >
-                  <BiArrowToRight />
+                  {pendingHref === `/register/${role.id}` ? (
+                    <BiLoaderAlt className="animate-spin" />
+                  ) : (
+                    <BiArrowToRight />
+                  )}
                 </div>
               </div>
             </button>
@@ -146,7 +151,7 @@ export default function RegisterRoleSelection() {
             </button>
           </p>
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => navigate("/login")}
             className="text-slate-700 flex items-center gap-6 hover:bg-slate-100 transition-all hover:scale-[1.03] active:scale-[0.98]"
           >
             Already Registered? <span className="font-bold">Login</span>

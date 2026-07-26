@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
@@ -22,7 +22,7 @@ import {
 import { VerifiedIcon } from "lucide-react";
 
 export default function DoctorsView() {
-  const router = useRouter();
+  const { navigate, beginNavigation, done } = useNavigate();
   const [doctors, setDoctors] = useState<any[]>([]);
   const [myDoctors, setMyDoctors] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,6 +115,9 @@ export default function DoctorsView() {
   const handleStartMessage = async (doc: any) => {
     if (!doc?.id) return;
     setIsInitiating(true);
+    // Every branch below navigates, so light the bar before the fetch rather
+    // than leaving the user with nothing during the round-trip.
+    beginNavigation();
     try {
       const res = await fetch("/api/conversations", {
         method: "POST",
@@ -128,12 +131,12 @@ export default function DoctorsView() {
       const conversationId = data?.conversationId;
       // Open messages with this doctor — not the full list alone
       if (conversationId) {
-        router.push(`/patient/messages?chatId=${conversationId}`);
+        navigate(`/patient/messages?chatId=${conversationId}`);
       } else {
-        router.push(`/patient/messages?doctorId=${doc.id}`);
+        navigate(`/patient/messages?doctorId=${doc.id}`);
       }
     } catch {
-      router.push(`/patient/messages?doctorId=${doc.id}`);
+      navigate(`/patient/messages?doctorId=${doc.id}`);
     }
     setIsInitiating(false);
     setSelectedDoctor(null);
@@ -141,6 +144,7 @@ export default function DoctorsView() {
 
   const handleImmediateCall = async (doc: any) => {
     setIsInitiating(true);
+    beginNavigation();
     try {
       // 1. Create instant consultation
       const res = await fetch("/api/consultations/book", {
@@ -161,10 +165,11 @@ export default function DoctorsView() {
       const data = await res.json();
       if (data.success) {
         // Redir to chat for this consultation with autostart flag
-        router.push(`/patient/chat/${data.consultation._id}?autoStart=true`);
+        navigate(`/patient/chat/${data.consultation._id}?autoStart=true`);
       }
     } catch {
       /* silent */
+      done(); // nothing to navigate to — clear the bar
     }
     setIsInitiating(false);
   };
@@ -299,7 +304,7 @@ export default function DoctorsView() {
                   <Card
                     key={doc.id}
                     className="hover:border-primary/20 transition-all border-slate-100 cursor-pointer"
-                    onClick={() => router.push(`/patient/doctors/${doc.id}`)}
+                    onClick={() => navigate(`/patient/doctors/${doc.id}`)}
                   >
                     <div className="flex items-center gap-3">
                       <Avatar
@@ -401,7 +406,7 @@ export default function DoctorsView() {
                       e.stopPropagation();
                       handleStartMessage(doc);
                     }}
-                    onClick={() => router.push(`/patient/doctors/${doc.id}`)}
+                    onClick={() => navigate(`/patient/doctors/${doc.id}`)}
                   />
                 </div>
               ))}

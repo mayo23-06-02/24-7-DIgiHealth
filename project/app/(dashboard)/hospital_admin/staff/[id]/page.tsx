@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import Card from "@/components/ui/Card";
 import Avatar from "@/components/ui/Avatar";
 import {
@@ -50,7 +51,7 @@ type Tab = "overview" | "appointments" | "patients" | "revenue" | "sla";
 
 export default function StaffProfilePage() {
   const { id } = useParams() as { id: string };
-  const router = useRouter();
+  const { back } = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("overview");
@@ -77,7 +78,7 @@ export default function StaffProfilePage() {
         <BiUser size={48} className="opacity-20" />
         <p className="font-bold">Staff member not found.</p>
         <button
-          onClick={() => router.back()}
+          onClick={() => back()}
           className="text-sm text-primary font-bold hover:underline"
         >
           ← Go back
@@ -109,7 +110,7 @@ export default function StaffProfilePage() {
       {/* Header */}
       <div className="flex items-start gap-4">
         <button
-          onClick={() => router.back()}
+          onClick={() => back()}
           className="mt-1 p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
         >
           <BiArrowBack size={20} />
