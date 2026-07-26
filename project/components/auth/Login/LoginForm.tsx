@@ -9,6 +9,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const isRegistered = searchParams?.get("registered") === "true";
   const isVerified = searchParams?.get("verified") === "true";
+  const isReset = searchParams?.get("reset") === "true";
   const prefillEmail = (searchParams?.get("email") || "").trim();
   const login = useLogin();
 
@@ -17,6 +18,7 @@ export default function LoginForm() {
       <LeftPanel
         isRegistered={isRegistered}
         isVerified={isVerified}
+        isReset={isReset}
         prefillEmail={prefillEmail}
         login={login}
       />

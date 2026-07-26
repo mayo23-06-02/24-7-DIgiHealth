@@ -8,6 +8,7 @@ import SocialLoginButtons from "./SocialLoginButtons";
 interface LeftPanelProps {
   isRegistered: boolean;
   isVerified?: boolean;
+  isReset?: boolean;
   prefillEmail?: string;
   login: ReturnType<typeof useLogin>;
 }
@@ -15,6 +16,7 @@ interface LeftPanelProps {
 export default function LeftPanel({
   isRegistered,
   isVerified,
+  isReset,
   prefillEmail,
   login,
 }: LeftPanelProps) {
@@ -53,6 +55,16 @@ export default function LeftPanel({
           Login for 24/7 expert medical support across South Africa.
         </p>
       </div>
+
+      {/* Password reset banner */}
+      {isReset && (
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+          <span className="w-5 h-5 rounded-lg bg-emerald-100 flex items-center justify-center">
+            ✓
+          </span>
+          Password updated! Sign in with your new password.
+        </div>
+      )}
 
       {/* Email verified banner */}
       {isVerified && (
@@ -116,22 +128,12 @@ export default function LeftPanel({
           <p className="text-red-500 text-sm font-bold text-center">{error}</p>
         )}
 
-        <Button type="submit" fullWidth={true} disabled={loading}>
-          {loading ? "Authenticating..." : "Login"}
+        <Button type="submit" fullWidth={true} loading={loading}>
+          Login
         </Button>
       </form>
 
-      <div className="relative flex flex-col items-center gap-6 px-2 py-5">
-        <div className="w-full flex items-center gap-4">
-          <div className="h-px bg-slate-100 grow" />
-          <span className="text-xs font-semibold tracking-wide text-slate-500 whitespace-nowrap">
-            OR LOGIN VIA
-          </span>
-          <div className="h-px bg-slate-100 grow" />
-        </div>
-      </div>
-
-      <SocialLoginButtons loading={loading} />
+      
 
       <div className=" text-center flex justify-center gap-2  text-slate-700">
         <p>Don&apos;t have an account yet?</p>
