@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BiChevronRight, BiChevronLeft } from "react-icons/bi";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 interface CollapseToggleProps {
   isCollapsed: boolean;
@@ -12,10 +12,10 @@ export default function CollapseToggle({ isCollapsed, onClick }: CollapseToggleP
   return (
     <button
       onClick={onClick}
-      className="absolute -right-3 top-10 hidden lg:flex w-6 h-6 rounded-lg bg-white border border-slate-200 items-center justify-center text-slate-500 hover:text-primary transition-all z-50"
+      className="absolute -right-3 top-8 hidden lg:flex w-6 h-6 rounded-md bg-surface border border-border items-center justify-center text-ink-500 hover:text-primary hover:bg-primary/5 transition-all z-50 shadow-sm"
       aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
     >
-      {isCollapsed ? <BiChevronRight size={14} /> : <BiChevronLeft size={14} />}
+      {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
     </button>
   );
 }

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useLinkStatus } from "next/link";
-import { BiLoaderAlt } from "react-icons/bi";
+import { Loader2 } from "lucide-react";
 import { SidebarItem } from "./types";
 
 interface NavItemContentProps {
@@ -28,23 +28,27 @@ export default function NavItemContent({
   return (
     <div
       className={`
-        flex items-center gap-4 py-3 my-1 rounded-lg font-semibold text-sm transition-all duration-200 group
-        ${isActive ? "bg-primary text-white" : "text-slate-900 hover:bg-slate-50 hover:text-primary"}
-        ${isCollapsed ? "justify-center px-0" : "px-4"}
-        ${pending ? "opacity-70" : ""}
+        flex items-center gap-3 py-2.5 rounded-md font-medium text-sm transition-all duration-200 group
+        ${isActive ? "bg-primary text-white shadow-sm" : "text-ink-700 hover:bg-surface-soft hover:text-primary"}
+        ${isCollapsed ? "justify-center px-2" : "px-3"}
+        ${pending ? "opacity-60" : ""}
       `}
     >
       {pending ? (
-        <BiLoaderAlt size={22} className="animate-spin shrink-0" />
+        <Loader2 size={18} className="animate-spin shrink-0" />
       ) : (
         <item.icon
-          size={22}
-          className={`transition-transform duration-200 ${
-            isActive ? "scale-110" : "group-hover:scale-110"
+          size={18}
+          className={`transition-all duration-200 shrink-0 ${
+            isActive ? "" : "group-hover:scale-110"
           }`}
         />
       )}
-      {!isCollapsed && <span>{item.label}</span>}
+      {!isCollapsed && (
+        <span className="truncate leading-tight">
+          {item.label}
+        </span>
+      )}
     </div>
   );
 }

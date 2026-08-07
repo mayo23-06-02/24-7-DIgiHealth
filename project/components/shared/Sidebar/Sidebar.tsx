@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import LogoMain from "@/components/ui/LogoMain";
 import NavItem from "./NavItem";
@@ -39,16 +40,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-90 lg:hidden"
+          className="fixed inset-0 bg-ink-900/40 backdrop-blur-sm z-90 lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-100 flex flex-col bg-white transition-all duration-500
-          lg:relative lg:inset-auto lg:border-r lg:border-slate-200/50 lg:shadow-none
-          ${isCollapsed ? "w-24" : "w-60"}
+          fixed inset-y-0 left-0 z-100 flex flex-col bg-surface transition-all duration-300
+          lg:relative lg:inset-auto lg:border-r lg:border-border lg:shadow-none
+          ${isCollapsed ? "w-20" : "w-64"}
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
@@ -56,29 +58,29 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {isOpen && (
           <button
             onClick={onClose}
-            className="absolute -right-12 top-6 w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-500 shadow-md lg:hidden"
-            aria-label="Close menu"
+            className="absolute -right-12 top-4 w-10 h-10 bg-surface rounded-md flex items-center justify-center text-ink-600 shadow-md lg:hidden hover:bg-surface-soft transition-colors"
+            aria-label="Close sidebar"
           >
-            ×
+            <X size={18} />
           </button>
         )}
 
         {/* Brand */}
         <div
           className={`
-            h-16 flex items-center border-b border-slate-200/50 transition-all duration-500
-            ${isCollapsed ? "px-4 justify-center" : "px-8"}
+            h-16 flex items-center border-b border-border transition-all duration-300
+            ${isCollapsed ? "px-3 justify-center" : "px-6"}
           `}
         >
           {!isCollapsed && <LogoMain width={150} height={200} alt={false} />}
-          {isCollapsed && <LogoMain width={50} height={50} alt={false} />}
+          {isCollapsed && <LogoMain width={44} height={44} alt={false} />}
         </div>
 
         {/* Navigation */}
         <nav
           className={`
-            flex-1 py-6 space-y-1 overflow-y-auto custom-scrollbar
-            ${isCollapsed ? "px-2" : "px-4"}
+            flex-1 py-4 space-y-0.5 overflow-y-auto custom-scrollbar
+            ${isCollapsed ? "px-2" : "px-3"}
           `}
         >
           {filteredNav.map((item) => (

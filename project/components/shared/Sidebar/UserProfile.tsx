@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { BiLogOut } from "react-icons/bi";
+import { LogOut } from "lucide-react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
@@ -17,11 +17,11 @@ export default function UserProfile({ isCollapsed, onClose }: UserProfileProps) 
   if (!user) return null;
 
   return (
-    <div className="p-4 border-t border-slate-100 mt-auto">
+    <div className="p-3 border-t border-border mt-auto space-y-3">
       {!isCollapsed && (
         <Link
           href={`/${user.role}/profile`}
-          className="flex items-center gap-3 mb-4 p-2 rounded-lg bg-slate-50 border border-slate-100 hover:bg-slate-100 hover:border-primary/20 transition-all group"
+          className="flex items-center gap-3 p-2.5 rounded-md bg-surface-soft border border-border hover:border-primary hover:bg-primary/5 transition-all group"
           onClick={() => {
             if (window.innerWidth < 1024 && onClose) onClose();
           }}
@@ -30,10 +30,10 @@ export default function UserProfile({ isCollapsed, onClose }: UserProfileProps) 
             name={user.name}
             src={user.avatarUrl}
             size="sm"
-            className="group-hover:scale-105"
+            className="group-hover:scale-105 transition-transform"
           />
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-semibold text-slate-700 truncate group-hover:text-primary transition-colors">
+            <span className="text-sm font-semibold text-ink-900 truncate group-hover:text-primary transition-colors">
               {user.name}
             </span>
           </div>
@@ -43,7 +43,7 @@ export default function UserProfile({ isCollapsed, onClose }: UserProfileProps) 
       {isCollapsed && (
         <Link
           href={`/${user.role}/profile`}
-          className="flex justify-center mb-4 p-2 rounded-lg hover:bg-slate-50 transition-all group"
+          className="flex justify-center p-2 rounded-md hover:bg-surface-soft transition-all group"
           title="View Profile"
           onClick={() => {
             if (window.innerWidth < 1024 && onClose) onClose();
@@ -53,7 +53,7 @@ export default function UserProfile({ isCollapsed, onClose }: UserProfileProps) 
             name={user.name}
             src={user.avatarUrl}
             size="sm"
-            className="group-hover:scale-110"
+            className="group-hover:scale-110 transition-transform"
           />
         </Link>
       )}
@@ -61,14 +61,14 @@ export default function UserProfile({ isCollapsed, onClose }: UserProfileProps) 
       <Button
         onClick={logout}
         variant="white"
-        icon={<BiLogOut size={20} />}
+        icon={<LogOut size={16} />}
         iconPosition="left"
         className={`
-          w-full flex items-center transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-500 rounded-lg py-3
-          ${isCollapsed ? "justify-center" : "px-4 gap-3"}
+          w-full flex items-center transition-all bg-surface border border-border text-ink-600 hover:bg-danger-50 hover:text-danger-600 hover:border-danger-200 rounded-md py-2 text-sm
+          ${isCollapsed ? "justify-center" : "px-3 gap-2"}
         `}
       >
-        {!isCollapsed && <span className="text-sm font-bold tracking-normal">Sign Out</span>}
+        {!isCollapsed && <span className="font-medium">Sign Out</span>}
       </Button>
     </div>
   );
