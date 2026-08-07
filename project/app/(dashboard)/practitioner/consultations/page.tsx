@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Avatar from "@/components/ui/Avatar";
 import Modal from "@/components/ui/Modal";
@@ -8,6 +9,7 @@ import Button from "@/components/ui/Button";
 import KPICard from "@/components/ui/KPICard";
 import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
+import Badge from "@/components/ui/Badge";
 import {
   BiSearch,
   BiLoaderAlt,
@@ -85,6 +87,12 @@ function formatWhen(d: string | Date) {
 }
 
 export default function ConsultationsPage() {
+  const searchParams = useSearchParams();
+
+  // Get query parameters from URL
+  const consultationIdFromQuery = searchParams.get("consultationId");
+  const shouldOpenModal = searchParams.get("modal") === "true";
+
   const [consultations, setConsultations] = useState<ConsultationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -127,6 +135,20 @@ export default function ConsultationsPage() {
   useEffect(() => {
     setPage(1);
   }, [search]);
+
+  // Handle query parameters to open modal with specific consultation
+  useEffect(() => {
+    if (consultationIdFromQuery && shouldOpenModal && consultations.length > 0) {
+      const consultation = consultations.find(
+        (c) => c.id === consultationIdFromQuery || c.consultationId === consultationIdFromQuery
+      );
+      if (consultation) {
+        setSelected(consultation);
+        // Clean up the query parameters after opening modal
+        window.history.replaceState({}, "", "/practitioner/consultations");
+      }
+    }
+  }, [consultationIdFromQuery, shouldOpenModal, consultations]);
 
   const stats = useMemo(() => {
     const total = consultations.length;
@@ -360,9 +382,8 @@ export default function ConsultationsPage() {
                   {selected.reason || "General consultation"}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700">
-                    <BiCheckCircle size={12} /> {selected.status}
-                  </span>
+                  <Badge label={selected.status} status="success" size="sm" />
+
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-600 capitalize">
                     {TYPE_ICON[selected.type] || TYPE_ICON.video}
                     {selected.type || "Telehealth"}

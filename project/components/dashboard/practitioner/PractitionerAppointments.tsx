@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
@@ -33,10 +33,17 @@ type Tab = AppointmentTab;
 
 export default function PractitionerAppointments() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { appointments, loading, fetchAppointments } = useAppointments(
     "/api/practitioner/appointments?tab=all",
   );
-  const [activeTab, setActiveTab] = useState<Tab>("all");
+
+  // Get query parameters from URL
+  const initialTab = (searchParams.get("tab") as Tab) || "all";
+  const appointmentIdFromQuery = searchParams.get("appointmentId");
+  const shouldOpenModal = searchParams.get("modal") === "true";
+
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [view, setView] = useState<AppointmentView>("list");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -61,6 +68,21 @@ export default function PractitionerAppointments() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const tabs = ALL_TABS;
+
+  // Handle query parameters to open modal with specific appointment
+  useEffect(() => {
+    if (appointmentIdFromQuery && shouldOpenModal && appointments.length > 0) {
+      const appointment = appointments.find(
+        (a) => a.id === appointmentIdFromQuery || a.consultationId === appointmentIdFromQuery
+      );
+      if (appointment) {
+        setSelectedAppointment(appointment);
+        setShowDetailsModal(true);
+        // Clean up the query parameters after opening modal
+        window.history.replaceState({}, "", `/practitioner/appointments?tab=${initialTab}`);
+      }
+    }
+  }, [appointmentIdFromQuery, shouldOpenModal, appointments, initialTab]);
 
   // ─── Filtered and sorted list ──────────────────────────────────────
   const filtered = useMemo(() => {
