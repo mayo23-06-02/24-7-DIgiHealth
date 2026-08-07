@@ -110,11 +110,6 @@ const EventModal: React.FC<EventModalProps> = ({
 
           <div className="flex flex-wrap gap-2">
             {[
-              {
-                label: "Appointment",
-                value: "appointment",
-                icon: <BiCalendar />,
-              },
               { label: "Reminder", value: "reminder", icon: <BiTrendingUp /> },
               { label: "Refill", value: "refill", icon: <BiLoaderAlt /> },
               { label: "Note", value: "note", icon: <BiPencil /> },
@@ -132,69 +127,6 @@ const EventModal: React.FC<EventModalProps> = ({
               </button>
             ))}
           </div>
-
-          {addForm.type === "appointment" && (
-            <>
-              {doctors.length === 0 ? (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center space-y-4">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-600">
-                    <BiUser size={24} />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-gray-900 font-grotesk">
-                      No Practitioners Found
-                    </p>
-                    <p className="text-xs mb-4 text-gray-700 leading-relaxed">
-                      You need to add a practitioner before you can schedule.
-                    </p>
-                  </div>
-                  <Link href="/patient/doctors">
-                    <Button variant={"outline"} size={"sm"}>
-                      Browse Practitioners
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                <>
-                  <Input
-                    label="Concern / Title"
-                    type="text"
-                    placeholder="e.g. Blood pressure check"
-                    value={addForm.title}
-                    onChange={(e) =>
-                      setAddForm({ ...addForm, title: e.target.value })
-                    }
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="Time"
-                      type="time"
-                      value={addForm.time}
-                      onChange={(e) =>
-                        setAddForm({ ...addForm, time: e.target.value })
-                      }
-                    />
-                    <Select
-                      label="Doctor"
-                      value={addForm.doctor}
-                      onChange={(v) => setAddForm({ ...addForm, doctor: v })}
-                      options={doctorOptions}
-                      icon={<BiUser />}
-                    />
-                  </div>
-                  <Input
-                    label="Notes"
-                    textarea
-                    placeholder="Any details or observations..."
-                    value={addForm.notes}
-                    onChange={(e) =>
-                      setAddForm({ ...addForm, notes: e.target.value })
-                    }
-                  />
-                </>
-              )}
-            </>
-          )}
 
           {addForm.type === "reminder" && (
             <>
@@ -266,10 +198,7 @@ const EventModal: React.FC<EventModalProps> = ({
           </Button>
           <Button
             className="flex-1"
-            disabled={
-              isSaving ||
-              (addForm.type === "appointment" && !addForm.title.trim())
-            }
+            disabled={isSaving || !addForm.title.trim()}
             onClick={handleAddSubmit}
           >
             {isSaving ? (

@@ -64,7 +64,7 @@ export default function PatientCalendar() {
   const [addForm, setAddForm] = useState({
     title: "",
     time: "09:00",
-    type: "appointment" as Appointment["type"],
+    type: "reminder" as Appointment["type"],
     notes: "",
     doctor: "",
     institution: "",
