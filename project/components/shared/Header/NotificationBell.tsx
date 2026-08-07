@@ -377,7 +377,7 @@ export default function NotificationBell({
                   ) : (
                     selectedNotif.type?.includes("appointment") && (
                       <Link
-                        href={`/${user?.role}/appointments?tab=requests`}
+                        href={`/${user?.role}/appointments?tab=requests&appointmentId=${selectedNotif.data?.consultationId || selectedNotif.data?.appointmentId}&modal=true`}
                         className="w-full"
                         onClick={() => {
                           setIsDetailOpen(false);

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AppointmentList from "@/components/shared/Appointments/AppointmentList";
 import AppointmentFilters from "@/components/shared/Appointments/AppointmentFilters";
 import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
@@ -22,10 +22,17 @@ import { goToAppointmentRoom } from "@/lib/appointments/joinRoom";
 
 export default function PatientAppointments() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { appointments, loading, fetchAppointments } = useAppointments(
     "/api/patient/appointments",
   );
-  const [activeTab, setActiveTab] = useState<AppointmentTab>("upcoming");
+
+  // Get query parameters from URL
+  const initialTab = (searchParams.get("tab") as AppointmentTab) || "upcoming";
+  const appointmentIdFromQuery = searchParams.get("appointmentId");
+  const shouldOpenModal = searchParams.get("modal") === "true";
+
+  const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [view, setView] = useState<AppointmentView>("list");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -46,6 +53,21 @@ export default function PatientAppointments() {
 
   // Tabs configuration
   const tabs = ALL_TABS;
+
+  // Handle query parameters to open modal with specific appointment
+  useEffect(() => {
+    if (appointmentIdFromQuery && shouldOpenModal && appointments.length > 0) {
+      const appointment = appointments.find(
+        (a) => a.id === appointmentIdFromQuery || a.consultationId === appointmentIdFromQuery
+      );
+      if (appointment) {
+        setSelectedAppointment(appointment);
+        setShowDetailsModal(true);
+        // Clean up the query parameters after opening modal
+        window.history.replaceState({}, "", `/patient/appointments?tab=${initialTab}`);
+      }
+    }
+  }, [appointmentIdFromQuery, shouldOpenModal, appointments, initialTab]);
 
   // Filtered and sorted list
   const filtered = useMemo(() => {
