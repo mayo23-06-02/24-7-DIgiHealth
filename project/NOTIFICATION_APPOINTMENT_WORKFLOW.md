@@ -7,12 +7,13 @@ This document outlines the enhanced notification system workflow for appointment
 
 ## Workflow Diagram
 
+### Patient Workflow
 ```
-1. User sees notification in Activity Center
+1. Patient sees notification in Activity Center
    ↓
-2. User clicks "Manage Appointment" button
+2. Patient clicks "Manage Appointment" button
    ↓
-3. User is navigated to appointments page with query parameters:
+3. Patient is navigated to appointments page with query parameters:
    - tab=requests (or relevant tab)
    - appointmentId=<id>
    - modal=true
@@ -21,14 +22,49 @@ This document outlines the enhanced notification system workflow for appointment
    ↓
 5. Modal automatically opens with appointment details
    ↓
-6. User can view details, log history, and take actions
+6. Patient can view details and take actions (Accept/Decline/Reschedule)
    ↓
 7. Query parameters are cleaned up after modal opens
+```
+
+### Practitioner Workflow
+```
+1. Practitioner sees notification in Activity Center
+   ↓
+2. Practitioner clicks "Manage Appointment" button
+   ↓
+3. Practitioner is navigated to appointments page with query parameters:
+   - tab=requests (or relevant tab)
+   - appointmentId=<id>
+   - modal=true
+   ↓
+4. Page loads and detects query parameters
+   ↓
+5. Modal automatically opens with appointment details
+   ↓
+6. Practitioner can view patient details and take actions
+   ↓
+7. Query parameters are cleaned up after modal opens
+
+Alternative: Completed Consultations
+- For completed consultations, practitioner is navigated to:
+  - /practitioner/consultations?consultationId=<id>&modal=true
+  - Modal opens showing full consultation details with SOAP notes
 ```
 
 ---
 
 ## Implementation Details
+
+### Both Patient & Practitioner Workflows
+The notification system uses dynamic role-based routing. When a user clicks "Manage Appointment", they are directed to their role-specific page:
+- **Patient:** `/patient/appointments?tab=requests&appointmentId=<id>&modal=true`
+- **Practitioner:** `/practitioner/appointments?tab=requests&appointmentId=<id>&modal=true`
+
+For completed practitioner consultations:
+- **Practitioner:** `/practitioner/consultations?consultationId=<id>&modal=true`
+
+---
 
 ### 1. NotificationBell Component Updates
 
@@ -88,6 +124,83 @@ The page automatically navigates to the correct tab based on the notification ty
 
 ---
 
+### 3. Practitioner Appointments Page Updates
+
+**File:** `components/dashboard/practitioner/PractitionerAppointments.tsx`
+
+The page now:
+
+#### 3.1 Reads Query Parameters
+```tsx
+import { useSearchParams } from "next/navigation";
+
+const searchParams = useSearchParams();
+const initialTab = (searchParams.get("tab") as Tab) || "all";
+const appointmentIdFromQuery = searchParams.get("appointmentId");
+const shouldOpenModal = searchParams.get("modal") === "true";
+```
+
+#### 3.2 Auto-Opens Modal on Mount
+```tsx
+useEffect(() => {
+  if (appointmentIdFromQuery && shouldOpenModal && appointments.length > 0) {
+    const appointment = appointments.find(
+      (a) => a.id === appointmentIdFromQuery || a.consultationId === appointmentIdFromQuery
+    );
+    if (appointment) {
+      setSelectedAppointment(appointment);
+      setShowDetailsModal(true);
+      // Clean up query parameters after modal opens
+      window.history.replaceState({}, "", `/practitioner/appointments?tab=${initialTab}`);
+    }
+  }
+}, [appointmentIdFromQuery, shouldOpenModal, appointments, initialTab]);
+```
+
+---
+
+### 4. Practitioner Consultations Page Updates
+
+**File:** `app/(dashboard)/practitioner/consultations/page.tsx`
+
+For completed consultations, the page now:
+
+#### 4.1 Reads Query Parameters
+```tsx
+import { useSearchParams } from "next/navigation";
+
+const searchParams = useSearchParams();
+const consultationIdFromQuery = searchParams.get("consultationId");
+const shouldOpenModal = searchParams.get("modal") === "true";
+```
+
+#### 4.2 Auto-Opens Modal on Mount
+```tsx
+useEffect(() => {
+  if (consultationIdFromQuery && shouldOpenModal && consultations.length > 0) {
+    const consultation = consultations.find(
+      (c) => c.id === consultationIdFromQuery || c.consultationId === consultationIdFromQuery
+    );
+    if (consultation) {
+      setSelected(consultation);
+      // Clean up the query parameters after opening modal
+      window.history.replaceState({}, "", "/practitioner/consultations");
+    }
+  }
+}, [consultationIdFromQuery, shouldOpenModal, consultations]);
+```
+
+The modal displays:
+- ✅ Patient information and avatar
+- ✅ Consultation details (start/end time, duration)
+- ✅ SOAP notes (Subjective, Objective, Assessment, Plan)
+- ✅ AI recommendations (if available)
+- ✅ Risk score assessment
+- ✅ Appointment type (video/chat)
+- ✅ Consultation reason
+
+---
+
 ## User Journey Examples
 
 ### Example 1: Reschedule Request Notification
@@ -109,7 +222,7 @@ The page automatically navigates to the correct tab based on the notification ty
    - Click "Decline" → Rejects and keeps original time
    - Click "Reschedule" → Opens booking modal for custom time
 
-### Example 2: New Appointment Request Notification
+### Example 2: New Appointment Request Notification (Patient)
 
 1. **User receives notification:** "New appointment request from Dr. Johnson"
 2. **Clicks:** "Manage Appointment" button
@@ -125,6 +238,45 @@ The page automatically navigates to the correct tab based on the notification ty
 6. **User actions:**
    - Click "Accept" → Confirms appointment
    - Click "Decline" → Rejects appointment
+
+### Example 3: Practitioner New Appointment Request
+
+1. **Practitioner receives notification:** "New appointment request from patient John Smith"
+2. **Clicks:** "Manage Appointment" button
+3. **Navigated to:** `/practitioner/appointments?tab=requests&appointmentId=apt-789&modal=true`
+4. **Page loads:**
+   - Switches to "Requests" tab
+   - Finds appointment with ID apt-789
+   - Opens AppointmentDetailsModal
+5. **Modal displays:**
+   - Patient info (name, avatar)
+   - Requested appointment time
+   - Reason for consultation
+   - Appointment type (video/chat)
+   - Action buttons: Accept, Decline, Reschedule
+6. **Practitioner actions:**
+   - Click "Accept" → Confirms appointment with patient
+   - Click "Decline" → Declines appointment request
+   - Click "Reschedule" → Opens booking modal to propose new time
+
+### Example 4: Practitioner Completed Consultation Review
+
+1. **Practitioner receives notification or reminder:** "Consultation with patient Sarah completed - add SOAP notes"
+2. **Clicks:** "Manage Appointment" or navigates to Consultations
+3. **Navigated to:** `/practitioner/consultations?consultationId=cons-123&modal=true`
+4. **Page loads:**
+   - Opens modal with completed consultation details
+5. **Modal displays:**
+   - Patient info
+   - Consultation timing (start/end, duration)
+   - Risk score assessment
+   - Existing SOAP notes (if any)
+   - AI recommendations
+6. **Practitioner actions:**
+   - Click "Edit notes" → Opens SOAP note editor
+   - Review AI recommendations
+   - Add clinical assessment
+   - Save SOAP notes
 
 ---
 
@@ -314,6 +466,7 @@ Add ability to:
 ### Files Modified
 1. **components/shared/Header/NotificationBell.tsx**
    - Updated "Manage Appointment" link with query parameters
+   - Works for both patient and practitioner roles
 
 2. **components/dashboard/patient/PatientAppointments.tsx**
    - Added `useSearchParams` hook
@@ -321,16 +474,39 @@ Add ability to:
    - Added auto-modal opening effect
    - Added query parameter cleanup
 
+3. **components/dashboard/practitioner/PractitionerAppointments.tsx**
+   - Added `useSearchParams` hook
+   - Added query parameter reading logic
+   - Added auto-modal opening effect
+   - Added query parameter cleanup
+
+4. **app/(dashboard)/practitioner/consultations/page.tsx**
+   - Added `useSearchParams` hook
+   - Added query parameter reading logic
+   - Added auto-modal opening effect for completed consultations
+   - Added query parameter cleanup
+
 ### Files Available for Enhancement
 1. **components/shared/Appointments/AppointmentDetailsModal.tsx**
    - Can add log/history section
    - Can add communication interface
    - Can add more appointment metadata
+   - Used by both Patient and Practitioner workflows
 
 2. **components/dashboard/patient/PatientAppointments.tsx**
    - Can add advanced filtering
    - Can add calendar sync
    - Can add reminder system
+
+3. **components/dashboard/practitioner/PractitionerAppointments.tsx**
+   - Can add patient risk assessment view
+   - Can add consultation history
+   - Can add SOAP note quick access
+
+4. **app/(dashboard)/practitioner/consultations/page.tsx**
+   - Can add consultation filtering
+   - Can add SOAP note templates
+   - Can add consultation analytics
 
 ---
 
