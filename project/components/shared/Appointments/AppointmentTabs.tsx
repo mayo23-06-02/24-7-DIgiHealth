@@ -1,16 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  BiCalendar,
-  BiCalendarEvent,
-  BiCalendarEdit,
-  BiCalendarCheck,
-  BiCalendarExclamation,
-  BiCalendarX,
-  BiCalendarPlus,
-  BiGridAlt,
-} from "react-icons/bi";
+import { Calendar } from "lucide-react";
 import Select from "@/components/ui/Select";
 
 export type AppointmentTab =
@@ -38,65 +29,18 @@ export const ALL_TABS: AppointmentTab[] = [
 const tabConfig: Record<
   AppointmentTab,
   {
-    label1: string;
-    label2: string;
-    icon: React.ComponentType<{ className?: string; size?: number }>;
-    bgColor: string;
-    iconColor: string;
-    /** Highlight requests so they stand out in the strip */
-    emphasize?: boolean;
+    label: string;
+    badgeBg: string;
+    badgeText: string;
   }
 > = {
-  all: {
-    label1: "All",
-    label2: "Appointments",
-    icon: BiGridAlt,
-    bgColor: "#d6e8f4",
-    iconColor: "text-purple-600",
-  },
-  requests: {
-    label1: "Requests",
-    label2: "Requests",
-    icon: BiCalendarPlus,
-    bgColor: "#fef3c7",
-    iconColor: "text-amber-700",
-    emphasize: true,
-  },
-  upcoming: {
-    label1: "Upcoming",
-    label2: "Appointments",
-    icon: BiCalendarEvent,
-    bgColor: "#d6e8f4",
-    iconColor: "text-yellow-600",
-  },
-  ongoing: {
-    label1: "Ongoing",
-    label2: "Appointments",
-    icon: BiCalendarEdit,
-    bgColor: "#d6e8f4",
-    iconColor: "text-green-600",
-  },
-  past: {
-    label1: "Completed",
-    label2: "Appointments",
-    icon: BiCalendarCheck,
-    bgColor: "#d6e8f4",
-    iconColor: "text-blue-600",
-  },
-  missed: {
-    label1: "Missed",
-    label2: "Appointments",
-    icon: BiCalendarExclamation,
-    bgColor: "#d6e8f4",
-    iconColor: "text-orange-500",
-  },
-  cancelled: {
-    label1: "Cancelled",
-    label2: "Appointments",
-    icon: BiCalendarX,
-    bgColor: "#d6e8f4",
-    iconColor: "text-red-500",
-  },
+  all: { label: "All", badgeBg: "bg-primary-50", badgeText: "text-primary" },
+  requests: { label: "Requests", badgeBg: "bg-warning-50", badgeText: "text-warning-700" },
+  upcoming: { label: "Upcoming", badgeBg: "bg-primary-50", badgeText: "text-primary" },
+  ongoing: { label: "Ongoing", badgeBg: "bg-success-50", badgeText: "text-success-700" },
+  past: { label: "Completed", badgeBg: "bg-info-50", badgeText: "text-info-700" },
+  missed: { label: "Missed", badgeBg: "bg-warning-50", badgeText: "text-warning-700" },
+  cancelled: { label: "Cancelled", badgeBg: "bg-danger-50", badgeText: "text-danger-700" },
 };
 
 interface AppointmentTabsProps {
@@ -114,60 +58,52 @@ export default function AppointmentTabs({
 }: AppointmentTabsProps) {
   return (
     <>
-      {/* Mobile Dropdown — same order (Requests near top) */}
-      <div className="md:hidden pb-4">
+      {/* Mobile Dropdown */}
+      <div className="sm:hidden pb-4">
         <Select
           value={activeTab}
           onChange={(val) => onChange(val as AppointmentTab)}
           options={tabs.map((t) => ({
             value: t,
-            label: `${tabConfig[t].label1} ${tabConfig[t].label2} (${counts[t] ?? 0})`,
+            label: `${tabConfig[t].label} (${counts[t] ?? 0})`,
           }))}
-          icon={<BiCalendar className="text-slate-500 text-lg" />}
+          icon={<Calendar size={18} className="text-ink-600" />}
         />
       </div>
 
-      {/* Desktop: compact cards so all tabs fit without assuming horizontal scroll */}
-      <div className="hidden md:grid grid-cols-4 xl:grid-cols-7 gap-2 pb-4 w-full">
+      {/* Desktop: Underline Tab Design (Design System Pattern) */}
+      <div className="hidden sm:flex gap-1 border-b border-border overflow-x-auto no-scrollbar pb-0">
         {tabs.map((t) => {
           const config = tabConfig[t];
-          const Icon = config.icon;
           const count = counts[t] ?? 0;
           const isActive = activeTab === t;
-          const hasItems = count > 0 && t === "requests";
 
           return (
             <button
               key={t}
+              role="tab"
+              aria-selected={isActive}
               type="button"
               onClick={() => onChange(t)}
-              className={`flex items-center bg-white gap-2 cursor-pointer px-4 py-6 rounded-md transition-all ease-in-out duration-200 min-w-0 text-left border ${
-                isActive
-                  ? "border-slate-500 opacity-100 "
-                  : config.emphasize
-                    ? "border-slate-200 opacity-95 hover:opacity-100 hover:border-amber-300"
-                    : "border-slate-200 opacity-85 hover:opacity-100 hover:scale-[1.01]"
-              }`}
-              
+              className={`
+                relative flex items-center gap-2 px-4 py-3 text-sm font-semibold
+                whitespace-nowrap transition-colors
+                ${
+                  isActive
+                    ? "text-primary"
+                    : "text-ink-600 hover:text-ink-900"
+                }
+              `}
             >
-              <Icon
-                className={`text-primary shrink-0`}
-                size={20}
-              />
-              <div className="flex items-end space-x-1 min-w-0 flex-1">
-                <span className="text-lg font-bold text-slate-900 leading-none tabular-nums flex items-center gap-1.5">
+              <span>{config.label}</span>
+              {count > 0 && (
+                <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${config.badgeBg} ${config.badgeText}`}>
                   {count}
-                  {hasItems && (
-                    <span
-                      className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"
-                      title="Pending requests"
-                    />
-                  )}
                 </span>
-                <span className="text-xs font-medium text-slate-600 leading-tight mt-0.5 truncate">
-                  {config.label1} 
-                </span>
-              </div>
+              )}
+              {isActive && (
+                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-primary rounded-full" />
+              )}
             </button>
           );
         })}

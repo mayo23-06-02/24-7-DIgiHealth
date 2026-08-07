@@ -11,6 +11,7 @@ import AppointmentTabs, {
   ALL_TABS,
 } from "@/components/shared/Appointments/AppointmentTabs";
 import PageHeader from "@/components/ui/PageHeader";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BookingModal from "@/components/doctor/BookingModal";
@@ -209,6 +210,13 @@ export default function PatientAppointments() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Dashboard", href: "/patient" },
+          { label: "Appointments" },
+        ]}
+      />
+
       <PageHeader
         title="Clinical Appointments"
         subtitle="Manage your scheduled consultations and medical history."

@@ -24,6 +24,7 @@ import AppointmentDetailsModal from "@/components/shared/Appointments/Appointmen
 import AppointmentCalendarView from "@/components/shared/Appointments/AppointmentCalendarView";
 import ViewToggle, { AppointmentView } from "@/components/shared/Appointments/ViewToggle";
 import AppointmentTabs, { AppointmentTab, ALL_TABS } from "@/components/shared/Appointments/AppointmentTabs";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import BookingModal from "@/components/doctor/BookingModal";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
 import { useAppointments, Appointment } from "@/lib/hooks/useAppointments";
@@ -267,6 +268,13 @@ export default function PractitionerAppointments() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Dashboard", href: "/practitioner" },
+          { label: "Appointments" },
+        ]}
+      />
+
       <PageHeader
         title="Clinical Appointments"
         subtitle="Manage your consultation schedule and patient requests."
