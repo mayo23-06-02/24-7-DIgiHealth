@@ -17,7 +17,7 @@ import Card from "@/components/ui/Card";
 import BookingModal from "@/components/doctor/BookingModal";
 import { BiPlus } from "react-icons/bi";
 import { toast } from "react-hot-toast";
-import { useAppointments } from "@/lib/hooks/useAppointments";
+import { useAppointments, Appointment } from "@/lib/hooks/useAppointments";
 import { cancelBooking } from "@/lib/booking/service";
 import { goToAppointmentRoom } from "@/lib/appointments/joinRoom";
 
@@ -49,7 +49,7 @@ export default function PatientAppointments() {
   } | null>(null);
   const [editingApptId, setEditingApptId] = useState<string | null>(null);
   const [editingInitialForm, setEditingInitialForm] = useState<any>(null);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Tabs configuration

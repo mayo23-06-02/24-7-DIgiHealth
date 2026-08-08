@@ -97,7 +97,7 @@ export default function NavItem({
 
       {isExpanded && !isCollapsed && (
         <div className="space-y-0.5 pl-6 border-l-2 border-primary/20 ml-3">
-          {item.children.map((child) => {
+          {(item.children ?? []).map((child) => {
             const childHref = child.href.replace("[role]", userRole);
             const isChildActive = pathname.includes(childHref.split("?")[0]) &&
               new URLSearchParams(childHref.split("?")[1] || "").get("tab") ===
