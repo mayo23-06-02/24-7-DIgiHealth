@@ -86,21 +86,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             ${isCollapsed ? "px-2 space-y-2" : "px-4 space-y-1"}
           `}
         >
-          {filteredNav.map((item, idx) => (
-            <React.Fragment key={item.href}>
-              <NavItem
-                item={item}
-                userRole={user.role}
-                isCollapsed={isCollapsed}
-                onClose={onClose}
-                expandedItem={expandedItem}
-                onExpandChange={setExpandedItem}
-              />
-              {/* Visual separator every 3-4 items for sophisticated grouping */}
-              {!isCollapsed && idx === 0 && (
-                <div className="my-2 h-px bg-gradient-to-r from-border via-border/50 to-transparent" />
-              )}
-            </React.Fragment>
+          {filteredNav.map((item) => (
+            <NavItem
+              key={item.href}
+              item={item}
+              userRole={user.role}
+              isCollapsed={isCollapsed}
+              onClose={onClose}
+              expandedItem={expandedItem}
+              onExpandChange={setExpandedItem}
+            />
           ))}
         </nav>
 

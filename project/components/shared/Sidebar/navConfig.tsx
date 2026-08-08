@@ -40,6 +40,12 @@ export const MAIN_NAV: SidebarItem[] = [
   },
   {
     icon: Calendar,
+    label: "Calendar",
+    href: "/[role]/calendar",
+    roles: ["patient"],
+  },
+  {
+    icon: Calendar,
     label: "Appointments",
     href: "/[role]/appointments",
     roles: ["patient", "practitioner"],
