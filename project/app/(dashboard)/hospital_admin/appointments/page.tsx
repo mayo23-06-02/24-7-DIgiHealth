@@ -3,13 +3,15 @@
 import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import type { BadgeStatus } from "@/components/ui/Badge";
 import { BiPlus, BiLoaderAlt, BiCalendar, BiSearch, BiX } from "react-icons/bi";
 
-const STATUS_STYLES: Record<string, string> = {
-  scheduled: "bg-blue-50 text-blue-700 border-blue-200",
-  in_progress: "bg-gray-50 text-gray-700 border-gray-200",
-  completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  cancelled: "bg-rose-50 text-rose-600 border-rose-200",
+const STATUS_MAP: Record<string, BadgeStatus> = {
+  scheduled: "info",
+  in_progress: "warning",
+  completed: "success",
+  cancelled: "error",
 };
 
 export default function AppointmentsPage() {
@@ -187,9 +189,7 @@ export default function AppointmentsPage() {
                         : "Unassigned"}
                     </td>
                     <td className="py-4 px-5">
-                      <span className="text-xs capitalize bg-slate-100 text-slate-600 px-2 py-1 rounded-lg font-medium">
-                        {a.type}
-                      </span>
+                      <Badge label={a.type} status="neutral" size="sm" className="capitalize" />
                     </td>
                     <td className="py-4 px-5 text-sm text-slate-600">
                       {a.room}
@@ -206,11 +206,12 @@ export default function AppointmentsPage() {
                       </div>
                     </td>
                     <td className="py-4 px-5">
-                      <span
-                        className={`text-xs font-bold  tracking-wider px-2 py-1 rounded-lg border ${STATUS_STYLES[a.status] || STATUS_STYLES.scheduled}`}
-                      >
-                        {a.status?.replace("_", " ")}
-                      </span>
+                      <Badge
+                        label={a.status?.replace("_", " ") || "scheduled"}
+                        status={STATUS_MAP[a.status] || "info"}
+                        size="sm"
+                        className="capitalize"
+                      />
                     </td>
                     <td className="py-4 px-5 text-right">
                       {a.status === "scheduled" && (

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { BiX } from "react-icons/bi";
+import { X } from "lucide-react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -12,6 +12,10 @@ interface ModalProps {
   hideHeader?: boolean;
 }
 
+/**
+ * Full-height right-side sheet (functions as the product's "Drawer" — see
+ * design.md §3.6). For a small centered confirm/dialog, use `Dialog` instead.
+ */
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -29,63 +33,57 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const widths = {
-    sm: "max-w-md",
-    md: "max-w-2xl",
-    lg: "max-w-4xl",
-    xl: "max-w-5xl",
-    "2xl": "max-w-6xl",
-    "6xl": "max-w-6xl",
-    full: "max-w-[95vw]",
+    sm: "lg:max-w-md",
+    md: "lg:max-w-3xl",
+    lg: "lg:max-w-4xl",
+    xl: "lg:max-w-5xl",
+    "2xl": "lg:max-w-6xl",
+    "6xl": "lg:max-w-6xl",
+    full: "lg:max-w-[95vw]",
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] max-h-[100vh] h-full flex items-center justify-end ">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[9999] max-h-[100vh] h-full flex items-center justify-end">
       <div
-        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}
       />
 
-      {/* Content */}
       <div
-        className={`
-        relative lg:max-w-3xl w-full max-h-full h-full bg-white rounded-lg overflow-hidden
-        animate-in zoom-in-95 fade-in duration-500 transition-all shadow-none
-      `}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`relative w-full ${widths[width]} max-h-full h-full bg-white overflow-hidden animate-in slide-in-from-right fade-in duration-300 shadow-2xl flex flex-col`}
       >
-        {/* Header */}
         {!hideHeader && (
-          <div className="flex max-w-3xl items-center justify-between px-10 py-8 border-b border-slate-50">
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight  font-grotesk">
-              {title ? (
-                <>
-                  {title.split(" ").slice(0, -1).join(" ")}{" "}
-                  <span className="text-primary">
-                    {title.split(" ").slice(-1)}
-                  </span>
-                </>
-              ) : (
-                "Action Detail"
-              )}
+          <div className="flex items-center justify-between gap-4 px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 shrink-0">
+            <h3 className="text-lg sm:text-xl font-bold text-ink-900 tracking-tight font-grotesk truncate">
+              {title || "Details"}
             </h3>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all"
+              aria-label="Close"
+              className="w-10 h-10 shrink-0 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-danger-50 hover:text-danger-500 transition-colors"
             >
-              <BiX size={24} />
+              <X size={20} />
             </button>
           </div>
         )}
 
-        {/* Scrollable Body */}
         <div
-          className={`
-            ${noPadding ? "p-0" : "p-10"} 
-            max-h-[90vh] max-w-3xl overflow-y-auto custom-scrollbar
-          `}
+          className={`${noPadding ? "p-0" : "p-6 sm:p-8 lg:p-10"} flex-1 overflow-y-auto custom-scrollbar`}
         >
           {children}
         </div>

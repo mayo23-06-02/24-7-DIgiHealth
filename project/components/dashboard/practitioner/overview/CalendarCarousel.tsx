@@ -54,7 +54,7 @@ export default function CalendarCarousel({
             <BiChevronDown className={`transition-transform duration-200 ${isMonthOpen ? 'rotate-180' : ''}`} />
           </button>
           {isMonthOpen && (
-            <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-slate-100 rounded-lg shadow-lg z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-slate-100 rounded-lg  z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
               {monthOptions.map((m, idx) => (
                 <button
                   key={idx}

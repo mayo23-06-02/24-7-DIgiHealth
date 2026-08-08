@@ -38,6 +38,7 @@ import {
 } from "react-icons/bi";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import type { BadgeStatus } from "@/components/ui/Badge";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -78,27 +79,27 @@ const fmtDate = (d: any) =>
       })
     : "—";
 
-const STATUS_STYLES: Record<string, string> = {
-  completed: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  paid: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  active: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  approved: "bg-blue-50 text-blue-600 border-blue-100",
-  pending: "bg-gray-50 text-gray-600 border-gray-100",
-  trial: "bg-purple-50 text-purple-600 border-purple-100",
-  failed: "bg-red-50 text-red-600 border-red-100",
-  rejected: "bg-red-50 text-red-600 border-red-100",
-  cancelled: "bg-slate-100 text-slate-500 border-slate-200",
-  refunded: "bg-orange-50 text-orange-600 border-orange-100",
-  past_due: "bg-red-50 text-red-600 border-red-100",
+const STATUS_MAP: Record<string, BadgeStatus> = {
+  completed: "success",
+  paid: "success",
+  active: "success",
+  approved: "info",
+  pending: "warning",
+  trial: "premium",
+  failed: "error",
+  rejected: "error",
+  cancelled: "neutral",
+  refunded: "warning",
+  past_due: "error",
 };
 
 function StatusPill({ status }: { status: string }) {
   return (
-    <span
-      className={`px-3 py-1 rounded-lg text-xs font-bold  tracking-normal border ${STATUS_STYLES[status] ?? "bg-slate-100 text-slate-500 border-slate-200"}`}
-    >
-      {status}
-    </span>
+    <Badge
+      label={status}
+      status={STATUS_MAP[status] ?? "neutral"}
+      className="capitalize"
+    />
   );
 }
 
@@ -346,9 +347,7 @@ function TransactionTable({
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg capitalize">
-                      {t.category || "—"}
-                    </span>
+                    <Badge label={t.category || "—"} status="neutral" size="sm" className="capitalize" />
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-xs font-bold text-slate-800">
@@ -560,9 +559,7 @@ function OrderTable({ orders }: { orders: any[] }) {
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md ">
-                      {o.category}
-                    </span>
+                    <Badge label={o.category} status="neutral" size="sm" />
                   </td>
                   <td className="px-6 py-4 text-xs text-slate-500 font-medium">
                     {fmtDate(o.date)}

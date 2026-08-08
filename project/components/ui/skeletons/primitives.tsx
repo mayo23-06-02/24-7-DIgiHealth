@@ -7,10 +7,9 @@ import Card from "../Card";
 /**
  * Skeleton primitives, composed from the existing SkeletonLoader shimmer.
  *
- * Note on spacing: the `@layer utilities` block at the bottom of globals.css
- * redefines every padding/margin utility with `!important`, which beats
- * responsive variants like `sm:p-4`. Inline `style={{ padding }}` is used where
- * the exact inset matters so these skeletons line up with the real components.
+ * Inline `style={{ padding }}` is used in a few places where the exact inset
+ * matters so these skeletons line up pixel-for-pixel with the real
+ * components — not a workaround for anything broken, just precision.
  */
 
 /** Mirrors components/ui/PageHeader.tsx */

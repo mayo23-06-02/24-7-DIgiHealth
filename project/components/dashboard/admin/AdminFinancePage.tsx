@@ -71,7 +71,7 @@ export default function AdminFinancePage() {
                   type="button"
                   onClick={() => setDays(d)}
                   className={`px-3 py-2 text-xs font-bold rounded-lg ${
-                    days === d ? "bg-white text-primary shadow-sm" : "text-slate-500"
+                    days === d ? "bg-white text-primary " : "text-slate-500"
                   }`}
                 >
                   {d}d

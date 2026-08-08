@@ -29,7 +29,7 @@ export function WaitingRoomModal({ appt, timeLeft, onClose }: WaitingRoomProps) 
               src={appt.doctorAvatar}
               name={appt.doctor}
               size="xl"
-              className="border-4 border-primary/10 shadow-lg"
+              className="border-4 border-primary/10 "
             />
             <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white rounded-full animate-pulse" />
           </div>

@@ -31,20 +31,22 @@ import {
   CartesianGrid,
 } from "recharts";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import type { BadgeStatus } from "@/components/ui/Badge";
 
-const ROLE_COLORS: Record<string, string> = {
-  doctor: "bg-blue-50 text-blue-700 border-blue-200",
-  nurse: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  admin: "bg-purple-50 text-purple-700 border-purple-200",
-  technician: "bg-amber-50 text-amber-700 border-amber-200",
+const ROLE_STATUS: Record<string, BadgeStatus> = {
+  doctor: "info",
+  nurse: "success",
+  admin: "neutral",
+  technician: "warning",
 };
 
-const STATUS_STYLE: Record<string, string> = {
-  completed: "bg-emerald-50 text-emerald-700",
-  cancelled: "bg-rose-50 text-rose-600",
-  scheduled: "bg-blue-50 text-blue-700",
-  pending: "bg-amber-50 text-amber-700",
-  requested: "bg-indigo-50 text-indigo-700",
+const APPT_STATUS_MAP: Record<string, BadgeStatus> = {
+  completed: "success",
+  cancelled: "error",
+  scheduled: "info",
+  pending: "warning",
+  requested: "neutral",
 };
 
 type Tab = "overview" | "appointments" | "patients" | "revenue" | "sla";
@@ -122,16 +124,16 @@ export default function StaffProfilePage() {
               <h1 className="text-2xl font-bold text-slate-900 font-grotesk">
                 {fullName}
               </h1>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-bold border capitalize ${ROLE_COLORS[staff.role] || "bg-slate-100 text-slate-600"}`}
-              >
-                {staff.role}
-              </span>
-              <span
-                className={`px-2 py-1 rounded-lg text-xs font-bold ${staff.isOnDuty ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}
-              >
-                {staff.isOnDuty ? "● On Duty" : "○ Off Duty"}
-              </span>
+              <Badge
+                label={staff.role}
+                status={ROLE_STATUS[staff.role] ?? "neutral"}
+                className="capitalize"
+              />
+              <Badge
+                label={staff.isOnDuty ? "On Duty" : "Off Duty"}
+                status={staff.isOnDuty ? "success" : "neutral"}
+                dot
+              />
             </div>
             <p className="text-sm text-slate-500 mt-1">
               {staff.department} · {staff.shiftSchedule?.start} –{" "}
@@ -354,11 +356,12 @@ export default function StaffProfilePage() {
                       {a.chiefComplaint || "—"}
                     </td>
                     <td className="py-3 px-5">
-                      <span
-                        className={`px-2 py-1 rounded-lg text-xs font-bold capitalize ${STATUS_STYLE[a.status] || "bg-slate-100 text-slate-500"}`}
-                      >
-                        {a.status}
-                      </span>
+                      <Badge
+                        label={a.status}
+                        status={APPT_STATUS_MAP[a.status] ?? "neutral"}
+                        size="sm"
+                        className="capitalize"
+                      />
                     </td>
                   </tr>
                 ))}
@@ -581,11 +584,11 @@ export default function StaffProfilePage() {
                   >
                     {m.icon}
                   </div>
-                  <span
-                    className={`text-xs font-bold px-2 py-1 rounded-lg ${met ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"}`}
-                  >
-                    {met ? "✓ Met" : "✗ Below Target"}
-                  </span>
+                  <Badge
+                    label={met ? "✓ Met" : "✗ Below Target"}
+                    status={met ? "success" : "error"}
+                    size="sm"
+                  />
                 </div>
                 <div>
                   <p className="text-3xl font-bold text-slate-900 font-grotesk">

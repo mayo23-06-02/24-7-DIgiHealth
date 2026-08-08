@@ -59,7 +59,7 @@ export default function ProfileMenu({ user }: { user: User | null }) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-72 bg-surface rounded-lg border border-border shadow-lg py-2 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
+        <div className="absolute top-full right-0 mt-2 w-72 bg-surface rounded-lg border border-border  py-2 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
           <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center gap-3">
               <Avatar

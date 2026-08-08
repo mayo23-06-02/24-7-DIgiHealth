@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import KPICard from "@/components/ui/KPICard";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
 import {
   ResponsiveContainer,
   BarChart,
@@ -183,7 +184,7 @@ export default function ClinicalInsightsPage() {
                 onClick={() => setDays(d)}
                 className={`px-3 py-2 text-xs font-bold rounded-lg transition-all ${
                   days === d
-                    ? "bg-white text-primary shadow-sm"
+                    ? "bg-white text-primary "
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -249,9 +250,7 @@ export default function ClinicalInsightsPage() {
                     </span>
                   )}
                   {p?.isOnline && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">
-                      Online now
-                    </span>
+                    <Badge label="Online now" status="success" size="sm" />
                   )}
                 </div>
                 {(p?.languages?.length > 0 ||

@@ -1,57 +1,87 @@
 import React from "react";
 
 export type BadgeStatus =
-  "success" | "warning" | "error" | "info" | "neutral" | "premium";
+  | "success"
+  | "warning"
+  | "error"
+  | "info"
+  | "neutral"
+  | "premium";
 
 interface BadgeProps {
   label: string;
   status?: BadgeStatus;
   variant?: "solid" | "soft" | "outline";
+  size?: "sm" | "md";
   className?: string;
   dot?: boolean;
 }
 
+/**
+ * The single source of truth for status color across the product — every
+ * screen should reach for this instead of hand-picking bg-emerald-100 vs
+ * bg-rose-100 vs bg-red-100 per file (see design.md §0, §3.4).
+ */
 const Badge: React.FC<BadgeProps> = ({
   label,
   status = "neutral",
   variant = "soft",
+  size = "md",
   className = "",
   dot = false,
 }) => {
-  const configs: Record<BadgeStatus, { base: string; dot: string }> = {
-    success: { base: "bg-primary text-white ", dot: "bg-primary" },
-    warning: { base: "bg-accent text-gray-800 ", dot: "bg-accent" },
+  const configs: Record<
+    BadgeStatus,
+    { soft: string; solid: string; outline: string; dot: string }
+  > = {
+    success: {
+      soft: "bg-success-50 text-success-700",
+      solid: "bg-success-500 text-white",
+      outline: "bg-transparent border border-success-500 text-success-700",
+      dot: "bg-success-500",
+    },
+    warning: {
+      soft: "bg-warning-50 text-warning-700",
+      solid: "bg-warning-500 text-white",
+      outline: "bg-transparent border border-warning-500 text-warning-700",
+      dot: "bg-warning-500",
+    },
     error: {
-      base: "bg-red-100 text-red-700 border-red-200",
-      dot: "bg-red-500",
+      soft: "bg-danger-50 text-danger-700",
+      solid: "bg-danger-500 text-white",
+      outline: "bg-transparent border border-danger-500 text-danger-700",
+      dot: "bg-danger-500",
     },
     info: {
-      base: "bg-blue-100 text-blue-700 ",
-      dot: "bg-blue-500",
+      soft: "bg-info-50 text-info-700",
+      solid: "bg-info-500 text-white",
+      outline: "bg-transparent border border-info-500 text-info-700",
+      dot: "bg-info-500",
     },
     premium: {
-      base: "bg-primary text-white ",
-      dot: "bg-primary",
+      soft: "bg-accent/20 text-amber-700",
+      solid: "bg-accent text-ink-900",
+      outline: "bg-transparent border border-accent text-amber-700",
+      dot: "bg-accent",
     },
     neutral: {
-      base: "bg-slate-100 text-slate-600 ",
+      soft: "bg-slate-100 text-slate-600",
+      solid: "bg-slate-600 text-white",
+      outline: "bg-transparent border border-slate-300 text-slate-600",
       dot: "bg-slate-400",
     },
   };
 
   const style = configs[status] || configs.neutral;
+  const colorClass = style[variant] || style.soft;
+  const sizeClass = size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs";
 
   return (
     <span
-      className={`
-      inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-grotesk font-bold  tracking-wider
-      ${style.base} ${className}
-    `}
+      className={`inline-flex items-center gap-1.5 rounded-full font-semibold tracking-wide font-grotesk whitespace-nowrap ${sizeClass} ${colorClass} ${className}`}
     >
-      {dot && (
-        <span className={`w-1.5 h-1.5 rounded-lg ${style.dot} animate-pulse`} />
-      )}
-      <h1> {label}</h1>
+      {dot && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />}
+      {label}
     </span>
   );
 };

@@ -4,6 +4,7 @@ import React from "react";
 import { FileText } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
 import { formatHealthDate, type LabResult } from "./types";
 
 export default function LabsTab({ labs }: { labs: LabResult[] }) {
@@ -47,13 +48,9 @@ export default function LabsTab({ labs }: { labs: LabResult[] }) {
                     {v.parameter}
                   </span>
                   {v.status === "normal" ? (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">
-                      NORMAL
-                    </span>
+                    <Badge label="NORMAL" status="success" size="sm" />
                   ) : (
-                    <span className="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full font-bold">
-                      ABNORMAL
-                    </span>
+                    <Badge label="ABNORMAL" status="error" size="sm" />
                   )}
                 </div>
                 <div className="flex items-baseline gap-1">

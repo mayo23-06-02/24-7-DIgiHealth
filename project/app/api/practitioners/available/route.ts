@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
     const slots = ['08:00', '09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
 
-    let availablePractitioners = profiles.map(p => {
+    let availablePractitioners = profiles.filter(p => p.userId).map(p => {
       const u = p.userId as any;
       return {
         id: u._id.toString(),

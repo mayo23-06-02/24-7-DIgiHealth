@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import {
-  BiCheckCircle,
-  BiErrorCircle,
-  BiInfoCircle,
-  BiX,
-} from "react-icons/bi";
+import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 
 interface ToastProps {
   message: string;
@@ -15,6 +10,11 @@ interface ToastProps {
   onClose: () => void;
 }
 
+/**
+ * Standalone, manually-mounted toast. For most of the app, prefer the
+ * `react-hot-toast` instance already mounted in app/layout.tsx (`toast.success(...)`),
+ * whose default styling is themed to match this component's colors.
+ */
 const Toast: React.FC<ToastProps> = ({
   message,
   type = "info",
@@ -22,38 +22,41 @@ const Toast: React.FC<ToastProps> = ({
   onClose,
 }) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, duration);
+    const timer = setTimeout(() => onClose(), duration);
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
   const icons = {
-    success: <BiCheckCircle className="text-emerald-500" size={20} />,
-    error: <BiErrorCircle className="text-rose-500" size={20} />,
-    info: <BiInfoCircle className="text-primary" size={20} />,
+    success: <CheckCircle2 className="text-success-500" size={20} />,
+    error: <AlertCircle className="text-danger-500" size={20} />,
+    info: <Info className="text-info-500" size={20} />,
   };
 
   const bgColors = {
-    success: "bg-emerald-50 border-emerald-100",
-    error: "bg-rose-50 border-rose-100",
-    info: "bg-blue-50 border-blue-100",
+    success: "bg-success-50 border-success-500/20",
+    error: "bg-danger-50 border-danger-500/20",
+    info: "bg-info-50 border-info-500/20",
   };
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[300] animate-in slide-in-from-top duration-300">
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed top-6 left-1/2 -translate-x-1/2 z-[300] animate-in slide-in-from-top duration-300"
+    >
       <div
-        className={`flex items-center gap-3 px-6 py-4 rounded-lg border ${bgColors[type]} backdrop-blur-md`}
+        className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border  ${bgColors[type]} backdrop-blur-md`}
       >
         {icons[type]}
-        <p className="text-sm font-bold text-slate-800 whitespace-nowrap">
+        <p className="text-sm font-semibold text-ink-900 whitespace-nowrap">
           {message}
         </p>
         <button
           onClick={onClose}
-          className="ml-2 p-1 hover:bg-white/50 rounded-lg transition-colors text-slate-500 hover:text-slate-600"
+          aria-label="Dismiss"
+          className="ml-2 p-1 hover:bg-white/60 rounded-lg transition-colors text-slate-500 hover:text-slate-700"
         >
-          <BiX size={18} />
+          <X size={16} />
         </button>
       </div>
     </div>

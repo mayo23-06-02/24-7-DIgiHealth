@@ -353,7 +353,7 @@ export default function AIDiagnizerPage() {
                 </h3>
                 <div className="space-y-4">
                   {results.differentialDiagnosis.map((diag, i) => (
-                    <div key={i} className="p-4 rounded-lg bg-white border border-slate-100 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                    <div key={i} className="p-4 rounded-lg bg-white border border-slate-100 hover: hover:shadow-primary/5 transition-all">
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-bold text-slate-800">{diag.condition}</h4>
                         <Badge 
@@ -413,7 +413,7 @@ export default function AIDiagnizerPage() {
             </div>
           ) : (
             <Card className="min-h-[600px] flex flex-col justify-center items-center text-center p-12 bg-slate-50/50 border-dashed border-2 border-slate-200">
-              <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-xl shadow-slate-200/50 mb-8">
+              <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center  shadow-slate-200/50 mb-8">
                 <BiBrain className="text-slate-200 text-5xl" />
               </div>
               <h3 className="text-xl font-bold text-slate-400 mb-4 font-grotesk">Ready for Clinical Analysis</h3>

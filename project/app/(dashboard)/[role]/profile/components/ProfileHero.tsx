@@ -89,7 +89,7 @@ export default function ProfileHero({
     <section className="relative">
       {/* Cover */}
       <div
-        className={`relative h-40 sm:h-48 md:h-56 w-full rounded-lg md:rounded-lg overflow-hidden bg-gradient-to-br ${gradient} shadow-lg shadow-primary/15`}
+        className={`relative h-40 sm:h-48 md:h-56 w-full rounded-lg md:rounded-lg overflow-hidden bg-gradient-to-br ${gradient}  shadow-primary/15`}
       >
         {/* Decorative mesh */}
         <div className="absolute inset-0 opacity-40">
@@ -127,7 +127,7 @@ export default function ProfileHero({
 
       {/* Floating identity card */}
       <div className="relative px-3 sm:px-6 -mt-16 sm:-mt-20">
-        <div className="rounded-lg md:rounded-lg bg-white border border-slate-200/80 shadow-xl shadow-slate-200/50 p-4 sm:p-6 md:p-7">
+        <div className="rounded-lg md:rounded-lg bg-white border border-slate-200/80  shadow-slate-200/50 p-4 sm:p-6 md:p-7">
           <div className="flex flex-col lg:flex-row lg:items-end gap-5 lg:gap-8">
             {/* Avatar */}
             <div className="relative shrink-0 self-start">
@@ -139,7 +139,7 @@ export default function ProfileHero({
                 onChange={handleAvatarUpload}
               />
               <div className="relative group/avatar">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-lg p-1 bg-white shadow-lg shadow-slate-200/80 ring-4 ring-white">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-lg p-1 bg-white  shadow-slate-200/80 ring-4 ring-white">
                   <div className="w-full h-full rounded-[0.9rem] overflow-hidden bg-slate-100 flex items-center justify-center">
                     <Avatar
                       name={fullName}
@@ -154,7 +154,7 @@ export default function ProfileHero({
                   onClick={() => avatarInputRef.current?.click()}
                   disabled={isUploadingDoc}
                   title="Change photo"
-                  className="absolute -bottom-1.5 -right-1.5 w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center shadow-lg shadow-primary/30 border-2 border-white hover:scale-105 active:scale-95 transition-all disabled:opacity-60"
+                  className="absolute -bottom-1.5 -right-1.5 w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center  shadow-primary/30 border-2 border-white hover:scale-105 active:scale-95 transition-all disabled:opacity-60"
                 >
                   {isUploadingDoc ? (
                     <BiLoaderAlt size={18} className="animate-spin" />
@@ -272,7 +272,7 @@ export default function ProfileHero({
                 <Button
                   onClick={onSave}
                   disabled={isSaving}
-                  className="!rounded-lg !h-12 !px-6 !max-w-none normal-case !tracking-normal shadow-md shadow-primary/20"
+                  className="!rounded-lg !h-12 !px-6 !max-w-none normal-case !tracking-normal  shadow-primary/20"
                   icon={
                     isSaving ? (
                       <BiLoaderAlt className="animate-spin" size={18} />

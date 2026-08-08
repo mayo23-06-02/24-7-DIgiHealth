@@ -799,7 +799,7 @@ export default function ProfilePage() {
     return (
       <div className="w-full max-w-6xl mx-auto pb-16 space-y-6 animate-pulse">
         <div className="h-48 rounded-lg bg-gradient-to-br from-primary/30 to-slate-200" />
-        <div className="h-28 -mt-14 mx-4 rounded-lg bg-white border border-slate-100 shadow-sm" />
+        <div className="h-28 -mt-14 mx-4 rounded-lg bg-white border border-slate-100 " />
         <div className="h-14 rounded-lg bg-slate-100" />
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           <div className="xl:col-span-8 space-y-4">

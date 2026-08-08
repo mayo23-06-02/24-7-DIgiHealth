@@ -1,10 +1,6 @@
 import React from "react";
-import {
-  BiTrendingUp,
-  BiTrendingDown,
-  BiChevronRight,
-  BiLoaderAlt,
-} from "react-icons/bi";
+import { TrendingUp, TrendingDown, ChevronRight } from "lucide-react";
+import Spinner from "./Spinner";
 import Card from "./Card";
 
 interface KPICardProps {
@@ -13,6 +9,8 @@ interface KPICardProps {
   unit?: string;
   icon: React.ReactNode;
   trend?: number;
+  /** true = up is good (default). Set false for metrics like cost/ha where down is good. */
+  trendUp?: boolean;
   color?: string;
   description?: string;
   onClick?: () => void;
@@ -28,6 +26,7 @@ const KPICard: React.FC<KPICardProps> = ({
   unit,
   icon,
   trend,
+  trendUp = true,
   color = "primary",
   description,
   onClick,
@@ -36,6 +35,16 @@ const KPICard: React.FC<KPICardProps> = ({
 }) => {
   const clickable = typeof onClick === "function";
   const showChevron = clickable && !hideChevron;
+
+  const iconBg: Record<string, string> = {
+    primary: "bg-primary",
+    emerald: "bg-success-500",
+    red: "bg-danger-500",
+    amber: "bg-warning-500",
+    slate: "bg-slate-800",
+  };
+
+  const trendIsGood = trendUp ? (trend ?? 0) >= 0 : (trend ?? 0) < 0;
 
   return (
     <Card
@@ -51,10 +60,9 @@ const KPICard: React.FC<KPICardProps> = ({
         <div className="p-3 sm:p-4 lg:py-4 lg:px-4 flex items-start justify-between gap-2">
           <div
             className={`
-          w-8 h-8 sm:h-10 sm:w-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center text-white
-          transition-all duration-500 shrink-0
-          ${color === "primary" ? "bg-primary" : color === "emerald" ? "bg-emerald-500" : color === "red" ? "bg-red-500" : "bg-slate-800"}
-        `}
+              w-8 h-8 sm:h-10 sm:w-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white
+              transition-all duration-500 shrink-0 ${iconBg[color] || iconBg.primary}
+            `}
           >
             <span className="scale-75 sm:scale-90 lg:scale-100 origin-center [&>svg]:w-[18px] [&>svg]:h-[18px] sm:[&>svg]:w-5 sm:[&>svg]:h-5 lg:[&>svg]:w-6 lg:[&>svg]:h-6">
               {icon}
@@ -64,19 +72,19 @@ const KPICard: React.FC<KPICardProps> = ({
           {trend !== undefined && (
             <div
               className={`
-            flex items-center gap-0.5 sm:gap-1 font-bold px-2 sm:px-2 py-1 sm:py-1 rounded-full text-[8px] sm:text-[10px] lg:text-xs
-            ${trend >= 0 ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-600"}
-          `}
+                flex items-center gap-0.5 sm:gap-1 font-bold px-2 sm:px-2 py-1 sm:py-1 rounded-full text-[8px] sm:text-[10px] lg:text-xs
+                ${trendIsGood ? "bg-success-50 text-success-700" : "bg-danger-50 text-danger-700"}
+              `}
             >
-              {trend >= 0 ? <BiTrendingUp /> : <BiTrendingDown />}
-              <p>{Math.abs(trend)}%</p>
+              {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+              <span>{Math.abs(trend)}%</span>
             </div>
           )}
         </div>
 
-        <div className="space-y-1 sm:space-y-1 pb-3 sm:pb-4 px-3 sm:px-4 flex-1">
+        <div className="space-y-1 pb-3 sm:pb-4 px-3 sm:px-4 flex-1">
           <div className="flex items-baseline gap-0.5 sm:gap-1 flex-wrap">
-            <h4 className="text-xl sm:text-2xl lg:text-4xl font-medium text-slate-900 tracking-tight font-grotesk leading-none">
+            <h4 className="text-xl sm:text-2xl lg:text-4xl font-medium text-ink-900 tracking-tight font-grotesk leading-none tabular-nums">
               {value}
             </h4>
             {unit && (
@@ -93,8 +101,8 @@ const KPICard: React.FC<KPICardProps> = ({
         </div>
         <div
           className={`
-            py-2  lg:py-4 lg:px-6 px-3 sm:px-4 flex items-center border-t border-slate-100 transition-all duration-500
-            ${showChevron ? "justify-between hover:bg-slate-50" : "justify-start"}
+            py-2 lg:py-4 lg:px-6 px-3 sm:px-4 flex items-center border-t border-slate-100 transition-all duration-500
+            ${showChevron ? "justify-between group-hover:bg-slate-50" : "justify-start"}
           `}
         >
           <p className="text-[11px] sm:text-sm font-semibold text-slate-500 truncate pr-1">
@@ -103,9 +111,9 @@ const KPICard: React.FC<KPICardProps> = ({
           {showChevron && (
             <div className="shrink-0">
               {loading ? (
-                <BiLoaderAlt className="text-primary animate-spin" size={16} />
+                <Spinner size={16} className="text-primary" />
               ) : (
-                <BiChevronRight className="text-slate-500" size={16} />
+                <ChevronRight className="text-slate-400" size={16} />
               )}
             </div>
           )}

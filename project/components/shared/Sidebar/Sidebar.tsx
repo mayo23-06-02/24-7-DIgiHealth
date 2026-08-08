@@ -48,17 +48,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-100 flex flex-col bg-surface transition-all duration-300
-          lg:relative lg:inset-auto lg:border-r lg:border-border lg:shadow-none
+          fixed inset-y-0 left-0 z-100 flex flex-col bg-gradient-to-b from-surface to-surface transition-all duration-300
+          lg:relative lg:inset-auto lg:border-r lg:border-border/50 lg:shadow-sm lg:bg-surface
           ${isCollapsed ? "w-20" : "w-64"}
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          dark:lg:shadow-none dark:lg:border-border/30
         `}
       >
         {/* Mobile Close Button */}
         {isOpen && (
           <button
             onClick={onClose}
-            className="absolute -right-12 top-4 w-10 h-10 bg-surface rounded-md flex items-center justify-center text-ink-600 shadow-md lg:hidden hover:bg-surface-soft transition-colors"
+            className="absolute -right-12 top-4 w-10 h-10 bg-surface rounded-md flex items-center justify-center text-ink-600  lg:hidden hover:bg-surface-soft transition-colors"
             aria-label="Close sidebar"
           >
             <X size={18} />
@@ -79,18 +80,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Navigation */}
         <nav
           className={`
-            flex-1 py-4 space-y-0.5 overflow-y-auto custom-scrollbar
-            ${isCollapsed ? "px-2" : "px-3"}
+            flex-1 py-5 overflow-y-auto custom-scrollbar
+            ${isCollapsed ? "px-2 space-y-2" : "px-4 space-y-1"}
           `}
         >
-          {filteredNav.map((item) => (
-            <NavItem
-              key={item.href}
-              item={item}
-              userRole={user.role}
-              isCollapsed={isCollapsed}
-              onClose={onClose}
-            />
+          {filteredNav.map((item, idx) => (
+            <React.Fragment key={item.href}>
+              <NavItem
+                item={item}
+                userRole={user.role}
+                isCollapsed={isCollapsed}
+                onClose={onClose}
+              />
+              {/* Visual separator every 3-4 items for sophisticated grouping */}
+              {!isCollapsed && idx === 0 && (
+                <div className="my-2 h-px bg-gradient-to-r from-border via-border/50 to-transparent" />
+              )}
+            </React.Fragment>
           ))}
         </nav>
 

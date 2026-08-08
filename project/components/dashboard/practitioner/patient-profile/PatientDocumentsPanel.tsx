@@ -205,7 +205,7 @@ export default function PatientDocumentsPanel({
   };
 
   return (
-    <section className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+    <section className="rounded-lg border border-slate-200/80 bg-white  overflow-hidden">
       <input
         ref={fileInputRef}
         type="file"

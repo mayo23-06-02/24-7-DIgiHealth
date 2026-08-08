@@ -28,9 +28,12 @@ export default function NavItemContent({
   return (
     <div
       className={`
-        flex items-center gap-3 py-2.5 rounded-md font-medium text-sm transition-all duration-200 group
-        ${isActive ? "bg-primary text-white shadow-sm" : "text-ink-700 hover:bg-surface-soft hover:text-primary"}
-        ${isCollapsed ? "justify-center px-2" : "px-3"}
+        flex items-center gap-3 py-2.5 px-4 font-medium text-sm transition-all duration-200 group rounded-lg
+        ${isActive
+          ? "bg-gradient-to-r from-primary to-primary/90 text-white shadow-md shadow-primary/20"
+          : "text-ink-700 hover:bg-primary/8 hover:text-primary hover:shadow-sm"
+        }
+        ${isCollapsed ? "justify-center px-2" : ""}
         ${pending ? "opacity-60" : ""}
       `}
     >
@@ -40,7 +43,7 @@ export default function NavItemContent({
         <item.icon
           size={18}
           className={`transition-all duration-200 shrink-0 ${
-            isActive ? "" : "group-hover:scale-110"
+            isActive ? "" : "group-hover:scale-110 group-hover:rotate-6"
           }`}
         />
       )}

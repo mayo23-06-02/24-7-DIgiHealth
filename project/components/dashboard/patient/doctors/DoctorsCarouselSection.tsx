@@ -23,7 +23,7 @@ export default function DoctorsCarouselSection({
   return (
     <section className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-slate-800 text-xl font-grotesk">
+        <h3 className="font-bold text-ink-900 text-h3 font-grotesk">
           {title}
         </h3>
         <p className="text-xs text-slate-500">{doctors.length} found</p>

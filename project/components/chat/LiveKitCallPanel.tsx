@@ -296,7 +296,7 @@ export default function LiveKitCallPanel({
       {/* Audio blocked banner */}
       {audioBlocked && (
         <div className="absolute top-14 inset-x-0 z-30 flex justify-center pointer-events-none">
-          <div className="bg-amber-500/90 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg pointer-events-auto">
+          <div className="bg-amber-500/90 text-white text-xs font-semibold px-4 py-2 rounded-full  pointer-events-auto">
             Click anywhere to enable audio
           </div>
         </div>

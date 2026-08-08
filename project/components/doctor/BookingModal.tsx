@@ -3,20 +3,20 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Alert from "@/components/ui/Alert";
 import {
-  BiCalendar,
-  BiTime,
-  BiCheckCircle,
-  BiLoaderAlt,
-  BiX,
-  BiSearch,
-  BiVideo,
-  BiChat,
-} from "react-icons/bi";
+  Calendar,
+  CheckCircle2,
+  Loader2,
+  X,
+  Search,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "../ui/Card";
 import Avatar from "../ui/Avatar";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import {
   createBooking,
   updateBooking,
@@ -460,13 +460,10 @@ export default function BookingModal({
             {isPractitionerMode ? (
               <div ref={dropdownRef} className="relative px-1">
                 <div className="relative">
-                  <BiSearch
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                    size={15}
-                  />
-                  <input
+                  <Input
                     type="text"
                     placeholder="Type to search your patients..."
+                    icon={<Search size={16} />}
                     value={patientSearch}
                     onFocus={() => {
                       if (!selectedPatientState?.id && patientSearch)
@@ -477,11 +474,7 @@ export default function BookingModal({
                       setSelectedPatientState(null);
                       setShowDropdown(true);
                     }}
-                    className={`w-full pl-9 pr-9 py-3 border rounded-lg text-sm focus:outline-none transition-colors ${
-                      selectedPatientState
-                        ? "border-primary bg-primary/5 font-medium"
-                        : "border-slate-200 focus:border-primary"
-                    }`}
+                    className={selectedPatientState ? "!border-primary !bg-primary/5 font-medium pr-9" : "pr-9"}
                   />
                   {selectedPatientState && (
                     <button
@@ -489,17 +482,17 @@ export default function BookingModal({
                         setSelectedPatientState(null);
                         setPatientSearch("");
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-400 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-danger-500 transition-colors"
                     >
-                      <BiX size={14} />
+                      <X size={16} />
                     </button>
                   )}
                 </div>
                 {showDropdown && !selectedPatientState && (
-                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-lg shadow-lg z-50 overflow-hidden max-h-64 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-lg  z-50 overflow-hidden max-h-64 overflow-y-auto">
                     {patientLoading ? (
                       <div className="py-6 flex items-center justify-center gap-2 text-xs text-slate-500">
-                        <BiLoaderAlt className="animate-spin" size={14} />{" "}
+                        <Loader2 className="animate-spin" size={14} />{" "}
                         Searching patients...
                       </div>
                     ) : patientResults.length === 0 ? (
@@ -607,7 +600,7 @@ export default function BookingModal({
           <div className="space-y-6  animate-in slide-in-from-right-4 duration-300">
             <div className="space-y-3">
               <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
-                <BiCalendar size={14} className="text-primary" /> Select date
+                <Calendar size={14} className="text-primary" /> Select date
               </label>
               <div className="flex gap-2 overflow-x-auto py-3 px-1 -mx-1 custom-scrollbar">
                 {dateOptions.map((dateStr) => {
@@ -649,38 +642,30 @@ export default function BookingModal({
 
             {isPractitionerMode && (
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-500 tracking-wider mb-1.5 block">
-                    Duration
-                  </label>
-                  <select
-                    value={durationMinutes}
-                    onChange={(e) => {
-                      setDurationMinutes(Number(e.target.value));
-                      setSelectedTime("");
-                    }}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:border-primary"
-                  >
-                    <option value={15}>15 min</option>
-                    <option value={30}>30 min</option>
-                    <option value={45}>45 min</option>
-                    <option value={60}>1 hour</option>
-                    <option value={90}>1.5 hours</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-500 tracking-wider mb-1.5 block">
-                    Method
-                  </label>
-                  <select
-                    value={consultType}
-                    onChange={(e) => setConsultType(e.target.value)}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:border-primary"
-                  >
-                    <option value="video">Video Call</option>
-                    <option value="chat">Chat</option>
-                  </select>
-                </div>
+                <Select
+                  label="Duration"
+                  value={String(durationMinutes)}
+                  onChange={(v) => {
+                    setDurationMinutes(Number(v));
+                    setSelectedTime("");
+                  }}
+                  options={[
+                    { value: "15", label: "15 min" },
+                    { value: "30", label: "30 min" },
+                    { value: "45", label: "45 min" },
+                    { value: "60", label: "1 hour" },
+                    { value: "90", label: "1.5 hours" },
+                  ]}
+                />
+                <Select
+                  label="Method"
+                  value={consultType}
+                  onChange={setConsultType}
+                  options={[
+                    { value: "video", label: "Video Call" },
+                    { value: "chat", label: "Chat" },
+                  ]}
+                />
               </div>
             )}
 
@@ -710,18 +695,16 @@ export default function BookingModal({
           <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
-                <BiCheckCircle size={14} className="text-primary" /> Reason for
+                <CheckCircle2 size={14} className="text-primary" /> Reason for
                 Consultation
               </label>
-              <div className="relative">
-                <Input
-                  isTextArea
-                  placeholder="Briefly describe the clinical symptoms or reason for this consultation..."
-                  value={concern}
-                  onChange={(e) => setConcern(e.target.value)}
-                  className="w-full h-40 rounded-lg bg-slate-50/50 border border-slate-100 p-4 text-slate-700 focus:outline-none focus:bg-white focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all resize-none placeholder:text-slate-400"
-                />
-              </div>
+              <Input
+                isTextArea
+                rows={5}
+                placeholder="Briefly describe the clinical symptoms or reason for this consultation..."
+                value={concern}
+                onChange={(e) => setConcern(e.target.value)}
+              />
             </div>
           </div>
         )}
@@ -794,17 +777,14 @@ export default function BookingModal({
                 </div>
               </div>
             </div>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-start gap-3">
-              <BiCheckCircle
-                className="text-emerald-600 shrink-0 mt-0.5"
-                size={20}
-              />
-              <p className="text-sm font-bold text-emerald-700">
-                {isPractitionerMode
+            <Alert
+              status="success"
+              title={
+                isPractitionerMode
                   ? "You are about to schedule this appointment. The patient will be notified."
-                  : "You are about to confirm this appointment. A confirmation notification will be sent to your registered email and the practitioner will be notified."}
-              </p>
-            </div>
+                  : "You are about to confirm this appointment. A confirmation notification will be sent to your registered email and the practitioner will be notified."
+              }
+            />
           </div>
         )}
 
@@ -814,7 +794,7 @@ export default function BookingModal({
             <Button
               variant="ghost"
               onClick={handlePrev}
-              icon={<FaArrowLeft size={16} />}
+              icon={<ArrowLeft size={16} />}
               iconPosition="left"
             >
               Back
@@ -827,7 +807,7 @@ export default function BookingModal({
           {step < totalSteps ? (
             <Button
               onClick={handleNext}
-              icon={<FaArrowRight size={16} />}
+              icon={<ArrowRight size={16} />}
               iconPosition="right"
               fullWidth
             >
@@ -837,14 +817,9 @@ export default function BookingModal({
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="h-12 rounded-lg text-sm font-bold tracking-normal bg-emerald-500 text-white shadow-emerald-300"
-              icon={
-                isSubmitting ? (
-                  <BiLoaderAlt className="animate-spin" size={18} />
-                ) : (
-                  <BiCheckCircle size={18} />
-                )
-              }
+              loading={isSubmitting}
+              size="lg"
+              icon={<CheckCircle2 size={18} />}
               iconPosition="right"
               fullWidth
             >

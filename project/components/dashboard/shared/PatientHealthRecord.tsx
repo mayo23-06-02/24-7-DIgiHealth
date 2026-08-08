@@ -283,7 +283,7 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                     onClick={() => setSelectedVital(v.id as any)}
                     className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                       selectedVital === v.id
-                        ? "bg-white text-primary shadow-sm"
+                        ? "bg-white text-primary "
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                   >

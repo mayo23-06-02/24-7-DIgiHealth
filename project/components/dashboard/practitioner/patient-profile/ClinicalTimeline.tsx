@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
 import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
 import {
   BiChevronLeft,
@@ -99,15 +100,11 @@ export default function ClinicalTimeline({
                     <h4 className="font-bold text-slate-800 text-sm truncate font-grotesk">
                       {c.chiefComplaint || "No complaint recorded"}
                     </h4>
-                    <span
-                      className={`px-2 py-1 rounded-lg text-xs font-bold tracking-tighter ${
-                        c.status === "completed"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      {c.status}
-                    </span>
+                    <Badge
+                      label={c.status}
+                      status={c.status === "completed" ? "success" : "neutral"}
+                      size="sm"
+                    />
                   </div>
                   <div className="flex items-center gap-3 mt-1.5">
                     <div className="flex items-center gap-1 text-xs font-bold text-slate-500">

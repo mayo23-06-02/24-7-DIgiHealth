@@ -131,7 +131,7 @@ To:   bg-primary-50, bg-primary/10, text-ink-400/600/900
    - Better hover states with `hover:bg-surface-soft`
 
 2. **Design Token Usage**
-   - Active state: `bg-primary text-white shadow-sm`
+   - Active state: `bg-primary text-white `
    - Inactive: `text-ink-700 hover:bg-surface-soft`
    - Better color contrast
 

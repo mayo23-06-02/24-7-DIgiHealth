@@ -84,7 +84,7 @@ export default function NotificationsTab({
                 }
                 className={`w-full flex items-center gap-4 p-4 rounded-lg border text-left transition-all ${
                   on
-                    ? "border-primary/30 bg-primary/[0.04] shadow-sm shadow-primary/5"
+                    ? "border-primary/30 bg-primary/[0.04]  shadow-primary/5"
                     : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >

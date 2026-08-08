@@ -1,16 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  BiSearch,
-  BiX,
-  BiCalendar,
-  BiFilter,
-  BiSortDown,
-  BiSortUp,
-} from "react-icons/bi";
+import { Search, X, Calendar, SlidersHorizontal, ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
+import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Dialog from "@/components/ui/Dialog";
 
 interface Props {
   searchQuery: string;
@@ -48,126 +43,101 @@ export default function AppointmentFilters({
   return (
     <>
       <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-            size={16}
-          />
-          <input
+        <div className="flex-1 min-w-[200px]">
+          <Input
             type="text"
             placeholder="Search patient name or fields..."
+            icon={<Search size={16} />}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-4 p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
           />
         </div>
 
-        {/* Filter & Sort Icons (All screens) */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilterModal(true)}
-            className="flex items-center justify-center  rounded-lg px-2  p-2  text-slate-500 cursor-pointer hover:text-slate-800 outline-none relative"
+            aria-label="Filters"
+            className="relative flex items-center justify-center w-11 h-11 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-colors"
           >
-            <BiFilter size={24} />
+            <SlidersHorizontal size={18} />
             {hasActiveFilters && (
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
             )}
           </button>
           <button
             onClick={() =>
               onSortChange(sortBy === "newest" ? "oldest" : "newest")
             }
-            className="flex items-center justify-center  rounded-lg px-2  p-2  text-slate-500 cursor-pointer hover:text-slate-800 outline-none"
+            aria-label={sortBy === "newest" ? "Sorted newest first" : "Sorted oldest first"}
+            className="flex items-center justify-center w-11 h-11 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-colors"
           >
             {sortBy === "newest" ? (
-              <BiSortDown size={24} />
+              <ArrowDownWideNarrow size={18} />
             ) : (
-              <BiSortUp size={24} />
+              <ArrowUpWideNarrow size={18} />
             )}
           </button>
         </div>
       </div>
 
-      <Modal
+      <Dialog
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
         title="Filters"
+        size="sm"
       >
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {onTypeFilterChange && (
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-slate-700">
-                Appointment Type
-              </label>
-              <Select
-                value={typeFilter || "all"}
-                onChange={(v) => onTypeFilterChange(v)}
-                options={[
-                  { value: "all", label: "All Types" },
-                  { value: "video", label: "Video" },
-                  { value: "chat", label: "Chat" },
-                ]}
-              />
-            </div>
+            <Select
+              label="Appointment Type"
+              value={typeFilter || "all"}
+              onChange={(v) => onTypeFilterChange(v)}
+              options={[
+                { value: "all", label: "All Types" },
+                { value: "video", label: "Video" },
+                { value: "chat", label: "Chat" },
+              ]}
+            />
           )}
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-slate-700">
-              Start Date
-            </label>
-            <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-3 bg-white">
-              <BiCalendar className="text-slate-500 shrink-0" size={18} />
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => onDateFromChange(e.target.value)}
-                className="w-full text-base outline-none text-slate-700 font-medium [&::-webkit-calendar-picker-indicator]:hidden bg-transparent cursor-text"
-                onClick={(e) =>
-                  (e.target as HTMLInputElement).showPicker &&
-                  (e.target as HTMLInputElement).showPicker()
-                }
-              />
-            </div>
-          </div>
+          <Input
+            type="date"
+            label="Start Date"
+            icon={<Calendar size={16} />}
+            value={dateFrom}
+            onChange={(e) => onDateFromChange(e.target.value)}
+          />
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-slate-700">End Date</label>
-            <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-3 bg-white">
-              <BiCalendar className="text-slate-500 shrink-0" size={18} />
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => onDateToChange(e.target.value)}
-                className="w-full text-base outline-none text-slate-700 font-medium [&::-webkit-calendar-picker-indicator]:hidden bg-transparent cursor-text"
-                onClick={(e) =>
-                  (e.target as HTMLInputElement).showPicker &&
-                  (e.target as HTMLInputElement).showPicker()
-                }
-              />
-            </div>
-          </div>
+          <Input
+            type="date"
+            label="End Date"
+            icon={<Calendar size={16} />}
+            value={dateTo}
+            onChange={(e) => onDateToChange(e.target.value)}
+          />
 
           {hasActiveFilters && (
-            <button
+            <Button
+              variant="white"
+              icon={<X size={16} />}
+              iconPosition="left"
+              fullWidth
+              className="!text-danger-500 !border-danger-500/20 hover:!bg-danger-50"
               onClick={() => {
                 onClearDates();
                 if (onTypeFilterChange) onTypeFilterChange("all");
                 setShowFilterModal(false);
               }}
-              className="mt-2 flex items-center justify-center gap-1 w-full px-4 py-3 text-sm font-bold text-red-500 border border-red-200 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
             >
-              <BiX size={18} /> Clear Filters
-            </button>
+              Clear Filters
+            </Button>
           )}
 
-          <button
-            onClick={() => setShowFilterModal(false)}
-            className="w-full px-4 py-3 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-          >
+          <Button fullWidth onClick={() => setShowFilterModal(false)}>
             Apply Filters
-          </button>
+          </Button>
         </div>
-      </Modal>
+      </Dialog>
     </>
   );
 }

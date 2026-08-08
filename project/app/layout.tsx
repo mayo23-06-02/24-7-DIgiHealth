@@ -38,7 +38,31 @@ export default function RootLayout({
         <NavigationProgressProvider>
           <AuthProvider>{children}</AuthProvider>
         </NavigationProgressProvider>
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "#fff",
+              color: "#0A0A2E",
+              borderRadius: "12px",
+              padding: "12px 16px",
+              fontSize: "14px",
+              fontWeight: 600,
+              boxShadow:
+                "0 12px 32px rgb(0 0 0 / 0.12), 0 1px 3px rgb(0 0 0 / 0.08)",
+              border: "1px solid #E2E8F0",
+            },
+            success: {
+              iconTheme: { primary: "#10b981", secondary: "#fff" },
+              style: { border: "1px solid #10b98133" },
+            },
+            error: {
+              iconTheme: { primary: "#dc2626", secondary: "#fff" },
+              style: { border: "1px solid #dc262633" },
+            },
+          }}
+        />
       </body>
     </html>
   );

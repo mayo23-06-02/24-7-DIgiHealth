@@ -35,7 +35,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       <div className="flex gap-4">
         {icon && (
           <div
-            className={`${isCompact ? "w-10 h-10" : "w-14 h-14"} bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner shrink-0`}
+            className={`${isCompact ? "w-10 h-10" : "w-14 h-14"} bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0`}
           >
             {React.cloneElement(icon as any, {
               size: isCompact ? 20 : 28,
@@ -53,12 +53,12 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
             />
           )}
           <h3
-            className={`${isCompact ? "text-xl" : "text-2xl"} font-bold text-slate-800 tracking-tight leading-none`}
+            className={`${isCompact ? "text-h3" : "text-h2"} font-bold text-ink-900 tracking-tight leading-none font-grotesk`}
           >
             {title}
           </h3>
           {subtitle && (
-            <p className="text-xs font-bold text-slate-500  tracking-normal mt-1.5">
+            <p className="text-xs font-semibold text-slate-500 tracking-normal mt-1.5">
               {subtitle}
             </p>
           )}

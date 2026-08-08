@@ -1,4 +1,5 @@
 import React from "react";
+import Spinner from "./Spinner";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?:
@@ -17,6 +18,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
+/**
+ * Pill-shaped action button — the brand's established shape (see design.md
+ * §2.4). Every variant/size below is intentionally kept backward-compatible
+ * with existing call sites; only the internal styling changed.
+ */
 const Button: React.FC<ButtonProps> = ({
   children,
   variant = "primary",
@@ -30,33 +36,32 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex lg:hover:scale-105 items-center flex cursor-pointer max-w-[400px] lg:max-w-[800px] text-sm font-grotesk uppercase   justify-center font-bold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full ";
+    "inline-flex lg:hover:scale-[1.03] items-center cursor-pointer max-w-[400px] lg:max-w-[800px] text-sm font-grotesk justify-center font-semibold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full";
 
-  const variants = {
-    primary: "bg-primary text-white hover:bg-[#326E8A] ",
-    secondary: "bg-secondary text-white hover:bg-secondary/90 ",
-    accent: "bg-accent text-slate-900 hover:brightness-110 ",
+  const variants: Record<string, string> = {
+    primary: "bg-primary text-white hover:bg-primary-600  shadow-primary/20",
+    secondary: "bg-secondary text-white hover:bg-secondary/90",
+    accent: "bg-accent text-ink-900 hover:brightness-110",
     white: "bg-white text-primary border border-slate-200 hover:bg-slate-50",
-    outline:
-      "bg-transparent border border-primary text-primary hover:bg-primary/5",
+    outline: "bg-transparent border border-primary text-primary hover:bg-primary/5",
     dashed:
-      "bg-transparent border- border-dashed border-slate-200 text-slate-500 hover:border-primary hover:text-primary",
-    ghost: "bg-transparent text-slate-500 hover:bg-slate-100",
-    danger: "bg-red-400 text-white hover:bg-red-600",
+      "bg-transparent border border-dashed border-slate-300 text-slate-500 hover:border-primary hover:text-primary",
+    ghost: "bg-transparent text-slate-600 hover:bg-slate-100",
+    danger: "bg-danger-500 text-white hover:bg-danger-700  shadow-danger-500/20",
   };
 
   const sizes = {
-    sm: "px-3 py-2 text-[10px]",
-    md: "px-6 py-3 text-sm",
-    lg: "px-8 py-4.5 text-lg",
-    xl: "px-10 py-6 text-lg",
+    sm: "px-4 py-2.5 text-xs min-h-[36px]",
+    md: "px-6 py-3 text-sm min-h-[44px]",
+    lg: "px-8 py-4 text-base min-h-[52px]",
+    xl: "px-10 py-5 text-base min-h-[56px]",
   };
 
   const widthStyle = fullWidth ? "w-full" : "";
 
   return (
     <button
-      className={`${baseStyles} relative ${variants[variant as keyof typeof variants] || variants.primary} ${sizes[size as keyof typeof sizes] || sizes.md} ${widthStyle} ${
+      className={`${baseStyles} relative ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${widthStyle} ${
         // `disabled:opacity-50` in baseStyles is a class+pseudo-class selector and
         // would otherwise wash the spinner out to 50%.
         loading ? "disabled:opacity-100 cursor-wait pointer-events-none" : ""
@@ -69,50 +74,23 @@ const Button: React.FC<ButtonProps> = ({
       {loading && (
         <span
           aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className="absolute inset-0 flex items-center justify-center"
         >
-          <svg
-            className="animate-spin h-5 w-5 text-current"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
+          <Spinner size={18} />
         </span>
       )}
       <span
-        className="inline-flex items-center justify-center transition-opacity duration-150"
+        className="inline-flex items-center justify-center gap-2 transition-opacity duration-150"
         style={{ opacity: loading ? 0 : 1 }}
       >
         {icon && iconPosition === "left" && (
-          <span className="px-2  ">{icon}</span>
+          <span className="inline-flex shrink-0 [&>svg]:w-[1em] [&>svg]:h-[1em]">{icon}</span>
         )}
-        <h4
-          className={`text-md text-center tracking-wide flex gap-2 items-center ${icon ? "hidden sm:flex" : "flex"}`}
-        >
+        <span className={`tracking-wide ${icon ? "hidden sm:inline" : "inline"}`}>
           {children}
-        </h4>
+        </span>
         {icon && iconPosition === "right" && (
-          <span className="px-2 ">{icon}</span>
+          <span className="inline-flex shrink-0 [&>svg]:w-[1em] [&>svg]:h-[1em]">{icon}</span>
         )}
       </span>
     </button>

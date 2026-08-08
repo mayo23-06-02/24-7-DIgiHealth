@@ -1,5 +1,5 @@
 import React from "react";
-import Modal from "@/components/ui/Modal";
+import Dialog from "@/components/ui/Dialog";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 
@@ -27,7 +27,7 @@ export default function DoctorsFilterModal({
   allLanguages,
 }: DoctorsFilterModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Filter Practitioners">
+    <Dialog isOpen={isOpen} onClose={onClose} title="Filter Practitioners" size="sm">
       <div className="space-y-6">
         <Select
           label="Specialization"
@@ -81,6 +81,6 @@ export default function DoctorsFilterModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </Dialog>
   );
 }

@@ -78,7 +78,7 @@ export default function RiskScoreCard({
           ${ui.bg} ${ui.text} ${ui.border}
           ${size === "sm" ? "text-xs" : "text-sm"}
           cursor-default transition-all duration-200
-          hover:shadow-md ${ui.glow}
+          hover: ${ui.glow}
         `}
         title={style.label}
       >

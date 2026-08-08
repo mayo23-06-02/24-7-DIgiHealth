@@ -2,6 +2,14 @@
 import React, { useState } from "react";
 import { FiChevronDown, FiChevronUp, FiDownload } from "react-icons/fi";
 import Button from "../ui/Button";
+import Badge, { type BadgeStatus } from "../ui/Badge";
+
+const statusMap: Record<string, BadgeStatus> = {
+  paid: "success",
+  pending: "warning",
+  failed: "error",
+  refunded: "neutral",
+};
 
 const mockHistory = [
   {
@@ -66,9 +74,11 @@ export default function PaymentHistory() {
                 <span className="block font-bold text-slate-800">
                   R {tx.amount}
                 </span>
-                <span className="text-xs font-bold text-emerald-500  tracking-normal">
-                  {tx.status}
-                </span>
+                <Badge
+                  label={tx.status}
+                  status={statusMap[tx.status.toLowerCase()] ?? "neutral"}
+                  size="sm"
+                />
               </div>
               <Button
                 variant="ghost"

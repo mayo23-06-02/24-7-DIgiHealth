@@ -2,13 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
-import {
-  BiTime,
-  BiLoaderAlt,
-  BiCheckCircle,
-  BiErrorCircle,
-  BiEditAlt,
-} from "react-icons/bi";
+import Badge from "@/components/ui/Badge";
+import type { BadgeStatus } from "@/components/ui/Badge";
+import { BiTime, BiLoaderAlt, BiEditAlt } from "react-icons/bi";
 
 interface SLAMetric {
   id: string;
@@ -77,30 +73,25 @@ const defaultSLAs: SLAMetric[] = [
   },
 ];
 
+const SLA_STATUS_MAP: Record<SLAMetric["status"], BadgeStatus> = {
+  met: "success",
+  at_risk: "warning",
+  breached: "error",
+};
+
+const SLA_STATUS_LABEL: Record<SLAMetric["status"], string> = {
+  met: "Met",
+  at_risk: "At Risk",
+  breached: "Breached",
+};
+
 function StatusBadge({ status }: { status: SLAMetric["status"] }) {
-  const cfg = {
-    met: {
-      cls: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      label: "Met",
-      icon: <BiCheckCircle size={14} />,
-    },
-    at_risk: {
-      cls: "bg-gray-50 text-gray-700 border-gray-200",
-      label: "At Risk",
-      icon: <BiErrorCircle size={14} />,
-    },
-    breached: {
-      cls: "bg-rose-50 text-rose-700 border-rose-200",
-      label: "Breached",
-      icon: <BiErrorCircle size={14} />,
-    },
-  }[status];
   return (
-    <span
-      className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg border ${cfg.cls}`}
-    >
-      {cfg.icon} {cfg.label}
-    </span>
+    <Badge
+      label={SLA_STATUS_LABEL[status]}
+      status={SLA_STATUS_MAP[status]}
+      size="sm"
+    />
   );
 }
 

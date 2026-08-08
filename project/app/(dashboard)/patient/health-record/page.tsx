@@ -2,26 +2,18 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  Calendar,
   Pill,
   FlaskConical as Lab,
   Syringe,
   Brain,
   Download,
-  FileText,
   LineChart as LineChartIcon,
   Clock,
-  CheckCircle,
-  Filter as FilterIcon,
-  User as UserIcon,
+  Loader2,
+  MapPin,
+  Truck,
+  Store,
 } from "lucide-react";
-import {
-  BiPlus,
-  BiLoaderAlt,
-  BiMap,
-  BiSolidTruck,
-  BiStore,
-} from "react-icons/bi";
 import {
   LineChart,
   Line,
@@ -37,6 +29,8 @@ import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import MedicalManikin from "@/components/ui/MedicalManikin";
 import Select from "@/components/ui/Select";
+import Tabs from "@/components/ui/Tabs";
+import Alert from "@/components/ui/Alert";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
@@ -276,59 +270,33 @@ export default function HealthRecordPage() {
         title="Medical Records"
         subtitle="POPIA-Compliant Health History"
         right={
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={handleDownloadReport}
-              disabled={isDownloading}
-              className="bg-primary text-white p-2.5 rounded-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 px-5 text-sm font-semibold"
-            >
-              <Download size={20} />
-              <span className="hidden sm:inline">
-                {isDownloading ? "Generating…" : "Download PDF"}
-              </span>
-            </Button>
-          </div>
+          <Button
+            onClick={handleDownloadReport}
+            loading={isDownloading}
+            icon={<Download size={18} />}
+            iconPosition="left"
+          >
+            {isDownloading ? "Generating…" : "Download PDF"}
+          </Button>
         }
       />
 
       {/* Tabs Row */}
-      <Card
-        variant="glass"
-        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-2 sticky top-0 z-30"
-      >
-        <div className="flex p-1 gap-2 overflow-x-auto custom-scrollbar lg:no-scrollbar max-w-full">
-          {[
+      <div  className=" border-b border-gray-200 top-0 z-30 px-4">
+        <Tabs
+          activeId={activeTab}
+          onChange={(id) => setActiveTab(id as any)}
+          tabs={[
             { id: "timeline", label: "Timeline", icon: <Clock size={16} /> },
-            {
-              id: "vitals",
-              label: "Vitals",
-              icon: <LineChartIcon size={16} />,
-            },
+            { id: "vitals", label: "Vitals", icon: <LineChartIcon size={16} /> },
             { id: "labs", label: "Laboratory", icon: <Lab size={16} /> },
             { id: "medications", label: "Meds", icon: <Pill size={16} /> },
             { id: "allergies", label: "Allergies", icon: <Brain size={16} /> },
-            {
-              id: "immunizations",
-              label: "Vaccines",
-              icon: <Syringe size={16} />,
-            },
-          ].map((tab) => (
-            <Button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              variant={activeTab === tab.id ? "primary" : "ghost"}
-              className={`flex items-center gap-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all border-none ${
-                activeTab === tab.id
-                  ? ""
-                  : "text-slate-500 bg-slate-300 cursor-pointer hover:border-primary/30 hover:text-primary"
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </Button>
-          ))}
-        </div>
-      </Card>
+            { id: "immunizations", label: "Vaccines", icon: <Syringe size={16} /> },
+          ]}
+          className="border-b-0"
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: Records Content */}
@@ -336,7 +304,7 @@ export default function HealthRecordPage() {
           <div className="mt-2 text-slate-800">
             {loadingRecords ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <BiLoaderAlt className="animate-spin text-primary" size={40} />
+                <Loader2 className="animate-spin text-primary" size={40} />
                 <p className="text-slate-500 font-bold">
                   Synchronizing medical records...
                 </p>
@@ -469,7 +437,7 @@ export default function HealthRecordPage() {
                     : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
                 }`}
               >
-                <BiStore size={24} />
+                <Store size={22} />
                 <span className="text-xs font-bold tracking-normal">
                   Pharmacy Pickup
                 </span>
@@ -490,7 +458,7 @@ export default function HealthRecordPage() {
                     : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
                 }`}
               >
-                <BiSolidTruck size={24} />
+                <Truck size={22} />
                 <span className="text-xs font-bold tracking-normal">
                   Courier Delivery
                 </span>
@@ -508,7 +476,7 @@ export default function HealthRecordPage() {
                     deliveryAddress: e.target.value,
                   }))
                 }
-                icon={<BiMap />}
+                icon={<MapPin size={16} />}
               />
             ) : (
               <Select
@@ -528,19 +496,16 @@ export default function HealthRecordPage() {
               />
             )}
 
-            <div className="space-y-2">
-              <h1 className="text-xs font-bold text-slate-500 tracking-normal">
-                Additional Notes
-              </h1>
-              <textarea
-                className="w-full h-24 p-4 rounded-lg border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white transition-all outline-none text-xs font-medium"
-                placeholder="Any special instructions for the pharmacist?"
-                value={refillForm.notes}
-                onChange={(e) =>
-                  setRefillForm((prev) => ({ ...prev, notes: e.target.value }))
-                }
-              />
-            </div>
+            <Input
+              isTextArea
+              rows={3}
+              label="Additional Notes"
+              placeholder="Any special instructions for the pharmacist?"
+              value={refillForm.notes}
+              onChange={(e) =>
+                setRefillForm((prev) => ({ ...prev, notes: e.target.value }))
+              }
+            />
           </div>
 
           <div className="flex gap-3">
@@ -575,64 +540,44 @@ export default function HealthRecordPage() {
           }}
           className="space-y-5"
         >
-          <div className="bg-rose-50 border border-rose-100 rounded-lg p-4 text-xs text-rose-700 leading-relaxed">
-            <strong>Important:</strong> Please provide accurate details about
-            your allergy. This will be immediately visible to any practitioner
-            treating you.
-          </div>
+          <Alert status="warning" title="Important">
+            Please provide accurate details about your allergy. This will be
+            immediately visible to any practitioner treating you.
+          </Alert>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Allergen (e.g. Penicillin, Peanuts)
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="What are you allergic to?"
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
-                value={allergyForm.allergen}
-                onChange={(e) =>
-                  setAllergyForm({ ...allergyForm, allergen: e.target.value })
-                }
-              />
-            </div>
+            <Input
+              label="Allergen (e.g. Penicillin, Peanuts)"
+              required
+              placeholder="What are you allergic to?"
+              value={allergyForm.allergen}
+              onChange={(e) =>
+                setAllergyForm({ ...allergyForm, allergen: e.target.value })
+              }
+            />
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Severity
-                </label>
-                <select
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
-                  value={allergyForm.severity}
-                  onChange={(e) =>
-                    setAllergyForm({
-                      ...allergyForm,
-                      severity: e.target.value as any,
-                    })
-                  }
-                >
-                  <option value="mild">Mild</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="severe">Severe / Critical</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Reaction Type
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Rash, Swelling"
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
-                  value={allergyForm.reaction}
-                  onChange={(e) =>
-                    setAllergyForm({ ...allergyForm, reaction: e.target.value })
-                  }
-                />
-              </div>
+              <Select
+                label="Severity"
+                value={allergyForm.severity}
+                onChange={(v) =>
+                  setAllergyForm({ ...allergyForm, severity: v as any })
+                }
+                options={[
+                  { value: "mild", label: "Mild" },
+                  { value: "moderate", label: "Moderate" },
+                  { value: "severe", label: "Severe / Critical" },
+                ]}
+              />
+              <Input
+                label="Reaction Type"
+                required
+                placeholder="e.g. Rash, Swelling"
+                value={allergyForm.reaction}
+                onChange={(e) =>
+                  setAllergyForm({ ...allergyForm, reaction: e.target.value })
+                }
+              />
             </div>
           </div>
 
@@ -648,17 +593,14 @@ export default function HealthRecordPage() {
             <Button
               type="submit"
               fullWidth
+              loading={isSavingAllergy}
               disabled={
                 isSavingAllergy ||
                 !allergyForm.allergen ||
                 !allergyForm.reaction
               }
             >
-              {isSavingAllergy ? (
-                <BiLoaderAlt className="animate-spin" />
-              ) : (
-                "Save Allergy"
-              )}
+              Save Allergy
             </Button>
           </div>
         </form>

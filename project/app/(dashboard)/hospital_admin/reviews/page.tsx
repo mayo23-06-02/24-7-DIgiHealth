@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
+import type { BadgeStatus } from "@/components/ui/Badge";
 import { BiStar, BiLoaderAlt, BiUser, BiCheck, BiTrash } from "react-icons/bi";
 
 interface Review {
@@ -51,14 +53,11 @@ export default function HospitalReviewsPage() {
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : "—";
 
-  function badge(status: string) {
-    const map: Record<string, string> = {
-      pending: "bg-gray-50 text-gray-600 border-gray-200",
-      approved: "bg-emerald-50 text-emerald-600 border-emerald-200",
-      rejected: "bg-rose-50 text-rose-600 border-rose-200",
-    };
-    return map[status] || "";
-  }
+  const reviewStatusMap: Record<string, BadgeStatus> = {
+    pending: "neutral",
+    approved: "success",
+    rejected: "error",
+  };
 
   if (loading)
     return (
@@ -129,11 +128,12 @@ export default function HospitalReviewsPage() {
                     </p>
                   </div>
                 </div>
-                <span
-                  className={`text-xs font-bold px-2 py-1 rounded-lg border capitalize ${badge(rev.status)}`}
-                >
-                  {rev.status}
-                </span>
+                <Badge
+                  label={rev.status}
+                  status={reviewStatusMap[rev.status] ?? "neutral"}
+                  size="sm"
+                  className="capitalize"
+                />
               </div>
               <StarRating rating={rev.rating} />
               <p className="text-sm text-slate-600 leading-relaxed">

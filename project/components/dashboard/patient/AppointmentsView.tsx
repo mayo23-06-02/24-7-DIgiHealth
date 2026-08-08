@@ -707,7 +707,7 @@ const AppointmentsView: React.FC = () => {
               return (
                 <Card
                   key={appt.id}
-                  className="p-4 border border-slate-100 rounded-lg hover:shadow-md transition-shadow"
+                  className="p-4 border border-slate-100 rounded-lg hover: transition-shadow"
                 >
                   <div className="flex items-start gap-4">
                     <Avatar

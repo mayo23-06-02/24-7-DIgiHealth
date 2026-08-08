@@ -417,7 +417,7 @@ export default function HospitalReportsPage() {
             onClick={() => setType(rt.id)}
             className={`p-3 rounded-lg border text-left transition-all ${
               type === rt.id
-                ? "border-primary bg-primary/5 shadow-sm"
+                ? "border-primary bg-primary/5 "
                 : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >

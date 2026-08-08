@@ -17,7 +17,7 @@ export default function FacilityBanner({
   return (
     <Card
       noPadding
-      className="!rounded-lg overflow-hidden !border-0 bg-linear-to-br from-[#1a4d66] via-primary to-[#53CBF3] text-white shadow-lg shadow-primary/20"
+      className="!rounded-lg overflow-hidden !border-0 bg-linear-to-br from-[#1a4d66] via-primary to-[#53CBF3] text-white  shadow-primary/20"
     >
       <div className="p-5 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         <div className="min-w-0">
@@ -46,8 +46,8 @@ export default function FacilityBanner({
               dot
               className={
                 facility.isOpen
-                  ? "!bg-emerald-500/30 !text-white border-0"
-                  : "!bg-rose-500/30 !text-white border-0"
+                  ? "!bg-success-500/30 !text-white border-0"
+                  : "!bg-danger-500/30 !text-white border-0"
               }
             />
             {facility.emergencyServices && (

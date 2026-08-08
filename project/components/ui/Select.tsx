@@ -1,17 +1,16 @@
 import React from "react";
-import { BiChevronDown } from "react-icons/bi";
+import { ChevronDown } from "lucide-react";
 
 export interface SelectOption {
   value: string;
   label: string;
 }
 
-interface SelectProps extends Omit<
-  React.SelectHTMLAttributes<HTMLSelectElement>,
-  "onChange"
-> {
+interface SelectProps
+  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "onChange"> {
   label?: string;
   error?: string;
+  helperText?: string;
   options: SelectOption[];
   fullWidth?: boolean;
   value?: string;
@@ -22,6 +21,7 @@ interface SelectProps extends Omit<
 const Select: React.FC<SelectProps> = ({
   label,
   error,
+  helperText,
   options,
   fullWidth = true,
   className = "",
@@ -33,25 +33,25 @@ const Select: React.FC<SelectProps> = ({
 }) => {
   const containerStyle = fullWidth ? "w-full" : "w-auto";
   const commonStyles = `
-    w-full bg-slate-50 rounded-full outline-none appearance-none
-    focus:ring-4 focus:ring-primary/10 focus:border-primary 
-    transition-all text-slate-900 placeholder-slate-400 border border-slate-300
-    ${error ? "border-red-400 bg-red-50 text-red-900" : ""}
-    ${icon ? "pl-14 pr-12" : "px-6 pr-12"}
+    w-full h-11 bg-white rounded-lg outline-none appearance-none border
+    focus:ring-4 focus:ring-primary/10 focus:border-primary
+    transition-all text-ink-900
+    ${error ? "border-danger-500 bg-danger-50" : "border-slate-200 hover:border-slate-300"}
+    ${icon ? "pl-11 pr-10" : "px-4 pr-10"}
     ${className}
   `;
 
   return (
-    <div className={`space-y-2 ${containerStyle}`}>
+    <div className={`space-y-1.5 ${containerStyle}`}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-bold text-slate-500 ">
+        <label htmlFor={id} className="block text-sm font-semibold text-ink-600">
           {label}
         </label>
       )}
 
       <div className="relative">
         {icon && (
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 z-10">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10 [&>svg]:w-[18px] [&>svg]:h-[18px]">
             {icon}
           </div>
         )}
@@ -60,7 +60,8 @@ const Select: React.FC<SelectProps> = ({
           id={id}
           value={value}
           onChange={(e) => onChange && onChange(e.target.value)}
-          className={`${commonStyles} py-3 cursor-pointer`}
+          className={`${commonStyles} cursor-pointer`}
+          aria-invalid={!!error}
           {...props}
         >
           {options.map((opt) => (
@@ -70,16 +71,18 @@ const Select: React.FC<SelectProps> = ({
           ))}
         </select>
 
-        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
-          <BiChevronDown size={24} />
+        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+          <ChevronDown size={18} />
         </div>
       </div>
 
-      {error && (
-        <p className="mt-1.5 text-xs font-bold text-red-500 animate-in fade-in slide-in-from-top-1">
+      {error ? (
+        <p role="alert" className="text-xs font-medium text-danger-700">
           {error}
         </p>
-      )}
+      ) : helperText ? (
+        <p className="text-xs text-slate-500">{helperText}</p>
+      ) : null}
     </div>
   );
 };

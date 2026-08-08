@@ -150,7 +150,7 @@ export default function Header({
           >
             <MessageSquare size={18} />
             {badgeText && (
-              <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 bg-danger-500 rounded-full flex items-center justify-center shadow-sm">
+              <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 bg-danger-500 rounded-full flex items-center justify-center ">
                 <span className="text-[9px] leading-none text-white font-bold tabular-nums">
                   {badgeText}
                 </span>

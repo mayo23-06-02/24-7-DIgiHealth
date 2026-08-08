@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import KPICard from "@/components/ui/KPICard";
+import Badge from "@/components/ui/Badge";
+import type { BadgeStatus } from "@/components/ui/Badge";
 import {
   BiDollarCircle,
   BiTime,
@@ -88,13 +90,10 @@ export default function BillingPage() {
     }
   };
 
-  const statusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      pending: "bg-gray-50 text-gray-700 border-gray-200",
-      refunded: "bg-slate-100 text-slate-600 border-slate-200",
-    };
-    return `px-2 py-1 rounded-lg text-xs font-bold  tracking-wider border ${styles[status] || styles.pending}`;
+  const billingStatusMap: Record<string, BadgeStatus> = {
+    paid: "success",
+    pending: "warning",
+    refunded: "neutral",
   };
 
   return (
@@ -262,7 +261,12 @@ export default function BillingPage() {
                       R {t.amount.toLocaleString()}
                     </td>
                     <td className="py-4 px-5">
-                      <span className={statusBadge(t.status)}>{t.status}</span>
+                      <Badge
+                        label={t.status}
+                        status={billingStatusMap[t.status] ?? "neutral"}
+                        size="sm"
+                        className="capitalize"
+                      />
                     </td>
                     <td className="py-4 px-5 text-xs text-slate-500 capitalize">
                       {t.paymentMethod?.replace("_", " ")}

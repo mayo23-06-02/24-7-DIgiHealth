@@ -1,5 +1,5 @@
 import React from "react";
-import Modal from "@/components/ui/Modal";
+import Dialog from "@/components/ui/Dialog";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 
@@ -17,7 +17,7 @@ export default function DoctorsSortModal({
   setSortBy,
 }: DoctorsSortModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Sort Practitioners">
+    <Dialog isOpen={isOpen} onClose={onClose} title="Sort Practitioners" size="sm">
       <div className="space-y-6">
         <Select
           label="Sort By"
@@ -34,6 +34,6 @@ export default function DoctorsSortModal({
           </Button>
         </div>
       </div>
-    </Modal>
+    </Dialog>
   );
 }

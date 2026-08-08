@@ -3,6 +3,7 @@
 import React from "react";
 import { Download, Pill } from "lucide-react";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
 import { formatHealthDate, type Medication } from "./types";
 
 interface MedicationsTabProps {
@@ -33,15 +34,11 @@ export default function MedicationsTab({
             <div className="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center text-supportive-teal">
               <Pill size={24} />
             </div>
-            <span
-              className={`text-xs font-bold px-3 py-1 rounded-full tracking-tighter ${
-                med.status === "active"
-                  ? "bg-teal-100 text-teal-700"
-                  : "bg-slate-100 text-slate-600"
-              }`}
-            >
-              {med.status}
-            </span>
+            <Badge
+              label={med.status}
+              status={med.status === "active" ? "success" : "neutral"}
+              size="sm"
+            />
           </div>
           <h3 className="text-lg font-bold text-slate-800 font-grotesk">
             {med.name}

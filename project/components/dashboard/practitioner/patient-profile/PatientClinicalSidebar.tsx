@@ -2,6 +2,7 @@
 
 import React from "react";
 import Card from "@/components/ui/Card";
+import Badge, { type BadgeStatus } from "@/components/ui/Badge";
 import {
   BiCapsule,
   BiCheckShield,
@@ -18,6 +19,12 @@ interface PatientClinicalSidebarProps {
   onSyncRecords: () => void;
   onIssuePrescription: () => void;
 }
+
+const prescriptionStatusMap: Record<string, BadgeStatus> = {
+  active: "success",
+  completed: "neutral",
+  discontinued: "error",
+};
 
 export default function PatientClinicalSidebar({
   patient,
@@ -129,9 +136,7 @@ export default function PatientClinicalSidebar({
                 </span>
               ))}
               {patient.allergies.length === 0 && (
-                <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
-                  <BiCheckShield size={12} /> NO KNOWN ALLERGIES
-                </div>
+                <Badge label="NO KNOWN ALLERGIES" status="success" size="sm" dot />
               )}
             </div>
           </div>
@@ -149,7 +154,7 @@ export default function PatientClinicalSidebar({
               <button
                 type="button"
                 onClick={onIssuePrescription}
-                className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-110 transition-all shadow-sm"
+                className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-110 transition-all "
                 title="Issue New Prescription"
               >
                 <BiPlus size={16} />
@@ -167,15 +172,11 @@ export default function PatientClinicalSidebar({
                       <h3 className="text-sm font-bold text-slate-700">
                         {p.medicationName}
                       </h3>
-                      <span
-                        className={`text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${
-                          p.status === "active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {p.status}
-                      </span>
+                      <Badge
+                        label={p.status}
+                        status={prescriptionStatusMap[p.status] ?? "neutral"}
+                        size="sm"
+                      />
                     </div>
                     <p className="text-sm text-slate-500 font-medium mb-2">
                       {p.dosage}

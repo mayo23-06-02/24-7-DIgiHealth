@@ -34,7 +34,7 @@ export default function ProfileNavigation({
 
   return (
     <section className="sticky top-0 z-20 -mx-1 px-1">
-      <div className="rounded-lg border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-sm shadow-slate-200/40 p-1.5">
+      <div className="rounded-lg border border-slate-200/80 bg-white/90 backdrop-blur-xl  shadow-slate-200/40 p-1.5">
         <div
           ref={scrollerRef}
           className="flex gap-1 overflow-x-auto scrollbar-none"
@@ -57,7 +57,7 @@ export default function ProfileNavigation({
                   text-sm font-bold whitespace-nowrap transition-all duration-200 shrink-0
                   ${
                     active
-                      ? "bg-primary text-white shadow-md shadow-primary/25"
+                      ? "bg-primary text-white  shadow-primary/25"
                       : "text-slate-500 hover:text-primary hover:bg-slate-50"
                   }
                 `}

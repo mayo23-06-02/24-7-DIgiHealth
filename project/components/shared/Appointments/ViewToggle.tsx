@@ -18,7 +18,7 @@ export default function ViewToggle({ view, onChange }: Props) {
         aria-pressed={view === "list"}
         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors ${
           view === "list"
-            ? "bg-white text-primary shadow-sm"
+            ? "bg-white text-primary "
             : "text-slate-500 hover:text-slate-700"
         }`}
       >
@@ -31,7 +31,7 @@ export default function ViewToggle({ view, onChange }: Props) {
         aria-pressed={view === "calendar"}
         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors ${
           view === "calendar"
-            ? "bg-white text-primary shadow-sm"
+            ? "bg-white text-primary "
             : "text-slate-500 hover:text-slate-700"
         }`}
       >

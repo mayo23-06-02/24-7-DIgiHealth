@@ -13,12 +13,13 @@ import {
   BiReceipt,
 } from "react-icons/bi";
 import Avatar from "@/components/ui/Avatar";
+import Badge, { type BadgeStatus } from "@/components/ui/Badge";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
-const STATUS_BADGE: Record<string, string> = {
-  paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  pending: "bg-gray-50 text-gray-700 border-gray-200",
-  failed: "bg-rose-50 text-rose-600 border-rose-200",
+const STATUS_BADGE: Record<string, BadgeStatus> = {
+  paid: "success",
+  pending: "neutral",
+  failed: "error",
 };
 
 export default function PractitionerBillingPage() {
@@ -250,11 +251,11 @@ export default function PractitionerBillingPage() {
                       R {(t.amount || 0).toLocaleString()}
                     </td>
                     <td className="py-4 px-5">
-                      <span
-                        className={`text-xs font-bold  tracking-wider px-2 py-1 rounded-lg border ${STATUS_BADGE[t.status] || STATUS_BADGE.pending}`}
-                      >
-                        {t.status || "pending"}
-                      </span>
+                      <Badge
+                        label={t.status || "pending"}
+                        status={STATUS_BADGE[t.status] || STATUS_BADGE.pending}
+                        size="sm"
+                      />
                     </td>
                     <td className="py-4 px-5 text-right">
                       <button

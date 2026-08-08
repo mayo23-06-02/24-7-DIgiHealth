@@ -34,13 +34,13 @@ const tabConfig: Record<
     badgeText: string;
   }
 > = {
-  all: { label: "All", badgeBg: "bg-primary-50", badgeText: "text-primary" },
-  requests: { label: "Requests", badgeBg: "bg-warning-50", badgeText: "text-warning-700" },
-  upcoming: { label: "Upcoming", badgeBg: "bg-primary-50", badgeText: "text-primary" },
-  ongoing: { label: "Ongoing", badgeBg: "bg-success-50", badgeText: "text-success-700" },
-  past: { label: "Completed", badgeBg: "bg-info-50", badgeText: "text-info-700" },
-  missed: { label: "Missed", badgeBg: "bg-warning-50", badgeText: "text-warning-700" },
-  cancelled: { label: "Cancelled", badgeBg: "bg-danger-50", badgeText: "text-danger-700" },
+  all: { label: "All", badgeBg: "bg-primary", badgeText: "text-white" },
+  requests: { label: "Requests", badgeBg: "bg-warning-500", badgeText: "text-warning-50" },
+  upcoming: { label: "Upcoming", badgeBg: "bg-primary", badgeText: "text-white" },
+  ongoing: { label: "Ongoing", badgeBg: "bg-success-500", badgeText: "text-success-50" },
+  past: { label: "Completed", badgeBg: "bg-info-500", badgeText: "text-info-50" },
+  missed: { label: "Missed", badgeBg: "bg-warning-500", badgeText: "text-warning-50" },
+  cancelled: { label: "Cancelled", badgeBg: "bg-danger-500", badgeText: "text-danger-50" },
 };
 
 interface AppointmentTabsProps {

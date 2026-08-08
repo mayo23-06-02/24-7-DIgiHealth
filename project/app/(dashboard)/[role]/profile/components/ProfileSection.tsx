@@ -83,7 +83,7 @@ export default function ProfileSection({
 
   return (
     <section
-      className={`rounded-lg border border-slate-200/80 bg-white shadow-sm shadow-slate-200/40 overflow-hidden ${className}`}
+      className={`rounded-lg border border-slate-200/80 bg-white  shadow-slate-200/40 overflow-hidden ${className}`}
     >
       <div className="px-5 sm:px-7 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white">
         <ProfileSectionHead

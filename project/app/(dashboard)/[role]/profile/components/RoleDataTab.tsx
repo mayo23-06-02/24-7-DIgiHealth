@@ -111,7 +111,7 @@ export default function RoleDataTab({
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-200/80 bg-white px-5 py-4 ">
         <p className="text-xs text-slate-500">
           Save updates to keep your{" "}
           {currentRole === "patient"

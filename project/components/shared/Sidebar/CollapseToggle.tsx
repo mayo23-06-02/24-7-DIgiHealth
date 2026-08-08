@@ -12,7 +12,7 @@ export default function CollapseToggle({ isCollapsed, onClick }: CollapseToggleP
   return (
     <button
       onClick={onClick}
-      className="absolute -right-3 top-8 hidden lg:flex w-6 h-6 rounded-md bg-surface border border-border items-center justify-center text-ink-500 hover:text-primary hover:bg-primary/5 transition-all z-50 shadow-sm"
+      className="absolute -right-3 top-8 hidden lg:flex w-6 h-6 rounded-md bg-surface border border-border items-center justify-center text-ink-500 hover:text-primary hover:bg-primary/5 transition-all z-50 "
       aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
     >
       {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}

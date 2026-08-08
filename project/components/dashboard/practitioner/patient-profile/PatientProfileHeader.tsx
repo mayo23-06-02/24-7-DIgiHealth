@@ -113,7 +113,7 @@ export default function PatientProfileHeader({
           {menuOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 animate-in fade-in zoom-in-95 duration-150"
+              className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-lg  z-50 py-1 animate-in fade-in zoom-in-95 duration-150"
             >
               <button
                 type="button"

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
 import { formatHealthDate, type TimelineEvent } from "./types";
 
 interface TimelineTabProps {
@@ -63,11 +64,11 @@ export default function TimelineTab({
             <p className="text-primary w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center">
               {getIcon(event.type)}
             </p>
-            <div className="bg-slate-100 px-3 py-1 rounded-full text-slate-500">
-              <p className="whitespace-nowrap font-bold text-xs tracking-normal">
-                {event.type.replace("_", " ")}
-              </p>
-            </div>
+            <Badge
+              label={event.type.replace("_", " ")}
+              status="neutral"
+              size="sm"
+            />
           </div>
           <div className="bg-white border border-slate-200 rounded-lg pl-12 pr-6 pt-8 pb-6 hover:border-primary/20 transition-all">
             <div className="flex justify-end items-start mb-2">

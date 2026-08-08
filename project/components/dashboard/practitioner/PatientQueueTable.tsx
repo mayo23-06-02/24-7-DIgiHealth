@@ -18,6 +18,7 @@ import SoapNoteModal from "./SoapNoteModal";
 import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import Badge, { type BadgeStatus } from "@/components/ui/Badge";
 
 interface QueueItem {
   consultationId: string;
@@ -59,14 +60,11 @@ const typeLabel = (type: string) => {
   return "Video";
 };
 
-const statusConfig: Record<
-  string,
-  { bg: string; text: string; label: string }
-> = {
-  requested: { bg: "bg-gray-100", text: "text-gray-700", label: "Requested" },
-  scheduled: { bg: "bg-slate-100", text: "text-slate-600", label: "Scheduled" },
-  ongoing: { bg: "bg-emerald-100", text: "text-emerald-700", label: "● Live" },
-  cancelled: { bg: "bg-red-100", text: "text-red-600", label: "Cancelled" },
+const statusConfig: Record<string, { status: BadgeStatus; label: string }> = {
+  requested: { status: "neutral", label: "Requested" },
+  scheduled: { status: "neutral", label: "Scheduled" },
+  ongoing: { status: "success", label: "● Live" },
+  cancelled: { status: "error", label: "Cancelled" },
 };
 
 const MOCK_QUEUE: QueueItem[] = [
@@ -337,11 +335,12 @@ export default function PatientQueueTable() {
                       <p className="text-sm font-bold text-slate-800 truncate">
                         {item.patientName}
                       </p>
-                      <span
-                        className={`text-[9px] px-2 py-1 rounded-full font-bold  tracking-normal shrink-0 ${sc.bg} ${sc.text}`}
-                      >
-                        {sc.label}
-                      </span>
+                      <Badge
+                        label={sc.label}
+                        status={sc.status}
+                        size="sm"
+                        className="shrink-0"
+                      />
                     </div>
                     <div className="flex items-center gap-3 mt-1.5">
                       <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500  tracking-normal">

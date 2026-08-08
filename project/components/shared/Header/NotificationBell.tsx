@@ -163,7 +163,7 @@ export default function NotificationBell({
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 bg-danger-500 rounded-full flex items-center justify-center shadow-sm">
+          <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 bg-danger-500 rounded-full flex items-center justify-center ">
             <span className="text-[9px] leading-none text-white font-bold tabular-nums">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
@@ -172,7 +172,7 @@ export default function NotificationBell({
       </button>
 
       {isOpen && (
-        <div className="absolute top-12 right-0 sm:right-0 sm:-right-0 w-[95vw] sm:w-96 bg-surface border border-border rounded-lg shadow-lg p-4 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 z-50 max-h-[600px] flex flex-col">
+        <div className="absolute top-12 right-0 sm:right-0 sm:-right-0 w-[95vw] sm:w-96 bg-surface border border-border rounded-lg  p-4 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 z-50 max-h-[600px] flex flex-col">
           {!isDetailOpen ? (
             <>
               <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">

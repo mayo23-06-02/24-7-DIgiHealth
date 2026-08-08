@@ -466,7 +466,7 @@ export default function StaffManagement() {
               {showDoctorDropdown &&
                 doctorResults.length > 0 &&
                 !selectedDoctor && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-lg  z-50 max-h-48 overflow-y-auto">
                     {doctorResults.map((dr) => (
                       <button
                         key={dr._id}

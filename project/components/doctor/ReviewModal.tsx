@@ -133,7 +133,7 @@ export default function ReviewModal({
             Cancel
           </Button>
           <Button
-            className="flex-[2] rounded-lg h-12 bg-primary shadow-lg shadow-primary/20"
+            className="flex-[2] rounded-lg h-12 bg-primary  shadow-primary/20"
             onClick={handleSubmit}
             disabled={submitting}
             icon={submitting ? <BiLoaderAlt className="animate-spin" /> : <BiSend />}

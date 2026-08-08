@@ -5,7 +5,7 @@ import { useNavigate } from "@/hooks/useNavigate";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import Card from "@/components/ui/Card";
-import { BiSearch, BiLoaderAlt } from "react-icons/bi";
+import { Search, Loader2 } from "lucide-react";
 import DoctorProfileModal from "@/components/dashboard/patient/DoctorProfileModal";
 import BookingModal from "@/components/doctor/BookingModal";
 import DoctorsSearchHeader from "./DoctorsSearchHeader";
@@ -109,10 +109,10 @@ export default function DoctorsViewRefactored() {
       />
 
       {isLoading ? (
-        <div className="flex justify-center py-20"><BiLoaderAlt size={40} className="text-primary animate-spin" /></div>
+        <div className="flex justify-center py-20"><Loader2 size={40} className="text-primary animate-spin" /></div>
       ) : filteredDoctors.length === 0 ? (
         <Card>
-          <EmptyState title="No Practitioners Found" description="Try adjusting your search or filters." icon={<BiSearch size={32} />} actionLabel="Clear Filters" onAction={() => { setSearchQuery(""); setFilters({ specialization: "", language: "", location: "" }); }} />
+          <EmptyState title="No Practitioners Found" description="Try adjusting your search or filters." icon={<Search size={32} />} actionLabel="Clear Filters" onAction={() => { setSearchQuery(""); setFilters({ specialization: "", language: "", location: "" }); }} />
         </Card>
       ) : (
         <div className="space-y-12">

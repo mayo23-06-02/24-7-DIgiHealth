@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import { PendingRequest } from "./types";
 import AppointmentDetailsModal from "@/components/shared/Appointments/AppointmentDetailsModal";
 import BookingModal from "@/components/doctor/BookingModal";
+import Badge from "@/components/ui/Badge";
 
 interface PendingRequestsProps {
   requests: PendingRequest[];
@@ -123,7 +124,7 @@ export default function PendingRequests({
           return (
             <div
               key={req.consultationId}
-              className="p-4 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-1"
+              className="p-4 rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover: transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-1"
               role="button"
               tabIndex={0}
               onClick={() => handleCardClick(req)}
@@ -138,14 +139,10 @@ export default function PendingRequests({
                       {req.patientName}
                     </h4>
                     {isNew && (
-                      <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-full font-bold uppercase tracking-wider">
-                        New
-                      </span>
+                      <Badge label="New" status="info" size="sm" />
                     )}
                     {req.canAccept === false && (
-                      <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                        Awaiting patient
-                      </span>
+                      <Badge label="Awaiting patient" status="neutral" size="sm" />
                     )}
                   </div>
                   <p className="text-xs font-medium text-slate-500 mb-1">

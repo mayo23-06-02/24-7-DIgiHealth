@@ -43,7 +43,7 @@ export default function ProfileSidebar({
   return (
     <aside className="xl:col-span-4 space-y-5">
       {/* Completeness */}
-      <div className="rounded-lg border border-slate-200/80 bg-white shadow-sm shadow-slate-200/40 overflow-hidden sticky top-20">
+      <div className="rounded-lg border border-slate-200/80 bg-white  shadow-slate-200/40 overflow-hidden sticky top-20">
         <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
           <div className="flex items-center justify-between">
             <div>
@@ -187,7 +187,7 @@ export default function ProfileSidebar({
       </div>
 
       {/* Support */}
-      <div className="rounded-lg overflow-hidden bg-gradient-to-br from-[#1a4d66] via-primary to-[#53CBF3] p-6 text-white shadow-lg shadow-primary/20">
+      <div className="rounded-lg overflow-hidden bg-gradient-to-br from-[#1a4d66] via-primary to-[#53CBF3] p-6 text-white  shadow-primary/20">
         <div className="w-11 h-11 rounded-lg bg-white/15 backdrop-blur flex items-center justify-center mb-4">
           <BiSupport size={22} />
         </div>

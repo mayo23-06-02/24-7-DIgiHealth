@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { Eye, EyeOff } from "lucide-react";
 
-interface InputProps extends React.InputHTMLAttributes<
-  HTMLInputElement | HTMLTextAreaElement
-> {
+interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
   label?: string;
   error?: string;
+  helperText?: string;
   isTextArea?: boolean;
   textarea?: boolean;
   rows?: number;
@@ -13,9 +13,15 @@ interface InputProps extends React.InputHTMLAttributes<
   icon?: React.ReactNode; // placed on the left side
 }
 
+/**
+ * Single form-field contract for the whole product (see design.md §3.2):
+ * rounded-lg bordered field, visible label, one error style. Every hand-rolled
+ * `<input className="border ...">` elsewhere should migrate to this.
+ */
 const Input: React.FC<InputProps> = ({
   label,
   error,
+  helperText,
   isTextArea = false,
   textarea = false,
   rows = 3,
@@ -33,39 +39,35 @@ const Input: React.FC<InputProps> = ({
 
   const containerStyle = fullWidth ? "w-full" : "w-auto";
 
-  // Compute padding classes
-  let paddingClass = "px-6";
-  if (icon) paddingClass = "pl-12 pr-6"; // icon on left
-  if (isPassword) paddingClass = "px-6 pr-12"; // eye toggle on right
+  let paddingClass = "px-4";
+  if (icon) paddingClass = "pl-11 pr-4";
+  if (isPassword) paddingClass = "px-4 pr-11";
 
   const commonStyles = `
-    w-full bg-slate-50  outline-none  
-    transition-all text-slate-900 placeholder-slate-500
-    ${error ? "border-red-400 bg-red-50 border" : "border border-slate-200 bg-slate-50"}
+    w-full bg-white rounded-lg outline-none border
+    transition-all text-ink-900 placeholder-slate-400
+    focus:ring-4 focus:ring-primary/10 focus:border-primary
+    ${error ? "border-danger-500 bg-danger-50" : "border-slate-200 hover:border-slate-300"}
     ${paddingClass}
     ${className}
-    ${textarea ? "rounded-lg" : "rounded-full"}
   `;
 
   const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
-  const handleTogglePassword = () => setShowPassword(!showPassword);
-
   return (
-    <div className={`space-y-2 ${containerStyle}`}>
+    <div className={`space-y-1.5 ${containerStyle}`}>
       {label && (
         <label
           htmlFor={id}
-          className="block text-slate-500 font-bold text-sm tracking-wide"
+          className="block text-ink-600 font-semibold text-sm tracking-wide"
         >
           {label}
         </label>
       )}
 
       <div className="relative">
-        {/* Left icon */}
         {icon && (
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10 [&>svg]:w-[18px] [&>svg]:h-[18px]">
             {icon}
           </div>
         )}
@@ -74,36 +76,40 @@ const Input: React.FC<InputProps> = ({
           <textarea
             id={id}
             rows={rows}
-            className={`${commonStyles} pt-4 py-4 resize-none`}
+            className={`${commonStyles} py-3 resize-none`}
+            aria-invalid={!!error}
             {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
           />
         ) : (
           <input
             id={id}
             type={inputType}
-            className={`${commonStyles} p-2 md:py-4`}
+            className={`${commonStyles} h-11`}
+            aria-invalid={!!error}
             {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
           />
         )}
 
-        {/* Password toggle */}
         {isPassword && (
           <button
             type="button"
-            onClick={handleTogglePassword}
-            className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
             tabIndex={-1}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         )}
       </div>
 
-      {error && (
-        <p className="mt-1.5 text-xs text-red-500 animate-in fade-in slide-in-from-top-1">
+      {error ? (
+        <p role="alert" className="text-xs font-medium text-danger-700">
           {error}
         </p>
-      )}
+      ) : helperText ? (
+        <p className="text-xs text-slate-500">{helperText}</p>
+      ) : null}
     </div>
   );
 };

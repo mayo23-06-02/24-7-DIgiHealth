@@ -1,6 +1,6 @@
 import React from "react";
 import Input from "@/components/ui/Input";
-import { BiSearch, BiFilterAlt, BiSortAlt2 } from "react-icons/bi";
+import { Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 
 interface DoctorsSearchHeaderProps {
   searchQuery: string;
@@ -23,7 +23,7 @@ export default function DoctorsSearchHeader({
         <Input
           type="text"
           placeholder="Search doctors, specializations, or conditions..."
-          icon={<BiSearch size={24} />}
+          icon={<Search size={18} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -31,20 +31,20 @@ export default function DoctorsSearchHeader({
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={onOpenFilter}
-          className={`p-3 rounded-full transition-colors relative ${hasActiveFilters ? "bg-primary text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
-          title="Filter"
+          aria-label="Filter"
+          className={`relative flex items-center justify-center w-11 h-11 rounded-lg transition-colors ${hasActiveFilters ? "bg-primary text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
         >
-          <BiFilterAlt size={24} />
+          <SlidersHorizontal size={18} />
           {hasActiveFilters && (
-            <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-danger-500 rounded-full border-2 border-white" />
           )}
         </button>
         <button
           onClick={onOpenSort}
-          className="p-3 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-          title="Sort"
+          aria-label="Sort"
+          className="flex items-center justify-center w-11 h-11 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
         >
-          <BiSortAlt2 size={24} />
+          <ArrowUpDown size={18} />
         </button>
       </div>
     </div>

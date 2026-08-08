@@ -11,9 +11,9 @@ const STATUS_STYLES: Record<
 > = {
   available: {
     idle:
-      "border-slate-200 bg-white text-slate-700 hover:border-primary/40 hover:bg-primary/5 hover:text-primary shadow-sm",
+      "border-slate-200 bg-white text-slate-700 hover:border-primary/40 hover:bg-primary/5 hover:text-primary ",
     selected:
-      "border-primary bg-primary text-white shadow-md shadow-primary/25 ring-2 ring-primary/20",
+      "border-primary bg-primary text-white  shadow-primary/25 ring-2 ring-primary/20",
     cursor: "cursor-pointer",
   },
   past: {

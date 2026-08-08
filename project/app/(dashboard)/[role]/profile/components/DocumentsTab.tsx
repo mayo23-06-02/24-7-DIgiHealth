@@ -264,7 +264,7 @@ export default function DocumentsTab({
           dragOver
             ? "border-primary bg-primary/5 scale-[1.01]"
             : "border-slate-200 bg-white"
-        } shadow-sm shadow-slate-200/40 overflow-hidden`}
+        }  shadow-slate-200/40 overflow-hidden`}
       >
         <div className="px-5 sm:px-7 py-6 sm:py-8">
           <div className="flex flex-col items-center text-center max-w-lg mx-auto">
@@ -345,7 +345,7 @@ export default function DocumentsTab({
 
       {/* Upload queue: per-file progress + success/error */}
       {uploadQueue.length > 0 && (
-        <div className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden divide-y divide-slate-100">
+        <div className="rounded-lg border border-slate-200/80 bg-white  overflow-hidden divide-y divide-slate-100">
           {uploadQueue.map((item) => (
             <div key={item.id} className="flex items-center gap-3 px-4 py-3">
               <div
@@ -417,7 +417,7 @@ export default function DocumentsTab({
       )}
 
       {/* Photos gallery */}
-      <section className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+      <section className="rounded-lg border border-slate-200/80 bg-white  overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center">
@@ -500,7 +500,7 @@ export default function DocumentsTab({
       </section>
 
       {/* Documents list */}
-      <section className="rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+      <section className="rounded-lg border border-slate-200/80 bg-white  overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
@@ -543,7 +543,7 @@ export default function DocumentsTab({
               {otherDocs.map((doc) => (
                 <Card
                   key={doc.id}
-                  className="group p-4 bg-white border-slate-200/80 shadow-sm hover:shadow-md hover:border-primary/20 transition-all !rounded-lg"
+                  className="group p-4 bg-white border-slate-200/80  hover: hover:border-primary/20 transition-all !rounded-lg"
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
@@ -673,7 +673,7 @@ export default function DocumentsTab({
                 <img
                   src={selectedDoc.url}
                   alt={selectedDoc.type}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md bg-white p-2"
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg  bg-white p-2"
                 />
               ) : selectedDoc.mimeType?.includes("pdf") ||
                 selectedDoc.url?.endsWith(".pdf") ? (

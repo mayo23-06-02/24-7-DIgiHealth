@@ -116,7 +116,7 @@ export default function AppointmentCard({
           if (onClick) onClick(appointment);
           else setShowDetails(true);
         }}
-        className={`relative flex items-center gap-4 p-2 border border-slate-100 rounded-lg bg-white hover:shadow-md transition-shadow cursor-pointer ${showMenu ? "z-50" : "z-0"} ${compact ? "py-3" : ""}`}
+        className={`relative flex items-center gap-4 p-2 border border-slate-100 rounded-lg bg-white hover: transition-shadow cursor-pointer ${showMenu ? "z-50" : "z-0"} ${compact ? "py-3" : ""}`}
       >
         <div className="flex items-center gap-4 min-w-0 flex-1 h-full">
           <div
@@ -160,17 +160,20 @@ export default function AppointmentCard({
 
         <div className="flex items-center gap-3 shrink-0 relative z-10">
           {appointment.pendingReschedule && (
-            <span
-              className={`hidden sm:inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+            <Badge
+              label={
                 appointment.pendingReschedule.proposedByMe
-                  ? "bg-slate-100 text-slate-500"
-                  : "bg-amber-100 text-amber-700"
-              }`}
-            >
-              {appointment.pendingReschedule.proposedByMe
-                ? "Reschedule sent"
-                : "New time proposed"}
-            </span>
+                  ? "Reschedule sent"
+                  : "New time proposed"
+              }
+              status={
+                appointment.pendingReschedule.proposedByMe
+                  ? "neutral"
+                  : "warning"
+              }
+              size="sm"
+              className="hidden sm:inline-flex uppercase"
+            />
           )}
           {showActions && (
             <div className="relative flex items-center">
@@ -209,7 +212,7 @@ export default function AppointmentCard({
                       setShowMenu(false);
                     }}
                   />
-                  <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-slate-100 z-50 py-1 flex flex-col overflow-hidden">
+                  <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg  border border-slate-100 z-50 py-1 flex flex-col overflow-hidden">
                     <button
                       className="w-full text-left px-4 p-2 text-sm hover:bg-slate-50 text-slate-700 font-medium border-b border-slate-50"
                       onClick={(e) => {

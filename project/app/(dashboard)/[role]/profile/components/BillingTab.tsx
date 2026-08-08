@@ -673,7 +673,7 @@ export default function BillingTab({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Consultations */}
-          <Card className="p-6 bg-white border border-slate-100 shadow-sm relative overflow-hidden">
+          <Card className="p-6 bg-white border border-slate-100  relative overflow-hidden">
             <div className="flex justify-between items-start mb-2">
               <div>
                 <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
@@ -714,7 +714,7 @@ export default function BillingTab({
           </Card>
 
           {/* AI Triage */}
-          <Card className="p-6 bg-white border border-slate-100 shadow-sm relative overflow-hidden">
+          <Card className="p-6 bg-white border border-slate-100  relative overflow-hidden">
             <div className="flex justify-between items-start mb-2">
               <div>
                 <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
@@ -814,7 +814,7 @@ export default function BillingTab({
       {/* ── Footer banner ────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-6 rounded-lg border border-slate-100 gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
+          <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center text-primary ">
             <BiWallet size={24} />
           </div>
           <div>
@@ -829,7 +829,7 @@ export default function BillingTab({
         </div>
         <a
           href="/patient/billing"
-          className="px-6 h-12 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-xs flex items-center justify-center shadow-sm shrink-0 transition-all"
+          className="px-6 h-12 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-xs flex items-center justify-center  shrink-0 transition-all"
         >
           Open Billing Portal
         </a>

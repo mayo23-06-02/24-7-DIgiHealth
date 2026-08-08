@@ -84,7 +84,7 @@ export default function EditableRiskScoreCard({
 
   return (
     <div
-      className={`rounded-lg p-4 flex flex-col justify-between min-h-[148px] shadow-sm transition-colors duration-300 ${style.bgClass} ${style.textClass}`}
+      className={`rounded-lg p-4 flex flex-col justify-between min-h-[148px]  transition-colors duration-300 ${style.bgClass} ${style.textClass}`}
       style={{ backgroundColor: style.bg }}
     >
       <div className="flex items-start justify-between gap-2">

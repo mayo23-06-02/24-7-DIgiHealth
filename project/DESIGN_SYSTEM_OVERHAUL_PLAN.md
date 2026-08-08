@@ -159,7 +159,7 @@ The 24/7 DigiHealth application currently has a comprehensive design system defi
 #### Approach:
 ```tsx
 // Before
-<div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+<div className="bg-white border border-slate-200 rounded-lg p-4 ">
   Content
 </div>
 

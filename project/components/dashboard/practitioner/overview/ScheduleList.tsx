@@ -103,7 +103,7 @@ export default function ScheduleList({ items, selectedDate }: ScheduleListProps)
                       <BiDotsVerticalRounded size={20} />
                     </Button>
                     {menuOpenRow === item.consultationId && (
-                      <div className="absolute right-12 top-10 bg-white border border-slate-200 rounded-lg shadow-lg flex flex-col py-2 w-40 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <div className="absolute right-12 top-10 bg-white border border-slate-200 rounded-lg  flex flex-col py-2 w-40 z-50 animate-in fade-in zoom-in-95 duration-100">
                         <Link
                           href={`/practitioner/messages?patient=${item.patientId}`}
                           className="text-left px-4 py-2 text-xs font-bold text-slate-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2"

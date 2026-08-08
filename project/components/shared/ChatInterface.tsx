@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { BiSend, BiUser, BiBot, BiPaperclip } from "react-icons/bi";
 import Avatar from "../ui/Avatar";
+import StatusDot from "../ui/StatusDot";
 
 interface Message {
   id: string;
@@ -53,10 +54,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <h4 className="text-sm font-bold text-slate-800 leading-none font-grotesk">
                 {title}
               </h4>
-              <p className="text-sm font-bold text-emerald-500  tracking-normal mt-1 flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                Active Session
-              </p>
+              <StatusDot status="online" label="Active Session" className="text-sm font-bold mt-1" />
             </div>
           </div>
         </div>

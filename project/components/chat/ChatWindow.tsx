@@ -246,9 +246,11 @@ export default function ChatWindow({
             </button>
           )}
           <div className="relative shrink-0">
-            <Avatar name={opponentName} src={opponentAvatar} size="sm" />
-            <div
-              className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${isConnected ? "bg-emerald-500" : "bg-slate-300"}`}
+            <Avatar
+              name={opponentName}
+              src={opponentAvatar}
+              size="sm"
+              status={isConnected ? "online" : "offline"}
             />
           </div>
           <div className="min-w-0">

@@ -1,4 +1,4 @@
-import { BiArchive } from "react-icons/bi";
+import { Inbox } from "lucide-react";
 import Button from "./Button";
 
 interface EmptyStateProps {
@@ -26,12 +26,12 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       className={`flex flex-col items-center justify-center py-12 px-6 text-center ${className}`}
     >
       <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-6">
-        {icon || <BiArchive size={32} />}
+        {icon || <Inbox size={28} />}
       </div>
-      <h4 className="text-lg font-semibold text-slate-700 mb-2 tracking-tight font-grotesk">
+      <h4 className="text-lg font-semibold text-ink-900 mb-2 tracking-tight font-grotesk">
         {title}
       </h4>
-      <p className="text-sm text-slate-500  max-w-sm mb-8 leading-relaxed">
+      <p className="text-sm text-slate-500 max-w-sm mb-8 leading-relaxed">
         {description}
       </p>
       {actionLabel && onAction && (
@@ -39,7 +39,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           onClick={onAction}
           variant="white"
           size="sm"
-          className="px-8 py-3"
           loading={actionLoading}
         >
           {actionLabel}

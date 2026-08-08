@@ -438,7 +438,7 @@ export default function PractitionerPatientsPage() {
 
           {exportOpen && (
             <div
-              className="absolute right-0 top-full mt-2 z-40 w-64 rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-200/60 overflow-hidden"
+              className="absolute right-0 top-full mt-2 z-40 w-64 rounded-lg border border-slate-200 bg-white  shadow-slate-200/60 overflow-hidden"
               role="menu"
             >
               <div className="px-3 py-3 border-b border-slate-100 bg-slate-50/80">
