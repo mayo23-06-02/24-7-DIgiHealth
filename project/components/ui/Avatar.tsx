@@ -2,7 +2,7 @@ import React from "react";
 
 interface AvatarProps {
   src?: string;
-  name: string;
+  name?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   status?: "online" | "offline" | "busy" | "none";
   className?: string;
@@ -43,12 +43,12 @@ function paletteFor(name: string) {
 
 const Avatar: React.FC<AvatarProps> = ({
   src,
-  name,
+  name = "?",
   size = "md",
   status = "none",
   className = "",
 }) => {
-  const initials = name
+  const initials = (name || "?")
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -63,7 +63,7 @@ const Avatar: React.FC<AvatarProps> = ({
         }`}
       >
         {src ? (
-          <img src={src} alt={name} className="w-full h-full object-cover" />
+          <img src={src} alt={name || "Avatar"} className="w-full h-full object-cover" />
         ) : (
           <span>{initials}</span>
         )}
