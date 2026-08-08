@@ -84,79 +84,79 @@ export default function FavoriteDoctors({
   return (
     <>
       <div className="px-4 py-4 border-t border-border/50">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Heart size={16} className="text-primary" />
-          <p className="text-xs font-bold uppercase tracking-wide text-ink-600">
-            Favorite Doctors
-          </p>
-        </div>
-        <button
-          onClick={handleAddDoctor}
-          title="Add doctor to favorites"
-          className="p-1.5 hover:bg-primary/10 rounded-md transition-colors text-ink-600 hover:text-primary"
-        >
-          <Plus size={14} />
-        </button>
-      </div>
-
-      {favoriteDoctors.length === 0 ? (
-        <div className="text-center py-4">
-          <p className="text-xs text-ink-500 mb-3">
-            No favorite doctors yet
-          </p>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Heart size={16} className="text-primary" />
+            <p className="text-xs font-bold uppercase tracking-wide text-ink-600">
+              Favorite Doctors
+            </p>
+          </div>
           <button
             onClick={handleAddDoctor}
-            className="w-full py-2 px-3 bg-primary/8 text-primary text-xs font-semibold rounded-lg hover:bg-primary/12 transition-colors"
+            title="Add doctor to favorites"
+            className="p-1.5 hover:bg-primary/10 rounded-md transition-colors text-ink-600 hover:text-primary"
           >
-            Add Doctors
+            <Plus size={14} />
           </button>
         </div>
-      ) : (
-        <div className="space-y-2">
-          {favoriteDoctors.map((doctor) => (
-            <div
-              key={doctor.id}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-surface-soft transition-colors group"
-            >
-              <button
-                onClick={() => handleDoctorClick(doctor)}
-                className="flex items-center gap-2.5 flex-1 min-w-0"
-                title={`Chat with ${doctor.name}`}
-              >
-                <Avatar
-                  src={doctor.avatar}
-                  alt={doctor.name}
-                  size="sm"
-                  className="shrink-0"
-                />
-                <div className="min-w-0 flex-1 text-left">
-                  <p className="text-xs font-semibold text-ink-900 truncate">
-                    {doctor.name}
-                  </p>
-                  <p className="text-[10px] text-ink-500 truncate">
-                    {doctor.specialisation || "Doctor"}
-                  </p>
-                </div>
-              </button>
-              <button
-                onClick={() => handleDoctorClick(doctor)}
-                className="p-1.5 text-ink-400 hover:text-primary hover:bg-primary/8 rounded-md transition-colors shrink-0 opacity-0 group-hover:opacity-100"
-                title={`Message ${doctor.name}`}
-              >
-                <MessageCircle size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
 
-      <AddFavoriteDoctorsPanel
-        isOpen={isAddPanelOpen}
-        onClose={() => setIsAddPanelOpen(false)}
-        onSave={handleSaveFavorites}
-        selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
-      />
+        {favoriteDoctors.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-xs text-ink-500 mb-3">
+              No favorite doctors yet
+            </p>
+            <button
+              onClick={handleAddDoctor}
+              className="w-full py-2 px-3 bg-primary/8 text-primary text-xs font-semibold rounded-lg hover:bg-primary/12 transition-colors"
+            >
+              Add Doctors
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {favoriteDoctors.map((doctor) => (
+              <div
+                key={doctor.id}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-surface-soft transition-colors group"
+              >
+                <button
+                  onClick={() => handleDoctorClick(doctor)}
+                  className="flex items-center gap-2.5 flex-1 min-w-0"
+                  title={`Chat with ${doctor.name}`}
+                >
+                  <Avatar
+                    src={doctor.avatar}
+                    alt={doctor.name}
+                    size="sm"
+                    className="shrink-0"
+                  />
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="text-xs font-semibold text-ink-900 truncate">
+                      {doctor.name}
+                    </p>
+                    <p className="text-[10px] text-ink-500 truncate">
+                      {doctor.specialisation || "Doctor"}
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleDoctorClick(doctor)}
+                  className="p-1.5 text-ink-400 hover:text-primary hover:bg-primary/8 rounded-md transition-colors shrink-0 opacity-0 group-hover:opacity-100"
+                  title={`Message ${doctor.name}`}
+                >
+                  <MessageCircle size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <AddFavoriteDoctorsPanel
+          isOpen={isAddPanelOpen}
+          onClose={() => setIsAddPanelOpen(false)}
+          onSave={handleSaveFavorites}
+          selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
+        />
       </div>
     </>
   );
