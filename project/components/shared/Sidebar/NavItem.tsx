@@ -71,8 +71,8 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
           >
             <ChevronDown
               size={16}
-              className={`transition-transform duration-300 ${
-                isExpanded ? "rotate-180" : ""
+              className={`transition-transform  duration-300 ${
+                isExpanded ? "rotate-180 " : "text-white"
               }`}
             />
           </button>

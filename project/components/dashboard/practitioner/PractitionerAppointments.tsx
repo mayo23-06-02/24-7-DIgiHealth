@@ -70,6 +70,14 @@ export default function PractitionerAppointments() {
 
   const tabs = ALL_TABS;
 
+  // Update active tab when query parameter changes
+  useEffect(() => {
+    const tabParam = searchParams.get("tab") as Tab | null;
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
   // Handle query parameters to open modal with specific appointment
   useEffect(() => {
     if (appointmentIdFromQuery && shouldOpenModal && appointments.length > 0) {
