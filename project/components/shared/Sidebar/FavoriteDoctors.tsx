@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Heart, MessageCircle, Plus } from "lucide-react";
 import { useNavigate } from "@/hooks/useNavigate";
 import Avatar from "@/components/ui/Avatar";
+import AddFavoriteDoctorsPanel from "./AddFavoriteDoctorsPanel";
 
 interface Doctor {
   id: string;
@@ -25,6 +26,7 @@ export default function FavoriteDoctors({
   const { navigate } = useNavigate();
   const [favoriteDoctors, setFavoriteDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAddPanelOpen, setIsAddPanelOpen] = useState(false);
 
   useEffect(() => {
     fetchFavoriteDoctors();
@@ -70,14 +72,18 @@ export default function FavoriteDoctors({
   };
 
   const handleAddDoctor = () => {
-    navigate("/patient/doctors");
-    if (window.innerWidth < 1024 && onClose) onClose();
+    setIsAddPanelOpen(true);
+  };
+
+  const handleSaveFavorites = (selectedIds: string[]) => {
+    fetchFavoriteDoctors();
   };
 
   if (isCollapsed) return null;
 
   return (
-    <div className="px-4 py-4 border-t border-border/50">
+    <>
+      <div className="px-4 py-4 border-t border-border/50">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Heart size={16} className="text-primary" />
@@ -144,6 +150,14 @@ export default function FavoriteDoctors({
           ))}
         </div>
       )}
-    </div>
+      </div>
+
+      <AddFavoriteDoctorsPanel
+        isOpen={isAddPanelOpen}
+        onClose={() => setIsAddPanelOpen(false)}
+        onSave={handleSaveFavorites}
+        selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
+      />
+    </>
   );
 }

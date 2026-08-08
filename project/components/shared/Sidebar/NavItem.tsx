@@ -88,7 +88,7 @@ export default function NavItem({
             <ChevronDown
               size={16}
               className={`transition-transform  duration-300 ${
-                isExpanded ? "rotate-180 " : "text-white"
+                isExpanded ? "rotate-180 " : ""
               }`}
             />
           </button>
