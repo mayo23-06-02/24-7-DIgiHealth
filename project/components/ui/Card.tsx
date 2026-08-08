@@ -7,6 +7,7 @@ interface CardProps {
   className?: string;
   noPadding?: boolean;
   onClick?: () => void;
+  id?: string;
 }
 
 /**
@@ -19,6 +20,7 @@ const Card = function Card({
   className = "",
   noPadding = false,
   onClick,
+  id,
 }: CardProps) {
   const baseStyles = "rounded-xl transition-all duration-300 overflow-hidden w-full";
 
@@ -35,6 +37,7 @@ const Card = function Card({
 
   return (
     <div
+      id={id}
       className={`${baseStyles} ${variants[variant]} ${interactive} ${noPadding ? "" : "p-4 sm:p-6"} ${className}`}
       onClick={onClick}
       role={onClick ? "button" : undefined}

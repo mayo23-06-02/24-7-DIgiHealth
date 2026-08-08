@@ -15,26 +15,35 @@ import {
   Legend,
 } from "recharts";
 import {
-  BiDownload,
-  BiLoaderAlt,
-  BiSearch,
-  BiFilterAlt,
-  BiSortAlt2,
-  BiFile,
-  BiGroup,
-  BiUser,
-  BiDollarCircle,
-  BiCalendar,
-  BiBuildings,
-  BiBarChartAlt2,
-  BiRefresh,
-  BiBulb,
-  BiX,
-} from "react-icons/bi";
+  Download,
+  Loader2,
+  Search,
+  SlidersHorizontal,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronDown,
+  FileText,
+  Users,
+  User,
+  CircleDollarSign,
+  Calendar,
+  Building2,
+  BarChart3,
+  RefreshCw,
+  Lightbulb,
+  X,
+  BedDouble,
+  Stethoscope,
+  UserCheck,
+  Clock,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Modal from "@/components/ui/Modal";
 import KPICard from "@/components/ui/KPICard";
 import PageHeader from "@/components/ui/PageHeader";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -61,43 +70,43 @@ const REPORT_TYPES: {
     id: "overview",
     label: "Full overview",
     description: "Facility, doctors, patients & intelligence",
-    icon: <BiBarChartAlt2 size={22} />,
+    icon: <BarChart3 size={22} />,
   },
   {
     id: "facility",
     label: "Facility",
     description: "Capacity, departments, operational KPIs",
-    icon: <BiBuildings size={22} />,
+    icon: <Building2 size={22} />,
   },
   {
     id: "doctors",
     label: "Doctors",
     description: "Roster, duty, load, ratings",
-    icon: <BiGroup size={22} />,
+    icon: <Users size={22} />,
   },
   {
     id: "patients",
     label: "Patients",
     description: "Visits, risk bands, follow-ups",
-    icon: <BiUser size={22} />,
+    icon: <User size={22} />,
   },
   {
     id: "financial",
     label: "Financial",
     description: "Transactions, revenue, methods",
-    icon: <BiDollarCircle size={22} />,
+    icon: <CircleDollarSign size={22} />,
   },
   {
     id: "staff",
     label: "Staff",
     description: "All roles, shifts, duty status",
-    icon: <BiGroup size={22} />,
+    icon: <Users size={22} />,
   },
   {
     id: "appointments",
     label: "Appointments",
     description: "Clinic schedule and status mix",
-    icon: <BiCalendar size={22} />,
+    icon: <Calendar size={22} />,
   },
 ];
 
@@ -183,6 +192,7 @@ export default function HospitalReportsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState<"pdf" | "csv" | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const queryParams = useMemo(
     () => ({
@@ -308,16 +318,276 @@ export default function HospitalReportsPage() {
     setDateTo("");
   };
 
-  const activeFilterCount = [
-    search,
-    department,
-    role,
-    status,
-    risk,
-    onDuty,
-    dateFrom,
-    dateTo,
-  ].filter(Boolean).length;
+  const RISK_LABELS: Record<string, string> = {
+    green: "Low risk",
+    gray: "Mild risk",
+    orange: "Moderate risk",
+    red: "High risk",
+  };
+  const STATUS_LABELS: Record<string, string> = {
+    paid: "Paid",
+    pending: "Pending",
+    refunded: "Refunded",
+    scheduled: "Scheduled",
+    in_progress: "In progress",
+    completed: "Completed",
+    cancelled: "Cancelled",
+  };
+
+  // Each active filter as a removable chip — makes it explicit exactly what
+  // will be applied to the on-screen table *and* the PDF/CSV export, rather
+  // than a bare "Clear (3)" count that hides what's actually filtering.
+  const activeFilterChips = useMemo(
+    () =>
+      [
+        search && { key: "search", label: `"${search}"`, onClear: () => setSearch("") },
+        dateFrom && {
+          key: "dateFrom",
+          label: `From ${new Date(dateFrom).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}`,
+          onClear: () => setDateFrom(""),
+        },
+        dateTo && {
+          key: "dateTo",
+          label: `To ${new Date(dateTo).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}`,
+          onClear: () => setDateTo(""),
+        },
+        department && { key: "department", label: department, onClear: () => setDepartment("") },
+        role && { key: "role", label: role.charAt(0).toUpperCase() + role.slice(1), onClear: () => setRole("") },
+        status && { key: "status", label: STATUS_LABELS[status] || status, onClear: () => setStatus("") },
+        risk && { key: "risk", label: RISK_LABELS[risk] || risk, onClear: () => setRisk("") },
+        onDuty && {
+          key: "onDuty",
+          label: onDuty === "true" ? "On duty" : "Off duty",
+          onClear: () => setOnDuty(""),
+        },
+      ].filter(Boolean) as { key: string; label: string; onClear: () => void }[],
+    [search, dateFrom, dateTo, department, role, status, risk, onDuty],
+  );
+
+  const activeFilterCount = activeFilterChips.length;
+
+  const sortLabel =
+    (SORT_OPTIONS[type] || []).find((o) => o.value === sort)?.label || sort;
+
+  type KpiEntry = { label: string; value: string | number; icon: React.ReactNode; color: string };
+
+  const kpis = useMemo((): KpiEntry[] => {
+    if (!data) return [];
+    const k = data.kpi;
+    const fmt = (n: number) => `R ${(n || 0).toLocaleString("en-ZA")}`;
+    const deptCount = (data.departments || []).length;
+    switch (type) {
+      case "facility":
+        return [
+          { label: "Bed occupancy", value: `${data.facility?.bedCapacity?.occupancyPercent ?? 0}%`, icon: <BedDouble size={20} />, color: "primary" },
+          { label: "Doctors on duty", value: `${k.doctorsOnDuty}/${k.totalDoctors}`, icon: <Stethoscope size={20} />, color: "emerald" },
+          { label: "Staff on duty", value: `${k.staffOnDuty}/${k.totalStaff}`, icon: <UserCheck size={20} />, color: "emerald" },
+          { label: "Departments", value: deptCount, icon: <Building2 size={20} />, color: "slate" },
+          { label: "Consults today", value: k.consultationsToday, icon: <Calendar size={20} />, color: "primary" },
+          { label: "Avg wait", value: `${data.facility?.waitTimeMins ?? 0} min`, icon: <Clock size={20} />, color: "slate" },
+        ];
+      case "doctors":
+        return [
+          { label: "Doctors", value: k.doctorCount, icon: <Users size={20} />, color: "primary" },
+          { label: "On duty", value: k.doctorsOnDuty, icon: <UserCheck size={20} />, color: "emerald" },
+          { label: "Avg rating", value: (k.avgDoctorRating ?? 0).toFixed(1), icon: <Lightbulb size={20} />, color: "primary" },
+          { label: "Appointments", value: k.appointmentCount, icon: <Calendar size={20} />, color: "emerald" },
+          { label: "Completed (mo)", value: k.completedThisMonth, icon: <BarChart3 size={20} />, color: "slate" },
+          { label: "Departments", value: deptCount, icon: <Building2 size={20} />, color: "slate" },
+        ];
+      case "patients":
+        return [
+          { label: "Patients", value: k.patientCount, icon: <User size={20} />, color: "primary" },
+          { label: "New this month", value: k.patientsThisMonth, icon: <User size={20} />, color: "emerald" },
+          { label: "High risk", value: k.highRiskPatients, icon: <Lightbulb size={20} />, color: "primary" },
+          { label: "Upcoming", value: k.upcomingAppointments, icon: <Calendar size={20} />, color: "slate" },
+          { label: "Completed (mo)", value: k.completedThisMonth, icon: <BarChart3 size={20} />, color: "emerald" },
+          { label: "Cancelled (mo)", value: k.cancelledThisMonth, icon: <X size={20} />, color: "slate" },
+        ];
+      case "financial":
+        return [
+          { label: "Period revenue", value: fmt(k.revenuePeriod), icon: <CircleDollarSign size={20} />, color: "emerald" },
+          { label: "Pending", value: fmt(k.revenuePending), icon: <CircleDollarSign size={20} />, color: "slate" },
+          { label: "Revenue today", value: fmt(k.revenueToday), icon: <CircleDollarSign size={20} />, color: "primary" },
+          { label: "Revenue (month)", value: fmt(k.revenueMonth), icon: <CircleDollarSign size={20} />, color: "emerald" },
+          { label: "Transactions", value: k.transactionCount, icon: <FileText size={20} />, color: "slate" },
+          { label: "Cancelled (mo)", value: k.cancelledThisMonth, icon: <X size={20} />, color: "slate" },
+        ];
+      case "staff":
+        return [
+          { label: "Staff", value: k.staffCount, icon: <Users size={20} />, color: "primary" },
+          { label: "On duty", value: k.staffOnDuty, icon: <UserCheck size={20} />, color: "emerald" },
+          { label: "Doctors", value: k.doctorCount, icon: <Stethoscope size={20} />, color: "primary" },
+          { label: "Nurses", value: k.totalNurses, icon: <User size={20} />, color: "slate" },
+          { label: "Departments", value: deptCount, icon: <Building2 size={20} />, color: "slate" },
+          { label: "Completed (mo)", value: k.completedThisMonth, icon: <BarChart3 size={20} />, color: "emerald" },
+        ];
+      case "appointments":
+        return [
+          { label: "Appointments", value: k.appointmentCount, icon: <Calendar size={20} />, color: "primary" },
+          { label: "Upcoming", value: k.upcomingAppointments, icon: <Calendar size={20} />, color: "emerald" },
+          { label: "Completed (mo)", value: k.completedThisMonth, icon: <BarChart3 size={20} />, color: "emerald" },
+          { label: "Cancelled (mo)", value: k.cancelledThisMonth, icon: <X size={20} />, color: "slate" },
+          { label: "Consults today", value: k.consultationsToday, icon: <Clock size={20} />, color: "primary" },
+          { label: "Doctors on duty", value: `${k.doctorsOnDuty}/${k.totalDoctors}`, icon: <UserCheck size={20} />, color: "slate" },
+        ];
+      case "overview":
+      default:
+        return [
+          { label: "Doctors", value: k.doctorCount, icon: <Users size={20} />, color: "primary" },
+          { label: "Patients", value: k.patientCount, icon: <User size={20} />, color: "slate" },
+          { label: "Appointments", value: k.appointmentCount, icon: <Calendar size={20} />, color: "emerald" },
+          { label: "Period revenue", value: fmt(k.revenuePeriod), icon: <CircleDollarSign size={20} />, color: "emerald" },
+          { label: "Pending", value: fmt(k.revenuePending), icon: <CircleDollarSign size={20} />, color: "slate" },
+          { label: "High risk", value: k.highRiskPatients, icon: <Lightbulb size={20} />, color: "primary" },
+        ];
+    }
+  }, [data, type]);
+
+  type ChartSlot =
+    | {
+        kind: "bar";
+        title: string;
+        icon: React.ReactNode;
+        data: any[];
+        xKey: string;
+        bars: { dataKey: string; name: string; color: string }[];
+      }
+    | {
+        kind: "pie";
+        title: string;
+        icon: React.ReactNode;
+        data: any[];
+        dataKey: string;
+        nameKey: string;
+        colors?: string[];
+        donut?: boolean;
+      };
+
+  const dutySplit = (rows: any[]) => {
+    const on = rows.filter((r) => r.isOnDuty).length;
+    return [
+      { name: "On duty", value: on },
+      { name: "Off duty", value: Math.max(rows.length - on, 0) },
+    ];
+  };
+
+  const financialByStatus = (rows: any[]) => {
+    const totals: Record<string, number> = {};
+    rows.forEach((r: any) => {
+      totals[r.status] = (totals[r.status] || 0) + (r.amount || 0);
+    });
+    return Object.entries(totals).map(([name, value]) => ({
+      label: STATUS_LABELS[name] || name,
+      value,
+    }));
+  };
+
+  const chartSlots = useMemo((): ChartSlot[] => {
+    if (!data) return [];
+    const c = data.charts || {};
+    const monthlyBar: ChartSlot = {
+      kind: "bar",
+      title: "Monthly volume",
+      icon: <BarChart3 />,
+      data: c.monthlyData || [],
+      xKey: "month",
+      bars: [
+        { dataKey: "consultations", name: "Booked", color: "#4493b8" },
+        { dataKey: "completed", name: "Done", color: "#36B37E" },
+      ],
+    };
+    const deptBar: ChartSlot = {
+      kind: "bar",
+      title: "Department breakdown",
+      icon: <Building2 />,
+      data: c.departmentBreakdown || [],
+      xKey: "department",
+      bars: [
+        { dataKey: "staff", name: "Staff", color: "#4493b8" },
+        { dataKey: "doctors", name: "Doctors", color: "#36B37E" },
+      ],
+    };
+    const riskPie: ChartSlot = {
+      kind: "pie",
+      title: "Patient risk",
+      icon: <User />,
+      data: c.riskDist || [],
+      dataKey: "value",
+      nameKey: "label",
+      colors: (c.riskDist || []).map((e: any) => e.color),
+      donut: true,
+    };
+    const staffRolePie: ChartSlot = {
+      kind: "pie",
+      title: "Staff roles",
+      icon: <Users />,
+      data: (c.staffByRole || []).map((r: any) => ({
+        name: r.role.charAt(0).toUpperCase() + r.role.slice(1),
+        value: r.count,
+      })),
+      dataKey: "value",
+      nameKey: "name",
+    };
+    const apptStatusPie: ChartSlot = {
+      kind: "pie",
+      title: "Appointment status",
+      icon: <Calendar />,
+      data: c.appointmentStatus || [],
+      dataKey: "value",
+      nameKey: "name",
+    };
+    const apptTypesPie: ChartSlot = {
+      kind: "pie",
+      title: "Appointment types",
+      icon: <FileText />,
+      data: c.appointmentTypes || [],
+      dataKey: "value",
+      nameKey: "name",
+    };
+    const doctorDutyPie: ChartSlot = {
+      kind: "pie",
+      title: "Doctor duty split",
+      icon: <Stethoscope />,
+      data: dutySplit(data.tables?.doctors || []),
+      dataKey: "value",
+      nameKey: "name",
+    };
+    const staffDutyPie: ChartSlot = {
+      kind: "pie",
+      title: "Staff duty split",
+      icon: <UserCheck />,
+      data: dutySplit(data.tables?.staff || []),
+      dataKey: "value",
+      nameKey: "name",
+    };
+    const financialPie: ChartSlot = {
+      kind: "pie",
+      title: "Revenue by status",
+      icon: <CircleDollarSign />,
+      data: financialByStatus(data.tables?.financial || []),
+      dataKey: "value",
+      nameKey: "label",
+    };
+
+    switch (type) {
+      case "facility":
+        return [deptBar, staffRolePie, monthlyBar];
+      case "doctors":
+        return [deptBar, monthlyBar, doctorDutyPie];
+      case "patients":
+        return [riskPie, apptTypesPie, monthlyBar];
+      case "financial":
+        return [financialPie, apptTypesPie, monthlyBar];
+      case "staff":
+        return [staffRolePie, deptBar, staffDutyPie];
+      case "appointments":
+        return [apptStatusPie, apptTypesPie, monthlyBar];
+      case "overview":
+      default:
+        return [monthlyBar, riskPie, staffRolePie];
+    }
+  }, [data, type]);
 
   const tableRows = useMemo(() => {
     if (!data?.tables) return [];
@@ -360,9 +630,9 @@ export default function HospitalReportsPage() {
               disabled={loading}
               icon={
                 loading ? (
-                  <BiLoaderAlt className="animate-spin" size={16} />
+                  <Loader2 className="animate-spin" size={16} />
                 ) : (
-                  <BiRefresh size={16} />
+                  <RefreshCw size={16} />
                 )
               }
               iconPosition="left"
@@ -377,9 +647,9 @@ export default function HospitalReportsPage() {
               disabled={!!exporting || loading}
               icon={
                 exporting === "csv" ? (
-                  <BiLoaderAlt className="animate-spin" size={16} />
+                  <Loader2 className="animate-spin" size={16} />
                 ) : (
-                  <BiDownload size={16} />
+                  <Download size={16} />
                 )
               }
               iconPosition="left"
@@ -394,9 +664,9 @@ export default function HospitalReportsPage() {
               disabled={!!exporting || loading}
               icon={
                 exporting === "pdf" ? (
-                  <BiLoaderAlt className="animate-spin" size={16} />
+                  <Loader2 className="animate-spin" size={16} />
                 ) : (
-                  <BiFile size={16} />
+                  <FileText size={16} />
                 )
               }
               iconPosition="left"
@@ -408,226 +678,327 @@ export default function HospitalReportsPage() {
         }
       />
 
-      {/* Report type picker */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
-        {REPORT_TYPES.map((rt) => (
-          <button
-            key={rt.id}
-            type="button"
-            onClick={() => setType(rt.id)}
-            className={`p-3 rounded-lg border text-left transition-all ${
-              type === rt.id
-                ? "border-primary bg-primary/5 "
-                : "border-slate-200 bg-white hover:border-slate-300"
-            }`}
-          >
-            <div
-              className={`w-9 h-9 rounded-lg flex items-center justify-center mb-2 ${
-                type === rt.id
-                  ? "bg-primary text-white"
-                  : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              {rt.icon}
-            </div>
-            <p
-              className={`text-xs font-bold ${
-                type === rt.id ? "text-primary" : "text-slate-800"
-              }`}
-            >
-              {rt.label}
-            </p>
-            <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">
-              {rt.description}
-            </p>
-          </button>
-        ))}
-      </div>
-
-      {/* Filters */}
-      <Card className="!rounded-lg space-y-4">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
+      {/* Intelligence */}
+      {data && data.intelligence?.length > 0 && (
+        <Card className="!rounded-lg">
           <SectionHeader
             compact
-            icon={<BiFilterAlt />}
-            title="Filters & sort"
-            subtitle="Narrow the report, then export PDF or CSV"
+            icon={<Lightbulb />}
+            title="Report intelligence"
+            subtitle="Insights from the filtered dataset"
+            className="mb-4"
           />
-          {activeFilterCount > 0 && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={clearFilters}
-              icon={<BiX size={16} />}
-              iconPosition="left"
-              className="!rounded-lg !max-w-none normal-case !tracking-normal"
-            >
-              Clear ({activeFilterCount})
-            </Button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="sm:col-span-2">
-            <div className="relative">
-              <BiSearch
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={18}
-              />
-              <input
-                type="search"
-                placeholder="Search name, department, email…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary bg-white"
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {data.intelligence.map((item: any) => (
+              <div
+                key={item.id}
+                className="rounded-lg border border-slate-100 bg-slate-50/80 p-3.5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-bold text-slate-800">
+                    {item.title}
+                  </p>
+                  <Badge
+                    label={item.severity}
+                    status={
+                      item.severity === "critical"
+                        ? "error"
+                        : item.severity === "warning"
+                          ? "warning"
+                          : item.severity === "success"
+                            ? "success"
+                            : "info"
+                    }
+                    className="!text-[10px] !px-2 !py-1 capitalize shrink-0"
+                  />
+                </div>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  {item.detail}
+                </p>
+                {item.metric && (
+                  <p className="text-[11px] font-bold text-primary mt-2">
+                    {item.metric}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
-          <Input
-            type="date"
-            label="From"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-          />
-          <Input
-            type="date"
-            label="To"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+        </Card>
+      )}
+
+      {/* Report type tabs */}
+      <div>
+        {/* Mobile: dropdown */}
+        <div className="sm:hidden pb-3">
+          <Select
+            value={type}
+            onChange={(v) => setType(v as ReportType)}
+            options={REPORT_TYPES.map((rt) => ({ value: rt.id, label: rt.label }))}
+            icon={<BarChart3 size={18} className="text-ink-600" />}
           />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Desktop: underline tabs (design system pattern) */}
+        <div className="hidden sm:flex gap-1 border-b border-border overflow-x-auto no-scrollbar">
+          {REPORT_TYPES.map((rt) => {
+            const isActive = type === rt.id;
+            return (
+              <button
+                key={rt.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setType(rt.id)}
+                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors ${
+                  isActive ? "text-primary" : "text-ink-600 hover:text-ink-900"
+                }`}
+              >
+                {React.cloneElement(rt.icon as React.ReactElement<{ size?: number }>, {
+                  size: 16,
+                })}
+                <span>{rt.label}</span>
+                {isActive && (
+                  <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-primary rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active tab context */}
+        <p className="text-xs text-slate-500 mt-2 sm:mt-3">
+          {REPORT_TYPES.find((rt) => rt.id === type)?.description}
+        </p>
+      </div>
+
+      {/* Filters & sort — compact icon toolbar, full controls live in the modal */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setFiltersOpen(true)}
+          title="Filters"
+          aria-label="Filters"
+          className="relative w-10 h-10 shrink-0 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:border-primary hover:text-primary transition-colors"
+        >
+          <SlidersHorizontal size={18} />
+          {activeFilterCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFiltersOpen(true)}
+          title={`Sort: ${sortLabel}`}
+          aria-label="Sort"
+          className="w-10 h-10 shrink-0 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:border-primary hover:text-primary transition-colors"
+        >
+          <ArrowUpDown size={18} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+          title={sortDir === "asc" ? "Ascending — click for descending" : "Descending — click for ascending"}
+          aria-label="Toggle sort direction"
+          className="w-10 h-10 shrink-0 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:border-primary hover:text-primary transition-colors"
+        >
+          {sortDir === "asc" ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+        </button>
+
+        {activeFilterChips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {activeFilterChips.map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                onClick={chip.onClear}
+                className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/15 transition-colors"
+              >
+                {chip.label}
+                <X size={12} />
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={clearFilters}
+              title="Clear all filters"
+              className="text-xs font-semibold text-slate-500 hover:text-danger-500 transition-colors px-1.5"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
+        <p className="text-xs font-medium text-slate-500 ml-auto flex items-center gap-1.5">
+          <FileText size={14} className="text-slate-400" />
+          Exporting <span className="font-bold text-slate-800">{tableRows.length}</span>{" "}
+          row{tableRows.length === 1 ? "" : "s"} · sorted by{" "}
+          <span className="font-bold text-slate-800">{sortLabel}</span> (
+          {sortDir === "asc" ? "asc" : "desc"})
+          <a href="#report-table" className="font-semibold text-primary hover:underline ml-1">
+            Preview ↓
+          </a>
+        </p>
+      </div>
+
+      <Modal
+        isOpen={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        title="Filters & sort"
+        width="sm"
+      >
+        <div className="space-y-4">
+          <Input
+            type="search"
+            label="Search"
+            placeholder="Search name, department, email…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            icon={<Search size={18} />}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              type="date"
+              label="From"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+            <Input
+              type="date"
+              label="To"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
+          </div>
+
           <div>
-            <label className="text-xs font-bold text-slate-500 mb-1 block">
+            <label className="block text-sm font-semibold text-ink-600 mb-1.5">
               Sort by
             </label>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-primary"
-            >
-              {(SORT_OPTIONS[type] || []).map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-bold text-slate-500 mb-1 block">
-              Direction
-            </label>
-            <select
-              value={sortDir}
-              onChange={(e) => setSortDir(e.target.value as "asc" | "desc")}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-primary"
-            >
-              <option value="desc">Descending</option>
-              <option value="asc">Ascending</option>
-            </select>
-          </div>
-          {(type === "doctors" || type === "staff" || type === "overview") && (
-            <div>
-              <label className="text-xs font-bold text-slate-500 mb-1 block">
-                Department
-              </label>
-              <select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-primary"
+            <div className="flex gap-2">
+              <div className="flex-1 min-w-0">
+                <Select
+                  value={sort}
+                  onChange={setSort}
+                  options={(SORT_OPTIONS[type] || []).map((o) => ({
+                    value: o.value,
+                    label: o.label,
+                  }))}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+                title={sortDir === "asc" ? "Ascending" : "Descending"}
+                aria-label="Toggle sort direction"
+                className="shrink-0 w-11 h-11 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:border-slate-300 hover:text-primary transition-colors"
               >
-                <option value="">All</option>
-                {(data?.departments || []).map((d: string) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+                {sortDir === "asc" ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+              </button>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(type === "doctors" || type === "staff" || type === "overview") && (
+            <Select
+              label="Department"
+              value={department}
+              onChange={setDepartment}
+              options={[
+                { value: "", label: "All" },
+                ...(data?.departments || []).map((d: string) => ({
+                  value: d,
+                  label: d,
+                })),
+              ]}
+            />
           )}
           {type === "staff" && (
-            <div>
-              <label className="text-xs font-bold text-slate-500 mb-1 block">
-                Role
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-primary"
-              >
-                <option value="">All</option>
-                <option value="doctor">Doctor</option>
-                <option value="nurse">Nurse</option>
-                <option value="admin">Admin</option>
-                <option value="technician">Technician</option>
-              </select>
-            </div>
+            <Select
+              label="Role"
+              value={role}
+              onChange={setRole}
+              options={[
+                { value: "", label: "All" },
+                { value: "doctor", label: "Doctor" },
+                { value: "nurse", label: "Nurse" },
+                { value: "admin", label: "Admin" },
+                { value: "technician", label: "Technician" },
+              ]}
+            />
           )}
           {(type === "doctors" || type === "staff") && (
-            <div>
-              <label className="text-xs font-bold text-slate-500 mb-1 block">
-                On duty
-              </label>
-              <select
-                value={onDuty}
-                onChange={(e) => setOnDuty(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-primary"
-              >
-                <option value="">All</option>
-                <option value="true">On duty</option>
-                <option value="false">Off duty</option>
-              </select>
-            </div>
+            <Select
+              label="On duty"
+              value={onDuty}
+              onChange={setOnDuty}
+              options={[
+                { value: "", label: "All" },
+                { value: "true", label: "On duty" },
+                { value: "false", label: "Off duty" },
+              ]}
+            />
           )}
           {(type === "financial" || type === "appointments") && (
-            <div>
-              <label className="text-xs font-bold text-slate-500 mb-1 block">
-                Status
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-primary"
-              >
-                <option value="">All</option>
-                {type === "financial" ? (
-                  <>
-                    <option value="paid">Paid</option>
-                    <option value="pending">Pending</option>
-                    <option value="refunded">Refunded</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="scheduled">Scheduled</option>
-                    <option value="in_progress">In progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </>
-                )}
-              </select>
-            </div>
+            <Select
+              label="Status"
+              value={status}
+              onChange={setStatus}
+              options={
+                type === "financial"
+                  ? [
+                      { value: "", label: "All" },
+                      { value: "paid", label: "Paid" },
+                      { value: "pending", label: "Pending" },
+                      { value: "refunded", label: "Refunded" },
+                    ]
+                  : [
+                      { value: "", label: "All" },
+                      { value: "scheduled", label: "Scheduled" },
+                      { value: "in_progress", label: "In progress" },
+                      { value: "completed", label: "Completed" },
+                      { value: "cancelled", label: "Cancelled" },
+                    ]
+              }
+            />
           )}
           {type === "patients" && (
-            <div>
-              <label className="text-xs font-bold text-slate-500 mb-1 block">
-                Risk band
-              </label>
-              <select
-                value={risk}
-                onChange={(e) => setRisk(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-primary"
-              >
-                <option value="">All</option>
-                <option value="green">Low</option>
-                <option value="gray">Mild</option>
-                <option value="orange">Moderate</option>
-                <option value="red">High</option>
-              </select>
-            </div>
+            <Select
+              label="Risk band"
+              value={risk}
+              onChange={setRisk}
+              options={[
+                { value: "", label: "All" },
+                { value: "green", label: "Low" },
+                { value: "gray", label: "Mild" },
+                { value: "orange", label: "Moderate" },
+                { value: "red", label: "High" },
+              ]}
+            />
           )}
+          </div>
+
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+            {activeFilterCount > 0 ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-sm font-semibold text-slate-500 hover:text-danger-500 transition-colors"
+              >
+                Clear all filters
+              </button>
+            ) : (
+              <span />
+            )}
+            <Button size="sm" onClick={() => setFiltersOpen(false)} className="!max-w-none">
+              Done
+            </Button>
+          </div>
         </div>
-      </Card>
+      </Modal>
 
       {loading && !data ? (
         <div className="space-y-4">
@@ -642,245 +1013,109 @@ export default function HospitalReportsPage() {
         <EmptyState
           title="No report data"
           description="Link a facility and add appointments or staff to generate reports."
-          icon={<BiFile size={32} />}
+          icon={<FileText size={32} />}
           actionLabel="Retry"
           onAction={() => void load()}
         />
       ) : (
         <>
-          {/* KPIs */}
+          {/* KPIs — tied to the selected report type */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-            <KPICard
-              label="Doctors"
-              value={data.kpi.doctorCount}
-              icon={<BiGroup size={20} />}
-              color="primary"
-            />
-            <KPICard
-              label="Patients"
-              value={data.kpi.patientCount}
-              icon={<BiUser size={20} />}
-              color="slate"
-            />
-            <KPICard
-              label="Appointments"
-              value={data.kpi.appointmentCount}
-              icon={<BiCalendar size={20} />}
-              color="emerald"
-            />
-            <KPICard
-              label="Period revenue"
-              value={`R ${(data.kpi.revenuePeriod || 0).toLocaleString("en-ZA")}`}
-              icon={<BiDollarCircle size={20} />}
-              color="emerald"
-            />
-            <KPICard
-              label="Pending"
-              value={`R ${(data.kpi.revenuePending || 0).toLocaleString("en-ZA")}`}
-              icon={<BiDollarCircle size={20} />}
-              color="slate"
-            />
-            <KPICard
-              label="High risk"
-              value={data.kpi.highRiskPatients}
-              icon={<BiBulb size={20} />}
-              color="primary"
-            />
+            {kpis.map((kpiItem) => (
+              <KPICard
+                key={kpiItem.label}
+                label={kpiItem.label}
+                value={kpiItem.value}
+                icon={kpiItem.icon}
+                color={kpiItem.color as any}
+              />
+            ))}
           </div>
 
-          {/* Intelligence */}
-          {data.intelligence?.length > 0 && (
-            <Card className="!rounded-lg">
-              <SectionHeader
-                compact
-                icon={<BiBulb />}
-                title="Report intelligence"
-                subtitle="Insights from the filtered dataset"
-                className="mb-4"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {data.intelligence.map((item: any) => (
-                  <div
-                    key={item.id}
-                    className="rounded-lg border border-slate-100 bg-slate-50/80 p-3.5"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-bold text-slate-800">
-                        {item.title}
-                      </p>
-                      <Badge
-                        label={item.severity}
-                        status={
-                          item.severity === "critical"
-                            ? "error"
-                            : item.severity === "warning"
-                              ? "warning"
-                              : item.severity === "success"
-                                ? "success"
-                                : "info"
-                        }
-                        className="!text-[10px] !px-2 !py-1 capitalize shrink-0"
-                      />
-                    </div>
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                      {item.detail}
-                    </p>
-                    {item.metric && (
-                      <p className="text-[11px] font-bold text-primary mt-2">
-                        {item.metric}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Charts */}
+          {/* Charts — tied to the selected report type */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Card className="!rounded-lg min-h-[260px] flex flex-col">
-              <SectionHeader
-                compact
-                icon={<BiBarChartAlt2 />}
-                title="Monthly volume"
-                className="mb-3"
-              />
-              <div className="flex-1 min-h-[180px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.charts?.monthlyData || []}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#f1f5f9"
-                    />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fontSize: 10, fill: "#94a3b8" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: "#94a3b8" }}
-                      axisLine={false}
-                      tickLine={false}
-                      allowDecimals={false}
-                    />
-                    <Tooltip contentStyle={tipStyle} />
-                    <Bar
-                      dataKey="consultations"
-                      name="Booked"
-                      fill="#4493b8"
-                      radius={[4, 4, 0, 0]}
-                      barSize={14}
-                    />
-                    <Bar
-                      dataKey="completed"
-                      name="Done"
-                      fill="#36B37E"
-                      radius={[4, 4, 0, 0]}
-                      barSize={14}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-
-            <Card className="!rounded-lg min-h-[260px] flex flex-col">
-              <SectionHeader
-                compact
-                icon={<BiUser />}
-                title="Patient risk"
-                className="mb-3"
-              />
-              <div className="flex-1 min-h-[180px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.charts?.riskDist || []}
-                      dataKey="value"
-                      nameKey="label"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={45}
-                      outerRadius={70}
-                      paddingAngle={2}
-                    >
-                      {(data.charts?.riskDist || []).map(
-                        (e: any, i: number) => (
-                          <Cell
-                            key={i}
-                            fill={e.color || CHART_COLORS[i % CHART_COLORS.length]}
+            {chartSlots.map((slot) => (
+              <Card key={slot.title} className="!rounded-lg min-h-[260px] flex flex-col">
+                <SectionHeader compact icon={slot.icon} title={slot.title} className="mb-3" />
+                <div className="flex-1 min-h-[180px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    {slot.kind === "bar" ? (
+                      <BarChart data={slot.data}>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                          stroke="#f1f5f9"
+                        />
+                        <XAxis
+                          dataKey={slot.xKey}
+                          tick={{ fontSize: 10, fill: "#94a3b8" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 10, fill: "#94a3b8" }}
+                          axisLine={false}
+                          tickLine={false}
+                          allowDecimals={false}
+                        />
+                        <Tooltip contentStyle={tipStyle} />
+                        {slot.bars.map((b) => (
+                          <Bar
+                            key={b.dataKey}
+                            dataKey={b.dataKey}
+                            name={b.name}
+                            fill={b.color}
+                            radius={[4, 4, 0, 0]}
+                            barSize={14}
                           />
-                        ),
-                      )}
-                    </Pie>
-                    <Tooltip contentStyle={tipStyle} />
-                    <Legend
-                      formatter={(v) => (
-                        <span className="text-xs text-slate-600">{v}</span>
-                      )}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-
-            <Card className="!rounded-lg min-h-[260px] flex flex-col">
-              <SectionHeader
-                compact
-                icon={<BiGroup />}
-                title="Staff roles"
-                className="mb-3"
-              />
-              <div className="flex-1 min-h-[180px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={(data.charts?.staffByRole || []).map((r: any) => ({
-                        name:
-                          r.role.charAt(0).toUpperCase() + r.role.slice(1),
-                        value: r.count,
-                      }))}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={70}
-                    >
-                      {(data.charts?.staffByRole || []).map(
-                        (_: any, i: number) => (
-                          <Cell
-                            key={i}
-                            fill={CHART_COLORS[i % CHART_COLORS.length]}
-                          />
-                        ),
-                      )}
-                    </Pie>
-                    <Tooltip contentStyle={tipStyle} />
-                    <Legend
-                      formatter={(v) => (
-                        <span className="text-xs text-slate-600">{v}</span>
-                      )}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
+                        ))}
+                      </BarChart>
+                    ) : (
+                      <PieChart>
+                        <Pie
+                          data={slot.data}
+                          dataKey={slot.dataKey}
+                          nameKey={slot.nameKey}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={slot.donut ? 45 : 0}
+                          outerRadius={70}
+                          paddingAngle={2}
+                        >
+                          {slot.data.map((e: any, i: number) => (
+                            <Cell
+                              key={i}
+                              fill={slot.colors?.[i] || e.color || CHART_COLORS[i % CHART_COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={tipStyle} />
+                        <Legend
+                          formatter={(v) => (
+                            <span className="text-xs text-slate-600">{v}</span>
+                          )}
+                        />
+                      </PieChart>
+                    )}
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+            ))}
           </div>
 
           {/* Data table */}
-          <Card noPadding className="!rounded-lg !p-0 overflow-hidden">
+          <Card id="report-table" noPadding className="!rounded-lg !p-0 overflow-hidden scroll-mt-4">
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap">
               <SectionHeader
                 compact
-                icon={<BiSortAlt2 />}
+                icon={<ArrowUpDown />}
                 title={
                   REPORT_TYPES.find((r) => r.id === type)?.label || "Report data"
                 }
                 subtitle={`${tableRows.length} rows · sorted by ${sort} (${sortDir})`}
               />
               {loading && (
-                <BiLoaderAlt className="animate-spin text-primary" size={18} />
+                <Loader2 className="animate-spin text-primary" size={18} />
               )}
             </div>
             {tableRows.length === 0 ? (

@@ -124,8 +124,9 @@ function drawTable(
   }
   const rowH = 16;
   // header
+  const headerY = doc.y;
   doc.save();
-  doc.roundedRect(left, doc.y, contentW, rowH, 3).fill(BRAND.primary);
+  doc.roundedRect(left, headerY, contentW, rowH, 3).fill(BRAND.primary);
   doc.restore();
   let x = left;
   columns.forEach((col) => {
@@ -133,19 +134,20 @@ function drawTable(
       .font(fonts.monoBold || fonts.mono)
       .fontSize(7)
       .fillColor(BRAND.white)
-      .text(col.label, x + 4, doc.y + 4, {
+      .text(col.label, x + 4, headerY + 4, {
         width: col.w - 6,
         lineBreak: false,
       });
     x += col.w;
   });
-  doc.y += rowH + 1;
+  doc.y = headerY + rowH + 1;
 
   rows.slice(0, maxRows).forEach((row, idx) => {
     ensureRoom(doc, rowH + 4, left, contentW, fonts);
+    const rowY = doc.y;
     if (idx % 2 === 1) {
       doc.save();
-      doc.rect(left, doc.y, contentW, rowH).fill(BRAND.soft);
+      doc.rect(left, rowY, contentW, rowH).fill(BRAND.soft);
       doc.restore();
     }
     let cx = left;
@@ -157,14 +159,14 @@ function drawTable(
         .font(fonts.body)
         .fontSize(7.5)
         .fillColor(BRAND.text)
-        .text(String(val ?? "—").slice(0, 40), cx + 4, doc.y + 4, {
+        .text(String(val ?? "—").slice(0, 40), cx + 4, rowY + 4, {
           width: col.w - 6,
           lineBreak: false,
           ellipsis: true,
         });
       cx += col.w;
     });
-    doc.y += rowH;
+    doc.y = rowY + rowH;
   });
   if (rows.length > maxRows) {
     doc.y += 4;
@@ -259,7 +261,10 @@ export async function buildHospitalReportPdf(
     { label: "DOCTORS", value: String(report.kpi.doctorCount) },
     { label: "PATIENTS", value: String(report.kpi.patientCount) },
     { label: "APPTS", value: String(report.kpi.appointmentCount) },
-    { label: "REVENUE", value: `R${Math.round(report.kpi.revenuePeriod || 0)}` },
+    {
+      label: "REVENUE",
+      value: `R ${Math.round(report.kpi.revenuePeriod || 0).toLocaleString("en-ZA")}`,
+    },
     { label: "HIGH RISK", value: String(report.kpi.highRiskPatients) },
     { label: "STAFF", value: String(report.kpi.staffCount) },
   ];
