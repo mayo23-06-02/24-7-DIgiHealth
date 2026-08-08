@@ -96,6 +96,22 @@ export default function DoctorsViewRefactored() {
     }
   };
 
+  const handleFavoriteChange = (doctorId: string, isFavorite: boolean) => {
+    setDoctors((prev) =>
+      prev.map((doc) =>
+        doc.id === doctorId ? { ...doc, isFavorite } : doc
+      )
+    );
+    if (isFavorite) {
+      setMyDoctors((prev) => {
+        const doc = doctors.find((d) => d.id === doctorId);
+        return doc && !prev.find((d) => d.id === doctorId) ? [...prev, doc] : prev;
+      });
+    } else {
+      setMyDoctors((prev) => prev.filter((d) => d.id !== doctorId));
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-12">
       <PageHeader title="Clinical Practitioners" subtitle="Find and book appointments with verified practitioners." />
@@ -117,13 +133,13 @@ export default function DoctorsViewRefactored() {
       ) : (
         <div className="space-y-12">
           {myDoctors.length > 0 && !searchQuery && !hasActiveFilters && (
-            <DoctorsCarouselSection title="My Doctors" doctors={myDoctors} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} />
+            <DoctorsCarouselSection title="My Doctors" doctors={myDoctors} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} onFavoriteChange={handleFavoriteChange} />
           )}
-          <DoctorsCarouselSection title="All Practitioners" doctors={randomizedDoctors} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} />
+          <DoctorsCarouselSection title="All Practitioners" doctors={randomizedDoctors} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} onFavoriteChange={handleFavoriteChange} />
           {generalPractitioners.length > 0 && (
-            <DoctorsCarouselSection title="General Practitioners" doctors={generalPractitioners} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} />
+            <DoctorsCarouselSection title="General Practitioners" doctors={generalPractitioners} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} onFavoriteChange={handleFavoriteChange} />
           )}
-          <DoctorsCarouselSection title="Most Popular" doctors={popularDoctors} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} />
+          <DoctorsCarouselSection title="Most Popular" doctors={popularDoctors} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} onFavoriteChange={handleFavoriteChange} />
         </div>
       )}
 

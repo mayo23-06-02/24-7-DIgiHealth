@@ -7,6 +7,7 @@ import LogoMain from "@/components/ui/LogoMain";
 import NavItem from "./NavItem";
 import UserProfile from "./UserProfile";
 import CollapseToggle from "./CollapseToggle";
+import FavoriteDoctors from "./FavoriteDoctors";
 import { MAIN_NAV } from "./navConfig";
 import { SidebarProps } from "./types";
 
@@ -99,6 +100,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </React.Fragment>
           ))}
         </nav>
+
+        {/* Favorite Doctors - Patient only */}
+        {user.role === "patient" && (
+          <FavoriteDoctors isCollapsed={isCollapsed} onClose={onClose} />
+        )}
 
         {/* User Profile */}
         <UserProfile isCollapsed={isCollapsed} onClose={onClose} />

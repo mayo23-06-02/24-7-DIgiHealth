@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Avatar from "../ui/Avatar";
 import Badge from "@/components/ui/Badge";
-import { MessageSquare, CalendarPlus, Star, BadgeCheck } from "lucide-react";
+import { MessageSquare, CalendarPlus, Star, BadgeCheck, Heart } from "lucide-react";
 
 interface Doctor {
   id: string;
@@ -18,6 +19,7 @@ interface Doctor {
   avatar?: string;
   schedule?: string[];
   slug?: string;
+  isFavorite?: boolean;
 }
 
 interface DoctorCardProps {
@@ -26,6 +28,7 @@ interface DoctorCardProps {
   onMessage: (id: string, e: React.MouseEvent) => void;
   onClick?: () => void;
   linkName?: string;
+  onFavoriteChange?: (doctorId: string, isFavorite: boolean) => void;
 }
 
 export default function DoctorCard({
@@ -34,7 +37,32 @@ export default function DoctorCard({
   onMessage,
   onClick,
   linkName,
+  onFavoriteChange,
 }: DoctorCardProps) {
+  const [isFavorite, setIsFavorite] = useState(doctor.isFavorite || false);
+  const [isToggling, setIsToggling] = useState(false);
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsToggling(true);
+    try {
+      const res = await fetch(`/api/patient/my-doctors/${doctor.id}`, {
+        method: isFavorite ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const newState = !isFavorite;
+        setIsFavorite(newState);
+        onFavoriteChange?.(doctor.id, newState);
+        toast.success(newState ? "Added to favorites" : "Removed from favorites");
+      }
+    } catch {
+      toast.error("Failed to update favorite");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <Card
       className="flex flex-col w-full h-full justify-between group relative overflow-hidden transition-all duration-500 hover: hover:-translate-y-1"
@@ -45,6 +73,22 @@ export default function DoctorCard({
           <Badge label="Online" status="success" size="sm" dot />
         </div>
       )}
+
+      <button
+        onClick={handleToggleFavorite}
+        disabled={isToggling}
+        className="absolute top-4 left-4 z-10 p-2 rounded-lg transition-all duration-200 bg-white/80 hover:bg-white shadow-sm hover:shadow-md"
+        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      >
+        <Heart
+          size={18}
+          className={`transition-all duration-200 ${
+            isFavorite
+              ? "fill-primary text-primary"
+              : "text-ink-600 hover:text-primary"
+          } ${isToggling ? "opacity-60" : ""}`}
+        />
+      </button>
 
       <div className="flex flex-row items-center gap-4 mb-5">
         <Link

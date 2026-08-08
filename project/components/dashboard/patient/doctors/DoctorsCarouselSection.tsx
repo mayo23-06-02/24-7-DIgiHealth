@@ -8,6 +8,7 @@ interface DoctorsCarouselSectionProps {
   doctors: any[];
   onBook: (doc: any) => void;
   onMessage: (doc: any) => void;
+  onFavoriteChange?: (doctorId: string, isFavorite: boolean) => void;
 }
 
 export default function DoctorsCarouselSection({
@@ -15,6 +16,7 @@ export default function DoctorsCarouselSection({
   doctors,
   onBook,
   onMessage,
+  onFavoriteChange,
 }: DoctorsCarouselSectionProps) {
   const { navigate } = useNavigate();
 
@@ -48,6 +50,7 @@ export default function DoctorsCarouselSection({
                 onMessage(doc);
               }}
               onClick={() => navigate(`/patient/doctors/${doc.id}`)}
+              onFavoriteChange={onFavoriteChange}
             />
           </div>
         ))}
