@@ -150,7 +150,6 @@ export default function FavoriteDoctors({
           ))}
         </div>
       )}
-      </div>
 
       <AddFavoriteDoctorsPanel
         isOpen={isAddPanelOpen}
@@ -158,6 +157,7 @@ export default function FavoriteDoctors({
         onSave={handleSaveFavorites}
         selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
       />
+      </div>
     </>
   );
 }
