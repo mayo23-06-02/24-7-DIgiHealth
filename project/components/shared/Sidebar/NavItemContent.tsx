@@ -28,7 +28,7 @@ export default function NavItemContent({
   return (
     <div
       className={`
-        flex items-center gap-3 py-2.5 px-4 font-medium text-sm transition-all duration-200 group rounded-full
+        flex items-center gap-3 py-3 px-4 font-medium text-sm transition-all duration-200 group rounded-xl
         ${isActive
           ? "bg-primary text-white  "
           : "text-ink-700 hover:bg-primary/8 hover:text-primary hover:"

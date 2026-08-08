@@ -44,27 +44,40 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
 
   return (
     <div className="space-y-1">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        title={isCollapsed ? item.label : ""}
-        className="w-full text-left"
-      >
-        <div className="relative">
+      <div className="relative flex items-center">
+        <Link
+          href={href}
+          title={isCollapsed ? item.label : ""}
+          className="flex-1"
+          onClick={() => {
+            if (window.innerWidth < 1024 && onClose) onClose();
+          }}
+        >
           <NavItemContent
             item={item}
             isActive={isActive}
             isCollapsed={isCollapsed}
           />
-          {!isCollapsed && (
+        </Link>
+        {!isCollapsed && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            className="absolute right-2 p-1.5 hover:bg-primary/10 rounded-md transition-colors"
+            title={isExpanded ? "Collapse" : "Expand"}
+          >
             <ChevronDown
               size={16}
-              className={`absolute right-4 top-1/2 -translate-y-1/2 transition-transform duration-300 ${
+              className={`transition-transform duration-300 ${
                 isExpanded ? "rotate-180" : ""
               }`}
             />
-          )}
-        </div>
-      </button>
+          </button>
+        )}
+      </div>
 
       {isExpanded && !isCollapsed && (
         <div className="space-y-0.5 pl-6 border-l-2 border-primary/20 ml-3">
