@@ -2,6 +2,7 @@ import { SidebarItem } from "./types";
 import {
   Home,
   Calendar,
+  CalendarDays,
   User,
   CheckCircle2,
   Building2,
@@ -39,7 +40,7 @@ export const MAIN_NAV: SidebarItem[] = [
     exact: true,
   },
   {
-    icon: Calendar,
+    icon: CalendarDays,
     label: "Calendar",
     href: "/[role]/calendar",
     roles: ["patient"],

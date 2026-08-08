@@ -37,7 +37,7 @@ export async function GET(req: Request) {
         id: u._id.toString(),
         name: `${u.firstName} ${u.lastName}`,
         specialisation: p.specialisation,
-        avatarUrl: `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=0052cc&color=fff`,
+        avatarUrl: `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=4493b8&color=fff`,
         isOnline: p.isOnline,
         rating: 4.8, // Static for now as in practitioners API
         isFavorite: favoriteDoctorIds.includes(u._id.toString()),

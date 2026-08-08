@@ -332,13 +332,16 @@ export default function PatientDashboard() {
             />
           </Card>
         </div>
-        <Card className="xl:col-span-7 h-[600px] overflow-hidden flex flex-col p-0 relative">
-          <PatientCalendar />
-          <Link href="/patient/calendar" className="absolute top-4 right-4 z-10">
-            <Button variant="outline" size="sm">
-              View Full Calendar
-            </Button>
-          </Link>
+        <Card className="xl:col-span-7 h-[600px] overflow-hidden flex flex-col p-0">
+          <PatientCalendar
+            headerAction={
+              <Link href="/patient/calendar">
+                <Button variant="outline" size="sm">
+                  View Full Calendar
+                </Button>
+              </Link>
+            }
+          />
         </Card>
       </section>
 

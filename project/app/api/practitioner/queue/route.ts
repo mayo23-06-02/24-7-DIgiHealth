@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
           patientId: c.patientId.toString(),
           patientName,
           initials,
-          avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(patientName)}&background=e2e8f0&color=0052cc`,
+          avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(patientName)}&background=4493b8&color=fff`,
           scheduledStart: c.scheduledStartTime,
           scheduledEnd: c.scheduledEndTime,
           reason: c.chiefComplaint,

@@ -231,13 +231,13 @@ export default function MessagesView({
   if (activeCall) {
     if (activeCall.type === "video") {
       return (
-        <div className="flex flex-col h-[calc(100vh-140px)] -m-4 lg:-m-8 bg-slate-900 overflow-hidden">
+        <div className="flex flex-col h-[calc(100vh-64px)] -m-2 lg:-m-8 bg-slate-900 overflow-hidden">
           <LiveKitCallPanel callInfo={activeCall} onEnded={handleCallEnd} />
         </div>
       );
     }
     return (
-      <div className="flex h-[calc(100vh-140px)] overflow-hidden -m-4 lg:-m-8">
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-2 lg:-m-8">
         <div className="w-full lg:w-1/2 min-w-0 border-r border-slate-800">
           <LiveKitCallPanel callInfo={activeCall} onEnded={handleCallEnd} />
         </div>
@@ -268,61 +268,66 @@ export default function MessagesView({
   const showChatOnMobile = isActiveChatOpen && mobilePane === "chat";
 
   return (
-    <Card className="flex flex-1 overflow-hidden bg-white h-[calc(100vh-140px)] -m-4 lg:-m-8">
-      <ConversationList
-        conversations={conversations}
-        activeId={activeChatId}
-        onSelect={handleChatSelect}
-        isLoading={isLoading || openingContact}
-        onNewChat={onNewChatClick}
-        pageTitle={pageTitle}
-        pageSubtitle={pageSubtitle}
-        emptyStateTitle={emptyStateTitle}
-        emptyStateDesc={emptyStateDesc}
-        onStartConversation={handleStartConversation}
-        className={
-          showListOnMobile
-            ? "flex w-full md:w-96"
-            : "hidden md:flex md:w-96"
-        }
-        // Mobile shortcut: jump back into open chat without re-selecting
-        onOpenActiveChat={
-          isActiveChatOpen
-            ? () => setMobilePane("chat")
-            : undefined
-        }
-        hasActiveChat={isActiveChatOpen}
-      />
+    <div className="w-full max-w-6xl mx-auto">
+      <Card
+        noPadding
+        className="flex overflow-hidden h-[calc(100vh-80px)] lg:h-[calc(100vh-128px)]"
+      >
+        <ConversationList
+          conversations={conversations}
+          activeId={activeChatId}
+          onSelect={handleChatSelect}
+          isLoading={isLoading || openingContact}
+          onNewChat={onNewChatClick}
+          pageTitle={pageTitle}
+          pageSubtitle={pageSubtitle}
+          emptyStateTitle={emptyStateTitle}
+          emptyStateDesc={emptyStateDesc}
+          onStartConversation={handleStartConversation}
+          className={
+            showListOnMobile
+              ? "flex w-full md:w-96"
+              : "hidden md:flex md:w-96"
+          }
+          // Mobile shortcut: jump back into open chat without re-selecting
+          onOpenActiveChat={
+            isActiveChatOpen
+              ? () => setMobilePane("chat")
+              : undefined
+          }
+          hasActiveChat={isActiveChatOpen}
+        />
 
-      {isActiveChatOpen ? (
-        <div
-          className={`flex-1 flex-col relative overflow-hidden min-w-0 ${
-            showChatOnMobile ? "flex" : "hidden md:flex"
-          }`}
-        >
-          <ChatWindow
-            conversationId={activeChatId!}
-            onCallStart={handleCallStart}
-            onCallEnd={handleCallEnd}
-            onBack={handleBackToList}
-          />
-        </div>
-      ) : (
-        <div className="flex-1 hidden md:flex items-center justify-center bg-slate-50">
-          {openingContact ? (
-            <div className="flex flex-col items-center gap-3 text-slate-500">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm font-medium">Opening conversation…</p>
-            </div>
-          ) : (
-            <EmptyState
-              title="Encrypted Messaging"
-              description="Select a contact to begin a secure clinical session."
-              icon={<BiMessageDetail size={48} />}
+        {isActiveChatOpen ? (
+          <div
+            className={`flex-1 flex-col relative overflow-hidden min-w-0 ${
+              showChatOnMobile ? "flex" : "hidden md:flex"
+            }`}
+          >
+            <ChatWindow
+              conversationId={activeChatId!}
+              onCallStart={handleCallStart}
+              onCallEnd={handleCallEnd}
+              onBack={handleBackToList}
             />
-          )}
-        </div>
-      )}
-    </Card>
+          </div>
+        ) : (
+          <div className="flex-1 hidden md:flex items-center justify-center bg-slate-50">
+            {openingContact ? (
+              <div className="flex flex-col items-center gap-3 text-slate-500">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm font-medium">Opening conversation…</p>
+              </div>
+            ) : (
+              <EmptyState
+                title="Encrypted Messaging"
+                description="Select a contact to begin a secure clinical session."
+                icon={<BiMessageDetail size={48} />}
+              />
+            )}
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }

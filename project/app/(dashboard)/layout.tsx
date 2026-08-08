@@ -46,7 +46,7 @@ export default async function DashboardLayout({
         lastName: lName,
         name: lName ? `${fName} ${lName}` : fName,
         role: payload.role as string,
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(fName)}+${encodeURIComponent(lName)}&background=0052cc&color=fff`,
+        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(fName)}+${encodeURIComponent(lName)}&background=4493b8&color=fff`,
       };
     }
   } catch (err) {

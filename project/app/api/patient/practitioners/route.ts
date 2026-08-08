@@ -24,7 +24,7 @@ export async function GET() {
         reviewCount: p.reviewCount || 0,
         nextAvailableMinutes: Math.floor(Math.random() * 60) + 10,
         languages: p.languages || ['English'],
-        avatarUrl: `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=0052cc&color=fff`,
+        avatarUrl: `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=4493b8&color=fff`,
         isOnline: p.isOnline,
         consultationFee: 0,
         experienceYears: p.experienceYears,

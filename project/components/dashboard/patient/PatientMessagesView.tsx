@@ -91,7 +91,7 @@ export default function PatientMessagesView() {
             contactName: req.dr,
             avatar:
               req.img ||
-              `https://ui-avatars.com/api/?name=${req.dr.replace(" ", "+")}&background=fbbf24&color=fff`,
+              `https://ui-avatars.com/api/?name=${req.dr.replace(" ", "+")}&background=4493b8&color=fff`,
             lastMessage: "Request pending clinical review.",
             timestamp: "Pending",
             unread: 0,

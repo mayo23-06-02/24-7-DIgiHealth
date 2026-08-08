@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       return {
         id: u._id.toString(),
         name: `Dr. ${u.firstName} ${u.lastName}`,
-        avatar: u.avatarUrl || `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=0052cc&color=fff`,
+        avatar: u.avatarUrl || `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=4493b8&color=fff`,
         specialisation: p.specialisation,
         availableSlots: slots.filter(() => Math.random() > 0.3),
         bio: p.bio,

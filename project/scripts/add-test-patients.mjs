@@ -59,7 +59,7 @@ async function addPatients() {
     lastName: 'Davies',
     profile: {
       fullName: 'Mark Davies',
-      avatarUrl: 'https://ui-avatars.com/api/?name=Mark+Davies&background=0052cc&color=fff'
+      avatarUrl: 'https://ui-avatars.com/api/?name=Mark+Davies&background=4493b8&color=fff'
     }
   });
 
@@ -96,7 +96,7 @@ async function addPatients() {
     lastName: 'Watson',
     profile: {
       fullName: 'Sarah Watson',
-      avatarUrl: 'https://ui-avatars.com/api/?name=Sarah+Watson&background=e11d48&color=fff'
+      avatarUrl: 'https://ui-avatars.com/api/?name=Sarah+Watson&background=4493b8&color=fff'
     }
   });
 

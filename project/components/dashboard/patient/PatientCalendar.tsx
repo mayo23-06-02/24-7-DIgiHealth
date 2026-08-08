@@ -45,7 +45,11 @@ interface Prescription {
   expiryDate: string;
 }
 
-export default function PatientCalendar() {
+interface PatientCalendarProps {
+  headerAction?: React.ReactNode;
+}
+
+export default function PatientCalendar({ headerAction }: PatientCalendarProps = {}) {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [liveCarouselIndex, setLiveCarouselIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
@@ -189,6 +193,7 @@ export default function PatientCalendar() {
       <CalendarHeader
         onPrev={() => setCarouselIndex(p => Math.max(0, p - 1))}
         onNext={() => setCarouselIndex(p => Math.min(carouselDays.length - 1, p + 1))}
+        action={headerAction}
       />
 
       <div className="flex-1 flex flex-col overflow-y-auto py-4 space-y-4 custom-scrollbar">

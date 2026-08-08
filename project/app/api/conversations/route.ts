@@ -136,7 +136,7 @@ export async function GET() {
       practitionerId: conv.practitionerId?._id || conv.practitionerId,
       doctor: contactName,
       avatar: other
-        ? `https://ui-avatars.com/api/?name=${encodeURIComponent(other.firstName || '')}+${encodeURIComponent(other.lastName || '')}&background=0052cc&color=fff`
+        ? `https://ui-avatars.com/api/?name=${encodeURIComponent(other.firstName || '')}+${encodeURIComponent(other.lastName || '')}&background=4493b8&color=fff`
         : '',
       lastMessage: lastMsg?.content || 'No messages yet.',
       timestamp: conv.lastActivityAt

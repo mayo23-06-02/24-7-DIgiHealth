@@ -51,7 +51,7 @@ export async function GET() {
       field: prac ? specMap.get(prac._id.toString()) || 'General' : 'General',
       date: new Date(c.scheduledStartTime).toDateString(),
       time: new Date(c.scheduledStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      img: prac ? `https://ui-avatars.com/api/?name=${prac.firstName}+${prac.lastName}&background=0052cc&color=fff` : '',
+      img: prac ? `https://ui-avatars.com/api/?name=${prac.firstName}+${prac.lastName}&background=4493b8&color=fff` : '',
       concern: c.chiefComplaint || 'Scheduled Consultation',
       status: c.status === 'requested' ? 'requested' : c.status === 'scheduled' ? 'confirmed' : c.status,
       countdown: isPast ? 'Past' : 'Upcoming',

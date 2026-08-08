@@ -150,7 +150,7 @@ const practitioners = [
       specialisation: "General Practitioner",
       hpcsNumber: "MP0123456",
       avatarUrl:
-        "https://ui-avatars.com/api/?name=Sipho+Nkosi&background=0052cc&color=fff",
+        "https://ui-avatars.com/api/?name=Sipho+Nkosi&background=4493b8&color=fff",
       bio: "Experienced GP with 12 years in telehealth and preventive care.",
     },
   },
@@ -163,7 +163,7 @@ const practitioners = [
       specialisation: "Cardiologist",
       hpcsNumber: "MP0789012",
       avatarUrl:
-        "https://ui-avatars.com/api/?name=Anke+van+Wyk&background=00A3BF&color=fff",
+        "https://ui-avatars.com/api/?name=Anke+van+Wyk&background=4493b8&color=fff",
       bio: "Cardiologist specialising in cardiac risk stratification and heart failure management.",
     },
   },
@@ -437,7 +437,7 @@ async function seed() {
       role: "patient",
       profile: {
         fullName: p.fullName,
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.fullName)}&background=e2e8f0&color=0052cc`,
+        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.fullName)}&background=4493b8&color=fff`,
       },
     });
 
