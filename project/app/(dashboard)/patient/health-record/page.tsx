@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Pill,
   FlaskConical as Lab,
@@ -53,6 +54,7 @@ import type {
 import { formatHealthDate } from "@/components/dashboard/patient/health-record/types";
 
 export default function HealthRecordPage() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<HealthRecordTab>("timeline");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVital, setSelectedVital] = useState<
@@ -88,10 +90,9 @@ export default function HealthRecordPage() {
   const [immunizations, setImmunizations] = useState<Immunization[]>([]);
   const [loadingRecords, setLoadingRecords] = useState(true);
 
-  // Deep-link from notifications: /patient/health-record?tab=medications
+  // Update active tab when query parameter changes (sidebar & notifications)
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    const tab = new URLSearchParams(window.location.search).get("tab");
+    const tab = searchParams.get("tab") as HealthRecordTab | null;
     const allowed = [
       "timeline",
       "body_map",
@@ -104,7 +105,7 @@ export default function HealthRecordPage() {
     if (tab && (allowed as readonly string[]).includes(tab)) {
       setActiveTab(tab as (typeof allowed)[number]);
     }
-  }, []);
+  }, [searchParams]);
 
   const fetchHealthRecord = React.useCallback(() => {
     return fetch("/api/patient/health-record")

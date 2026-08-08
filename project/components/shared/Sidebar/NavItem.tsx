@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { SidebarItem } from "./types";
 import NavItemContent from "./NavItemContent";
-import Tooltip from "@/components/ui/Tooltip";
 
 interface NavItemProps {
   item: SidebarItem;
@@ -61,24 +60,22 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
           />
         </Link>
         {!isCollapsed && (
-          <Tooltip content={isExpanded ? "Collapse" : "Expand"} side="right">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-              className="absolute right-2 p-1.5 hover:bg-primary/10 rounded-md transition-colors"
-              aria-label={isExpanded ? "Collapse menu" : "Expand menu"}
-            >
-              <ChevronDown
-                size={16}
-                className={`transition-transform  duration-300 ${
-                  isExpanded ? "rotate-180 " : "text-white"
-                }`}
-              />
-            </button>
-          </Tooltip>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            className="absolute right-2 p-1.5 hover:bg-primary/10 rounded-md transition-colors"
+            aria-label={isExpanded ? "Collapse menu" : "Expand menu"}
+          >
+            <ChevronDown
+              size={16}
+              className={`transition-transform  duration-300 ${
+                isExpanded ? "rotate-180 " : "text-white"
+              }`}
+            />
+          </button>
         )}
       </div>
 

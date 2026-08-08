@@ -24,6 +24,9 @@ import {
   Pill,
   Stethoscope,
   FileCheck,
+  Zap,
+  Activity as BodyMapIcon,
+  Syringe,
 } from "lucide-react";
 
 export const MAIN_NAV: SidebarItem[] = [
@@ -41,6 +44,16 @@ export const MAIN_NAV: SidebarItem[] = [
     href: "/[role]/appointments",
     roles: ["patient", "practitioner"],
     children: [
+      {
+        label: "All Appointments",
+        href: "/[role]/appointments?tab=all",
+        icon: Calendar,
+      },
+      {
+        label: "Requests",
+        href: "/[role]/appointments?tab=requests",
+        icon: Bell,
+      },
       {
         label: "Upcoming",
         href: "/[role]/appointments?tab=upcoming",
@@ -76,6 +89,16 @@ export const MAIN_NAV: SidebarItem[] = [
         icon: Heart,
       },
       {
+        label: "Body Map",
+        href: "/[role]/health-record?tab=body_map",
+        icon: BodyMapIcon,
+      },
+      {
+        label: "Vitals",
+        href: "/[role]/health-record?tab=vitals",
+        icon: Zap,
+      },
+      {
         label: "Medications",
         href: "/[role]/health-record?tab=medications",
         icon: Pill,
@@ -89,6 +112,11 @@ export const MAIN_NAV: SidebarItem[] = [
         label: "Allergies",
         href: "/[role]/health-record?tab=allergies",
         icon: AlertCircle,
+      },
+      {
+        label: "Immunizations",
+        href: "/[role]/health-record?tab=immunizations",
+        icon: Syringe,
       },
     ],
   },
