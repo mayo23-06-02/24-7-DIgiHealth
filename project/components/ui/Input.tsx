@@ -15,7 +15,7 @@ interface InputProps
 
 /**
  * Single form-field contract for the whole product (see design.md §3.2):
- * rounded-lg bordered field, visible label, one error style. Every hand-rolled
+ * rounded-full bordered field, visible label, one error style. Every hand-rolled
  * `<input className="border ...">` elsewhere should migrate to this.
  */
 const Input: React.FC<InputProps> = ({
@@ -44,7 +44,7 @@ const Input: React.FC<InputProps> = ({
   if (isPassword) paddingClass = "px-4 pr-11";
 
   const commonStyles = `
-    w-full bg-white rounded-lg outline-none border
+    w-full bg-white rounded-full outline-none border
     transition-all text-ink-900 placeholder-slate-400
     focus:ring-4 focus:ring-primary/10 focus:border-primary
     ${error ? "border-danger-500 bg-danger-50" : "border-slate-200 hover:border-slate-300"}

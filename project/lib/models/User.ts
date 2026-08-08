@@ -21,6 +21,9 @@ export interface IUser extends Document {
    */
   emailVerified: boolean;
   emailVerifiedAt?: Date;
+  /** Bcrypt hash of the current 6-digit verification code, if one is pending */
+  otpCodeHash?: string;
+  otpExpiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +53,8 @@ const UserSchema = new Schema<IUser>(
     // registration sets false until /verify-email completes
     emailVerified: { type: Boolean, default: true, index: true },
     emailVerifiedAt: { type: Date },
+    otpCodeHash: { type: String },
+    otpExpiresAt: { type: Date },
   },
   { timestamps: true }
 );

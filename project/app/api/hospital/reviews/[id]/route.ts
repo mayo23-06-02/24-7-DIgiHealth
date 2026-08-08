@@ -1,10 +1,25 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import { Review } from '@/lib/models/ReviewsDocs';
 import Staff from '@/lib/models/Staff';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function assertReviewInFacility(reviewId: string, hospitalId: string) {
+  const review = await Review.findById(reviewId).lean();
+  if (!review) return null;
+
+  const doctorStaff = await Staff.findOne({
+    facilityId: hospitalId,
+    role: 'doctor',
+    userId: (review as any).practitionerId,
+  }).lean();
+
+  return doctorStaff ? review : null;
+}
+
+/** PATCH — approve a review (marks it verified) */
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
     const user = await getRequestUser();
@@ -17,26 +32,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const { id } = await params;
-    const body = await req.json();
-
-    const updatedStaff = await Staff.findOneAndUpdate(
-      { _id: id, facilityId: hospitalId },
-      body,
-      { new: true },
-    ).populate('userId', 'firstName lastName email');
-
-    if (!updatedStaff) {
-      return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
+    const review = await assertReviewInFacility(id, hospitalId);
+    if (!review) {
+      return NextResponse.json({ success: false, error: 'Review not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: updatedStaff });
-
+    await Review.findByIdAndUpdate(id, { isVerified: true });
+    return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error('[PATCH /api/hospital/reviews/[id]]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+/** DELETE — dismiss a review */
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
     const user = await getRequestUser();
@@ -49,16 +59,15 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     }
 
     const { id } = await params;
-
-    const deletedStaff = await Staff.findOneAndDelete({ _id: id, facilityId: hospitalId });
-
-    if (!deletedStaff) {
-      return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
+    const review = await assertReviewInFacility(id, hospitalId);
+    if (!review) {
+      return NextResponse.json({ success: false, error: 'Review not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: {} });
-
+    await Review.findByIdAndDelete(id);
+    return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error('[DELETE /api/hospital/reviews/[id]]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

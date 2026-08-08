@@ -65,12 +65,23 @@ export async function PATCH(req: NextRequest) {
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
+    }
 
     const body = await req.json();
     const { staffId, ...updates } = body;
 
-    const updated = await Staff.findByIdAndUpdate(staffId, updates, { new: true })
-      .populate('userId', 'firstName lastName email');
+    const updated = await Staff.findOneAndUpdate(
+      { _id: staffId, facilityId: hospitalId },
+      updates,
+      { new: true },
+    ).populate('userId', 'firstName lastName email');
+
+    if (!updated) {
+      return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
@@ -86,6 +97,10 @@ export async function DELETE(req: NextRequest) {
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
+    }
 
     const { searchParams } = new URL(req.url);
     const staffId = searchParams.get('id');
@@ -93,7 +108,11 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'staffId is required' }, { status: 400 });
     }
 
-    await Staff.findByIdAndDelete(staffId);
+    const deleted = await Staff.findOneAndDelete({ _id: staffId, facilityId: hospitalId });
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[DELETE /api/hospital/staff]', error);

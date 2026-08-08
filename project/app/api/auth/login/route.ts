@@ -6,8 +6,8 @@ import { SignJWT } from "jose";
 
 /**
  * POST /api/auth/login
- * Password login. No email verification gate — any active account
- * with a matching password can sign in.
+ * Password login. Blocked until the account's email is verified via
+ * the 6-digit code sent at registration (see /api/auth/otp/*).
  */
 export async function POST(request: Request) {
   try {
@@ -59,6 +59,17 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Incorrect password entered" },
         { status: 401 },
+      );
+    }
+
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        {
+          error: "Please verify your email before signing in.",
+          requiresVerification: true,
+          email: user.email,
+        },
+        { status: 403 },
       );
     }
 

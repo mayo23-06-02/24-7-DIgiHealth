@@ -14,6 +14,13 @@ const STATUS_MAP: Record<string, BadgeStatus> = {
   cancelled: "error",
 };
 
+const emptyAppointmentForm = {
+  type: "consultation",
+  room: "",
+  scheduledStart: "",
+  scheduledEnd: "",
+};
+
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +31,119 @@ export default function AppointmentsPage() {
   const PAGE_SIZE = 12;
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [appointmentForm, setAppointmentForm] = useState(emptyAppointmentForm);
+  const [isSavingAppointment, setIsSavingAppointment] = useState(false);
+  const [appointmentError, setAppointmentError] = useState("");
+
+  const [patientSearch, setPatientSearch] = useState("");
+  const [patientResults, setPatientResults] = useState<any[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [isSearchingPatient, setIsSearchingPatient] = useState(false);
+
+  const [doctorSearch, setDoctorSearch] = useState("");
+  const [doctorResults, setDoctorResults] = useState<any[]>([]);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [isSearchingDoctor, setIsSearchingDoctor] = useState(false);
+
+  useEffect(() => {
+    if (patientSearch.length < 2 || selectedPatient) {
+      setPatientResults([]);
+      return;
+    }
+    setIsSearchingPatient(true);
+    const debounce = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/hospital/patients/search?search=${encodeURIComponent(patientSearch)}`,
+        );
+        const json = await res.json();
+        if (json.success) setPatientResults(json.data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsSearchingPatient(false);
+      }
+    }, 300);
+    return () => clearTimeout(debounce);
+  }, [patientSearch, selectedPatient]);
+
+  useEffect(() => {
+    if (doctorSearch.length < 2 || selectedDoctor) {
+      setDoctorResults([]);
+      return;
+    }
+    setIsSearchingDoctor(true);
+    const debounce = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/hospital/doctors/search?search=${encodeURIComponent(doctorSearch)}&role=doctor`,
+        );
+        const json = await res.json();
+        if (json.success) setDoctorResults(json.data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsSearchingDoctor(false);
+      }
+    }, 300);
+    return () => clearTimeout(debounce);
+  }, [doctorSearch, selectedDoctor]);
+
+  const resetAppointmentForm = () => {
+    setAppointmentForm(emptyAppointmentForm);
+    setPatientSearch("");
+    setPatientResults([]);
+    setSelectedPatient(null);
+    setDoctorSearch("");
+    setDoctorResults([]);
+    setSelectedDoctor(null);
+    setAppointmentError("");
+  };
+
+  const handleSaveAppointment = async () => {
+    if (!selectedPatient || !selectedDoctor) {
+      setAppointmentError("Select a patient and a practitioner");
+      return;
+    }
+    if (!appointmentForm.room.trim()) {
+      setAppointmentError("Room is required");
+      return;
+    }
+    if (!appointmentForm.scheduledStart || !appointmentForm.scheduledEnd) {
+      setAppointmentError("Start and end time are required");
+      return;
+    }
+
+    setIsSavingAppointment(true);
+    setAppointmentError("");
+    try {
+      const res = await fetch("/api/hospital/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientId: selectedPatient._id,
+          practitionerId: selectedDoctor._id,
+          type: appointmentForm.type,
+          room: appointmentForm.room,
+          scheduledStart: appointmentForm.scheduledStart,
+          scheduledEnd: appointmentForm.scheduledEnd,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setModalOpen(false);
+        resetAppointmentForm();
+        fetchAppointments();
+      } else {
+        setAppointmentError(json.error || "Failed to create appointment");
+      }
+    } catch (e) {
+      console.error(e);
+      setAppointmentError("An error occurred while saving");
+    } finally {
+      setIsSavingAppointment(false);
+    }
+  };
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -271,27 +391,154 @@ export default function AppointmentsPage() {
       {/* Create Appointment Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-lg w-full max-w-md shadow-none p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-lg w-full max-w-md shadow-none p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold font-grotesk">
                 New Appointment
               </h2>
               <button
-                onClick={() => setModalOpen(false)}
+                onClick={() => {
+                  setModalOpen(false);
+                  resetAppointmentForm();
+                }}
                 className="text-slate-500 hover:text-slate-600"
               >
                 <BiX size={24} />
               </button>
             </div>
             <div className="space-y-4">
+              {/* Patient picker */}
+              <div className="relative">
+                <h1 className="text-xs font-bold text-slate-500 tracking-wider mb-1 block">
+                  Patient
+                </h1>
+                {selectedPatient ? (
+                  <div className="flex items-center justify-between border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50">
+                    <span>
+                      {selectedPatient.firstName} {selectedPatient.lastName}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setSelectedPatient(null);
+                        setPatientSearch("");
+                      }}
+                      className="text-slate-400 hover:text-slate-600"
+                    >
+                      <BiX size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      value={patientSearch}
+                      onChange={(e) => setPatientSearch(e.target.value)}
+                      placeholder="Search patient by name or email..."
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                    />
+                    {(isSearchingPatient || patientResults.length > 0) && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                        {isSearchingPatient ? (
+                          <div className="p-3 text-center text-sm text-slate-500">
+                            <BiLoaderAlt className="animate-spin inline mr-2" />
+                            Searching...
+                          </div>
+                        ) : (
+                          patientResults.map((p) => (
+                            <button
+                              key={p._id}
+                              onClick={() => {
+                                setSelectedPatient(p);
+                                setPatientResults([]);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors"
+                            >
+                              {p.firstName} {p.lastName}{" "}
+                              <span className="text-slate-400">
+                                ({p.email})
+                              </span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Practitioner picker */}
+              <div className="relative">
+                <h1 className="text-xs font-bold text-slate-500 tracking-wider mb-1 block">
+                  Practitioner
+                </h1>
+                {selectedDoctor ? (
+                  <div className="flex items-center justify-between border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50">
+                    <span>
+                      Dr. {selectedDoctor.firstName} {selectedDoctor.lastName}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setSelectedDoctor(null);
+                        setDoctorSearch("");
+                      }}
+                      className="text-slate-400 hover:text-slate-600"
+                    >
+                      <BiX size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      value={doctorSearch}
+                      onChange={(e) => setDoctorSearch(e.target.value)}
+                      placeholder="Search practitioner by name or email..."
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                    />
+                    {(isSearchingDoctor || doctorResults.length > 0) && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                        {isSearchingDoctor ? (
+                          <div className="p-3 text-center text-sm text-slate-500">
+                            <BiLoaderAlt className="animate-spin inline mr-2" />
+                            Searching...
+                          </div>
+                        ) : (
+                          doctorResults.map((d) => (
+                            <button
+                              key={d._id}
+                              onClick={() => {
+                                setSelectedDoctor(d);
+                                setDoctorResults([]);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors"
+                            >
+                              Dr. {d.firstName} {d.lastName}{" "}
+                              <span className="text-slate-400">
+                                ({d.email})
+                              </span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
               <div>
                 <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
                   Type
                 </h1>
-                <select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
-                  <option>Consultation</option>
-                  <option>Procedure</option>
-                  <option>Lab</option>
+                <select
+                  value={appointmentForm.type}
+                  onChange={(e) =>
+                    setAppointmentForm({ ...appointmentForm, type: e.target.value })
+                  }
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="consultation">Consultation</option>
+                  <option value="procedure">Procedure</option>
+                  <option value="lab">Lab</option>
                 </select>
               </div>
               <div>
@@ -300,6 +547,10 @@ export default function AppointmentsPage() {
                 </h1>
                 <input
                   type="text"
+                  value={appointmentForm.room}
+                  onChange={(e) =>
+                    setAppointmentForm({ ...appointmentForm, room: e.target.value })
+                  }
                   className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
                   placeholder="e.g. R-5"
                 />
@@ -311,6 +562,13 @@ export default function AppointmentsPage() {
                   </h1>
                   <input
                     type="datetime-local"
+                    value={appointmentForm.scheduledStart}
+                    onChange={(e) =>
+                      setAppointmentForm({
+                        ...appointmentForm,
+                        scheduledStart: e.target.value,
+                      })
+                    }
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
@@ -320,17 +578,44 @@ export default function AppointmentsPage() {
                   </h1>
                   <input
                     type="datetime-local"
+                    value={appointmentForm.scheduledEnd}
+                    onChange={(e) =>
+                      setAppointmentForm({
+                        ...appointmentForm,
+                        scheduledEnd: e.target.value,
+                      })
+                    }
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
+
+              {appointmentError && (
+                <p className="text-xs font-medium text-rose-600">
+                  {appointmentError}
+                </p>
+              )}
             </div>
             <div className="flex justify-end gap-3 mt-4">
-              <Button variant="outline" onClick={() => setModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setModalOpen(false);
+                  resetAppointmentForm();
+                }}
+                disabled={isSavingAppointment}
+              >
                 Cancel
               </Button>
-              <Button onClick={() => setModalOpen(false)}>
-                Save Appointment
+              <Button
+                onClick={handleSaveAppointment}
+                disabled={isSavingAppointment}
+              >
+                {isSavingAppointment ? (
+                  <BiLoaderAlt className="animate-spin" />
+                ) : (
+                  "Save Appointment"
+                )}
               </Button>
             </div>
           </div>

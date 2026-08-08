@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import localforage from "localforage";
 import { roleConfig, skippableSteps } from "../constants";
 import { validateStep } from "../validation";
 
 export function useRegistrationWizard(role: string) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const safeRole = Object.keys(roleConfig).includes(role) ? role : "patient";
   const config = roleConfig[safeRole];
   const totalSteps = config.steps.length;
@@ -18,6 +19,42 @@ export function useRegistrationWizard(role: string) {
   const [submitting, setSubmitting] = useState(false);
   const [showDraftBanner, setShowDraftBanner] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [inviteInfo, setInviteInfo] = useState<{ facilityName: string } | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
+  // Hospital-admin invite link: /register/practitioner?invite=<token>
+  // Pre-fills + locks the email and tags formData so /api/auth/register
+  // can auto-attach this account to the inviting facility's Staff roster.
+  useEffect(() => {
+    const token = searchParams.get("invite");
+    if (!token || safeRole !== "practitioner") return;
+
+    let cancelled = false;
+    fetch(`/api/invites/${token}`)
+      .then(async (res) => {
+        const json = await res.json();
+        if (cancelled) return;
+        if (!res.ok || !json.success) {
+          setInviteError(json.error || "This invite link is not valid.");
+          return;
+        }
+        setInviteInfo({ facilityName: json.data.facilityName });
+        setFormData((prev: any) => ({
+          ...prev,
+          email: json.data.email,
+          inviteToken: token,
+        }));
+      })
+      .catch(() => {
+        if (!cancelled) setInviteError("Could not verify this invite link.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // Only re-run if the token itself changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, safeRole]);
 
   // Online status
   useEffect(() => {
@@ -143,10 +180,8 @@ export function useRegistrationWizard(role: string) {
         .toString()
         .trim()
         .toLowerCase();
-      // Account created — no verification needed, go straight to login
-      router.push(
-        `/login?email=${encodeURIComponent(email)}&registered=true`,
-      );
+      // Account created — confirm email ownership with a 6-digit code next
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       setGlobalError(err.message ?? "Submission failed. Please try again.");
       setSubmitting(false);
@@ -164,6 +199,8 @@ export function useRegistrationWizard(role: string) {
     submitting,
     showDraftBanner,
     globalError,
+    inviteInfo,
+    inviteError,
     config,
     progress,
     isSkippable,

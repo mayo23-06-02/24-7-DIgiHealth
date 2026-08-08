@@ -268,7 +268,7 @@ export default function MessagesView({
   const showChatOnMobile = isActiveChatOpen && mobilePane === "chat";
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-[1600px] mx-auto">
       <Card
         noPadding
         className="flex overflow-hidden h-[calc(100vh-80px)] lg:h-[calc(100vh-128px)]"

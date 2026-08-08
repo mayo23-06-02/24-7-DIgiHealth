@@ -35,8 +35,9 @@ export default function HospitalReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("all");
+  const [moderatingId, setModeratingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchReviews = () => {
     fetch("/api/hospital/reviews")
       .then((r) => r.json())
       .then((d) => {
@@ -44,7 +45,43 @@ export default function HospitalReviewsPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchReviews();
   }, []);
+
+  const handleApprove = async (id: string) => {
+    setModeratingId(id);
+    try {
+      const res = await fetch(`/api/hospital/reviews/${id}`, { method: "PATCH" });
+      const json = await res.json();
+      if (json.success) {
+        setReviews((prev) =>
+          prev.map((r) => (r._id === id ? { ...r, status: "approved" } : r)),
+        );
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setModeratingId(null);
+    }
+  };
+
+  const handleDismiss = async (id: string) => {
+    setModeratingId(id);
+    try {
+      const res = await fetch(`/api/hospital/reviews/${id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        setReviews((prev) => prev.filter((r) => r._id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setModeratingId(null);
+    }
+  };
 
   const moderated = reviews.filter((r) =>
     filter === "all" ? true : r.status === filter,
@@ -141,11 +178,29 @@ export default function HospitalReviewsPage() {
               </p>
               {rev.status === "pending" && (
                 <div className="flex gap-2 mt-1 pt-3 border-t border-slate-100">
-                  <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition-colors">
-                    <BiCheck size={16} /> Approve
+                  <button
+                    onClick={() => handleApprove(rev._id)}
+                    disabled={moderatingId === rev._id}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                  >
+                    {moderatingId === rev._id ? (
+                      <BiLoaderAlt size={16} className="animate-spin" />
+                    ) : (
+                      <BiCheck size={16} />
+                    )}{" "}
+                    Approve
                   </button>
-                  <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-bold hover:bg-rose-100 transition-colors">
-                    <BiTrash size={16} /> Dismiss
+                  <button
+                    onClick={() => handleDismiss(rev._id)}
+                    disabled={moderatingId === rev._id}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-bold hover:bg-rose-100 transition-colors disabled:opacity-50"
+                  >
+                    {moderatingId === rev._id ? (
+                      <BiLoaderAlt size={16} className="animate-spin" />
+                    ) : (
+                      <BiTrash size={16} />
+                    )}{" "}
+                    Dismiss
                   </button>
                 </div>
               )}

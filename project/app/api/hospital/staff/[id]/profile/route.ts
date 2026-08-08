@@ -4,6 +4,8 @@ import Staff from '@/lib/models/Staff';
 import User from '@/lib/models/User';
 import { Consultation } from '@/lib/models/Consultation';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
 export async function GET(
   _req: Request,
@@ -11,9 +13,18 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
+    const user = await getRequestUser();
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) {
+      return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
+    }
+
     const { id } = await params;
 
-    const staffDoc = await Staff.findById(id)
+    const staffDoc = await Staff.findOne({ _id: id, facilityId: hospitalId })
       .populate('userId', 'firstName lastName email mobile role status createdAt')
       .lean();
 

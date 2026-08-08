@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
 
 // SLA targets are configuration-driven. In a full implementation these
 // would be stored in a DB collection and editable by hospital admins.
@@ -13,6 +14,10 @@ const SLA_TARGETS = [
 
 export async function GET() {
   try {
+    const user = await getRequestUser();
+    if (!user || user.role !== 'hospital_admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     return NextResponse.json({ success: true, data: SLA_TARGETS });
   } catch (error) {
     console.error('GET /api/hospital/sla error:', error);

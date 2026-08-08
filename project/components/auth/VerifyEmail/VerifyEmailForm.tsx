@@ -1,45 +1,54 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { BiEnvelope, BiLoaderAlt, BiCheckCircle, BiMailSend } from "react-icons/bi";
+import { Lock, Loader2, CheckCircle2, Mail } from "lucide-react";
+
+const RESEND_COOLDOWN_SECONDS = 30;
 
 /**
- * Email verification via Supabase magic / sign-in link only (no OTP code).
+ * Email verification via a 6-digit code sent by email.
+ * Verifying also logs the user in (the API sets the session cookie).
  */
 export default function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialEmail = (searchParams?.get("email") || "").trim().toLowerCase();
-  const linkError = searchParams?.get("error") || "";
 
   const [email, setEmail] = useState(initialEmail);
-  const [linkSent, setLinkSent] = useState(false);
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState(linkError);
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [alreadyVerified, setAlreadyVerified] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const hasAutoSent = useRef(false);
 
   useEffect(() => {
     if (initialEmail) setEmail(initialEmail);
   }, [initialEmail]);
 
-  useEffect(() => {
-    if (linkError) setError(linkError);
-  }, [linkError]);
-
-  // Auto-send magic link when arriving from registration
+  // Auto-send a code when arriving fresh from registration
   useEffect(() => {
     if (!initialEmail || !initialEmail.includes("@")) return;
-    if (searchParams?.get("error")) return;
-    void sendLink(initialEmail, true);
+    if (hasAutoSent.current) return;
+    hasAutoSent.current = true;
+    void sendCode(initialEmail, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialEmail]);
 
-  const sendLink = async (targetEmail?: string, silent = false) => {
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  const sendCode = async (targetEmail?: string, silent = false) => {
     const e = (targetEmail || email).trim().toLowerCase();
     setError("");
     if (!silent) setInfo("");
@@ -52,7 +61,7 @@ export default function VerifyEmailForm() {
       const res = await fetch("/api/auth/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: e, purpose: "verify" }),
+        body: JSON.stringify({ email: e }),
       });
       const data = await res.json();
       if (data.alreadyVerified) {
@@ -60,16 +69,44 @@ export default function VerifyEmailForm() {
         setInfo("Email is already verified. You can sign in.");
         return;
       }
-      if (!res.ok) throw new Error(data.error || "Failed to send sign-in link");
+      if (!res.ok) throw new Error(data.error || "Failed to send verification code");
       setEmail(e);
-      setLinkSent(true);
-      setInfo(
-        `We sent a sign-in link to ${e}. Open it on this device to verify, then sign in with your password.`,
-      );
+      setCodeSent(true);
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+      setInfo(`We sent a 6-digit code to ${e}. Enter it below to activate your account.`);
     } catch (err: any) {
-      setError(err?.message || "Failed to send sign-in link");
+      setError(err?.message || "Failed to send verification code");
     } finally {
       setSending(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    setError("");
+    if (code.trim().length !== 6) {
+      setError("Enter the 6-digit code from your email.");
+      return;
+    }
+    setVerifying(true);
+    try {
+      const res = await fetch("/api/auth/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code: code.trim() }),
+      });
+      const data = await res.json();
+      if (data.alreadyVerified) {
+        setAlreadyVerified(true);
+        setInfo("Email is already verified. You can sign in.");
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || "Verification failed");
+      // Verified + logged in (cookie set by the API) — go straight to their dashboard
+      router.push(`/${data.user.role}`);
+    } catch (err: any) {
+      setError(err?.message || "Verification failed");
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -77,47 +114,38 @@ export default function VerifyEmailForm() {
     <div className="bg-white rounded-lg lg:rounded-r-none w-full max-w-lg mx-auto lg:max-w-2/5 lg:w-1/2 p-4 md:p-8 py-12 flex flex-col justify-center">
       <div className="mb-6 gap-3 flex flex-col items-center text-center">
         <div className="w-14 h-14 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-          {alreadyVerified || linkSent ? (
-            linkSent && !alreadyVerified ? (
-              <BiMailSend size={28} />
-            ) : (
-              <BiCheckCircle size={28} />
-            )
+          {alreadyVerified ? (
+            <CheckCircle2 size={28} />
+          ) : codeSent ? (
+            <Lock size={28} />
           ) : (
-            <BiEnvelope size={28} />
+            <Mail size={28} />
           )}
         </div>
         <h2 className="text-2xl font-bold text-slate-900 tracking-tighter font-grotesk">
           {alreadyVerified
             ? "Email already verified"
-            : linkSent
-              ? "Check your email"
+            : codeSent
+              ? "Enter your code"
               : "Verify your email"}
         </h2>
         <p className="text-slate-500 text-sm max-w-sm">
           {alreadyVerified
             ? "Your account is ready. Sign in with your email and password."
-            : linkSent
-              ? "Click the sign-in link in the email we sent. No code is required."
-              : "We will email you a one-click sign-in link to confirm your DigiHealth account."}
+            : codeSent
+              ? "We emailed a 6-digit code — it expires in 10 minutes."
+              : "We'll email you a 6-digit code to confirm your DigiHealth account."}
         </p>
       </div>
 
       {alreadyVerified ? (
         <div className="space-y-4">
           {info && (
-            <p className="text-sm font-semibold text-emerald-600 text-center">
+            <p className="text-sm font-semibold text-success-700 text-center">
               {info}
             </p>
           )}
-          <Button
-            fullWidth
-            onClick={() =>
-              router.push(
-                `/login?registered=true&verified=true&email=${encodeURIComponent(email)}`,
-              )
-            }
-          >
+          <Button fullWidth onClick={() => router.push(`/login?email=${encodeURIComponent(email)}`)}>
             Continue to sign in
           </Button>
         </div>
@@ -131,48 +159,63 @@ export default function VerifyEmailForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
+            disabled={codeSent}
           />
 
-          {linkSent && (
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-center space-y-2">
-              <p className="text-sm font-bold text-slate-800">
-                Sign-in link sent
-              </p>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Open the email and click{" "}
-                <span className="font-semibold">Confirm your mail</span> / the
-                DigiHealth link. You will return here verified, then use your
-                password on the login page.
-              </p>
-            </div>
+          {codeSent && (
+            <Input
+              label="6-digit code"
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+              className="text-center text-2xl tracking-[0.5em] font-bold"
+              autoFocus
+            />
           )}
 
-          <Button
-            type="button"
-            fullWidth
-            disabled={sending}
-            onClick={() => void sendLink()}
-            icon={
-              sending ? (
-                <BiLoaderAlt className="animate-spin" size={18} />
-              ) : (
-                <BiMailSend size={18} />
-              )
-            }
-            iconPosition="left"
-          >
-            {sending
-              ? "Sending link…"
-              : linkSent
-                ? "Resend sign-in link"
-                : "Send sign-in link"}
-          </Button>
+          {codeSent ? (
+            <Button
+              type="button"
+              fullWidth
+              disabled={verifying || code.length !== 6}
+              onClick={() => void verifyCode()}
+              icon={verifying ? <Loader2 className="animate-spin" size={18} /> : undefined}
+              iconPosition="left"
+            >
+              {verifying ? "Verifying…" : "Verify & continue"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              fullWidth
+              disabled={sending}
+              onClick={() => void sendCode()}
+              icon={sending ? <Loader2 className="animate-spin" size={18} /> : <Mail size={18} />}
+              iconPosition="left"
+            >
+              {sending ? "Sending code…" : "Send verification code"}
+            </Button>
+          )}
+
+          {codeSent && (
+            <button
+              type="button"
+              onClick={() => void sendCode()}
+              disabled={sending || cooldown > 0}
+              className="w-full text-center text-sm font-semibold text-primary disabled:text-slate-300 disabled:cursor-not-allowed"
+            >
+              {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
+            </button>
+          )}
 
           {error && (
-            <p className="text-red-500 text-sm font-bold text-center">{error}</p>
+            <p className="text-danger-500 text-sm font-bold text-center">{error}</p>
           )}
           {info && !error && (
-            <p className="text-emerald-600 text-sm font-semibold text-center">
+            <p className="text-success-700 text-sm font-semibold text-center">
               {info}
             </p>
           )}

@@ -16,63 +16,6 @@ interface SLAMetric {
   description: string;
 }
 
-const defaultSLAs: SLAMetric[] = [
-  {
-    id: "1",
-    name: "Emergency Response Time",
-    target: "< 8",
-    current: "6.2",
-    unit: "min",
-    status: "met",
-    description: "Time from emergency call to first responder contact",
-  },
-  {
-    id: "2",
-    name: "Outpatient Wait Time",
-    target: "< 30",
-    current: "34",
-    unit: "min",
-    status: "at_risk",
-    description: "Average waiting time for outpatient consultations",
-  },
-  {
-    id: "3",
-    name: "Teleconsultation Connect",
-    target: "< 2",
-    current: "1.4",
-    unit: "min",
-    status: "met",
-    description: "Time for a patient to connect with a practitioner",
-  },
-  {
-    id: "4",
-    name: "Lab Result Turnaround",
-    target: "< 4",
-    current: "5.1",
-    unit: "hrs",
-    status: "breached",
-    description: "Time from sample collection to result delivery",
-  },
-  {
-    id: "5",
-    name: "Appointment Booking",
-    target: "< 24",
-    current: "19",
-    unit: "hrs",
-    status: "met",
-    description: "Lead time to secure a booked appointment slot",
-  },
-  {
-    id: "6",
-    name: "Discharge Processing",
-    target: "< 2",
-    current: "1.8",
-    unit: "hrs",
-    status: "met",
-    description: "Time to process and complete patient discharge",
-  },
-];
-
 const SLA_STATUS_MAP: Record<SLAMetric["status"], BadgeStatus> = {
   met: "success",
   at_risk: "warning",
@@ -111,8 +54,24 @@ function ProgressBar({ target, current }: { target: string; current: string }) {
 }
 
 export default function HospitalSLAPage() {
-  const [slas] = useState<SLAMetric[]>(defaultSLAs);
-  const [loading] = useState(false);
+  const [slas, setSlas] = useState<SLAMetric[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/hospital/sla")
+      .then((res) => res.json())
+      .then((json) => {
+        if (!cancelled && json.success) setSlas(json.data);
+      })
+      .catch((e) => console.error(e))
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const met = slas.filter((s) => s.status === "met").length;
   const breached = slas.filter((s) => s.status === "breached").length;

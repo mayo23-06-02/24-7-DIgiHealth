@@ -13,9 +13,8 @@ function RightPanel() {
         Confirm your inbox to activate DigiHealth
       </h3>
       <p className="text-white/80 text-sm leading-relaxed max-w-md">
-        We email a one-click Supabase sign-in link to confirm your address. No
-        codes to type. After you open the link, sign in with the password you
-        created.
+        We email a 6-digit code to confirm your address. Enter it here and
+        you're signed in immediately — no separate login step needed.
       </p>
     </div>
   );

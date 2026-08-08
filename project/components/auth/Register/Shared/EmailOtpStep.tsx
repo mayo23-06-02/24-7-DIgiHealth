@@ -5,8 +5,8 @@ import Input from "@/components/ui/Input";
 import { BiLockAlt, BiEnvelope } from "react-icons/bi";
 
 /**
- * Registration security step — password only.
- * No email verification step; the account is active immediately.
+ * Registration security step — password entry. A 6-digit email
+ * verification code is sent immediately after this on submission.
  */
 export default function EmailOtpStep({
   formData,
@@ -32,7 +32,8 @@ export default function EmailOtpStep({
         </h3>
         <p className="text-sm text-slate-500 mb-8">
           Create a password for day-to-day sign-in. Once you finish
-          registration your account is ready — no email verification needed.
+          registration, we'll email you a 6-digit code to confirm your
+          address.
         </p>
 
         <div className="space-y-6">
@@ -80,14 +81,14 @@ export default function EmailOtpStep({
         <BiEnvelope className="text-primary shrink-0 mt-0.5" size={22} />
         <div>
           <p className="text-sm font-bold text-slate-800">
-            Next: sign in
+            Next: verify your email
           </p>
           <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-            After registering, sign in with{" "}
+            After registering, we'll send a 6-digit code to{" "}
             <span className="font-semibold text-slate-700">
               {email || "your address"}
             </span>{" "}
-            and this password.
+            — enter it to activate your account.
           </p>
         </div>
       </div>

@@ -1,17 +1,108 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { SignJWT } from "jose";
+import { connectToDatabase } from "@/lib/mongodb";
+import User from "@/lib/models/User";
+import { normalizeEmail } from "@/lib/supabase/auth";
 
 /**
  * POST /api/auth/otp/verify
- * OTP codes are no longer used. Email is confirmed via Supabase magic link
- * at GET /auth/callback.
+ * Confirms the 6-digit code and, on success, activates the account and
+ * logs the user in (issues the session cookie) in the same step.
+ * Body: { email: string, code: string }
  */
-export async function POST() {
-  return NextResponse.json(
-    {
-      error:
-        "OTP codes are disabled. Open the sign-in link in your email, or request a new link from /verify-email.",
-      code: "MAGIC_LINK_ONLY",
-    },
-    { status: 410 },
-  );
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const email = normalizeEmail(body.email || "");
+    const code = String(body.code || "").trim();
+
+    if (!email || !code) {
+      return NextResponse.json(
+        { error: "Email and verification code are required" },
+        { status: 400 },
+      );
+    }
+
+    await connectToDatabase();
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+
+    if (user.emailVerified) {
+      return NextResponse.json({
+        alreadyVerified: true,
+        message: "Email is already verified. You can sign in.",
+      });
+    }
+
+    if (!user.otpCodeHash || !user.otpExpiresAt) {
+      return NextResponse.json(
+        { error: "No verification code is pending. Request a new one." },
+        { status: 400 },
+      );
+    }
+
+    if (user.otpExpiresAt < new Date()) {
+      return NextResponse.json(
+        { error: "This code has expired. Request a new one." },
+        { status: 410 },
+      );
+    }
+
+    const isMatch = await bcrypt.compare(code, user.otpCodeHash);
+    if (!isMatch) {
+      return NextResponse.json(
+        { error: "Incorrect verification code" },
+        { status: 401 },
+      );
+    }
+
+    user.emailVerified = true;
+    user.emailVerifiedAt = new Date();
+    user.status = "active";
+    user.otpCodeHash = undefined;
+    user.otpExpiresAt = undefined;
+    await user.save();
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const token = await new SignJWT({
+      userId: user._id.toString(),
+      role: user.role,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime("24h")
+      .sign(secret);
+
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        id: user._id.toString(),
+        role: user.role,
+        email: user.email,
+        firstName: user.firstName,
+      },
+    });
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 86400,
+    });
+
+    return response;
+  } catch (err: any) {
+    console.error("[POST /api/auth/otp/verify]", err);
+    return NextResponse.json(
+      { error: err?.message || "Failed to verify code" },
+      { status: 500 },
+    );
+  }
 }

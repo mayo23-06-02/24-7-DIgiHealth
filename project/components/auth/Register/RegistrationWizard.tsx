@@ -18,6 +18,8 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
     submitting,
     showDraftBanner,
     globalError,
+    inviteInfo,
+    inviteError,
     config,
     isSkippable,
     updateData,
@@ -49,6 +51,26 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
       {!isOnline && (
         <div className="bg-gray-500 text-white text-center text-xs font-bold tracking-normal py-3 px-6">
           You are offline — progress saved locally. Go online to submit.
+        </div>
+      )}
+
+      {/* Hospital invite banner */}
+      {inviteInfo && (
+        <div className="bg-primary/5 border-b-2 border-primary/10 px-8 py-4">
+          <p className="text-sm font-bold text-primary">
+            You've been invited to join {inviteInfo.facilityName} as a doctor.
+          </p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Complete your registration below and you'll be added to their staff roster automatically.
+          </p>
+        </div>
+      )}
+      {inviteError && (
+        <div className="bg-amber-50 border-b-2 border-amber-200 px-8 py-4">
+          <p className="text-sm font-bold text-amber-800">{inviteError}</p>
+          <p className="text-xs text-amber-700 mt-0.5">
+            You can still register normally — ask your hospital admin to resend the invite if needed.
+          </p>
         </div>
       )}
 

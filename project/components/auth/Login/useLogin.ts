@@ -37,6 +37,11 @@ export function useLogin() {
         return;
       }
 
+      if (data.requiresVerification) {
+        navigate(`/verify-email?email=${encodeURIComponent(data.email || identifier)}`);
+        return;
+      }
+
       setError(data.error || "Login failed");
       setLoading(false);
     } catch {

@@ -8,6 +8,8 @@ import {
 } from "@/lib/models/RoleProfiles";
 import { Anthropometric, MedicalContext } from "@/lib/models/ClinicalData";
 import Facility from "@/lib/models/Facility";
+import Staff from "@/lib/models/Staff";
+import StaffInvite from "@/lib/models/StaffInvite";
 import bcrypt from "bcryptjs";
 import { normalizeEmail } from "@/lib/supabase/auth";
 import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
@@ -101,8 +103,8 @@ export async function POST(request: Request) {
       saId: formData.saId,
       mobile: phone?.e164 || formData.mobile,
       phoneE164: phone?.e164,
-      status: "active" as any,
-      emailVerified: true,
+      status: "pending_verification" as any,
+      emailVerified: false,
       mfaEnabled: false,
     } as any);
 
@@ -186,6 +188,43 @@ export async function POST(request: Request) {
         languages: formData.languages || ["English"],
         isOnline: false,
       });
+
+      // Hospital-admin invite acceptance: auto-attach to the inviting
+      // facility's Staff roster when this registration came from a valid,
+      // unexpired invite for this exact email. Never blocks account
+      // creation — a bad/stale token just means no auto-attachment.
+      if (formData.inviteToken) {
+        try {
+          const invite = await StaffInvite.findOne({
+            token: formData.inviteToken,
+            status: "pending",
+          });
+          if (
+            invite &&
+            invite.expiresAt > new Date() &&
+            invite.email === formEmail
+          ) {
+            await Staff.create({
+              userId: newUser._id,
+              facilityId: invite.facilityId,
+              role: "doctor",
+              department: formData.specialization || "General Practitioner",
+              shiftSchedule: {
+                start: invite.shiftStart,
+                end: invite.shiftEnd,
+                days: [1, 2, 3, 4, 5],
+              },
+              isOnDuty: false,
+              hourlyRate: invite.hourlyRate,
+            });
+            invite.status = "accepted";
+            invite.acceptedAt = new Date();
+            await invite.save();
+          }
+        } catch (e) {
+          console.warn("[register] staff invite acceptance skipped:", e);
+        }
+      }
     } else if (wizardRole === "hospital") {
       const newFacility = await Facility.create({
         name: formData.facilityName,
@@ -222,9 +261,24 @@ export async function POST(request: Request) {
       });
     }
 
+    // Every new account must confirm ownership of their email via a 6-digit
+    // code before they can sign in. Non-fatal — a failed send just means
+    // the verify-email page's own "resend" button can retry.
+    try {
+      const { issueOtpCode } = await import("@/lib/auth/otp");
+      await issueOtpCode({
+        userId: newUser._id.toString(),
+        email: formEmail,
+        firstName: newUser.firstName,
+      });
+    } catch (e) {
+      console.warn("[register] verification code send skipped:", e);
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Account created. You can now log in.",
+      message: "Account created. Check your email for a verification code.",
+      requiresVerification: true,
       userId: newUser._id.toString(),
       email: formEmail,
       user: {
@@ -232,7 +286,7 @@ export async function POST(request: Request) {
         role: newUser.role,
         email: formEmail,
         firstName: newUser.firstName,
-        emailVerified: true,
+        emailVerified: false,
       },
     });
   } catch (error: any) {

@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import HospitalAppointment from '@/lib/models/HospitalAppointment';
+import StaffInvite from '@/lib/models/StaffInvite';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+/** DELETE — cancel a pending invite */
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
     const user = await getRequestUser();
@@ -17,15 +18,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const { id } = await params;
-    const body = await req.json();
-    const updated = await HospitalAppointment.findOneAndUpdate(
+    const invite = await StaffInvite.findOneAndUpdate(
       { _id: id, facilityId: hospitalId },
-      body,
+      { status: 'cancelled' },
       { new: true },
     );
-    if (!updated) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
-    return NextResponse.json({ success: true, data: updated });
+    if (!invite) {
+      return NextResponse.json({ success: false, error: 'Invite not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error('[DELETE /api/hospital/staff/invite/[id]]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

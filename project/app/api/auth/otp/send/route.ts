@@ -1,37 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
-import {
-  applyAuthCookies,
-  getAppOrigin,
-  isSupabaseAuthConfigured,
-  isValidEmail,
-  normalizeEmail,
-  sendMagicLink,
-  type OtpPurpose,
-} from "@/lib/supabase/auth";
+import { issueOtpCode } from "@/lib/auth/otp";
+import { normalizeEmail, isValidEmail } from "@/lib/supabase/auth";
 
 /**
  * POST /api/auth/otp/send
- * Sends a Supabase magic / sign-in link (no OTP code).
- * Body: { email: string, purpose?: "verify" | "login" | "register" }
+ * Sends a 6-digit verification code by email.
+ * Body: { email: string }
  */
 export async function POST(req: NextRequest) {
   try {
-    if (!isSupabaseAuthConfigured()) {
-      return NextResponse.json(
-        {
-          error:
-            "Supabase Auth is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
-        },
-        { status: 503 },
-      );
-    }
-
     const body = await req.json();
     const email = normalizeEmail(body.email || "");
-    const purpose = (body.purpose || "verify") as OtpPurpose;
 
     if (!isValidEmail(email)) {
       return NextResponse.json(
@@ -40,85 +21,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!["login", "register", "verify"].includes(purpose)) {
-      return NextResponse.json(
-        { error: 'purpose must be "login", "register", or "verify"' },
-        { status: 400 },
-      );
-    }
-
     await connectToDatabase();
-    const existing = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email });
 
-    if (purpose === "login" || purpose === "verify") {
-      if (!existing) {
-        return NextResponse.json(
-          {
-            error:
-              "No DigiHealth account found for this email. Please register first.",
-          },
-          { status: 404 },
-        );
-      }
-      if (existing.status === "suspended") {
-        return NextResponse.json(
-          { error: "Account is suspended. Contact support." },
-          { status: 403 },
-        );
-      }
-    }
-
-    if (purpose === "register" && existing) {
+    if (!user) {
       return NextResponse.json(
-        {
-          error:
-            "An account with this email already exists. Sign in or verify your email.",
-        },
-        { status: 409 },
+        { error: "No DigiHealth account found for this email. Please register first." },
+        { status: 404 },
       );
     }
 
-    if (purpose === "verify" && existing?.emailVerified === true) {
+    if (user.status === "suspended") {
       return NextResponse.json(
-        {
-          error: "Email is already verified. You can sign in.",
-          alreadyVerified: true,
-        },
-        { status: 400 },
+        { error: "Account is suspended. Contact support." },
+        { status: 403 },
       );
     }
 
-    const origin = getAppOrigin(req.url);
-    // After clicking the link, confirm email then land on login
-    const emailRedirectTo = `${origin}/auth/callback?next=${encodeURIComponent(
-      `/login?registered=true&verified=true&email=${encodeURIComponent(email)}`,
-    )}`;
+    if (user.emailVerified) {
+      return NextResponse.json({
+        alreadyVerified: true,
+        message: "Email is already verified. You can sign in.",
+      });
+    }
 
-    const cookieStore = await cookies();
-    const { pendingCookies, error } = await sendMagicLink({
-      email,
-      purpose: purpose === "verify" ? "register" : purpose,
-      cookieStore,
-      emailRedirectTo,
+    const { error } = await issueOtpCode({
+      userId: user._id.toString(),
+      email: user.email,
+      firstName: user.firstName,
     });
 
     if (error) {
-      const res = NextResponse.json({ error }, { status: 400 });
-      return applyAuthCookies(res, pendingCookies);
+      return NextResponse.json(
+        { error: `Failed to send verification code: ${error}` },
+        { status: 502 },
+      );
     }
 
-    const res = NextResponse.json({
+    return NextResponse.json({
       success: true,
-      message: "Sign-in link sent to your email",
+      message: "Verification code sent to your email",
       email,
-      purpose,
-      method: "magic_link",
     });
-    return applyAuthCookies(res, pendingCookies);
   } catch (err: any) {
     console.error("[POST /api/auth/otp/send]", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to send sign-in link" },
+      { error: err?.message || "Failed to send verification code" },
       { status: 500 },
     );
   }
