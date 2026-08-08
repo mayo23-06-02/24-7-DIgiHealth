@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { BiPlus, BiLoaderAlt, BiTrendingUp, BiPencil, BiTrash } from "react-icons/bi";
+import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react";
 import AppointmentCalendarView from "@/components/shared/Appointments/AppointmentCalendarView";
 import PageHeader from "@/components/ui/PageHeader";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -11,6 +12,58 @@ import Input from "@/components/ui/Input";
 import RefillForm from "./RefillForm";
 import { toast } from "react-hot-toast";
 import { Appointment } from "@/lib/hooks/useAppointments";
+
+// ─── Local date/time helpers (avoid UTC drift from toISOString) ────────────
+function toLocalDateStr(d: Date) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function toLocalTimeStr(d: Date) {
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
+function roundUpToNext30(d: Date) {
+  const result = new Date(d);
+  const minutes = result.getMinutes();
+  const remainder = minutes % 30;
+  if (remainder !== 0) result.setMinutes(minutes + (30 - remainder));
+  result.setSeconds(0, 0);
+  return result;
+}
+
+function isDateTimeInPast(dateStr: string, timeStr: string) {
+  if (!dateStr || !timeStr) return false;
+  return new Date(`${dateStr}T${timeStr}`).getTime() < Date.now();
+}
+
+function createDefaultAddForm() {
+  const now = new Date();
+  const rounded = roundUpToNext30(now);
+  return {
+    title: "",
+    date: toLocalDateStr(now),
+    time: toLocalTimeStr(rounded),
+    type: "reminder" as "reminder" | "refill" | "note",
+    notes: "",
+    prescriptionId: "",
+    deliveryMethod: "pickup" as "pickup" | "delivery",
+    deliveryAddress: "",
+    pharmacyId: "",
+    paymentMethod: "insurance" as "insurance" | "card" | "cash",
+    reminderDays: 3,
+  };
+}
+
+const QUICK_TIME_SLOTS = [
+  { label: "Morning", time: "09:00" },
+  { label: "Afternoon", time: "13:00" },
+  { label: "Evening", time: "18:00" },
+];
 
 interface AgendaItem {
   id: string;
@@ -53,19 +106,12 @@ export default function EventsCalendar() {
   const [isSaving, setIsSaving] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
-  const [addForm, setAddForm] = useState({
-    title: "",
-    date: new Date().toISOString().slice(0, 10),
-    time: "09:00",
-    type: "reminder" as "reminder" | "refill" | "note",
-    notes: "",
-    prescriptionId: "",
-    deliveryMethod: "pickup" as "pickup" | "delivery",
-    deliveryAddress: "",
-    pharmacyId: "",
-    paymentMethod: "insurance" as "insurance" | "card" | "cash",
-    reminderDays: 3,
-  });
+  const [addForm, setAddForm] = useState(createDefaultAddForm);
+
+  const todayStr = toLocalDateStr(new Date());
+  const isFormDateToday = addForm.date === todayStr;
+  const minTimeForSelectedDate = isFormDateToday ? toLocalTimeStr(new Date()) : undefined;
+  const isPastSelection = isDateTimeInPast(addForm.date, addForm.time);
 
   const fetchAgenda = useCallback(async () => {
     try {
@@ -82,6 +128,11 @@ export default function EventsCalendar() {
   useEffect(() => {
     fetchAgenda();
   }, [fetchAgenda]);
+
+  // Reset to a fresh, always-future date/time whenever the modal is (re)opened
+  useEffect(() => {
+    if (showAddModal) setAddForm(createDefaultAddForm());
+  }, [showAddModal]);
 
   useEffect(() => {
     if (showAddModal && addForm.type === "refill") {
@@ -142,6 +193,10 @@ export default function EventsCalendar() {
 
   const handleAddSubmit = async () => {
     if (!addForm.title.trim() && addForm.type !== "refill") return;
+    if (isDateTimeInPast(addForm.date, addForm.time)) {
+      toast.error("Please choose a future date and time");
+      return;
+    }
     setIsSaving(true);
     try {
       const dateStr = new Date(`${addForm.date}T00:00:00`).toDateString();
@@ -153,19 +208,7 @@ export default function EventsCalendar() {
       if (res.ok) {
         await fetchAgenda();
         setShowAddModal(false);
-        setAddForm({
-          title: "",
-          date: new Date().toISOString().slice(0, 10),
-          time: "09:00",
-          type: "reminder",
-          notes: "",
-          prescriptionId: "",
-          deliveryMethod: "pickup",
-          deliveryAddress: "",
-          pharmacyId: "",
-          paymentMethod: "insurance",
-          reminderDays: 3,
-        });
+        setAddForm(createDefaultAddForm());
         toast.success("Event added to calendar");
       } else {
         toast.error("Failed to save event");
@@ -312,19 +355,94 @@ export default function EventsCalendar() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Date"
-                type="date"
-                value={addForm.date}
-                onChange={(e) => setAddForm({ ...addForm, date: e.target.value })}
-              />
-              <Input
-                label="Time"
-                type="time"
-                value={addForm.time}
-                onChange={(e) => setAddForm({ ...addForm, time: e.target.value })}
-              />
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Date"
+                  type="date"
+                  icon={<CalendarIcon size={18} />}
+                  min={todayStr}
+                  value={addForm.date}
+                  onChange={(e) => {
+                    const nextDate = e.target.value;
+                    setAddForm((prev) => {
+                      // Bumping to today shouldn't leave a stale past time behind
+                      if (nextDate === todayStr && isDateTimeInPast(nextDate, prev.time)) {
+                        return { ...prev, date: nextDate, time: toLocalTimeStr(roundUpToNext30(new Date())) };
+                      }
+                      return { ...prev, date: nextDate };
+                    });
+                  }}
+                />
+                <Input
+                  label="Time"
+                  type="time"
+                  icon={<Clock size={18} />}
+                  min={minTimeForSelectedDate}
+                  value={addForm.time}
+                  onChange={(e) => setAddForm({ ...addForm, time: e.target.value })}
+                />
+              </div>
+
+              {/* Quick date picks */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "Today", date: toLocalDateStr(new Date()) },
+                  { label: "Tomorrow", date: toLocalDateStr(new Date(Date.now() + 86400000)) },
+                  { label: "Next Week", date: toLocalDateStr(new Date(Date.now() + 7 * 86400000)) },
+                ].map((opt) => (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() =>
+                      setAddForm((prev) => {
+                        if (isDateTimeInPast(opt.date, prev.time)) {
+                          return { ...prev, date: opt.date, time: toLocalTimeStr(roundUpToNext30(new Date())) };
+                        }
+                        return { ...prev, date: opt.date };
+                      })
+                    }
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                      addForm.date === opt.date
+                        ? "bg-primary/10 text-primary border-primary/40"
+                        : "bg-white text-slate-500 border-slate-200 hover:border-primary/40"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+
+                {/* Quick time picks */}
+                <span className="w-px bg-slate-200 mx-1" />
+                {QUICK_TIME_SLOTS.map((slot) => {
+                  const disabled = isDateTimeInPast(addForm.date, slot.time);
+                  return (
+                    <button
+                      key={slot.label}
+                      type="button"
+                      disabled={disabled}
+                      title={disabled ? "This time has already passed" : undefined}
+                      onClick={() => setAddForm({ ...addForm, time: slot.time })}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                        disabled
+                          ? "bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed"
+                          : addForm.time === slot.time
+                            ? "bg-primary/10 text-primary border-primary/40"
+                            : "bg-white text-slate-500 border-slate-200 hover:border-primary/40"
+                      }`}
+                    >
+                      {slot.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {isPastSelection && (
+                <p className="flex items-center gap-1.5 text-xs font-medium text-danger-700">
+                  <AlertCircle size={14} />
+                  Please choose a future date and time.
+                </p>
+              )}
             </div>
 
             {addForm.type === "reminder" && (
@@ -385,7 +503,11 @@ export default function EventsCalendar() {
             </Button>
             <Button
               className="flex-1"
-              disabled={isSaving || (addForm.type !== "refill" && !addForm.title.trim())}
+              disabled={
+                isSaving ||
+                isPastSelection ||
+                (addForm.type !== "refill" && !addForm.title.trim())
+              }
               onClick={handleAddSubmit}
             >
               {isSaving ? <BiLoaderAlt className="animate-spin mr-2" /> : <BiPlus className="mr-2" />}
