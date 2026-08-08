@@ -126,7 +126,7 @@ export default function FavoriteDoctors({
                 >
                   <Avatar
                     src={doctor.avatar}
-                    alt={doctor.name}
+                    name={doctor.name}
                     size="sm"
                     className="shrink-0"
                   />
@@ -150,14 +150,14 @@ export default function FavoriteDoctors({
             ))}
           </div>
         )}
-
-        <AddFavoriteDoctorsPanel
-          isOpen={isAddPanelOpen}
-          onClose={() => setIsAddPanelOpen(false)}
-          onSave={handleSaveFavorites}
-          selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
-        />
       </div>
+
+      <AddFavoriteDoctorsPanel
+        isOpen={isAddPanelOpen}
+        onClose={() => setIsAddPanelOpen(false)}
+        onSave={handleSaveFavorites}
+        selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
+      />
     </>
   );
 }
