@@ -6,6 +6,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
+import Tooltip from "@/components/ui/Tooltip";
 
 interface Props {
   searchQuery: string;
@@ -54,29 +55,33 @@ export default function AppointmentFilters({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowFilterModal(true)}
-            aria-label="Filters"
-            className="relative flex items-center justify-center w-11 h-11 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-colors"
-          >
-            <SlidersHorizontal size={18} />
-            {hasActiveFilters && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
-            )}
-          </button>
-          <button
-            onClick={() =>
-              onSortChange(sortBy === "newest" ? "oldest" : "newest")
-            }
-            aria-label={sortBy === "newest" ? "Sorted newest first" : "Sorted oldest first"}
-            className="flex items-center justify-center w-11 h-11 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-colors"
-          >
-            {sortBy === "newest" ? (
-              <ArrowDownWideNarrow size={18} />
-            ) : (
-              <ArrowUpWideNarrow size={18} />
-            )}
-          </button>
+          <Tooltip content="Open filters" side="bottom">
+            <button
+              onClick={() => setShowFilterModal(true)}
+              aria-label="Filters"
+              className="relative flex items-center justify-center w-11 h-11 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-colors"
+            >
+              <SlidersHorizontal size={18} />
+              {hasActiveFilters && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+              )}
+            </button>
+          </Tooltip>
+          <Tooltip content={sortBy === "newest" ? "Sort oldest first" : "Sort newest first"} side="bottom">
+            <button
+              onClick={() =>
+                onSortChange(sortBy === "newest" ? "oldest" : "newest")
+              }
+              aria-label={sortBy === "newest" ? "Sorted newest first" : "Sorted oldest first"}
+              className="flex items-center justify-center w-11 h-11 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-colors"
+            >
+              {sortBy === "newest" ? (
+                <ArrowDownWideNarrow size={18} />
+              ) : (
+                <ArrowUpWideNarrow size={18} />
+              )}
+            </button>
+          </Tooltip>
         </div>
       </div>
 
