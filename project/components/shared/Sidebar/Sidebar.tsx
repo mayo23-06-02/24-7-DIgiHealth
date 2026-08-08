@@ -15,6 +15,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user } = useAuthContext();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -92,6 +93,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 userRole={user.role}
                 isCollapsed={isCollapsed}
                 onClose={onClose}
+                expandedItem={expandedItem}
+                onExpandChange={setExpandedItem}
               />
               {/* Visual separator every 3-4 items for sophisticated grouping */}
               {!isCollapsed && idx === 0 && (

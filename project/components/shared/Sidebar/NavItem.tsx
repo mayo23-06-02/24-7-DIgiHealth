@@ -12,17 +12,26 @@ interface NavItemProps {
   userRole: string;
   isCollapsed: boolean;
   onClose?: () => void;
+  expandedItem?: string | null;
+  onExpandChange?: (itemHref: string | null) => void;
 }
 
-export default function NavItem({ item, userRole, isCollapsed, onClose }: NavItemProps) {
+export default function NavItem({
+  item,
+  userRole,
+  isCollapsed,
+  onClose,
+  expandedItem,
+  onExpandChange,
+}: NavItemProps) {
   const pathname = usePathname();
   const href = item.href.replace("[role]", userRole);
   const isActive =
     pathname === href ||
     (href !== `/${userRole}` && pathname.startsWith(href));
 
-  const [isExpanded, setIsExpanded] = useState(isActive && !!item.children);
   const hasChildren = item.children && item.children.length > 0;
+  const isExpanded = expandedItem === item.href && hasChildren;
 
   if (!hasChildren) {
     return (
@@ -42,6 +51,19 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
     );
   }
 
+  const handleNavItemClick = () => {
+    if (window.innerWidth < 1024 && onClose) onClose();
+    // Auto-expand dropdown when nav item is clicked
+    onExpandChange?.(item.href);
+  };
+
+  const handleChevronClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Toggle dropdown
+    onExpandChange?.(isExpanded ? null : item.href);
+  };
+
   return (
     <div className="space-y-1">
       <div className="relative flex items-center">
@@ -49,9 +71,7 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
           href={href}
           title={isCollapsed ? item.label : ""}
           className="flex-1"
-          onClick={() => {
-            if (window.innerWidth < 1024 && onClose) onClose();
-          }}
+          onClick={handleNavItemClick}
         >
           <NavItemContent
             item={item}
@@ -61,11 +81,7 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
         </Link>
         {!isCollapsed && (
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsExpanded(!isExpanded);
-            }}
+            onClick={handleChevronClick}
             className="absolute right-2 p-1.5 hover:bg-primary/10 rounded-md transition-colors"
             aria-label={isExpanded ? "Collapse menu" : "Expand menu"}
           >
