@@ -70,7 +70,9 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
         <div className="space-y-0.5 pl-6 border-l-2 border-primary/20 ml-3">
           {item.children.map((child) => {
             const childHref = child.href.replace("[role]", userRole);
-            const isChildActive = pathname === childHref || pathname.startsWith(childHref);
+            const isChildActive = pathname.includes(childHref.split("?")[0]) &&
+              new URLSearchParams(childHref.split("?")[1] || "").get("tab") ===
+              new URLSearchParams(pathname.split("?")[1] || "").get("tab");
             const ChildIcon = child.icon;
 
             return (
@@ -85,7 +87,7 @@ export default function NavItem({ item, userRole, isCollapsed, onClose }: NavIte
                   className={`
                     flex items-center gap-2.5 py-2 px-3 text-xs font-medium rounded-md transition-all duration-200 group
                     ${isChildActive
-                      ? "bg-primary/10 text-primary"
+                      ? "bg-primary/10 text-primary font-semibold"
                       : "text-ink-600 hover:bg-surface-soft hover:text-primary"
                     }
                   `}

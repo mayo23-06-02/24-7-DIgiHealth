@@ -24,21 +24,9 @@ const statusColors = {
   none: "",
 };
 
-// Deterministic brand-tinted background from the person's name, so a page
-// full of avatars without a photo doesn't render as a wall of identical
-// primary-colored circles.
-const PALETTE = [
-  "bg-primary",
-  "bg-info-500",
-  "bg-success-700",
-  "bg-amber-600",
-  "bg-violet-600",
-  "bg-rose-600",
-];
+// Use primary color consistently for all avatars
 function paletteFor(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  return PALETTE[hash % PALETTE.length];
+  return "bg-primary";
 }
 
 const Avatar: React.FC<AvatarProps> = ({

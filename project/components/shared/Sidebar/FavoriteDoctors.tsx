@@ -36,7 +36,7 @@ export default function FavoriteDoctors({
       const res = await fetch("/api/patient/my-doctors?favorite=true");
       if (res.ok) {
         const data = await res.json();
-        setFavoriteDoctors(data.slice(0, 4));
+        setFavoriteDoctors(data.slice(0, 2));
       }
     } catch {
       /* silent */

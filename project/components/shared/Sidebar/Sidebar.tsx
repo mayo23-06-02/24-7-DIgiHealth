@@ -50,7 +50,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside
         className={`
           fixed inset-y-0 left-0 z-100 flex flex-col bg-gradient-to-b from-surface to-surface transition-all duration-300
-          lg:relative lg:inset-auto lg:border-r lg:border-border/50 lg:shadow-sm lg:bg-surface
+          lg:relative lg:inset-auto lg:border-r lg:border-border/50 lg: lg:bg-surface
           ${isCollapsed ? "w-20" : "w-64"}
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           dark:lg:shadow-none dark:lg:border-border/30

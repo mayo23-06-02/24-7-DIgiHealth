@@ -77,7 +77,7 @@ export default function DoctorCard({
       <button
         onClick={handleToggleFavorite}
         disabled={isToggling}
-        className="absolute top-4 left-4 z-10 p-2 rounded-lg transition-all duration-200 bg-white/80 hover:bg-white shadow-sm hover:shadow-md"
+        className="absolute top-4 left-4 z-10 p-2 rounded-lg transition-all duration-200 bg-white/80 hover:bg-white  hover:"
         title={isFavorite ? "Remove from favorites" : "Add to favorites"}
       >
         <Heart

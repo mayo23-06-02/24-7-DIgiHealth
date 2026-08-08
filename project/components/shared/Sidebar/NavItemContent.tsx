@@ -28,10 +28,10 @@ export default function NavItemContent({
   return (
     <div
       className={`
-        flex items-center gap-3 py-2.5 px-4 font-medium text-sm transition-all duration-200 group rounded-lg
+        flex items-center gap-3 py-2.5 px-4 font-medium text-sm transition-all duration-200 group rounded-full
         ${isActive
-          ? "bg-gradient-to-r from-primary to-primary/90 text-white shadow-md shadow-primary/20"
-          : "text-ink-700 hover:bg-primary/8 hover:text-primary hover:shadow-sm"
+          ? "bg-primary text-white  "
+          : "text-ink-700 hover:bg-primary/8 hover:text-primary hover:"
         }
         ${isCollapsed ? "justify-center px-2" : ""}
         ${pending ? "opacity-60" : ""}
