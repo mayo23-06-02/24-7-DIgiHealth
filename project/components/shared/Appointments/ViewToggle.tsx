@@ -24,7 +24,7 @@ export default function ViewToggle({ view, onChange }: Props) {
         title="List view"
       >
         <BiListUl size={18} className="shrink-0" />
-        <span className="hidden xs:inline">List</span>
+        <span>List</span>
       </button>
       <button
         type="button"
@@ -38,7 +38,7 @@ export default function ViewToggle({ view, onChange }: Props) {
         title="Calendar view"
       >
         <BiCalendarWeek size={18} className="shrink-0" />
-        <span className="hidden xs:inline">Calendar</span>
+        <span>Calendar</span>
       </button>
     </div>
   );
