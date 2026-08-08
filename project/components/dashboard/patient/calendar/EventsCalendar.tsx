@@ -9,6 +9,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import RefillForm from "./RefillForm";
 import { toast } from "react-hot-toast";
 import { Appointment } from "@/lib/hooks/useAppointments";
@@ -65,6 +66,19 @@ const QUICK_TIME_SLOTS = [
   { label: "Evening", time: "18:00" },
 ];
 
+type EventFilterType = "all" | "doctor" | "reminder" | "refill" | "note";
+
+const EVENT_FILTER_TABS: EventFilterType[] = ["all", "doctor", "reminder", "refill", "note"];
+
+/** Mirrors the badge/underline pattern in AppointmentTabs.tsx for design-system consistency. */
+const eventTabConfig: Record<EventFilterType, { label: string; badgeBg: string; badgeText: string }> = {
+  all: { label: "All", badgeBg: "bg-primary", badgeText: "text-white" },
+  doctor: { label: "Appointments", badgeBg: "bg-primary", badgeText: "text-white" },
+  reminder: { label: "Reminders", badgeBg: "bg-warning-500", badgeText: "text-warning-50" },
+  refill: { label: "Refills", badgeBg: "bg-success-500", badgeText: "text-success-50" },
+  note: { label: "Notes", badgeBg: "bg-info-500", badgeText: "text-info-50" },
+};
+
 interface AgendaItem {
   id: string;
   type: "doctor" | "refill" | "reminder" | "note" | "appointment";
@@ -94,9 +108,7 @@ const EVENT_TYPES = [
 export default function EventsCalendar() {
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedType, setSelectedType] = useState<
-    "all" | "doctor" | "reminder" | "refill" | "note"
-  >("all");
+  const [selectedType, setSelectedType] = useState<EventFilterType>("all");
 
   const [selectedEvent, setSelectedEvent] = useState<AgendaItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -158,6 +170,15 @@ export default function EventsCalendar() {
     if (selectedType === "doctor") return agenda.filter((a) => a.type === "doctor");
     return agenda.filter((a) => a.type === selectedType);
   }, [agenda, selectedType]);
+
+  const typeCounts = useMemo(() => {
+    const counts: Partial<Record<EventFilterType, number>> = { all: agenda.length };
+    agenda.forEach((item) => {
+      const key = item.type as EventFilterType;
+      counts[key] = (counts[key] ?? 0) + 1;
+    });
+    return counts;
+  }, [agenda]);
 
   // Map agenda items -> Appointment shape expected by AppointmentCalendarView
   const calendarAppointments = useMemo<Appointment[]>(
@@ -263,21 +284,52 @@ export default function EventsCalendar() {
         }
       />
 
-      {/* Type Filter */}
-      <div className="flex gap-2 flex-wrap">
-        {(["all", "doctor", "reminder", "refill", "note"] as const).map((type) => (
-          <button
-            key={type}
-            onClick={() => setSelectedType(type)}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-              selectedType === type
-                ? "bg-primary text-white"
-                : "bg-surface-soft text-ink-600 hover:bg-surface"
-            }`}
-          >
-            {type === "doctor" ? "Appointments" : type.charAt(0).toUpperCase() + type.slice(1)}
-          </button>
-        ))}
+      {/* Type Filter — mirrors AppointmentTabs.tsx for design-system consistency */}
+      {/* Mobile Dropdown */}
+      <div className="sm:hidden">
+        <Select
+          value={selectedType}
+          onChange={(val) => setSelectedType(val as EventFilterType)}
+          options={EVENT_FILTER_TABS.map((t) => ({
+            value: t,
+            label: `${eventTabConfig[t].label} (${typeCounts[t] ?? 0})`,
+          }))}
+          icon={<CalendarIcon size={18} className="text-ink-600" />}
+        />
+      </div>
+
+      {/* Desktop: Underline Tab Design (Design System Pattern) */}
+      <div className="hidden sm:flex gap-1 border-b border-border overflow-x-auto no-scrollbar pb-0">
+        {EVENT_FILTER_TABS.map((t) => {
+          const config = eventTabConfig[t];
+          const count = typeCounts[t] ?? 0;
+          const isActive = selectedType === t;
+
+          return (
+            <button
+              key={t}
+              role="tab"
+              aria-selected={isActive}
+              type="button"
+              onClick={() => setSelectedType(t)}
+              className={`
+                relative flex items-center gap-2 px-4 py-3 text-sm font-semibold
+                whitespace-nowrap transition-colors
+                ${isActive ? "text-primary" : "text-ink-600 hover:text-ink-900"}
+              `}
+            >
+              <span>{config.label}</span>
+              {count > 0 && (
+                <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${config.badgeBg} ${config.badgeText}`}>
+                  {count}
+                </span>
+              )}
+              {isActive && (
+                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-primary rounded-full" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Calendar View */}
