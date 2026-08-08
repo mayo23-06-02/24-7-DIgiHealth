@@ -230,6 +230,15 @@ export default function ChatWindow({
       ? conversation.consultationId
       : null;
 
+  const startedAtRaw = conversation.startedAt || conversation.createdAt;
+  const startedLabel = startedAtRaw
+    ? `Started ${new Date(startedAtRaw).toLocaleDateString("en-ZA", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })}`
+    : null;
+
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-none">
       <div className="flex justify-between items-center px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-slate-100 bg-white shrink-0 gap-2">
@@ -264,9 +273,13 @@ export default function ChatWindow({
               )}
             </h2>
             <p className="text-sm text-slate-500 truncate">
-              {isConnected
-                ? "Live Encryption Active"
-                : "Connecting Securely..."}
+              {isConnected ? "Live Encryption Active" : "Connecting Securely..."}
+              {startedLabel && (
+                <>
+                  <span className="mx-1.5 text-slate-300">·</span>
+                  {startedLabel}
+                </>
+              )}
             </p>
           </div>
         </div>
