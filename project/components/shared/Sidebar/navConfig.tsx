@@ -89,11 +89,6 @@ export const MAIN_NAV: SidebarItem[] = [
         icon: Heart,
       },
       {
-        label: "Body Map",
-        href: "/[role]/health-record?tab=body_map",
-        icon: BodyMapIcon,
-      },
-      {
         label: "Vitals",
         href: "/[role]/health-record?tab=vitals",
         icon: Zap,
