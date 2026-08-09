@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Heart, MessageCircle, Plus } from "lucide-react";
 import { useNavigate } from "@/hooks/useNavigate";
 import Avatar from "@/components/ui/Avatar";
@@ -27,6 +27,7 @@ export default function FavoriteDoctors({
   const [favoriteDoctors, setFavoriteDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAddPanelOpen, setIsAddPanelOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     fetchFavoriteDoctors();
@@ -72,18 +73,18 @@ export default function FavoriteDoctors({
   };
 
   const handleAddDoctor = () => {
-    setIsAddPanelOpen(true);
+    setIsAddPanelOpen(!isAddPanelOpen);
   };
 
-  const handleSaveFavorites = (selectedIds: string[]) => {
-    fetchFavoriteDoctors();
+  const handleSaveFavorites = (selectedIds: string[], selectedDoctors: Doctor[]) => {
+    setFavoriteDoctors(selectedDoctors);
   };
 
   if (isCollapsed) return null;
 
   return (
     <>
-      <div className="px-4 py-4 border-t border-border/50">
+      <div className="relative px-4 py-4 border-t border-border/50">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Heart size={16} className="text-primary" />
@@ -92,9 +93,14 @@ export default function FavoriteDoctors({
             </p>
           </div>
           <button
+            ref={buttonRef}
             onClick={handleAddDoctor}
             title="Add doctor to favorites"
-            className="p-1.5 hover:bg-primary/10 rounded-md transition-colors text-ink-600 hover:text-primary"
+            className={`p-1.5 rounded-md transition-colors ${
+              isAddPanelOpen
+                ? "bg-primary text-white"
+                : "text-ink-600 hover:text-primary hover:bg-primary/10"
+            }`}
           >
             <Plus size={14} />
           </button>
@@ -150,14 +156,16 @@ export default function FavoriteDoctors({
             ))}
           </div>
         )}
-      </div>
 
-      <AddFavoriteDoctorsPanel
-        isOpen={isAddPanelOpen}
-        onClose={() => setIsAddPanelOpen(false)}
-        onSave={handleSaveFavorites}
-        selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
-      />
+        {/* Floating Panel */}
+        <AddFavoriteDoctorsPanel
+          isOpen={isAddPanelOpen}
+          onClose={() => setIsAddPanelOpen(false)}
+          onSave={handleSaveFavorites}
+          selectedDoctorIds={favoriteDoctors.map((d) => d.id)}
+          floatingMode={true}
+        />
+      </div>
     </>
   );
 }
