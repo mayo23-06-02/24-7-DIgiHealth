@@ -14,6 +14,8 @@ export interface IMessage extends Document {
   isRead: boolean;
   readAt?: Date;
   deliveredAt: Date;
+  /** Set once the "you have a new message" nudge email has gone out for this message. */
+  reminderEmailSentAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,11 +38,13 @@ const MessageSchema = new Schema<IMessage>({
   isRead: { type: Boolean, default: false },
   readAt: { type: Date },
   deliveredAt: { type: Date, default: Date.now },
+  reminderEmailSentAt: { type: Date },
 }, { timestamps: true });
 
 // Compound index for idempotent operations
 MessageSchema.index({ clientId: 1, conversationId: 1 }, { unique: true, sparse: true });
 MessageSchema.index({ conversationId: 1, createdAt: -1 });
+MessageSchema.index({ receiverId: 1, isRead: 1, createdAt: 1, reminderEmailSentAt: 1 });
 
 /**
  * Guard against a legacy Message model (Communications.ts used to register one

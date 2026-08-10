@@ -174,12 +174,13 @@ export default function PractitionerPracticeForm({
             value={practitionerData.bankAccount?.branchCode || ""}
             onChange={(e) => updateBank({ branchCode: e.target.value })}
           />
-          <Input
-            label="Tax number"
-            value={practitionerData.bankAccount?.taxNumber || ""}
-            onChange={(e) => updateBank({ taxNumber: e.target.value })}
-            className="md:col-span-2"
-          />
+          <div className="md:col-span-2">
+            <Input
+              label="Tax number"
+              value={practitionerData.bankAccount?.taxNumber || ""}
+              onChange={(e) => updateBank({ taxNumber: e.target.value })}
+            />
+          </div>
         </div>
       </ProfileSection>
     </>

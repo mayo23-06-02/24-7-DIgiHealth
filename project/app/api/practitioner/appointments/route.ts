@@ -33,6 +33,9 @@ export async function GET(req: NextRequest) {
     await connectToDatabase();
     const { expireStaleBookingRequests } = await import('@/lib/booking/expire');
     await expireStaleBookingRequests();
+    // Email reminder for consultations starting in ~10 minutes (throttled, idempotent)
+    const { sendDueAppointmentReminders } = await import('@/lib/email/reminders');
+    void sendDueAppointmentReminders();
     const practitionerId = await getPractitionerId(req);
     const { searchParams } = new URL(req.url);
 

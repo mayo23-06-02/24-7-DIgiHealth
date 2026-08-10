@@ -12,6 +12,9 @@ export async function GET(req: NextRequest) {
     // Auto-cancel unaccepted requests past their start time
     const { expireStaleBookingRequests } = await import('@/lib/booking/expire');
     await expireStaleBookingRequests();
+    // Email reminder for consultations starting in ~10 minutes (throttled, idempotent)
+    const { sendDueAppointmentReminders } = await import('@/lib/email/reminders');
+    void sendDueAppointmentReminders();
 
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;

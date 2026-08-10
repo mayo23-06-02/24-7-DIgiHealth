@@ -85,7 +85,11 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/api/media/sign-upload-public') ||
-    pathname.startsWith('/api/media/complete-public')
+    pathname.startsWith('/api/media/complete-public') ||
+    // Vercel Cron invokes this with `Authorization: Bearer $CRON_SECRET`, not a
+    // session cookie — the route itself verifies that header (see
+    // app/api/cron/reminders/route.ts), so it must bypass the session gate below.
+    pathname.startsWith('/api/cron/')
   ) {
     return NextResponse.next();
   }

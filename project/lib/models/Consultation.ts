@@ -26,6 +26,8 @@ export interface IConsultation extends Document {
     proposedAt: Date;
   };
   requestedTo?: Types.ObjectId;
+  /** Set once the 10-minutes-before-start email reminder has gone out, so it never sends twice. */
+  reminderEmailSentAt?: Date;
 }
 
 const ConsultationSchema = new Schema<IConsultation>({
@@ -54,10 +56,12 @@ const ConsultationSchema = new Schema<IConsultation>({
     },
     default: undefined,
   },
+  reminderEmailSentAt: { type: Date },
 }, { timestamps: true });
 
 ConsultationSchema.index({ patientId: 1, scheduledStartTime: -1 });
 ConsultationSchema.index({ practitionerId: 1, scheduledStartTime: -1 });
+ConsultationSchema.index({ status: 1, scheduledStartTime: 1, reminderEmailSentAt: 1 });
 
 export const Consultation = mongoose.models.Consultation || mongoose.model<IConsultation>('Consultation', ConsultationSchema);
 export default Consultation;

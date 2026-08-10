@@ -13,6 +13,10 @@ function userMatch(userId: string) {
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
+    // Email nudge for messages that have sat unread for 5+ hours (throttled, idempotent)
+    const { sendDueMessageReminders } = await import('@/lib/email/reminders');
+    void sendDueMessageReminders();
+
     const userId = req.headers.get('x-user-id');
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

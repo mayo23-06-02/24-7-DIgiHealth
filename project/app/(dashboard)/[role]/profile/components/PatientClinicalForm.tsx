@@ -64,12 +64,13 @@ export default function PatientClinicalForm({
             onChange={(e) => updateAid({ planName: e.target.value })}
             placeholder="e.g. Classic Saver"
           />
-          <Input
-            label="Member number"
-            value={patientData.medicalAid?.memberNumber || ""}
-            onChange={(e) => updateAid({ memberNumber: e.target.value })}
-            className="md:col-span-2"
-          />
+          <div className="md:col-span-2">
+            <Input
+              label="Member number"
+              value={patientData.medicalAid?.memberNumber || ""}
+              onChange={(e) => updateAid({ memberNumber: e.target.value })}
+            />
+          </div>
         </div>
         {patientData.subscriptionTier && (
           <p className="mt-4 text-xs text-slate-500">
@@ -102,13 +103,14 @@ export default function PatientClinicalForm({
             }
             placeholder="e.g. Spouse, Parent"
           />
-          <Input
-            label="Phone number"
-            value={patientData.emergencyContact?.phone || ""}
-            onChange={(e) => updateEmergency({ phone: e.target.value })}
-            placeholder="+27 …"
-            className="md:col-span-2"
-          />
+          <div className="md:col-span-2">
+            <Input
+              label="Phone number"
+              value={patientData.emergencyContact?.phone || ""}
+              onChange={(e) => updateEmergency({ phone: e.target.value })}
+              placeholder="+27 …"
+            />
+          </div>
         </div>
       </ProfileSection>
     </>

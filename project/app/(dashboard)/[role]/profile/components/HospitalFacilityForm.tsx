@@ -110,17 +110,18 @@ export default function HospitalFacilityForm({
               })
             }
           />
-          <Input
-            label="ICU available"
-            type="number"
-            value={String(fac?.bedCapacity?.icuAvailable ?? "")}
-            onChange={(e) =>
-              updateBeds({
-                icuAvailable: parseInt(e.target.value, 10) || 0,
-              })
-            }
-            className="md:col-span-2"
-          />
+          <div className="md:col-span-2">
+            <Input
+              label="ICU available"
+              type="number"
+              value={String(fac?.bedCapacity?.icuAvailable ?? "")}
+              onChange={(e) =>
+                updateBeds({
+                  icuAvailable: parseInt(e.target.value, 10) || 0,
+                })
+              }
+            />
+          </div>
         </div>
       </ProfileSection>
 
