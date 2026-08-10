@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { PatientProfile, PractitionerProfile } from "@/lib/models/RoleProfiles";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get("x-user-id") || null;
@@ -14,6 +16,46 @@ export async function GET(req: NextRequest) {
     const userId = await getUserId(req);
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Postgres-native accounts have no Mongo `User`/profile row to seed or
+    // read (see lib/utils/mongoId.ts) — return sensible defaults instead of
+    // crashing on findById/auto-seed create().
+    if (!isMongoObjectId(userId)) {
+      const requestUser = await getRequestUser();
+      if (!requestUser)
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const roleData =
+        requestUser.role === "patient"
+          ? {
+              medicalAid: { provider: "", planName: "", memberNumber: "" },
+              emergencyContact: { name: "", phone: "", relationship: "" },
+              subscriptionTier: "free",
+              dateOfBirth: null,
+              gender: null,
+              popiaConsentDate: null,
+            }
+          : requestUser.role === "practitioner"
+            ? {
+                specialisation: "General Practitioner",
+                hpcsaNumber: "",
+                experienceYears: 0,
+                bio: "",
+                languages: ["English"],
+                acceptedMedicalAids: [],
+                bankAccount: {
+                  accountHolder: "",
+                  bankName: "",
+                  accountNumber: "",
+                  branchCode: "",
+                  taxNumber: "",
+                },
+                hpcsaVerified: false,
+                rating: 0,
+                reviewCount: 0,
+              }
+            : { role: requestUser.role, status: "active" };
+      return NextResponse.json({ success: true, data: roleData });
+    }
 
     const user = await User.findById(userId).lean();
     if (!user)
@@ -135,6 +177,12 @@ export async function PUT(req: NextRequest) {
     const userId = await getUserId(req);
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!isMongoObjectId(userId)) {
+      return NextResponse.json(
+        { error: "Profile editing is not yet available for this account." },
+        { status: 400 },
+      );
+    }
 
     const user = await User.findById(userId).lean();
     if (!user)

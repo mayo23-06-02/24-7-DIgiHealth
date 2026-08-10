@@ -221,7 +221,7 @@ export default function PatientDashboard() {
   });
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-4 lg:space-y-6 pb-24">
       {/* HERO */}
       <Card
         variant="glass"
@@ -232,19 +232,24 @@ export default function PatientDashboard() {
             <p className="text-label text-primary uppercase tracking-wide mb-2">
               {todayLabel}
             </p>
-            <h1 className="text-h1 font-bold text-ink-900 tracking-tight font-grotesk">
+            <h2 className="text-h3 lg:text-h2 font-bold text-ink-900 tracking-tight font-grotesk">
               How are you doing today,{" "}
               <span className="text-primary">{user.firstName}</span>?
-            </h1>
-            <p className="text-slate-500 mt-2 max-w-xl">
+            </h2>
+            <p className="text-slate-500 text-sm mt-2 max-w-xl">
               Here is your personalized health snapshot for today — a clear
               view of your wellbeing at a glance.
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
-            <Link href="/patient/appointments">
-              <Button icon={<Plus size={18} />} iconPosition="left">
+            <Link href="/patient/appointments?book=true">
+              <Button size="sm" fullWidth>
                 Book Appointment
+              </Button>
+            </Link>
+            <Link href="/patient/calendar">
+              <Button size="sm" variant="outline" fullWidth>
+                My Calendar
               </Button>
             </Link>
           </div>
@@ -252,7 +257,7 @@ export default function PatientDashboard() {
       </Card>
 
       {/* KPI GRID — showing last weigh-in only; clinical vitals commented out for future use */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:gap-4 gap-2">
         {/* <KPICard
           label="Heart Rate"
           value={dashboardData?.vitals?.heartRate ? dashboardData.vitals.heartRate.toString() : "---"}

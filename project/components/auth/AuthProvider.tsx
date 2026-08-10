@@ -11,6 +11,8 @@ interface User {
   role: string;
   avatarUrl: string;
   gender?: string;
+  /** True when the current session is a guardian impersonating a linked child. */
+  isImpersonating?: boolean;
 }
 
 interface AuthContextType {

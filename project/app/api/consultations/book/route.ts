@@ -6,6 +6,7 @@ import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
 import { notifyBookingEvent } from '@/lib/booking/notifications';
 import { expireStaleBookingRequests } from '@/lib/booking/expire';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 /**
  * Legacy patient booking endpoint.
@@ -23,6 +24,12 @@ export async function POST(req: NextRequest) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
     const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
+    if (!isMongoObjectId(userId)) {
+      return NextResponse.json(
+        { success: false, error: 'Booking is not yet available for this account.' },
+        { status: 400 },
+      );
+    }
 
     if (!body.practitionerId || !mongoose.Types.ObjectId.isValid(body.practitionerId)) {
       return NextResponse.json({ success: false, error: 'Invalid practitionerId' }, { status: 400 });

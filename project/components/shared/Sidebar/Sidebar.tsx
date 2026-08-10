@@ -8,6 +8,7 @@ import NavItem from "./NavItem";
 import UserProfile from "./UserProfile";
 import CollapseToggle from "./CollapseToggle";
 import FavoriteDoctors from "./FavoriteDoctors";
+import FamilySwitcher from "@/components/shared/FamilySwitcher";
 import { MAIN_NAV } from "./navConfig";
 import { SidebarProps } from "./types";
 
@@ -102,6 +103,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Favorite Doctors - Patient only */}
         {user.role === "patient" && (
           <FavoriteDoctors isCollapsed={isCollapsed} onClose={onClose} />
+        )}
+
+        {/* Family account switcher - patient guardians only, self-guards on data */}
+        {user.role === "patient" && !isCollapsed && (
+          <div className="pt-2">
+            <FamilySwitcher variant="card" />
+          </div>
         )}
 
         {/* User Profile */}

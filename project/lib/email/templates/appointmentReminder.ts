@@ -4,13 +4,16 @@
  */
 export function appointmentReminderEmailHtml(params: {
   recipientName?: string;
+  /** Set when emailing a guardian about a minor dependent's appointment, not the recipient's own. */
+  onBehalfOf?: string;
   otherPartyName: string;
   scheduledStartTime: Date;
   consultationType: string;
   joinUrl?: string;
 }): string {
-  const { recipientName, otherPartyName, scheduledStartTime, consultationType, joinUrl } = params;
+  const { recipientName, onBehalfOf, otherPartyName, scheduledStartTime, consultationType, joinUrl } = params;
   const greeting = recipientName ? `Hi ${escapeHtml(recipientName)},` : "Hi there,";
+  const subjectPerson = onBehalfOf ? `${escapeHtml(onBehalfOf)}'s` : "your";
   const timeStr = scheduledStartTime.toLocaleTimeString("en-ZA", {
     hour: "2-digit",
     minute: "2-digit",
@@ -37,7 +40,7 @@ export function appointmentReminderEmailHtml(params: {
                   ⏰
                 </div>
                 <h1 style="margin:0; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.3px;">
-                  Your consultation starts soon
+                  ${onBehalfOf ? `${escapeHtml(onBehalfOf)}'s consultation starts soon` : "Your consultation starts soon"}
                 </h1>
               </td>
             </tr>
@@ -46,7 +49,7 @@ export function appointmentReminderEmailHtml(params: {
             <tr>
               <td style="padding:36px 32px 8px; text-align:center;">
                 <p style="margin:0 0 20px; color:#475569; font-size:15px; line-height:1.6;">
-                  ${greeting} your ${escapeHtml(consultationType)} consultation with
+                  ${greeting} ${subjectPerson} ${escapeHtml(consultationType)} consultation with
                   <strong>${escapeHtml(otherPartyName)}</strong> starts in about 10 minutes.
                 </p>
 

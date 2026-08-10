@@ -5,6 +5,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Call from "@/lib/models/Call";
 import Conversation from "@/lib/models/Conversation";
 import User from "@/lib/models/User";
+import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -17,6 +18,10 @@ export async function GET() {
     const userId = payload.userId as string;
 
     await connectToDatabase();
+
+    // Postgres-native accounts have no Mongo identity — Conversation is
+    // still Mongo-only, so they can't be a participant in any (see lib/utils/mongoId.ts).
+    if (!isMongoObjectId(userId)) return NextResponse.json({ calls: [] });
 
     // Find all conversations where current user is a participant
     const userConversations = await Conversation.find({

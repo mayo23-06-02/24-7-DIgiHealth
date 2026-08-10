@@ -3,25 +3,13 @@ import { connectToDatabase } from '@/lib/mongodb';
 import Conversation from '@/lib/models/Conversation';
 import User from '@/lib/models/User';
 import Message from '@/lib/models/Message';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
-
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 async function getUserInfo() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
-  if (!token) return null;
-  try {
-    const { payload } = await jwtVerify(token, SECRET);
-    await connectToDatabase();
-    const user = await User.findById(payload.userId).select('_id role').lean();
-    return user ? { userId: user._id.toString(), role: user.role } : null;
-  } catch (err) {
-    console.error('getUserInfo Auth Error:', err);
-    return null;
-  }
+  const requestUser = await getRequestUser();
+  return requestUser ? { userId: requestUser.userId, role: requestUser.role } : null;
 }
 
 /** GET /api/conversations — list conversations (batched last-message + unread) */
@@ -29,6 +17,10 @@ export async function GET() {
   const userInfo = await getUserInfo();
   if (!userInfo) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { userId } = userInfo;
+
+  // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
+  // — Conversation is still Mongo-only, so they genuinely have none yet.
+  if (!isMongoObjectId(userId)) return NextResponse.json([]);
   const userOid = new mongoose.Types.ObjectId(userId);
 
   await connectToDatabase();
@@ -186,6 +178,12 @@ export async function POST(request: Request) {
 
   if (!targetPractitionerId || !targetPatientId) {
     return NextResponse.json({ error: 'Missing required participant IDs' }, { status: 400 });
+  }
+  if (!isMongoObjectId(targetPatientId) || !isMongoObjectId(targetPractitionerId)) {
+    return NextResponse.json(
+      { error: 'Messaging is not yet available for this account.' },
+      { status: 400 },
+    );
   }
 
   let conv;

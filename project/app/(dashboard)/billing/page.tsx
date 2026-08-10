@@ -2,44 +2,40 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
-  BiWallet,
-  BiCreditCard,
-  BiReceipt,
-  BiTrendingUp,
-  BiTrendingDown,
-  BiDownload,
-  BiRefresh,
-  BiCheckCircle,
-  BiXCircle,
-  BiTime,
-  BiShield,
-  BiCog,
-  BiBuildings,
-  BiUser,
-  BiGroup,
-  BiFilter,
-  BiDotsVerticalRounded,
-  BiChevronDown,
-  BiChevronRight,
-  BiEdit,
-  BiPlus,
-  BiMinus,
-  BiAperture,
-  BiInfoCircle,
-  BiHistory,
-  BiDollarCircle,
-  BiTransfer,
-  BiHotel,
-  BiChart,
-  BiSearch,
-  BiPackage,
-  BiSolidTruck,
-  BiErrorCircle,
-} from "react-icons/bi";
+  Wallet,
+  CreditCard,
+  Receipt,
+  TrendingUp,
+  Download,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Shield,
+  Building2,
+  User,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  Plus,
+  History,
+  CircleDollarSign,
+  ArrowLeftRight,
+  BarChart3,
+  Search,
+  AlertCircle,
+} from "lucide-react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import type { BadgeStatus } from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Dialog from "@/components/ui/Dialog";
+import EmptyState from "@/components/ui/EmptyState";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
+import { TIER_ORDER, TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BillingData {
@@ -118,10 +114,9 @@ function SummaryCard({
 }) {
   const accents: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
-    emerald: "bg-emerald-50 text-emerald-600",
-    gray: "bg-gray-50 text-gray-600",
-    rose: "bg-rose-50 text-rose-500",
-    slate: "bg-slate-100 text-slate-500",
+    success: "bg-success-50 text-success-700",
+    warning: "bg-warning-50 text-warning-700",
+    neutral: "bg-surface-soft text-ink-600",
     purple: "bg-purple-50 text-purple-600",
   };
   return (
@@ -210,53 +205,57 @@ function TransactionTable({
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
-        <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+        <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
           {title}
         </h3>
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative">
-            <BiSearch
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"
-              size={16}
-            />
-            <input
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search transactions..."
-              className="pl-9 pr-4 py-3 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white outline-none w-48 transition-all"
-            />
-          </div>
-          <select
-            value={statusFilter}
+          <Input
+            fullWidth={false}
+            icon={<Search size={16} />}
+            value={search}
             onChange={(e) => {
-              setStatusFilter(e.target.value);
+              setSearch(e.target.value);
               setPage(1);
             }}
-            className="text-xs font-bold rounded-lg border border-slate-200 bg-slate-50 focus:border-primary outline-none px-3 py-3 transition-all"
-          >
-            <option value="">All Statuses</option>
-            {["completed", "pending", "failed", "refunded"].map((s) => (
-              <option key={s} value={s}>
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </option>
-            ))}
-          </select>
+            placeholder="Search transactions..."
+            aria-label="Search transactions"
+            className="w-48 h-10 text-xs"
+          />
+          <Select
+            fullWidth={false}
+            value={statusFilter}
+            onChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+            aria-label="Filter by status"
+            className="w-40 h-10 text-xs"
+            options={[
+              { value: "", label: "All Statuses" },
+              ...["completed", "pending", "failed", "refunded"].map((s) => ({
+                value: s,
+                label: s.charAt(0).toUpperCase() + s.slice(1),
+              })),
+            ]}
+          />
           {showDownload && (
             <>
-              <button
+              <Button
                 type="button"
+                size="sm"
                 onClick={() => void downloadReportPdf()}
-                disabled={reportLoading}
-                className="flex items-center gap-2 px-4 py-3 rounded-lg bg-primary text-white text-xs font-bold tracking-normal hover:bg-primary/80 transition-all shadow-none active:scale-95 disabled:opacity-50"
+                loading={reportLoading}
+                icon={<Receipt size={14} />}
+                iconPosition="left"
               >
-                <BiReceipt size={14} />
-                {reportLoading ? "PDF…" : "Report PDF"}
-              </button>
-              <button
+                Report PDF
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
+                icon={<Download size={14} />}
+                iconPosition="left"
                 onClick={() => {
                   const csv = [
                     [
@@ -286,10 +285,9 @@ function TransactionTable({
                   a.click();
                   URL.revokeObjectURL(url);
                 }}
-                className="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-200 text-slate-600 text-xs font-bold tracking-normal hover:border-primary/30 hover:text-primary transition-all active:scale-95"
               >
-                <BiDownload size={14} /> CSV
-              </button>
+                CSV
+              </Button>
             </>
           )}
         </div>
@@ -383,7 +381,7 @@ function TransactionTable({
                         }
                         className="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 flex items-center justify-center transition-all disabled:opacity-40"
                       >
-                        <BiDownload size={16} />
+                        <Download size={16} />
                       </button>
                       <button
                         type="button"
@@ -394,7 +392,7 @@ function TransactionTable({
                         onClick={() => void downloadTxnPdf(t, "invoice")}
                         className="hidden md:flex w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 items-center justify-center transition-all disabled:opacity-40"
                       >
-                        <BiReceipt size={16} />
+                        <Receipt size={16} />
                       </button>
                     </div>
                   </td>
@@ -414,9 +412,10 @@ function TransactionTable({
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
+              aria-label="Previous page"
+              className="w-11 h-11 sm:w-8 sm:h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
             >
-              <BiChevronDown className="rotate-90" size={16} />
+              <ChevronLeft size={16} />
             </button>
             {Array.from(
               { length: Math.min(5, totalPages) },
@@ -425,7 +424,9 @@ function TransactionTable({
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${p === page ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                aria-label={`Page ${p}`}
+                aria-current={p === page ? "page" : undefined}
+                className={`w-11 h-11 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition-all ${p === page ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-50"}`}
               >
                 {p}
               </button>
@@ -433,9 +434,10 @@ function TransactionTable({
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
+              aria-label="Next page"
+              className="w-11 h-11 sm:w-8 sm:h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center disabled:opacity-30"
             >
-              <BiChevronDown className="-rotate-90" size={16} />
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
@@ -503,21 +505,18 @@ function OrderTable({ orders }: { orders: any[] }) {
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+        <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
           My Orders & Refills
         </h3>
-        <div className="relative">
-          <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"
-            size={14}
-          />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search orders..."
-            className="pl-9 pr-4 py-2 text-xs font-medium rounded-lg border border-slate-100 bg-slate-50 focus:border-primary focus:bg-white outline-none w-40 transition-all"
-          />
-        </div>
+        <Input
+          fullWidth={false}
+          icon={<Search size={14} />}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search orders..."
+          aria-label="Search orders"
+          className="w-40 h-9 text-xs"
+        />
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left font-sans">
@@ -594,43 +593,23 @@ function PatientBillingView({
     paymentMethods = [],
   } = data;
   const [upgradeModal, setUpgradeModal] = useState(false);
-  const [selectedTier, setSelectedTier] = useState("pro");
+  const [selectedTier, setSelectedTier] = useState(TIER_ORDER[0]);
 
-  const tiers = [
-    {
-      id: "free",
-      label: "Free",
-      price: 0,
-      features: [
-        "1 consultation/month",
-        "Basic health tips",
-        "AI triage (5 chats/month)",
-      ],
-    },
-    {
-      id: "pro",
-      label: "Pro",
-      price: 299,
-      features: [
-        "Unlimited consultations",
-        "Priority booking",
-        "AI triage (unlimited)",
-        "Health record PDF",
-        "Medication reminders",
-      ],
-    },
-    {
-      id: "family",
-      label: "Family",
-      price: 499,
-      features: [
-        "All Pro features",
-        "Up to 4 family members",
-        "Dedicated GP",
-        "24/7 emergency line",
-      ],
-    },
-  ];
+  const tiers = TIER_ORDER.map((id) => {
+    const cfg = TIER_CONFIG[id];
+    const features = [
+      cfg.consultationsMax === Infinity
+        ? "Unlimited consultations"
+        : `${cfg.consultationsMax} consultations/month`,
+      "24/7 access & AI triage",
+    ];
+    if (cfg.maxFamilyMembers > 0) {
+      features.push(
+        `Up to ${cfg.maxFamilyMembers} family member${cfg.maxFamilyMembers > 1 ? "s" : ""}`,
+      );
+    }
+    return { id: cfg.id, label: cfg.label, price: cfg.price, features };
+  });
 
   const cardIcons: Record<string, string> = {
     Visa: "💳",
@@ -645,20 +624,20 @@ function PatientBillingView({
         <SummaryCard
           label="Total Spent"
           value={fmtZAR(summary.totalSpent)}
-          icon={<BiWallet />}
+          icon={<Wallet />}
           accent="primary"
         />
         <SummaryCard
           label="Completed Transactions"
           value={summary.completedCount}
-          icon={<BiCheckCircle />}
-          accent="emerald"
+          icon={<CheckCircle2 />}
+          accent="success"
         />
         <SummaryCard
           label="Pending Transactions"
           value={summary.pendingCount}
-          icon={<BiTime />}
-          accent="gray"
+          icon={<Clock />}
+          accent="warning"
         />
       </div>
 
@@ -666,7 +645,7 @@ function PatientBillingView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+            <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
               Subscription Plan
             </h3>
             <StatusPill status={subscription?.status || "free"} />
@@ -676,22 +655,28 @@ function PatientBillingView({
               <div className="flex items-center gap-4">
                 <div
                   className={`w-16 h-16 rounded-lg flex items-center justify-center text-2xl font-bold ${
-                    subscription.tier === "family"
+                    subscription.tier === "family_plus"
                       ? "bg-purple-50 text-purple-600"
-                      : subscription.tier === "pro"
+                      : subscription.tier === "family"
                         ? "bg-primary/10 text-primary"
                         : "bg-slate-100 text-slate-500"
                   }`}
                 >
-                  {subscription.tier === "family"
+                  {subscription.tier === "family_plus"
                     ? "👨‍👩‍👧‍👦"
-                    : subscription.tier === "pro"
+                    : subscription.tier === "family"
                       ? "⭐"
                       : "🆓"}
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-slate-800 capitalize">
-                    {subscription.tier} Plan
+                  <p className="text-2xl font-bold text-slate-800">
+                    {(() => {
+                      const rawTier: string = subscription.tier;
+                      return isValidTier(rawTier)
+                        ? TIER_CONFIG[rawTier].label
+                        : rawTier;
+                    })()}{" "}
+                    Plan
                   </p>
                   <p className="text-sm text-slate-500 font-medium">
                     {fmtZAR(subscription.price || 0)} / month
@@ -706,23 +691,22 @@ function PatientBillingView({
                 </span>
               </div>
               <div className="flex gap-3 mt-4">
-                <button
-                  onClick={() => setUpgradeModal(true)}
-                  className="flex-1 py-3 rounded-lg bg-primary text-white text-xs font-bold  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
-                >
+                <Button fullWidth size="sm" onClick={() => setUpgradeModal(true)}>
                   Upgrade Plan
-                </button>
+                </Button>
                 {subscription.status !== "cancelled" && (
-                  <button
+                  <Button
+                    fullWidth
+                    size="sm"
+                    variant="ghost"
+                    disabled={actionLoading}
                     onClick={() =>
                       confirm("Cancel your subscription?") &&
                       onAction("cancel_subscription")
                     }
-                    disabled={actionLoading}
-                    className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-500 text-xs font-bold  tracking-normal hover:bg-red-50 hover:text-red-500 transition-all"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -731,12 +715,9 @@ function PatientBillingView({
               <p className="text-slate-500 text-sm font-medium mb-4">
                 No active subscription
               </p>
-              <button
-                onClick={() => setUpgradeModal(true)}
-                className="px-6 py-3 rounded-lg bg-primary text-white text-xs font-bold  tracking-normal  shadow-primary/20 hover:bg-primary/80 transition-all"
-              >
+              <Button size="sm" onClick={() => setUpgradeModal(true)}>
                 Get Started
-              </button>
+              </Button>
             </div>
           )}
         </Card>
@@ -744,11 +725,11 @@ function PatientBillingView({
         {/* Payment Methods */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+            <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
               Payment Methods
             </h3>
             <button className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
-              <BiPlus size={14} /> Add New
+              <Plus size={14} /> Add New
             </button>
           </div>
           <div className="space-y-3">
@@ -812,7 +793,7 @@ function PatientBillingView({
                     </span>
                   )}
                   <button className="text-slate-300 hover:text-red-500 transition-colors shrink-0">
-                    <BiXCircle size={18} />
+                    <XCircle size={18} />
                   </button>
                 </div>
               ))
@@ -862,26 +843,28 @@ function PatientBillingView({
         </div>
       </div>
 
-      {/* Upgrade Modal */}
+      {/* Upgrade Modal — same centered-desktop/bottom-sheet-mobile contract as
+          Dialog, but wider to fit the 3-column tier grid Dialog's max size can't. */}
       {upgradeModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setUpgradeModal(false)}
           />
-          <div className="relative w-full max-w-2xl bg-white rounded-lg overflow-hidden animate-in zoom-in-95 duration-300 ">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-800 font-grotesk">
+          <div className="relative w-full sm:max-w-2xl bg-white shadow-2xl overflow-hidden rounded-t-2xl sm:rounded-2xl max-h-[90vh] sm:max-h-none flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 sm:slide-in-from-bottom-0 fade-in duration-200">
+            <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 shrink-0">
+              <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
                 Choose Your Plan
               </h3>
               <button
                 onClick={() => setUpgradeModal(false)}
-                className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all"
+                aria-label="Close"
+                className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-danger-50 hover:text-danger-500 flex items-center justify-center transition-all"
               >
-                ✕
+                <XCircle size={18} />
               </button>
             </div>
-            <div className="p-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar">
               {tiers.map((t) => (
                 <button
                   key={t.id}
@@ -904,8 +887,8 @@ function PatientBillingView({
                         key={f}
                         className="flex items-start gap-2 text-xs font-medium text-slate-600"
                       >
-                        <BiCheckCircle
-                          className="text-emerald-500 shrink-0 mt-0.5"
+                        <CheckCircle2
+                          className="text-success-500 shrink-0 mt-0.5"
                           size={13}
                         />{" "}
                         {f}
@@ -915,19 +898,17 @@ function PatientBillingView({
                 </button>
               ))}
             </div>
-            <div className="px-8 pb-8">
-              <button
+            <div className="px-6 sm:px-8 pb-6 sm:pb-8 pt-2 shrink-0">
+              <Button
+                fullWidth
+                loading={actionLoading}
                 onClick={() => {
                   onAction("upgrade_subscription", { tier: selectedTier });
                   setUpgradeModal(false);
                 }}
-                disabled={actionLoading}
-                className="w-full py-4 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal shadow-none shadow-primary/20 hover:bg-primary/80 transition-all disabled:opacity-50"
               >
-                {actionLoading
-                  ? "Processing..."
-                  : `Upgrade to ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`}
-              </button>
+                {`Upgrade to ${isValidTier(selectedTier) ? TIER_CONFIG[selectedTier].label : selectedTier}`}
+              </Button>
             </div>
           </div>
         </div>
@@ -964,25 +945,25 @@ function PractitionerBillingView({
         <SummaryCard
           label="Total Earned"
           value={fmtZAR(summary.totalEarned)}
-          icon={<BiTrendingUp />}
-          accent="emerald"
+          icon={<TrendingUp />}
+          accent="success"
         />
         <SummaryCard
           label="Total Paid Out"
           value={fmtZAR(summary.totalPaid)}
-          icon={<BiBuildings />}
+          icon={<Building2 />}
           accent="primary"
         />
         <SummaryCard
           label="Pending Payouts"
           value={fmtZAR(summary.totalPending)}
-          icon={<BiTime />}
-          accent="gray"
+          icon={<Clock />}
+          accent="warning"
         />
         <SummaryCard
           label="Payout Requests"
           value={String(summary.pendingPayouts)}
-          icon={<BiTransfer />}
+          icon={<ArrowLeftRight />}
           accent="purple"
         />
       </div>
@@ -1004,13 +985,13 @@ function PractitionerBillingView({
               onClick={() => setRequestModal(true)}
               className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal hover:bg-primary/80 transition-all  shadow-primary/20 active:scale-95"
             >
-              <BiTransfer size={18} /> Request Payout
+              <ArrowLeftRight size={18} /> Request Payout
             </button>
             <button
               onClick={() => setBankModal(true)}
               className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs  tracking-normal hover:bg-slate-200 transition-all"
             >
-              <BiBuildings size={18} /> Update Bank Account
+              <Building2 size={18} /> Update Bank Account
             </button>
             <button
               type="button"
@@ -1026,7 +1007,7 @@ function PractitionerBillingView({
               }}
               className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs tracking-normal hover:bg-slate-200 transition-all"
             >
-              <BiDownload size={18} /> Download Payout Report (PDF)
+              <Download size={18} /> Download Payout Report (PDF)
             </button>
             <button
               type="button"
@@ -1042,7 +1023,7 @@ function PractitionerBillingView({
               }}
               className="w-full flex items-center gap-3 px-5 py-4 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs tracking-normal hover:bg-slate-200 transition-all"
             >
-              <BiReceipt size={18} /> Full Earnings Report (PDF)
+              <Receipt size={18} /> Full Earnings Report (PDF)
             </button>
           </div>
         </Card>
@@ -1051,7 +1032,7 @@ function PractitionerBillingView({
       {/* Payout History */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+          <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
             Payout History
           </h3>
         </div>
@@ -1130,125 +1111,70 @@ function PractitionerBillingView({
       />
 
       {/* Request Payout Modal */}
-      {requestModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            onClick={() => setRequestModal(false)}
+      <Dialog
+        isOpen={requestModal}
+        onClose={() => setRequestModal(false)}
+        title="Request Payout"
+        size="sm"
+        onConfirm={() => {
+          if (!requestAmount) return;
+          onAction("request_payout", {
+            amount: parseFloat(requestAmount) * 0.88,
+            notes: requestNotes,
+            periodFrom: new Date(
+              Date.now() - 30 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+            periodTo: new Date().toISOString(),
+            consultationCount: 0,
+          });
+          setRequestModal(false);
+        }}
+        confirmLabel="Submit Request"
+        confirmLoading={actionLoading}
+      >
+        <div className="space-y-4">
+          <Input
+            label="Amount (ZAR)"
+            type="number"
+            value={requestAmount}
+            onChange={(e) => setRequestAmount(e.target.value)}
+            placeholder="0.00"
           />
-          <div className="relative w-full max-w-md bg-white rounded-lg p-8  animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
-              Request Payout
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-2">
-                  Amount (ZAR)
-                </h1>
-                <input
-                  type="number"
-                  value={requestAmount}
-                  onChange={(e) => setRequestAmount(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none font-bold"
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-2">
-                  Notes (optional)
-                </h1>
-                <input
-                  type="text"
-                  value={requestNotes}
-                  onChange={(e) => setRequestNotes(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
-                  placeholder="Monthly payout request"
-                />
-              </div>
-              <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                Platform fee of 12% will be deducted. Net amount:{" "}
-                <strong>
-                  {fmtZAR(parseFloat(requestAmount || "0") * 0.88)}
-                </strong>
-              </p>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setRequestModal(false)}
-                className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  onAction("request_payout", {
-                    amount: parseFloat(requestAmount) * 0.88,
-                    notes: requestNotes,
-                    periodFrom: new Date(
-                      Date.now() - 30 * 24 * 60 * 60 * 1000,
-                    ).toISOString(),
-                    periodTo: new Date().toISOString(),
-                    consultationCount: 0,
-                  });
-                  setRequestModal(false);
-                }}
-                disabled={!requestAmount || actionLoading}
-                className="flex-1 py-3 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal  disabled:opacity-50 hover:bg-primary/80 transition-all"
-              >
-                {actionLoading ? "Submitting..." : "Submit Request"}
-              </button>
-            </div>
-          </div>
+          <Input
+            label="Notes (optional)"
+            type="text"
+            value={requestNotes}
+            onChange={(e) => setRequestNotes(e.target.value)}
+            placeholder="Monthly payout request"
+          />
+          <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
+            Platform fee of 12% will be deducted. Net amount:{" "}
+            <strong>{fmtZAR(parseFloat(requestAmount || "0") * 0.88)}</strong>
+          </p>
         </div>
-      )}
+      </Dialog>
 
       {/* Bank Account Modal */}
-      {bankModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            onClick={() => setBankModal(false)}
-          />
-          <div className="relative w-full max-w-md bg-white rounded-lg p-8  animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
-              Bank Account Details
-            </h3>
-            <div className="space-y-4">
-              {[
-                "Account Holder",
-                "Bank Name",
-                "Account Number",
-                "Branch Code",
-                "Tax Number",
-              ].map((field) => (
-                <div key={field}>
-                  <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-1.5">
-                    {field}
-                  </h1>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none"
-                    placeholder={field}
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setBankModal(false)}
-                className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => setBankModal(false)}
-                className="flex-1 py-3 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all"
-              >
-                Save Account
-              </button>
-            </div>
-          </div>
+      <Dialog
+        isOpen={bankModal}
+        onClose={() => setBankModal(false)}
+        title="Bank Account Details"
+        size="sm"
+        onConfirm={() => setBankModal(false)}
+        confirmLabel="Save Account"
+      >
+        <div className="space-y-4">
+          {[
+            "Account Holder",
+            "Bank Name",
+            "Account Number",
+            "Branch Code",
+            "Tax Number",
+          ].map((field) => (
+            <Input key={field} label={field} placeholder={field} />
+          ))}
         </div>
-      )}
+      </Dialog>
     </div>
   );
 }
@@ -1287,20 +1213,20 @@ function HospitalAdminBillingView({
         <SummaryCard
           label="Total Revenue"
           value={fmtZAR(summary.totalRevenue)}
-          icon={<BiChart />}
+          icon={<BarChart3 />}
           accent="primary"
         />
         <SummaryCard
           label="This Month"
           value={fmtZAR(totalRevThisMonth)}
-          icon={<BiTrendingUp />}
-          accent="emerald"
+          icon={<TrendingUp />}
+          accent="success"
         />
         <SummaryCard
           label="Pending Payouts"
           value={String(summary.pendingPayoutCount)}
-          icon={<BiTime />}
-          accent="gray"
+          icon={<Clock />}
+          accent="warning"
         />
       </div>
 
@@ -1310,7 +1236,7 @@ function HospitalAdminBillingView({
 
         <Card noPadding>
           <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+            <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
               Revenue by Department
             </h3>
           </div>
@@ -1344,7 +1270,7 @@ function HospitalAdminBillingView({
       {/* Practitioner Payout Management */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+          <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
             Practitioner Payouts
           </h3>
           <div className="flex items-center gap-3">
@@ -1362,7 +1288,7 @@ function HospitalAdminBillingView({
               }}
               className="flex items-center gap-2 text-xs font-bold text-primary hover:underline"
             >
-              <BiReceipt size={14} /> Export PDF
+              <Receipt size={14} /> Export PDF
             </button>
             <button
               type="button"
@@ -1391,7 +1317,7 @@ function HospitalAdminBillingView({
               }}
               className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:underline"
             >
-              <BiDownload size={14} /> CSV
+              <Download size={14} /> CSV
             </button>
           </div>
         </div>
@@ -1538,31 +1464,31 @@ function AdminBillingView({
         <SummaryCard
           label="Platform Revenue"
           value={fmtZAR(summary.platformRevenue)}
-          icon={<BiDollarCircle />}
+          icon={<CircleDollarSign />}
           accent="primary"
         />
         <SummaryCard
           label="Total Transacted"
           value={fmtZAR(summary.totalRevenue)}
-          icon={<BiTrendingUp />}
-          accent="emerald"
+          icon={<TrendingUp />}
+          accent="success"
         />
         <SummaryCard
           label="Pending Payouts"
           value={String(summary.pendingPayouts)}
-          icon={<BiTime />}
-          accent="gray"
+          icon={<Clock />}
+          accent="warning"
         />
         <SummaryCard
           label="Patients"
           value={String(summary.patientCount)}
-          icon={<BiUser />}
-          accent="slate"
+          icon={<User />}
+          accent="neutral"
         />
         <SummaryCard
           label="Practitioners"
           value={String(summary.practitionerCount)}
-          icon={<BiGroup />}
+          icon={<Users />}
           accent="purple"
         />
       </div>
@@ -1585,7 +1511,7 @@ function AdminBillingView({
               onClick={() => setFeeModal(true)}
               className="flex items-center gap-1 text-xs font-bold text-primary hover:underline"
             >
-              <BiEdit size={13} /> Adjust
+              <Pencil size={13} /> Adjust
             </button>
           </div>
           <div className="space-y-4">
@@ -1755,7 +1681,7 @@ function AdminBillingView({
                     className="flex items-start gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors"
                   >
                     <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 text-slate-500 text-sm">
-                      <BiHistory />
+                      <History />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 flex-wrap">
@@ -1786,68 +1712,46 @@ function AdminBillingView({
       </div>
 
       {/* Fee Config Modal */}
-      {feeModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            onClick={() => setFeeModal(false)}
-          />
-          <div className="relative w-full max-w-sm bg-white rounded-lg p-8  animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-slate-800 mb-6 font-grotesk">
-              Adjust Platform Fees
-            </h3>
-            <div className="space-y-4">
-              {(
-                [
-                  ["Platform Fee %", "platformFeePercent"],
-                  ["Consultation Fee %", "consultationFeePercent"],
-                  ["Subscription Fee %", "subscriptionFeePercent"],
-                ] as const
-              ).map(([label, key]) => (
-                <div key={key}>
-                  <h1 className="block text-sm font-bold text-slate-500  tracking-normal mb-1.5">
-                    {label}
-                  </h1>
-                  <input
-                    type="number"
-                    min={0}
-                    max={50}
-                    value={feeForm[key]}
-                    onChange={(e) =>
-                      setFeeForm((f) => ({
-                        ...f,
-                        [key]: parseFloat(e.target.value) || 0,
-                      }))
-                    }
-                    className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm font-bold focus:border-primary outline-none"
-                  />
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-3 mt-4">
-              ⚠️ Changes apply to all future transactions.
-            </p>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setFeeModal(false)}
-                className="flex-1 py-3 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  onAction("update_fee_config", { config: feeForm });
-                  setFeeModal(false);
-                }}
-                disabled={actionLoading}
-                className="flex-1 py-3 rounded-lg bg-primary text-white font-bold text-xs  tracking-normal  hover:bg-primary/80 transition-all disabled:opacity-50"
-              >
-                {actionLoading ? "Saving..." : "Save Config"}
-              </button>
-            </div>
-          </div>
+      <Dialog
+        isOpen={feeModal}
+        onClose={() => setFeeModal(false)}
+        title="Adjust Platform Fees"
+        size="sm"
+        onConfirm={() => {
+          onAction("update_fee_config", { config: feeForm });
+          setFeeModal(false);
+        }}
+        confirmLabel="Save Config"
+        confirmLoading={actionLoading}
+      >
+        <div className="space-y-4">
+          {(
+            [
+              ["Platform Fee %", "platformFeePercent"],
+              ["Consultation Fee %", "consultationFeePercent"],
+              ["Subscription Fee %", "subscriptionFeePercent"],
+            ] as const
+          ).map(([label, key]) => (
+            <Input
+              key={key}
+              label={label}
+              type="number"
+              min={0}
+              max={50}
+              value={feeForm[key]}
+              onChange={(e) =>
+                setFeeForm((f) => ({
+                  ...f,
+                  [key]: parseFloat(e.target.value) || 0,
+                }))
+              }
+            />
+          ))}
+          <p className="text-xs text-warning-700 bg-warning-50 border border-warning-500/20 rounded-lg p-3">
+            Changes apply to all future transactions.
+          </p>
         </div>
-      )}
+      </Dialog>
     </div>
   );
 }
@@ -1935,12 +1839,12 @@ export default function BillingPage() {
   };
 
   const roleIcon: Record<string, React.ReactNode> = {
-    patient: <BiCreditCard size={22} />,
-    practitioner: <BiWallet size={22} />,
-    hospital_admin: <BiBuildings size={22} />,
-    super_admin: <BiShield size={22} />,
-    mega_admin: <BiShield size={22} />,
-    inspector: <BiChart size={22} />,
+    patient: <CreditCard size={22} />,
+    practitioner: <Wallet size={22} />,
+    hospital_admin: <Building2 size={22} />,
+    super_admin: <Shield size={22} />,
+    mega_admin: <Shield size={22} />,
+    inspector: <BarChart3 size={22} />,
   };
 
   return (
@@ -1950,15 +1854,15 @@ export default function BillingPage() {
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
             {data ? (
-              (roleIcon[data.role] ?? <BiWallet size={22} />)
+              (roleIcon[data.role] ?? <Wallet size={22} />)
             ) : (
-              <BiWallet size={22} />
+              <Wallet size={22} />
             )}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight font-grotesk">
+            <h1 className="text-h1 font-bold text-ink-900 tracking-tight font-grotesk">
               {data ? (roleLabel[data.role] ?? "Billing") : "Billing"}
-            </h2>
+            </h1>
             <p className="text-sm text-slate-500 font-medium mt-0.5">
               {data?.role === "patient" &&
                 "Manage your payments, subscription, and insurance"}
@@ -1989,7 +1893,7 @@ export default function BillingPage() {
               }}
               className="flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-white font-bold text-xs tracking-normal hover:bg-primary/90 transition-all"
             >
-              <BiReceipt size={16} />
+              <Receipt size={16} />
               Download report PDF
             </button>
           )}
@@ -1998,7 +1902,7 @@ export default function BillingPage() {
             disabled={loading}
             className="flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-200 text-slate-500 font-bold text-xs tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
           >
-            <BiRefresh size={16} className={loading ? "animate-spin" : ""} />{" "}
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />{" "}
             Refresh
           </button>
         </div>
@@ -2014,7 +1918,7 @@ export default function BillingPage() {
         </div>
       ) : error ? (
         <div className="text-center py-24 space-y-4">
-          <BiErrorCircle size={48} className="mx-auto text-slate-200" />
+          <AlertCircle size={48} className="mx-auto text-slate-200" />
           <p className="text-slate-500 font-bold">
             Could not load billing data.
           </p>
@@ -2070,9 +1974,9 @@ export default function BillingPage() {
           }`}
         >
           {toast.type === "success" ? (
-            <BiCheckCircle size={18} />
+            <CheckCircle2 size={18} />
           ) : (
-            <BiXCircle size={18} />
+            <XCircle size={18} />
           )}
 
           {toast.msg}

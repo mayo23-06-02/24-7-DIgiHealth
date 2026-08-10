@@ -22,6 +22,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge, { BadgeStatus } from "@/components/ui/Badge";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
+import { TIER_ORDER, TIER_CONFIG } from "@/lib/billing/tiers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BillingTabProps {
@@ -68,57 +69,34 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-// ─── Plan Tiers ───────────────────────────────────────────────────────────────
-const TIERS = [
-  {
-    id: "basic",
-    label: "Basic",
-    price: 250,
-    consultations: 2,
-    chats: 20,
-    features: [
-      "2 consultations per month",
-      "20 AI triage checks",
-      "24/7 platform access",
-      "AI triage & symptom checker",
-      "Digital health record",
-      "Secure messaging",
-    ],
-  },
-  {
-    id: "standard",
-    label: "Standard",
-    price: 500,
-    consultations: 5,
-    chats: 50,
-    features: [
-      "5 consultations per month",
-      "50 AI triage checks",
-      "24/7 platform access",
-      "Full AI triage & diagnostics",
-      "Medical health record PDF",
-      "Medication reminders",
-      "Secure messaging",
-    ],
-  },
-  {
-    id: "premium",
-    label: "Premium",
-    price: 1000,
-    consultations: 10,
+// ─── Plan Tiers ─────────────────────────────────────────────────────────────
+// Sourced from lib/billing/tiers.ts (single source of truth, also used by
+// app/api/billing/route.ts and the family-linking cap checks) rather than
+// hardcoded here — this array used to drift out of sync with the real
+// pricing/quotas enforced server-side.
+const TIERS = TIER_ORDER.map((id) => {
+  const t = TIER_CONFIG[id];
+  const consultationsLabel = Number.isFinite(t.consultationsMax) ? `${t.consultationsMax}` : "Unlimited";
+  const features = [
+    `${consultationsLabel} consultation${t.consultationsMax === 1 ? "" : "s"} per month`,
+    "24/7 platform access",
+    "AI triage & symptom checker",
+    "Digital health record",
+    "Secure messaging",
+  ];
+  if (t.maxFamilyMembers > 0) {
+    features.splice(1, 0, `Up to ${t.maxFamilyMembers} family member${t.maxFamilyMembers === 1 ? "" : "s"} included`);
+  }
+  return {
+    id: t.id,
+    label: t.label,
+    price: t.price,
+    consultations: Number.isFinite(t.consultationsMax) ? t.consultationsMax : 999,
     chats: 999,
-    features: [
-      "10 consultations per month",
-      "Unlimited AI triage checks",
-      "24/7 priority access",
-      "Priority AI triage",
-      "Full medical health record PDF",
-      "Medication refills & reminders",
-      "Secure cloud health vault",
-      "Self-pay or insurance covered",
-    ],
-  },
-];
+    maxFamilyMembers: t.maxFamilyMembers,
+    features,
+  };
+});
 
 // ─── Transaction Mini-Table ───────────────────────────────────────────────────
 function MiniTransactionTable({ transactions }: { transactions: any[] }) {
@@ -317,7 +295,7 @@ export default function BillingTab({
 
   // ── Patient billing data ──────────────────────────────────────────────────
   const subscription = billingData?.subscription || {
-    tier: "free",
+    tier: "individual",
     status: "active",
     startDate: new Date(),
     nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),

@@ -1,8 +1,11 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { TIER_ORDER } from '@/lib/billing/tiers';
 
 // ─── Payment Transaction ──────────────────────────────────────────────────────
 export interface IPaymentTransaction extends Document {
   patientId: Types.ObjectId;
+  /** Set when a family guardian pays on this patient's behalf; unset = pays for self (default, unchanged behavior). */
+  payerId?: Types.ObjectId;
   practitionerId?: Types.ObjectId;
   facilityId?: Types.ObjectId;
   consultationId?: Types.ObjectId;
@@ -21,6 +24,7 @@ export interface IPaymentTransaction extends Document {
 }
 const PaymentTransactionSchema = new Schema<IPaymentTransaction>({
   patientId:              { type: Schema.Types.ObjectId, ref: 'User' },
+  payerId:                { type: Schema.Types.ObjectId, ref: 'User' },
   practitionerId:         { type: Schema.Types.ObjectId, ref: 'User' },
   facilityId:             { type: Schema.Types.ObjectId, ref: 'Facility' },
   consultationId:         { type: Schema.Types.ObjectId, ref: 'Consultation' },
@@ -41,7 +45,9 @@ const PaymentTransactionSchema = new Schema<IPaymentTransaction>({
 // ─── Subscription ─────────────────────────────────────────────────────────────
 export interface ISubscription extends Document {
   patientId: Types.ObjectId;
-  tier: 'free' | 'pro' | 'family';
+  /** Set when a family guardian pays for this patient; unset = pays for self (default, unchanged behavior). */
+  payerId?: Types.ObjectId;
+  tier: 'individual' | 'family' | 'family_plus';
   status: 'active' | 'trial' | 'cancelled' | 'past_due';
   startDate: Date;
   nextBillingDate: Date;
@@ -51,7 +57,8 @@ export interface ISubscription extends Document {
 }
 const SubscriptionSchema = new Schema<ISubscription>({
   patientId:       { type: Schema.Types.ObjectId, ref: 'User' },
-  tier:            { type: String, enum: ['free', 'pro', 'family'], default: 'free' },
+  payerId:         { type: Schema.Types.ObjectId, ref: 'User' },
+  tier:            { type: String, enum: TIER_ORDER, default: 'individual' },
   status:          { type: String, enum: ['active', 'trial', 'cancelled', 'past_due'] },
   startDate:       Date,
   nextBillingDate: Date,

@@ -19,6 +19,7 @@ import {
   Mail,
   Phone,
   CheckCircle2,
+  Users,
 } from "lucide-react";
 
 import Toast from "@/components/ui/Toast";
@@ -39,6 +40,7 @@ const DocumentsTab = dynamic(() => import("./components/DocumentsTab"), {
 import SecurityTab from "./components/SecurityTab";
 import NotificationsTab from "./components/NotificationsTab";
 import BillingTab from "./components/BillingTab";
+import FamilyTab from "./components/FamilyTab";
 import ProfileSidebar from "./components/ProfileSidebar";
 
 // ─── TYPES ──────────────────────────────────────────────────────────────────
@@ -907,6 +909,7 @@ export default function ProfilePage() {
     { id: "security", label: "Security", icon: ShieldCheck },
     { id: "notifications", label: "Alerts", icon: Bell },
     { id: "billing", label: "Billing", icon: Wallet },
+    ...(currentRole === "patient" ? [{ id: "family", label: "Family", icon: Users }] : []),
   ];
 
   const healthItems = [
@@ -1066,6 +1069,10 @@ export default function ProfilePage() {
               setBillingData={setBillingData}
               setToast={setToast}
             />
+          )}
+
+          {activeTab === "family" && currentRole === "patient" && (
+            <FamilyTab setToast={setToast} />
           )}
         </div>
 

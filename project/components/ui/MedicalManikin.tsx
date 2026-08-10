@@ -156,10 +156,27 @@ interface Note {
   createdAt?: string | Date;
 }
 
+export type ManikinAgeGroup = "infant" | "child" | "adult";
+
+/**
+ * Only adult has a male/female split — pre-pubescent body proportions differ
+ * far more by age band (head-to-body ratio, limb length) than by sex, so a
+ * single unisex mesh per band is the practical tradeoff for a symptom-
+ * annotation tool. Adult paths point at real assets; infant/child are wired
+ * for zero-code-change drop-in once those two meshes are sourced.
+ */
+const MANIKIN_MODEL_PATHS: Record<ManikinAgeGroup, { male: string; female: string } | { unisex: string }> = {
+  adult: { male: "/human_glb.glb", female: "/female.glb" },
+  child: { unisex: "/child.glb" },
+  infant: { unisex: "/infant.glb" },
+};
+
 interface MedicalManikinProps {
   gender: "male" | "female";
   heightCm: number;
   weightKg: number;
+  /** Selects the body-proportion mesh; defaults to "adult" (today's only real assets). */
+  ageGroup?: ManikinAgeGroup;
   readOnly?: boolean;
   patientId?: string;
   onUpdateHeightWeight?: () => void;
@@ -233,18 +250,37 @@ function HighlightMarker({
 }
 
 // ==================== 3D MODEL ====================
+type ModelVariant = "adult-male" | "adult-female" | "child" | "infant";
+
+/**
+ * Per-mesh-file calibration, not per-gender: each .glb is authored at its
+ * own native scale/origin, so these numbers compensate for that specific
+ * file, not for the person's sex. child/infant reuse adult-male's numbers as
+ * a placeholder — almost certainly wrong once those meshes actually exist,
+ * since they'll have been authored independently. Recalibrate on arrival.
+ */
+const MODEL_CALIBRATION: Record<
+  ModelVariant,
+  { scale: (b: { x: number; y: number }) => [number, number, number]; position: [number, number, number] }
+> = {
+  "adult-female": { scale: (b) => [b.x * 1.4, b.y * 1.4, b.x * 1.4], position: [0, -2.8, 0] },
+  "adult-male": { scale: (b) => [b.x * 0.7, b.y * 0.8, b.x * 0.8], position: [0, 1.0, 0] },
+  child: { scale: (b) => [b.x * 0.7, b.y * 0.8, b.x * 0.8], position: [0, 1.0, 0] }, // TODO recalibrate
+  infant: { scale: (b) => [b.x * 0.7, b.y * 0.8, b.x * 0.8], position: [0, 1.0, 0] }, // TODO recalibrate
+};
+
 function Model({
   url,
   bmiScale,
   onClick,
   readOnly,
-  gender,
+  variant,
 }: {
   url: string;
   bmiScale: { x: number; y: number };
   onClick: (name: string, point: THREE.Vector3) => void;
   readOnly?: boolean;
-  gender: "male" | "female";
+  variant: ModelVariant;
 }) {
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
@@ -273,16 +309,14 @@ function Model({
     }
   });
 
+  const calibration = MODEL_CALIBRATION[variant];
+
   return (
     <primitive
       ref={group}
       object={scene}
-      scale={
-        gender === "female"
-          ? [bmiScale.x * 1.4, bmiScale.y * 1.4, bmiScale.x * 1.4]
-          : [bmiScale.x * 0.7, bmiScale.y * 0.8, bmiScale.x * 0.8]
-      }
-      position={gender === "female" ? [0, -2.8, 0] : [0, 1.0, 0]}
+      scale={calibration.scale(bmiScale)}
+      position={calibration.position}
       onClick={(e: any) => {
         if (readOnly) return;
         e.stopPropagation();
@@ -305,6 +339,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
       gender: rawGender,
       heightCm,
       weightKg,
+      ageGroup = "adult",
       readOnly = false,
       patientId,
       onUpdateHeightWeight,
@@ -360,12 +395,23 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
     [orderedNotes],
   );
 
-  // Choose model based on gender
+  // Choose model based on age band first (infant/child are unisex meshes), gender within adult
   const modelUrl = useMemo(() => {
-    return gender === "female" ? "/female.glb" : "/human_glb.glb";
-  }, [gender]);
+    const paths = MANIKIN_MODEL_PATHS[ageGroup];
+    if ("unisex" in paths) return paths.unisex;
+    return gender === "female" ? paths.female : paths.male;
+  }, [ageGroup, gender]);
 
-  // Preload both models for zero latency switching
+  const modelVariant: ModelVariant = useMemo(() => {
+    if (ageGroup === "child") return "child";
+    if (ageGroup === "infant") return "infant";
+    return gender === "female" ? "adult-female" : "adult-male";
+  }, [ageGroup, gender]);
+
+  // Preload both adult models for zero-latency gender switching. Infant/child
+  // aren't preloaded yet — those .glb files don't exist in /public until
+  // sourced, and eagerly preloading a 404 on every mount is just noise.
+  // Drop the two new meshes in and add their preload calls here.
   useEffect(() => {
     useGLTF.preload("/human_glb.glb");
     useGLTF.preload("/female.glb");
@@ -576,11 +622,6 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
             intensity={1.2}
             castShadow
           />
-          <gridHelper
-            args={[20, 40, "#cbd5e1", "#f1f5f9"]}
-            position={[0, -2.5, -2]}
-            rotation={[Math.PI / 2, 0, 0]}
-          />
 
           <Suspense
             fallback={
@@ -601,7 +642,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
                   bmiScale={bmiScale}
                   onClick={handlePartClick}
                   readOnly={readOnly}
-                  gender={gender}
+                  variant={modelVariant}
                 />
                 {orderedNotes.map((note, i) => (
                   <HighlightMarker

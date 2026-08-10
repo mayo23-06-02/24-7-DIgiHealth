@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { normalizePhoneZaSz, maskE164 } from '@/lib/phone/normalizePhone';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get('x-user-id') || null;
@@ -13,6 +15,31 @@ export async function GET(req: NextRequest) {
     await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    // Postgres-native accounts (no Mongo `User` row — see lib/utils/mongoId.ts)
+    // can't be looked up with findById; fall back to the basics getRequestUser
+    // already resolved from Postgres rather than crashing.
+    if (!isMongoObjectId(userId)) {
+      const requestUser = await getRequestUser();
+      if (!requestUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: requestUser.userId,
+          firstName: requestUser.firstName || '',
+          lastName: requestUser.lastName || '',
+          email: requestUser.email || '',
+          mobile: '',
+          phoneE164: '',
+          phoneMasked: '',
+          saId: '',
+          role: requestUser.role,
+          mfaEnabled: false,
+          avatarUrl: null,
+          status: 'active',
+        },
+      });
+    }
 
     const user = await User.findById(userId).lean();
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -52,6 +79,12 @@ export async function PUT(req: NextRequest) {
     await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!isMongoObjectId(userId)) {
+      return NextResponse.json(
+        { error: 'Profile editing is not yet available for this account.' },
+        { status: 400 },
+      );
+    }
 
     const body = await req.json();
     const { firstName, lastName, mobile, avatarUrl } = body;

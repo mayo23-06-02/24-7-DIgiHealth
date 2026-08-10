@@ -10,6 +10,9 @@ import {
 export async function POST() {
   const response = NextResponse.json({ success: true });
   clearDigiHealthTokenCookie(response);
+  // Guard against a stale impersonation cookie surviving on a shared device
+  // (see app/api/patient/family/[memberId]/switch/route.ts).
+  response.cookies.delete("guardian_token");
 
   if (isSupabaseAuthConfigured()) {
     try {

@@ -8,6 +8,7 @@ import User from '@/lib/models/User';
 import { Facility } from '@/lib/models/Facility';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
@@ -26,6 +27,11 @@ async function getPatientId() {
 export async function GET() {
   const patientId = await getPatientId();
   if (!patientId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // Postgres-native accounts have no Mongo `User` row (see
+  // lib/utils/mongoId.ts) — every collection below is still Mongo-only, so
+  // they genuinely have an empty agenda rather than a lookup failure.
+  if (!isMongoObjectId(patientId)) return NextResponse.json([]);
 
   await connectToDatabase();
   const patient = await User.findById(patientId);

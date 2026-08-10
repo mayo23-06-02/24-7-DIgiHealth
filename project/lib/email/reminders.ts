@@ -1,6 +1,7 @@
 import { Consultation } from "@/lib/models/Consultation";
 import { Message } from "@/lib/models/Message";
 import User from "@/lib/models/User";
+import FamilyLink from "@/lib/models/FamilyLink";
 import { sendEmail, isPostmarkConfigured } from "@/lib/email/postmark";
 import { appointmentReminderEmailHtml } from "@/lib/email/templates/appointmentReminder";
 import { newMessageReminderEmailHtml } from "@/lib/email/templates/newMessageReminder";
@@ -14,6 +15,25 @@ const MESSAGE_REMINDER_DELAY_MS = 5 * 60 * 60 * 1000; // 5 hours unread
 let lastAppointmentCheckAt = 0;
 let lastMessageCheckAt = 0;
 const CHECK_COOLDOWN_MS = 60_000;
+
+/**
+ * A minor dependent's stored email is a plus-addressed synthetic address
+ * (see app/api/patient/family/child/route.ts) that resolves to the
+ * guardian's real inbox via standard plus-addressing — so this technically
+ * isn't strictly necessary. It's still worth resolving explicitly: it makes
+ * the "on behalf of {child}" framing possible, and doesn't depend on every
+ * recipient mail provider actually honoring plus-addressing.
+ */
+async function resolveReminderRecipient(patient: { _id: any; firstName: string; email: string }) {
+  const link = await FamilyLink.findOne({ memberId: patient._id, status: "active", isMinor: true })
+    .populate("guardianId", "firstName email")
+    .lean();
+  const guardian = (link as any)?.guardianId;
+  if (guardian?.email) {
+    return { email: guardian.email, recipientName: guardian.firstName, onBehalfOf: patient.firstName };
+  }
+  return { email: patient.email, recipientName: patient.firstName, onBehalfOf: undefined };
+}
 
 /**
  * Emails both parties once, ~10 minutes before a confirmed consultation
@@ -64,11 +84,15 @@ export async function sendDueAppointmentReminders(options?: {
         if (!patient?.email || !practitioner?.email) return;
 
         const start = new Date(c.scheduledStartTime);
+        const recipient = await resolveReminderRecipient(patient);
         const patientEmail = sendEmail({
-          to: patient.email,
-          subject: "Your consultation starts in 10 minutes",
+          to: recipient.email,
+          subject: recipient.onBehalfOf
+            ? `${recipient.onBehalfOf}'s consultation starts in 10 minutes`
+            : "Your consultation starts in 10 minutes",
           html: appointmentReminderEmailHtml({
-            recipientName: patient.firstName,
+            recipientName: recipient.recipientName,
+            onBehalfOf: recipient.onBehalfOf,
             otherPartyName: `Dr. ${practitioner.firstName} ${practitioner.lastName}`,
             scheduledStartTime: start,
             consultationType: c.type,

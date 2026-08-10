@@ -5,6 +5,7 @@ import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { getBlockedAcceptorId } from '@/lib/booking/requester';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,6 +23,12 @@ export async function GET(req: NextRequest) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
     const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
+
+    // Postgres-native accounts have no Mongo identity — Consultation is
+    // still Mongo-only, so they can't have any (see lib/utils/mongoId.ts).
+    if (!isMongoObjectId(userId)) {
+      return NextResponse.json({ success: true, data: [] });
+    }
 
     const consultations = await Consultation.find({ patientId: userId })
       .populate('practitionerId', 'firstName lastName avatarUrl')

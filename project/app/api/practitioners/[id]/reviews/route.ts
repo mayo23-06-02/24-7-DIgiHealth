@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Review } from '@/lib/models/ReviewsDocs';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import mongoose from 'mongoose';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 export async function POST(
   req: NextRequest,
@@ -14,6 +15,12 @@ export async function POST(
 
     if (!userId) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!isMongoObjectId(userId)) {
+      return NextResponse.json(
+        { success: false, error: 'Reviews are not yet available for this account.' },
+        { status: 400 },
+      );
     }
 
     const { rating, comment } = await req.json();

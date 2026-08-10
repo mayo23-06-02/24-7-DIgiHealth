@@ -13,6 +13,7 @@ import {
 import WeatherWidget from "./WeatherWidget";
 import NotificationBell from "./NotificationBell";
 import ProfileMenu from "./ProfileMenu";
+import FamilySwitcher from "@/components/shared/FamilySwitcher";
 
 export interface UnifiedHeaderProps {
   onNotificationClick?: () => void;
@@ -71,7 +72,11 @@ export default function Header({
     }
   }, []);
 
+  const hasMessages = user?.role === "patient" || user?.role === "practitioner";
+
   useEffect(() => {
+    if (!hasMessages) return;
+
     void fetchUnreadMessagesCount({ isInitial: true });
 
     const interval = setInterval(() => {
@@ -94,7 +99,7 @@ export default function Header({
       window.removeEventListener(CHAT_UNREAD_EVENT, onUnreadChanged);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [fetchUnreadMessagesCount]);
+  }, [fetchUnreadMessagesCount, hasMessages]);
 
   const formattedDate = time?.toLocaleDateString("en-US", {
     weekday: "short",
@@ -137,27 +142,31 @@ export default function Header({
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-1.5 sm:gap-3 ml-auto">
-        {/* Messages */}
-        <Link href={`/${user?.role}/messages`}>
-          <button
-            type="button"
-            className="w-10 h-10 rounded-md border border-border flex items-center justify-center cursor-pointer transition-all relative bg-surface text-ink-600 hover:text-primary hover:bg-surface-soft"
-            aria-label={
-              unreadMessagesCount > 0
-                ? `${unreadMessagesCount} unread chat${unreadMessagesCount === 1 ? "" : "s"}`
-                : "Messages"
-            }
-          >
-            <MessageSquare size={18} />
-            {badgeText && (
-              <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 bg-danger-500 rounded-full flex items-center justify-center ">
-                <span className="text-[9px] leading-none text-white font-bold tabular-nums">
-                  {badgeText}
-                </span>
-              </div>
-            )}
-          </button>
-        </Link>
+        <FamilySwitcher variant="compact" />
+        
+        {/* Messages — only patient/practitioner have a messages inbox */}
+        {hasMessages && (
+          <Link href={`/${user?.role}/messages`}>
+            <button
+              type="button"
+              className="w-10 h-10 rounded-md border border-border flex items-center justify-center cursor-pointer transition-all relative bg-surface text-ink-600 hover:text-primary hover:bg-surface-soft"
+              aria-label={
+                unreadMessagesCount > 0
+                  ? `${unreadMessagesCount} unread chat${unreadMessagesCount === 1 ? "" : "s"}`
+                  : "Messages"
+              }
+            >
+              <MessageSquare size={18} />
+              {badgeText && (
+                <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 bg-danger-500 rounded-full flex items-center justify-center ">
+                  <span className="text-[9px] leading-none text-white font-bold tabular-nums">
+                    {badgeText}
+                  </span>
+                </div>
+              )}
+            </button>
+          </Link>
+        )}
 
         <NotificationBell onNotificationClick={onNotificationClick} />
         <ProfileMenu user={user} />

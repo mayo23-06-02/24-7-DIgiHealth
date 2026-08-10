@@ -1,14 +1,81 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import { Users, ArrowLeftRight } from "lucide-react";
 import { useAuthContext } from "../auth/AuthProvider";
 import { BiBrain } from "react-icons/bi";
 import Header from "@/components/shared/Header";
 import Sidebar from "./Sidebar";
 import { useNavigationProgress } from "@/components/providers/NavigationProgressProvider";
+import {
+  FamilyMemberProvider,
+  useFamilyMembers,
+} from "@/lib/family/FamilyMemberContext";
+import Button from "../ui/Button";
 
 interface DashboardShellProps {
   children: React.ReactNode;
+}
+
+function ActiveMemberBanner() {
+  const { user } = useAuthContext();
+  const { activeMember, setActiveMemberId } = useFamilyMembers();
+  const [isSwitchingBack, setIsSwitchingBack] = React.useState(false);
+
+  // A child has no login of their own — impersonating one replaces the
+  // session cookie outright (see app/api/patient/family/[memberId]/switch),
+  // so this reads it straight off the real session rather than client state.
+  if (user?.isImpersonating) {
+    const switchBack = async () => {
+      setIsSwitchingBack(true);
+      try {
+        await fetch("/api/patient/family/switch-back", { method: "POST" });
+      } finally {
+        window.location.href = "/patient";
+      }
+    };
+    return (
+      <div className="mb-4 flex items-center gap-3 rounded-lg border border-info-500/20 bg-primary px-4 py-2.5">
+        <Users size={16} className="text-white shrink-0" />
+        <p className="flex-1 min-w-0 text-sm font-medium text-white">
+          You&apos;re managing <span className="font-bold">{user.name}</span>&apos;s account
+        </p>
+        <Button
+          onClick={switchBack}
+          variant="white"
+          disabled={isSwitchingBack}
+          size="sm"
+        >
+          
+          {isSwitchingBack ? "Switching back…" : "Switch back to my account"}
+        </Button>
+      </div>
+    );
+  }
+
+  // An adult dependent has their own login — the guardian never takes over
+  // their session, they just get a read-only management view (see
+  // app/(dashboard)/patient/family/[memberId]/page.tsx).
+  if (!activeMember) return null;
+
+  return (
+    <div className="mb-4 flex items-center gap-3 rounded-lg border border-info-500/20 bg-info-50 px-4 py-2.5">
+      <Users size={16} className="text-info-700 shrink-0" />
+      <p className="flex-1 min-w-0 text-sm font-medium text-info-700">
+        Managing <span className="font-bold">{activeMember.name}</span>&apos;s
+        account
+      </p>
+      <Link
+        href="/patient"
+        onClick={() => setActiveMemberId(null)}
+        className="flex items-center gap-1.5 shrink-0 text-xs font-bold text-info-700 hover:underline"
+      >
+        <ArrowLeftRight size={13} />
+        Switch to my account
+      </Link>
+    </div>
+  );
 }
 
 const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
@@ -17,6 +84,39 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
   const { user } = useAuthContext();
   const { isNavigating } = useNavigationProgress();
 
+  return (
+    <FamilyMemberProvider>
+      <DashboardShellInner
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        isTriageOpen={isTriageOpen}
+        setIsTriageOpen={setIsTriageOpen}
+        user={user}
+        isNavigating={isNavigating}
+      >
+        {children}
+      </DashboardShellInner>
+    </FamilyMemberProvider>
+  );
+};
+
+function DashboardShellInner({
+  children,
+  isSidebarOpen,
+  setIsSidebarOpen,
+  isTriageOpen,
+  setIsTriageOpen,
+  user,
+  isNavigating,
+}: {
+  children: React.ReactNode;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (v: boolean) => void;
+  isTriageOpen: boolean;
+  setIsTriageOpen: (v: boolean) => void;
+  user: ReturnType<typeof useAuthContext>["user"];
+  isNavigating: boolean;
+}) {
   return (
     // Root container: fills screen, forbids body scroll
     <div className="flex h-screen overflow-hidden bg-slate-100 font-sans selection:bg-primary/10">
@@ -47,7 +147,10 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
           aria-busy={isNavigating || undefined}
           className="flex-1 overflow-y-auto overflow-x-hidden p-2 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 custom-scrollbar"
         >
-          <div className="max-w-400 mx-auto">{children}</div>
+          <div className="max-w-400 mx-auto">
+            <ActiveMemberBanner />
+            {children}
+          </div>
         </main>
 
         {/* ── FLOATING AI TRIAGE BUTTON (Only for Practitioners) ── */}
@@ -71,6 +174,6 @@ const DashboardShell: React.FC<DashboardShellProps> = ({ children }) => {
       </div>
     </div>
   );
-};
+}
 
 export default DashboardShell;

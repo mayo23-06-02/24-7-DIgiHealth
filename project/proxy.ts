@@ -21,6 +21,18 @@ function getClientIdentifier(request: NextRequest): string {
   return forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
 }
 
+/**
+ * Resolve which rate-limit bucket a pathname belongs to. Routes with a
+ * dedicated entry in RATE_LIMIT_CONFIG get their own bucket key so that
+ * high-frequency traffic on OTHER chat endpoints (message history fetches,
+ * read-receipt PATCHes, conversation loads, etc.) can't eat into the
+ * stricter budget reserved for sending messages, and vice versa.
+ */
+function getRateLimitBucket(pathname: string): { key: string; config: { windowMs: number; maxRequests: number } } {
+  const config = RATE_LIMIT_CONFIG[pathname];
+  return config ? { key: pathname, config } : { key: 'default', config: RATE_LIMIT_CONFIG.default };
+}
+
 function checkRateLimit(identifier: string, config: { windowMs: number; maxRequests: number }): boolean {
   const now = Date.now();
   const record = rateLimitMap.get(identifier);
@@ -63,8 +75,12 @@ export default auth(async function middleware(request: NextRequest & { auth: any
 
   // ---------- 1. Rate limiting for API routes ----------
   if (pathname.startsWith('/api/chat') || pathname.startsWith('/api/ably')) {
-    const config = RATE_LIMIT_CONFIG[pathname] ?? RATE_LIMIT_CONFIG.default;
-    const identifier = getClientIdentifier(request);
+    const { key, config } = getRateLimitBucket(pathname);
+    // Bucket by identifier + route group so, e.g., message-history polling or
+    // read-receipt PATCHes on other /api/chat/* routes can't burn through the
+    // (intentionally stricter) budget for POST /api/chat/messages, and a burst
+    // of sends can't lock a user out of unrelated chat reads.
+    const identifier = `${getClientIdentifier(request)}:${key}`;
     if (!checkRateLimit(identifier, config)) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
@@ -89,7 +105,12 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // Vercel Cron invokes this with `Authorization: Bearer $CRON_SECRET`, not a
     // session cookie — the route itself verifies that header (see
     // app/api/cron/reminders/route.ts), so it must bypass the session gate below.
-    pathname.startsWith('/api/cron/')
+    pathname.startsWith('/api/cron/') ||
+    // Public invite-token lookups (staff invite, family invite) are hit by
+    // people who aren't logged in yet — that's the whole point of an invite
+    // link. Each route validates the token itself; this just lets the
+    // request through to reach that check instead of 401ing first.
+    pathname.startsWith('/api/invites/')
   ) {
     return NextResponse.next();
   }

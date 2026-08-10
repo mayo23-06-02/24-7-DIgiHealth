@@ -32,6 +32,7 @@ export default function PatientAppointments() {
   const initialTab = (searchParams.get("tab") as AppointmentTab) || "upcoming";
   const appointmentIdFromQuery = searchParams.get("appointmentId");
   const shouldOpenModal = searchParams.get("modal") === "true";
+  const shouldOpenBooking = searchParams.get("book") === "true";
 
   const [activeTab, setActiveTab] = useState<AppointmentTab>(initialTab);
   const [view, setView] = useState<AppointmentView>("list");
@@ -77,6 +78,20 @@ export default function PatientAppointments() {
       }
     }
   }, [appointmentIdFromQuery, shouldOpenModal, appointments, initialTab]);
+
+  // Deep-link support for "Book Appointment" CTAs elsewhere in the app
+  // (e.g. the patient home page) — opens the booking modal directly instead
+  // of just landing on the list.
+  useEffect(() => {
+    if (shouldOpenBooking) {
+      setEditingApptId(null);
+      setSelectedDoctor(null);
+      setEditingInitialForm(null);
+      setShowBooking(true);
+      window.history.replaceState({}, "", `/patient/appointments?tab=${initialTab}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldOpenBooking]);
 
   // Filtered and sorted list
   const filtered = useMemo(() => {

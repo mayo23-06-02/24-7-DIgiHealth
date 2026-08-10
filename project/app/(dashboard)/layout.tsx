@@ -1,8 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { jwtVerify } from "jose";
-import { connectToDatabase } from "@/lib/mongodb";
-import User from "@/lib/models/User";
+import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import DashboardShell from "@/components/shared/DashboardShell";
 import CallWrapper from "@/components/providers/CallWrapper";
@@ -13,49 +11,32 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-
-  if (!token) {
-    redirect("/login");
-  }
-
-  let user = null;
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
-
-    await connectToDatabase();
-    const dbUser = await User.findById(payload.userId).lean();
-
-    if (dbUser) {
-      user = {
-        id: dbUser._id.toString(),
-        firstName: dbUser.firstName,
-        lastName: dbUser.lastName,
-        name: `${dbUser.firstName} ${dbUser.lastName}`,
-        role: dbUser.role || payload.role,
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(dbUser.firstName)}+${encodeURIComponent(dbUser.lastName)}&background=4493b8&color=fff`,
-      };
-    } else {
-      const fName = (payload.firstName as string) || "User";
-      const lName = (payload.lastName as string) || "";
-      user = {
-        id: payload.userId as string,
-        firstName: fName,
-        lastName: lName,
-        name: lName ? `${fName} ${lName}` : fName,
-        role: payload.role as string,
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(fName)}+${encodeURIComponent(lName)}&background=4493b8&color=fff`,
-      };
-    }
-  } catch (err) {
+  // Postgres-first with a Mongo fallback, and correctly handles both Mongo
+  // ObjectId and Postgres-uuid session identities — see lib/auth/getRequestUser.ts.
+  const requestUser = await getRequestUser().catch((err) => {
     console.error("Layout Auth Error:", err);
-  }
+    return null;
+  });
 
-  if (!user) {
+  if (!requestUser) {
     redirect("/login");
   }
+
+  const firstName = requestUser.firstName || "User";
+  const lastName = requestUser.lastName || "";
+  // Presence of this cookie means the current session is a guardian
+  // impersonating a linked child (see app/api/patient/family/[memberId]/switch)
+  // — the dashboard shell uses it to show the "managing X's account" banner.
+  const isImpersonating = !!(await cookies()).get("guardian_token")?.value;
+  const user = {
+    id: requestUser.userId,
+    firstName,
+    lastName,
+    name: lastName ? `${firstName} ${lastName}` : firstName,
+    role: requestUser.role,
+    avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}+${encodeURIComponent(lastName)}&background=4493b8&color=fff`,
+    isImpersonating,
+  };
 
   return (
     <AuthProvider user={user}>

@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import {
@@ -15,20 +13,23 @@ import {
 import { Facility } from "@/lib/models/Facility";
 
 import Consultation from "@/lib/models/Consultation";
+import { TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 async function getAuthUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-  if (!token) return null;
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
-    await connectToDatabase();
-    const user = (await User.findById(payload.userId).lean()) as any;
-    return user;
-  } catch {
-    return null;
-  }
+  const requestUser = await getRequestUser();
+  if (!requestUser) return null;
+  // Postgres-native accounts have no Mongo `User` row (see
+  // lib/utils/mongoId.ts) — this shape is compatible with every `user._id`/
+  // `user.role` read below without touching Mongo for identity.
+  return {
+    _id: requestUser.userId,
+    role: requestUser.role,
+    email: requestUser.email,
+    firstName: requestUser.firstName,
+    lastName: requestUser.lastName,
+  } as any;
 }
 
 // ─── GET /api/billing ──────────────────────────────────────────────────────────
@@ -44,6 +45,34 @@ export async function GET(request: Request) {
 
     // ── Patient View ──────────────────────────────────────────────────────────
     if (role === "patient") {
+      // Postgres-native accounts have no Mongo identity (see
+      // lib/utils/mongoId.ts) — every collection here is still Mongo-only,
+      // so they genuinely have none of this data yet. Same shape the route
+      // already returns for a brand-new Mongo patient with no subscription.
+      if (!isMongoObjectId(user._id)) {
+        return NextResponse.json({
+          role: "patient",
+          summary: { totalSpent: 0, pendingCount: 0, completedCount: 0 },
+          transactions: [],
+          subscription: {
+            patientId: user._id,
+            tier: "individual",
+            status: "active",
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+            price: 0,
+            autoRenew: false,
+          },
+          paymentMethods: [],
+          utilization: {
+            consultationsUsed: 0,
+            consultationsMax: TIER_CONFIG.individual.consultationsMax,
+            chatsUsed: 0,
+            chatsMax: 999,
+          },
+        });
+      }
+
       const [transactions, subscription, paymentMethods] = await Promise.all([
         PaymentTransaction.find({ patientId: user._id })
           .sort({ timestamp: -1 })
@@ -64,16 +93,11 @@ export async function GET(request: Request) {
       });
 
       // Calculate max consultations based on subscription tier
-      const tier = subscription?.tier || "free";
-      let consultationsMax = 1;
-      let chatsMax = 5;
-      if (tier === "pro") {
-        consultationsMax = 5;
-        chatsMax = 999; // Represents unlimited in UI
-      } else if (tier === "family") {
-        consultationsMax = 15;
-        chatsMax = 999;
-      }
+      const rawTier: string | undefined = subscription?.tier;
+      const tier = rawTier && isValidTier(rawTier) ? rawTier : "individual";
+      const tierConfig = TIER_CONFIG[tier];
+      const consultationsMax = Number.isFinite(tierConfig.consultationsMax) ? tierConfig.consultationsMax : 999;
+      const chatsMax = 999; // AI-triage chats are unmetered today regardless of tier
 
       // Summarize
       const completed = transactions.filter(
@@ -90,7 +114,7 @@ export async function GET(request: Request) {
       // Provide a clean fallback subscription if none is active in DB
       const activeSubscription = subscription || {
         patientId: user._id,
-        tier: "free",
+        tier: "individual",
         status: "active",
         startDate: user.createdAt || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
@@ -373,6 +397,12 @@ export async function PATCH(request: Request) {
 
     // Cancel subscription
     if (body.action === "cancel_subscription") {
+      if (!isMongoObjectId(user._id)) {
+        return NextResponse.json(
+          { error: "Subscription management is not yet available for this account." },
+          { status: 400 },
+        );
+      }
       const sub = await Subscription.findOneAndUpdate(
         { patientId: user._id },
         { status: "cancelled", autoRenew: false },
@@ -383,12 +413,21 @@ export async function PATCH(request: Request) {
 
     // Upgrade subscription
     if (body.action === "upgrade_subscription") {
-      const prices: Record<string, number> = { free: 0, pro: 299, family: 499 };
-      const price = prices[body.tier] || 0;
+      if (!isMongoObjectId(user._id)) {
+        return NextResponse.json(
+          { error: "Subscription management is not yet available for this account." },
+          { status: 400 },
+        );
+      }
+      const requestedTier: string = body.tier;
+      if (!isValidTier(requestedTier)) {
+        return NextResponse.json({ error: "Unknown subscription tier" }, { status: 400 });
+      }
+      const price = TIER_CONFIG[requestedTier].price;
       const sub = await Subscription.findOneAndUpdate(
         { patientId: user._id },
         {
-          tier: body.tier,
+          tier: requestedTier,
           status: "active",
           price,
           autoRenew: true,

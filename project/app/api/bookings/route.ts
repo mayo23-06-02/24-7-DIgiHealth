@@ -2,33 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
 import User from "@/lib/models/User";
-import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
 import mongoose from "mongoose";
 import { expireStaleBookingRequests } from "@/lib/booking/expire";
 import { notifyBookingEvent } from "@/lib/booking/notifications";
-
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "secret123!",
-);
+import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 async function getAuthUser(): Promise<{
   userId: string;
   role: string;
 } | null> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-    if (!token) return null;
-    const { payload } = await jwtVerify(token, SECRET);
-    const userId = payload.userId as string;
-    if (!userId) return null;
-    const user = await User.findById(userId).lean();
-    if (!user) return null;
-    return { userId, role: (user as any).role };
-  } catch {
-    return null;
-  }
+  const requestUser = await getRequestUser();
+  return requestUser ? { userId: requestUser.userId, role: requestUser.role } : null;
 }
 
 function toRecord(c: any, extras: Record<string, unknown> = {}) {
@@ -78,6 +63,15 @@ export async function GET(req: NextRequest) {
       parseInt(searchParams.get("limit") || "100", 10) || 100,
       200,
     );
+
+    // Postgres-native accounts have no Mongo identity (see
+    // lib/utils/mongoId.ts) — Consultation is still Mongo-only, so they
+    // genuinely have no bookings under their own id yet.
+    if (auth.role === "patient" || auth.role === "practitioner") {
+      if (!isMongoObjectId(auth.userId)) {
+        return NextResponse.json({ success: true, data: [] });
+      }
+    }
 
     const filter: Record<string, unknown> = {};
     const now = new Date();

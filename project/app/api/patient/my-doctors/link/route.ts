@@ -4,11 +4,12 @@ import User from '@/lib/models/User';
 import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
-    
+
     // Get current user (patient)
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -17,6 +18,12 @@ export async function POST(req: NextRequest) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
     const { payload } = await jwtVerify(token, secret);
     const patientUserId = payload.userId as string;
+    if (!isMongoObjectId(patientUserId)) {
+      return NextResponse.json(
+        { error: 'Favorite doctors are not yet available for this account.' },
+        { status: 400 },
+      );
+    }
 
     const { practitionerId, action } = await req.json(); // practitionerId is the User._id of the doctor
 
