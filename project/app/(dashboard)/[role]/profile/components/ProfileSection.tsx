@@ -4,12 +4,12 @@ import React from "react";
 
 const COLOR_MAP: Record<string, string> = {
   primary: "bg-primary/10 text-primary ring-primary/10",
-  rose: "bg-rose-500/10 text-rose-600 ring-rose-500/10",
-  emerald: "bg-emerald-500/10 text-emerald-600 ring-emerald-500/10",
-  blue: "bg-sky-500/10 text-sky-600 ring-sky-500/10",
-  amber: "bg-amber-500/10 text-amber-600 ring-amber-500/10",
+  rose: "bg-danger-50 text-danger-700 ring-danger-500/10",
+  emerald: "bg-success-50 text-success-700 ring-success-500/10",
+  blue: "bg-info-50 text-info-700 ring-info-500/10",
+  amber: "bg-warning-50 text-warning-700 ring-warning-500/10",
   violet: "bg-violet-500/10 text-violet-600 ring-violet-500/10",
-  slate: "bg-slate-100 text-slate-600 ring-slate-200/60",
+  slate: "bg-surface-soft text-ink-600 ring-border",
 };
 
 interface ProfileSectionProps {
@@ -41,7 +41,7 @@ export function ProfileSectionHead({
           {icon}
         </div>
         <div className="min-w-0 pt-0.5">
-          <h3 className="text-lg font-bold text-slate-800 font-grotesk tracking-tight">
+          <h3 className="text-h3 font-semibold text-ink-900 font-grotesk tracking-tight">
             {title}
           </h3>
           {description && (
@@ -83,9 +83,9 @@ export default function ProfileSection({
 
   return (
     <section
-      className={`rounded-lg border border-slate-200/80 bg-white  shadow-slate-200/40 overflow-hidden ${className}`}
+      className={`rounded-lg border border-slate-200 bg-white overflow-hidden ${className}`}
     >
-      <div className="px-5 sm:px-7 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white">
+      <div className="px-5 sm:px-7 py-5 border-b border-slate-200 bg-surface-soft">
         <ProfileSectionHead
           icon={icon}
           title={title}

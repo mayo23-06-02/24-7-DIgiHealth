@@ -3,7 +3,9 @@ import Modal from "@/components/ui/Modal";
 import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import { BiVideo, BiChat, BiCalendar, BiTime, BiUser, BiUserPlus, BiNote } from "react-icons/bi";
+import Card from "@/components/ui/Card";
+import DescriptionList, { DescriptionItem } from "@/components/ui/DescriptionList";
+import { User, UserPlus } from "lucide-react";
 import { Appointment } from "@/lib/hooks/useAppointments";
 import PendingRescheduleBanner from "./PendingRescheduleBanner";
 
@@ -65,12 +67,45 @@ export default function AppointmentDetailsModal({
   const profileId = isDoctor ? appointment.patientId : appointment.practitionerId;
   const profileLabel = isDoctor ? "Patient" : "Doctor";
 
+  const statusValue = appointment.computedStatus || appointment.status;
+  const statusBadgeStatus =
+    statusValue === "upcoming" || statusValue === "requests"
+      ? "warning"
+      : statusValue === "ongoing"
+        ? "info"
+        : statusValue === "missed" || statusValue === "cancelled"
+          ? "error"
+          : "success";
+
+  const infoItems: DescriptionItem[] = [
+    { label: "Date", value: dateStr },
+    { label: "Time", value: `${timeStr} - ${endTimeStr}` },
+    { label: "Consultation Type", value: <span className="capitalize">{appointment.type || "Video"}</span> },
+    {
+      label: "Status",
+      value: (
+        <Badge
+          label={statusValue}
+          status={statusBadgeStatus}
+          variant="solid"
+          className="uppercase"
+        />
+      ),
+    },
+    ...(appointment.reason ? [{ label: "Reason for Visit", value: appointment.reason }] : []),
+    {
+      label: "Consultation ID",
+      value: <span className="font-mono">{appointment.consultationId || appointment.id}</span>,
+    },
+    ...(appointment.duration ? [{ label: "Duration", value: appointment.duration }] : []),
+  ];
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Appointment Details" width="lg">
       <div className="space-y-6">
         {/* Profile Section — clickable when onViewProfile is provided */}
         <div
-          className={`flex items-center gap-4 p-4 bg-slate-50 rounded-lg ${
+          className={`flex items-center gap-4 p-4 bg-surface-soft rounded-xl ${
             onViewProfile && profileId
               ? "cursor-pointer hover:bg-primary/5 hover:ring-1 hover:ring-primary/20 transition-all group"
               : ""
@@ -103,7 +138,7 @@ export default function AppointmentDetailsModal({
           />
           <div className="flex-1 min-w-0">
             <p
-              className={`font-bold text-slate-800 text-lg truncate ${
+              className={`font-bold text-ink-900 font-grotesk text-lg truncate ${
                 onViewProfile && profileId
                   ? "group-hover:text-primary transition-colors"
                   : ""
@@ -124,7 +159,7 @@ export default function AppointmentDetailsModal({
                 e.stopPropagation();
                 onViewProfile(profileId);
               }}
-              icon={isDoctor ? <BiUser size={16} /> : <BiUserPlus size={16} />}
+              icon={isDoctor ? <User size={16} /> : <UserPlus size={16} />}
             >
               View {profileLabel}
             </Button>
@@ -132,63 +167,11 @@ export default function AppointmentDetailsModal({
         </div>
 
         {/* Appointment Details */}
-        <div className="space-y-4">
-          <h4 className="font-bold text-slate-800 text-sm">Appointment Information</h4>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-              <BiCalendar className="text-primary" size={20} />
-              <div>
-                <p className="text-xs text-slate-500 font-medium">Date</p>
-                <p className="text-sm font-bold text-slate-800">{dateStr}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-              <BiTime className="text-primary" size={20} />
-              <div>
-                <p className="text-xs text-slate-500 font-medium">Time</p>
-                <p className="text-sm font-bold text-slate-800">{timeStr} - {endTimeStr}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-            {appointment.type === "video" ? (
-              <BiVideo className="text-primary" size={20} />
-            ) : (
-              <BiChat className="text-secondary" size={20} />
-            )}
-            <div>
-              <p className="text-xs text-slate-500 font-medium">Consultation Type</p>
-              <p className="text-sm font-bold text-slate-800 capitalize">{appointment.type || "Video"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-            <Badge
-              label={appointment.computedStatus || appointment.status}
-              status={
-                appointment.computedStatus === "upcoming" ||
-                appointment.computedStatus === "requests"
-                  ? "warning"
-                  : appointment.computedStatus === "ongoing"
-                    ? "info"
-                    : appointment.computedStatus === "missed" ||
-                        appointment.computedStatus === "cancelled"
-                      ? "error"
-                      : "success"
-              }
-              variant="solid"
-              className="uppercase text-xs font-bold"
-            />
-            <div>
-              <p className="text-xs text-slate-500 font-medium">Status</p>
-              <p className="text-sm font-bold text-slate-800 capitalize">
-                {appointment.computedStatus || appointment.status}
-              </p>
-            </div>
-          </div>
+        <div className="space-y-3">
+          <h4 className="font-bold text-ink-900 font-grotesk text-sm">Appointment Information</h4>
+          <Card>
+            <DescriptionList columns={2} items={infoItems} />
+          </Card>
         </div>
 
         <PendingRescheduleBanner
@@ -196,35 +179,10 @@ export default function AppointmentDetailsModal({
           onResponded={onClose}
         />
 
-        {/* Reason/Chief Complaint */}
-        {appointment.reason && (
-          <div className="space-y-2">
-            <h4 className="font-bold text-slate-800 text-sm">Reason for Visit</h4>
-            <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
-              <BiNote className="text-slate-400 mt-0.5" size={20} />
-              <p className="text-sm text-slate-700 leading-relaxed">{appointment.reason}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Additional Info */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 bg-slate-50 rounded-lg">
-            <p className="text-xs text-slate-500 font-medium">Consultation ID</p>
-            <p className="text-sm font-bold text-slate-800 font-mono">{appointment.consultationId || appointment.id}</p>
-          </div>
-          {appointment.duration && (
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <p className="text-xs text-slate-500 font-medium">Duration</p>
-              <p className="text-sm font-bold text-slate-800">{appointment.duration}</p>
-            </div>
-          )}
-        </div>
-
         {/* Risk Score if available */}
         {appointment.riskScore !== undefined && (
-          <div className="p-4 bg-rose-50 border border-rose-100 rounded-lg">
-            <p className="text-sm font-bold text-rose-700 mb-1">Risk Score: {appointment.riskScore}/100</p>
+          <div className="p-4 bg-danger-50 border border-danger-500/20 rounded-lg">
+            <p className="text-sm font-bold text-danger-700 mb-1">Risk Score: {appointment.riskScore}/100</p>
             {appointment.riskColor && (
               <Badge
                 label={appointment.riskColor === "red" ? "High Risk" : appointment.riskColor === "green" ? "Low Risk" : "Medium Risk"}
@@ -257,7 +215,7 @@ export default function AppointmentDetailsModal({
               </Button>
               <Button
                 fullWidth
-                variant="secondary"
+                variant="danger"
                 onClick={() =>
                   onDecline?.(
                     appointment.id || appointment.consultationId || "",
@@ -303,7 +261,7 @@ export default function AppointmentDetailsModal({
               </Button>
               <Button
                 fullWidth
-                variant="secondary"
+                variant="danger"
                 onClick={() =>
                   onCancel?.(
                     appointment.id || appointment.consultationId || "",
@@ -335,7 +293,7 @@ export default function AppointmentDetailsModal({
               </Button>
               <Button
                 fullWidth
-                variant="secondary"
+                variant="danger"
                 onClick={() =>
                   onCancel?.(
                     appointment.id || appointment.consultationId || "",

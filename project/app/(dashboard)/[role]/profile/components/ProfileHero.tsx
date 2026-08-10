@@ -2,17 +2,14 @@
 
 import React from "react";
 import {
-  BiCamera,
-  BiLoaderAlt,
-  BiShieldQuarter,
-  BiCheckCircle,
-  BiEnvelope,
-  BiPhone,
-  BiStar,
-  BiIdCard,
-  BiBuildings,
-  BiBadgeCheck,
-} from "react-icons/bi";
+  Camera,
+  Loader2,
+  ShieldCheck,
+  CheckCircle2,
+  Mail,
+  Phone,
+  BadgeCheck,
+} from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 
@@ -127,7 +124,7 @@ export default function ProfileHero({
 
       {/* Floating identity card */}
       <div className="relative px-3 sm:px-6 -mt-16 sm:-mt-20">
-        <div className="rounded-lg md:rounded-lg bg-white border border-slate-200/80  shadow-slate-200/50 p-4 sm:p-6 md:p-7">
+        <div className="rounded-lg bg-white border border-slate-200 p-4 sm:p-6 md:p-7">
           <div className="flex flex-col lg:flex-row lg:items-end gap-5 lg:gap-8">
             {/* Avatar */}
             <div className="relative shrink-0 self-start">
@@ -139,8 +136,8 @@ export default function ProfileHero({
                 onChange={handleAvatarUpload}
               />
               <div className="relative group/avatar">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-lg p-1 bg-white  shadow-slate-200/80 ring-4 ring-white">
-                  <div className="w-full h-full rounded-[0.9rem] overflow-hidden bg-slate-100 flex items-center justify-center">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-lg p-1 bg-white ring-4 ring-white">
+                  <div className="w-full h-full rounded-[0.9rem] overflow-hidden bg-surface-soft flex items-center justify-center">
                     <Avatar
                       name={fullName}
                       src={user.avatarUrl || undefined}
@@ -154,12 +151,13 @@ export default function ProfileHero({
                   onClick={() => avatarInputRef.current?.click()}
                   disabled={isUploadingDoc}
                   title="Change photo"
-                  className="absolute -bottom-1.5 -right-1.5 w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center  shadow-primary/30 border-2 border-white hover:scale-105 active:scale-95 transition-all disabled:opacity-60"
+                  aria-label="Change profile photo"
+                  className="absolute -bottom-1.5 -right-1.5 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-primary/30 border-2 border-white hover:scale-105 active:scale-95 transition-all disabled:opacity-60"
                 >
                   {isUploadingDoc ? (
-                    <BiLoaderAlt size={18} className="animate-spin" />
+                    <Loader2 size={18} className="animate-spin" />
                   ) : (
-                    <BiCamera size={18} />
+                    <Camera size={18} />
                   )}
                 </button>
               </div>
@@ -170,22 +168,22 @@ export default function ProfileHero({
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wide">
-                    <BiBadgeCheck size={14} />
+                    <BadgeCheck size={14} />
                     {roleLabel}
                   </span>
                   {user.mfaEnabled ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-bold">
-                      <BiShieldQuarter size={14} />
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-success-50 text-success-700 text-[11px] font-bold">
+                      <ShieldCheck size={14} />
                       MFA secured
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-50 text-amber-700 text-[11px] font-bold">
-                      <BiShieldQuarter size={14} />
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-warning-50 text-warning-700 text-[11px] font-bold">
+                      <ShieldCheck size={14} />
                       Enable MFA
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 font-grotesk tracking-tight truncate">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-ink-900 font-grotesk tracking-tight truncate">
                   {fullName}
                 </h1>
                 {subtitle && (
@@ -197,12 +195,12 @@ export default function ProfileHero({
 
               <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-600">
                 <span className="inline-flex items-center gap-1.5 min-w-0">
-                  <BiEnvelope className="text-slate-400 shrink-0" size={16} />
+                  <Mail className="text-slate-400 shrink-0" size={16} />
                   <span className="truncate">{user.email}</span>
                 </span>
                 {user.mobile && (
                   <span className="inline-flex items-center gap-1.5">
-                    <BiPhone className="text-slate-400 shrink-0" size={16} />
+                    <Phone className="text-slate-400 shrink-0" size={16} />
                     {user.mobile}
                   </span>
                 )}
@@ -213,7 +211,7 @@ export default function ProfileHero({
                   {metaChips.map((chip) => (
                     <span
                       key={chip.label}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-600"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-soft border border-slate-200 text-xs font-semibold text-slate-600"
                     >
                       {chip.icon}
                       {chip.label}
@@ -225,7 +223,7 @@ export default function ProfileHero({
 
             {/* Actions + completeness ring */}
             <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-4 shrink-0">
-              <div className="flex items-center gap-3 rounded-lg bg-slate-50 border border-slate-100 px-4 py-3">
+              <div className="flex items-center gap-3 rounded-lg bg-surface-soft border border-slate-200 px-4 py-3">
                 <div className="relative w-12 h-12 shrink-0">
                   <svg className="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
                     <circle
@@ -256,7 +254,7 @@ export default function ProfileHero({
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Completeness
                   </p>
-                  <p className="text-sm font-bold text-slate-800">
+                  <p className="text-sm font-bold text-ink-900">
                     {completeness >= 90
                       ? "Excellent"
                       : completeness >= 70
@@ -271,15 +269,9 @@ export default function ProfileHero({
               {showSave && (
                 <Button
                   onClick={onSave}
-                  disabled={isSaving}
-                  className="!rounded-lg !h-12 !px-6 !max-w-none normal-case !tracking-normal  shadow-primary/20"
-                  icon={
-                    isSaving ? (
-                      <BiLoaderAlt className="animate-spin" size={18} />
-                    ) : (
-                      <BiCheckCircle size={18} />
-                    )
-                  }
+                  loading={isSaving}
+                  size="lg"
+                  icon={<CheckCircle2 size={18} />}
                   iconPosition="left"
                 >
                   {isSaving ? "Saving…" : "Save changes"}
@@ -292,6 +284,3 @@ export default function ProfileHero({
     </section>
   );
 }
-
-// Re-export icons used by parent for meta chips convenience
-export { BiStar, BiIdCard, BiBuildings, BiBadgeCheck };

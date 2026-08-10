@@ -2,21 +2,21 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-  BiFile,
-  BiUpload,
-  BiLoaderAlt,
-  BiImage,
-  BiEditAlt,
-  BiTrash,
-  BiCheckCircle,
-  BiX,
-  BiDownload,
-  BiCloudUpload,
-  BiImages,
-  BiErrorCircle,
-  BiNote,
-  BiCheck,
-} from "react-icons/bi";
+  FileText,
+  Upload,
+  Loader2,
+  Image as ImageIcon,
+  Pencil,
+  Trash2,
+  CheckCircle2,
+  X,
+  Download,
+  UploadCloud,
+  Images,
+  AlertCircle,
+  StickyNote,
+  Check,
+} from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -131,7 +131,7 @@ export default function DocumentsTab({
         <div className="mt-1.5 flex items-center gap-1.5">
           <input
             autoFocus
-            className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-primary/20 outline-none"
+            className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-ink-900 focus:ring-2 focus:ring-primary/20 outline-none"
             placeholder="Add a note about this file..."
             value={noteDraft}
             onChange={(e) => setNoteDraft(e.target.value)}
@@ -140,16 +140,16 @@ export default function DocumentsTab({
           <button
             type="button"
             onClick={() => saveNote(doc.id)}
-            className="p-1.5 bg-emerald-500 text-white rounded-lg shrink-0"
+            className="p-1.5 bg-success-500 text-white rounded-lg shrink-0"
           >
-            <BiCheck size={14} />
+            <Check size={14} />
           </button>
           <button
             type="button"
             onClick={() => setNoteEditingId(null)}
             className="p-1.5 bg-slate-200 text-slate-600 rounded-lg shrink-0"
           >
-            <BiX size={14} />
+            <X size={14} />
           </button>
         </div>
       );
@@ -163,7 +163,7 @@ export default function DocumentsTab({
         }}
         className="mt-1.5 flex items-start gap-1 text-left w-full group/note"
       >
-        <BiNote size={12} className="text-slate-400 mt-0.5 shrink-0" />
+        <StickyNote size={12} className="text-slate-400 mt-0.5 shrink-0" />
         <span className="text-[11px] text-slate-500 group-hover/note:text-primary transition-colors">
           {doc.note}
         </span>
@@ -260,11 +260,11 @@ export default function DocumentsTab({
         }}
         onDrop={onDrop}
         className={`rounded-lg border-2 border-dashed transition-all ${
-          uploadError ? "border-rose-300 bg-rose-50/50" :
+          uploadError ? "border-danger-500/40 bg-danger-50" :
           dragOver
             ? "border-primary bg-primary/5 scale-[1.01]"
             : "border-slate-200 bg-white"
-        }  shadow-slate-200/40 overflow-hidden`}
+        } overflow-hidden`}
       >
         <div className="px-5 sm:px-7 py-6 sm:py-8">
           <div className="flex flex-col items-center text-center max-w-lg mx-auto">
@@ -276,12 +276,12 @@ export default function DocumentsTab({
               }`}
             >
               {isUploadingDoc ? (
-                <BiLoaderAlt size={28} className="animate-spin" />
+                <Loader2 size={28} className="animate-spin" />
               ) : (
-                <BiCloudUpload size={28} />
+                <UploadCloud size={28} />
               )}
             </div>
-            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+            <h3 className="text-lg font-bold text-ink-900 font-grotesk">
               {isUploadingDoc
                 ? "Uploading…"
                 : uploadError
@@ -304,8 +304,7 @@ export default function DocumentsTab({
                   photoInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                className="!rounded-lg !h-11 !px-5 !max-w-none normal-case !tracking-normal"
-                icon={<BiImages size={18} />}
+                icon={<Images size={18} />}
                 iconPosition="left"
               >
                 Upload photos
@@ -318,8 +317,7 @@ export default function DocumentsTab({
                   localDocInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                className="!rounded-lg !h-11 !px-5 !max-w-none normal-case !tracking-normal"
-                icon={<BiFile size={18} />}
+                icon={<FileText size={18} />}
                 iconPosition="left"
               >
                 Upload documents
@@ -332,8 +330,7 @@ export default function DocumentsTab({
                   docInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                className="!rounded-lg !h-11 !px-4 !max-w-none normal-case !tracking-normal text-slate-600"
-                icon={<BiUpload size={18} />}
+                icon={<Upload size={18} />}
                 iconPosition="left"
               >
                 Any file
@@ -345,37 +342,37 @@ export default function DocumentsTab({
 
       {/* Upload queue: per-file progress + success/error */}
       {uploadQueue.length > 0 && (
-        <div className="rounded-lg border border-slate-200/80 bg-white  overflow-hidden divide-y divide-slate-100">
+        <div className="rounded-lg border border-slate-200 bg-white overflow-hidden divide-y divide-slate-200">
           {uploadQueue.map((item) => (
             <div key={item.id} className="flex items-center gap-3 px-4 py-3">
               <div
                 className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                   item.status === "success"
-                    ? "bg-emerald-50 text-emerald-600"
+                    ? "bg-success-50 text-success-700"
                     : item.status === "error"
-                      ? "bg-rose-50 text-rose-600"
+                      ? "bg-danger-50 text-danger-700"
                       : "bg-primary/10 text-primary"
                 }`}
               >
                 {item.status === "success" ? (
-                  <BiCheckCircle size={18} />
+                  <CheckCircle2 size={18} />
                 ) : item.status === "error" ? (
-                  <BiErrorCircle size={18} />
+                  <AlertCircle size={18} />
                 ) : (
-                  <BiLoaderAlt size={18} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-bold text-slate-800 truncate">
+                  <p className="text-xs font-bold text-ink-900 truncate">
                     {item.name}
                   </p>
                   <span
                     className={`text-[10px] font-bold shrink-0 ${
                       item.status === "success"
-                        ? "text-emerald-600"
+                        ? "text-success-700"
                         : item.status === "error"
-                          ? "text-rose-500"
+                          ? "text-danger-700"
                           : "text-slate-400"
                     }`}
                   >
@@ -387,14 +384,14 @@ export default function DocumentsTab({
                   </span>
                 </div>
                 {item.status === "error" ? (
-                  <p className="text-[11px] text-rose-500 mt-1 truncate">
+                  <p className="text-[11px] text-danger-700 mt-1 truncate">
                     {item.error || "Upload failed"}
                   </p>
                 ) : (
-                  <div className="h-1.5 rounded-full bg-slate-100 mt-1.5 overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-surface-soft mt-1.5 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${
-                        item.status === "success" ? "bg-emerald-500" : "bg-primary"
+                        item.status === "success" ? "bg-success-500" : "bg-primary"
                       }`}
                       style={{ width: `${item.progress}%` }}
                     />
@@ -405,10 +402,10 @@ export default function DocumentsTab({
                 <button
                   type="button"
                   onClick={() => onDismissUploadItem(item.id)}
-                  className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg shrink-0"
+                  className="p-1.5 text-slate-400 hover:text-danger-700 rounded-lg shrink-0"
                   title="Dismiss"
                 >
-                  <BiX size={16} />
+                  <X size={16} />
                 </button>
               )}
             </div>
@@ -417,14 +414,14 @@ export default function DocumentsTab({
       )}
 
       {/* Photos gallery */}
-      <section className="rounded-lg border border-slate-200/80 bg-white  overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+      <section className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center">
-              <BiImage size={20} />
+            <div className="w-10 h-10 rounded-lg bg-info-50 text-info-700 flex items-center justify-center">
+              <ImageIcon size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800">Photos</h3>
+              <h3 className="text-sm font-bold text-ink-900">Photos</h3>
               <p className="text-xs text-slate-500">
                 {photos.length} image{photos.length === 1 ? "" : "s"}
               </p>
@@ -445,9 +442,9 @@ export default function DocumentsTab({
               type="button"
               onClick={() => photoInputRef.current?.click()}
               disabled={isUploadingDoc}
-              className="w-full py-10 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+              className="w-full py-10 rounded-lg border border-dashed border-slate-200 bg-surface-soft text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
             >
-              <BiImages className="mx-auto text-slate-300 mb-2" size={32} />
+              <Images className="mx-auto text-slate-300 mb-2" size={32} />
               <p className="text-sm font-semibold text-slate-500">
                 No photos yet
               </p>
@@ -459,7 +456,7 @@ export default function DocumentsTab({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {photos.map((doc) => (
                 <div key={doc.id} className="space-y-1.5">
-                  <div className="group relative aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
+                  <div className="group relative aspect-square rounded-lg overflow-hidden border border-slate-200 bg-surface-soft">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={doc.url}
@@ -476,18 +473,18 @@ export default function DocumentsTab({
                       <button
                         type="button"
                         onClick={() => setSelectedDoc(doc)}
-                        className="w-8 h-8 rounded-lg bg-white/95 text-slate-700 flex items-center justify-center shadow"
+                        className="w-8 h-8 rounded-lg bg-white/95 text-ink-600 flex items-center justify-center shadow"
                         title="View"
                       >
-                        <BiDownload size={14} />
+                        <Download size={14} />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteDoc(doc.id)}
-                        className="w-8 h-8 rounded-lg bg-white/95 text-rose-600 flex items-center justify-center shadow"
+                        className="w-8 h-8 rounded-lg bg-white/95 text-danger-700 flex items-center justify-center shadow"
                         title="Delete"
                       >
-                        <BiTrash size={14} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
@@ -500,14 +497,14 @@ export default function DocumentsTab({
       </section>
 
       {/* Documents list */}
-      <section className="rounded-lg border border-slate-200/80 bg-white  overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+      <section className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
-              <BiFile size={20} />
+            <div className="w-10 h-10 rounded-lg bg-warning-50 text-warning-700 flex items-center justify-center">
+              <FileText size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800">Documents</h3>
+              <h3 className="text-sm font-bold text-ink-900">Documents</h3>
               <p className="text-xs text-slate-500">
                 {otherDocs.length} file{otherDocs.length === 1 ? "" : "s"}
               </p>
@@ -528,9 +525,9 @@ export default function DocumentsTab({
               type="button"
               onClick={() => localDocInputRef.current?.click()}
               disabled={isUploadingDoc}
-              className="w-full py-10 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+              className="w-full py-10 rounded-lg border border-dashed border-slate-200 bg-surface-soft text-center hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
             >
-              <BiFile className="mx-auto text-slate-300 mb-2" size={32} />
+              <FileText className="mx-auto text-slate-300 mb-2" size={32} />
               <p className="text-sm font-semibold text-slate-500">
                 No documents yet
               </p>
@@ -543,18 +540,18 @@ export default function DocumentsTab({
               {otherDocs.map((doc) => (
                 <Card
                   key={doc.id}
-                  className="group p-4 bg-white border-slate-200/80  hover: hover:border-primary/20 transition-all !rounded-lg"
+                  className="group p-4 bg-white border-slate-200 hover:border-primary/20 transition-all !rounded-lg"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                      <BiFile size={24} />
+                    <div className="w-12 h-12 rounded-lg bg-warning-50 text-warning-700 flex items-center justify-center shrink-0">
+                      <FileText size={24} />
                     </div>
                     <div className="flex-1 min-w-0">
                       {editDocId === doc.id ? (
                         <div className="flex items-center gap-2">
                           <input
                             autoFocus
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none"
+                            className="flex-1 bg-surface-soft border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-ink-900 focus:ring-2 focus:ring-primary/20 outline-none"
                             value={editDocLabel}
                             onChange={(e) => setEditDocLabel(e.target.value)}
                             onKeyDown={(e) =>
@@ -564,20 +561,20 @@ export default function DocumentsTab({
                           <button
                             type="button"
                             onClick={() => handleRenameDoc(doc.id)}
-                            className="p-1.5 bg-emerald-500 text-white rounded-lg"
+                            className="p-1.5 bg-success-500 text-white rounded-lg"
                           >
-                            <BiCheckCircle size={16} />
+                            <CheckCircle2 size={16} />
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditDocId(null)}
                             className="p-1.5 bg-slate-200 text-slate-600 rounded-lg"
                           >
-                            <BiX size={16} />
+                            <X size={16} />
                           </button>
                         </div>
                       ) : (
-                        <h4 className="text-sm font-bold text-slate-800 truncate">
+                        <h4 className="text-sm font-bold text-ink-900 truncate">
                           {doc.type}
                         </h4>
                       )}
@@ -606,14 +603,14 @@ export default function DocumentsTab({
                           }}
                           className="p-1.5 text-slate-400 hover:text-primary rounded-lg"
                         >
-                          <BiEditAlt size={16} />
+                          <Pencil size={16} />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteDoc(doc.id)}
-                          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg"
+                          className="p-1.5 text-slate-400 hover:text-danger-700 rounded-lg"
                         >
-                          <BiTrash size={16} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
@@ -633,9 +630,9 @@ export default function DocumentsTab({
             onClick={() => setSelectedDoc(null)}
           />
           <div className="relative w-full max-w-5xl bg-white rounded-lg overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50 gap-3">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-surface-soft gap-3">
               <div className="min-w-0">
-                <h3 className="text-lg font-bold text-slate-800 font-grotesk truncate">
+                <h3 className="text-lg font-bold text-ink-900 font-grotesk truncate">
                   {selectedDoc.type}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -653,38 +650,38 @@ export default function DocumentsTab({
                   download
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-lg flex items-center gap-1.5 border border-slate-200"
+                  className="px-3 py-2 bg-white hover:bg-surface-soft text-ink-600 font-bold text-xs rounded-lg flex items-center gap-1.5 border border-slate-200"
                 >
-                  <BiDownload size={14} /> Download
+                  <Download size={14} /> Download
                 </a>
                 <button
                   type="button"
                   onClick={() => setSelectedDoc(null)}
-                  className="w-10 h-10 rounded-lg bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center border border-slate-200"
+                  className="w-10 h-10 rounded-lg bg-white text-slate-500 hover:bg-danger-50 hover:text-danger-700 flex items-center justify-center border border-slate-200"
                 >
-                  <BiX size={20} />
+                  <X size={20} />
                 </button>
               </div>
             </div>
 
-            <div className="p-6 overflow-y-auto bg-slate-100/50 flex-1 flex items-center justify-center min-h-[50vh]">
+            <div className="p-6 overflow-y-auto bg-surface-soft flex-1 flex items-center justify-center min-h-[50vh]">
               {isImage(selectedDoc) ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={selectedDoc.url}
                   alt={selectedDoc.type}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg  bg-white p-2"
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg bg-white p-2"
                 />
               ) : selectedDoc.mimeType?.includes("pdf") ||
                 selectedDoc.url?.endsWith(".pdf") ? (
                 <div className="flex flex-col items-center gap-4 w-full">
-                  <div className="flex items-center justify-between w-full max-w-2xl bg-white px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-700">
+                  <div className="flex items-center justify-between w-full max-w-2xl bg-white px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-ink-600">
                     <div className="flex gap-2">
                       <button
                         type="button"
                         disabled={pageNumber <= 1}
                         onClick={() => setPageNumber((p) => p - 1)}
-                        className="px-3 py-2 bg-slate-100 rounded-lg disabled:opacity-40"
+                        className="px-3 py-2 bg-surface-soft rounded-lg disabled:opacity-40"
                       >
                         ← Prev
                       </button>
@@ -692,7 +689,7 @@ export default function DocumentsTab({
                         type="button"
                         disabled={numPages ? pageNumber >= numPages : true}
                         onClick={() => setPageNumber((p) => p + 1)}
-                        className="px-3 py-2 bg-slate-100 rounded-lg disabled:opacity-40"
+                        className="px-3 py-2 bg-surface-soft rounded-lg disabled:opacity-40"
                       >
                         Next →
                       </button>
@@ -706,7 +703,7 @@ export default function DocumentsTab({
                         onClick={() =>
                           setPdfScale((s) => Math.max(0.5, s - 0.1))
                         }
-                        className="px-2 py-1 bg-slate-100 rounded-lg"
+                        className="px-2 py-1 bg-surface-soft rounded-lg"
                       >
                         −
                       </button>
@@ -715,7 +712,7 @@ export default function DocumentsTab({
                         onClick={() =>
                           setPdfScale((s) => Math.min(1.5, s + 0.1))
                         }
-                        className="px-2 py-1 bg-slate-100 rounded-lg"
+                        className="px-2 py-1 bg-surface-soft rounded-lg"
                       >
                         +
                       </button>
@@ -728,7 +725,7 @@ export default function DocumentsTab({
                         onLoadSuccess={onDocumentLoadSuccess}
                         loading={
                           <div className="flex flex-col items-center py-16 gap-3">
-                            <BiLoaderAlt
+                            <Loader2
                               className="animate-spin text-primary"
                               size={32}
                             />
@@ -738,7 +735,7 @@ export default function DocumentsTab({
                           </div>
                         }
                         error={
-                          <div className="text-center py-16 text-rose-500 text-sm font-semibold">
+                          <div className="text-center py-16 text-danger-700 text-sm font-semibold">
                             Could not preview PDF. Use Download instead.
                           </div>
                         }
@@ -755,8 +752,8 @@ export default function DocumentsTab({
                 </div>
               ) : (
                 <div className="text-center py-12 space-y-4">
-                  <BiFile className="mx-auto text-amber-500" size={40} />
-                  <p className="text-sm font-bold text-slate-800">
+                  <FileText className="mx-auto text-warning-500" size={40} />
+                  <p className="text-sm font-bold text-ink-900">
                     Preview not available for this format
                   </p>
                   <a
@@ -766,7 +763,7 @@ export default function DocumentsTab({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-bold text-xs rounded-lg"
                   >
-                    <BiDownload size={16} /> Download file
+                    <Download size={16} /> Download file
                   </a>
                 </div>
               )}

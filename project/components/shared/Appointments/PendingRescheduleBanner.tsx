@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { toast } from "react-hot-toast";
-import { BiTime } from "react-icons/bi";
+import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
 import { Appointment } from "@/lib/hooks/useAppointments";
 
@@ -31,13 +31,10 @@ export default function PendingRescheduleBanner({
 
   if (pending.proposedByMe) {
     return (
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-        <BiTime className="text-amber-600 shrink-0 mt-0.5" size={20} />
-        <p className="text-sm font-semibold text-amber-800">
-          You proposed moving this appointment to {when}. Waiting for the
-          other party to accept.
-        </p>
-      </div>
+      <Alert
+        status="warning"
+        title={`You proposed moving this appointment to ${when}. Waiting for the other party to accept.`}
+      />
     );
   }
 
@@ -70,21 +67,19 @@ export default function PendingRescheduleBanner({
   };
 
   return (
-    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-3">
-      <div className="flex items-start gap-3">
-        <BiTime className="text-amber-600 shrink-0 mt-0.5" size={20} />
-        <p className="text-sm font-semibold text-amber-800">
-          A new time has been proposed: {when}
-        </p>
-      </div>
-      <div className="flex gap-3">
-        <Button fullWidth variant="outline" onClick={() => respond("decline")}>
-          Decline
-        </Button>
-        <Button fullWidth onClick={() => respond("accept")}>
-          Accept new time
-        </Button>
-      </div>
-    </div>
+    <Alert
+      status="warning"
+      title={`A new time has been proposed: ${when}`}
+      action={
+        <div className="flex gap-3">
+          <Button fullWidth variant="outline" onClick={() => respond("decline")}>
+            Decline
+          </Button>
+          <Button fullWidth onClick={() => respond("accept")}>
+            Accept new time
+          </Button>
+        </div>
+      }
+    />
   );
 }

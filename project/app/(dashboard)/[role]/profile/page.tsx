@@ -5,21 +5,21 @@ import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useMediaUpload } from "@/components/media/useMediaUpload";
 import {
-  BiUser,
-  BiShieldQuarter,
-  BiBell,
-  BiWallet,
-  BiBriefcase,
-  BiFile,
-  BiLoaderAlt,
-  BiStar,
-  BiIdCard,
-  BiBuildings,
-  BiLockAlt,
-  BiEnvelope,
-  BiPhone,
-  BiCheckCircle,
-} from "react-icons/bi";
+  User,
+  ShieldCheck,
+  Bell,
+  Wallet,
+  Briefcase,
+  FileText,
+  Loader2,
+  Star,
+  IdCard,
+  Building2,
+  Lock,
+  Mail,
+  Phone,
+  CheckCircle2,
+} from "lucide-react";
 
 import Toast from "@/components/ui/Toast";
 import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
@@ -31,8 +31,8 @@ import RoleDataTab from "./components/RoleDataTab";
 const DocumentsTab = dynamic(() => import("./components/DocumentsTab"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center py-16 rounded-lg border border-slate-100 bg-white">
-      <BiLoaderAlt className="animate-spin text-primary" size={28} />
+    <div className="flex items-center justify-center py-16 rounded-lg border border-slate-200 bg-white">
+      <Loader2 className="animate-spin text-primary" size={28} />
     </div>
   ),
 });
@@ -797,19 +797,19 @@ export default function ProfilePage() {
 
   if (isLoading || !user) {
     return (
-      <div className="w-full max-w-6xl mx-auto pb-16 space-y-6 animate-pulse">
+      <div className="w-full max-w-[1400px] mx-auto pb-16 space-y-6 animate-pulse">
         <div className="h-48 rounded-lg bg-gradient-to-br from-primary/30 to-slate-200" />
-        <div className="h-28 -mt-14 mx-4 rounded-lg bg-white border border-slate-100 " />
-        <div className="h-14 rounded-lg bg-slate-100" />
+        <div className="h-28 -mt-14 mx-4 rounded-lg bg-white border border-slate-200" />
+        <div className="h-14 rounded-lg bg-surface-soft" />
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           <div className="xl:col-span-8 space-y-4">
-            <div className="h-64 rounded-lg bg-white border border-slate-100" />
-            <div className="h-40 rounded-lg bg-white border border-slate-100" />
+            <div className="h-64 rounded-lg bg-white border border-slate-200" />
+            <div className="h-40 rounded-lg bg-white border border-slate-200" />
           </div>
-          <div className="xl:col-span-4 h-80 rounded-lg bg-white border border-slate-100" />
+          <div className="xl:col-span-4 h-80 rounded-lg bg-white border border-slate-200" />
         </div>
         <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-400 pt-4">
-          <BiLoaderAlt className="animate-spin text-primary" size={18} />
+          <Loader2 className="animate-spin text-primary" size={18} />
           Loading your profile…
         </div>
       </div>
@@ -847,19 +847,19 @@ export default function ProfilePage() {
   if (currentRole === "practitioner" && practitionerData) {
     if (practitionerData.hpcsaNumber) {
       metaChips.push({
-        icon: <BiIdCard size={13} className="text-slate-400" />,
+        icon: <IdCard size={13} className="text-slate-400" />,
         label: `HPCSA ${practitionerData.hpcsaNumber}`,
       });
     }
     if (practitionerData.rating > 0) {
       metaChips.push({
-        icon: <BiStar size={13} className="text-amber-500" />,
+        icon: <Star size={13} className="text-warning-500" />,
         label: `${practitionerData.rating}/5 · ${practitionerData.reviewCount || 0} reviews`,
       });
     }
     if (practitionerData.hpcsaVerified) {
       metaChips.push({
-        icon: <BiCheckCircle size={13} className="text-emerald-500" />,
+        icon: <CheckCircle2 size={13} className="text-success-500" />,
         label: "HPCSA verified",
       });
     }
@@ -871,7 +871,7 @@ export default function ProfilePage() {
   }
   if (currentRole === "hospital_admin" && hospitalData?.facility) {
     metaChips.push({
-      icon: <BiBuildings size={13} className="text-slate-400" />,
+      icon: <Building2 size={13} className="text-slate-400" />,
       label: hospitalData.facility.facilityType || "Facility",
     });
     if (hospitalData.facility.address?.city) {
@@ -892,7 +892,7 @@ export default function ProfilePage() {
   }
 
   const tabs = [
-    { id: "general", label: "Identity", icon: BiUser },
+    { id: "general", label: "Identity", icon: User },
     {
       id: "role-data",
       label:
@@ -901,20 +901,20 @@ export default function ProfilePage() {
           : currentRole === "hospital_admin"
             ? "Facility"
             : "Practice",
-      icon: BiBriefcase,
+      icon: Briefcase,
     },
-    { id: "documents", label: "Documents", icon: BiFile },
-    { id: "security", label: "Security", icon: BiShieldQuarter },
-    { id: "notifications", label: "Alerts", icon: BiBell },
-    { id: "billing", label: "Billing", icon: BiWallet },
+    { id: "documents", label: "Documents", icon: FileText },
+    { id: "security", label: "Security", icon: ShieldCheck },
+    { id: "notifications", label: "Alerts", icon: Bell },
+    { id: "billing", label: "Billing", icon: Wallet },
   ];
 
   const healthItems = [
     {
       label: "Identity",
       value: health.identity,
-      color: "bg-emerald-500",
-      icon: <BiUser size={14} />,
+      color: "bg-success-500",
+      icon: <User size={14} />,
     },
     {
       label:
@@ -925,19 +925,19 @@ export default function ProfilePage() {
             : "Practice",
       value: health.role,
       color: "bg-primary",
-      icon: <BiBriefcase size={14} />,
+      icon: <Briefcase size={14} />,
     },
     {
       label: "Security",
       value: health.security,
-      color: "bg-amber-500",
-      icon: <BiLockAlt size={14} />,
+      color: "bg-warning-500",
+      icon: <Lock size={14} />,
     },
     {
       label: "Documents",
       value: health.documents,
       color: "bg-violet-500",
-      icon: <BiFile size={14} />,
+      icon: <FileText size={14} />,
     },
   ];
 
@@ -945,22 +945,22 @@ export default function ProfilePage() {
     {
       label: "Email",
       value: user.email,
-      icon: <BiEnvelope size={14} />,
+      icon: <Mail size={14} />,
     },
     {
       label: "Mobile",
       value: user.mobile || "Not set",
-      icon: <BiPhone size={14} />,
+      icon: <Phone size={14} />,
     },
     {
       label: "Role",
       value: roleLabel,
-      icon: <BiBriefcase size={14} />,
+      icon: <Briefcase size={14} />,
     },
     {
       label: "MFA",
       value: user.mfaEnabled ? "Enabled" : "Off",
-      icon: <BiShieldQuarter size={14} />,
+      icon: <ShieldCheck size={14} />,
     },
   ];
 

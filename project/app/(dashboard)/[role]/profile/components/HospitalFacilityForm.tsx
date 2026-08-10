@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BiBuilding, BiEnvelope, BiMap } from "react-icons/bi";
+import { Building2, Mail, MapPin } from "lucide-react";
 import Input from "@/components/ui/Input";
 import ProfileSection from "./ProfileSection";
 
@@ -70,7 +70,7 @@ export default function HospitalFacilityForm({
   return (
     <>
       <ProfileSection
-        icon={<BiBuilding size={22} />}
+        icon={<Building2 size={22} />}
         title="Facility infrastructure"
         description="Hospital identity and clinical capacity"
         color="primary"
@@ -81,7 +81,6 @@ export default function HospitalFacilityForm({
             value={fac?.name || ""}
             onChange={(e) => updateFacility({ name: e.target.value })}
             placeholder="e.g. City Central Hospital"
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Department / office"
@@ -92,7 +91,6 @@ export default function HospitalFacilityForm({
               )
             }
             placeholder="e.g. Administration"
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Total bed capacity"
@@ -101,7 +99,6 @@ export default function HospitalFacilityForm({
             onChange={(e) =>
               updateBeds({ total: parseInt(e.target.value, 10) || 0 })
             }
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="General available"
@@ -112,7 +109,6 @@ export default function HospitalFacilityForm({
                 generalAvailable: parseInt(e.target.value, 10) || 0,
               })
             }
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="ICU available"
@@ -123,13 +119,13 @@ export default function HospitalFacilityForm({
                 icuAvailable: parseInt(e.target.value, 10) || 0,
               })
             }
-            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
+            className="md:col-span-2"
           />
         </div>
       </ProfileSection>
 
       <ProfileSection
-        icon={<BiEnvelope size={22} />}
+        icon={<Mail size={22} />}
         title="Contact & location"
         description="Lines patients and staff use to reach the facility"
         color="emerald"
@@ -139,26 +135,22 @@ export default function HospitalFacilityForm({
             label="General phone"
             value={fac?.contactInfo?.phone || ""}
             onChange={(e) => updateContact({ phone: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Official email"
             value={fac?.contactInfo?.email || ""}
             onChange={(e) => updateContact({ email: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Facility type"
             value={fac?.facilityType || ""}
             disabled
-            className="opacity-70 bg-slate-100 border-slate-200"
           />
           <Input
             label="Province"
             value={fac?.address?.province || ""}
             disabled
-            icon={<BiMap />}
-            className="opacity-70 bg-slate-100 border-slate-200"
+            icon={<MapPin size={16} />}
           />
         </div>
       </ProfileSection>

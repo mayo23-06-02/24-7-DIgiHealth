@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BiLoaderAlt, BiCheckCircle } from "react-icons/bi";
+import { CheckCircle2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 import PatientClinicalForm from "./PatientClinicalForm";
@@ -104,14 +104,14 @@ export default function RoleDataTab({
       )}
 
       {!patientData && !practitionerData && !hospitalData && (
-        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 py-16 text-center">
+        <div className="rounded-lg border border-dashed border-slate-200 bg-surface-soft py-16 text-center">
           <p className="text-sm font-semibold text-slate-500">
             Loading role configuration…
           </p>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-200/80 bg-white px-5 py-4 ">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4">
         <p className="text-xs text-slate-500">
           Save updates to keep your{" "}
           {currentRole === "patient"
@@ -123,16 +123,10 @@ export default function RoleDataTab({
         </p>
         <Button
           onClick={handleSaveRoleData}
-          disabled={isSaving}
-          className="!rounded-lg !h-11 !px-6 !max-w-none normal-case !tracking-normal shrink-0"
-          icon={
-            isSaving ? (
-              <BiLoaderAlt className="animate-spin" size={18} />
-            ) : (
-              <BiCheckCircle size={18} />
-            )
-          }
+          loading={isSaving}
+          icon={<CheckCircle2 size={18} />}
           iconPosition="left"
+          className="shrink-0"
         >
           {isSaving ? "Saving…" : "Save configuration"}
         </Button>

@@ -1,18 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  BiCheckCircle,
-  BiShieldQuarter,
-  BiUser,
-  BiFile,
-  BiBell,
-  BiSupport,
-  BiLockAlt,
-  BiEnvelope,
-  BiPhone,
-  BiBadgeCheck,
-} from "react-icons/bi";
+import { CheckCircle2, LifeBuoy, BadgeCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 interface HealthItem {
@@ -43,14 +32,14 @@ export default function ProfileSidebar({
   return (
     <aside className="xl:col-span-4 space-y-5">
       {/* Completeness */}
-      <div className="rounded-lg border border-slate-200/80 bg-white  shadow-slate-200/40 overflow-hidden sticky top-20">
-        <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+      <div className="rounded-lg border border-slate-200 bg-white overflow-hidden sticky top-20">
+        <div className="px-5 py-4 border-b border-slate-200 bg-surface-soft">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Profile health
               </p>
-              <p className="text-sm font-bold text-slate-800 mt-0.5">
+              <p className="text-sm font-bold text-ink-900 mt-0.5">
                 Verification progress
               </p>
             </div>
@@ -61,7 +50,7 @@ export default function ProfileSidebar({
                   cy="18"
                   r="15"
                   fill="none"
-                  stroke="#f1f5f9"
+                  stroke="#F1F5F9"
                   strokeWidth="3"
                 />
                 <circle
@@ -71,17 +60,17 @@ export default function ProfileSidebar({
                   fill="none"
                   stroke={
                     completeness >= 80
-                      ? "#16a34a"
+                      ? "#10b981"
                       : completeness >= 50
                         ? "#4493b8"
-                        : "#ea580c"
+                        : "#f59e0b"
                   }
                   strokeWidth="3"
                   strokeLinecap="round"
                   strokeDasharray={`${(completeness / 100) * 94.2} 94.2`}
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-800 tabular-nums">
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-ink-900 tabular-nums">
                 {completeness}%
               </span>
             </div>
@@ -96,11 +85,11 @@ export default function ProfileSidebar({
                   <span className="text-slate-400">{item.icon}</span>
                   {item.label}
                 </span>
-                <span className="text-sm font-bold text-slate-800 tabular-nums">
+                <span className="text-sm font-bold text-ink-900 tabular-nums">
                   {item.value}%
                 </span>
               </div>
-              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-surface-soft rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ease-out ${item.color}`}
                   style={{ width: `${Math.min(100, item.value)}%` }}
@@ -112,18 +101,18 @@ export default function ProfileSidebar({
           <div
             className={`flex items-start gap-3 p-3.5 rounded-lg border ${
               completeness >= 80
-                ? "bg-emerald-50/80 border-emerald-100"
+                ? "bg-success-50 border-success-500/20"
                 : "bg-primary/5 border-primary/10"
             }`}
           >
-            <BiCheckCircle
+            <CheckCircle2
               className={
-                completeness >= 80 ? "text-emerald-600" : "text-primary"
+                completeness >= 80 ? "text-success-500" : "text-primary"
               }
               size={20}
             />
             <div>
-              <p className="text-sm font-bold text-slate-800">
+              <p className="text-sm font-bold text-ink-900">
                 {completeness >= 80
                   ? "High reliability"
                   : completeness >= 50
@@ -151,13 +140,13 @@ export default function ProfileSidebar({
                 className="flex items-start gap-2.5 text-sm"
               >
                 <span className="mt-0.5 text-slate-400 shrink-0">
-                  {f.icon || <BiBadgeCheck size={14} />}
+                  {f.icon || <BadgeCheck size={14} />}
                 </span>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                     {f.label}
                   </p>
-                  <p className="font-semibold text-slate-700 truncate">
+                  <p className="font-semibold text-ink-900 truncate">
                     {f.value}
                   </p>
                 </div>
@@ -167,7 +156,7 @@ export default function ProfileSidebar({
         </div>
 
         {tips.length > 0 && (
-          <div className="mx-5 mb-5 p-3.5 rounded-lg bg-slate-50 border border-slate-100">
+          <div className="mx-5 mb-5 p-3.5 rounded-lg bg-surface-soft border border-slate-200">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
               Next steps
             </p>
@@ -187,9 +176,9 @@ export default function ProfileSidebar({
       </div>
 
       {/* Support */}
-      <div className="rounded-lg overflow-hidden bg-gradient-to-br from-[#1a4d66] via-primary to-[#53CBF3] p-6 text-white  shadow-primary/20">
+      <div className="rounded-lg overflow-hidden bg-gradient-to-br from-[#1a4d66] via-primary to-[#53CBF3] p-6 text-white">
         <div className="w-11 h-11 rounded-lg bg-white/15 backdrop-blur flex items-center justify-center mb-4">
-          <BiSupport size={22} />
+          <LifeBuoy size={22} />
         </div>
         <h3 className="text-lg font-bold font-grotesk mb-1.5">
           Need assistance?
@@ -201,7 +190,6 @@ export default function ProfileSidebar({
         <Button
           variant="white"
           fullWidth
-          className="!h-11 !rounded-lg !text-sm !font-bold !text-primary !max-w-none normal-case"
           onClick={() =>
             setToast({
               message: "Assistance request sent to support.",
@@ -215,13 +203,3 @@ export default function ProfileSidebar({
     </aside>
   );
 }
-
-export {
-  BiUser,
-  BiFile,
-  BiBell,
-  BiShieldQuarter,
-  BiLockAlt,
-  BiEnvelope,
-  BiPhone,
-};

@@ -1,14 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  BiBuilding,
-  BiCertification,
-  BiClipboard,
-  BiCheckCircle,
-  BiUserVoice,
-  BiStar,
-} from "react-icons/bi";
+import { Landmark, Award, ClipboardList, Languages, Star } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
 import ProfileSection from "./ProfileSection";
@@ -56,7 +49,7 @@ export default function PractitionerPracticeForm({
   return (
     <>
       <ProfileSection
-        icon={<BiCertification size={22} />}
+        icon={<Award size={22} />}
         title="Professional credentials"
         description="How patients and the platform identify your practice"
         color="primary"
@@ -64,30 +57,27 @@ export default function PractitionerPracticeForm({
         <div
           className={`mb-6 rounded-lg border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
             practitionerData.hpcsaVerified
-              ? "bg-emerald-50/80 border-emerald-100"
+              ? "bg-success-50 border-success-500/20"
               : "bg-primary/5 border-primary/15"
           }`}
         >
           <div className="flex items-center gap-4 min-w-0">
             <div className="w-12 h-12 rounded-lg bg-white border border-slate-200 text-primary flex items-center justify-center shrink-0">
-              <BiClipboard size={24} />
+              <ClipboardList size={24} />
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 HPCSA registration
               </p>
-              <p className="text-lg font-bold text-slate-800 font-mono tracking-wide truncate">
+              <p className="text-lg font-bold text-ink-900 font-mono tracking-wide truncate">
                 {practitionerData.hpcsaNumber || "—"}
               </p>
             </div>
           </div>
           {practitionerData.hpcsaVerified ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-2 rounded-full shrink-0">
-              <BiCheckCircle size={16} />
-              Verified
-            </span>
+            <Badge label="Verified" status="success" className="shrink-0" />
           ) : (
-            <Badge label="Verification pending" status="warning" />
+            <Badge label="Verification pending" status="warning" className="shrink-0" />
           )}
         </div>
 
@@ -96,7 +86,6 @@ export default function PractitionerPracticeForm({
             label="Specialisation"
             value={practitionerData.specialisation || ""}
             onChange={(e) => update({ specialisation: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Years of experience"
@@ -105,18 +94,15 @@ export default function PractitionerPracticeForm({
             onChange={(e) =>
               update({ experienceYears: Number(e.target.value) || 0 })
             }
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
-          <div className="md:col-span-2 space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">
-              Professional bio
-            </label>
-            <textarea
+          <div className="md:col-span-2">
+            <Input
+              label="Professional bio"
+              isTextArea
+              rows={4}
               value={practitionerData.bio || ""}
               onChange={(e) => update({ bio: e.target.value })}
-              rows={4}
               placeholder="Share your clinical focus, approach, and languages for patients…"
-              className="w-full rounded-lg border border-slate-200 bg-slate-50/60 focus:bg-white focus:border-primary focus:outline-none px-4 py-3 text-sm text-slate-800 transition-colors resize-y min-h-[100px]"
             />
           </div>
           <Input
@@ -131,8 +117,7 @@ export default function PractitionerPracticeForm({
               })
             }
             placeholder="English, Afrikaans, isiZulu"
-            icon={<BiUserVoice />}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+            icon={<Languages size={16} />}
           />
           <Input
             label="Accepted medical aids"
@@ -146,14 +131,13 @@ export default function PractitionerPracticeForm({
               })
             }
             placeholder="Discovery, Bonitas, …"
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
         </div>
 
         {practitionerData.rating > 0 && (
           <div className="mt-5 flex items-center gap-2 text-sm text-slate-600">
-            <BiStar className="text-amber-500" size={18} />
-            <span className="font-bold text-slate-800">
+            <Star className="text-warning-500" size={18} />
+            <span className="font-bold text-ink-900">
               {practitionerData.rating}/5
             </span>
             <span className="text-slate-400">
@@ -164,7 +148,7 @@ export default function PractitionerPracticeForm({
       </ProfileSection>
 
       <ProfileSection
-        icon={<BiBuilding size={22} />}
+        icon={<Landmark size={22} />}
         title="Payout banking"
         description="Where teleclinic earnings are disbursed"
         color="emerald"
@@ -174,31 +158,27 @@ export default function PractitionerPracticeForm({
             label="Account holder"
             value={practitionerData.bankAccount?.accountHolder || ""}
             onChange={(e) => updateBank({ accountHolder: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Bank"
             value={practitionerData.bankAccount?.bankName || ""}
             onChange={(e) => updateBank({ bankName: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Account number"
             value={practitionerData.bankAccount?.accountNumber || ""}
             onChange={(e) => updateBank({ accountNumber: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Branch code"
             value={practitionerData.bankAccount?.branchCode || ""}
             onChange={(e) => updateBank({ branchCode: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Tax number"
             value={practitionerData.bankAccount?.taxNumber || ""}
             onChange={(e) => updateBank({ taxNumber: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
+            className="md:col-span-2"
           />
         </div>
       </ProfileSection>

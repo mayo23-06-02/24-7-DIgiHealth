@@ -44,10 +44,11 @@ const Input: React.FC<InputProps> = ({
   if (isPassword) paddingClass = "px-4 pr-11";
 
   const commonStyles = `
-    w-full bg-white rounded-full outline-none border
+    w-lg bg-white rounded-full outline-none border
     transition-all text-ink-900 placeholder-slate-400
     focus:ring-4 focus:ring-primary/10 focus:border-primary
     ${error ? "border-danger-500 bg-danger-50" : "border-slate-200 hover:border-slate-300"}
+    disabled:bg-surface-soft disabled:text-ink-400 disabled:cursor-not-allowed disabled:border-slate-200 disabled:hover:border-slate-200
     ${paddingClass}
     ${className}
   `;

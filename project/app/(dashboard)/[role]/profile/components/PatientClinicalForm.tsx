@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BiCreditCard, BiFirstAid, BiUser } from "react-icons/bi";
+import { CreditCard, Siren, User } from "lucide-react";
 import Input from "@/components/ui/Input";
 import ProfileSection from "./ProfileSection";
 
@@ -46,7 +46,7 @@ export default function PatientClinicalForm({
   return (
     <>
       <ProfileSection
-        icon={<BiCreditCard size={22} />}
+        icon={<CreditCard size={22} />}
         title="Medical aid"
         description="Coverage used for claims and eligibility checks"
         color="primary"
@@ -57,26 +57,24 @@ export default function PatientClinicalForm({
             value={patientData.medicalAid?.provider || ""}
             onChange={(e) => updateAid({ provider: e.target.value })}
             placeholder="e.g. Discovery"
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Plan name"
             value={patientData.medicalAid?.planName || ""}
             onChange={(e) => updateAid({ planName: e.target.value })}
             placeholder="e.g. Classic Saver"
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Member number"
             value={patientData.medicalAid?.memberNumber || ""}
             onChange={(e) => updateAid({ memberNumber: e.target.value })}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
+            className="md:col-span-2"
           />
         </div>
         {patientData.subscriptionTier && (
           <p className="mt-4 text-xs text-slate-500">
             DigiHealth plan:{" "}
-            <span className="font-bold text-slate-700 capitalize">
+            <span className="font-bold text-ink-900 capitalize">
               {patientData.subscriptionTier}
             </span>
           </p>
@@ -84,7 +82,7 @@ export default function PatientClinicalForm({
       </ProfileSection>
 
       <ProfileSection
-        icon={<BiFirstAid size={22} />}
+        icon={<Siren size={22} />}
         title="Emergency contact"
         description="Who we should reach in an urgent clinical situation"
         color="rose"
@@ -94,8 +92,7 @@ export default function PatientClinicalForm({
             label="Full name"
             value={patientData.emergencyContact?.name || ""}
             onChange={(e) => updateEmergency({ name: e.target.value })}
-            icon={<BiUser />}
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
+            icon={<User size={16} />}
           />
           <Input
             label="Relationship"
@@ -104,14 +101,13 @@ export default function PatientClinicalForm({
               updateEmergency({ relationship: e.target.value })
             }
             placeholder="e.g. Spouse, Parent"
-            className="bg-slate-50/60 border-slate-200 focus:bg-white"
           />
           <Input
             label="Phone number"
             value={patientData.emergencyContact?.phone || ""}
             onChange={(e) => updateEmergency({ phone: e.target.value })}
             placeholder="+27 …"
-            className="bg-slate-50/60 border-slate-200 focus:bg-white md:col-span-2"
+            className="md:col-span-2"
           />
         </div>
       </ProfileSection>

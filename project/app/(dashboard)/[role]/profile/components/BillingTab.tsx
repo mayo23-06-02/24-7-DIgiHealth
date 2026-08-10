@@ -2,23 +2,25 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  BiWallet,
-  BiCheckCircle,
-  BiCalendar,
-  BiInfoCircle,
-  BiLoaderAlt,
-  BiMessageRoundedDetail,
-  BiCreditCard,
-  BiTime,
-  BiPlus,
-  BiXCircle,
-  BiDownload,
-  BiChevronDown,
-  BiSearch,
-  BiReceipt,
-} from "react-icons/bi";
+  Wallet,
+  CheckCircle2,
+  Calendar,
+  Info,
+  Loader2,
+  MessageSquare,
+  CreditCard,
+  Clock,
+  Plus,
+  XCircle,
+  Download,
+  ChevronDown,
+  Search,
+  Receipt,
+  X,
+} from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Badge, { BadgeStatus } from "@/components/ui/Badge";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -49,26 +51,20 @@ const fmtDate = (d: any) =>
       })
     : "—";
 
-const STATUS_STYLES: Record<string, string> = {
-  completed: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  paid: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  active: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  pending: "bg-gray-50 text-gray-600 border-gray-100",
-  trial: "bg-purple-50 text-purple-600 border-purple-100",
-  failed: "bg-red-50 text-red-600 border-red-100",
-  cancelled: "bg-slate-100 text-slate-500 border-slate-200",
-  refunded: "bg-orange-50 text-orange-600 border-orange-100",
+const STATUS_TO_BADGE: Record<string, BadgeStatus> = {
+  completed: "success",
+  paid: "success",
+  active: "success",
+  pending: "neutral",
+  trial: "info",
+  failed: "error",
+  cancelled: "neutral",
+  refunded: "info",
 };
 
 function StatusPill({ status }: { status: string }) {
   return (
-    <span
-      className={`px-3 py-1 rounded-lg text-xs font-bold tracking-normal border ${
-        STATUS_STYLES[status] ?? "bg-slate-100 text-slate-500 border-slate-200"
-      }`}
-    >
-      {status}
-    </span>
+    <Badge label={status} status={STATUS_TO_BADGE[status] ?? "neutral"} />
   );
 }
 
@@ -155,7 +151,7 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
   return (
     <div className="space-y-3">
       <div className="relative">
-        <BiSearch
+        <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"
           size={14}
         />
@@ -166,13 +162,13 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
             setPage(1);
           }}
           placeholder="Search transactions..."
-          className="w-full pl-9 pr-4 p-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 focus:border-primary focus:bg-white outline-none transition-all"
+          className="w-full pl-9 pr-4 p-2 text-xs font-medium rounded-lg border border-slate-200 bg-surface-soft focus:border-primary focus:bg-white outline-none transition-all"
         />
       </div>
-      <div className="overflow-x-auto rounded-lg border border-slate-100">
+      <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="w-full text-left min-w-[480px]">
           <thead>
-            <tr className="bg-slate-50">
+            <tr className="bg-surface-soft">
               {["Date", "Description", "Amount", "Status", ""].map((h) => (
                 <th
                   key={h || "actions"}
@@ -183,19 +179,19 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
+          <tbody className="divide-y divide-slate-200">
             {paginated.map((t, i) => (
               <tr
                 key={t._id || i}
-                className="hover:bg-slate-50/50 transition-colors"
+                className="hover:bg-surface-soft transition-colors"
               >
                 <td className="px-4 py-3 text-xs text-slate-500">
                   {fmtDate(t.timestamp)}
                 </td>
-                <td className="px-4 py-3 text-xs font-bold text-slate-800 max-w-[160px] truncate">
+                <td className="px-4 py-3 text-xs font-bold text-ink-900 max-w-[160px] truncate">
                   {t.description || "—"}
                 </td>
-                <td className="px-4 py-3 text-xs font-bold text-slate-800">
+                <td className="px-4 py-3 text-xs font-bold text-ink-900">
                   {fmtZAR(t.amount)}
                 </td>
                 <td className="px-4 py-3">
@@ -229,7 +225,7 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
                     }}
                     className="inline-flex w-8 h-8 items-center justify-center rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-all disabled:opacity-40"
                   >
-                    <BiDownload size={15} />
+                    <Download size={15} />
                   </button>
                 </td>
               </tr>
@@ -248,14 +244,14 @@ function MiniTransactionTable({ transactions }: { transactions: any[] }) {
               disabled={page === 1}
               className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center disabled:opacity-30 hover:border-primary/30 transition-all"
             >
-              <BiChevronDown className="rotate-90" size={14} />
+              <ChevronDown className="rotate-90" size={14} />
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center disabled:opacity-30 hover:border-primary/30 transition-all"
             >
-              <BiChevronDown className="-rotate-90" size={14} />
+              <ChevronDown className="-rotate-90" size={14} />
             </button>
           </div>
         </div>
@@ -297,7 +293,7 @@ export default function BillingTab({
           <div className="flex flex-wrap gap-4">
             <Button
               variant="white"
-              className="h-16 rounded-lg px-10 text-xs font-bold text-slate-900"
+              size="lg"
               onClick={() =>
                 setToast({
                   message: "Enterprise licenses cannot be self-cancelled.",
@@ -453,14 +449,14 @@ export default function BillingTab({
   return (
     <div className="space-y-8 animate-in slide-in-from-left-4 duration-500">
       {/* ── Active Plan Hero ────────────────────────────────────────── */}
-      <Card className=" bg-slate-800 text-slate-800 relative overflow-hidden ">
+      <Card className="bg-slate-800 text-white relative overflow-hidden">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
           <div className="lg:col-span-2 space-y-5">
             <div>
               <span className="text-xs text-primary font-bold uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
                 ACTIVE PLAN
               </span>
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight font-grotesk text-slate-800 mt-4 capitalize">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight font-grotesk text-white mt-4 capitalize">
                 {currentTier.label} Clinical Access
               </h2>
             </div>
@@ -473,7 +469,7 @@ export default function BillingTab({
                   className={`inline-block mt-2 px-3 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase border ${
                     subscription.status === "cancelled"
                       ? "bg-slate-700 text-slate-300 border-slate-600"
-                      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-success-500/10 text-success-500 border-success-500/20"
                   }`}
                 >
                   {subscription.status === "cancelled"
@@ -486,12 +482,12 @@ export default function BillingTab({
 
           {/* Days counter */}
           <div className="flex flex-col gap-3 bg-white/5 backdrop-blur-md p-6 rounded-lg border border-white/10 text-center items-center justify-center">
-            <BiCalendar size={28} className="text-primary animate-pulse" />
+            <Calendar size={28} className="text-primary animate-pulse" />
             <div>
               <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
                 Next Payment In
               </p>
-              <h3 className="text-4xl font-extrabold text-slate-800 mt-1 font-grotesk">
+              <h3 className="text-4xl font-extrabold text-white mt-1 font-grotesk">
                 {daysRemaining}
                 <span className="text-lg font-bold ml-1">days</span>
               </h3>
@@ -513,7 +509,7 @@ export default function BillingTab({
         {/* Subscription card */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+            <h3 className="text-lg font-bold text-ink-900 font-grotesk">
               Subscription Plan
             </h3>
             <StatusPill status={subscription.status || "free"} />
@@ -521,10 +517,10 @@ export default function BillingTab({
           <div className="space-y-5">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-lg flex items-center justify-center bg-primary/10">
-                <BiWallet size={26} className="text-primary" />
+                <Wallet size={26} className="text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-800">
+                <p className="text-2xl font-bold text-ink-900">
                   {currentTier.label} Plan
                 </p>
                 <p className="text-sm text-slate-500 font-medium">
@@ -542,8 +538,8 @@ export default function BillingTab({
                   key={f}
                   className="flex items-center gap-2 text-xs text-slate-600 font-medium"
                 >
-                  <BiCheckCircle
-                    className="text-emerald-500 shrink-0"
+                  <CheckCircle2
+                    className="text-success-500 shrink-0"
                     size={13}
                   />
                   {f}
@@ -551,7 +547,7 @@ export default function BillingTab({
               ))}
             </ul>
 
-            <div className="flex gap-3 pt-2 border-t border-slate-100">
+            <div className="flex gap-3 pt-2 border-t border-slate-200">
               <Button
                 onClick={() => {
                   setSelectedTier(currentTier.id);
@@ -565,14 +561,10 @@ export default function BillingTab({
                 <Button
                   fullWidth
                   variant="danger"
+                  loading={actionLoading}
                   onClick={handleCancelSubscription}
-                  disabled={actionLoading}
                 >
-                  {actionLoading ? (
-                    <BiLoaderAlt className="animate-spin" size={16} />
-                  ) : (
-                    "Cancel"
-                  )}
+                  Cancel
                 </Button>
               )}
             </div>
@@ -582,17 +574,17 @@ export default function BillingTab({
         {/* Payment methods */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-800 font-grotesk">
+            <h3 className="text-lg font-bold text-ink-900 font-grotesk">
               Payment Methods
             </h3>
             <button className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
-              <BiPlus size={14} /> Add New
+              <Plus size={14} /> Add New
             </button>
           </div>
           <div className="space-y-3">
             {paymentMethods.length === 0 ? (
               <div className="py-10 text-center space-y-2">
-                <BiCreditCard size={32} className="mx-auto text-slate-200" />
+                <CreditCard size={32} className="mx-auto text-slate-200" />
                 <p className="text-slate-400 text-sm font-medium">
                   No payment methods saved
                 </p>
@@ -607,10 +599,10 @@ export default function BillingTab({
                   className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
                     pm.isDefault
                       ? "border-primary/30 bg-primary/[0.02]"
-                      : "border-slate-100 hover:border-slate-200"
+                      : "border-slate-200 hover:border-slate-300"
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-xl shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center text-xl shrink-0">
                     {pm.type === "card"
                       ? "💳"
                       : pm.type === "medical_aid"
@@ -620,7 +612,7 @@ export default function BillingTab({
                   <div className="flex-1 min-w-0">
                     {pm.type === "card" && (
                       <>
-                        <p className="text-xs font-bold text-slate-800">
+                        <p className="text-xs font-bold text-ink-900">
                           {pm.cardBrand} •••• {pm.last4}
                         </p>
                         <p className="text-xs text-slate-500">
@@ -630,7 +622,7 @@ export default function BillingTab({
                     )}
                     {pm.type === "medical_aid" && (
                       <>
-                        <p className="text-xs font-bold text-slate-800">
+                        <p className="text-xs font-bold text-ink-900">
                           {pm.medicalAidProvider}
                         </p>
                         <p className="text-xs text-slate-500">
@@ -640,7 +632,7 @@ export default function BillingTab({
                     )}
                     {pm.type === "eft" && (
                       <>
-                        <p className="text-xs font-bold text-slate-800">
+                        <p className="text-xs font-bold text-ink-900">
                           {pm.bankName}
                         </p>
                         <p className="text-xs text-slate-500">
@@ -654,8 +646,8 @@ export default function BillingTab({
                       Default
                     </span>
                   )}
-                  <button className="text-slate-200 hover:text-red-400 transition-colors shrink-0">
-                    <BiXCircle size={18} />
+                  <button className="text-slate-200 hover:text-danger-500 transition-colors shrink-0">
+                    <XCircle size={18} />
                   </button>
                 </div>
               ))
@@ -666,42 +658,42 @@ export default function BillingTab({
 
       {/* ── Usage Utilization ───────────────────────────────────────── */}
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-slate-800 font-grotesk flex items-center gap-2">
-          <BiInfoCircle className="text-primary" size={20} />
+        <h3 className="text-lg font-bold text-ink-900 font-grotesk flex items-center gap-2">
+          <Info className="text-primary" size={20} />
           Current Cycle Package Utilization
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Consultations */}
-          <Card className="p-6 bg-white border border-slate-100  relative overflow-hidden">
+          <Card className="p-6 bg-white border border-slate-200 relative overflow-hidden">
             <div className="flex justify-between items-start mb-2">
               <div>
                 <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
                   CONSULTATION QUOTA
                 </span>
-                <h4 className="text-xl font-bold text-slate-800 font-grotesk mt-1">
+                <h4 className="text-xl font-bold text-ink-900 font-grotesk mt-1">
                   Telehealth Sessions
                 </h4>
               </div>
               <div className="p-3 bg-primary/10 text-primary rounded-lg">
-                <BiCheckCircle size={22} />
+                <CheckCircle2 size={22} />
               </div>
             </div>
             <div className="mt-6 space-y-2">
               <div className="flex justify-between text-sm font-bold">
                 <span className="text-slate-500">Used</span>
-                <span className="text-slate-800">
+                <span className="text-ink-900">
                   {utilization.consultationsUsed} /{" "}
                   {utilization.consultationsMax} sessions
                 </span>
               </div>
-              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-3 w-full bg-surface-soft rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all duration-1000 rounded-full ${
                     consultPercent >= 90
-                      ? "bg-rose-500"
+                      ? "bg-danger-500"
                       : consultPercent >= 70
-                        ? "bg-amber-500"
+                        ? "bg-warning-500"
                         : "bg-primary"
                   }`}
                   style={{ width: `${consultPercent}%` }}
@@ -714,30 +706,30 @@ export default function BillingTab({
           </Card>
 
           {/* AI Triage */}
-          <Card className="p-6 bg-white border border-slate-100  relative overflow-hidden">
+          <Card className="p-6 bg-white border border-slate-200 relative overflow-hidden">
             <div className="flex justify-between items-start mb-2">
               <div>
                 <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
                   AI DECISION ENGINE
                 </span>
-                <h4 className="text-xl font-bold text-slate-800 font-grotesk mt-1">
+                <h4 className="text-xl font-bold text-ink-900 font-grotesk mt-1">
                   AI Symptom Triage Checks
                 </h4>
               </div>
               <div className="p-3 bg-indigo-50 text-indigo-500 rounded-lg">
-                <BiMessageRoundedDetail size={22} />
+                <MessageSquare size={22} />
               </div>
             </div>
             <div className="mt-6 space-y-2">
               <div className="flex justify-between text-sm font-bold">
                 <span className="text-slate-500">Used</span>
-                <span className="text-slate-800">
+                <span className="text-ink-900">
                   {utilization.chatsMax === 999
                     ? `${utilization.chatsUsed} / Unlimited`
                     : `${utilization.chatsUsed} / ${utilization.chatsMax} checks`}
                 </span>
               </div>
-              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-3 w-full bg-surface-soft rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 transition-all duration-1000 rounded-full"
                   style={{ width: `${chatsPercent}%` }}
@@ -755,8 +747,8 @@ export default function BillingTab({
       {/* ── Transaction History ─────────────────────────────────────── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-slate-800 font-grotesk flex items-center gap-2">
-            <BiTime className="text-primary" size={20} />
+          <h3 className="text-lg font-bold text-ink-900 font-grotesk flex items-center gap-2">
+            <Clock className="text-primary" size={20} />
             Payment History
           </h3>
           {transactions.length > 0 && (
@@ -775,7 +767,7 @@ export default function BillingTab({
                 }}
                 className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
               >
-                <BiReceipt size={14} /> Statement PDF
+                <Receipt size={14} /> Statement PDF
               </button>
               <button
                 type="button"
@@ -801,7 +793,7 @@ export default function BillingTab({
                 }}
                 className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:underline"
               >
-                <BiDownload size={14} /> CSV
+                <Download size={14} /> CSV
               </button>
             </div>
           )}
@@ -812,13 +804,13 @@ export default function BillingTab({
       </div>
 
       {/* ── Footer banner ────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-6 rounded-lg border border-slate-100 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-surface-soft p-6 rounded-lg border border-slate-200 gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center text-primary ">
-            <BiWallet size={24} />
+          <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center text-primary">
+            <Wallet size={24} />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-slate-800">
+            <h4 className="text-sm font-bold text-ink-900">
               Need to modify payment methods or view full receipts?
             </h4>
             <p className="text-xs text-slate-500">
@@ -829,7 +821,7 @@ export default function BillingTab({
         </div>
         <a
           href="/patient/billing"
-          className="px-6 h-12 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-xs flex items-center justify-center  shrink-0 transition-all"
+          className="px-6 h-12 bg-primary hover:bg-primary/90 text-white rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-all"
         >
           Open Billing Portal
         </a>
@@ -843,9 +835,9 @@ export default function BillingTab({
             onClick={() => setUpgradeModal(false)}
           />
           <div className="relative w-full max-w-5xl bg-white rounded-lg overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 sticky top-0 bg-white z-10">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-200 sticky top-0 bg-white z-10">
               <div>
-                <h3 className="text-xl font-bold text-slate-800 font-grotesk">
+                <h3 className="text-xl font-bold text-ink-900 font-grotesk">
                   Choose Your Plan
                 </h3>
                 <p className="text-sm text-slate-500 font-medium mt-0.5">
@@ -854,9 +846,10 @@ export default function BillingTab({
               </div>
               <button
                 onClick={() => setUpgradeModal(false)}
-                className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-all font-bold"
+                aria-label="Close"
+                className="w-10 h-10 rounded-lg bg-surface-soft text-slate-500 hover:bg-danger-50 hover:text-danger-700 flex items-center justify-center transition-all"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 
@@ -871,7 +864,7 @@ export default function BillingTab({
                     className={`relative text-left p-5 rounded-lg border-2 transition-all duration-200 ${
                       isSelected
                         ? "border-primary bg-primary/[0.03]"
-                        : "border-slate-100 hover:border-slate-200 bg-white"
+                        : "border-slate-200 hover:border-slate-300 bg-white"
                     }`}
                   >
                     {isCurrent && (
@@ -880,9 +873,9 @@ export default function BillingTab({
                       </span>
                     )}
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                      <BiWallet size={18} className="text-primary" />
+                      <Wallet size={18} className="text-primary" />
                     </div>
-                    <p className="text-base font-bold text-slate-800 mb-0.5">
+                    <p className="text-base font-bold text-ink-900 mb-0.5">
                       {tier.label}
                     </p>
                     <p className="text-xl font-bold text-primary mb-0.5">
@@ -904,8 +897,8 @@ export default function BillingTab({
                           key={f}
                           className="flex items-start gap-1.5 text-sm font-medium text-slate-600"
                         >
-                          <BiCheckCircle
-                            className="text-emerald-500 shrink-0 mt-0.5"
+                          <CheckCircle2
+                            className="text-success-500 shrink-0 mt-0.5"
                             size={12}
                           />
                           {f}
@@ -918,21 +911,21 @@ export default function BillingTab({
             </div>
 
             <div className="px-8 pb-8">
-              <button
+              <Button
+                fullWidth
+                size="lg"
                 onClick={() => handleUpgrade(selectedTier)}
-                disabled={actionLoading || currentTier.id === selectedTier}
-                className="w-full py-4 rounded-lg bg-primary text-white font-bold text-sm shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={currentTier.id === selectedTier}
+                loading={actionLoading}
               >
-                {actionLoading
-                  ? "Processing..."
-                  : currentTier.id === selectedTier
-                    ? "This is your current plan"
-                    : `Switch to ${TIERS.find((t) => t.id === selectedTier)?.label}${
-                        TIERS.find((t) => t.id === selectedTier)?.price
-                          ? ` — R${TIERS.find((t) => t.id === selectedTier)?.price}/mo`
-                          : " — Free"
-                      }`}
-              </button>
+                {currentTier.id === selectedTier
+                  ? "This is your current plan"
+                  : `Switch to ${TIERS.find((t) => t.id === selectedTier)?.label}${
+                      TIERS.find((t) => t.id === selectedTier)?.price
+                        ? ` — R${TIERS.find((t) => t.id === selectedTier)?.price}/mo`
+                        : " — Free"
+                    }`}
+              </Button>
             </div>
           </div>
         </div>
