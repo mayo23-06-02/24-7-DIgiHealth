@@ -18,17 +18,17 @@ import {
   Legend,
 } from "recharts";
 import {
-  BiLoaderAlt,
-  BiUser,
-  BiGroup,
-  BiBuildingHouse,
-  BiCalendar,
-  BiDollarCircle,
-  BiShield,
-  BiRefresh,
-  BiBulb,
-  BiCog,
-} from "react-icons/bi";
+  Loader2,
+  User,
+  Users,
+  Building2,
+  Calendar,
+  CircleDollarSign,
+  Shield,
+  RefreshCw,
+  Lightbulb,
+  Settings,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -81,7 +81,7 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
           ))}
         </div>
         <div className="flex justify-center py-8 text-slate-400 text-sm font-semibold gap-2">
-          <BiLoaderAlt className="animate-spin text-primary" size={18} />
+          <Loader2 className="animate-spin text-primary" size={18} />
           Loading platform overview…
         </div>
       </div>
@@ -112,7 +112,7 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
               size="sm"
               variant="outline"
               onClick={() => void load()}
-              icon={<BiRefresh size={16} />}
+              icon={<RefreshCw size={16} />}
               iconPosition="left"
               className="!rounded-lg !max-w-none normal-case !tracking-normal"
             >
@@ -122,7 +122,7 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
               <Button
                 size="sm"
                 variant="ghost"
-                icon={<BiCog size={16} />}
+                icon={<Settings size={16} />}
                 iconPosition="left"
                 className="!rounded-lg !max-w-none normal-case !tracking-normal"
               >
@@ -140,19 +140,19 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-        <KPICard label="Total users" value={k.totalUsers} icon={<BiUser size={22} />} color="primary" description={`${k.activeUsers} active · ${k.suspendedUsers} suspended`} />
-        <KPICard label="Patients" value={k.patients} icon={<BiGroup size={22} />} color="slate" />
-        <KPICard label="Practitioners" value={k.practitioners} icon={<BiGroup size={22} />} color="emerald" description={`${k.mfaPractitioners} MFA on`} />
-        <KPICard label="Facilities" value={k.facilities} icon={<BiBuildingHouse size={22} />} color="primary" description={`${k.facilitiesOpen} open`} />
-        <KPICard label="Consults today" value={k.consultsToday} icon={<BiCalendar size={22} />} color="emerald" description={`${k.consults30d} / 30d`} />
-        <KPICard label="Revenue 30d" value={`R ${k.revenue30d.toLocaleString("en-ZA")}`} icon={<BiDollarCircle size={22} />} color="emerald" description={`Fees R ${k.platformFees30d.toLocaleString("en-ZA")}`} />
-        <KPICard label="Pending payouts" value={k.pendingPayouts} icon={<BiDollarCircle size={22} />} color="slate" description={`R ${k.pendingPayoutAmount.toLocaleString("en-ZA")}`} />
-        <KPICard label="High-risk patients" value={k.highRiskPatients} icon={<BiShield size={22} />} color="primary" description={`${k.staffOnDuty} staff on duty`} />
+        <KPICard label="Total users" value={k.totalUsers} icon={<User size={22} />} color="primary" description={`${k.activeUsers} active · ${k.suspendedUsers} suspended`} />
+        <KPICard label="Patients" value={k.patients} icon={<Users size={22} />} color="slate" />
+        <KPICard label="Practitioners" value={k.practitioners} icon={<Users size={22} />} color="emerald" description={`${k.mfaPractitioners} MFA on`} />
+        <KPICard label="Facilities" value={k.facilities} icon={<Building2 size={22} />} color="primary" description={`${k.facilitiesOpen} open`} />
+        <KPICard label="Consults today" value={k.consultsToday} icon={<Calendar size={22} />} color="emerald" description={`${k.consults30d} / 30d`} />
+        <KPICard label="Revenue 30d" value={`R ${k.revenue30d.toLocaleString("en-ZA")}`} icon={<CircleDollarSign size={22} />} color="emerald" description={`Fees R ${k.platformFees30d.toLocaleString("en-ZA")}`} />
+        <KPICard label="Pending payouts" value={k.pendingPayouts} icon={<CircleDollarSign size={22} />} color="slate" description={`R ${k.pendingPayoutAmount.toLocaleString("en-ZA")}`} />
+        <KPICard label="High-risk patients" value={k.highRiskPatients} icon={<Shield size={22} />} color="primary" description={`${k.staffOnDuty} staff on duty`} />
       </div>
 
       {data.intelligence?.length > 0 && (
         <Card className="!rounded-lg">
-          <SectionHeader compact icon={<BiBulb />} title="Platform intelligence" subtitle="Operational signals across DigiHealth" className="mb-4" />
+          <SectionHeader compact icon={<Lightbulb />} title="Platform intelligence" subtitle="Operational signals across DigiHealth" className="mb-4" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {data.intelligence.map((item: any) => (
               <div key={item.id} className="rounded-lg border border-slate-100 bg-slate-50/80 p-3.5">

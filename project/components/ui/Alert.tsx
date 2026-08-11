@@ -31,8 +31,8 @@ const config = {
   },
   info: {
     icon: Info,
-    classes: "bg-info-50 border-info-500/20 text-info-700",
-    iconClass: "text-info-500",
+    classes: "bg-primary  text-white",
+    iconClass: "text-white",
   },
 };
 

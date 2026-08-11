@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { escapeRegex } from '@/lib/escapeRegex';
 
 export async function GET(req: Request) {
   try {
@@ -12,7 +13,7 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const search = searchParams.get('search') || '';
+    const search = escapeRegex(searchParams.get('search') || '');
 
     const patients = await User.find({
       role: 'patient',

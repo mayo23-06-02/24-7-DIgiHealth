@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import User from "@/lib/models/User";
 import { sendEmail } from "@/lib/email/resend";
 import { otpVerificationEmailHtml } from "@/lib/email/templates/otpVerification";
+import { updateUserByMongoId } from "@/lib/postgres/users";
 
 const OTP_TTL_MINUTES = 10;
 
@@ -20,6 +21,10 @@ export async function issueOtpCode(params: {
   const otpExpiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
   await User.findByIdAndUpdate(params.userId, { otpCodeHash, otpExpiresAt });
+  await updateUserByMongoId(params.userId, {
+    otp_code_hash: otpCodeHash,
+    otp_expires_at: otpExpiresAt.toISOString(),
+  });
 
   const { error } = await sendEmail({
     to: params.email,

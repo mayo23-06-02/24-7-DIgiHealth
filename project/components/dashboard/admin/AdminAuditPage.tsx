@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { BiRefresh, BiSearch } from "react-icons/bi";
+import { RefreshCw, Search } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
@@ -45,22 +46,21 @@ export default function AdminAuditPage() {
         title="Audit log"
         subtitle="Immutable record of admin actions"
         right={
-          <Button size="sm" variant="outline" onClick={() => void load()} icon={<BiRefresh size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
+          <Button size="sm" variant="outline" onClick={() => void load()} icon={<RefreshCw size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
             Refresh
           </Button>
         }
       />
       <Card className="!rounded-lg">
-        <div className="relative max-w-md">
-          <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
+        <div className="max-w-md">
+          <Input
             value={search}
             onChange={(e) => {
               setPage(1);
               setSearch(e.target.value);
             }}
             placeholder="Search action, email, target…"
-            className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
+            icon={<Search size={18} />}
           />
         </div>
       </Card>

@@ -4,21 +4,22 @@ import { useParams } from "next/navigation";
 import { useNavigate } from "@/hooks/useNavigate";
 import Card from "@/components/ui/Card";
 import Avatar from "@/components/ui/Avatar";
+import EmptyState from "@/components/ui/EmptyState";
 import {
-  BiArrowBack,
-  BiLoaderAlt,
-  BiUser,
-  BiCalendar,
-  BiGroup,
-  BiTrendingUp,
-  BiStar,
-  BiPhone,
-  BiEnvelope,
-  BiTime,
-  BiCheckCircle,
-  BiXCircle,
-  BiPulse,
-} from "react-icons/bi";
+  ArrowLeft,
+  Loader2,
+  User,
+  Calendar,
+  Users,
+  TrendingUp,
+  Star,
+  Phone,
+  Mail,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Activity,
+} from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -70,14 +71,14 @@ export default function StaffProfilePage() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <BiLoaderAlt className="animate-spin text-primary" size={40} />
+        <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
 
   if (!data)
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-slate-500">
-        <BiUser size={48} className="opacity-20" />
+        <User size={48} className="opacity-20" />
         <p className="font-bold">Staff member not found.</p>
         <button
           onClick={() => back()}
@@ -115,7 +116,7 @@ export default function StaffProfilePage() {
           onClick={() => back()}
           className="mt-1 p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
         >
-          <BiArrowBack size={20} />
+          <ArrowLeft size={20} />
         </button>
         <div className="flex-1 flex flex-col md:flex-row md:items-center gap-5">
           <Avatar name={fullName} size="xl" />
@@ -142,13 +143,13 @@ export default function StaffProfilePage() {
             <div className="flex gap-4 mt-2 text-xs text-slate-500">
               {user?.email && (
                 <span className="flex items-center gap-1">
-                  <BiEnvelope size={13} />
+                  <Mail size={13} />
                   {user.email}
                 </span>
               )}
               {user?.mobile && (
                 <span className="flex items-center gap-1">
-                  <BiPhone size={13} />
+                  <Phone size={13} />
                   {user.mobile}
                 </span>
               )}
@@ -163,37 +164,37 @@ export default function StaffProfilePage() {
           {
             label: "Total Consults",
             value: kpi.totalConsultations,
-            icon: <BiCalendar size={18} />,
+            icon: <Calendar size={18} />,
             color: "text-blue-500",
           },
           {
             label: "Completed",
             value: kpi.completedConsultations,
-            icon: <BiCheckCircle size={18} />,
+            icon: <CheckCircle2 size={18} />,
             color: "text-emerald-500",
           },
           {
             label: "Upcoming",
             value: kpi.upcomingConsultations,
-            icon: <BiTime size={18} />,
+            icon: <Clock size={18} />,
             color: "text-indigo-500",
           },
           {
             label: "Unique Patients",
             value: kpi.uniquePatients,
-            icon: <BiGroup size={18} />,
+            icon: <Users size={18} />,
             color: "text-purple-500",
           },
           {
             label: "Revenue",
             value: `R${kpi.totalRevenue.toLocaleString()}`,
-            icon: <BiTrendingUp size={18} />,
+            icon: <TrendingUp size={18} />,
             color: "text-primary",
           },
           {
             label: "Rating",
             value: kpi.rating ? `${kpi.rating.toFixed(1)} ★` : "N/A",
-            icon: <BiStar size={18} />,
+            icon: <Star size={18} />,
             color: "text-amber-500",
           },
         ].map((k) => (
@@ -305,79 +306,77 @@ export default function StaffProfilePage() {
               {recentAppointments.length} records
             </span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[600px]">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  {["Patient", "Date", "Type", "Complaint", "Status"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider"
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {recentAppointments.map((a: any) => (
-                  <tr
-                    key={a.id}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="py-3 px-5">
-                      <div className="flex items-center gap-2">
-                        <Avatar name={a.patientName} size="sm" />
-                        <div>
-                          <p className="text-sm font-bold text-slate-700">
-                            {a.patientName}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {a.patientEmail}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-5 text-xs text-slate-500">
-                      {new Date(a.date).toLocaleDateString("en-ZA", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="py-3 px-5">
-                      <span className="text-xs font-bold capitalize text-slate-600">
-                        {a.type?.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="py-3 px-5 text-xs text-slate-500 max-w-[200px] truncate">
-                      {a.chiefComplaint || "—"}
-                    </td>
-                    <td className="py-3 px-5">
-                      <Badge
-                        label={a.status}
-                        status={APPT_STATUS_MAP[a.status] ?? "neutral"}
-                        size="sm"
-                        className="capitalize"
-                      />
-                    </td>
+          {recentAppointments.length === 0 ? (
+            <EmptyState
+              title="No appointments found"
+              description="This staff member has no recorded appointments yet."
+              className="py-12"
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left min-w-[600px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    {["Patient", "Date", "Type", "Complaint", "Status"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider"
+                        >
+                          {h}
+                        </th>
+                      ),
+                    )}
                   </tr>
-                ))}
-                {recentAppointments.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-12 text-center text-slate-500 text-sm"
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {recentAppointments.map((a: any) => (
+                    <tr
+                      key={a.id}
+                      className="hover:bg-slate-50/50 transition-colors"
                     >
-                      No appointments found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                      <td className="py-3 px-5">
+                        <div className="flex items-center gap-2">
+                          <Avatar name={a.patientName} size="sm" />
+                          <div>
+                            <p className="text-sm font-bold text-slate-700">
+                              {a.patientName}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {a.patientEmail}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-5 text-xs text-slate-500">
+                        {new Date(a.date).toLocaleDateString("en-ZA", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="py-3 px-5">
+                        <span className="text-xs font-bold capitalize text-slate-600">
+                          {a.type?.replace("_", " ")}
+                        </span>
+                      </td>
+                      <td className="py-3 px-5 text-xs text-slate-500 max-w-[200px] truncate">
+                        {a.chiefComplaint || "—"}
+                      </td>
+                      <td className="py-3 px-5">
+                        <Badge
+                          label={a.status}
+                          status={APPT_STATUS_MAP[a.status] ?? "neutral"}
+                          size="sm"
+                          className="capitalize"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       )}
 
@@ -392,66 +391,64 @@ export default function StaffProfilePage() {
               {kpi.uniquePatients} unique patients
             </span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[500px]">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  {["Patient", "Email", "Total Visits", "Last Seen"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider"
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {recentPatients.map((p: any) => (
-                  <tr
-                    key={p.id}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="py-3 px-5">
-                      <div className="flex items-center gap-2">
-                        <Avatar name={p.name} size="sm" />
-                        <span className="text-sm font-bold text-slate-700">
-                          {p.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-5 text-xs text-slate-500">
-                      {p.email}
-                    </td>
-                    <td className="py-3 px-5">
-                      <span className="px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded-lg">
-                        {p.totalVisits} visits
-                      </span>
-                    </td>
-                    <td className="py-3 px-5 text-xs text-slate-500">
-                      {new Date(p.lastSeen).toLocaleDateString("en-ZA", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
+          {recentPatients.length === 0 ? (
+            <EmptyState
+              title="No patient history found"
+              description="This staff member has no recorded patient visits yet."
+              className="py-12"
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left min-w-[500px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    {["Patient", "Email", "Total Visits", "Last Seen"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="py-3 px-5 text-xs font-bold text-slate-500 tracking-wider"
+                        >
+                          {h}
+                        </th>
+                      ),
+                    )}
                   </tr>
-                ))}
-                {recentPatients.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="py-12 text-center text-slate-500 text-sm"
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {recentPatients.map((p: any) => (
+                    <tr
+                      key={p.id}
+                      className="hover:bg-slate-50/50 transition-colors"
                     >
-                      No patient history found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                      <td className="py-3 px-5">
+                        <div className="flex items-center gap-2">
+                          <Avatar name={p.name} size="sm" />
+                          <span className="text-sm font-bold text-slate-700">
+                            {p.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-5 text-xs text-slate-500">
+                        {p.email}
+                      </td>
+                      <td className="py-3 px-5">
+                        <span className="px-2 py-1 bg-primary/10 text-primary text-xs font-bold rounded-lg">
+                          {p.totalVisits} visits
+                        </span>
+                      </td>
+                      <td className="py-3 px-5 text-xs text-slate-500">
+                        {new Date(p.lastSeen).toLocaleDateString("en-ZA", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       )}
 
@@ -535,7 +532,7 @@ export default function StaffProfilePage() {
               label: "Completion Rate",
               value: sla.completionRate,
               target: 90,
-              icon: <BiCheckCircle size={20} />,
+              icon: <CheckCircle2 size={20} />,
               color: "text-emerald-500",
               bg: "bg-emerald-50",
             },
@@ -543,7 +540,7 @@ export default function StaffProfilePage() {
               label: "Patient Satisfaction",
               value: sla.patientSatisfaction,
               target: 85,
-              icon: <BiStar size={20} />,
+              icon: <Star size={20} />,
               color: "text-amber-500",
               bg: "bg-amber-50",
             },
@@ -551,7 +548,7 @@ export default function StaffProfilePage() {
               label: "On-Time Rate",
               value: sla.onTimeRate,
               target: 85,
-              icon: <BiTime size={20} />,
+              icon: <Clock size={20} />,
               color: "text-indigo-500",
               bg: "bg-indigo-50",
             },
@@ -559,7 +556,7 @@ export default function StaffProfilePage() {
               label: "Cancellation Rate",
               value: sla.cancellationRate,
               target: 10,
-              icon: <BiXCircle size={20} />,
+              icon: <XCircle size={20} />,
               color: "text-rose-500",
               bg: "bg-rose-50",
               invert: true,
@@ -569,7 +566,7 @@ export default function StaffProfilePage() {
               value: sla.avgResponseMinutes,
               target: 30,
               unit: "min",
-              icon: <BiPulse size={20} />,
+              icon: <Activity size={20} />,
               color: "text-blue-500",
               bg: "bg-blue-50",
               invert: true,

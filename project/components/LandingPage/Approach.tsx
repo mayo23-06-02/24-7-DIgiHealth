@@ -28,7 +28,7 @@ export default function Approach() {
           solutions, and personalized support every step of the way.
         </p>
 
-        <div className="relative bg-slate-200 rounded-lg overflow-hidden w-full max-w-6xl mx-auto h-[450px] md:h-[600px]  ring-1 ring-slate-200/50">
+        <div className="relative bg-slate-200 rounded-lg overflow-hidden w-full max-w-[1400px] mx-auto h-[450px] md:h-[600px]  ring-1 ring-slate-200/50">
           {/* Background Image */}
 
           {/* Play Button Overlay */}

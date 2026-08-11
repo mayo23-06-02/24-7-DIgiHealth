@@ -5,7 +5,11 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import type { BadgeStatus } from "@/components/ui/Badge";
-import { BiPlus, BiLoaderAlt, BiCalendar, BiSearch, BiX } from "react-icons/bi";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
+import { Plus, Loader2, Calendar, Search, X } from "lucide-react";
 
 const STATUS_MAP: Record<string, BadgeStatus> = {
   scheduled: "info",
@@ -200,70 +204,78 @@ export default function AppointmentsPage() {
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
-            Appointments
-          </h1>
-          <p className="text-sm text-slate-500">
-            All consultations, procedures, and lab referrals
-          </p>
-        </div>
-        <Button onClick={() => setModalOpen(true)} icon={<BiPlus size={18} />}>
-          New Appointment
-        </Button>
-      </div>
+      <PageHeader
+        title="Appointments"
+        subtitle="All consultations, procedures, and lab referrals"
+        right={
+          <Button
+            onClick={() => setModalOpen(true)}
+            icon={<Plus size={18} />}
+            iconPosition="left"
+            className="!rounded-lg !max-w-none normal-case !tracking-normal"
+          >
+            New Appointment
+          </Button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
-        <div className="relative flex-1 min-w-[200px]">
-          <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-            size={18}
-          />
-          <input
+        <div className="flex-1 min-w-[200px]">
+          <Input
             type="text"
             placeholder="Search patient or practitioner..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
+            icon={<Search size={18} />}
           />
         </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
-        >
-          <option value="all">All Statuses</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-          <BiCalendar className="text-slate-500" size={16} />
-          <input
+        <div className="w-full sm:w-56">
+          <Select
+            value={filterStatus}
+            onChange={setFilterStatus}
+            options={[
+              { value: "all", label: "All Statuses" },
+              { value: "scheduled", label: "Scheduled" },
+              { value: "in_progress", label: "In Progress" },
+              { value: "completed", label: "Completed" },
+              { value: "cancelled", label: "Cancelled" },
+            ]}
+          />
+        </div>
+        <div className="w-full sm:w-48">
+          <Input
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="text-sm outline-none"
+            icon={<Calendar size={18} />}
           />
         </div>
         {filterDate && (
-          <button
+          <Button
+            size="sm"
+            variant="outline"
             onClick={() => setFilterDate("")}
-            className="text-xs text-slate-500 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50 flex items-center gap-1"
+            icon={<X size={16} />}
+            iconPosition="left"
+            className="!rounded-lg !max-w-none normal-case !tracking-normal"
           >
-            <BiX /> Clear Date
-          </button>
+            Clear Date
+          </Button>
         )}
       </div>
 
       <Card className="flex flex-col p-0 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <BiLoaderAlt className="animate-spin text-primary text-3xl" />
+            <Loader2 className="animate-spin text-primary" size={32} />
           </div>
+        ) : paginated.length === 0 ? (
+          <EmptyState
+            title="No appointments found"
+            description="Try adjusting your filters or search."
+            className="py-12"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[750px]">
@@ -345,16 +357,6 @@ export default function AppointmentsPage() {
                     </td>
                   </tr>
                 ))}
-                {paginated.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="py-10 text-center text-slate-500"
-                    >
-                      No appointments found.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
@@ -403,44 +405,47 @@ export default function AppointmentsPage() {
                 }}
                 className="text-slate-500 hover:text-slate-600"
               >
-                <BiX size={24} />
+                <X size={24} />
               </button>
             </div>
             <div className="space-y-4">
               {/* Patient picker */}
               <div className="relative">
-                <h1 className="text-xs font-bold text-slate-500 tracking-wider mb-1 block">
-                  Patient
-                </h1>
                 {selectedPatient ? (
-                  <div className="flex items-center justify-between border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50">
-                    <span>
-                      {selectedPatient.firstName} {selectedPatient.lastName}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setSelectedPatient(null);
-                        setPatientSearch("");
-                      }}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <BiX size={16} />
-                    </button>
-                  </div>
+                  <>
+                    <label className="block text-ink-600 font-semibold text-sm tracking-wide mb-1.5">
+                      Patient
+                    </label>
+                    <div className="flex items-center justify-between border border-slate-200 rounded-full h-11 px-4 text-sm bg-slate-50">
+                      <span>
+                        {selectedPatient.firstName} {selectedPatient.lastName}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setSelectedPatient(null);
+                          setPatientSearch("");
+                        }}
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   <>
-                    <input
+                    <Input
+                      label="Patient"
                       type="text"
                       value={patientSearch}
                       onChange={(e) => setPatientSearch(e.target.value)}
                       placeholder="Search patient by name or email..."
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                      icon={<Search size={16} />}
                     />
                     {(isSearchingPatient || patientResults.length > 0) && (
                       <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
                         {isSearchingPatient ? (
                           <div className="p-3 text-center text-sm text-slate-500">
-                            <BiLoaderAlt className="animate-spin inline mr-2" />
+                            <Loader2 size={16} className="animate-spin inline mr-2" />
                             Searching...
                           </div>
                         ) : (
@@ -468,38 +473,41 @@ export default function AppointmentsPage() {
 
               {/* Practitioner picker */}
               <div className="relative">
-                <h1 className="text-xs font-bold text-slate-500 tracking-wider mb-1 block">
-                  Practitioner
-                </h1>
                 {selectedDoctor ? (
-                  <div className="flex items-center justify-between border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50">
-                    <span>
-                      Dr. {selectedDoctor.firstName} {selectedDoctor.lastName}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setSelectedDoctor(null);
-                        setDoctorSearch("");
-                      }}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <BiX size={16} />
-                    </button>
-                  </div>
+                  <>
+                    <label className="block text-ink-600 font-semibold text-sm tracking-wide mb-1.5">
+                      Practitioner
+                    </label>
+                    <div className="flex items-center justify-between border border-slate-200 rounded-full h-11 px-4 text-sm bg-slate-50">
+                      <span>
+                        Dr. {selectedDoctor.firstName} {selectedDoctor.lastName}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setSelectedDoctor(null);
+                          setDoctorSearch("");
+                        }}
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   <>
-                    <input
+                    <Input
+                      label="Practitioner"
                       type="text"
                       value={doctorSearch}
                       onChange={(e) => setDoctorSearch(e.target.value)}
                       placeholder="Search practitioner by name or email..."
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                      icon={<Search size={16} />}
                     />
                     {(isSearchingDoctor || doctorResults.length > 0) && (
                       <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
                         {isSearchingDoctor ? (
                           <div className="p-3 text-center text-sm text-slate-500">
-                            <BiLoaderAlt className="animate-spin inline mr-2" />
+                            <Loader2 size={16} className="animate-spin inline mr-2" />
                             Searching...
                           </div>
                         ) : (
@@ -525,69 +533,50 @@ export default function AppointmentsPage() {
                 )}
               </div>
 
-              <div>
-                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
-                  Type
-                </h1>
-                <select
-                  value={appointmentForm.type}
-                  onChange={(e) =>
-                    setAppointmentForm({ ...appointmentForm, type: e.target.value })
-                  }
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="consultation">Consultation</option>
-                  <option value="procedure">Procedure</option>
-                  <option value="lab">Lab</option>
-                </select>
-              </div>
-              <div>
-                <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
-                  Room
-                </h1>
-                <input
-                  type="text"
-                  value={appointmentForm.room}
-                  onChange={(e) =>
-                    setAppointmentForm({ ...appointmentForm, room: e.target.value })
-                  }
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  placeholder="e.g. R-5"
-                />
-              </div>
+              <Select
+                label="Type"
+                value={appointmentForm.type}
+                onChange={(value) =>
+                  setAppointmentForm({ ...appointmentForm, type: value })
+                }
+                options={[
+                  { value: "consultation", label: "Consultation" },
+                  { value: "procedure", label: "Procedure" },
+                  { value: "lab", label: "Lab" },
+                ]}
+              />
+              <Input
+                label="Room"
+                type="text"
+                value={appointmentForm.room}
+                onChange={(e) =>
+                  setAppointmentForm({ ...appointmentForm, room: e.target.value })
+                }
+                placeholder="e.g. R-5"
+              />
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
-                    Start
-                  </h1>
-                  <input
-                    type="datetime-local"
-                    value={appointmentForm.scheduledStart}
-                    onChange={(e) =>
-                      setAppointmentForm({
-                        ...appointmentForm,
-                        scheduledStart: e.target.value,
-                      })
-                    }
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <h1 className="text-xs font-bold text-slate-500  tracking-wider mb-1 block">
-                    End
-                  </h1>
-                  <input
-                    type="datetime-local"
-                    value={appointmentForm.scheduledEnd}
-                    onChange={(e) =>
-                      setAppointmentForm({
-                        ...appointmentForm,
-                        scheduledEnd: e.target.value,
-                      })
-                    }
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
+                <Input
+                  label="Start"
+                  type="datetime-local"
+                  value={appointmentForm.scheduledStart}
+                  onChange={(e) =>
+                    setAppointmentForm({
+                      ...appointmentForm,
+                      scheduledStart: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  label="End"
+                  type="datetime-local"
+                  value={appointmentForm.scheduledEnd}
+                  onChange={(e) =>
+                    setAppointmentForm({
+                      ...appointmentForm,
+                      scheduledEnd: e.target.value,
+                    })
+                  }
+                />
               </div>
 
               {appointmentError && (
@@ -609,13 +598,9 @@ export default function AppointmentsPage() {
               </Button>
               <Button
                 onClick={handleSaveAppointment}
-                disabled={isSavingAppointment}
+                loading={isSavingAppointment}
               >
-                {isSavingAppointment ? (
-                  <BiLoaderAlt className="animate-spin" />
-                ) : (
-                  "Save Appointment"
-                )}
+                Save Appointment
               </Button>
             </div>
           </div>

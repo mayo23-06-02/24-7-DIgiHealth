@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
+import { escapeRegex } from "@/lib/escapeRegex";
 
 export const runtime = "nodejs";
 
@@ -24,11 +25,8 @@ export async function GET(req: NextRequest) {
     if (role) q.role = role;
     if (status) q.status = status;
     if (search) {
-      q.$or = [
-        { firstName: new RegExp(search, "i") },
-        { lastName: new RegExp(search, "i") },
-        { email: new RegExp(search, "i") },
-      ];
+      const re = new RegExp(escapeRegex(search), "i");
+      q.$or = [{ firstName: re }, { lastName: re }, { email: re }];
     }
 
     const sortField = ["createdAt", "firstName", "email", "role", "status"].includes(sort)

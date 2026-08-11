@@ -1,19 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import KPICard from "@/components/ui/KPICard";
 import Badge from "@/components/ui/Badge";
 import type { BadgeStatus } from "@/components/ui/Badge";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import PageHeader from "@/components/ui/PageHeader";
+import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 import {
-  BiDollarCircle,
-  BiTime,
-  BiHealth,
-  BiDownload,
-  BiLoaderAlt,
-  BiCalendar,
-  BiReceipt,
-} from "react-icons/bi";
+  CircleDollarSign,
+  Clock,
+  HeartPulse,
+  Download,
+  Loader2,
+  Calendar,
+  Receipt,
+} from "lucide-react";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 export default function BillingPage() {
@@ -98,107 +104,109 @@ export default function BillingPage() {
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
-            Billing & Transactions
-          </h1>
-          <p className="text-sm text-slate-500">
-            Revenue tracking and payment records
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={async () => {
-              try {
-                await downloadBillingPdf(
-                  { type: "report", reportKind: "full" },
-                  "facility_billing_report.pdf",
-                );
-              } catch (e: any) {
-                alert(e?.message || "PDF download failed");
-              }
-            }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
-          >
-            <BiReceipt size={18} /> Report PDF
-          </button>
-          <button
-            onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            <BiDownload size={18} /> Export CSV
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Billing & Transactions"
+        subtitle="Revenue tracking and payment records"
+        right={
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={async () => {
+                try {
+                  await downloadBillingPdf(
+                    { type: "report", reportKind: "full" },
+                    "facility_billing_report.pdf",
+                  );
+                } catch (e: any) {
+                  toast.error(e?.message || "PDF download failed");
+                }
+              }}
+              icon={<Receipt size={16} />}
+              iconPosition="left"
+              className="!rounded-lg !max-w-none normal-case !tracking-normal"
+            >
+              Report PDF
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void exportCSV()}
+              icon={<Download size={16} />}
+              iconPosition="left"
+              className="!rounded-lg !max-w-none normal-case !tracking-normal"
+            >
+              Export CSV
+            </Button>
+          </div>
+        }
+      />
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KPICard
           label="Total Revenue"
           value={`R ${summary.totalRevenue.toLocaleString()}`}
-          icon={<BiDollarCircle size={24} />}
+          icon={<CircleDollarSign size={24} />}
           color="primary"
         />
         <KPICard
           label="Pending Payments"
           value={`R ${summary.pendingAmount.toLocaleString()}`}
-          icon={<BiTime size={24} />}
+          icon={<Clock size={24} />}
           color="slate"
         />
         <KPICard
           label="Medical Aid Claims"
           value={`R ${summary.medicalAidClaims.toLocaleString()}`}
-          icon={<BiHealth size={24} />}
+          icon={<HeartPulse size={24} />}
           color="emerald"
         />
       </div>
 
       {/* Filters */}
       <Card className="flex flex-col p-0 overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-wrap gap-4">
-          <input
+        <div className="p-4 bg-slate-50 border-b border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Input
             type="text"
-            placeholder="Search patient..."
+            placeholder="Search patient…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-2 text-sm flex-1 min-w-[200px] focus:outline-none focus:border-primary"
           />
-          <select
+          <Select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
-          >
-            <option value="all">All Statuses</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="refunded">Refunded</option>
-          </select>
-          <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-500" size={16} />
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="text-sm outline-none"
-            />
-          </div>
-          <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-500" size={16} />
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="text-sm outline-none"
-            />
-          </div>
+            onChange={setFilterStatus}
+            options={[
+              { value: "all", label: "All statuses" },
+              { value: "paid", label: "Paid" },
+              { value: "pending", label: "Pending" },
+              { value: "refunded", label: "Refunded" },
+            ]}
+          />
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            icon={<Calendar size={18} />}
+          />
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            icon={<Calendar size={18} />}
+          />
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <BiLoaderAlt className="animate-spin text-primary text-3xl" />
+            <Loader2 className="animate-spin text-primary" size={28} />
           </div>
+        ) : paginated.length === 0 ? (
+          <EmptyState
+            title="No transactions found"
+            description="Try adjusting your filters or search."
+            className="py-12"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[700px]">
@@ -281,7 +289,7 @@ export default function BillingPage() {
                         onClick={async () => {
                           const id = t._id || t.id;
                           if (!id) {
-                            alert("No transaction id");
+                            toast.error("No transaction id");
                             return;
                           }
                           try {
@@ -297,7 +305,7 @@ export default function BillingPage() {
                               "invoice.pdf",
                             );
                           } catch (e: any) {
-                            alert(e?.message || "PDF download failed");
+                            toast.error(e?.message || "PDF download failed");
                           }
                         }}
                       >
@@ -306,16 +314,6 @@ export default function BillingPage() {
                     </td>
                   </tr>
                 ))}
-                {paginated.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="py-10 text-center text-slate-500"
-                    >
-                      No transactions found.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>

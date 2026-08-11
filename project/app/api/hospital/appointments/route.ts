@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import { syncHospitalAppointment } from '@/lib/postgres/facility';
 
 export async function GET(req: NextRequest) {
   try {
@@ -61,7 +62,13 @@ export async function POST(req: NextRequest) {
       ...body,
       facilityId: hospitalId
     });
-    
+    await syncHospitalAppointment(
+      hospitalId,
+      appointment.patientId.toString(),
+      appointment.practitionerId.toString(),
+      appointment as any,
+    );
+
     return NextResponse.json({ success: true, data: appointment });
   } catch (error: any) {
     console.error('[POST /api/hospital/appointments]', error);

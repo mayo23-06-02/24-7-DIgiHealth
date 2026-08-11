@@ -1,8 +1,89 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
+
+interface LoginUser {
+  /**
+   * Session identity used in the JWT. Prefers the Mongo `_id` when a row
+   * has one (so every not-yet-migrated collection, which still stores
+   * foreign keys as Mongo ObjectIds, keeps resolving), falling back to the
+   * Postgres uuid for accounts with no Mongo origin at all (e.g. rows from
+   * scripts/seed-supabase.ts). Once every domain reads from Postgres, this
+   * can be simplified to always use the Postgres id.
+   */
+  identityId: string;
+  email: string;
+  passwordHash?: string | null;
+  role: string;
+  status: string;
+  firstName: string;
+  lastName: string;
+  emailVerified: boolean;
+}
+
+/**
+ * Migration note (Phase 3): reads from Postgres first, falling back to
+ * Mongo for any account not yet synced there.
+ */
+async function findLoginUser(identifier: string): Promise<LoginUser | null> {
+  // Two separate parameterized .eq() lookups rather than a single .or()
+  // filter string — PostgREST's .or() syntax interpolates the raw string,
+  // so passing user input straight into it (commas/periods/parens are
+  // filter-syntax metacharacters there) would be an injection risk.
+  const columns =
+    "id, mongo_id, email, password_hash, role, status, first_name, last_name, email_verified, sa_id";
+  const supabase = getSupabaseAdmin();
+
+  let { data, error } = await supabase
+    .from("users")
+    .select(columns)
+    .eq("email", identifier)
+    .maybeSingle();
+
+  if (!error && !data) {
+    ({ data, error } = await supabase
+      .from("users")
+      .select(columns)
+      .eq("sa_id", identifier)
+      .maybeSingle());
+  }
+
+  if (!error && data) {
+    return {
+      identityId: data.mongo_id || data.id,
+      email: data.email,
+      passwordHash: data.password_hash,
+      role: data.role,
+      status: data.status,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      emailVerified: data.email_verified,
+    };
+  }
+  if (error) {
+    console.warn("[login] Postgres lookup failed, falling back to Mongo:", error.message);
+  }
+
+  await connectToDatabase();
+  const user = await User.findOne({
+    $or: [{ email: identifier }, { saId: identifier }],
+  });
+  if (!user) return null;
+
+  return {
+    identityId: user._id.toString(),
+    email: user.email,
+    passwordHash: user.passwordHash,
+    role: user.role,
+    status: user.status,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    emailVerified: user.emailVerified,
+  };
+}
 
 /**
  * POST /api/auth/login
@@ -11,7 +92,6 @@ import { SignJWT } from "jose";
  */
 export async function POST(request: Request) {
   try {
-    await connectToDatabase();
     const { identifier, password } = await request.json();
 
     if (!identifier || !password) {
@@ -21,9 +101,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await User.findOne({
-      $or: [{ email: identifier.trim() }, { saId: identifier.trim() }],
-    });
+    const user = await findLoginUser(identifier.trim());
 
     if (!user) {
       return NextResponse.json(
@@ -41,10 +119,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      !user.passwordHash ||
-      user.passwordHash.startsWith("otp_only:")
-    ) {
+    if (!user.passwordHash || user.passwordHash.startsWith("otp_only:")) {
       return NextResponse.json(
         {
           error:
@@ -75,7 +150,7 @@ export async function POST(request: Request) {
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const token = await new SignJWT({
-      userId: user._id.toString(),
+      userId: user.identityId,
       role: user.role,
       email: user.email,
       firstName: user.firstName,
@@ -88,9 +163,9 @@ export async function POST(request: Request) {
     const response = NextResponse.json({
       mfaRequired: false,
       emailVerified: true,
-      userId: user._id.toString(),
+      userId: user.identityId,
       user: {
-        id: user._id.toString(),
+        id: user.identityId,
         role: user.role,
         email: user.email,
         firstName: user.firstName,

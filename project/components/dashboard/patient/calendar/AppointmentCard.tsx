@@ -44,17 +44,17 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       <div
         onClick={() => onSelect(appt)}
         className={`
-          border rounded-lg p-4 transition-all group flex flex-col h-full cursor-pointer
+          border rounded-lg p-3 transition-all group flex flex-col h-full cursor-pointer
           ${isExpired ? "bg-slate-50 border-slate-200 opacity-60 grayscale-[0.5]" : "bg-slate-100 border-slate-300 hover:shadow-slate-200/50"}
         `}
       >
-        <div className="flex h-full justify-between items-start mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-slate-100 overflow-hidden relative rounded-lg">
+        <div className="flex h-full justify-between items-start mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-slate-100 overflow-hidden relative rounded-lg shrink-0">
               {appt.img ? (
-                <Avatar name={appt.dr || ""} size="md" />
+                <Avatar name={appt.dr || ""} size="sm" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-2xl">
+                <div className="w-full h-full flex items-center justify-center text-base">
                   {appt.type === "refill"
                     ? "💊"
                     : appt.type === "reminder"
@@ -64,7 +64,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
               )}
             </div>
             <div className="flex flex-col items-start">
-              <h5 className="text-base font-bold text-slate-800 leading-none mb-1 truncate max-w-[150px] font-grotesk">
+              <h5 className="text-sm font-bold text-slate-800 leading-none mb-1 truncate max-w-[150px] font-grotesk">
                 {appt.dr ||
                   appt.title ||
                   (appt.type === "refill" ? "Prescription Refill" : "Event")}
@@ -115,15 +115,15 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {appt.location && (
-              <div className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
+              <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-white px-1.5 py-0.5 rounded-md border border-slate-100">
                 <BiMap className="text-primary" /> {appt.location}
               </div>
             )}
             {appt.dr_specialty && (
-              <div className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100">
+              <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-white px-1.5 py-0.5 rounded-md border border-slate-100">
                 <BiTrendingUp className="text-emerald-500" />{" "}
                 {appt.dr_specialty}
               </div>
@@ -131,12 +131,12 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           </div>
 
           <div className="flex flex-col gap-1 justify-start items-start">
-            <p className="text-sm font-semibold mb-2 text-slate-600 tracking-normal leading-none">
+            <p className="text-xs font-semibold text-slate-600 tracking-normal leading-none">
               {appt.type === "refill"
                 ? "Refill Details"
                 : "Appointment Details"}
             </p>
-            <div className="bg-white p-4 rounded-lg border border-slate-100 w-full text-xs text-slate-500 leading-relaxed text-left">
+            <div className="bg-white p-2 rounded-lg border border-slate-100 w-full text-xs text-slate-500 leading-snug text-left line-clamp-2">
               {appt.concern ? (
                 `"${appt.concern}"`
               ) : appt.prescriptionName ? (

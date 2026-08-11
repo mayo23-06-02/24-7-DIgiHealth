@@ -14,6 +14,7 @@ import {
   type BillingDocKind,
 } from "@/lib/pdf/buildBillingPdf";
 import { pdfResponse } from "@/lib/pdf/createPdfDocument";
+import { resolveHospitalId } from "@/lib/hospital/resolveHospitalId";
 
 export const runtime = "nodejs";
 
@@ -85,14 +86,17 @@ export async function POST(req: NextRequest) {
       const uid = user._id.toString();
       const isOwner = txn.patientId?.toString() === uid;
       const isPract = txn.practitionerId?.toString() === uid;
-      const isAdmin = [
-        "hospital_admin",
-        "super_admin",
-        "mega_admin",
-        "inspector",
-      ].includes(role);
+      const isPlatformAdmin = ["super_admin", "mega_admin", "inspector"].includes(
+        role,
+      );
+      let isFacilityAdmin = false;
+      if (role === "hospital_admin") {
+        const hospitalId = await resolveHospitalId(uid, user.email);
+        isFacilityAdmin =
+          !!hospitalId && txn.facilityId?.toString() === hospitalId;
+      }
 
-      if (!isOwner && !isPract && !isAdmin) {
+      if (!isOwner && !isPract && !isPlatformAdmin && !isFacilityAdmin) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
@@ -200,12 +204,19 @@ export async function POST(req: NextRequest) {
       }
 
       if (role === "hospital_admin") {
+        const hospitalId = await resolveHospitalId(user._id.toString(), user.email);
+        if (!hospitalId) {
+          return NextResponse.json(
+            { error: "No facility linked to this account." },
+            { status: 404 },
+          );
+        }
         const [transactions, payouts] = await Promise.all([
-          PaymentTransaction.find({})
+          PaymentTransaction.find({ facilityId: hospitalId })
             .sort({ timestamp: -1 })
             .limit(200)
             .lean(),
-          PayoutRequest.find({})
+          PayoutRequest.find({ facilityId: hospitalId })
             .populate("practitionerId", "firstName lastName")
             .sort({ requestedAt: -1 })
             .limit(100)

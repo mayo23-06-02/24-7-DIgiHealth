@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { escapeRegex } from '@/lib/escapeRegex';
 
 // Staff management is doctor-only — search always targets practitioner accounts.
 export async function GET(req: Request) {
@@ -16,12 +17,13 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
 
+    const searchRe = escapeRegex(search);
     const doctors = await User.find({
       role: 'practitioner',
       $or: [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
+        { firstName: { $regex: searchRe, $options: 'i' } },
+        { lastName: { $regex: searchRe, $options: 'i' } },
+        { email: { $regex: searchRe, $options: 'i' } }
       ]
     }).limit(10).select('firstName lastName email _id').lean();
 

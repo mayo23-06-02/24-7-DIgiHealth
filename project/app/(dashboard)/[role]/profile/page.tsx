@@ -968,7 +968,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto space-y-6 md:space-y-7 pb-16 animate-in fade-in duration-500">
+    <div className="w-full max-full mx-auto space-y-6 md:space-y-7 pb-16 animate-in fade-in duration-500">
       <ProfileHero
         fullName={fullName}
         user={user}

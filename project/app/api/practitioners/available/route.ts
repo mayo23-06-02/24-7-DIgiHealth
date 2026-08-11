@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
+import { escapeRegex } from '@/lib/escapeRegex';
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
 
     const query: any = {};
     if (specialisation && specialisation !== 'All') {
-      query.specialisation = { $regex: specialisation, $options: 'i' };
+      query.specialisation = { $regex: escapeRegex(specialisation), $options: 'i' };
     }
     
     // In a real app, we'd filter by user gender if it's on the profile

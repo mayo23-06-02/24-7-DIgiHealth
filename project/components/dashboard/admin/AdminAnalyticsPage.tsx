@@ -16,7 +16,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { BiRefresh, BiCalendar, BiCheckCircle, BiUserPlus, BiDollarCircle } from "react-icons/bi";
+import { RefreshCw, Calendar, CheckCircle2, UserPlus, CircleDollarSign } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -72,7 +72,7 @@ export default function AdminAnalyticsPage() {
                 </button>
               ))}
             </div>
-            <Button size="sm" variant="outline" onClick={() => void load()} icon={<BiRefresh size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
+            <Button size="sm" variant="outline" onClick={() => void load()} icon={<RefreshCw size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
               Refresh
             </Button>
           </div>
@@ -88,10 +88,10 @@ export default function AdminAnalyticsPage() {
       ) : data ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <KPICard label="Consults" value={data.kpi.consults30d} color="primary" icon={<BiCalendar size={20} />} />
-            <KPICard label="Completed" value={data.kpi.completed30d} color="emerald" icon={<BiCheckCircle size={20} />} />
-            <KPICard label="New users" value={data.signupTrend?.reduce((s: number, r: any) => s + r.count, 0) || 0} color="slate" icon={<BiUserPlus size={20} />} />
-            <KPICard label="Revenue" value={`R ${data.kpi.revenue30d.toLocaleString("en-ZA")}`} color="emerald" icon={<BiDollarCircle size={20} />} />
+            <KPICard label="Consults" value={data.kpi.consults30d} color="primary" icon={<Calendar size={20} />} />
+            <KPICard label="Completed" value={data.kpi.completed30d} color="emerald" icon={<CheckCircle2 size={20} />} />
+            <KPICard label="New users" value={data.signupTrend?.reduce((s: number, r: any) => s + r.count, 0) || 0} color="slate" icon={<UserPlus size={20} />} />
+            <KPICard label="Revenue" value={`R ${data.kpi.revenue30d.toLocaleString("en-ZA")}`} color="emerald" icon={<CircleDollarSign size={20} />} />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="!rounded-lg min-h-[280px] flex flex-col">

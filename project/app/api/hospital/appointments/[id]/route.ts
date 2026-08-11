@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import { updateHospitalAppointmentByMongoId } from '@/lib/postgres/facility';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -24,6 +25,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       { new: true },
     );
     if (!updated) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+
+    const pgUpdates: Record<string, unknown> = {};
+    if (typeof body.status === 'string') pgUpdates.status = body.status;
+    if (typeof body.type === 'string') pgUpdates.type = body.type;
+    if (typeof body.room === 'string') pgUpdates.room = body.room;
+    if (body.scheduledStart) pgUpdates.scheduled_start = body.scheduledStart;
+    if (body.scheduledEnd) pgUpdates.scheduled_end = body.scheduledEnd;
+    if (Object.keys(pgUpdates).length) {
+      await updateHospitalAppointmentByMongoId(id, pgUpdates);
+    }
+
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

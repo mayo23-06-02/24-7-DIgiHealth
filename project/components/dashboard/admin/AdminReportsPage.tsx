@@ -2,21 +2,22 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  BiDownload,
-  BiFile,
-  BiLoaderAlt,
-  BiRefresh,
-  BiSearch,
-  BiBulb,
-  BiUser,
-  BiBuildingHouse,
-  BiCalendar,
-  BiDollarCircle,
-} from "react-icons/bi";
+  Download,
+  FileText,
+  Loader2,
+  RefreshCw,
+  Search,
+  Lightbulb,
+  User,
+  Building2,
+  Calendar,
+  CircleDollarSign,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import KPICard from "@/components/ui/KPICard";
 import PageHeader from "@/components/ui/PageHeader";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -147,13 +148,13 @@ export default function AdminReportsPage() {
         subtitle="Filter, sort, and export system-wide intelligence"
         right={
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={() => void load()} icon={<BiRefresh size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
+            <Button size="sm" variant="outline" onClick={() => void load()} icon={<RefreshCw size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
               Refresh
             </Button>
-            <Button size="sm" variant="outline" onClick={() => void downloadCsv()} disabled={!!exporting} icon={exporting === "csv" ? <BiLoaderAlt className="animate-spin" size={16} /> : <BiDownload size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
+            <Button size="sm" variant="outline" onClick={() => void downloadCsv()} disabled={!!exporting} icon={exporting === "csv" ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
               CSV
             </Button>
-            <Button size="sm" variant="primary" onClick={() => void downloadPdf()} disabled={!!exporting} icon={exporting === "pdf" ? <BiLoaderAlt className="animate-spin" size={16} /> : <BiFile size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
+            <Button size="sm" variant="primary" onClick={() => void downloadPdf()} disabled={!!exporting} icon={exporting === "pdf" ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />} iconPosition="left" className="!rounded-lg !max-w-none normal-case !tracking-normal">
               PDF
             </Button>
           </div>
@@ -179,50 +180,61 @@ export default function AdminReportsPage() {
 
       <Card className="!rounded-lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <div className="relative lg:col-span-2">
-            <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
+          <div className="lg:col-span-2">
+            <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search…"
-              className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
+              icon={<Search size={18} />}
             />
           </div>
           <Input type="date" label="From" value={from} onChange={(e) => setFrom(e.target.value)} />
           <Input type="date" label="To" value={to} onChange={(e) => setTo(e.target.value)} />
           {(type === "users" || type === "overview") && (
-            <select value={role} onChange={(e) => setRole(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white self-end">
-              <option value="">All roles</option>
-              <option value="patient">Patient</option>
-              <option value="practitioner">Practitioner</option>
-              <option value="hospital_admin">Hospital admin</option>
-              <option value="super_admin">Super admin</option>
-              <option value="mega_admin">Mega admin</option>
-            </select>
+            <div className="self-end">
+              <Select
+                value={role}
+                onChange={(v) => setRole(v)}
+                options={[
+                  { value: "", label: "All roles" },
+                  { value: "patient", label: "Patient" },
+                  { value: "practitioner", label: "Practitioner" },
+                  { value: "hospital_admin", label: "Hospital admin" },
+                  { value: "super_admin", label: "Super admin" },
+                  { value: "mega_admin", label: "Mega admin" },
+                ]}
+              />
+            </div>
           )}
           {(type === "users" || type === "finance" || type === "consultations") && (
-            <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white self-end">
-              <option value="">All statuses</option>
-              {type === "users" && (
-                <>
-                  <option value="active">Active</option>
-                  <option value="suspended">Suspended</option>
-                </>
-              )}
-              {type === "finance" && (
-                <>
-                  <option value="completed">Completed</option>
-                  <option value="pending">Pending</option>
-                </>
-              )}
-              {type === "consultations" && (
-                <>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="scheduled">Scheduled</option>
-                </>
-              )}
-            </select>
+            <div className="self-end">
+              <Select
+                value={status}
+                onChange={(v) => setStatus(v)}
+                options={[
+                  { value: "", label: "All statuses" },
+                  ...(type === "users"
+                    ? [
+                        { value: "active", label: "Active" },
+                        { value: "suspended", label: "Suspended" },
+                      ]
+                    : []),
+                  ...(type === "finance"
+                    ? [
+                        { value: "completed", label: "Completed" },
+                        { value: "pending", label: "Pending" },
+                      ]
+                    : []),
+                  ...(type === "consultations"
+                    ? [
+                        { value: "completed", label: "Completed" },
+                        { value: "cancelled", label: "Cancelled" },
+                        { value: "scheduled", label: "Scheduled" },
+                      ]
+                    : []),
+                ]}
+              />
+            </div>
           )}
         </div>
       </Card>
@@ -237,16 +249,16 @@ export default function AdminReportsPage() {
         <>
           {k && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <KPICard label="Users" value={k.totalUsers} color="primary" icon={<BiUser size={20} />} />
-              <KPICard label="Facilities" value={k.facilities} color="slate" icon={<BiBuildingHouse size={20} />} />
-              <KPICard label="Consults 30d" value={k.consults30d} color="emerald" icon={<BiCalendar size={20} />} />
-              <KPICard label="Revenue 30d" value={`R ${k.revenue30d.toLocaleString("en-ZA")}`} color="emerald" icon={<BiDollarCircle size={20} />} />
+              <KPICard label="Users" value={k.totalUsers} color="primary" icon={<User size={20} />} />
+              <KPICard label="Facilities" value={k.facilities} color="slate" icon={<Building2 size={20} />} />
+              <KPICard label="Consults 30d" value={k.consults30d} color="emerald" icon={<Calendar size={20} />} />
+              <KPICard label="Revenue 30d" value={`R ${k.revenue30d.toLocaleString("en-ZA")}`} color="emerald" icon={<CircleDollarSign size={20} />} />
             </div>
           )}
 
           {data.intelligence?.length > 0 && (
             <Card className="!rounded-lg">
-              <SectionHeader compact icon={<BiBulb />} title="Report intelligence" className="mb-3" />
+              <SectionHeader compact icon={<Lightbulb />} title="Report intelligence" className="mb-3" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {data.intelligence.slice(0, 6).map((item: any) => (
                   <div key={item.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">

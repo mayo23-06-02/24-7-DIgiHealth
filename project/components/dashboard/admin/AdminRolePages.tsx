@@ -36,7 +36,8 @@ export function AdminFacilities() {
 }
 
 export function AdminFinance() {
-  return <AdminFinancePage />;
+  const { isMega } = useAdminRole();
+  return <AdminFinancePage isMega={isMega} />;
 }
 
 export function AdminAnalytics() {

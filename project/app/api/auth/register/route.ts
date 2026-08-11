@@ -13,6 +13,13 @@ import StaffInvite from "@/lib/models/StaffInvite";
 import bcrypt from "bcryptjs";
 import { normalizeEmail } from "@/lib/supabase/auth";
 import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
+import {
+  syncUser,
+  syncPatientProfile,
+  syncPractitionerProfile,
+  syncHospitalAdminProfile,
+} from "@/lib/postgres/users";
+import { syncFacility, syncStaff, updateStaffInviteByMongoId } from "@/lib/postgres/facility";
 
 /**
  * POST /api/auth/register
@@ -108,6 +115,12 @@ export async function POST(request: Request) {
       mfaEnabled: false,
     } as any);
 
+    // Dual-write (Phase 2 of the Mongo -> Postgres migration): mirror into
+    // Postgres, non-fatal — Mongo remains the source of truth for reads.
+    // Awaited (not fire-and-forget) since serverless functions don't
+    // guarantee background work continues after the response is sent.
+    await syncUser(newUser as any);
+
     try {
       const regToken =
         formData.registrationMediaToken ||
@@ -122,7 +135,7 @@ export async function POST(request: Request) {
     }
 
     if (wizardRole === "patient") {
-      await PatientProfile.create({
+      const patientProfile = await PatientProfile.create({
         userId: newUser._id,
         dateOfBirth: formData.dob ? new Date(formData.dob) : new Date(),
         gender: formData.gender?.toLowerCase() || "other",
@@ -138,6 +151,7 @@ export async function POST(request: Request) {
           ? [formData.medicalDocument]
           : [],
       });
+      await syncPatientProfile(newUser._id.toString(), patientProfile as any);
 
       if (formData.heightCm || formData.weightKg) {
         const height = parseFloat(formData.heightCm) || 0;
@@ -168,7 +182,7 @@ export async function POST(request: Request) {
         familyHistory: [],
       });
     } else if (wizardRole === "practitioner") {
-      await PractitionerProfile.create({
+      const practitionerProfile = await PractitionerProfile.create({
         userId: newUser._id,
         specialisation: formData.specialization || "General Practitioner",
         hpcsaNumber: formData.hpcsaNumber || "N/A",
@@ -188,6 +202,7 @@ export async function POST(request: Request) {
         languages: formData.languages || ["English"],
         isOnline: false,
       });
+      await syncPractitionerProfile(newUser._id.toString(), practitionerProfile as any);
 
       // Hospital-admin invite acceptance: auto-attach to the inviting
       // facility's Staff roster when this registration came from a valid,
@@ -204,7 +219,7 @@ export async function POST(request: Request) {
             invite.expiresAt > new Date() &&
             invite.email === formEmail
           ) {
-            await Staff.create({
+            const newStaff = await Staff.create({
               userId: newUser._id,
               facilityId: invite.facilityId,
               role: "doctor",
@@ -217,9 +232,15 @@ export async function POST(request: Request) {
               isOnDuty: false,
               hourlyRate: invite.hourlyRate,
             });
+            await syncStaff(invite.facilityId.toString(), newStaff as any);
+
             invite.status = "accepted";
             invite.acceptedAt = new Date();
             await invite.save();
+            await updateStaffInviteByMongoId(invite._id.toString(), {
+              status: "accepted",
+              accepted_at: invite.acceptedAt,
+            });
           }
         } catch (e) {
           console.warn("[register] staff invite acceptance skipped:", e);
@@ -228,37 +249,40 @@ export async function POST(request: Request) {
     } else if (wizardRole === "hospital") {
       const newFacility = await Facility.create({
         name: formData.facilityName,
-        type:
+        facilityType:
           formData.facilityType === "NGO / Clinic"
-            ? "ngo"
-            : formData.facilityType?.toLowerCase() || "private",
-        location: {
-          address: formData.street,
+            ? "NGO"
+            : formData.facilityType === "Private"
+              ? "Private"
+              : "Public",
+        address: {
+          street: formData.street,
           city: formData.city,
           province: formData.province,
-          country: "South Africa",
         },
-        contactNo: formData.mobile || "",
-        email: formData.adminEmail,
+        contactInfo: {
+          phone: formData.mobile || "",
+          email: formData.adminEmail,
+        },
         bedCapacity: {
           total: parseInt(formData.bedCapacity) || 0,
+          generalAvailable: parseInt(formData.bedCapacity) || 0,
+          icuAvailable: 0,
         },
+        isOpen: true,
         logo: formData.facilityLogo,
         wallpaper: formData.facilityWallpaper,
         regCertificate: formData.regCertificate,
-        status: "active",
       });
+      await syncFacility(newFacility as any);
 
-      await HospitalAdminProfile.create({
+      const adminProfile = await HospitalAdminProfile.create({
         userId: newUser._id,
         hospitalId: newFacility._id,
         department: "Administration",
         permissions: ["all"],
       });
-
-      await User.findByIdAndUpdate(newUser._id, {
-        facilityId: newFacility._id,
-      });
+      await syncHospitalAdminProfile(newUser._id.toString(), adminProfile as any);
     }
 
     // Every new account must confirm ownership of their email via a 6-digit

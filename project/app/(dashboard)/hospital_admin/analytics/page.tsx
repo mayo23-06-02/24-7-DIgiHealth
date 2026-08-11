@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import PageHeader from "@/components/ui/PageHeader";
 import {
   ResponsiveContainer,
   LineChart,
@@ -18,7 +20,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { BiLoaderAlt, BiDownload, BiCalendar } from "react-icons/bi";
+import { Loader2, Download, Calendar } from "lucide-react";
 
 const COLORS = ["#0052CC", "#00A3BF", "#36B37E", "#FF5630", "#6554C0"];
 
@@ -58,48 +60,46 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <BiLoaderAlt className="animate-spin text-primary text-4xl" />
+        <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
   }
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
-            Operational Analytics
-          </h1>
-          <p className="text-sm text-slate-500">
-            Charts update based on selected date range
-          </p>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-500" />
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="text-sm outline-none"
-            />
+      <PageHeader
+        title="Operational Analytics"
+        subtitle="Charts update based on selected date range"
+        right={
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="w-40">
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                icon={<Calendar size={16} />}
+              />
+            </div>
+            <span className="text-slate-500 text-sm">to</span>
+            <div className="w-40">
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                icon={<Calendar size={16} />}
+              />
+            </div>
+            <Button
+              onClick={fetchAnalytics}
+              variant="outline"
+              size="sm"
+              className="!rounded-lg !max-w-none normal-case !tracking-normal"
+            >
+              Apply
+            </Button>
           </div>
-          <span className="text-slate-500 text-sm">to</span>
-          <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-white">
-            <BiCalendar className="text-slate-500" />
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="text-sm outline-none"
-            />
-          </div>
-          <Button onClick={fetchAnalytics} variant="outline">
-            Apply
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
                 onClick={() => exportCSV("occupancy")}
                 className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary transition-colors"
               >
-                <BiDownload size={16} />
+                <Download size={16} />
               </button>
             </div>
             <div className="flex-1 min-h-[200px]">
@@ -174,7 +174,7 @@ export default function AnalyticsPage() {
                 onClick={() => exportCSV("financial")}
                 className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary transition-colors"
               >
-                <BiDownload size={16} />
+                <Download size={16} />
               </button>
             </div>
             <div className="flex-1 min-h-[200px]">

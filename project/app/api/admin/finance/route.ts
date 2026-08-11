@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { PaymentTransaction, PayoutRequest } from "@/lib/models/Billing";
 import HospitalTransaction from "@/lib/models/HospitalTransaction";
-import { requirePlatformAdmin } from "@/lib/auth/admin";
+import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
 
 export const runtime = "nodejs";
@@ -99,6 +99,14 @@ export async function PATCH(req: NextRequest) {
     const { payoutId, status } = body;
     if (!payoutId || !["approved", "paid", "rejected", "pending"].includes(status)) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
+    // Marking a payout "paid" states money has actually left the platform —
+    // reserve that irreversible step for mega_admin, same as other high-trust actions.
+    if (status === "paid" && !isMegaAdmin(gate.user.role)) {
+      return NextResponse.json(
+        { error: "Only mega admin can mark a payout as paid" },
+        { status: 403 },
+      );
     }
     const payout = await PayoutRequest.findById(payoutId);
     if (!payout) {

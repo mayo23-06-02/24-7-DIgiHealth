@@ -11,6 +11,7 @@ interface CarouselProps {
   infiniteLoop?: boolean;
   centerMode?: boolean;
   centerSlidePercentage?: number;
+  slideClassName?: string;
   selectedItem?: number;
   onChange?: (index: number) => void;
   className?: string;
@@ -24,6 +25,7 @@ const Carousel: React.FC<CarouselProps> = ({
   infiniteLoop = false,
   centerMode = false,
   centerSlidePercentage = 100,
+  slideClassName,
   selectedItem,
   onChange,
   className = "",
@@ -63,8 +65,8 @@ const Carousel: React.FC<CarouselProps> = ({
           {childrenArray.map((child, index) => (
             <div
               key={index}
-              className="snap-start shrink-0 h-full transition-all duration-300"
-              style={{ width: `${centerSlidePercentage}%` }}
+              className={`snap-start shrink-0 h-full transition-all duration-300 ${slideClassName || ""}`}
+              style={slideClassName ? undefined : { width: `${centerSlidePercentage}%` }}
             >
               {child}
             </div>

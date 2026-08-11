@@ -275,20 +275,21 @@ export async function buildInvoiceReceiptPdf(opts: {
   doc.y += 14;
 
   // Table header
+  const lineItemsHeaderY = doc.y;
   doc.save();
-  doc.rect(left, doc.y, contentW, 22).fill(BRAND.primary);
+  doc.rect(left, lineItemsHeaderY, contentW, 22).fill(BRAND.primary);
   doc.restore();
   doc
     .font(fonts.monoBold)
     .fontSize(8)
     .fillColor(BRAND.white)
-    .text("Description", left + 10, doc.y + 7, { lineBreak: false })
-    .text("Amount", left + contentW - 90, doc.y + 7, {
+    .text("Description", left + 10, lineItemsHeaderY + 7, { lineBreak: false })
+    .text("Amount", left + contentW - 90, lineItemsHeaderY + 7, {
       width: 80,
       align: "right",
       lineBreak: false,
     });
-  doc.y += 28;
+  doc.y = lineItemsHeaderY + 28;
 
   doc
     .font(fonts.body)
@@ -310,17 +311,18 @@ export async function buildInvoiceReceiptPdf(opts: {
   doc.y = Math.max(doc.y, descBottom) + 8;
 
   if (t.platformFeeAmount) {
+    const feeY = doc.y;
     doc
       .font(fonts.body)
       .fontSize(9)
       .fillColor(BRAND.muted)
-      .text("Platform fee", left + 10, doc.y, { lineBreak: false })
-      .text(fmtZAR(t.platformFeeAmount), left + contentW - 90, doc.y, {
+      .text("Platform fee", left + 10, feeY, { lineBreak: false })
+      .text(fmtZAR(t.platformFeeAmount), left + contentW - 90, feeY, {
         width: 80,
         align: "right",
         lineBreak: false,
       });
-    doc.y += 14;
+    doc.y = feeY + 14;
   }
 
   doc
@@ -502,19 +504,20 @@ export async function buildBillingReportPdf(
     };
 
     const drawTxnHeader = () => {
+      const y = doc.y;
       doc.save();
-      doc.rect(left, doc.y, contentW, 18).fill(BRAND.primary);
+      doc.rect(left, y, contentW, 18).fill(BRAND.primary);
       doc.restore();
       doc
         .font(fonts.monoBold)
         .fontSize(7)
         .fillColor(BRAND.white)
-        .text("DATE", col.date + 6, doc.y + 5, { lineBreak: false })
-        .text("DESCRIPTION", col.desc, doc.y + 5, { lineBreak: false })
-        .text("CATEGORY", col.cat, doc.y + 5, { lineBreak: false })
-        .text("AMOUNT", col.amount, doc.y + 5, { lineBreak: false })
-        .text("STATUS", col.status, doc.y + 5, { lineBreak: false });
-      doc.y += 22;
+        .text("DATE", col.date + 6, y + 5, { lineBreak: false })
+        .text("DESCRIPTION", col.desc, y + 5, { lineBreak: false })
+        .text("CATEGORY", col.cat, y + 5, { lineBreak: false })
+        .text("AMOUNT", col.amount, y + 5, { lineBreak: false })
+        .text("STATUS", col.status, y + 5, { lineBreak: false });
+      doc.y = y + 22;
     };
 
     drawTxnHeader();
@@ -522,37 +525,38 @@ export async function buildBillingReportPdf(
     txns.forEach((t, idx) => {
       ensureRoom(doc, 22);
       if (doc.y < PAGE_MARGIN + 30) drawTxnHeader();
+      const rowY = doc.y;
       if (idx % 2 === 0) {
         doc.save();
-        doc.rect(left, doc.y - 2, contentW, 18).fill("#f8fafc");
+        doc.rect(left, rowY - 2, contentW, 18).fill("#f8fafc");
         doc.restore();
       }
       doc
         .font(fonts.body)
         .fontSize(8)
         .fillColor(BRAND.text)
-        .text(fmtDate(t.timestamp), col.date + 6, doc.y, {
+        .text(fmtDate(t.timestamp), col.date + 6, rowY, {
           width: 60,
           lineBreak: false,
         })
-        .text((t.description || "—").slice(0, 36), col.desc, doc.y, {
+        .text((t.description || "—").slice(0, 36), col.desc, rowY, {
           width: 170,
           lineBreak: false,
           ellipsis: true,
         })
-        .text((t.category || "—").replace(/_/g, " ").slice(0, 14), col.cat, doc.y, {
+        .text((t.category || "—").replace(/_/g, " ").slice(0, 14), col.cat, rowY, {
           width: 70,
           lineBreak: false,
         })
-        .text(fmtZAR(t.amount), col.amount, doc.y, {
+        .text(fmtZAR(t.amount), col.amount, rowY, {
           width: 60,
           lineBreak: false,
         })
-        .text((t.status || "—").slice(0, 10), col.status, doc.y, {
+        .text((t.status || "—").slice(0, 10), col.status, rowY, {
           width: 58,
           lineBreak: false,
         });
-      doc.y += 16;
+      doc.y = rowY + 16;
     });
     doc.y += 10;
   }
@@ -574,20 +578,21 @@ export async function buildBillingReportPdf(
       const label = p.practitionerName
         ? `${p.practitionerName} · ${period}`
         : period;
+      const rowY = doc.y;
       doc
         .font(fonts.body)
         .fontSize(9)
         .fillColor(BRAND.text)
-        .text(label, left, doc.y, { width: contentW - 140, lineBreak: false })
-        .text(fmtZAR(p.amount), left + contentW - 130, doc.y, {
+        .text(label, left, rowY, { width: contentW - 140, lineBreak: false })
+        .text(fmtZAR(p.amount), left + contentW - 130, rowY, {
           width: 70,
           lineBreak: false,
         })
-        .text((p.status || "—").toUpperCase(), left + contentW - 55, doc.y, {
+        .text((p.status || "—").toUpperCase(), left + contentW - 55, rowY, {
           width: 50,
           lineBreak: false,
         });
-      doc.y += 14;
+      doc.y = rowY + 14;
       doc
         .font(fonts.mono)
         .fontSize(7)

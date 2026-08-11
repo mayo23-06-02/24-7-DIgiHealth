@@ -34,7 +34,7 @@ export default function ProfileNavigation({
     <section className="sticky top-0 z-20 -mx-1 px-1">
       <div
         ref={scrollerRef}
-        className="rounded-lg border border-slate-200 bg-white/90 backdrop-blur-xl px-2"
+        className=""
       >
         <Tabs
           tabs={tabs.map((tab) => ({

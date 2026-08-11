@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { BiRefresh, BiSearch, BiBuildingHouse } from "react-icons/bi";
+import { RefreshCw, Search, Building2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
@@ -65,7 +66,7 @@ export default function AdminFacilitiesPage() {
             size="sm"
             variant="outline"
             onClick={() => void load()}
-            icon={<BiRefresh size={16} />}
+            icon={<RefreshCw size={16} />}
             iconPosition="left"
             className="!rounded-lg !max-w-none normal-case !tracking-normal"
           >
@@ -74,13 +75,12 @@ export default function AdminFacilitiesPage() {
         }
       />
       <Card className="!rounded-lg">
-        <div className="relative max-w-md">
-          <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
+        <div className="max-w-md">
+          <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search facilities…"
-            className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
+            icon={<Search size={18} />}
           />
         </div>
       </Card>
@@ -95,7 +95,7 @@ export default function AdminFacilitiesPage() {
           <EmptyState
             title="No facilities"
             description="Hospital admins create facilities during onboarding."
-            icon={<BiBuildingHouse size={32} />}
+            icon={<Building2 size={32} />}
           />
         ) : (
           <div className="overflow-x-auto">

@@ -43,7 +43,7 @@ const ScheduleFeed: React.FC<ScheduleFeedProps> = ({
   setSelectedAppointment,
 }) => {
   return (
-    <section className="space-y-6 flex-1 flex flex-col min-h-[300px]">
+    <section className="space-y-4 flex-1 flex flex-col min-h-0">
       <div className="flex-shrink-0 flex items-center justify-between">
         <div>
           <h4 className="text-lg font-bold text-slate-800 font-grotesk">

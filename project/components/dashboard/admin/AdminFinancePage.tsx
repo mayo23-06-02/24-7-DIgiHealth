@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { BiRefresh, BiDollarCircle, BiLoaderAlt, BiReceipt } from "react-icons/bi";
+import { RefreshCw, CircleDollarSign, Loader2, Receipt } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -12,7 +12,7 @@ import Badge from "@/components/ui/Badge";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
-export default function AdminFinancePage() {
+export default function AdminFinancePage({ isMega = false }: { isMega?: boolean }) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
@@ -94,7 +94,7 @@ export default function AdminFinancePage() {
                   );
                 }
               }}
-              icon={<BiReceipt size={16} />}
+              icon={<Receipt size={16} />}
               iconPosition="left"
               className="!rounded-lg !max-w-none normal-case !tracking-normal"
             >
@@ -104,7 +104,7 @@ export default function AdminFinancePage() {
               size="sm"
               variant="outline"
               onClick={() => void load()}
-              icon={<BiRefresh size={16} />}
+              icon={<RefreshCw size={16} />}
               iconPosition="left"
               className="!rounded-lg !max-w-none normal-case !tracking-normal"
             >
@@ -122,10 +122,10 @@ export default function AdminFinancePage() {
         </div>
       ) : s ? (
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-          <KPICard label="GMV" value={`R ${s.gmv.toLocaleString("en-ZA")}`} icon={<BiDollarCircle size={22} />} color="emerald" />
-          <KPICard label="Platform fees" value={`R ${s.platformFees.toLocaleString("en-ZA")}`} icon={<BiDollarCircle size={22} />} color="primary" />
-          <KPICard label="Practitioner earnings" value={`R ${s.practitionerEarnings.toLocaleString("en-ZA")}`} icon={<BiDollarCircle size={22} />} color="slate" />
-          <KPICard label="Pending payouts" value={s.pendingPayouts} icon={<BiDollarCircle size={22} />} color="primary" description={`R ${s.pendingAmount.toLocaleString("en-ZA")}`} />
+          <KPICard label="GMV" value={`R ${s.gmv.toLocaleString("en-ZA")}`} icon={<CircleDollarSign size={22} />} color="emerald" />
+          <KPICard label="Platform fees" value={`R ${s.platformFees.toLocaleString("en-ZA")}`} icon={<CircleDollarSign size={22} />} color="primary" />
+          <KPICard label="Practitioner earnings" value={`R ${s.practitionerEarnings.toLocaleString("en-ZA")}`} icon={<CircleDollarSign size={22} />} color="slate" />
+          <KPICard label="Pending payouts" value={s.pendingPayouts} icon={<CircleDollarSign size={22} />} color="primary" description={`R ${s.pendingAmount.toLocaleString("en-ZA")}`} />
         </div>
       ) : null}
 
@@ -169,7 +169,7 @@ export default function AdminFinancePage() {
                         onClick={() => void setPayoutStatus(p.id, "approved")}
                         className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px] !px-2"
                       >
-                        {busyId === p.id ? <BiLoaderAlt className="animate-spin" /> : "Approve"}
+                        {busyId === p.id ? <Loader2 className="animate-spin" size={14} /> : "Approve"}
                       </Button>
                       <Button
                         size="sm"
@@ -182,7 +182,7 @@ export default function AdminFinancePage() {
                       </Button>
                     </>
                   )}
-                  {p.status === "approved" && (
+                  {p.status === "approved" && isMega && (
                     <Button
                       size="sm"
                       variant="outline"
@@ -192,6 +192,11 @@ export default function AdminFinancePage() {
                     >
                       Mark paid
                     </Button>
+                  )}
+                  {p.status === "approved" && !isMega && (
+                    <span className="text-[10px] font-semibold text-slate-400">
+                      Awaiting mega admin
+                    </span>
                   )}
                 </div>
               </li>

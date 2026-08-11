@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import AuditLog from "@/lib/models/AuditLog";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
+import { escapeRegex } from "@/lib/escapeRegex";
 
 export const runtime = "nodejs";
 
@@ -18,13 +19,10 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, Math.max(10, parseInt(sp.get("limit") || "40", 10)));
 
     const q: any = {};
-    if (action) q.action = new RegExp(action, "i");
+    if (action) q.action = new RegExp(escapeRegex(action), "i");
     if (search) {
-      q.$or = [
-        { actorEmail: new RegExp(search, "i") },
-        { action: new RegExp(search, "i") },
-        { targetId: new RegExp(search, "i") },
-      ];
+      const re = new RegExp(escapeRegex(search), "i");
+      q.$or = [{ actorEmail: re }, { action: re }, { targetId: re }];
     }
 
     const [total, rows] = await Promise.all([

@@ -261,11 +261,11 @@ function ArticleCard({
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-700">
+            <div className="w-full h-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-700">
               💡
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {article.tags?.[0] && (
             <div className="absolute top-4 left-4">
@@ -293,7 +293,7 @@ function ArticleCard({
             <h4 className="text-[15px] font-bold text-slate-800 leading-tight mb-3 tracking-tight group-hover:text-primary transition-colors line-clamp-2 font-grotesk">
               {article.title}
             </h4>
-            <p className="text-xs text-slate-500 text-start  line-clamp-2 mb-6 opacity-80">
+            <p className="text-sm text-slate-500 text-start  line-clamp-2 mb-6 opacity-80">
               {article.excerpt}
             </p>
           </div>
@@ -408,14 +408,14 @@ export default function HealthBlog() {
       <div className="flex justify-between items-center px-2">
         <div className="flex flex-col lg:flex-row  justify-between w-full gap-2">
           <div className="mb-4 px-2">
-            <h3 className="font-bold text-2xl text-slate-900 font-grotesk">
+            <h3 className="font-bold text-xl text-slate-900 font-grotesk">
               Health Insights
             </h3>
-            <p className="text-base text-slate-600">
+            <p className="text-sm text-slate-600">
               Latest medical news and wellness articles
             </p>
           </div>
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center lg:justify-end justify-between gap-3">
             <div className="text-xs text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full border border-emerald-100 font-bold whitespace-nowrap">
               <span className="flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
@@ -447,43 +447,7 @@ export default function HealthBlog() {
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 px-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          {CATEGORY_FILTERS.map((f) => (
-            <Button
-              key={f.value}
-              onClick={() => setActiveCategory(f.value)}
-              variant={activeCategory === f.value ? "primary" : "ghost"}
-              className={`flex items-center gap-1.5 px-4 py-2 !h-auto rounded-lg text-xs font-bold transition-all border !min-w-0 ${
-                activeCategory === f.value
-                  ? "border-primary"
-                  : "bg-white text-slate-500 border-slate-200 hover:border-primary/30 hover:text-primary"
-              }`}
-            >
-              <BiFilter size={13} />
-              {f.label}
-            </Button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {bookmarks.size > 0 && (
-            <span className="flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg">
-              <BiBookmark size={12} /> {bookmarks.size} Saved
-            </span>
-          )}
-          <Button
-            variant="ghost"
-            onClick={() => fetchArticles(activeCategory)}
-            className="w-9 h-9 p-0 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30 transition-all !min-w-0"
-            title="Refresh"
-          >
-            <BiRefresh size={18} />
-          </Button>
-        </div>
-      </div>
-
+    
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center pt-20 gap-3 text-slate-500">

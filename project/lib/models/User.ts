@@ -24,6 +24,10 @@ export interface IUser extends Document {
   /** Bcrypt hash of the current 6-digit verification code, if one is pending */
   otpCodeHash?: string;
   otpExpiresAt?: Date;
+  /** Bcrypt hash of a password reset token (generated via forgot-password flow) */
+  resetTokenHash?: string;
+  /** Expiry of the current reset token (single-use, 10 min TTL) */
+  resetTokenExpiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +59,8 @@ const UserSchema = new Schema<IUser>(
     emailVerifiedAt: { type: Date },
     otpCodeHash: { type: String },
     otpExpiresAt: { type: Date },
+    resetTokenHash: { type: String },
+    resetTokenExpiresAt: { type: Date },
   },
   { timestamps: true }
 );

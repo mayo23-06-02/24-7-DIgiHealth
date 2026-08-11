@@ -4,10 +4,10 @@ import Carousel from "@/components/ui/Carousel";
 import DoctorCard from "./DoctorCard";
 import DoctorModal from "./DoctorModal";
 import BookingModal from "./BookingModal";
-import { BiLoaderCircle } from "react-icons/bi";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
 import { useNavigate } from "@/hooks/useNavigate";
-import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 
 interface Doctor {
   id: string;
@@ -19,6 +19,7 @@ interface Doctor {
   isOnline: boolean;
   nextAvailable: string;
   avatar?: string;
+  bio?: string;
 }
 
 export default function DoctorCarousel() {
@@ -29,12 +30,6 @@ export default function DoctorCarousel() {
   const [bookingDoctor, setBookingDoctor] = useState<Doctor | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const { navigate, beginNavigation } = useNavigate();
-
-  // Responsive carousel item calculation
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -103,59 +98,52 @@ export default function DoctorCarousel() {
     navigate(`/patient/messages?doctorId=${doctorId}`);
   };
 
-  const visibleCount = isClient
-    ? window.innerWidth >= 1200
-      ? 4
-      : window.innerWidth >= 800
-        ? 2
-        : 1
-    : 3;
-  const slidePercent = 100 / visibleCount;
-
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <BiLoaderCircle className="animate-spin text-primary text-4xl" />
+        <Loader2 className="animate-spin text-primary" size={36} />
       </div>
     );
   }
 
   if (doctors.length === 0) {
     return (
-      <p className="text-slate-500 text-center py-8">
-        No doctors available at the moment.
-      </p>
+      <EmptyState
+        title="No doctors available"
+        description="Check back soon — new practitioners are added regularly."
+      />
     );
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center px-2">
-        <div className="flex flex-col lg:flex-row  justify-between w-full gap-2">
+        <div className="flex flex-col lg:flex-row  justify-between w-full ">
           <div className="mb-4 px-2">
-            <h3 className="font-bold text-2xl text-slate-900 font-grotesk">
+            <h3 className="font-bold text-h3 text-ink-900 font-grotesk">
               Available Doctors
             </h3>
-            <p className="text-base text-slate-600">
+            <p className="text-small text-ink-600">
               Connect with our medical professionals for expert advice and care.
             </p>
           </div>
-          <div className="flex items-center justify-end gap-3">
-            <div className="text-xs text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full border border-emerald-100 font-bold whitespace-nowrap">
+          <div className="flex items-center lg:justify-end justify-between gap-3">
+            <div className="text-label text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full font-bold whitespace-nowrap">
               <span className="flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
               </span>
-              <h1>{doctors.length} Available Doctors</h1>
+              <span>{doctors.length} Available Doctors</span>
             </div>
             <div className="flex gap-2 ml-4">
               <button
                 onClick={() =>
                   setCarouselIndex((prev) => Math.max(0, prev - 1))
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                aria-label="Previous doctors"
+                className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
-                <BiChevronLeft size={24} />
+                <ChevronLeft size={22} />
               </button>
               <button
                 onClick={() =>
@@ -163,9 +151,10 @@ export default function DoctorCarousel() {
                     Math.min(doctors.length - 1, prev + 1),
                   )
                 }
-                className="w-10 h-10 hover:bg-primary bg-slate-200 hover:text-white rounded-lg transition-all border border-slate-100 flex items-center justify-center text-slate-500"
+                aria-label="Next doctors"
+                className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
-                <BiChevronRight size={24} />
+                <ChevronRight size={22} />
               </button>
             </div>
           </div>
@@ -178,13 +167,13 @@ export default function DoctorCarousel() {
         showArrows={false}
         infiniteLoop={true}
         centerMode={true}
-        centerSlidePercentage={slidePercent}
+        slideClassName="w-[45.4545%] md:w-[31.25%] lg:w-[23.8095%] xl:w-[21.7391%]"
         className="py-2"
         showStatus={false}
         showIndicators={false}
       >
         {doctors.map((doctor) => (
-          <div key={doctor.id} className="px-3 h-full ">
+          <div key={doctor.id} className="px-2 h-full ">
             <DoctorCard
               doctor={doctor}
               onBook={handleBook}

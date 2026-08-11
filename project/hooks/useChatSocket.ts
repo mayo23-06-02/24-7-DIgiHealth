@@ -189,7 +189,7 @@ export const useChatSocket = (
     };
   }, [conversationId, currentUserId]);
 
-  const sendMessage = useCallback(async (data: unknown): Promise<boolean> => {
+  const sendMessage = useCallback(async (data: unknown): Promise<{ ok: boolean; status?: number }> => {
     try {
       const res = await fetch('/api/chat/messages', {
         method: 'POST',
@@ -198,12 +198,12 @@ export const useChatSocket = (
       });
       if (!res.ok) {
         console.error('REST send failed', res.status);
-        return false;
+        return { ok: false, status: res.status };
       }
-      return true;
+      return { ok: true, status: res.status };
     } catch (error) {
       console.error('sendMessage error', error);
-      return false;
+      return { ok: false };
     }
   }, []);
 

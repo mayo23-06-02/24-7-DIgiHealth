@@ -9,6 +9,8 @@ import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 import { getAppOrigin, normalizeEmail, isValidEmail } from '@/lib/supabase/auth';
 import { sendEmail } from '@/lib/email/resend';
 import { staffInviteEmailHtml } from '@/lib/email/templates/staffInvite';
+import { syncStaffInvite, facilityIdFor } from '@/lib/postgres/facility';
+import { getSupabaseAdmin } from '@/lib/supabase/server';
 
 const INVITE_TTL_MINUTES = 15;
 
@@ -78,6 +80,19 @@ export async function POST(req: NextRequest) {
       { email, facilityId: hospitalId, status: 'pending' },
       { status: 'cancelled' },
     );
+    try {
+      const pgFacilityId = await facilityIdFor(hospitalId);
+      if (pgFacilityId) {
+        await getSupabaseAdmin()
+          .from('staff_invites')
+          .update({ status: 'cancelled' })
+          .eq('email', email)
+          .eq('facility_id', pgFacilityId)
+          .eq('status', 'pending');
+      }
+    } catch (e) {
+      console.warn('[pg-sync] cancel prior invites skipped:', e);
+    }
 
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + INVITE_TTL_MINUTES * 60 * 1000);
@@ -93,6 +108,7 @@ export async function POST(req: NextRequest) {
       hourlyRate,
       expiresAt,
     });
+    await syncStaffInvite(hospitalId, user.userId, invite as any);
 
     const facility = await Facility.findById(hospitalId).select('name').lean();
     const facilityName = (facility as any)?.name || 'the facility';
@@ -110,6 +126,11 @@ export async function POST(req: NextRequest) {
     if (error) {
       // Don't leave an orphaned invite the admin can't retry cleanly.
       await StaffInvite.findByIdAndDelete(invite._id);
+      try {
+        await getSupabaseAdmin().from('staff_invites').delete().eq('mongo_id', invite._id.toString());
+      } catch (e) {
+        console.warn('[pg-sync] delete orphaned invite skipped:', e);
+      }
       return NextResponse.json({ success: false, error: `Failed to send invite email: ${error}` }, { status: 502 });
     }
 

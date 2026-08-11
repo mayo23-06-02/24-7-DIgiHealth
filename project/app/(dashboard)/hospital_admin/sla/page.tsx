@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import type { BadgeStatus } from "@/components/ui/Badge";
-import { BiTime, BiLoaderAlt, BiEditAlt } from "react-icons/bi";
+import PageHeader from "@/components/ui/PageHeader";
+import { Clock, Loader2 } from "lucide-react";
 
 interface SLAMetric {
   id: string;
@@ -80,21 +81,16 @@ export default function HospitalSLAPage() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <BiLoaderAlt className="animate-spin text-primary text-4xl" />
+        <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
-          Service Level Agreements
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Monitor and manage operational performance targets
-        </p>
-      </div>
+      <PageHeader
+        title="Service Level Agreements"
+        subtitle="Monitor and manage operational performance targets"
+      />
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-3 gap-4">
@@ -124,7 +120,7 @@ export default function HospitalSLAPage() {
               className="px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
             >
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <BiTime size={20} />
+                <Clock size={20} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1.5">
@@ -145,9 +141,6 @@ export default function HospitalSLAPage() {
                   Target: {sla.target} {sla.unit}
                 </p>
               </div>
-              <button className="text-slate-300 hover:text-primary transition-colors">
-                <BiEditAlt size={18} />
-              </button>
             </div>
           ))}
         </div>

@@ -47,8 +47,8 @@ export default function LeftPanel({
   return (
     <div className="bg-white rounded-lg lg:rounded-r-none lg:px-8 py-12 w-full max-w-lg mx-auto lg:max-w-2/5 lg:w-1/2  p-4 md:p-8 flex flex-col justify-center">
       {/* Header */}
-      <div className="mb-6 gap-4 flex flex-col">
-        <h2 className="text-2xl md:text-2xl font-bold text-slate-900 leading-[0.95] tracking-tighter mb-2.5 font-grotesk">
+      <div className="mb-6  flex border-b border-slate-200 pb-4 flex-col">
+        <h2 className="text-3xl md:text-3xl font-bold text-slate-900 leading-[0.95] tracking-tighter mb-2.5 font-grotesk">
           Sign In
         </h2>
         <p className="text-slate-500 max-w-[380px] text-sm lg:text-base">
@@ -135,7 +135,7 @@ export default function LeftPanel({
 
       
 
-      <div className=" text-center flex justify-center gap-2  text-slate-700">
+      <div className=" text-sm text-center mt-4 flex justify-center   text-slate-700">
         <p>Don&apos;t have an account yet?</p>
         <Link
           href="/register"

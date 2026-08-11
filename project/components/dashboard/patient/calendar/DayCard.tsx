@@ -35,7 +35,7 @@ const DayCard: React.FC<DayCardProps> = ({
     >
       <div
         onClick={() => onSelect(day.dateStr)}
-        className={`h-52 rounded-lg border transition-all duration-500 relative p-4 flex flex-col justify-between group cursor-pointer ${
+        className={`h-32 sm:h-36 lg:h-40 rounded-lg border transition-all duration-500 relative p-2 sm:p-3 flex flex-col justify-between group cursor-pointer ${
           day.isUnavailable
             ? "bg-slate-50 border-slate-100 opacity-50 grayscale pointer-events-none"
             : day.isToday
@@ -60,7 +60,7 @@ const DayCard: React.FC<DayCardProps> = ({
               ))}
             </div>
             <span
-              className={`items-center font-semibold whitespace-nowrap ${
+              className={`items-center text-xs sm:text-sm font-semibold whitespace-nowrap ${
                 day.isToday ? "text-primary flex gap-1" : "text-slate-500"
               }`}
             >
@@ -68,7 +68,7 @@ const DayCard: React.FC<DayCardProps> = ({
             </span>
           </div>
           {day.isToday && (
-            <div className="text-sm uppercase font-bold bg-primary px-3 py-1 rounded-full text-white">
+            <div className="text-[10px] sm:text-xs uppercase font-bold bg-primary px-2 py-0.5 rounded-full text-white">
               Today
             </div>
           )}
@@ -80,19 +80,19 @@ const DayCard: React.FC<DayCardProps> = ({
               e.stopPropagation();
               onSelect(day.dateStr);
             }}
-            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
               day.isUnavailable
                 ? "bg-slate-100 text-slate-300 pointer-events-none"
                 : "text-slate-500 bg-slate-200 hover:text-primary hover:bg-primary/10"
             }`}
           >
-            <BiPlus size={18} />
+            <BiPlus size={14} />
           </button>
         </div>
         <div className="flex items-end justify-between">
           <div className="flex flex-col-reverse gap-2">
             <span
-              className={`text-4xl font-semibold tracking-tighter ${
+              className={`text-2xl sm:text-3xl font-semibold tracking-tighter ${
                 day.isToday
                   ? "text-primary"
                   : "text-slate-200 group-hover:text-primary transition-colors"
@@ -107,13 +107,13 @@ const DayCard: React.FC<DayCardProps> = ({
                 e.stopPropagation();
                 onToggleUnavailable(day.dateStr);
               }}
-              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all ${
                 day.isUnavailable
                   ? "bg-primary text-white"
                   : "text-slate-500 bg-slate-100 hover:text-primary"
               }`}
             >
-              <BiBlock size={18} />
+              <BiBlock size={14} />
             </button>
           </div>
         </div>

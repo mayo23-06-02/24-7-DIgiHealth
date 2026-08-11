@@ -2,6 +2,11 @@ import { HospitalAdminProfile } from "@/lib/models/RoleProfiles";
 import User from "@/lib/models/User";
 import Facility from "@/lib/models/Facility";
 
+/** Mongo ObjectIds are exactly 24 hex chars; Postgres uuids are 36 chars with dashes. */
+function looksLikeMongoObjectId(id: string): boolean {
+  return /^[a-f0-9]{24}$/i.test(id);
+}
+
 /**
  * Resolves the Facility (hospital) ID for a hospital_admin user.
  *
@@ -11,11 +16,20 @@ import Facility from "@/lib/models/Facility";
  *  1. HospitalAdminProfile.hospitalId  (ideal path)
  *  2. User.facilityId                  (set during registration)
  *  3. Facility matched by admin email  (last resort for legacy accounts)
+ *
+ * Migration note: this only resolves Mongo-origin accounts (Mongoose would
+ * throw a CastError trying to query these Mongo collections with a
+ * Postgres-uuid `userId`). Accounts with no Mongo origin at all (e.g. the
+ * fresh scripts/seed-supabase.ts data) return null here — routes still on
+ * this Mongo-only helper show "no facility linked" for those rather than
+ * crashing; they'll show real data once cut over to Postgres reads.
  */
 export async function resolveHospitalId(
   userId: string,
   userEmail?: string,
 ): Promise<string | null> {
+  if (!looksLikeMongoObjectId(userId)) return null;
+
   // ── 1. HospitalAdminProfile ───────────────────────────────────────────────
   const profile = (await HospitalAdminProfile.findOne({
     userId,

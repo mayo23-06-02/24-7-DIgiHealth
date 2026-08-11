@@ -49,8 +49,8 @@ const Modal: React.FC<ModalProps> = ({
     md: "lg:max-w-3xl",
     lg: "lg:max-w-4xl",
     xl: "lg:max-w-5xl",
-    "2xl": "lg:max-w-6xl",
-    "6xl": "lg:max-w-6xl",
+    "2xl": "lg:max-w-[1400px]",
+    "6xl": "lg:max-w-[1400px]",
     full: "lg:max-w-[95vw]",
   };
 

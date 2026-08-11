@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { BiSave, BiLoaderAlt, BiCog } from "react-icons/bi";
+import { Save, Loader2, Settings } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 import PageHeader from "@/components/ui/PageHeader";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Badge from "@/components/ui/Badge";
@@ -113,7 +114,7 @@ export default function AdminSettingsPage({ isMega }: { isMega: boolean }) {
               variant="primary"
               onClick={() => void save()}
               disabled={saving}
-              icon={saving ? <BiLoaderAlt className="animate-spin" size={16} /> : <BiSave size={16} />}
+              icon={saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
               iconPosition="left"
               className="!rounded-lg !max-w-none normal-case !tracking-normal"
             >
@@ -126,7 +127,7 @@ export default function AdminSettingsPage({ isMega }: { isMega: boolean }) {
       />
 
       <Card className="!rounded-lg space-y-5">
-        <SectionHeader compact icon={<BiCog />} title="Operations" />
+        <SectionHeader compact icon={<Settings />} title="Operations" />
         <label className="flex items-center justify-between gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50/50 cursor-pointer">
           <div>
             <p className="text-sm font-bold text-slate-800">Maintenance mode</p>
@@ -171,30 +172,24 @@ export default function AdminSettingsPage({ isMega }: { isMega: boolean }) {
       <Card className="!rounded-lg space-y-4">
         <SectionHeader compact title="Defaults" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-bold text-slate-500 block mb-1">POPIA version</label>
-            <input
-              disabled={!isMega}
-              value={form.popiaVersion}
-              onChange={(e) => setForm((f) => ({ ...f, popiaVersion: e.target.value }))}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm disabled:bg-slate-50"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold text-slate-500 block mb-1">Default consult fee (ZAR)</label>
-            <input
-              type="number"
-              disabled={!isMega}
-              value={form.consultationFeeDefault}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  consultationFeeDefault: Number(e.target.value) || 0,
-                }))
-              }
-              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm disabled:bg-slate-50"
-            />
-          </div>
+          <Input
+            label="POPIA version"
+            disabled={!isMega}
+            value={form.popiaVersion}
+            onChange={(e) => setForm((f) => ({ ...f, popiaVersion: e.target.value }))}
+          />
+          <Input
+            type="number"
+            label="Default consult fee (ZAR)"
+            disabled={!isMega}
+            value={form.consultationFeeDefault}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                consultationFeeDefault: Number(e.target.value) || 0,
+              }))
+            }
+          />
         </div>
       </Card>
     </div>

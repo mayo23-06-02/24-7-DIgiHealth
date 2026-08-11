@@ -1,16 +1,12 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  BiLoaderAlt,
-  BiSearch,
-  BiRefresh,
-  BiUserX,
-  BiUserCheck,
-} from "react-icons/bi";
+import { Loader2, Search, RefreshCw, UserX, UserCheck } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
@@ -125,7 +121,7 @@ export default function AdminUsersPage({
             size="sm"
             variant="outline"
             onClick={() => void load()}
-            icon={<BiRefresh size={16} />}
+            icon={<RefreshCw size={16} />}
             iconPosition="left"
             className="!rounded-lg !max-w-none normal-case !tracking-normal"
           >
@@ -136,60 +132,52 @@ export default function AdminUsersPage({
 
       <Card className="!rounded-lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <div className="lg:col-span-2 relative">
-            <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
+          <div className="lg:col-span-2">
+            <Input
               value={search}
               onChange={(e) => {
                 setPage(1);
                 setSearch(e.target.value);
               }}
               placeholder="Search name or email…"
-              className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
+              icon={<Search size={18} />}
             />
           </div>
-          <select
+          <Select
             value={role}
-            onChange={(e) => {
+            onChange={(v) => {
               setPage(1);
-              setRole(e.target.value);
+              setRole(v);
             }}
-            className="border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white"
-          >
-            <option value="">All roles</option>
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-          <select
+            options={[{ value: "", label: "All roles" }, ...ROLES.map((r) => ({ value: r, label: r }))]}
+          />
+          <Select
             value={status}
-            onChange={(e) => {
+            onChange={(v) => {
               setPage(1);
-              setStatus(e.target.value);
+              setStatus(v);
             }}
-            className="border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white"
-          >
-            <option value="">All statuses</option>
-            <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
-            <option value="pending_verification">Pending</option>
-          </select>
-          <select
+            options={[
+              { value: "", label: "All statuses" },
+              { value: "active", label: "Active" },
+              { value: "suspended", label: "Suspended" },
+              { value: "pending_verification", label: "Pending" },
+            ]}
+          />
+          <Select
             value={`${sort}:${sortDir}`}
-            onChange={(e) => {
-              const [s, d] = e.target.value.split(":");
+            onChange={(v) => {
+              const [s, d] = v.split(":");
               setSort(s);
               setSortDir(d as "asc" | "desc");
             }}
-            className="border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white"
-          >
-            <option value="createdAt:desc">Newest</option>
-            <option value="createdAt:asc">Oldest</option>
-            <option value="firstName:asc">Name A–Z</option>
-            <option value="role:asc">Role</option>
-          </select>
+            options={[
+              { value: "createdAt:desc", label: "Newest" },
+              { value: "createdAt:asc", label: "Oldest" },
+              { value: "firstName:asc", label: "Name A–Z" },
+              { value: "role:asc", label: "Role" },
+            ]}
+          />
         </div>
       </Card>
 
@@ -262,9 +250,9 @@ export default function AdminUsersPage({
                           onClick={() => void suspend(u.id, "unsuspend")}
                           icon={
                             busyId === u.id ? (
-                              <BiLoaderAlt className="animate-spin" size={14} />
+                              <Loader2 className="animate-spin" size={14} />
                             ) : (
-                              <BiUserCheck size={14} />
+                              <UserCheck size={14} />
                             )
                           }
                           iconPosition="left"
@@ -280,9 +268,9 @@ export default function AdminUsersPage({
                           onClick={() => void suspend(u.id, "suspend")}
                           icon={
                             busyId === u.id ? (
-                              <BiLoaderAlt className="animate-spin" size={14} />
+                              <Loader2 className="animate-spin" size={14} />
                             ) : (
-                              <BiUserX size={14} />
+                              <UserX size={14} />
                             )
                           }
                           iconPosition="left"

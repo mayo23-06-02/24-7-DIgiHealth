@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
 import KPICard from "@/components/ui/KPICard";
+import PageHeader from "@/components/ui/PageHeader";
 import {
-  BiGroup,
-  BiStar,
-  BiCalendar,
-  BiLoaderAlt,
-  BiLineChart,
-} from "react-icons/bi";
+  Users,
+  Star,
+  Calendar,
+  Loader2,
+  LineChart as LineChartIcon,
+} from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -58,26 +59,23 @@ export default function HospitalPerformancePage() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <BiLoaderAlt className="animate-spin text-primary text-4xl" />
+        <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800 font-grotesk">Performance</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Key performance indicators and operational analytics
-        </p>
-      </div>
+      <PageHeader
+        title="Performance"
+        subtitle="Key performance indicators and operational analytics"
+      />
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <KPICard
           label="Total Consultations"
           value="432"
-          icon={<BiCalendar size={22} />}
+          icon={<Calendar size={22} />}
           color="primary"
           trend={12.3}
           description="vs last month"
@@ -85,7 +83,7 @@ export default function HospitalPerformancePage() {
         <KPICard
           label="Patient Satisfaction"
           value="4.7 / 5"
-          icon={<BiStar size={22} />}
+          icon={<Star size={22} />}
           color="emerald"
           trend={2.1}
           description="vs last month"
@@ -93,7 +91,7 @@ export default function HospitalPerformancePage() {
         <KPICard
           label="Active Patients"
           value="1,204"
-          icon={<BiGroup size={22} />}
+          icon={<Users size={22} />}
           color="slate"
           trend={5.8}
           description="vs last month"
@@ -101,7 +99,7 @@ export default function HospitalPerformancePage() {
         <KPICard
           label="Revenue Growth"
           value="18.4%"
-          icon={<BiLineChart size={22} />}
+          icon={<LineChartIcon size={22} />}
           color="primary"
           trend={3.2}
           description="vs last quarter"

@@ -4,6 +4,7 @@ import { SignJWT } from "jose";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { normalizeEmail } from "@/lib/supabase/auth";
+import { updateUserByMongoId } from "@/lib/postgres/users";
 
 /**
  * POST /api/auth/otp/verify
@@ -66,6 +67,14 @@ export async function POST(req: NextRequest) {
     user.otpCodeHash = undefined;
     user.otpExpiresAt = undefined;
     await user.save();
+
+    await updateUserByMongoId(user._id.toString(), {
+      email_verified: true,
+      email_verified_at: user.emailVerifiedAt,
+      status: "active",
+      otp_code_hash: null,
+      otp_expires_at: null,
+    });
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const token = await new SignJWT({

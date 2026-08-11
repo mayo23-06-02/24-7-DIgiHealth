@@ -5,6 +5,7 @@ import VoiceRecorder from "./VoiceRecorder";
 export default function MessageInput({
   onSend,
   onTyping,
+  disabled = false,
 }: {
   onSend: (
     content: string,
@@ -13,6 +14,9 @@ export default function MessageInput({
     fileMime?: string,
   ) => void;
   onTyping: (isTyping: boolean) => void;
+  /** Disable submission, e.g. while a previous send is still in flight, to
+   *  prevent Enter/click double-fires from sending duplicate messages. */
+  disabled?: boolean;
 }) {
   const [text, setText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -21,6 +25,7 @@ export default function MessageInput({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (disabled) return;
     if (text.trim()) {
       onSend(text, "text");
       setText("");
@@ -112,7 +117,7 @@ export default function MessageInput({
 
       <button
         type="submit"
-        disabled={!text.trim()}
+        disabled={!text.trim() || disabled}
         className="p-3 bg-primary text-white rounded-lg shadow-none shadow-primary/30 hover:bg-primary-600 disabled:opacity-40 disabled:shadow-none transition-all"
       >
         <BiPaperPlane size={20} />

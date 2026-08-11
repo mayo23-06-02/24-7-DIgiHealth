@@ -4,7 +4,10 @@ import React, { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import type { BadgeStatus } from "@/components/ui/Badge";
-import { BiStar, BiLoaderAlt, BiUser, BiCheck, BiTrash } from "react-icons/bi";
+import PageHeader from "@/components/ui/PageHeader";
+import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
+import { Star, Loader2, User, Check, Trash2 } from "lucide-react";
 
 interface Review {
   _id: string;
@@ -19,7 +22,7 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
-        <BiStar
+        <Star
           key={s}
           size={16}
           className={
@@ -99,43 +102,36 @@ export default function HospitalReviewsPage() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <BiLoaderAlt className="animate-spin text-primary text-4xl" />
+        <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
-            Patient Reviews
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Moderate and view all patient feedback
-          </p>
-        </div>
-        <div className="flex items-center gap-2 bg-primary/10 text-primary font-bold px-4 py-2 rounded-lg">
-          <BiStar size={20} className="text-gray-400" />
-          <span className="text-xl">{avgRating}</span>
-          <span className="text-sm font-medium text-slate-500">/ 5.0</span>
-        </div>
-      </div>
+      <PageHeader
+        title="Patient Reviews"
+        subtitle="Moderate and view all patient feedback"
+        right={
+          <div className="flex items-center gap-2 bg-primary/10 text-primary font-bold px-4 py-2 rounded-lg">
+            <Star size={20} className="text-gray-400" />
+            <span className="text-xl">{avgRating}</span>
+            <span className="text-sm font-medium text-slate-500">/ 5.0</span>
+          </div>
+        }
+      />
 
       {/* Filter Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         {(["all", "pending", "approved"] as const).map((f) => (
-          <button
+          <Button
             key={f}
+            size="sm"
+            variant={filter === f ? "primary" : "outline"}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize border transition-all ${
-              filter === f
-                ? "bg-primary text-white border-primary"
-                : "bg-white text-slate-500 border-slate-200 hover:border-primary/50"
-            }`}
+            className="!rounded-lg !max-w-none normal-case !tracking-normal capitalize"
           >
             {f}
-          </button>
+          </Button>
         ))}
         <span className="ml-auto text-sm text-slate-500 self-center">
           {moderated.length} review{moderated.length !== 1 ? "s" : ""}
@@ -144,8 +140,12 @@ export default function HospitalReviewsPage() {
 
       {/* Reviews Grid */}
       {moderated.length === 0 ? (
-        <Card className="text-center py-16 text-slate-500">
-          No reviews found.
+        <Card className="p-0">
+          <EmptyState
+            title="No reviews found"
+            description="Try adjusting your filter."
+            className="py-16"
+          />
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -154,7 +154,7 @@ export default function HospitalReviewsPage() {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                    <BiUser size={18} />
+                    <User size={18} />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-800">
@@ -184,9 +184,9 @@ export default function HospitalReviewsPage() {
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition-colors disabled:opacity-50"
                   >
                     {moderatingId === rev._id ? (
-                      <BiLoaderAlt size={16} className="animate-spin" />
+                      <Loader2 size={16} className="animate-spin" />
                     ) : (
-                      <BiCheck size={16} />
+                      <Check size={16} />
                     )}{" "}
                     Approve
                   </button>
@@ -196,9 +196,9 @@ export default function HospitalReviewsPage() {
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-bold hover:bg-rose-100 transition-colors disabled:opacity-50"
                   >
                     {moderatingId === rev._id ? (
-                      <BiLoaderAlt size={16} className="animate-spin" />
+                      <Loader2 size={16} className="animate-spin" />
                     ) : (
-                      <BiTrash size={16} />
+                      <Trash2 size={16} />
                     )}{" "}
                     Dismiss
                   </button>

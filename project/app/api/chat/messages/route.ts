@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Message } from '@/lib/models/Message';
 import { Conversation } from '@/lib/models/Conversation';
 import Ably from 'ably';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
 
 function serializeMessage(message: any, clientId?: string) {
   const obj = typeof message.toObject === 'function' ? message.toObject() : { ...message };
@@ -20,23 +21,43 @@ function serializeMessage(message: any, clientId?: string) {
 
 export async function POST(req: Request) {
   try {
+    // Verify the user is authenticated
+    const user = await getRequestUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectToDatabase();
     const body = await req.json();
-    const { conversationId, senderId, receiverId, content, type, fileUrl, fileMime, clientId } = body;
+    const { conversationId, content, type, fileUrl, fileMime, clientId } = body;
 
     if (!conversationId || !mongoose.Types.ObjectId.isValid(conversationId)) {
       return NextResponse.json({ error: 'Invalid conversation ID' }, { status: 400 });
     }
-    if (!senderId || !mongoose.Types.ObjectId.isValid(senderId)) {
-      return NextResponse.json({ error: 'Invalid sender ID' }, { status: 400 });
-    }
 
     const convObjectId = new mongoose.Types.ObjectId(conversationId);
-    const senderObjectId = new mongoose.Types.ObjectId(senderId);
+
+    // Verify the user is a participant in this conversation
+    const conversation = await Conversation.findById(convObjectId).lean();
+    if (!conversation) {
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+    }
+
+    const userMongoId = new mongoose.Types.ObjectId(user.userId);
+    const isParticipant =
+      conversation.patientId?.toString() === userMongoId.toString() ||
+      conversation.practitionerId?.toString() === userMongoId.toString();
+
+    if (!isParticipant) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Use the authenticated user's ID as senderId (not client-supplied)
+    const senderObjectId = userMongoId;
     const receiverObjectId =
-      receiverId && mongoose.Types.ObjectId.isValid(receiverId)
-        ? new mongoose.Types.ObjectId(receiverId)
-        : undefined;
+      conversation.patientId?.toString() === userMongoId.toString()
+        ? conversation.practitionerId
+        : conversation.patientId;
 
     // Idempotent message creation using clientId when provided
     const filter = clientId

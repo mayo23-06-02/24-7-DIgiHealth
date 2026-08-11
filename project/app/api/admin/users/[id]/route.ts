@@ -7,6 +7,7 @@ import {
   isMegaAdmin,
 } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
+import { updateUserByMongoId } from "@/lib/postgres/users";
 
 export const runtime = "nodejs";
 
@@ -86,6 +87,15 @@ export async function PATCH(
 
     Object.assign(user, updates);
     await user.save();
+
+    const pgUpdates: Record<string, unknown> = {};
+    if (updates.status) pgUpdates.status = updates.status;
+    if (updates.role) pgUpdates.role = updates.role;
+    if (updates.firstName) pgUpdates.first_name = updates.firstName;
+    if (updates.lastName) pgUpdates.last_name = updates.lastName;
+    if (Object.keys(pgUpdates).length) {
+      await updateUserByMongoId(id, pgUpdates);
+    }
 
     await logAdminAction({
       actor: gate.user,

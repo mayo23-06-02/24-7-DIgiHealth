@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import Link from "next/link";
 import MessageList from "./MessageList";
@@ -90,6 +91,10 @@ export default function ChatWindow({
   const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [tempIdMap, setTempIdMap] = useState<Map<string, string>>(new Map());
+  // Guards against duplicate sends from rapid double-clicks (e.g. quick-phrase
+  // buttons) or double-fired Enter/submit events while a send is in flight.
+  const sendingRef = useRef(false);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -117,6 +122,13 @@ export default function ChatWindow({
     ) => {
       if (!content && !fileUrl) return;
       if (!user || !conversation) return;
+      // Ignore re-entrant calls fired while a previous send is still in
+      // flight (e.g. a user rapid-clicking several quick-phrase buttons in a
+      // row) so we don't fire duplicate requests that can trip the
+      // send-endpoint rate limiter.
+      if (sendingRef.current) return;
+      sendingRef.current = true;
+      setIsSending(true);
 
       const clientId = crypto.randomUUID();
       const msg = {
@@ -141,28 +153,45 @@ export default function ChatWindow({
       };
       setMessages((prev) => upsertMessage(prev, optimisticMsg as any));
 
-      if (isOffline) {
-        await queueMessage(msg);
-        setTempIdMap((prev) => new Map(prev).set(clientId, ""));
-      } else {
-        try {
-          const sent = await socketSendMessage(msg);
-          if (!sent) {
-            const serverMsg = await restSendMessage(msg);
-            if (serverMsg) {
-              setMessages((prev) =>
-                upsertMessage(prev, {
-                  ...(serverMsg as any),
-                  clientId,
-                }),
-              );
+      try {
+        if (isOffline) {
+          await queueMessage(msg);
+          setTempIdMap((prev) => new Map(prev).set(clientId, ""));
+        } else {
+          try {
+            const result = await socketSendMessage(msg);
+            if (!result.ok) {
+              if (result.status === 429) {
+                // Don't hammer the same rate-limited endpoint with an
+                // immediate retry — just let the user know and let the
+                // optimistic message be retried by hand.
+                toast.error(
+                  "You're sending messages too quickly. Please wait a moment and try again.",
+                );
+              } else {
+                const serverMsg = await restSendMessage(msg);
+                if (serverMsg) {
+                  setMessages((prev) =>
+                    upsertMessage(prev, {
+                      ...(serverMsg as any),
+                      clientId,
+                    }),
+                  );
+                } else {
+                  toast.error("Failed to send message. Please try again.");
+                }
+              }
             }
+          } catch (error) {
+            console.error("Failed to send message", error);
+            toast.error("Failed to send message. Please try again.");
           }
-        } catch (error) {
-          console.error("Failed to send message", error);
         }
+        stopTyping();
+      } finally {
+        sendingRef.current = false;
+        setIsSending(false);
       }
-      stopTyping();
     },
     [
       user,
@@ -322,12 +351,14 @@ export default function ChatWindow({
             <div className="mb-2">
               <QuickPhrases
                 onSelect={(phrase) => handleSend(phrase, "quick_phrase")}
+                disabled={isSending}
               />
             </div>
           )}
           <MessageInput
             onSend={handleSend}
             onTyping={(isTyping) => (isTyping ? startTyping() : stopTyping())}
+            disabled={isSending}
           />
         </div>
       </div>

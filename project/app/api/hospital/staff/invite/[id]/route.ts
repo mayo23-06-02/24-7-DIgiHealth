@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import StaffInvite from '@/lib/models/StaffInvite';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import { updateStaffInviteByMongoId } from '@/lib/postgres/facility';
 
 /** DELETE — cancel a pending invite */
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -26,6 +27,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     if (!invite) {
       return NextResponse.json({ success: false, error: 'Invite not found' }, { status: 404 });
     }
+    await updateStaffInviteByMongoId(id, { status: 'cancelled' });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

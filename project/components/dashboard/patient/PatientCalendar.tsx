@@ -81,20 +81,11 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(3);
 
   useEffect(() => {
     setIsClient(true);
     fetchAgenda();
     fetchLists();
-    const updateCount = () => {
-      if (window.innerWidth >= 1200) setVisibleCount(3);
-      else if (window.innerWidth >= 800) setVisibleCount(2);
-      else setVisibleCount(1);
-    };
-    updateCount();
-    window.addEventListener("resize", updateCount);
-    return () => window.removeEventListener("resize", updateCount);
   }, []);
 
   const fetchAgenda = useCallback(async () => {
@@ -198,7 +189,7 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
 
       <div className="flex-1 flex flex-col overflow-y-auto py-4 space-y-4 custom-scrollbar">
         <div className="flex-shrink-0">
-          <Carousel selectedItem={carouselIndex} onChange={setCarouselIndex} centerMode centerSlidePercentage={100 / visibleCount}>
+          <Carousel selectedItem={carouselIndex} onChange={setCarouselIndex} centerMode slideClassName="w-[40%] md:w-[28.5714%] lg:w-[22.2222%]">
             {carouselDays.map((day, idx) => (
               <DayCard key={idx} day={day} idx={idx} onSelect={setShowAddModal} onDrop={async (e, target) => {
                 const id = e.dataTransfer.getData("apptId");

@@ -1,5 +1,5 @@
 import React from "react";
-import { BiMap, BiBuilding, BiVideo, BiPencil, BiTrash, BiLoaderAlt } from "react-icons/bi";
+import { BiMap, BiBuilding, BiVideo, BiPencil, BiTrash, BiLoaderAlt, BiTime, BiBell, BiCategory, BiHash } from "react-icons/bi";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 
@@ -71,6 +71,12 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
           <div className="flex gap-2 flex-wrap">
             <Badge label={appt.date} status="info" variant="soft" />
             <Badge label={appt.time} status="premium" variant="soft" />
+            <Badge
+              label={appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
+              status={appt.status === "confirmed" ? "success" : appt.status === "cancelled" ? "error" : "warning"}
+              variant="soft"
+            />
+            {appt.countdown && <Badge label={appt.countdown} status="neutral" variant="soft" />}
           </div>
         </div>
       </div>
@@ -108,7 +114,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
 
       <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-lg">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-          <BiMap className="text-primary text-lg" />
+          <BiMap className="text-primary text-lg shrink-0" />
           {appt.location ||
             (appt.type === "refill"
               ? appt.deliveryMethod === "delivery"
@@ -117,8 +123,26 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
               : "Generic Location")}
         </div>
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-          <BiBuilding className="text-primary text-lg" />
+          <BiBuilding className="text-primary text-lg shrink-0" />
           {appt.institution || (appt.type === "refill" ? appt.pharmacyId || "Your pharmacy" : "Main Office")}
+        </div>
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <BiCategory className="text-primary text-lg shrink-0" />
+          <span className="capitalize">{appt.type}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <BiTime className="text-primary text-lg shrink-0" />
+          {appt.durationMinutes ? `${appt.durationMinutes} min duration` : "Duration not set"}
+        </div>
+        {appt.type === "reminder" && (
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+            <BiBell className="text-primary text-lg shrink-0" />
+            {appt.reminderDays ? `Remind ${appt.reminderDays} day${appt.reminderDays === 1 ? "" : "s"} before` : "No reminder set"}
+          </div>
+        )}
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <BiHash className="text-primary text-lg shrink-0" />
+          <span className="truncate" title={appt.id}>{appt.id.slice(-8).toUpperCase()}</span>
         </div>
       </div>
 

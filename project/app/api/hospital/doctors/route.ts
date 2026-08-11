@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
         languages: (profile as any).languages || [],
         isOnline: (profile as any).isOnline || false,
         avatar: (profile as any).profilePhoto || null,
+        bio: (profile as any).bio || '',
         nextAvailable: 'Available Now' // Fallback for UI
       };
     }).filter(Boolean);

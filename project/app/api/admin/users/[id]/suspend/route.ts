@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
+import { updateUserByMongoId } from "@/lib/postgres/users";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,7 @@ export async function POST(
     const action = body.action === "unsuspend" ? "unsuspend" : "suspend";
     user.status = action === "unsuspend" ? "active" : "suspended";
     await user.save();
+    await updateUserByMongoId(id, { status: user.status });
 
     await logAdminAction({
       actor: gate.user,

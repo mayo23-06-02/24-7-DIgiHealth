@@ -64,8 +64,9 @@ function table(
     return;
   }
   const rowH = 15;
+  const headerY = doc.y;
   doc.save();
-  doc.roundedRect(left, doc.y, contentW, rowH, 3).fill(BRAND.primary);
+  doc.roundedRect(left, headerY, contentW, rowH, 3).fill(BRAND.primary);
   doc.restore();
   let x = left;
   cols.forEach((c) => {
@@ -73,15 +74,16 @@ function table(
       .font(fonts.monoBold || fonts.mono)
       .fontSize(7)
       .fillColor(BRAND.white)
-      .text(c.label, x + 3, doc.y + 4, { width: c.w - 4, lineBreak: false });
+      .text(c.label, x + 3, headerY + 4, { width: c.w - 4, lineBreak: false });
     x += c.w;
   });
-  doc.y += rowH + 1;
+  doc.y = headerY + rowH + 1;
   rows.slice(0, max).forEach((row, i) => {
     ensureRoom(doc, rowH + 2, left, contentW, fonts);
+    const rowY = doc.y;
     if (i % 2) {
       doc.save();
-      doc.rect(left, doc.y, contentW, rowH).fill(BRAND.soft);
+      doc.rect(left, rowY, contentW, rowH).fill(BRAND.soft);
       doc.restore();
     }
     let cx = left;
@@ -93,14 +95,14 @@ function table(
         .font(fonts.body)
         .fontSize(7)
         .fillColor(BRAND.text)
-        .text(String(v ?? "—").slice(0, 36), cx + 3, doc.y + 3, {
+        .text(String(v ?? "—").slice(0, 36), cx + 3, rowY + 3, {
           width: c.w - 4,
           lineBreak: false,
           ellipsis: true,
         });
       cx += c.w;
     });
-    doc.y += rowH;
+    doc.y = rowY + rowH;
   });
   doc.y += 8;
 }

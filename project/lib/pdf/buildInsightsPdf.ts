@@ -206,7 +206,7 @@ function drawVBarChart(
   });
 
   // show first / mid / last labels
-  doc.y = baseY + 4;
+  const labelY = baseY + 4;
   const showIdx = [0, Math.floor(rows.length / 2), rows.length - 1];
   showIdx.forEach((i) => {
     if (i < 0 || i >= rows.length) return;
@@ -215,13 +215,13 @@ function drawVBarChart(
       .font(fonts.mono)
       .fontSize(6)
       .fillColor(BRAND.muted)
-      .text(rows[i].label.slice(5) || rows[i].label, x - 4, doc.y, {
+      .text(rows[i].label.slice(5) || rows[i].label, x - 4, labelY, {
         width: barW + 12,
         align: "center",
         lineBreak: false,
       });
   });
-  doc.y += 14;
+  doc.y = labelY + 14;
 }
 
 export async function buildInsightsPdf(

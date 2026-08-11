@@ -84,17 +84,17 @@ const KPICard: React.FC<KPICardProps> = ({
 
         <div className="space-y-1 pb-3 sm:pb-4 px-3 sm:px-4 flex-1">
           <div className="flex items-baseline gap-0.5 sm:gap-1 flex-wrap">
-            <h4 className="text-xl sm:text-2xl lg:text-4xl font-medium text-ink-900 tracking-tight font-grotesk leading-none tabular-nums">
+            <h4 className="text-3xl lg:text-4xl font-medium text-ink-900 tracking-tight font-grotesk leading-none tabular-nums">
               {value}
             </h4>
             {unit && (
-              <span className="text-xs sm:text-md lg:text-lg font-semibold text-slate-500">
+              <span className="text-md lg:text-lg font-semibold text-slate-500">
                 {unit}
               </span>
             )}
           </div>
           {description && (
-            <p className="text-[11px] sm:text-[13px] lg:text-sm text-slate-500 leading-tight line-clamp-2">
+            <p className="text-sm lg:text-sm text-slate-500 leading-tight line-clamp-2">
               {description}
             </p>
           )}
