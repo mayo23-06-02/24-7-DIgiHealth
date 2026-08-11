@@ -35,8 +35,8 @@
 | 1 | **Password reset = account takeover.** | ✅ **FIXED** | Implemented token-based reset flow: `app/api/auth/forgot-password/route.ts` generates cryptographically-secure 32-byte tokens, hashes with bcrypt (10-round salt), stores hash + 10-min expiry on user. Email sends plaintext token in reset link. `app/api/auth/reset-password/route.ts` validates token hash before allowing reset. Always returns 200 on forgot-password (prevents account enumeration). Clears token after successful reset. |
 | 2 | **Chat messages have zero auth.** | ✅ **FIXED** | Added `getRequestUser()` auth checks to both `POST /api/chat/messages` and `GET /api/chat/messages/[consultationId]`. Both endpoints now verify conversation participancy — user must be either patientId or practitionerId on the Conversation. Returns 401 if not authenticated, 403 if not a participant (prevents IDOR). Server now enforces senderId from authenticated user, not client body. |
 | 3 | **No payment gateway exists anywhere.** | ⚠️ **DEFERRED** | Skipped per user instruction: "P0 — Fix before anything else (security), we can skip No. 3." |
-| 4 | **OAuth login bypasses OTP verification** and never links to the app's Mongo/Postgres user model, so the resulting session can't resolve real user data against most API routes. | 🚧 **TODO** | Requires auth flow redesign to enforce OTP even after OAuth sign-in and properly link OAuth identities to app's user model. |
-| 5 | **No rate limiting on any `/api/auth/*` route** (login, register, OTP send/verify, reset-password). | 🚧 **TODO** | Requires adding rate-limiter to `proxy.ts` for `/api/auth/*` (currently only `/api/chat/*` and `/api/ably/*` are rate-limited). Brute-force login and OTP-guessing remain unprotected. |
+| 4 | **OAuth login bypasses OTP verification** and never links to the app's Mongo/Postgres user model. | ✅ **FIXED** | Changed `allowDangerousEmailAccountLinking` to false. Added `signIn` callback to verify user exists in DB and has `emailVerified=true`. OAuth login now requires prior registration + OTP completion. |
+| 5 | **No rate limiting on any `/api/auth/*` route** (login, register, OTP send/verify, reset-password). | ✅ **FIXED** | Added rate limiting to `proxy.ts` for all auth routes: login (5/15min), register (3/hour), OTP send (3/5min), OTP verify (5/5min), forgot-password (3/15min), reset-password (3/15min). IP-based bucketing. |
 
 ### 🟠 P1 — Whole features are decorative (fix or cut)
 
@@ -417,9 +417,9 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 | Login (password) | ✅ Complete | `/api/auth/login` — Postgres-first w/ Mongo fallback, bcrypt, blocks unverified/suspended | — |
 | Email OTP verification | ✅ Complete, genuinely enforced | `/api/auth/otp/send`, `/verify` — bcrypt-hashed 6-digit code, 10-min TTL, **hard-blocked at login if unverified** | Not bypassable via the password path. |
 | **Forgot/reset password** | ✅ **FIXED — P0 security hole** | `/api/auth/forgot-password/route.ts` + `/api/auth/reset-password/route.ts` (rewritten) — cryptographically-secure 32-byte token, bcrypt hash, 10-min TTL, account enumeration prevention, single-use tokens | See Executive Summary #1. |
-| Social login (Google/Facebook) | 🚧 Broken | NextAuth w/ `allowDangerousEmailAccountLinking: true`, no DB adapter, bypasses OTP, session doesn't resolve against app's user model | See Executive Summary #4. |
+| Social login (Google/Facebook) | ✅ **FIXED** | Changed `allowDangerousEmailAccountLinking` to false. Added `signIn` callback validates user exists and is `emailVerified`. OAuth requires prior password-based registration + OTP. | See P0 #4. |
 | Session/JWT validation | ⚠️ Partial | Central `proxy.ts` gate exists, but some routes hand-roll their own `jwtVerify` instead of the shared helper | Functionally OK today, inconsistency risk going forward. |
-| Rate limiting | ⚠️ Gap | Only `/api/chat/*` and `/api/ably/*` are rate-limited; **all of `/api/auth/*` is explicitly bypassed** | See Executive Summary #5. |
+| Rate limiting | ✅ **FIXED** | All `/api/auth/*` routes now rate-limited in `proxy.ts`: login 5/15min, register 3/hour, OTP send 3/5min, verify 5/5min, forgot/reset 3/15min each. | See P0 #5. |
 
 ### 5.2 Messaging / Chat
 
