@@ -1,29 +1,28 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useNavigate } from "@/hooks/useNavigate";
+import { toast } from "react-hot-toast";
 import {
-  BiChevronLeft,
-  BiStar,
-  BiHistory,
-  BiHeart,
-  BiShareAlt,
-  BiCheckCircle,
-  BiVideo,
-  BiMessageDetail,
-  BiMap,
-  BiCalendarEvent,
-  BiDollar,
-  BiWorld,
-  BiCheckShield,
-  BiUser,
-} from "react-icons/bi";
-import Avatar from "@/components/ui/Avatar";
+  ArrowLeft,
+  Star,
+  Heart,
+  Share2,
+  CheckCircle2,
+  CalendarPlus,
+  MessageSquare,
+  Globe,
+  ShieldCheck,
+  User,
+  BadgeCheck,
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
-import Modal from "@/components/ui/Modal";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import EmptyState from "@/components/ui/EmptyState";
+import PageSkeleton from "@/components/ui/skeletons/PageSkeleton";
 
 import BookingModal from "@/components/doctor/BookingModal";
 import PatientFeedbackSection, {
@@ -33,12 +32,26 @@ import { fetchDaySlots, todayDateString, periodOfDay } from "@/lib/booking";
 
 type PeriodCounts = { Morning: number; Afternoon: number; Evening: number };
 
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="text-center lg:text-left">
+      <p className="text-[11px] font-bold uppercase tracking-wide text-ink-400">
+        {label}
+      </p>
+      <p className="text-sm font-bold text-ink-700">{value}</p>
+    </div>
+  );
+}
+
 export default function DoctorProfilePage() {
   const { id } = useParams();
   const { navigate, beginNavigation } = useNavigate();
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteBusy, setFavoriteBusy] = useState(false);
   const [slotCounts, setSlotCounts] = useState<PeriodCounts>({
     Morning: 0,
     Afternoon: 0,
@@ -48,22 +61,31 @@ export default function DoctorProfilePage() {
 
   useEffect(() => {
     if (!id) return;
-
     setLoading(true);
+    setNotFound(false);
     fetch(`/api/practitioners/${id}`)
       .then((res) => res.json())
       .then((json) => {
-        if (json.success) {
-          setDoc(json.data);
-        } else {
-          setDoc(null);
-        }
+        if (json.success) setDoc(json.data);
+        else setNotFound(true);
       })
       .catch((err) => {
         console.error("Failed to fetch doctor profile", err);
-        setDoc(null);
+        setNotFound(true);
       })
       .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    fetch("/api/patient/my-doctors?favorite=true")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((list) => {
+        if (Array.isArray(list)) {
+          setIsFavorite(list.some((d: any) => d.id === id));
+        }
+      })
+      .catch(() => {});
   }, [id]);
 
   useEffect(() => {
@@ -93,156 +115,221 @@ export default function DoctorProfilePage() {
     };
   }, [id]);
 
-  if (loading)
+  const toggleFavorite = useCallback(async () => {
+    if (!id || favoriteBusy) return;
+    const next = !isFavorite;
+    setFavoriteBusy(true);
+    setIsFavorite(next);
+    try {
+      const res = await fetch(`/api/patient/my-doctors/${id}`, {
+        method: next ? "POST" : "DELETE",
+      });
+      if (!res.ok) throw new Error();
+      toast.success(next ? "Added to favorites" : "Removed from favorites");
+    } catch {
+      setIsFavorite(!next);
+      toast.error("Couldn't update favorites — please try again.");
+    } finally {
+      setFavoriteBusy(false);
+    }
+  }, [id, isFavorite, favoriteBusy]);
+
+  const handleShare = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Profile link copied to clipboard");
+    } catch {
+      toast.error("Couldn't copy the link");
+    }
+  }, []);
+
+  const handleMessage = useCallback(async () => {
+    if (!doc) return;
+    beginNavigation(); // every branch below navigates; cover the fetch too
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ practitionerId: doc.id, contactId: doc.id }),
+      });
+      const data = res.ok ? await res.json() : null;
+      if (data?.conversationId) {
+        navigate(`/patient/messages?chatId=${data.conversationId}`);
+        return;
+      }
+    } catch {
+      /* fall through */
+    }
+    navigate(`/patient/messages?doctorId=${doc.id}`);
+  }, [doc, navigate, beginNavigation]);
+
+  if (loading) return <PageSkeleton variant="detail" />;
+
+  if (notFound || !doc) {
     return (
-      <div className="p-10 flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold text-slate-500  tracking-normal leading-none">
-          Retrieving Encrypted Practitioner Profile...
-        </p>
+      <div className="max-w-lg mx-auto py-16">
+        <EmptyState
+          title="Doctor not found"
+          description="This practitioner profile doesn't exist or is no longer available."
+          actionLabel="Back to Doctors"
+          onAction={() => navigate("/patient/doctors")}
+        />
       </div>
     );
-
-  if (!doc) return <div>Doctor not found.</div>;
+  }
 
   return (
-    <div className="p-6 lg:p-10  mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* HERO SECTION */}
-      <div className="flex flex-col lg:flex-row gap-12 items-start">
-        <div className="relative shrink-0">
-          <div className="w-48 h-48 rounded-lg bg-white p-2 border-4 border-primary/10  overflow-hidden group">
-            <div className="w-full h-full flex items-center justify-center rounded-lg overflow-hidden bg-slate-100 relative">
-              {doc.avatar ? (
-                <Avatar
-                  name={doc.name}
-                  size="2xl"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-300">
-                  <BiUser className="text-6xl" />
-                </div>
-              )}
-              {doc.online && (
-                <div className="absolute bottom-4 right-4 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white animate-pulse shadow-none" />
-              )}
-            </div>
-          </div>
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white px-6 py-2 rounded-lg  border border-slate-100 flex items-center gap-2">
-            <BiStar className="text-gray-400" />
-            <span className="text-sm font-bold text-slate-800">
-              {doc.rating?.toFixed(1) || "5.0"}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex-1 space-y-6">
-          <div className="space-y-2 text-center lg:text-left">
-            <h1 className="text-4xl font-bold text-slate-800 tracking-tight font-grotesk">
-              {doc.name}
-            </h1>
-            <div className="flex items-center justify-center lg:justify-start gap-3">
-              <Badge
-                label={doc.specialisation}
-                variant="soft"
-                className=" font-bold text-xs"
-              />
-              <span className="text-slate-300">|</span>
-              <span className="text-xs font-bold text-slate-500">
-                HPCSA Reg: MP{String(id).slice(-6)}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center lg:justify-start gap-8">
-            <div className="flex flex-col">
-              <span className="text-xs  text-slate-500  tracking-normal mb-1 text-center lg:text-left">
-                Experience
-              </span>
-              <span className="font-bold text-slate-500">
-                {doc.experienceYears || 10}+ Years
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs  text-slate-500  tracking-normal mb-1 text-center lg:text-left">
-                Languages
-              </span>
-              <span className="font-bold text-slate-500">
-                {doc.languages?.join(", ") || "English"}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs  text-slate-500  tracking-normal mb-1 text-center lg:text-left">
-                Reviews
-              </span>
-              <span className="font-bold text-slate-500">
-                {doc.reviewCount || 50}+ Verified
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 pt-2">
-            <Button
-              className=""
-              onClick={() => setShowBooking(true)}
-              icon={<BiCalendarEvent className="text-xl" />}
-              iconPosition="left"
-            >
-              Book Clinical Session
-            </Button>
-            <Button
-              variant="outline"
-              className=""
-              onClick={async () => {
-                beginNavigation(); // every branch navigates; cover the fetch too
-                try {
-                  const res = await fetch("/api/conversations", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      practitionerId: doc.id,
-                      contactId: doc.id,
-                    }),
-                  });
-                  const data = res.ok ? await res.json() : null;
-                  if (data?.conversationId) {
-                    navigate(
-                      `/patient/messages?chatId=${data.conversationId}`,
-                    );
-                    return;
-                  }
-                } catch {
-                  /* fall through */
-                }
-                navigate(`/patient/messages?doctorId=${doc.id}`);
-              }}
-              icon={<BiMessageDetail className="text-xl" />}
-              iconPosition="left"
-            >
-              Message Practitioner
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-2 duration-400">
+      <div className="flex items-center justify-between gap-4">
+        <Breadcrumbs
+          items={[
+            { label: "Dashboard", href: "/patient" },
+            { label: "Doctors", href: "/patient/doctors" },
+            { label: doc.name },
+          ]}
+        />
+        <button
+          onClick={() => navigate("/patient/doctors")}
+          className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-ink-600 hover:text-primary transition-colors shrink-0"
+        >
+          <ArrowLeft size={14} />
+          Back to Doctors
+        </button>
       </div>
 
+      {/* HERO */}
+      <Card>
+        <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
+          <div className="relative shrink-0">
+            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg overflow-hidden bg-surface-soft border border-border flex items-center justify-center">
+              {doc.avatar ? (
+                <img
+                  src={doc.avatar}
+                  alt={doc.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User size={56} className="text-ink-400" />
+              )}
+            </div>
+            {doc.isOnline && (
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-surface border border-border rounded-full pl-2 pr-3 py-1 shadow-xs whitespace-nowrap">
+                <span className="w-2 h-2 rounded-full bg-success-500 animate-pulse shrink-0" />
+                <span className="text-[10px] font-bold text-success-700">
+                  Online now
+                </span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0 w-full text-center lg:text-left space-y-4">
+            <div>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-1.5">
+                <h1 className="text-h1 font-bold text-ink-900 tracking-tight font-grotesk">
+                  {doc.name}
+                </h1>
+                <BadgeCheck size={22} className="text-primary shrink-0" />
+              </div>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <Badge label={doc.specialisation} status="neutral" />
+                {doc.hpcsaNumber ? (
+                  <span className="text-xs font-bold text-ink-500">
+                    HPCSA {doc.hpcsaNumber}
+                  </span>
+                ) : (
+                  <Badge label="Verified Practitioner" status="info" size="sm" />
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-3">
+              <div className="flex items-center gap-1.5">
+                <div className="flex -space-x-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={15}
+                      className={
+                        i < Math.round(doc.rating || 0)
+                          ? "fill-accent stroke-accent"
+                          : "fill-transparent stroke-border"
+                      }
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-bold text-ink-900 tabular-nums">
+                  {doc.rating?.toFixed(1) || "0.0"}
+                </span>
+                <span className="text-xs text-ink-500">
+                  ({doc.reviewCount || 0})
+                </span>
+              </div>
+              <Stat label="Experience" value={`${doc.experienceYears || 5}+ yrs`} />
+              <Stat
+                label="Languages"
+                value={(doc.languages || ["English"]).join(", ")}
+              />
+              <Stat label="Fee" value={`R${doc.consultationFee ?? 750}`} />
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+              <Button
+                onClick={() => setShowBooking(true)}
+                icon={<CalendarPlus size={18} />}
+                iconPosition="left"
+              >
+                Book Consultation
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleMessage}
+                icon={<MessageSquare size={18} />}
+                iconPosition="left"
+              >
+                Message
+              </Button>
+              <div className="flex items-center gap-2 lg:ml-auto">
+                <button
+                  onClick={toggleFavorite}
+                  disabled={favoriteBusy}
+                  aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  aria-pressed={isFavorite}
+                  className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all disabled:opacity-50 ${
+                    isFavorite
+                      ? "bg-danger-50 border-danger-500/30 text-danger-500"
+                      : "border-border text-ink-500 hover:text-danger-500 hover:border-danger-500/30"
+                  }`}
+                >
+                  <Heart size={18} className={isFavorite ? "fill-current" : ""} />
+                </button>
+                <button
+                  onClick={handleShare}
+                  aria-label="Copy profile link"
+                  className="w-11 h-11 rounded-full border border-border text-ink-500 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all"
+                >
+                  <Share2 size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
       {/* DETAIL CONTENT */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-10">
-          {/* BIO */}
-          <Card className="p-12 space-y-6" variant="solid">
-            <h4 className="text-sm font-bold text-slate-500   font-grotesk">
-              Professional Biography
-            </h4>
-            <p className="text-slate-600 leading-relaxed  ">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="space-y-6">
+            <h2 className="text-h3 font-bold text-ink-900 font-grotesk">
+              About
+            </h2>
+            <p className="text-sm text-ink-600 leading-relaxed">
               {doc.bio ||
-                "Dedicated clinical specialist with a focus on patient-centered outcomes. Extensively trained in advanced diagnostic methodologies and humanitarian clinical practices."}
+                `${doc.name} is a dedicated ${(doc.specialisation || "clinical").toLowerCase()} specialist focused on patient-centered outcomes.`}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-6 border-t border-slate-50">
-              <div className="space-y-4">
-                <h6 className=" font-bold text-slate-500 text-sm   font-grotesk">
-                  Clinical Focus
-                </h6>
-                <ul className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-border">
+              <div className="space-y-3">
+                <p className="text-label text-ink-500">Clinical Focus</p>
+                <ul className="space-y-2.5">
                   {(
                     doc.clinicalFocus || [
                       "Preventative Care",
@@ -252,18 +339,19 @@ export default function DoctorProfilePage() {
                   ).map((item: string) => (
                     <li
                       key={item}
-                      className="flex items-center gap-2 text-sm font-semibold text-slate-600  tracking-tight"
+                      className="flex items-center gap-2 text-sm font-medium text-ink-700"
                     >
-                      <BiCheckCircle className="text-emerald-500" size={16} />{" "}
-                      <h1>{item}</h1>
+                      <CheckCircle2
+                        size={16}
+                        className="text-success-500 shrink-0"
+                      />
+                      {item}
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="space-y-4">
-                <h6 className=" font-bold text-slate-500 text-sm   font-grotesk">
-                  Medical Aid Certified
-                </h6>
+              <div className="space-y-3">
+                <p className="text-label text-ink-500">Medical Aid Accepted</p>
                 <div className="flex flex-wrap gap-2">
                   {(
                     doc.medicalAids || [
@@ -273,14 +361,13 @@ export default function DoctorProfilePage() {
                       "Medishield",
                     ]
                   ).map((aid: string) => (
-                    <Badge key={aid} label={aid} variant="soft" className="" />
+                    <Badge key={aid} label={aid} status="neutral" size="sm" />
                   ))}
                 </div>
               </div>
             </div>
           </Card>
 
-          {/* PATIENT FEEDBACK */}
           <PatientFeedbackSection
             practitionerId={String(id)}
             reviews={doc.reviews || []}
@@ -302,64 +389,51 @@ export default function DoctorProfilePage() {
           />
         </div>
 
-        {/* SIDEBAR: ACCESS & AVAILABILITY */}
+        {/* SIDEBAR */}
         <div className="space-y-6">
-          <div
-            className="p-8 space-y-8 rounded-lg bg-slate-600 text-white  relative overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-1000">
-              <BiCheckShield size={120} />
-            </div>
-            <div className="text-center relative z-10">
-              <p className="text-xs font-bold text-slate-500  tracking-normal mb-4">
-                Access Status
-              </p>
-              <h3 className="text-3xl font-bold tracking-tight font-grotesk">
-                Premium Access
-              </h3>
-              <p className="text-xs text-emerald-400 font-bold  mt-3 tracking-normal flex items-center justify-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Subscription Covered
-              </p>
-            </div>
-
-            <div className="space-y-4 pt-8 border-t border-white/10 relative z-10">
-              <div className="flex items-start gap-4">
-                <BiCheckShield
-                  className="text-emerald-400 shrink-0 mt-1"
-                  size={24}
-                />
-                <p className="text-sm font-medium  leading-relaxed tracking-normal text-slate-100">
-                  Unlocked via your health premium. No consultation fees apply
-                  for this session.
-                </p>
+          <Card className="space-y-4 bg-primary/[0.03] border-primary/15">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <ShieldCheck size={20} />
               </div>
-              <Button  onClick={() => setShowBooking(true)}>Schedule Now</Button>
+              <p className="text-sm font-bold text-ink-900">
+                Billed to your plan
+              </p>
             </div>
-          </div>
+            <p className="text-xs text-ink-600 leading-relaxed">
+              Consultations with {doc.name} are billed automatically under
+              your DigiHealth subscription — no upfront card details needed.
+            </p>
+            <Button fullWidth size="sm" onClick={() => setShowBooking(true)}>
+              Book Consultation
+            </Button>
+          </Card>
 
-          <Card className="p-6 space-y-6" variant="solid">
+          <Card className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-slate-500  tracking-normal font-grotesk">
-                Live Status
-              </h4>
-              <BiWorld
-                className="text-primary/20 animate-spin-slow"
-                size={24}
-              />
+              <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
+                Today's Availability
+              </h3>
+              <Globe size={18} className="text-ink-400" />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {(["Morning", "Afternoon", "Evening"] as const).map((period) => (
                 <div
                   key={period}
-                  className="flex items-center justify-between p-3 bg-slate-50/50 rounded-lg border border-slate-100/50 group hover:border-primary/20 transition-all"
+                  className="flex items-center justify-between p-3 rounded-lg bg-surface-soft"
                 >
-                  <span className="text-xs font-bold text-slate-600">
+                  <span className="text-sm font-semibold text-ink-700">
                     {period}
                   </span>
-                  <span className="text-xs font-bold text-emerald-500 tracking-normal tabular-nums">
-                    {slotsLoading ? "…" : slotCounts[period]} slots
-                  </span>
+                  {slotsLoading ? (
+                    <span className="text-xs text-ink-400">…</span>
+                  ) : (
+                    <Badge
+                      label={`${slotCounts[period]} slot${slotCounts[period] === 1 ? "" : "s"}`}
+                      status={slotCounts[period] > 0 ? "success" : "neutral"}
+                      size="sm"
+                    />
+                  )}
                 </div>
               ))}
             </div>

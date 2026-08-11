@@ -122,6 +122,12 @@ export default function BookingModal({
 
   const hasPreSelected = isPractitionerMode ? !!patient : !!doctor;
   const totalSteps = hasPreSelected ? 3 : 4;
+  const stepLabels = [
+    ...(hasPreSelected ? [] : [isPractitionerMode ? "Patient" : "Doctor"]),
+    "Date & Time",
+    "Reason",
+    "Confirm",
+  ];
 
   const showPersonSelect = !hasPreSelected && step === 1;
   const showDateTime =
@@ -413,7 +419,7 @@ export default function BookingModal({
       width="md"
     >
       <div className="space-y-6 py-2 ">
-        <BookingStepIndicator step={step} totalSteps={totalSteps} />
+        <BookingStepIndicator step={step} totalSteps={totalSteps} labels={stepLabels} />
 
         {/* Selected person card */}
         {selectedPerson && (

@@ -52,6 +52,7 @@ export async function GET(
       consultationFee: (profile as any).consultationFee || 750,
       rating: profile.rating || 5.0,
       reviewCount: profile.reviewCount || formattedReviews.length,
+      hpcsaNumber: profile.hpcsaNumber || null,
       isOnline: true, // This could be dynamic with a socket/status check
       reviews: formattedReviews,
       clinicalFocus: (profile as any).clinicalFocus || ["Preventative Care", "Diagnostic Excellence", "Systemic Recovery"],
