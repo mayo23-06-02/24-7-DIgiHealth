@@ -52,7 +52,7 @@
 
 ### 🟡 P2 — Broken buttons & dead code (quick fixes / cleanup)
 
-- Staff **Edit / Toggle Duty / Delete / View Profile** are broken for any staff member created via the current flow — a Mongo→Postgres migration was done for staff *list/create* but not for these four actions, so they're handed a Postgres UUID and query Mongo with it. (`app/api/hospital/staff/[id]/route.ts`, `.../[id]/profile/route.ts`)
+- Staff **Edit / Toggle Duty / Delete / View Profile**: ✅ **FIXED** — Completed Mongo→Postgres migration. Created `lib/postgres/staff.ts` helpers; updated routes to query Postgres with UUIDs instead of Mongo ObjectIds. All four operations now work correctly.
 - Practitioner Queue page: ✅ **FIXED** — "Join Video/Chat" button now navigates to consultation lobby; "Patient Profile" button navigates to patient profile page
 - Patient Billing: ✅ **FIXED** — "Add New" payment method opens modal; delete button calls DELETE API with confirmation
 - Patient Health Record: ✅ **FIXED** — "Request refill" button now calls real `/api/patient/prescriptions` POST endpoint to decrement refillsRemaining
