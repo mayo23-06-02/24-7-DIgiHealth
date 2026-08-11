@@ -13,6 +13,12 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 const RATE_LIMIT_CONFIG: Record<string, { windowMs: number; maxRequests: number }> = {
   '/api/chat/messages': { windowMs: 60_000, maxRequests: 60 },
+  '/api/auth/login': { windowMs: 900_000, maxRequests: 5 },          // 5 attempts per 15 minutes
+  '/api/auth/register': { windowMs: 3_600_000, maxRequests: 3 },     // 3 registrations per hour
+  '/api/auth/otp/send': { windowMs: 300_000, maxRequests: 3 },       // 3 OTP sends per 5 minutes
+  '/api/auth/otp/verify': { windowMs: 300_000, maxRequests: 5 },     // 5 verify attempts per 5 minutes
+  '/api/auth/forgot-password': { windowMs: 900_000, maxRequests: 3 }, // 3 forgot-password per 15 minutes
+  '/api/auth/reset-password': { windowMs: 900_000, maxRequests: 3 },  // 3 reset-password per 15 minutes
   default:              { windowMs: 60_000, maxRequests: 100 },
 };
 
@@ -74,12 +80,11 @@ export default auth(async function middleware(request: NextRequest & { auth: any
   }
 
   // ---------- 1. Rate limiting for API routes ----------
-  if (pathname.startsWith('/api/chat') || pathname.startsWith('/api/ably')) {
+  if (pathname.startsWith('/api/chat') || pathname.startsWith('/api/ably') || pathname.startsWith('/api/auth')) {
     const { key, config } = getRateLimitBucket(pathname);
-    // Bucket by identifier + route group so, e.g., message-history polling or
-    // read-receipt PATCHes on other /api/chat/* routes can't burn through the
-    // (intentionally stricter) budget for POST /api/chat/messages, and a burst
-    // of sends can't lock a user out of unrelated chat reads.
+    // For auth routes, bucket by IP + specific endpoint to prevent brute force attacks.
+    // For chat routes, bucket by identifier + route group so high-frequency traffic
+    // on other chat endpoints can't eat into the stricter budget for sending messages.
     const identifier = `${getClientIdentifier(request)}:${key}`;
     if (!checkRateLimit(identifier, config)) {
       return NextResponse.json(
