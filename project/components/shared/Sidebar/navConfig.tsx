@@ -263,7 +263,7 @@ export const MAIN_NAV: SidebarItem[] = [
     icon: Wallet,
     label: "Billing",
     href: "/[role]/billing",
-    roles: ["patient", "practitioner", "super_admin", "mega_admin", "inspector"],
+    roles: ["patient", "practitioner", "inspector"],
   },
   {
     icon: User,

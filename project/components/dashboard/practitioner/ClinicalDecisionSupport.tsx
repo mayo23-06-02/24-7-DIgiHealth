@@ -2,15 +2,15 @@
 
 import React, { useState } from "react";
 import {
-  BiShield,
-  BiPulse,
-  BiInfoCircle,
-  BiChevronDown,
-  BiChevronUp,
-  BiLinkExternal,
-  BiSearch,
-  BiCheckCircle,
-} from "react-icons/bi";
+  Shield,
+  Activity,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Search,
+  CheckCircle2,
+} from "lucide-react";
 
 interface DrugInteractionResult {
   drug1: string;
@@ -201,7 +201,7 @@ export default function ClinicalDecisionSupport() {
       {/* Header */}
       <div className="flex items-center gap-3 shrink-0">
         <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center  shadow-primary/20">
-          <BiShield className="text-white text-lg" />
+          <Shield className="text-white text-lg" />
         </div>
         <div>
           <h3 className="font-bold text-slate-800 text-sm leading-tight  tracking-normal font-grotesk">
@@ -217,7 +217,7 @@ export default function ClinicalDecisionSupport() {
       <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-none shadow-slate-900/5 shrink-0">
         <div className="flex items-center gap-3 mb-6 px-1">
           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-            <BiPulse size={20} />
+            <Activity size={20} />
           </div>
           <h4 className="text-sm font-bold text-slate-500  tracking-normal font-grotesk">
             Precision Drug Interaction Analytics
@@ -244,7 +244,7 @@ export default function ClinicalDecisionSupport() {
             onClick={handleCheckInteraction}
             fullWidth
             className="h-14 bg-primary hover:bg-primary/90 text-white text-[11px] font-bold  tracking-normal rounded-lg transition-all shadow-none shadow-primary/20"
-            icon={<BiSearch size={16} />}
+            icon={<Search size={16} />}
           >
             Execute Intelligence Check
           </Button>
@@ -258,7 +258,7 @@ export default function ClinicalDecisionSupport() {
         )}
         {interactionResult === "none" && (
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-            <BiCheckCircle className="text-emerald-600 text-base shrink-0" />
+            <CheckCircle2 className="text-emerald-600 text-base shrink-0" />
             <div>
               <p className="text-sm font-bold text-emerald-700  tracking-normal">
                 No known interactions found
@@ -323,7 +323,7 @@ export default function ClinicalDecisionSupport() {
       {/* Guidelines */}
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-3 mt-2">
-          <BiInfoCircle className="text-secondary text-base" />
+          <Info className="text-secondary text-base" />
           <h4 className="text-sm font-bold text-slate-700  tracking-normal font-grotesk">
             Clinical Guidelines
           </h4>
@@ -351,9 +351,9 @@ export default function ClinicalDecisionSupport() {
                     </span>
                   </div>
                   {isOpen ? (
-                    <BiChevronUp className="text-primary text-base shrink-0" />
+                    <ChevronUp className="text-primary text-base shrink-0" />
                   ) : (
-                    <BiChevronDown className="text-slate-500 text-base shrink-0" />
+                    <ChevronDown className="text-slate-500 text-base shrink-0" />
                   )}
                 </Button>
 
@@ -380,7 +380,7 @@ export default function ClinicalDecisionSupport() {
                       className="mt-4 inline-flex items-center gap-1 text-sm text-primary font-bold hover:underline p-0 !min-w-0 border-none bg-transparent  tracking-normal h-auto"
                       onClick={() => window.open(g.link, "_blank")}
                     >
-                      Full Guidelines <BiLinkExternal size={11} />
+                      Full Guidelines <ExternalLink size={11} />
                     </Button>
                   </div>
                 )}

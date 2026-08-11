@@ -10,6 +10,8 @@ import MedicalManikin from "@/components/ui/MedicalManikin";
 import VitalCardsGrid from "@/components/dashboard/practitioner/VitalCardsGrid";
 import PatientHealthRecord from "@/components/dashboard/shared/PatientHealthRecord";
 import BookingModal from "@/components/doctor/BookingModal";
+import AIDiagnosisPanel from "@/components/dashboard/practitioner/AIDiagnosisPanel";
+import ClinicalDecisionSupport from "@/components/dashboard/practitioner/ClinicalDecisionSupport";
 import { toast } from "react-hot-toast";
 import { BiLoader, BiUser } from "react-icons/bi";
 import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
@@ -468,6 +470,16 @@ export default function PatientProfilePage() {
               Complete Medical Context
             </h3>
             <PatientHealthRecord patientId={patient.id} isPractitioner />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-slate-800 font-grotesk px-1">
+              AI Clinical Tools
+            </h3>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+              <AIDiagnosisPanel patientId={patient.id} />
+              <ClinicalDecisionSupport />
+            </div>
           </div>
         </div>
 

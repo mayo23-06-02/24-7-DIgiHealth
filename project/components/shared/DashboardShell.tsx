@@ -2,9 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Users, ArrowLeftRight } from "lucide-react";
+import { Users, ArrowLeftRight, Bot } from "lucide-react";
 import { useAuthContext } from "../auth/AuthProvider";
-import { BiBrain } from "react-icons/bi";
 import Header from "@/components/shared/Header";
 import Sidebar from "./Sidebar";
 import { useNavigationProgress } from "@/components/providers/NavigationProgressProvider";
@@ -13,6 +12,7 @@ import {
   useFamilyMembers,
 } from "@/lib/family/FamilyMemberContext";
 import Button from "../ui/Button";
+import PractitionerAIChatPanel from "@/components/dashboard/practitioner/PractitionerAIChatPanel";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -153,22 +153,26 @@ function DashboardShellInner({
           </div>
         </main>
 
-        {/* ── FLOATING AI TRIAGE BUTTON (Only for Practitioners) ── */}
+        {/* ── FLOATING AI ASSISTANT BUTTON (Only for Practitioners) ── */}
         {user?.role === "practitioner" && (
           <>
             <button
               onClick={() => setIsTriageOpen(true)}
               className="fixed bottom-8 right-8 z-[60] w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 animate-in zoom-in group"
-              title="Open AI Triage Chat"
+              aria-label="Open AI clinical assistant"
+              title="Open AI Clinical Assistant"
             >
               <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-75 group-hover:hidden" />
-              <BiBrain size={32} className="relative z-10" />
+              <Bot size={28} className="relative z-10" />
 
-              {/* Optional Tooltip/Badge */}
-              <div className="absolute -top-2 -left-2 bg-secondary text-[10px] px-2 py-1 rounded-full font-bold  whitespace-nowrap">
+              <div className="absolute -top-2 -left-2 bg-secondary text-[10px] px-2 py-1 rounded-full font-bold whitespace-nowrap">
                 AI ASSISTANT
               </div>
             </button>
+            <PractitionerAIChatPanel
+              isOpen={isTriageOpen}
+              onClose={() => setIsTriageOpen(false)}
+            />
           </>
         )}
       </div>
