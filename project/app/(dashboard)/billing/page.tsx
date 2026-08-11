@@ -594,6 +594,7 @@ function PatientBillingView({
   } = data;
   const [upgradeModal, setUpgradeModal] = useState(false);
   const [selectedTier, setSelectedTier] = useState(TIER_ORDER[0]);
+  const [paymentMethodModal, setPaymentMethodModal] = useState(false);
 
   const tiers = TIER_ORDER.map((id) => {
     const cfg = TIER_CONFIG[id];
@@ -728,7 +729,10 @@ function PatientBillingView({
             <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
               Payment Methods
             </h3>
-            <button className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
+            <button
+              onClick={() => setPaymentMethodModal(true)}
+              className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+            >
               <Plus size={14} /> Add New
             </button>
           </div>
@@ -792,7 +796,24 @@ function PatientBillingView({
                       Default
                     </span>
                   )}
-                  <button className="text-slate-300 hover:text-red-500 transition-colors shrink-0">
+                  <button
+                    onClick={async () => {
+                      if (confirm('Are you sure you want to delete this payment method?')) {
+                        try {
+                          const res = await fetch(`/api/billing/payment-methods/${pm._id}`, {
+                            method: 'DELETE',
+                          });
+                          if (res.ok) {
+                            window.location.reload();
+                          }
+                        } catch (err) {
+                          console.error('Failed to delete payment method', err);
+                        }
+                      }
+                    }}
+                    className="text-slate-300 hover:text-red-500 transition-colors shrink-0"
+                    title="Delete payment method"
+                  >
                     <XCircle size={18} />
                   </button>
                 </div>

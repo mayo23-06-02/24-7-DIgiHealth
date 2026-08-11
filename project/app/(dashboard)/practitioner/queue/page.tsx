@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import RiskScoreCard from "@/components/dashboard/practitioner/RiskScoreCard";
 import SoapNoteModal from "@/components/dashboard/practitioner/SoapNoteModal";
 import Badge, { type BadgeStatus } from "@/components/ui/Badge";
@@ -71,6 +72,7 @@ const FILTERS: { value: string; label: string }[] = [
 ];
 
 export default function FullQueuePage() {
+  const router = useRouter();
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -207,6 +209,7 @@ export default function FullQueuePage() {
       render: (item) => (
         <div className="flex items-center justify-end gap-1.5">
           <button
+            onClick={() => router.push(`/practitioner/lobby/${item.consultationId}`)}
             className={`p-2.5 rounded-lg text-white transition-all active:scale-95 ${
               item.type === "chat" ? "bg-supportive-teal hover:brightness-95" : "bg-trust-blue hover:brightness-95"
             }`}
@@ -228,6 +231,7 @@ export default function FullQueuePage() {
             <FileEdit size={14} />
           </button>
           <button
+            onClick={() => router.push(`/practitioner/patients/${item.patientId}`)}
             className="p-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all active:scale-95"
             title="Patient Profile"
           >
