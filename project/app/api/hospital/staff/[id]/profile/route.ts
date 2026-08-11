@@ -1,39 +1,36 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import Staff from '@/lib/models/Staff';
-import User from '@/lib/models/User';
 import { Consultation } from '@/lib/models/Consultation';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
+import { getStaffByIdAndFacility } from '@/lib/postgres/staff';
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    const hospitalId = await resolvePostgresHospitalId(user.userId, user.email);
     if (!hospitalId) {
       return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
     }
 
     const { id } = await params;
 
-    const staffDoc = await Staff.findOne({ _id: id, facilityId: hospitalId })
-      .populate('userId', 'firstName lastName email mobile role status createdAt')
-      .lean();
+    const staffDoc = await getStaffByIdAndFacility(id, hospitalId);
 
     if (!staffDoc) {
       return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
     }
 
+    await connectToDatabase();
     const staffAny = staffDoc as any;
-    const userId = staffAny.userId?._id;
+    const userId = staffAny.user_id;
 
     // ── Practitioner profile (optional - only doctors have one) ──────────
     let practProfile: any = null;

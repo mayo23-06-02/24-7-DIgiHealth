@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import Staff from '@/lib/models/Staff';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
+import { updateStaffByIdAndFacility, deleteStaffByIdAndFacility, getStaffByIdAndFacility } from '@/lib/postgres/staff';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    const hospitalId = await resolvePostgresHospitalId(user.userId, user.email);
     if (!hospitalId) {
       return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
     }
@@ -19,15 +17,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const { id } = await params;
     const body = await req.json();
 
-    const updatedStaff = await Staff.findOneAndUpdate(
-      { _id: id, facilityId: hospitalId },
-      body,
-      { new: true },
-    ).populate('userId', 'firstName lastName email');
-
-    if (!updatedStaff) {
-      return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
-    }
+    const updatedStaff = await updateStaffByIdAndFacility(id, hospitalId, body);
 
     return NextResponse.json({ success: true, data: updatedStaff });
 
@@ -38,23 +28,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    const hospitalId = await resolvePostgresHospitalId(user.userId, user.email);
     if (!hospitalId) {
       return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
     }
 
     const { id } = await params;
 
-    const deletedStaff = await Staff.findOneAndDelete({ _id: id, facilityId: hospitalId });
-
-    if (!deletedStaff) {
-      return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
-    }
+    await deleteStaffByIdAndFacility(id, hospitalId);
 
     return NextResponse.json({ success: true, data: {} });
 

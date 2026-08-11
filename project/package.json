@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@ably/chat": "^1.4.0",
+    "@anthropic-ai/sdk": "^0.116.0",
     "@auth/mongodb-adapter": "^3.11.2",
     "@babel/runtime": "^8.0.0",
     "@google/generative-ai": "^0.24.1",
