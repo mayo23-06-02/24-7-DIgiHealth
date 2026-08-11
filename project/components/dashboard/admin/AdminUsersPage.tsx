@@ -70,6 +70,11 @@ export default function AdminUsersPage({
   }, [load]);
 
   const suspend = async (id: string, action: "suspend" | "unsuspend") => {
+    const msg = action === "suspend"
+      ? "Are you sure you want to suspend this user? They will lose access to all services."
+      : "Are you sure you want to reactivate this user?";
+    if (!confirm(msg)) return;
+
     setBusyId(id);
     try {
       const res = await fetch(`/api/admin/users/${id}/suspend`, {
@@ -93,6 +98,8 @@ export default function AdminUsersPage({
       toast.error("You cannot assign this role");
       return;
     }
+    if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+
     setBusyId(id);
     try {
       const res = await fetch(`/api/admin/users/${id}`, {

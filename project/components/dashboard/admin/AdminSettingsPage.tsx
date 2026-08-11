@@ -137,9 +137,13 @@ export default function AdminSettingsPage({ isMega }: { isMega: boolean }) {
             type="checkbox"
             disabled={!isMega}
             checked={form.maintenanceMode}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, maintenanceMode: e.target.checked }))
-            }
+            onChange={(e) => {
+              if (e.target.checked && !confirm('⚠️ Maintenance mode will take the entire platform offline. Are you sure?')) {
+                e.preventDefault();
+                return;
+              }
+              setForm((f) => ({ ...f, maintenanceMode: e.target.checked }));
+            }}
             className="w-5 h-5 accent-primary"
           />
         </label>

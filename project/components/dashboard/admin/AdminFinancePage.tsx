@@ -37,6 +37,8 @@ export default function AdminFinancePage({ isMega = false }: { isMega?: boolean 
   }, [days]);
 
   const setPayoutStatus = async (id: string, status: string) => {
+    if (!confirm(`Are you sure you want to mark this payout as ${status}? This cannot be undone.`)) return;
+
     setBusyId(id);
     try {
       const res = await fetch("/api/admin/finance", {
