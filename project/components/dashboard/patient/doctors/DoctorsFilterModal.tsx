@@ -28,7 +28,7 @@ export default function DoctorsFilterModal({
 }: DoctorsFilterModalProps) {
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Filter Practitioners" size="sm">
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-5 md:space-y-6">
         <Select
           label="Specialization"
           options={[
@@ -62,10 +62,10 @@ export default function DoctorsFilterModal({
           value={filters.language}
           onChange={(v) => setFilters({ ...filters, language: v })}
         />
-        <div className="flex gap-4 pt-4 border-t border-slate-100">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4 md:pt-6 border-t border-slate-100">
           <Button
             variant="outline"
-            className="flex-1"
+            className="flex-1 text-sm sm:text-base"
             onClick={() => {
               setFilters({
                 specialization: "",
@@ -74,10 +74,10 @@ export default function DoctorsFilterModal({
               });
             }}
           >
-            Clear Filters
+            Clear
           </Button>
-          <Button className="flex-1" onClick={onClose}>
-            Apply Filters
+          <Button className="flex-1 text-sm sm:text-base" onClick={onClose}>
+            Apply
           </Button>
         </div>
       </div>

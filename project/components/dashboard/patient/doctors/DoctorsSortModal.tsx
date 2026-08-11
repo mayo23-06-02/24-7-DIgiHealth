@@ -18,7 +18,7 @@ export default function DoctorsSortModal({
 }: DoctorsSortModalProps) {
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Sort Practitioners" size="sm">
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-5 md:space-y-6">
         <Select
           label="Sort By"
           value={sortBy}
@@ -28,8 +28,8 @@ export default function DoctorsSortModal({
             { label: "Experience", value: "experience" },
           ]}
         />
-        <div className="flex justify-end pt-4 border-t border-slate-100">
-          <Button onClick={onClose} className="w-full">
+        <div className="flex justify-end pt-3 sm:pt-4 md:pt-6 border-t border-slate-100">
+          <Button onClick={onClose} className="w-full text-sm sm:text-base">
             Done
           </Button>
         </div>

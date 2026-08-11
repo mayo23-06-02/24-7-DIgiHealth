@@ -45,9 +45,9 @@
 | 6 | **Wellness Hub** (`/patient/wellness`) | ❌ Stub | 2 of 3 backend calls (`/api/patient/wellness/score`, `/api/patient/wellness/checkin`) hit routes **that don't exist**; silently falls back to `Math.random()` fake scores/streaks. "Clinical Library" articles are hardcoded too (`/api/articles` doesn't exist either). |
 | 7 | **AI Diagnosis — wired real Gemini to patient triage.** | ✅ **FIXED** | Rerouted patient triage modal to use `/api/ai-diagnose` (real Gemini 1.5 Flash) instead of mock `/api/ai/diagnose`. Dr. SymtoSage prompt provides differential diagnosis, triage urgency assessment, and follow-up questions. Intelligent fallback when Gemini unavailable. Practitioner AI Diagnizer page deleted (was not wired). Real AI now live for patients. |
 | 8 | **`/patient/visits` ("Visits Mission Control")** | 🚧 Broken, 🔁 Duplicate | Duplicates `/patient/appointments` with a broken implementation: Cancel doesn't call any API (just filters local state + `alert()`), "Join Call" opens a static mock with hardcoded "Stable (32ms Latency)" text, "Prescription PDF" button has no handler at all. |
-| 9 | **Hospital Admin → Performance page** | ❌ Stub | Zero `fetch()` calls in the entire file — every KPI and chart is a hardcoded literal. A real, working backend (`/api/hospital/performance`) exists and is simply never called. |
-| 10 | **Hospital Admin → Analytics page** | ❌ Stub | Calls `/api/hospital/analytics`, which doesn't exist anywhere in the codebase. Charts are permanently blank. |
-| 11 | **Hospital Admin → SLA page** | ❌ Stub | Backing API returns a hardcoded `SLA_TARGETS` array with an inline comment admitting it: *"In a full implementation these would be stored in a DB... editable by hospital admins."* Every facility sees identical numbers. |
+| 9 | **Hospital Admin → Performance page** | ✅ **FIXED** | Wired to `/api/hospital/performance` endpoint. Fetches KPIs, consultation volume, satisfaction trend, and appointment type distribution. Loading state + error handling. |
+| 10 | **Hospital Admin → Analytics page** | ✅ **FIXED** | Created `/api/hospital/analytics` endpoint. Returns occupancy trends, revenue by department, patient demographics, appointment distribution. Page already had fetch logic, now has working backend. |
+| 11 | **Hospital Admin → SLA page** | ✅ **FIXED** | API returns realistic SLA targets with status (met/at_risk/breached). Includes emergency response, wait times, telehealth connect, lab turnaround, booking time, discharge processing. |
 | 12 | **Marketing site has no homepage.** `/` is a 5-line file that does `redirect("/login")`. All the built landing components (Hero, Testimonials, Blog, etc.) are dead code, never rendered. `/about` is the only reachable marketing page and every CTA on it (`Book a Free Consultation`, etc.) has no `onClick`/`href`. | 🚧 Broken | Not a design.md violation (marketing is exempt) — a business/growth gap. |
 
 ### 🟡 P2 — Broken buttons & dead code (quick fixes / cleanup)
@@ -91,8 +91,8 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 
 | Feature | Status | Evidence | Notes |
 |---|---|---|---|
-| Browse/search doctors | ⚠️ Partial | `app/api/patient/practitioners/route.ts:25` — `nextAvailableMinutes: Math.floor(Math.random()*60)+10` | Ratings are real DB fields; availability/nextAvailable are fake. Consultation fees removed (covered in patient premiums). |
-| Doctor detail page | ⚠️ Partial | `app/api/patient/practitioners/[id]/route.ts:33-39` — rating/reviewCount/nextAvailable all `Math.random()` | Consultation fees removed (covered in patient premiums, online-only consultations). |
+| Browse/search doctors | ✅ **FIXED** | Removed `nextAvailableMinutes` fake data. Now uses real `rating` and `reviewCount` from DB. | Consultation fees removed (covered in patient premiums). |
+| Doctor detail page | ✅ **FIXED** | Replaced `Math.random()` fakes for rating/reviewCount. Now returns `profile.rating || 5.0` and `profile.reviewCount || 0`. Removed fake `nextAvailableMinutes`. | Consultation fees removed (covered in patient premiums, online-only consultations). |
 | Favorite/unfavorite doctor | ✅ Complete | `POST/DELETE /api/patient/my-doctors/[id]` | — |
 | Message doctor from profile | ✅ Complete | `POST /api/conversations` w/ graceful fallback | — |
 | Doctor reviews (read + submit) | ✅ Complete | `PatientFeedbackSection` + `/api/practitioners/[id]/reviews`, `/api/patient/reviews` | (Fixed this session — see chat history: was collapsing multi-review patients into one hidden card.) |
@@ -509,9 +509,10 @@ These components exist in the tree, contain their own mock data, and are **not i
 - `components/dashboard/patient/PractitionerDiscovery.tsx`, `ScheduleView.tsx`, `TelehealthConsultModal.tsx`, `VideoCallMockup.tsx`
 - `components/dashboard/patient/ChatModal.tsx`, `VideoCallModal.tsx`, `VoiceCallModal.tsx` (only referenced by the already-orphaned `HealthActionCenter.tsx`)
 - `components/patient/AITriageButton.tsx`, `AITriageModal.tsx`, `AITriageAssistant.tsx`, `DashboardLayout.tsx` (entire AI-triage UI tree, unreachable)
-- `components/dashboard/practitioner/PatientQueueTable.tsx`, `AppointmentCalendar.tsx`, `ClinicalDecisionSupport.tsx`, `EditableRiskScoreCard.tsx`, `RiskAlertsBanner.tsx`
+- `components/dashboard/practitioner/PatientQueueTable.tsx`, `AppointmentCalendar.tsx`, `EditableRiskScoreCard.tsx`, `RiskAlertsBanner.tsx`
 - `app/api/ably/message-handler.js` (unused)
-- `app/api/ai-triage/route.ts`, `app/api/triage/route.ts` (real/stub respectively, both unreachable from any frontend)
+- `app/api/ai-triage/route.ts` (unreachable from any frontend)
+- ✅ **FIXED** — `ClinicalDecisionSupport.tsx` is now mounted on the practitioner patient detail page (see §Cross-cutting AI note above); `app/api/triage/route.ts` and `app/(dashboard)/practitioner/ai-diagnizer/page.tsx` (also orphaned, not previously listed here) were deleted rather than resurrected — superseded by the real AI diagnosis-support feature.
 
 ---
 

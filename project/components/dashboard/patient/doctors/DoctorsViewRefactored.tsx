@@ -113,7 +113,7 @@ export default function DoctorsViewRefactored() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-8 sm:pb-10 md:pb-12">
       <PageHeader title="Clinical Practitioners" subtitle="Find and book appointments with verified practitioners." />
 
       <DoctorsSearchHeader
@@ -125,13 +125,13 @@ export default function DoctorsViewRefactored() {
       />
 
       {isLoading ? (
-        <div className="flex justify-center py-20"><Loader2 size={40} className="text-primary animate-spin" /></div>
+        <div className="flex justify-center py-12 sm:py-16 md:py-20"><Loader2 size={40} className="text-primary animate-spin" /></div>
       ) : filteredDoctors.length === 0 ? (
         <Card>
           <EmptyState title="No Practitioners Found" description="Try adjusting your search or filters." icon={<Search size={32} />} actionLabel="Clear Filters" onAction={() => { setSearchQuery(""); setFilters({ specialization: "", language: "", location: "" }); }} />
         </Card>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-6 sm:space-y-8 md:space-y-12">
           {myDoctors.length > 0 && !searchQuery && !hasActiveFilters && (
             <DoctorsCarouselSection title="My Doctors" doctors={myDoctors} onBook={(doc) => { setSelectedDoctor(doc); setIsBookingModalOpen(true); }} onMessage={handleStartMessage} onFavoriteChange={handleFavoriteChange} />
           )}

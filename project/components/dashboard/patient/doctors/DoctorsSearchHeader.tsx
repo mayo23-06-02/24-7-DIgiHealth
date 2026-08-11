@@ -18,21 +18,24 @@ export default function DoctorsSearchHeader({
   hasActiveFilters,
 }: DoctorsSearchHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-3">
-      <div className="flex-1 w-full">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+      <div className="flex-1 w-full min-w-0">
         <Input
           type="text"
-          placeholder="Search doctors, specializations, or conditions..."
+          placeholder="Search doctors, conditions..."
+          aria-label="Search doctors"
           icon={<Search size={18} />}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full"
         />
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-2 shrink-0">
         <button
           onClick={onOpenFilter}
-          aria-label="Filter"
-          className={`relative flex items-center justify-center w-11 h-11 rounded-lg transition-colors ${hasActiveFilters ? "bg-primary text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+          aria-label="Filter practitioners"
+          title="Filter"
+          className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg transition-colors flex-shrink-0 ${hasActiveFilters ? "bg-primary text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
         >
           <SlidersHorizontal size={18} />
           {hasActiveFilters && (
@@ -41,8 +44,9 @@ export default function DoctorsSearchHeader({
         </button>
         <button
           onClick={onOpenSort}
-          aria-label="Sort"
-          className="flex items-center justify-center w-11 h-11 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+          aria-label="Sort practitioners"
+          title="Sort"
+          className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex-shrink-0"
         >
           <ArrowUpDown size={18} />
         </button>
