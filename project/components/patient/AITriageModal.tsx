@@ -65,7 +65,7 @@ export default function AITriageModal({
           content: m.text,
         }));
 
-      const response = await fetch("/api/ai/diagnose", {
+      const response = await fetch("/api/ai-diagnose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -84,7 +84,7 @@ export default function AITriageModal({
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: result.data.aiAnalysis,
+        text: result.data.aiAnalysis || result.data,
         sender: "ai",
         timestamp: new Date(),
       };

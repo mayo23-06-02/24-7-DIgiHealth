@@ -230,17 +230,23 @@ export default function PatientClinicalSidebar({
             Emergency Line
           </h4>
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-bold text-slate-800">
-            {patient.emergencyContact.name}
+        {patient.emergencyContact?.name ? (
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-slate-800">
+              {patient.emergencyContact.name}
+            </p>
+            <p className="text-xs font-bold text-slate-500 tracking-normal">
+              {patient.emergencyContact.relationship}
+            </p>
+            <p className="text-base font-bold text-primary mt-2">
+              {patient.emergencyContact.phone}
+            </p>
+          </div>
+        ) : (
+          <p className="text-xs font-medium text-slate-500">
+            No emergency contact on file.
           </p>
-          <p className="text-xs font-bold text-slate-500 tracking-normal">
-            {patient.emergencyContact.relationship}
-          </p>
-          <p className="text-base font-bold text-primary mt-2">
-            {patient.emergencyContact.phone}
-          </p>
-        </div>
+        )}
       </Card>
     </div>
   );
