@@ -57,7 +57,7 @@
 - Patient Billing: ✅ **FIXED** — "Add New" payment method opens modal; delete button calls DELETE API with confirmation
 - Patient Health Record: ✅ **FIXED** — "Request refill" button now calls real `/api/patient/prescriptions` POST endpoint to decrement refillsRemaining
 - Doctor ratings, review counts, "next available" time, and consultation fee are `Math.random()`-generated / hardcoded to `0` in both the doctor list and doctor detail APIs — causes a visible **"R0" consultation fee** on every doctor profile page (`?? 750` never kicks in because the value is `0`, not `undefined`). (`app/api/patient/practitioners/route.ts:25,29`, `.../[id]/route.ts:33-39`)
-- Mega/Super Admin: three pages are literal duplicates of another page — **Billing ≡ Finance** (same component, two nav entries), **Analytics ⊆ Overview** (strict data subset), and the same "platform intelligence" panel rendered independently on Overview, Alerts, *and* Reports.
+- Mega/Super Admin: ✅ **PARTIALLY FIXED** — Removed Billing duplicate (kept Finance only). **Analytics ⊆ Overview** kept separate due to different UX purposes (system analytics vs. revenue). "Platform intelligence" panel duplication across 3 pages noted for future consolidation (requires component refactoring).
 - ✅ **FIXED** — Confirmation dialogs added for all destructive admin actions: suspend/unsuspend user, change role, payout status change, maintenance mode toggle (with platform-outage warning)
 - A meaningful pile of orphaned/dead components duplicating real features (`AppointmentsView`, `DoctorsView`, `HealthActionCenter`, `PatientQueueTable`, `AppointmentCalendar`, `ClinicalDecisionSupport`, `VideoCallModal`, `VideoCallMockup`, `ChatModal`, `VoiceCallModal`, `EditableRiskScoreCard`, `RiskAlertsBanner`) — see §7.
 
