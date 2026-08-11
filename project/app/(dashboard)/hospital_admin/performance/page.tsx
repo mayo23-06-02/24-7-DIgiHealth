@@ -27,39 +27,53 @@ import {
   Cell,
 } from "recharts";
 
-const consultationVolume = [
-  { month: "Nov", consultations: 312 },
-  { month: "Dec", consultations: 289 },
-  { month: "Jan", consultations: 401 },
-  { month: "Feb", consultations: 378 },
-  { month: "Mar", consultations: 455 },
-  { month: "Apr", consultations: 432 },
-];
-
-const satisfactionTrend = [
-  { month: "Nov", score: 4.1 },
-  { month: "Dec", score: 4.3 },
-  { month: "Jan", score: 4.2 },
-  { month: "Feb", score: 4.5 },
-  { month: "Mar", score: 4.6 },
-  { month: "Apr", score: 4.7 },
-];
-
-const appointmentTypes = [
-  { name: "Teleconsultation", value: 75 },
-  { name: "Video Call", value: 20 },
-  { name: "Follow-up (Remote)", value: 5 },
-];
-
 const COLORS = ["var(--primary)", "#10b981", "#f59e0b"];
 
 export default function HospitalPerformancePage() {
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPerformanceData();
+  }, []);
+
+  const fetchPerformanceData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/hospital/performance");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to fetch performance data");
+      setData(json.data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || "Error loading performance data");
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const consultationVolume = data?.consultationVolume || [];
+  const satisfactionTrend = data?.satisfactionTrend || [];
+  const appointmentTypes = data?.appointmentTypes || [];
+  const kpis = data?.kpis || {};
 
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="animate-spin text-primary" size={40} />
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="w-full pb-10 flex flex-col gap-6">
+        <PageHeader
+          title="Performance"
+          subtitle="Key performance indicators and operational analytics"
+        />
+        <div className="text-center text-red-500 py-10">{error}</div>
       </div>
     );
 
@@ -74,34 +88,34 @@ export default function HospitalPerformancePage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <KPICard
           label="Total Consultations"
-          value="432"
+          value={kpis.consultationCount?.toString() || "0"}
           icon={<Calendar size={22} />}
           color="primary"
-          trend={12.3}
+          trend={kpis.consultationTrend || 0}
           description="vs last month"
         />
         <KPICard
           label="Patient Satisfaction"
-          value="4.7 / 5"
+          value={`${kpis.satisfactionScore || 0} / 5`}
           icon={<Star size={22} />}
           color="emerald"
-          trend={2.1}
+          trend={kpis.satisfactionTrend || 0}
           description="vs last month"
         />
         <KPICard
           label="Active Patients"
-          value="1,204"
+          value={(kpis.activePatients || 0).toLocaleString()}
           icon={<Users size={22} />}
           color="slate"
-          trend={5.8}
+          trend={kpis.patientsTrend || 0}
           description="vs last month"
         />
         <KPICard
           label="Revenue Growth"
-          value="18.4%"
+          value={`${kpis.revenueGrowth || 0}%`}
           icon={<LineChartIcon size={22} />}
           color="primary"
-          trend={3.2}
+          trend={kpis.revenueTrend || 0}
           description="vs last quarter"
         />
       </div>
