@@ -53,12 +53,12 @@
 ### 🟡 P2 — Broken buttons & dead code (quick fixes / cleanup)
 
 - Staff **Edit / Toggle Duty / Delete / View Profile** are broken for any staff member created via the current flow — a Mongo→Postgres migration was done for staff *list/create* but not for these four actions, so they're handed a Postgres UUID and query Mongo with it. (`app/api/hospital/staff/[id]/route.ts`, `.../[id]/profile/route.ts`)
-- Practitioner Queue page: "Join Video/Chat" and "Patient Profile" buttons have **no `onClick` at all**. (`app/(dashboard)/practitioner/queue/page.tsx:209-235`)
-- Patient Billing: "Add New" payment method and the delete-payment-method (×) button both have **no `onClick`**. "My Orders & Refills" is a hardcoded 3-item array. (`app/(dashboard)/billing/page.tsx:731-733,795-797,815-841`)
-- Patient Health Record: "Request refill" button does a `setTimeout` and shows a fake success toast — **no fetch call exists**. (`health-record/page.tsx:188-208`)
+- Practitioner Queue page: ✅ **FIXED** — "Join Video/Chat" button now navigates to consultation lobby; "Patient Profile" button navigates to patient profile page
+- Patient Billing: ✅ **FIXED** — "Add New" payment method opens modal; delete button calls DELETE API with confirmation
+- Patient Health Record: ✅ **FIXED** — "Request refill" button now calls real `/api/patient/prescriptions` POST endpoint to decrement refillsRemaining
 - Doctor ratings, review counts, "next available" time, and consultation fee are `Math.random()`-generated / hardcoded to `0` in both the doctor list and doctor detail APIs — causes a visible **"R0" consultation fee** on every doctor profile page (`?? 750` never kicks in because the value is `0`, not `undefined`). (`app/api/patient/practitioners/route.ts:25,29`, `.../[id]/route.ts:33-39`)
 - Mega/Super Admin: three pages are literal duplicates of another page — **Billing ≡ Finance** (same component, two nav entries), **Analytics ⊆ Overview** (strict data subset), and the same "platform intelligence" panel rendered independently on Overview, Alerts, *and* Reports.
-- No confirmation dialog anywhere in Mega/Super Admin before suspend-user, change-role, reject/mark-paid-payout, or enabling maintenance-mode — server-side checks are solid, but one misclick executes immediately.
+- ✅ **FIXED** — Confirmation dialogs added for all destructive admin actions: suspend/unsuspend user, change role, payout status change, maintenance mode toggle (with platform-outage warning)
 - A meaningful pile of orphaned/dead components duplicating real features (`AppointmentsView`, `DoctorsView`, `HealthActionCenter`, `PatientQueueTable`, `AppointmentCalendar`, `ClinicalDecisionSupport`, `VideoCallModal`, `VideoCallMockup`, `ChatModal`, `VoiceCallModal`, `EditableRiskScoreCard`, `RiskAlertsBanner`) — see §7.
 
 ### Responsive/mobile (design.md §3.5 / §2.5 — every screen must work at 375/768/1280px)
