@@ -191,15 +191,21 @@ export default function HealthRecordPage() {
     const tid = toast.loading("Submitting refill request...");
 
     try {
-      // Simulate API call
-      await new Promise((r) => setTimeout(r, 1500));
+      const res = await fetch("/api/patient/prescriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prescriptionId: selectedMedForRefill.id }),
+      });
+      const data = await res.json();
 
-      toast.success(
-        `Refill request for ${selectedMedForRefill.name} submitted successfully!`,
-        { id: tid },
-      );
-      setIsRefillModalOpen(false);
-      setSelectedMedForRefill(null);
+      if (res.ok && data.success) {
+        toast.success(data.message, { id: tid });
+        setIsRefillModalOpen(false);
+        setSelectedMedForRefill(null);
+        // Optionally refresh the medications list
+      } else {
+        toast.error(data.error || "Failed to submit refill request", { id: tid });
+      }
     } catch (err) {
       toast.error("Failed to submit refill request", { id: tid });
     } finally {

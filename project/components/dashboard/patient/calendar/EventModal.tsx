@@ -54,7 +54,6 @@ interface EventModalProps {
   handleDelete: (appt: Appointment) => void;
   doctors: any[];
   doctorOptions: any[];
-  facilityOptions: any[];
   loadingPrescriptions: boolean;
   prescriptionOptions: any[];
   isSaving: boolean;
@@ -74,7 +73,6 @@ const EventModal: React.FC<EventModalProps> = ({
   handleDelete,
   doctors,
   doctorOptions,
-  facilityOptions,
   loadingPrescriptions,
   prescriptionOptions,
   isSaving,

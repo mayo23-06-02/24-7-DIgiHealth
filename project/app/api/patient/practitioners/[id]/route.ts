@@ -36,7 +36,6 @@ export async function GET(
       languages: profile.languages || ['English'],
       avatarUrl: `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=4493b8&color=fff`,
       isOnline: profile.isOnline,
-      consultationFee: 0,
       experienceYears: profile.experienceYears,
       practicePhone: user.mobile,
       practiceEmail: user.email,

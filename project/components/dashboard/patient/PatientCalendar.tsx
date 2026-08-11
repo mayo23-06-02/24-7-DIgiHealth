@@ -59,7 +59,6 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
   const [selectedDateStr, setSelectedDateStr] = useState<string>("");
 
   const [doctors, setDoctors] = useState<{ name: string }[]>([]);
-  const [facilities, setFacilities] = useState<{ name: string }[]>([]);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
 
@@ -71,7 +70,6 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
     type: "reminder" as Appointment["type"],
     notes: "",
     doctor: "",
-    institution: "",
     prescriptionId: "",
     deliveryMethod: "pickup" as "pickup" | "delivery",
     deliveryAddress: "",
@@ -97,9 +95,8 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
 
   const fetchLists = async () => {
     try {
-      const [docsRes, facsRes] = await Promise.all([fetch("/api/patient/my-doctors"), fetch("/api/patient/facilities")]);
+      const docsRes = await fetch("/api/patient/my-doctors");
       if (docsRes.ok) setDoctors(await docsRes.json());
-      if (facsRes.ok) setFacilities(await facsRes.json());
     } catch { /* silent */ }
   };
 
@@ -111,7 +108,6 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
   }, [showAddModal, addForm.type]);
 
   const doctorOptions = useMemo(() => [{ value: "", label: "No preference" }, ...doctors.map(d => ({ value: d.name, label: d.name }))], [doctors]);
-  const facilityOptions = useMemo(() => [{ value: "", label: "No preference" }, ...facilities.map(f => ({ value: f.name, label: f.name }))], [facilities]);
   const prescriptionOptions = useMemo(() => {
     const opts = prescriptions.map(p => ({ value: p.id, label: `${p.medicationName} (${p.dosage}) - ${p.refillsRemaining} refills left` }));
     opts.unshift({ value: "new", label: "+ Request new prescription" });
@@ -161,7 +157,7 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
 
   const handleEdit = (appt: Appointment) => {
     setEditingId(appt.id);
-    setAddForm({ ...addForm, title: appt.title || appt.dr || "", time: appt.time, type: appt.type, notes: appt.notes || appt.concern || "", doctor: appt.dr || "", institution: appt.institution || "" });
+    setAddForm({ ...addForm, title: appt.title || appt.dr || "", time: appt.time, type: appt.type, notes: appt.notes || appt.concern || "", doctor: appt.dr || "" });
     setShowAddModal(appt.date);
   };
 
@@ -209,7 +205,7 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
       <EventModal
         showAddModal={showAddModal} onClose={() => setShowAddModal(null)} editingId={editingId} addForm={addForm} setAddForm={setAddForm}
         appointments={appointments} getMarkerColor={getMarkerColor} onDragStart={(e, id) => e.dataTransfer.setData("apptId", id)}
-        handleEdit={handleEdit} handleDelete={handleDelete} doctors={doctors} doctorOptions={doctorOptions} facilityOptions={facilityOptions}
+        handleEdit={handleEdit} handleDelete={handleDelete} doctors={doctors} doctorOptions={doctorOptions}
         loadingPrescriptions={loadingPrescriptions} prescriptionOptions={prescriptionOptions} isSaving={isSaving} handleAddSubmit={handleAddSubmit}
       />
 

@@ -36,3 +36,47 @@ export async function GET() {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+/** POST — request a prescription refill */
+export async function POST(request: Request) {
+  try {
+    await connectToDatabase();
+    const user = await getRequestUser();
+    if (!user || user.role !== "patient") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { prescriptionId } = await request.json();
+    if (!prescriptionId) {
+      return NextResponse.json({ error: "Prescription ID required" }, { status: 400 });
+    }
+
+    const prescription = await Prescription.findOne({
+      _id: prescriptionId,
+      patientId: user.userId,
+    });
+
+    if (!prescription) {
+      return NextResponse.json({ error: "Prescription not found" }, { status: 404 });
+    }
+
+    if (prescription.refillsRemaining <= 0) {
+      return NextResponse.json(
+        { error: "No refills remaining for this prescription" },
+        { status: 400 },
+      );
+    }
+
+    prescription.refillsRemaining -= 1;
+    await prescription.save();
+
+    return NextResponse.json({
+      success: true,
+      message: `Refill request for ${prescription.medicationName} submitted successfully`,
+      refillsRemaining: prescription.refillsRemaining,
+    });
+  } catch (err: any) {
+    console.error("[POST /api/patient/prescriptions]", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
