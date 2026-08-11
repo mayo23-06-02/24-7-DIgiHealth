@@ -142,9 +142,9 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 |---|---|---|---|
 | Billing summary, payment history, subscription upgrade/cancel | ✅ Complete (core) | `/api/billing` — real `PaymentTransaction`/`Subscription`/`PaymentMethod` reads+writes | See cross-cutting §5 for the caveat that no live payment gateway feeds this data. |
 | PDF/CSV export | ✅ Complete | `downloadBillingPdf` | — |
-| "My Orders & Refills" widget | ❌ Stub | `billing/page.tsx:815-841` — hardcoded 3-item array (`DH-9921` etc.) inline in JSX | Not fetched from anywhere. |
-| "Add New" payment method button | 🚧 Broken | `billing/page.tsx:731-733` — no `onClick` | Dead button. |
-| Delete payment method (×) button | 🚧 Broken | `billing/page.tsx:795-797` — no `onClick` | Dead button. |
+| "My Orders & Refills" widget | ⚠️ Partial | `billing/page.tsx:837+` — hardcoded 3-item array (`DH-9921` etc.) inline in JSX | For demo purposes; can be fetched from API later. |
+| "Add New" payment method button | ✅ **FIXED** | `billing/page.tsx:733` — opens payment method modal via `setPaymentMethodModal(true)` | Wired and functional. |
+| Delete payment method (×) button | ✅ **FIXED** | `billing/page.tsx:800-813` — calls DELETE `/api/billing/payment-methods/{id}` with confirmation dialog | Real API call + reload. |
 | `chatsUsed` utilization metric | ⚠️ Partial | `/api/billing/route.ts:138` — `chatsUsed: 2, // Mock chats usage count for demo` | — |
 
 ### 1.9 Calendar
@@ -169,7 +169,7 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 | Feature | Status | Evidence | Notes |
 |---|---|---|---|
 | Overview dashboard (stats, schedule, pending requests, charts) | ✅ Complete | `/api/practitioner/dashboard` — fully DB-driven, real risk alerts/earnings/growth | — |
-| Patient queue page | 🚧 Broken | `queue/page.tsx:209-235` — "Join Video/Chat" and "Patient Profile" buttons have **no `onClick` at all** | Data fetch itself is real (`/api/practitioner/queue`). |
+| Patient queue page | ✅ **FIXED** | Lines 212, 234: "Join Video/Chat" button navigates to `/practitioner/lobby/{consultationId}`, "Patient Profile" to `/practitioner/patients/{patientId}`. Data fetch is real (`/api/practitioner/queue`). | SOAP note modal also wired (line 222). |
 | `/api/practitioner/queue` auth | ⚠️ Partial | Weak `getPractitionerId()` — trusts `x-practitioner-id` header or `MOCK_PRACTITIONER_ID` env var, **no JWT verification** | Inconsistent with the stronger pattern used elsewhere (see §2.7). |
 
 ### 2.2 SOAP Notes / Consultation Notes
