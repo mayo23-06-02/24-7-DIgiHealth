@@ -83,19 +83,19 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 | Appointments list/calendar | ✅ Complete | `components/dashboard/patient/PatientAppointments.tsx`, `/api/patient/appointments` | Cancel, accept/decline, filters, list/calendar toggle all real. |
 | Booking modal (multi-step) | ✅ Complete | `components/doctor/BookingModal.tsx` via `lib/booking` → `/api/bookings/*` | Shared across patient/practitioner, reschedule too. |
 | Book from doctor profile | ✅ Complete | `doctors/[id]/page.tsx:447-451` opens `BookingModal` | — |
-| `/patient/visits` "Mission Control" | 🚧 Broken · 🔁 Duplicate | `visits/page.tsx:63-82` cancel = local `filter()` + `alert()`, no API call; "Join Call" is a static mock ("Stable (32ms Latency)"); "Prescription PDF" has no `onClick` | **Duplicates `/patient/appointments`** at lower quality. Recommend deprecating. |
+| `/patient/visits` "Mission Control" | ✅ **Removed** | Deleted entirely — was a duplicate of `/patient/appointments` at lower quality | Feature consolidated into primary appointments interface. |
 | Appointment lobby (`/patient/lobby/[id]`) | ✅ Complete | `components/dashboard/AppointmentLobby.tsx` — real fetch + auto-redirect at scheduled time | — |
 
 ### 1.3 Doctor Search, Profiles & Favorites
 
 | Feature | Status | Evidence | Notes |
 |---|---|---|---|
-| Browse/search doctors | ⚠️ Partial | `app/api/patient/practitioners/route.ts:25` `nextAvailableMinutes: Math.floor(Math.random()*60)+10`; `:29` `consultationFee: 0` hardcoded | Ratings are real DB fields; availability/fee are fake. |
-| Doctor detail page | ⚠️ Partial · 🚧 Bug | `app/api/patient/practitioners/[id]/route.ts:33-39` — rating/reviewCount/nextAvailable all `Math.random()`; `consultationFee: 0` | UI does `doc.consultationFee ?? 750` — since value is `0` not `undefined`, **every doctor shows "R0" fee**. |
+| Browse/search doctors | ⚠️ Partial | `app/api/patient/practitioners/route.ts:25` — `nextAvailableMinutes: Math.floor(Math.random()*60)+10` | Ratings are real DB fields; availability/nextAvailable are fake. Consultation fees removed (covered in patient premiums). |
+| Doctor detail page | ⚠️ Partial | `app/api/patient/practitioners/[id]/route.ts:33-39` — rating/reviewCount/nextAvailable all `Math.random()` | Consultation fees removed (covered in patient premiums, online-only consultations). |
 | Favorite/unfavorite doctor | ✅ Complete | `POST/DELETE /api/patient/my-doctors/[id]` | — |
 | Message doctor from profile | ✅ Complete | `POST /api/conversations` w/ graceful fallback | — |
 | Doctor reviews (read + submit) | ✅ Complete | `PatientFeedbackSection` + `/api/practitioners/[id]/reviews`, `/api/patient/reviews` | (Fixed this session — see chat history: was collapsing multi-review patients into one hidden card.) |
-| Nearby facilities widget | ⚠️ Partial | `app/api/patient/facilities/route.ts:15-32` — distance/rating/occupancy/patientsWaiting all `Math.random()` | Real facility record, fake live stats. |
+| Nearby facilities widget | ✅ **Removed** | Removed from PatientCalendar and calendar event modal — not needed for online-only consultations | Simplified calendar UI and removed unnecessary API call to `/api/patient/facilities`. |
 | Responsive (doctor search/browse) | 🚧 Gap | Zero `sm:/md:/lg:/xl:` classes anywhere in `DoctorsViewRefactored.tsx` + children | Primary discovery surface, worst mobile coverage in the app. |
 
 ### 1.4 Health Record
@@ -105,7 +105,7 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 | Timeline / Vitals / Labs / Meds / Allergies / Immunizations tabs | ✅ Complete | `app/api/patient/health-record/route.ts:39-198` — real aggregation across 6 collections | — |
 | Health profile PDF download | ✅ Complete | `/api/patient/health-record/report` | — |
 | Add/remove allergy | ✅ Complete | `/api/patient/health-record/allergies` | — |
-| **Medication refill request** | ❌ Stub | `health-record/page.tsx:188-208` — comment `// Simulate API call`, `setTimeout(1500)`, **no fetch at all** | Full UI (pharmacy, address, notes) exists; nothing is persisted. |
+| **Medication refill request** | ✅ **Fixed** | `POST /api/patient/prescriptions` endpoint now decrements `refillsRemaining` on prescription | Real API call replaces fake setTimeout. Validation checks refills remaining and returns 400 if none available. |
 | 3D body manikin annotations | ✅ Complete | `/api/patient/annotations` — real `BodyAnnotation` CRUD | — |
 
 ### 1.5 Family / Guardian Accounts
@@ -117,15 +117,15 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 | Manage individual family member | ✅ Complete | `/api/patient/family/[memberId]/appointments`, `/health-record` | — |
 | Switch active account (guardian ↔ member) | ✅ Complete | `/api/patient/family/[memberId]/switch`, `/switch-back` | Not deep-audited but DB-backed, not stub. |
 
-### 1.6 Wellness Hub — ❌ largest single stub in the Patient role
+### 1.6 Wellness Hub — ✅ Stubs Fixed
 
 | Feature | Status | Evidence | Notes |
 |---|---|---|---|
-| Wellness score / streak / weekly trend | ❌ Stub | `wellness/page.tsx:133-157` — calls `/api/patient/wellness/score`, **route does not exist**; catch-block fabricates `score: 78, streak: 12`, history via `Math.random()` | Entirely decorative. |
-| Daily check-in (mood/sleep/steps) | ❌ Stub | `handleCheckin` posts to `/api/patient/wellness/checkin` — **route does not exist**; silently fakes a success + score bump on failure | User sees "synced ✅" for data that went nowhere. |
-| Smart health tips | ⚠️ Partial | Real `/api/health-tips` exists, but falls back to hardcoded `MOCK_TIPS` silently on any failure | — |
-| Articles / clinical library | ❌ Stub | Calls `/api/articles` — **route does not exist**; always shows hardcoded `MOCK_ARTICLES` (2 items) | Permanently fake content. |
-| Motivational quote | ⚠️ Partial | Calls third-party `api.quotable.io` directly from the client, hardcoded fallback | Not even a DigiHealth API. |
+| Wellness score / streak / weekly trend | ✅ **Fixed** | `/api/patient/wellness/score` GET endpoint created — queries `WellnessScore` collection, calculates streak from consecutive check-in days | Returns { score, streak, history } with past 7 days of scores. |
+| Daily check-in (mood/sleep/steps) | ✅ **Fixed** | `/api/patient/wellness/checkin` POST endpoint created — persists check-in, calculates wellness score from mood/sleep/steps, updates daily `WellnessScore` | Real data persistence, streak tracking across days. |
+| Smart health tips | ✅ Complete | `/api/health-tips` returns published `Article` records filtered by category | — |
+| Articles / clinical library | ✅ **Fixed** | `/api/articles` GET endpoint created — returns published articles with optional limit/category filters | Calls same Article collection as health-tips. |
+| Motivational quote | ⚠️ Partial | Calls third-party `api.quotable.io` directly from the client, hardcoded fallback | Not a DigiHealth API, but functioning. |
 
 ### 1.7 Messaging & AI Diagnosis Chat
 
