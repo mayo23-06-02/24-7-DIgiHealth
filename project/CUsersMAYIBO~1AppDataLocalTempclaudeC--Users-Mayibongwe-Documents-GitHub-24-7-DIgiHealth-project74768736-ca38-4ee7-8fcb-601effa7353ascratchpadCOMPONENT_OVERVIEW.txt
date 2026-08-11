@@ -1,0 +1,122 @@
+================================================================================
+LANDING PAGE COMPONENT DETAILS
+================================================================================
+
+1. NAVBAR (Navigation Header)
+   Location: components/LandingPage/Navbar.tsx
+   Type: Client component (uses scroll state)
+   Features:
+     - Top bar with weather/social icons
+     - Sticky main navbar with scroll effect
+     - Desktop nav links: Home, About, Approach, Testimonials, Blog
+     - Mobile hamburger menu with full-screen overlay
+     - Auth buttons: Login & Get Started
+     - Logo: "24 DigiHealth"
+
+2. HERO (Carousel Hero Section)
+   Location: components/LandingPage/Hero.tsx
+   Type: Client component (carousel with auto-advance)
+   Features:
+     - 3-slide carousel auto-advancing every 7 seconds
+     - Parallax scrolling background images
+     - Slides:
+       a) "Your Trusted Partner in Modern Healthcare" (97% Trusted Care Rate)
+       b) "AI-Powered Symptom Triage For Everyone" (11 Languages Supported)
+       c) "Instant Access To Top Specialists 24/7 Support" (50+ Active Specialists)
+     - Dynamic stat cards showing slide-specific metrics
+     - Clickable slide indicators at bottom
+     - CTA: "Explore Services" button
+
+3. STATS SECTION (Market Statistics)
+   Location: components/LandingPage/StatsSection.tsx
+   Type: Static component
+   Statistics:
+     - $4.36B  - SA Market Value (2030)
+     - 27.5%   - Growth Rate (CAGR)
+     - 43M+    - RSA Internet Users
+     - 11      - Official Languages
+
+4. ABOUT US (Impact Metrics & Features)
+   Location: components/LandingPage/AboutUs.tsx
+   Type: Client component (rotating stats carousel)
+   Features:
+     - Dynamic stats carousel (4 metrics, arrow navigation):
+       * 50+ Healthcare Professionals
+       * 135k+ Patients Registered
+       * 97% Consultation Success Rate
+       * 24/7 Continuous Access
+     - Feature cards: Smart Care + Secure Data
+     - Description of platform benefits
+
+5. APPROACH (The DigiHealth Model)
+   Location: components/LandingPage/Approach.tsx
+   Type: Static component
+   Features:
+     - Section title: "24/7 DigiHealth Total Care™ Model"
+     - Large video placeholder with play button
+     - Description of holistic care approach
+     - Color scheme: Light background with blue overlays
+
+6. WHY CHOOSE US (Core Values)
+   Location: components/LandingPage/WhyChooseUs.tsx
+   Type: Client component (interactive tabs)
+   Features:
+     - 5 core values (interactive tabs):
+       * Compassion
+       * Collaboration
+       * Transparency
+       * Flexibility
+       * Excellence
+     - Left side: Values list with hover effects
+     - Center: Image of doctor/patient
+     - Right side: Blue box with commitment statement
+     - "Get Started" button
+
+7. TESTIMONIALS (Customer Reviews)
+   Location: components/LandingPage/Testimonials.tsx
+   Type: Client component (interactive carousel)
+   Features:
+     - 6 testimonials in carousel format
+     - Responsive: 3 cards desktop, 2 tablet, 1 mobile
+     - Hover effects: Text shows on edges, image shows on middle
+     - Navigation arrows
+     - Shows: Title, Review text, Name, Role, Avatar image
+     - Social share buttons (X, Facebook, Play)
+
+8. BLOG (Health Articles)
+   Location: components/LandingPage/Blog.tsx
+   Type: Static component
+   Features:
+     - 3 featured blog posts
+     - Posts:
+       a) "5 Daily Habits for a Healthier Heart you deserve"
+       b) "Top Benefits of Regular Health Checkups"
+       c) "The Link Between Stress & Physical Health"
+     - Each shows: Featured image, title, excerpt, date
+     - "Read More" button with icon on hover
+
+9. FOOTER (Site Footer)
+   Location: components/LandingPage/Footer.tsx
+   Type: Client component
+   Sections:
+     a) Newsletter signup:
+        - Heading: "Stay ahead of your health journey"
+        - Email input + Subscribe button
+     
+     b) Quick Links:
+        - Home, About, Services, Blog, Contact
+     
+     c) Our Services:
+        - General Medicine, Dental Care, Pediatrics
+        - Women's Health, Cardiology, Physiotherapy
+     
+     d) Doctors:
+        - Our Specialists, Qualifications & Expertise
+        - Patient Reviews, Join Our Team
+     
+     e) Social Icons:
+        - Twitter/X, Facebook, YouTube
+     
+     f) Copyright & Mission Statement
+
+================================================================================
