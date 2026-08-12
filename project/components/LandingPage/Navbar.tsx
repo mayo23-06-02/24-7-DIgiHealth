@@ -3,12 +3,13 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaPhoneAlt,
-} from "react-icons/fa";
-import { BiCalendar, BiUpArrow } from "react-icons/bi";
+  Facebook,
+  Twitter,
+  Instagram,
+  Phone,
+  Calendar,
+  ChevronUp,
+} from "lucide-react";
 import Button from "../ui/Button";
 import LogoMain from "../ui/LogoMain";
 
@@ -132,7 +133,7 @@ export default function Navbar() {
               aria-label="Facebook"
               className="hover:opacity-80 transition"
             >
-              <FaFacebookF size={14} />
+              <Facebook size={16} className="text-white" />
             </a>
             <a
               href="https://twitter.com"
@@ -141,7 +142,7 @@ export default function Navbar() {
               aria-label="Twitter"
               className="hover:opacity-80 transition"
             >
-              <FaTwitter size={14} />
+              <Twitter size={16} className="text-white" />
             </a>
             <a
               href="https://instagram.com"
@@ -150,14 +151,14 @@ export default function Navbar() {
               aria-label="Instagram"
               className="hover:opacity-80 transition"
             >
-              <FaInstagram size={14} />
+              <Instagram size={16} className="text-white" />
             </a>
             <div className="w-px h-4 bg-white/30" />
             <a
               href="tel:08001234567"
               className="flex items-center gap-2 font-medium hover:opacity-80 transition"
             >
-              <FaPhoneAlt size={12} />
+              <Phone size={14} className="text-white" />
               <span>Toll Free: 0800 123 4567</span>
             </a>
           </div>
