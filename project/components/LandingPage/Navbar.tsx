@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BiFacebook,
-  BiLogoTwitter,
-  BiLogoInstagram,
+  BiLink,
+  BiChat,
+  BiHeart,
   BiPhone,
 } from "react-icons/bi";
 import Button from "../ui/Button";
@@ -131,7 +131,7 @@ export default function Navbar() {
               aria-label="Facebook"
               className="hover:opacity-80 transition"
             >
-              <BiFacebook size={16} className="text-white" />
+              <BiLink size={16} className="text-white" />
             </a>
             <a
               href="https://twitter.com"
@@ -140,7 +140,7 @@ export default function Navbar() {
               aria-label="Twitter"
               className="hover:opacity-80 transition"
             >
-              <BiLogoTwitter size={16} className="text-white" />
+              <BiChat size={16} className="text-white" />
             </a>
             <a
               href="https://instagram.com"
@@ -149,7 +149,7 @@ export default function Navbar() {
               aria-label="Instagram"
               className="hover:opacity-80 transition"
             >
-              <BiLogoInstagram size={16} className="text-white" />
+              <BiHeart size={16} className="text-white" />
             </a>
             <div className="w-px h-4 bg-white/30" />
             <a
