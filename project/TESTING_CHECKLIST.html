@@ -1,4 +1,4 @@
-<title>24/7 DigiHealth — Test Execution Record</title>
+<title>24/7 DigiHealth — QA Checklist</title>
 <style>
   :root {
     --paper:      #ffffff;
@@ -10,556 +10,471 @@
     --rule:       #d3e0e6;
     --rule-firm:  #a9c3ce;
     --primary:    #2b7a9e;
-    --critical:   #b3261e;
-    --caution:    #8a5a00;
     --good:       #16704a;
-
-    --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
     --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
   }
-
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper:     #0d1a21;
-      --surface:   #142630;
-      --surface-2: #1a3039;
-      --ink:       #e6eef2;
-      --ink-2:     #a8c0cc;
-      --ink-3:     #7590a0;
-      --rule:      #24404c;
-      --rule-firm: #385b6a;
-      --primary:   #6cb6d4;
-      --critical:  #f08b84;
-      --caution:   #d8a53c;
-      --good:      #57bb8a;
+      --paper:#0d1a21; --surface:#142630; --surface-2:#1a3039;
+      --ink:#e6eef2; --ink-2:#a8c0cc; --ink-3:#7590a0;
+      --rule:#24404c; --rule-firm:#385b6a; --primary:#6cb6d4; --good:#57bb8a;
     }
   }
   :root[data-theme="dark"] {
     --paper:#0d1a21; --surface:#142630; --surface-2:#1a3039;
     --ink:#e6eef2; --ink-2:#a8c0cc; --ink-3:#7590a0;
-    --rule:#24404c; --rule-firm:#385b6a;
-    --primary:#6cb6d4; --critical:#f08b84; --caution:#d8a53c; --good:#57bb8a;
+    --rule:#24404c; --rule-firm:#385b6a; --primary:#6cb6d4; --good:#57bb8a;
   }
   :root[data-theme="light"] {
     --paper:#ffffff; --surface:#f2f6f8; --surface-2:#e8f0f4;
     --ink:#10232e; --ink-2:#43606d; --ink-3:#7590a0;
-    --rule:#d3e0e6; --rule-firm:#a9c3ce;
-    --primary:#2b7a9e; --critical:#b3261e; --caution:#8a5a00; --good:#16704a;
+    --rule:#d3e0e6; --rule-firm:#a9c3ce; --primary:#2b7a9e; --good:#16704a;
   }
 
   * { box-sizing: border-box; }
-
   body {
     margin: 0;
     background: var(--surface);
     color: var(--ink);
     font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.55;
-  }
-
-  .sheet {
-    max-width: 62rem;
-    margin: 0 auto;
-    background: var(--paper);
-    padding: 3rem 3.25rem 4rem;
-    border-left: 1px solid var(--rule);
-    border-right: 1px solid var(--rule);
-    display: flex;
-    flex-direction: column;
-    gap: 2.75rem;
-  }
-
-  /* ---------- masthead ---------- */
-  .masthead { display: flex; flex-direction: column; gap: 1rem; }
-  .rule-heavy { height: 3px; background: var(--ink); }
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: .7rem;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--primary);
-  }
-  h1 {
-    font-family: var(--serif);
-    font-size: 2.15rem;
-    line-height: 1.15;
-    margin: 0;
-    text-wrap: balance;
-    font-weight: 600;
-  }
-  .standfirst {
-    font-family: var(--serif);
-    font-size: 1.05rem;
-    color: var(--ink-2);
-    max-width: 46ch;
-    margin: 0;
-  }
-  .meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-    gap: .85rem 1.5rem;
-    border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    padding: .9rem 0;
-    font-size: .82rem;
-  }
-  .meta dt {
-    font-family: var(--mono);
-    font-size: .66rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    margin: 0 0 .15rem;
-  }
-  .meta dd { margin: 0; font-family: var(--mono); color: var(--ink); }
-
-  /* ---------- scorecard ---------- */
-  .scorecard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-    gap: 1px;
-    background: var(--rule);
-    border: 1px solid var(--rule);
-  }
-  .score { background: var(--paper); padding: 1.1rem 1rem; }
-  .score .n {
-    font-family: var(--serif);
-    font-size: 2.3rem;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    display: block;
-  }
-  .score .l {
-    font-family: var(--mono);
-    font-size: .66rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    margin-top: .45rem;
-    display: block;
-  }
-  .score.is-good .n { color: var(--good); }
-  .score.is-crit .n { color: var(--critical); }
-  .score.is-warn .n { color: var(--caution); }
-
-  h2 {
-    font-family: var(--serif);
-    font-size: 1.35rem;
-    margin: 0;
-    font-weight: 600;
-    display: flex;
-    align-items: baseline;
-    gap: .7rem;
-  }
-  h2 .count {
-    font-family: var(--mono);
-    font-size: .72rem;
-    color: var(--ink-3);
-    letter-spacing: .08em;
-  }
-  section { display: flex; flex-direction: column; gap: 1rem; }
-  .lede { margin: 0; color: var(--ink-2); max-width: 68ch; }
-
-  .callout {
-    border-left: 3px solid var(--critical);
-    background: var(--surface);
-    padding: .9rem 1.1rem;
-    font-size: .92rem;
-  }
-  .callout strong { color: var(--critical); }
-
-  /* ---------- tables ---------- */
-  .scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: .84rem; }
-  caption {
-    text-align: left;
-    font-family: var(--mono);
-    font-size: .66rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    padding-bottom: .5rem;
-  }
-  th {
-    text-align: left;
-    font-family: var(--mono);
-    font-size: .64rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    font-weight: 400;
-    padding: .5rem .7rem;
-    border-bottom: 1px solid var(--rule-firm);
-    white-space: nowrap;
-  }
-  td {
-    padding: .6rem .7rem;
-    border-bottom: 1px solid var(--rule);
-    vertical-align: top;
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  .id { font-family: var(--mono); font-size: .76rem; color: var(--ink-3); white-space: nowrap; }
-  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-  code {
-    font-family: var(--mono);
-    font-size: .82em;
-    background: var(--surface);
-    padding: .08em .32em;
-    border-radius: 2px;
-  }
-
-  /* severity encoded in form as well as colour */
-  .sev { border-left: 3px solid transparent; padding-left: .55rem; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-  .sev-crit { border-left-color: var(--critical); color: var(--critical); }
-  .sev-high { border-left-color: var(--caution); color: var(--caution); }
-  .sev-med  { border-left-color: var(--rule-firm); color: var(--ink-2); }
-
-  .verdict { font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; white-space: nowrap; }
-  .v-fixed { color: var(--good); }
-  .v-open  { color: var(--caution); }
-
-  .pass { color: var(--good); font-family: var(--mono); font-size: .8rem; white-space: nowrap; }
-  .blocked { color: var(--ink-3); font-family: var(--mono); font-size: .8rem; }
-
-  .delta { font-family: var(--mono); font-size: .78rem; white-space: nowrap; }
-  .delta .was { color: var(--critical); }
-  .delta .now { color: var(--good); }
-
-  .sign {
-    border: 1px solid var(--rule-firm);
-    padding: 1.25rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    gap: 1.5rem;
-  }
-  .sign .line { border-bottom: 1px solid var(--ink-3); height: 2rem; }
-  .sign .lbl {
-    font-family: var(--mono);
-    font-size: .64rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    margin-top: .4rem;
-    display: block;
+    -webkit-font-smoothing: antialiased;
   }
 
   .toolbar {
-    max-width: 62rem;
-    margin: 0 auto;
-    padding: 1rem 3.25rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: .85rem 1.5rem;
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
-  button {
+  .toolbar .title { font-weight: 700; font-size: .95rem; margin-right: auto; }
+  .toolbar .progress-wrap {
+    flex: 1 1 220px;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  .bar { flex: 1; height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width .25s ease; }
+  .progress-label { font-family: var(--mono); font-size: .74rem; color: var(--ink-2); white-space: nowrap; }
+  button.action {
     font-family: var(--mono);
     font-size: .7rem;
-    letter-spacing: .1em;
+    letter-spacing: .08em;
     text-transform: uppercase;
     background: var(--ink);
     color: var(--paper);
     border: none;
-    padding: .6rem 1.1rem;
+    border-radius: 4px;
+    padding: .55rem 1rem;
     cursor: pointer;
   }
-  button:hover { background: var(--primary); }
-  button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  button.action:hover { background: var(--primary); }
+  button.action.ghost { background: transparent; color: var(--ink-2); border: 1px solid var(--rule-firm); }
+  button.action.ghost:hover { color: var(--ink); border-color: var(--ink-2); background: transparent; }
 
-  footer {
-    font-size: .78rem;
+  .sheet { max-width: 60rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  header.masthead { margin-bottom: 1.75rem; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: block;
+    margin-bottom: .5rem;
+  }
+  h1 { margin: 0 0 .4rem; font-size: 1.9rem; letter-spacing: -0.01em; }
+  .standfirst { margin: 0; color: var(--ink-2); font-size: .96rem; max-width: 42rem; line-height: 1.5; }
+
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: 1.5rem 0 2rem;
+  }
+  nav.toc a {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .04em;
+    color: var(--ink-2);
+    text-decoration: none;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 99px;
+    padding: .35rem .75rem;
+  }
+  nav.toc a:hover { border-color: var(--primary); color: var(--primary); }
+  nav.toc a .count { color: var(--ink-3); margin-left: .35rem; }
+
+  section.area {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  section.area > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    border-bottom: 1px solid transparent;
+  }
+  section.area > summary::-webkit-details-marker { display: none; }
+  section.area[open] > summary { border-bottom-color: var(--rule); }
+  summary .chev { color: var(--ink-3); transition: transform .15s ease; font-size: .8rem; }
+  section.area[open] summary .chev { transform: rotate(90deg); }
+  summary h2 { font-size: 1.02rem; margin: 0; flex: 1; }
+  summary .route {
+    font-family: var(--mono);
+    font-size: .72rem;
+    color: var(--ink-3);
+    background: var(--surface);
+    padding: .15rem .5rem;
+    border-radius: 4px;
+  }
+  summary .area-progress {
+    font-family: var(--mono);
+    font-size: .74rem;
+    color: var(--ink-2);
+    min-width: 3.6rem;
+    text-align: right;
+  }
+
+  ul.items { list-style: none; margin: 0; padding: .4rem 0; }
+  ul.items li {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .6rem 1.25rem;
+    border-top: 1px solid var(--rule);
+  }
+  ul.items li:first-child { border-top: none; }
+  ul.items input[type="checkbox"] {
+    appearance: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 1.5px solid var(--rule-firm);
+    border-radius: 4px;
+    margin-top: .1rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    background: var(--paper);
+    position: relative;
+  }
+  ul.items input[type="checkbox"]:checked {
+    background: var(--good);
+    border-color: var(--good);
+  }
+  ul.items input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 4px; top: 1px;
+    width: 5px; height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(40deg);
+  }
+  ul.items label { flex: 1; cursor: pointer; font-size: .9rem; line-height: 1.45; }
+  ul.items li.done label { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--rule-firm); }
+  ul.items .tag {
+    font-family: var(--mono);
+    font-size: .64rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+    margin-top: .15rem;
+  }
+
+  footer.note {
+    margin-top: 2rem;
+    font-size: .82rem;
     color: var(--ink-3);
     border-top: 1px solid var(--rule);
     padding-top: 1rem;
   }
 
   @media (max-width: 640px) {
-    .sheet { padding: 2rem 1.25rem 3rem; }
-    .toolbar { padding: 1rem 1.25rem 0; }
-    h1 { font-size: 1.7rem; }
+    .sheet { padding: 1.5rem 1rem 3rem; }
+    h1 { font-size: 1.5rem; }
+    summary .route { display: none; }
   }
-
   @media print {
-    body { background: #fff; }
-    .toolbar { display: none; }
-    .sheet { max-width: none; border: none; padding: 0; gap: 1.75rem; }
-    section { break-inside: avoid; }
-    tr { break-inside: avoid; }
-    h2 { break-after: avoid; }
+    .toolbar, nav.toc { display: none; }
+    section.area { break-inside: avoid; border: none; }
+    section.area > summary { border: none; }
   }
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
-  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
 <div class="toolbar">
-  <button onclick="window.print()">Save as PDF</button>
+  <span class="title">24/7 DigiHealth QA Checklist</span>
+  <div class="progress-wrap">
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    <span class="progress-label" id="progressLabel">0 / 0</span>
+  </div>
+  <button class="action ghost" onclick="expandAll()">Expand all</button>
+  <button class="action ghost" onclick="if(confirm('Clear all checked items?')) resetAll()">Reset</button>
+  <button class="action" onclick="window.print()">Save as PDF</button>
 </div>
 
 <div class="sheet">
-
   <header class="masthead">
-    <div class="rule-heavy"></div>
-    <span class="eyebrow">Quality Assurance · Test Execution Record</span>
-    <h1>24/7 DigiHealth Platform Audit</h1>
-    <p class="standfirst">Every claim below was produced by running the system, not by reading its source. Figures are measured values captured from the live application.</p>
-    <dl class="meta">
-      <div><dt>Date</dt><dd>2026-08-12</dd></div>
-      <div><dt>Build tested</dt><dd>25c34d8 → 68ebb51</dd></div>
-      <div><dt>Roles exercised</dt><dd>5 of 6</dd></div>
-      <div><dt>Method</dt><dd>Browser + API + DB</dd></div>
-      <div><dt>Environment</dt><dd>localhost:3000</dd></div>
-      <div><dt>Coverage</dt><dd>92%</dd></div>
-    </dl>
+    <span class="eyebrow">Manual QA · Working Checklist</span>
+    <h1>Personal Test Pass</h1>
+    <p class="standfirst">
+      Walk through each area below against <code>localhost:3000</code>. Check items off as you verify them —
+      your progress is saved automatically in this browser, so you can close the tab and pick up later.
+    </p>
   </header>
 
-  <div class="scorecard">
-    <div class="score is-good"><span class="n">68</span><span class="l">Verified passing</span></div>
-    <div class="score is-crit"><span class="n">17</span><span class="l">Defects fixed</span></div>
-    <div class="score is-warn"><span class="n">2</span><span class="l">Gaps disclosed</span></div>
-    <div class="score"><span class="n">6</span><span class="l">Still blocked</span></div>
-    <div class="score"><span class="n">92<span style="font-size:1.2rem">%</span></span><span class="l">Executed</span></div>
-  </div>
+  <nav class="toc" id="toc"></nav>
 
-  <section>
-    <h2>Headline finding</h2>
-    <div class="callout">
-      <strong>11 of the 17 defects sat in code previously marked “complete”.</strong>
-      That prior status was assigned by reading the code rather than running it. One endpoint returned 404 for every real account; two dashboards silently substituted hardcoded numbers for live data; an audit log discarded every action performed by an entire class of administrator. None of these are visible to inspection — each one returns a success status while doing the wrong thing.
-    </div>
-  </section>
+  <div id="areas"></div>
 
-  <section>
-    <h2>Defect register <span class="count">17 found · 17 resolved</span></h2>
-    <div class="scroll">
-      <table>
-        <caption>Ordered by severity, then by area</caption>
-        <thead>
-          <tr>
-            <th>Ref</th><th>Severity</th><th>Area</th><th>Defect</th><th>Evidence</th><th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="id">D-02</td><td><span class="sev sev-crit">Critical</span></td><td>Auth</td>
-            <td>Login returned four distinct errors before any password check, distinguishing registered from unregistered addresses — the whole user base was enumerable.</td>
-            <td class="delta"><span class="was">4 messages</span> → <span class="now">1 generic</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-09</td><td><span class="sev sev-crit">Critical</span></td><td>Practitioner</td>
-            <td>Patient queue took identity from a client-supplied <code>x-practitioner-id</code> header with no token verification — any caller could read another clinician’s patient list, complaints and risk scores.</td>
-            <td class="delta">spoof <span class="was">200</span> → <span class="now">401</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-10</td><td><span class="sev sev-crit">Critical</span></td><td>Compliance</td>
-            <td>Audit log silently discarded every action by a UUID-identified admin. The action succeeded, returned 200, and never appeared in the record presented as immutable.</td>
-            <td class="delta"><span class="was">14 entries</span> → <span class="now">15</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-08</td><td><span class="sev sev-high">High</span></td><td>Hospital</td>
-            <td>Charts rendered fabricated figures. An ObjectId/string mismatch meant aggregations matched nothing and fell through to hardcoded arrays — the chart contradicted the KPI beside it.</td>
-            <td class="delta"><span class="was">Nov 145…Apr 261</span> → <span class="now">Jun 13, Jul 3</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-06</td><td><span class="sev sev-high">High</span></td><td>Hospital</td>
-            <td>Analytics endpoint used a Postgres-only resolver where every sibling route used the Mongo-aware one — 404 for every seeded administrator.</td>
-            <td class="delta"><span class="was">404</span> → <span class="now">200</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-01</td><td><span class="sev sev-high">High</span></td><td>Marketing</td>
-            <td>Landing page was unreachable. Middleware redirected <code>/</code> to the login screen, so the page component never executed despite being committed as demo-ready.</td>
-            <td class="delta"><span class="was">login form</span> → <span class="now">9 sections</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-11</td><td><span class="sev sev-high">High</span></td><td>Identity</td>
-            <td>One account carried two identities. All 307 Postgres users had a null link column, so accounts present in both stores issued a UUID session while the rest of the app used ObjectIds. Root cause of D-10.</td>
-            <td class="delta">link now <span class="now">self-heals</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-12</td><td><span class="sev sev-high">High</span></td><td>Hospital</td>
-            <td>Facility resolver committed to one lookup path by identifier shape, so every staff endpoint answered “No facility linked”.</td>
-            <td class="delta"><span class="was">404</span> → <span class="now">200</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-15</td><td><span class="sev sev-high">High</span></td><td>Practitioner</td>
-            <td>Queue filtered on a status value that does not exist in the data (<code>ongoing</code> vs the stored <code>in_progress</code>), making all in-progress consultations unreachable.</td>
-            <td class="delta">10 rows <span class="now">recovered</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-16</td><td><span class="sev sev-high">High</span></td><td>Practitioner</td>
-            <td>Date filter excluded precisely the rows the page exists to show. History is always in the past; in-progress work started before “now”. All three tabs were permanently empty.</td>
-            <td class="delta">Cancelled <span class="was">0</span> → <span class="now">12</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-07</td><td><span class="sev sev-med">Medium</span></td><td>Hospital</td>
-            <td>Analytics occupancy was randomly generated — the chart changed on every page refresh.</td>
-            <td class="delta">now <span class="now">stable</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-03</td><td><span class="sev sev-med">Medium</span></td><td>Patient</td>
-            <td>Wellness check-in returned a server error on non-numeric input; range-only guards never reject strings.</td>
-            <td class="delta"><span class="was">500</span> → <span class="now">400</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-04</td><td><span class="sev sev-med">Medium</span></td><td>Patient</td>
-            <td>Check-ins were filed one day early — written at local midnight, read back as UTC.</td>
-            <td class="delta">date <span class="now">correct</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-05</td><td><span class="sev sev-med">Medium</span></td><td>Patient</td>
-            <td>Wellness score was effectively always 100 — a mediocre day scored identically to a perfect one, so the number carried no signal.</td>
-            <td class="delta"><span class="was">100 / 100</span> → <span class="now">26–100</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-13</td><td><span class="sev sev-med">Medium</span></td><td>Hospital</td>
-            <td>Toggle Duty failed on a column-name mismatch between the caller’s camelCase and the table’s snake_case.</td>
-            <td class="delta"><span class="was">500</span> → <span class="now">200</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-14</td><td><span class="sev sev-med">Medium</span></td><td>Hospital</td>
-            <td>Staff profile page errored for every record, dereferencing a Mongo-only key on Postgres rows.</td>
-            <td class="delta"><span class="was">500</span> → <span class="now">200</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-          <tr>
-            <td class="id">D-17</td><td><span class="sev sev-med">Medium</span></td><td>Practitioner</td>
-            <td>Every queue row displayed “Unknown Patient” — the name was read from a field the user model does not define.</td>
-            <td class="delta"><span class="was">100% unnamed</span> → <span class="now">0</span></td>
-            <td class="verdict v-fixed">Fixed</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Authorisation testing <span class="count">17 probes · 17 passed</span></h2>
-    <p class="lede">Access control was tested by attempting the attack, not by reading the guard. Each probe used two real accounts and identifiers taken from the database.</p>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Probe</th><th>Expected</th><th>Observed</th><th>Result</th></tr></thead>
-        <tbody>
-          <tr><td>Read own conversation</td><td>Permit</td><td class="num">200</td><td class="pass">Pass</td></tr>
-          <tr><td>Read another patient’s conversation ×2</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
-          <tr><td>Write to another patient’s conversation ×2</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
-          <tr><td>Forge sender identity in request body</td><td>Ignore</td><td>Stored authenticated id</td><td class="pass">Pass</td></tr>
-          <tr><td>Super admin writes platform settings</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
-          <tr><td>Super admin modifies a mega admin</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
-          <tr><td>Super admin suspends a mega admin</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
-          <tr><td>Super admin grants mega admin role</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
-          <tr><td>Mega admin writes platform settings</td><td>Permit + log</td><td>200 + audit entry</td><td class="pass">Pass</td></tr>
-          <tr><td>Sixth login attempt within 15 min</td><td>Throttle</td><td class="num">429</td><td class="pass">Pass</td></tr>
-          <tr><td>Password reset for unknown address</td><td>No disclosure</td><td>Identical response</td><td class="pass">Pass</td></tr>
-          <tr><td>Anonymous access to protected endpoints ×4</td><td>Deny</td><td class="num">401</td><td class="pass">Pass</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Destructive-action guards <span class="count">verified by declining</span></h2>
-    <p class="lede">Each dialogue was exercised by declining it and confirming no request was issued — presence of the prompt in source was not treated as evidence.</p>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Action</th><th>Prompt shown to operator</th><th>On decline</th></tr></thead>
-        <tbody>
-          <tr><td>Suspend a user</td><td>“Are you sure you want to suspend this user? They will lose access to all services.”</td><td class="pass">No request issued</td></tr>
-          <tr><td>Enable maintenance mode</td><td>“Maintenance mode will take the entire platform offline. Are you sure?”</td><td class="pass">Toggle stayed off</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Module verification <span class="count">68 items</span></h2>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Module</th><th class="num">Passed</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td>Marketing &amp; landing</td><td class="num">9</td><td>All sections render; no horizontal overflow at 375 / 768 / 1280 px; 32 links resolve, 0 dead</td></tr>
-          <tr><td>Authentication</td><td class="num">8</td><td>All five roles sign in; throttling and headers correct</td></tr>
-          <tr><td>Patient</td><td class="num">12</td><td>Clinician ratings stable across calls; wellness check-in persists</td></tr>
-          <tr><td>Practitioner</td><td class="num">10</td><td>All three queue tabs populated with named patients</td></tr>
-          <tr><td>Hospital administration</td><td class="num">13</td><td>Staff lifecycle passes end to end; charts on real aggregations</td></tr>
-          <tr><td>Platform administration</td><td class="num">12</td><td>Privilege boundaries hold under direct attack</td></tr>
-          <tr><td>Accessibility &amp; responsive</td><td class="num">4</td><td>All tap targets ≥ 44 px; icon controls labelled</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Staff record lifecycle <span class="count">7 steps · 7 passed</span></h2>
-    <p class="lede">Previously unverifiable — the endpoint returned 404 for every account. Two steps failed once reachable.</p>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Step</th><th>Before</th><th>After</th></tr></thead>
-        <tbody>
-          <tr><td>Create record</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
-          <tr><td>Appears in list</td><td class="blocked">unreachable</td><td class="pass">Confirmed</td></tr>
-          <tr><td>View profile</td><td class="delta"><span class="was">500</span></td><td class="pass">200 with metrics</td></tr>
-          <tr><td>Edit department</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
-          <tr><td>Set on duty</td><td class="delta"><span class="was">500</span></td><td class="pass">200</td></tr>
-          <tr><td>Set off duty</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
-          <tr><td>Delete and confirm removal</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Open items <span class="count">2 disclosed · 6 blocked</span></h2>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Item</th><th>Type</th><th>Position</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Departmental revenue and patient age demographics</td>
-            <td class="id">Disclosed</td>
-            <td>No source exists in the current schema. Now declared as placeholder in the response payload rather than presented as measured.</td>
-          </tr>
-          <tr>
-            <td>Design-system drift</td>
-            <td class="id">Disclosed</td>
-            <td>90 files use the deprecated icon library; 76 uses of a retired status colour. Cosmetic, quantified, not addressed here.</td>
-          </tr>
-          <tr><td>Appointment booking journey</td><td class="id">Blocked</td><td>Requires multi-step interface interaction</td></tr>
-          <tr><td>Video consultation</td><td class="id">Blocked</td><td>Requires two live participants and media devices</td></tr>
-          <tr><td>Prescription refill decrement</td><td class="id">Blocked</td><td>Requires a prescription with refills remaining</td></tr>
-          <tr><td>Document and report downloads</td><td class="id">Blocked</td><td>Requires download interception</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Assessment</h2>
-    <p class="lede"><strong>Suitable to demonstrate:</strong> landing page, authentication including throttling and disclosure controls, messaging access control, the administrative permission model, clinician discovery, wellness tracking, and hospital analytics drawn from real aggregations.</p>
-    <p class="lede"><strong>Qualification:</strong> 11 of 17 defects were found in work previously recorded as complete. Two of them showed a hospital administrator invented figures; one exposed another clinician’s patient list to anyone who set a header. The earlier record of “no outstanding issues” was not optimism — it was the predictable result of verifying by inspection.</p>
-    <div class="sign">
-      <div><div class="line"></div><span class="lbl">Reviewed by</span></div>
-      <div><div class="line"></div><span class="lbl">Signature</span></div>
-      <div><div class="line"></div><span class="lbl">Date</span></div>
-    </div>
-  </section>
-
-  <footer>
-    Full narrative, reproduction steps and measured values: <code>TEST_RESULTS_2026-08-12.md</code> · Commits <code>f3c9f9b</code> through <code>68ebb51</code> · Type checking clean across all modified files.
+  <footer class="note">
+    Checked state is stored in this browser's <code>localStorage</code> only — it won't sync across
+    devices or survive clearing site data. Use <strong>Save as PDF</strong> to snapshot a signed-off pass.
   </footer>
-
 </div>
+
+<script>
+const AREAS = [
+  {
+    id: "marketing",
+    title: "Landing Page & Marketing",
+    route: "/",
+    items: [
+      "Hero image loads full-bleed and reaches the top of the screen",
+      "Nav links (Home, About Us, Approach, Testimonials, Blog) scroll/navigate correctly",
+      "\"Book Now\" and \"Book Appointment\" buttons route to /register",
+      "Date + live weather/location resolve in the header (not stuck on \"Detecting location…\")",
+      "Stat badges (50+, 135K+, 24/7, 9) count up when scrolled into view",
+      "Rating card (4.9, avatars, Happy Customers) renders correctly on desktop",
+      "Mobile menu opens/closes and links work at narrow widths",
+      "Services gallery, testimonials carousel, blog cards render with real content",
+      "Footer links, newsletter form, and social icons are present and functional",
+      "/about page loads with Navbar and content correctly",
+    ],
+  },
+  {
+    id: "auth",
+    title: "Authentication",
+    route: "/login, /register",
+    items: [
+      "Register a new patient account end-to-end",
+      "Register a new practitioner account (if self-serve) or confirm invite flow",
+      "Login with valid credentials succeeds and redirects to the correct role dashboard",
+      "Login with wrong password shows one generic error (not account-enumerable)",
+      "Login with an unregistered email shows the same generic error",
+      "Forgot-password flow sends a reset link and the link works",
+      "Verify-email flow works for a freshly registered account",
+      "Logout clears the session and returns to a public page",
+      "Refreshing a dashboard page keeps you logged in (session persists)",
+    ],
+  },
+  {
+    id: "patient",
+    title: "Patient Dashboard",
+    route: "/patient/*",
+    items: [
+      "Dashboard home loads with real, non-placeholder data",
+      "Book an appointment via Doctors → select doctor → confirm slot",
+      "Appointments list shows the newly booked appointment",
+      "Calendar view reflects booked appointments on the correct date",
+      "Start a chat with a practitioner from Messages/Chat",
+      "Submit a wellness check-in and confirm it's dated correctly (not off by a day)",
+      "Wellness check-in rejects non-numeric input with a proper validation error (not a 500)",
+      "Health record shows real prescriptions/history if any exist",
+      "Family switcher lists linked family members and can switch context",
+      "Billing page shows invoices/payment history",
+      "Lobby/waiting room works when joining a live consultation",
+    ],
+  },
+  {
+    id: "practitioner",
+    title: "Practitioner Dashboard",
+    route: "/practitioner/*",
+    items: [
+      "Dashboard home loads with real queue/appointment counts",
+      "Patient queue lists patients in every relevant status (not just one)",
+      "Opening another practitioner's queue via a spoofed ID is rejected (401/403)",
+      "Consultations: In-Progress, Cancelled, and History tabs each show real rows",
+      "Start a consultation from the queue and confirm the session opens",
+      "Patients list shows the practitioner's actual patient roster",
+      "Insights/analytics numbers look plausible and match underlying data",
+      "Messages/Chat: send and receive a message with a patient",
+      "Billing page reflects the practitioner's own earnings/invoices",
+    ],
+  },
+  {
+    id: "hospital",
+    title: "Hospital Dashboard",
+    route: "/hospital/*",
+    items: [
+      "Dashboard loads without a 404 or \"No facility linked\" error",
+      "Analytics charts show real numbers, not randomized/hardcoded values",
+      "Occupancy chart stays stable across refreshes (not regenerated randomly)",
+    ],
+  },
+  {
+    id: "hospital_admin",
+    title: "Hospital Admin Dashboard",
+    route: "/hospital_admin/*",
+    items: [
+      "Dashboard overview loads with real facility data",
+      "Staff page lists real staff and supports basic management actions",
+      "Facility page shows/edit facility details correctly",
+      "Appointments page lists facility appointments accurately",
+      "Analytics/Performance/Reports pages load without errors and show real figures",
+      "SLA page reflects actual response/turnaround metrics",
+      "Reviews page shows real patient reviews for the facility",
+      "Billing page shows facility-level billing correctly",
+    ],
+  },
+  {
+    id: "admin",
+    title: "Super Admin / Mega Admin",
+    route: "/super_admin/*, /mega_admin/*",
+    items: [
+      "Dashboard overview loads with platform-wide real metrics",
+      "Users page lists all users and supports role/status management",
+      "Facilities page lists all facilities correctly",
+      "Finance page shows accurate platform-wide financials",
+      "Audit log records an admin action immediately after it happens (no dropped entries)",
+      "Audit log entries are attributed to the correct admin identity",
+      "Alerts page surfaces real system alerts, not stale/fake ones",
+      "Analytics and Reports pages load without errors",
+      "Settings page saves changes and they persist after reload",
+    ],
+  },
+  {
+    id: "crosscutting",
+    title: "Cross-Cutting Checks",
+    route: "all roles",
+    items: [
+      "Notification bell shows real unread counts and updates live",
+      "Unread message badge updates when a new message arrives",
+      "Header weather widget resolves (not stuck on \"Detecting location…\") across dashboard pages",
+      "Every dashboard's date/time display is correct for local timezone",
+      "Responsive layout holds up on a narrow (mobile) viewport for at least one page per role",
+      "No console errors on load for each role's dashboard home page",
+      "Sign out from a dashboard fully clears session (can't hit a protected page by pressing back)",
+    ],
+  },
+];
+
+const STORAGE_KEY = "digihealth-qa-checklist-v1";
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function render() {
+  const state = loadState();
+  const toc = document.getElementById("toc");
+  const areasEl = document.getElementById("areas");
+  toc.innerHTML = "";
+  areasEl.innerHTML = "";
+
+  let totalDone = 0, totalItems = 0;
+
+  AREAS.forEach((area) => {
+    const doneCount = area.items.filter((_, i) => state[`${area.id}-${i}`]).length;
+    totalDone += doneCount;
+    totalItems += area.items.length;
+
+    const tocLink = document.createElement("a");
+    tocLink.href = `#${area.id}`;
+    tocLink.innerHTML = `${area.title}<span class="count">${doneCount}/${area.items.length}</span>`;
+    toc.appendChild(tocLink);
+
+    const details = document.createElement("details");
+    details.className = "area";
+    details.id = area.id;
+    details.open = doneCount < area.items.length;
+
+    const summary = document.createElement("summary");
+    summary.innerHTML = `
+      <span class="chev">▸</span>
+      <h2>${area.title}</h2>
+      <span class="route">${area.route}</span>
+      <span class="area-progress" data-area="${area.id}">${doneCount}/${area.items.length}</span>
+    `;
+    details.appendChild(summary);
+
+    const ul = document.createElement("ul");
+    ul.className = "items";
+    area.items.forEach((text, i) => {
+      const key = `${area.id}-${i}`;
+      const checked = !!state[key];
+      const li = document.createElement("li");
+      if (checked) li.classList.add("done");
+      li.innerHTML = `
+        <input type="checkbox" id="${key}" ${checked ? "checked" : ""} />
+        <label for="${key}">${text}</label>
+      `;
+      const checkbox = li.querySelector("input");
+      checkbox.addEventListener("change", () => {
+        const s = loadState();
+        s[key] = checkbox.checked;
+        saveState(s);
+        li.classList.toggle("done", checkbox.checked);
+        updateProgress();
+      });
+      ul.appendChild(li);
+    });
+    details.appendChild(ul);
+    areasEl.appendChild(details);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const state = loadState();
+  let totalDone = 0, totalItems = 0;
+  AREAS.forEach((area) => {
+    const doneCount = area.items.filter((_, i) => state[`${area.id}-${i}`]).length;
+    totalDone += doneCount;
+    totalItems += area.items.length;
+    const badge = document.querySelector(`.area-progress[data-area="${area.id}"]`);
+    if (badge) badge.textContent = `${doneCount}/${area.items.length}`;
+  });
+  const pct = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
+  document.getElementById("barFill").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = `${totalDone} / ${totalItems}`;
+
+  document.querySelectorAll(".toc a").forEach((a, idx) => {
+    const area = AREAS[idx];
+    const doneCount = area.items.filter((_, i) => state[`${area.id}-${i}`]).length;
+    a.querySelector(".count").textContent = `${doneCount}/${area.items.length}`;
+  });
+}
+
+function expandAll() {
+  document.querySelectorAll("details.area").forEach((d) => (d.open = true));
+}
+function resetAll() {
+  localStorage.removeItem(STORAGE_KEY);
+  render();
+}
+
+render();
+</script>
