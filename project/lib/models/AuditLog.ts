@@ -1,7 +1,15 @@
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IAuditLog extends Document {
-  actorId: Types.ObjectId;
+  /**
+   * Stored as a string, not an ObjectId, because admin identities come from two
+   * id systems mid-migration: Mongo ObjectIds (24-char hex) and Postgres uuids
+   * (36 chars with dashes). Declaring this an ObjectId made every write by a
+   * uuid-identified admin throw a CastError, which logAdminAction swallowed —
+   * so those actions were silently absent from the "immutable" audit trail.
+   * Existing ObjectId-valued documents still read back fine as strings.
+   */
+  actorId: string;
   actorRole: string;
   actorEmail?: string;
   action: string;
@@ -15,7 +23,7 @@ export interface IAuditLog extends Document {
 
 const AuditLogSchema = new Schema<IAuditLog>(
   {
-    actorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    actorId: { type: String, required: true },
     actorRole: { type: String, required: true },
     actorEmail: String,
     action: { type: String, required: true, index: true },

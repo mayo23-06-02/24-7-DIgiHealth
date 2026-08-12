@@ -2,21 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Consultation from '@/lib/models/Consultation';
 import Patient from '@/lib/models/Patient';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { riskBandFromScore } from '@/lib/riskScore';
-
-function getPractitionerId(req: NextRequest): string {
-  return (
-    req.headers.get('x-practitioner-id') ||
-    process.env.MOCK_PRACTITIONER_ID ||
-    '000000000000000000000000'
-  );
-}
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    const practitionerId = getPractitionerId(req);
+    // Identity comes from the verified session, never from the request.
+    //
+    // This previously read an `x-practitioner-id` header (falling back to a
+    // MOCK_PRACTITIONER_ID env var), with no JWT verification at all — so any
+    // caller could set that header to another practitioner's id and read their
+    // whole queue: patient names, presenting complaints, risk scores and AI
+    // recommendations. That is PHI, and the header is entirely client-supplied.
+    const user = await getRequestUser();
+    if (!user || user.role !== 'practitioner') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
+    const practitionerId = user.userId;
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
