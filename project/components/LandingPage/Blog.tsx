@@ -37,7 +37,7 @@ export default function Blog() {
       id="blog"
       className="py-24 bg-slate-100 text-slate-900 overflow-hidden"
     >
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         {/* Header Area */}
         <div className="flex flex-col gap-6 mb-16">
           <div className="flex items-center gap-2">

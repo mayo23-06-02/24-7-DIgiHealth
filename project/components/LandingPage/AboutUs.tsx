@@ -5,7 +5,7 @@ import React from "react";
 export default function AboutUs() {
   return (
     <section id="about" className="bg-white py-16 md:py-20">
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-6 items-stretch">
           {/* Consultations this month */}
           <div className="bg-surface-soft rounded-lg p-6 flex flex-col justify-between">

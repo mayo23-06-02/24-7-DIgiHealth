@@ -32,7 +32,7 @@ export default function Footer() {
     <footer
       className="bg-[#1a5b78] text-white pt-20 pb-10 pt-10 pb-5"
     >
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         {/* Top Section */}
         <div className="flex flex-col lg:flex-row justify-between mb-16 gap-16 lg:gap-8">
           {/* Newsletter Section */}
