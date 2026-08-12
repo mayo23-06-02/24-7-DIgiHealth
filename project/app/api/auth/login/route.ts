@@ -5,6 +5,15 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 
+/**
+ * A real bcrypt digest that no supplied password can match. Compared against
+ * when the account doesn't exist (or has no usable password) so a failed login
+ * costs the same wall-clock time either way — otherwise the timing difference
+ * leaks which accounts are registered.
+ */
+const DUMMY_HASH =
+  "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+
 interface LoginUser {
   /**
    * Session identity used in the JWT. Prefers the Mongo `_id` when a row
@@ -103,11 +112,27 @@ export async function POST(request: Request) {
 
     const user = await findLoginUser(identifier.trim());
 
-    if (!user) {
+    // Account-state checks (suspended / unverified) deliberately run *after*
+    // the password is proven correct. Anything that branches before that point
+    // — including "no such user" — must return the same generic failure, or the
+    // response text becomes an account-enumeration oracle: an attacker learns
+    // which addresses are registered just by reading the error.
+    const usablePasswordHash =
+      user?.passwordHash && !user.passwordHash.startsWith("otp_only:")
+        ? user.passwordHash
+        : null;
+
+    // Always run a bcrypt compare, even with no user/hash, so the response time
+    // doesn't leak existence either. DUMMY_HASH is a valid bcrypt digest of a
+    // value nothing can match.
+    const isMatch = await bcrypt.compare(
+      password,
+      usablePasswordHash ?? DUMMY_HASH,
+    );
+
+    if (!user || !usablePasswordHash || !isMatch) {
       return NextResponse.json(
-        {
-          error: `User with email or ID '${identifier.trim()}' not found`,
-        },
+        { error: "Invalid credentials" },
         { status: 401 },
       );
     }
@@ -116,24 +141,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Account is suspended. Contact support." },
         { status: 403 },
-      );
-    }
-
-    if (!user.passwordHash || user.passwordHash.startsWith("otp_only:")) {
-      return NextResponse.json(
-        {
-          error:
-            "This account has no password set. Complete registration with a password, or contact support.",
-        },
-        { status: 401 },
-      );
-    }
-
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) {
-      return NextResponse.json(
-        { error: "Incorrect password entered" },
-        { status: 401 },
       );
     }
 

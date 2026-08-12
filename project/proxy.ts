@@ -120,12 +120,31 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     return NextResponse.next();
   }
 
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
   const token = request.cookies.get('token')?.value;
   const user = session?.user || null;
+
+  // The marketing homepage is public. Signed-in users skip it and land on their
+  // own dashboard instead; everyone else gets the landing page (app/page.tsx).
+  if (pathname === '/') {
+    if (token || user) {
+      try {
+        let role: string | undefined;
+        if (token) {
+          const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+          const { payload } = await jwtVerify(token, secret);
+          role = payload.role as string;
+        } else if (user) {
+          role = user.role;
+        }
+        if (role) {
+          return NextResponse.redirect(new URL(`/${role}`, request.url));
+        }
+      } catch {
+        // invalid token – fall through and show the landing page
+      }
+    }
+    return NextResponse.next();
+  }
 
   // Login / register / verify-email / auth callback pages
   if (
