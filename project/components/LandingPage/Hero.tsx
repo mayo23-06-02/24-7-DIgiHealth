@@ -70,6 +70,7 @@ export default function Hero() {
       try {
         const weatherRes = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`,
+          { signal: AbortSignal.timeout(8000) },
         );
         if (!weatherRes.ok) throw new Error("Weather fetch failed");
         const weatherData = await weatherRes.json();
@@ -97,6 +98,7 @@ export default function Hero() {
         try {
           const geoRes = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+            { signal: AbortSignal.timeout(5000) },
           );
           if (geoRes.ok) {
             const geoData = await geoRes.json();
@@ -123,6 +125,7 @@ export default function Hero() {
       navigator.geolocation.getCurrentPosition(
         (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
         () => fetchWeatherData(-26.2041, 28.0473),
+        { timeout: 8000, maximumAge: 10 * 60 * 1000 },
       );
     } else {
       fetchWeatherData(-26.2041, 28.0473);
