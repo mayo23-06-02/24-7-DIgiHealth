@@ -8,7 +8,7 @@ export default function AboutUs() {
       <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-6 items-stretch">
           {/* Consultations this month */}
-          <div className="bg-surface-soft rounded-lg p-6 flex flex-col justify-between">
+          <div className="bg-surface-soft rounded-2xl p-6 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-bold text-ink-500">Consultations Completed</p>
               <span className="text-xs font-bold text-success-700 bg-success-50 px-2 py-1 rounded-full">
