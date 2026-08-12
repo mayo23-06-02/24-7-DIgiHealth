@@ -140,81 +140,86 @@ export default function Hero() {
           </span>
         </div>
 
-        {/* Inset hero card */}
-        <div className="relative rounded-[2rem] overflow-hidden h-[80vh] min-h-[560px] max-h-[880px] flex flex-col">
-          <img
-            src="/LandingPage/bg-1.jpg"
-            alt="24/7 DigiHealth care team"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink-900/70 via-ink-900/15 to-ink-900/80" />
+      </div>
 
-          {/* Nav row, transparent overlay directly on the image */}
-          <div className="relative z-10 flex items-center justify-between gap-4 px-5 py-5 md:px-10 md:py-8">
-            <Link href="/" className="shrink-0">
-              <LogoMain width={170} height={34} alt={true} />
+      {/* Full-bleed hero photo: breaks out of the max-w container to span the
+          whole viewport width, while its content stays aligned to the 1400px
+          grid via an inner container. */}
+      <div className="relative left-1/2 -translate-x-1/2 w-screen h-[80vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
+        <img
+          src="/LandingPage/bg-1.jpg"
+          alt="24/7 DigiHealth care team"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink-900/70 via-ink-900/15 to-ink-900/80" />
+
+        {/* Nav row, transparent overlay directly on the image */}
+        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex items-center justify-between gap-4 px-5 py-5 md:px-10 md:py-8">
+          <Link href="/" className="shrink-0">
+            <LogoMain width={170} height={34} alt={true} />
+          </Link>
+
+          <nav className="hidden lg:flex items-center gap-7">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="text-sm font-medium text-white/85 hover:text-white transition-colors"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="hidden lg:block">
+            <Link href="/register">
+              <button className="group flex items-center gap-3 pl-5 pr-1.5 py-1.5 rounded-full bg-primary hover:bg-primary-600 text-white text-sm font-semibold transition-colors">
+                Book Now
+                <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                  <ArrowRight size={15} />
+                </span>
+              </button>
             </Link>
-
-            <nav className="hidden lg:flex items-center gap-7">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-sm font-medium text-white/85 hover:text-white transition-colors"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="hidden lg:block">
-              <Link href="/register">
-                <button className="group flex items-center gap-3 pl-5 pr-1.5 py-1.5 rounded-full bg-primary hover:bg-primary-600 text-white text-sm font-semibold transition-colors">
-                  Book Now
-                  <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
-                    <ArrowRight size={15} />
-                  </span>
-                </button>
-              </Link>
-            </div>
-
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
           </div>
 
-          {/* Mobile menu panel */}
-          <div
-            className={`lg:hidden relative z-20 overflow-hidden transition-all duration-300 ${
-              mobileMenuOpen ? "max-h-96" : "max-h-0"
-            }`}
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white"
+            aria-label="Toggle menu"
           >
-            <div className="mx-5 mb-4 flex flex-col gap-1 rounded-2xl bg-ink-900/80 backdrop-blur-xl border border-white/10 p-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-white/90 text-sm font-medium py-2.5 px-2 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                  {link.name}
-                </Link>
-              ))}
-              <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="mt-2">
-                <Button variant="primary" size="sm">
-                  Book Now
-                </Button>
-              </Link>
-            </div>
-          </div>
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
 
-          {/* Hero copy */}
-          <div className="relative z-10 flex-1 flex flex-col justify-center px-5 md:px-10 max-w-2xl">
+        {/* Mobile menu panel */}
+        <div
+          className={`lg:hidden relative z-20 overflow-hidden transition-all duration-300 ${
+            mobileMenuOpen ? "max-h-96" : "max-h-0"
+          }`}
+        >
+          <div className="mx-5 mb-4 flex flex-col gap-1 rounded-2xl bg-ink-900/80 backdrop-blur-xl border border-white/10 p-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-white/90 text-sm font-medium py-2.5 px-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                {link.name}
+              </Link>
+            ))}
+            <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="mt-2">
+              <Button variant="primary" size="sm">
+                Book Now
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Hero copy */}
+        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex-1 flex flex-col justify-center px-5 md:px-10">
+          <div className="max-w-2xl">
             <div className="flex items-center gap-2 text-white/80 text-sm mb-4">
               <Sparkle size={16} className="text-secondary" />
               We invite you to take charge of your family&apos;s health.
@@ -256,9 +261,11 @@ export default function Hero() {
               </Link>
             </div>
           </div>
+        </div>
 
-          {/* Floating rating card */}
-          <div className="hidden md:flex absolute bottom-8 right-8 md:bottom-10 md:right-10 z-10 items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4">
+        {/* Floating rating card, aligned to the same 1400px content edge */}
+        <div className="hidden md:block relative z-10 mx-auto w-full max-w-[1400px] px-5 md:px-10 pb-10">
+          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4 w-fit ml-auto">
             <div className="flex items-center gap-1 text-3xl font-bold text-white font-grotesk">
               4.9
               <Star size={18} className="fill-secondary text-secondary mb-3" />
@@ -288,8 +295,10 @@ export default function Hero() {
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Stat badges, lifted so they straddle the bottom edge of the card. */}
+      <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+        {/* Stat badges, lifted so they straddle the bottom edge of the photo. */}
         <div className="relative z-10 -mt-12 md:-mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pb-16">
           {badges.map(({ icon: Icon, value, label }) => (
             <div
