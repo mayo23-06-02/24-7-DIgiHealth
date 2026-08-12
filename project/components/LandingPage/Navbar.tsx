@@ -3,12 +3,10 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Facebook,
-  Twitter,
-  Instagram,
+  Share2,
+  MessageCircle,
+  Heart,
   Phone,
-  Calendar,
-  ChevronUp,
 } from "lucide-react";
 import Button from "../ui/Button";
 import LogoMain from "../ui/LogoMain";
@@ -133,7 +131,7 @@ export default function Navbar() {
               aria-label="Facebook"
               className="hover:opacity-80 transition"
             >
-              <Facebook size={16} className="text-white" />
+              <Share2 size={16} className="text-white" />
             </a>
             <a
               href="https://twitter.com"
@@ -142,7 +140,7 @@ export default function Navbar() {
               aria-label="Twitter"
               className="hover:opacity-80 transition"
             >
-              <Twitter size={16} className="text-white" />
+              <MessageCircle size={16} className="text-white" />
             </a>
             <a
               href="https://instagram.com"
@@ -151,7 +149,7 @@ export default function Navbar() {
               aria-label="Instagram"
               className="hover:opacity-80 transition"
             >
-              <Instagram size={16} className="text-white" />
+              <Heart size={16} className="text-white" />
             </a>
             <div className="w-px h-4 bg-white/30" />
             <a
