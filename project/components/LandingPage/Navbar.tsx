@@ -7,6 +7,11 @@ import {
   BiChat,
   BiHeart,
   BiPhone,
+  BiSun,
+  BiCloud,
+  BiCloudRain,
+  BiCloudLightning,
+  BiCloudSnow,
 } from "react-icons/bi";
 import Button from "../ui/Button";
 import LogoMain from "../ui/LogoMain";
@@ -15,7 +20,10 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
-  const [weather, setWeather] = useState("☀️ 24°C | Cape Town");
+  const [weatherIcon, setWeatherIcon] = useState<React.ReactNode>(
+    <BiSun className="text-white animate-pulse" />,
+  );
+  const [weatherText, setWeatherText] = useState("Detecting location...");
   const pathname = usePathname();
 
   // Set current date and fetch real weather
@@ -29,61 +37,72 @@ export default function Navbar() {
     });
     setCurrentDate(formattedDate);
 
-    // Fetch real weather data based on geolocation
+    // Fetch real weather data based on geolocation (Open-Meteo, matches shared WeatherWidget)
     const fetchWeatherData = async (lat: number, lon: number) => {
       try {
-        // Open-Meteo API (free, no key required)
         const weatherRes = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`,
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`,
         );
         if (!weatherRes.ok) throw new Error("Weather fetch failed");
         const weatherData = await weatherRes.json();
-        const temp = Math.round(weatherData.current.temperature_2m);
-        const code = weatherData.current.weather_code;
+        const current = weatherData?.current_weather;
+        if (!current) throw new Error("No weather data");
 
-        // Get emoji for weather code (WMO)
-        let emoji = "☀️";
-        if (code === 0) emoji = "☀️";
-        else if (code === 1 || code === 2) emoji = "⛅";
-        else if (code === 3) emoji = "☁️";
-        else if (code >= 45 && code <= 48) emoji = "🌫️";
-        else if (code >= 51 && code <= 67) emoji = "🌧️";
-        else if (code >= 71 && code <= 77) emoji = "❄️";
-        else if (code >= 80 && code <= 82) emoji = "🌧️";
-        else if (code >= 85 && code <= 86) emoji = "❄️";
-        else if (code === 80 || code === 81 || code === 82) emoji = "⛈️";
+        const mapping: Record<number, { label: string; icon: React.ReactNode }> = {
+          0: { label: "Clear", icon: <BiSun className="text-white" /> },
+          1: { label: "Mainly Clear", icon: <BiSun className="text-white" /> },
+          2: { label: "Partly Cloudy", icon: <BiCloud className="text-white" /> },
+          3: { label: "Overcast", icon: <BiCloud className="text-white" /> },
+          45: { label: "Foggy", icon: <BiCloud className="text-white/80" /> },
+          51: { label: "Drizzle", icon: <BiCloudRain className="text-white" /> },
+          61: { label: "Rainy", icon: <BiCloudRain className="text-white" /> },
+          80: { label: "Showers", icon: <BiCloudRain className="text-white" /> },
+          95: { label: "Stormy", icon: <BiCloudLightning className="text-white" /> },
+          71: { label: "Snowy", icon: <BiCloudSnow className="text-white" /> },
+        };
+        const { label, icon } = mapping[current.weathercode] || {
+          label: "Cloudy",
+          icon: <BiCloud className="text-white" />,
+        };
 
-        // Reverse geocode to get location name
-        const geoRes = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-        );
-        if (!geoRes.ok) throw new Error("Geocoding failed");
-        const geoData = await geoRes.json();
-        const city =
-          geoData.address?.city ||
-          geoData.address?.town ||
-          geoData.address?.county ||
-          "Your Location";
+        // Reverse geocode to get a human-readable location name
+        let city = "Your Location";
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+          );
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            city =
+              geoData.address?.city ||
+              geoData.address?.town ||
+              geoData.address?.county ||
+              "Your Location";
+          }
+        } catch {
+          /* keep default city label */
+        }
 
-        setWeather(`${emoji} ${temp}°C | ${city}`);
+        setWeatherIcon(icon);
+        setWeatherText(`${Math.round(current.temperature)}°C ${label} | ${city}`);
       } catch (err) {
         console.warn("Weather fetch error, using default:", err);
-        setWeather("☀️ 24°C | Your Location");
+        setWeatherIcon(<BiSun className="text-white" />);
+        setWeatherText("Weather unavailable");
       }
     };
 
-    // Request geolocation
+    // Request geolocation, falling back to Johannesburg (matches shared WeatherWidget)
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           fetchWeatherData(latitude, longitude);
         },
-        (error) => {
-          console.warn("Geolocation denied, using default:", error);
-          setWeather("☀️ 24°C | South Africa");
-        },
+        () => fetchWeatherData(-26.2041, 28.0473),
       );
+    } else {
+      fetchWeatherData(-26.2041, 28.0473);
     }
   }, []);
 
@@ -121,7 +140,10 @@ export default function Navbar() {
       >
         <div className="container mx-auto max-w-[1400px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
           <div className="flex gap-4">
-            <span className="flex gap-2 items-center">{weather}</span>
+            <span className="flex gap-2 items-center">
+              <span className="text-base leading-none">{weatherIcon}</span>
+              {weatherText}
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <a
