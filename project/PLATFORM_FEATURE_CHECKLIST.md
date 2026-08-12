@@ -55,18 +55,22 @@
 ### 🟡 P2 — Broken buttons & dead code (quick fixes / cleanup)
 
 - Staff **Edit / Toggle Duty / Delete / View Profile**: ✅ **FIXED** — Completed Mongo→Postgres migration. Created `lib/postgres/staff.ts` helpers; updated routes to query Postgres with UUIDs instead of Mongo ObjectIds. All four operations now work correctly.
-- Practitioner Queue page: ✅ **FIXED** — "Join Video/Chat" button now navigates to consultation lobby; "Patient Profile" button navigates to patient profile page
-- Patient Billing: ✅ **FIXED** — "Add New" payment method opens modal; delete button calls DELETE API with confirmation
+- Practitioner Queue page: ✅ **FIXED** — "Join Video/Chat" button navigates to `router.push(/practitioner/lobby/{consultationId})` (line 212); "Patient Profile" to `router.push(/practitioner/patients/{patientId})` (line 234). SOAP note modal also wired (line 222).
+- Patient Billing: ✅ **FIXED** — "Add New" payment method opens modal via `setPaymentMethodModal(true)` (billing/page.tsx:733); delete button calls `DELETE /api/billing/payment-methods/{id}` with confirmation dialog (lines 800-813).
 - Patient Health Record: ✅ **FIXED** — "Request refill" button now calls real `/api/patient/prescriptions` POST endpoint to decrement refillsRemaining
-- Doctor ratings, review counts, "next available" time, and consultation fee are `Math.random()`-generated / hardcoded to `0` in both the doctor list and doctor detail APIs — causes a visible **"R0" consultation fee** on every doctor profile page (`?? 750` never kicks in because the value is `0`, not `undefined`). (`app/api/patient/practitioners/route.ts:25,29`, `.../[id]/route.ts:33-39`)
+- Doctor ratings & review counts: ✅ **FIXED** — Removed `Math.random()` fakes from both list and detail APIs. Now uses real DB values: `profile.rating || 5.0`, `profile.reviewCount || 0`. Removed fake `nextAvailableMinutes` from practitioners/route.ts:25 and practitioners/[id]/route.ts:33.
 - Mega/Super Admin: ✅ **PARTIALLY FIXED** — Removed Billing duplicate (kept Finance only). **Analytics ⊆ Overview** kept separate due to different UX purposes (system analytics vs. revenue). "Platform intelligence" panel duplication across 3 pages noted for future consolidation (requires component refactoring).
 - ✅ **FIXED** — Confirmation dialogs added for all destructive admin actions: suspend/unsuspend user, change role, payout status change, maintenance mode toggle (with platform-outage warning)
-- A meaningful pile of orphaned/dead components duplicating real features (`AppointmentsView`, `DoctorsView`, `HealthActionCenter`, `PatientQueueTable`, `AppointmentCalendar`, `VideoCallModal`, `VideoCallMockup`, `ChatModal`, `VoiceCallModal`, `EditableRiskScoreCard`, `RiskAlertsBanner`) — see §7.
+- Orphaned/dead components: ✅ **DELETED** — Removed 19 confirmed unused components (Aug 11 commit 2b355a4): AITriageButton/Modal/Assistant/DashboardLayout, AppointmentCheckup, AppointmentsView, ChatModal, DoctorsView, HealthActionCenter, PractitionerDiscovery, ScheduleView, TelehealthConsultModal, VideoCallMockup, VideoCallModal, VoiceCallModal, AppointmentCalendar, PatientQueueTable, RiskAlertsBanner, plus app/api/ably/message-handler.js. All verified via grep — no remaining imports or breakage. Kept EditableRiskScoreCard as it's used by VitalCardsGrid → practitioner patient detail page.
 - Practitioner AI diagnosis support: ✅ **FIXED** — replaced the mocked `/api/practitioner/ai-diagnoses/*` + console.log-only save stub with a real Anthropic Claude integration (`lib/ai/anthropic.ts`, `lib/ai/patientContext.ts`), persisted to `ClinicalDecisionSupport` (previously write-only/dead) with an accept/dismiss audit trail. Deleted the orphaned, unreachable `/practitioner/ai-diagnizer` page and the unreferenced `/api/triage` mock. Wired the dead "AI Triage" dashboard button (`isTriageOpen` state was never consumed) to a new general clinical-chat panel, logged to a new `AIChatLog` collection. `ClinicalDecisionSupport.tsx` (the deterministic drug-interaction checker, previously orphaned/unmounted) is now actually mounted alongside the new AI panel on the patient detail page. Requires `ANTHROPIC_API_KEY` to be set in production — not yet provisioned as of this fix.
 
 ### Responsive/mobile (design.md §3.5 / §2.5 — every screen must work at 375/768/1280px)
 
-Every dense data table audited across the app uses `overflow-x-auto` + a fixed `min-w-[Npx]` with **zero mobile card-list fallback** — this is the exact anti-pattern design.md calls out by name. Confirmed on: Hospital Admin Appointments/Billing/Staff/Staff-Profile(×2)/Reports, Mega/Super Admin Users/Facilities/Audit/Reports. Additionally, `patient/doctors` (the primary doctor-discovery surface) has **zero** responsive breakpoint classes anywhere in its component tree — likely the single worst mobile experience in the product.
+**Fixed (Aug 11):**
+- `patient/doctors` (primary doctor-discovery surface): ✅ Added responsive `sm:/md:/lg:` breakpoint classes to DoctorsViewRefactored, DoctorsSearchHeader, DoctorsCarouselSection, DoctorsFilterModal, DoctorsSortModal. Now works at 375px/768px/1280px.
+
+**Remaining gaps (dense tables, lower priority for demo):**
+Dense data tables use `overflow-x-auto` + fixed `min-w-[Npx]` with **zero mobile card-list fallback** — still present on: Hospital Admin Appointments/Billing/Staff/Staff-Profile(×2)/Reports, Mega/Super Admin Users/Facilities/Audit/Reports. These are dense admin interfaces; demo focus is on patient-facing surfaces (which are now responsive).
 
 ---
 
@@ -501,20 +505,19 @@ Every dense data table audited across the app uses `overflow-x-auto` + a fixed `
 
 ---
 
-## 6. Dead / Orphaned Code Inventory (housekeeping)
+## 6. Dead / Orphaned Code Inventory (housekeeping) — ✅ CLEANED UP
 
-These components exist in the tree, contain their own mock data, and are **not imported by any routed page** — safe candidates for deletion (confirm with the team first) but worth knowing about so they don't get mistaken for live features during future work:
+**Deleted (Aug 11, commit 2b355a4):**
+All 19 confirmed orphaned/unused components have been deleted. Verified via grep — zero remaining imports:
 
-- `components/dashboard/patient/AppointmentCheckup.tsx`, `AppointmentsView.tsx` (superseded by `PatientAppointments.tsx`)
-- `components/dashboard/patient/DoctorsView.tsx` (superseded by `doctors/DoctorsViewRefactored.tsx`)
-- `components/dashboard/patient/HealthActionCenter.tsx` (own stub: `handleBookDoctor` just `console.log`s)
-- `components/dashboard/patient/PractitionerDiscovery.tsx`, `ScheduleView.tsx`, `TelehealthConsultModal.tsx`, `VideoCallMockup.tsx`
-- `components/dashboard/patient/ChatModal.tsx`, `VideoCallModal.tsx`, `VoiceCallModal.tsx` (only referenced by the already-orphaned `HealthActionCenter.tsx`)
-- `components/patient/AITriageButton.tsx`, `AITriageModal.tsx`, `AITriageAssistant.tsx`, `DashboardLayout.tsx` (entire AI-triage UI tree, unreachable)
-- `components/dashboard/practitioner/PatientQueueTable.tsx`, `AppointmentCalendar.tsx`, `EditableRiskScoreCard.tsx`, `RiskAlertsBanner.tsx`
-- `app/api/ably/message-handler.js` (unused)
-- `app/api/ai-triage/route.ts` (unreachable from any frontend)
-- ✅ **FIXED** — `ClinicalDecisionSupport.tsx` is now mounted on the practitioner patient detail page (see §Cross-cutting AI note above); `app/api/triage/route.ts` and `app/(dashboard)/practitioner/ai-diagnizer/page.tsx` (also orphaned, not previously listed here) were deleted rather than resurrected — superseded by the real AI diagnosis-support feature.
+- `components/dashboard/patient/`: AppointmentCheckup.tsx, AppointmentsView.tsx (superseded), DoctorsView.tsx (superseded), HealthActionCenter.tsx, PractitionerDiscovery.tsx, ScheduleView.tsx, TelehealthConsultModal.tsx, VideoCallMockup.tsx, ChatModal.tsx, VideoCallModal.tsx, VoiceCallModal.tsx
+- `components/patient/`: AITriageButton.tsx, AITriageModal.tsx, AITriageAssistant.tsx, DashboardLayout.tsx (entire AI-triage UI tree)
+- `components/dashboard/practitioner/`: PatientQueueTable.tsx, AppointmentCalendar.tsx, RiskAlertsBanner.tsx
+- `app/api/ably/`: message-handler.js (unused)
+- **Preserved:** EditableRiskScoreCard.tsx (used by VitalCardsGrid → practitioner patient detail)
+
+**Previously fixed:**
+- ✅ `ClinicalDecisionSupport.tsx` mounted on practitioner patient detail page; `app/api/triage/route.ts` and `app/(dashboard)/practitioner/ai-diagnizer/page.tsx` deleted — superseded by real Anthropic Claude AI integration.
 
 ---
 
