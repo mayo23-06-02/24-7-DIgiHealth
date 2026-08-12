@@ -109,7 +109,7 @@ export default function LeftPanel({
               </span>
               <Link
                 href="/forgot-password"
-                className="text-xs font-bold text-slate-500 hover:text-primary transition-all hover:underline decoration-2 underline-offset-4"
+                className="inline-flex items-center min-h-11 text-xs font-bold text-slate-500 hover:text-primary transition-all hover:underline decoration-2 underline-offset-4"
               >
                 Forgot Password?
               </Link>
@@ -139,7 +139,7 @@ export default function LeftPanel({
         <p>Don&apos;t have an account yet?</p>
         <Link
           href="/register"
-          className="text-primary-500 hover:text-primary-600 transition-all ml-1 pb-1"
+          className="inline-flex items-center min-h-11 text-primary-500 hover:text-primary-600 transition-all ml-1 pb-1"
         >
           <span className="font-semibold text-primary-500 underline">
             Register Here

@@ -9,19 +9,22 @@ const quickLinks = [
   { name: "Blog", href: "/#blog" },
   { name: "Contact", href: "/#testimonials" },
 ];
+// Both lists previously pointed at "#services" / "#team" — neither anchor
+// exists on the page, so every one of these links was a no-op. They now target
+// sections that actually render, or the signup flow where that's the real intent.
 const services = [
-  "General Medicine",
-  "Dental Care",
-  "Pediatrics",
-  "Women's Health",
-  "Cardiology",
-  "Physiotherapy",
+  { name: "General Medicine", href: "/#approach" },
+  { name: "Dental Care", href: "/#approach" },
+  { name: "Pediatrics", href: "/#approach" },
+  { name: "Women's Health", href: "/#approach" },
+  { name: "Cardiology", href: "/#approach" },
+  { name: "Physiotherapy", href: "/#approach" },
 ];
 const doctors = [
-  "Our Specialists",
-  "Qualifications & Expertise",
-  "Patient Reviews",
-  "Join Our Team",
+  { name: "Our Specialists", href: "/#why-choose-us" },
+  { name: "Qualifications & Expertise", href: "/about" },
+  { name: "Patient Reviews", href: "/#testimonials" },
+  { name: "Join Our Team", href: "/register" },
 ];
 
 export default function Footer() {
@@ -94,13 +97,13 @@ export default function Footer() {
               </h4>
               <ul className="flex flex-col gap-4">
                 {services.map((service) => (
-                  <li key={service}>
-                    <a
-                      href="#services"
-                      className="text-white/80 hover:text-white transition-colors text-[0.95rem]"
+                  <li key={service.name}>
+                    <Link
+                      href={service.href}
+                      className="text-white/80 hover:text-white transition-colors text-[0.95rem] inline-flex items-center min-h-11"
                     >
-                      {service}
-                    </a>
+                      {service.name}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -113,13 +116,13 @@ export default function Footer() {
               </h4>
               <ul className="flex flex-col gap-4">
                 {doctors.map((doc) => (
-                  <li key={doc}>
-                    <a
-                      href="#team"
-                      className="text-white/80 hover:text-white transition-colors text-[0.95rem]"
+                  <li key={doc.name}>
+                    <Link
+                      href={doc.href}
+                      className="text-white/80 hover:text-white transition-colors text-[0.95rem] inline-flex items-center min-h-11"
                     >
-                      {doc}
-                    </a>
+                      {doc.name}
+                    </Link>
                   </li>
                 ))}
               </ul>

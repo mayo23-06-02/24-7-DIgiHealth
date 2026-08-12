@@ -95,8 +95,9 @@ const Input: React.FC<InputProps> = ({
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
-            tabIndex={-1}
+            /* h-11 w-11 keeps the hit area at the 44x44 minimum (design.md §5)
+               while the icon inside stays visually 18px. */
+            className="absolute right-1 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center text-slate-400 hover:text-slate-600 transition-colors z-10 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
