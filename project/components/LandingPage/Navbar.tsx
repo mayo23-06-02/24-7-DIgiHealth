@@ -116,11 +116,11 @@ export default function Navbar() {
           white rule separates it from the nav row without reintroducing a solid
           band across the image. */}
       <div
-        className={`w-full text-white text-sm py-2 z-50 transition-all p-1.25 border-b ${
-          scrolled ? "bg-primary border-transparent" : "bg-transparent border-white/15"
+        className={`w-full bg-primary text-white text-sm py-2 z-50 transition-all p-1.25 border-b ${
+          scrolled ? "bg-primary border-transparent" : "bg-primary border-white/15"
         }`}
       >
-        <div className="container mx-auto max-w-[1600px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
           <div className="flex gap-4">
             <span className="flex gap-2 items-center">{weather}</span>
           </div>

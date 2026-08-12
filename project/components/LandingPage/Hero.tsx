@@ -34,7 +34,7 @@ export default function Hero() {
 
         {/* Copy anchored to the bottom of the image. */}
         <div className="relative h-full flex items-end">
-          <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px] pb-28 md:pb-32">
+          <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px] pb-28 md:pb-32">
             <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8 items-end">
               <div className="reveal-hidden reveal-visible">
                 <h1 className="text-4xl md:text-6xl font-medium text-white leading-[1.05] tracking-tight font-grotesk mb-6 drop-shadow-sm">
@@ -66,7 +66,7 @@ export default function Hero() {
       </section>
 
       {/* Stat badges, lifted so they straddle the bottom edge of the photo. */}
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         <div className="relative z-10 -mt-12 md:-mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pb-16">
           {badges.map(({ icon: Icon, value, label }) => (
             <div
