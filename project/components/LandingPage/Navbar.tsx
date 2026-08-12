@@ -42,6 +42,7 @@ export default function Navbar() {
       try {
         const weatherRes = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`,
+          { signal: AbortSignal.timeout(8000) },
         );
         if (!weatherRes.ok) throw new Error("Weather fetch failed");
         const weatherData = await weatherRes.json();
@@ -70,6 +71,7 @@ export default function Navbar() {
         try {
           const geoRes = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+            { signal: AbortSignal.timeout(5000) },
           );
           if (geoRes.ok) {
             const geoData = await geoRes.json();
@@ -100,6 +102,7 @@ export default function Navbar() {
           fetchWeatherData(latitude, longitude);
         },
         () => fetchWeatherData(-26.2041, 28.0473),
+        { timeout: 8000, maximumAge: 10 * 60 * 1000 },
       );
     } else {
       fetchWeatherData(-26.2041, 28.0473);
@@ -134,8 +137,8 @@ export default function Navbar() {
           white rule separates it from the nav row without reintroducing a solid
           band across the image. */}
       <div
-        className={`w-full bg-primary text-white text-sm py-2 z-50 transition-all p-1.25 border-b ${
-          scrolled ? "bg-primary border-transparent" : "bg-primary border-white/15"
+        className={`w-full  text-white text-sm py-2 z-50 transition-all p-1.25 border-b ${
+          scrolled ? "t" : "bg-primary border-white/15"
         }`}
       >
         <div className="container mx-auto max-w-[1400px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
@@ -153,7 +156,7 @@ export default function Navbar() {
               aria-label="Facebook"
               className="hover:opacity-80 transition"
             >
-              <BiLink size={16} className="text-white" />
+              <BiLink size={16} className="text-primary  " />
             </a>
             <a
               href="https://twitter.com"
@@ -162,7 +165,7 @@ export default function Navbar() {
               aria-label="Twitter"
               className="hover:opacity-80 transition"
             >
-              <BiChat size={16} className="text-white" />
+              <BiChat size={16} className="text-primary" />
             </a>
             <a
               href="https://instagram.com"

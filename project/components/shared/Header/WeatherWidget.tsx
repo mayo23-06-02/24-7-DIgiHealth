@@ -22,7 +22,8 @@ export default function WeatherWidget() {
     const fetchWeather = async (lat: number, lon: number) => {
       try {
         const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`,
+          { signal: AbortSignal.timeout(8000) }
         );
         if (!res.ok) throw new Error("Weather API unreachable");
         const data = await res.json();
@@ -66,8 +67,11 @@ export default function WeatherWidget() {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
-        () => fetchWeather(-26.2041, 28.0473) // fallback: Johannesburg
+        () => fetchWeather(-26.2041, 28.0473), // fallback: Johannesburg
+        { timeout: 8000, maximumAge: 10 * 60 * 1000 }
       );
+    } else {
+      fetchWeather(-26.2041, 28.0473);
     }
   }, []);
 

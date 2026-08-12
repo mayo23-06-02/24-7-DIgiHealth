@@ -51,7 +51,7 @@ export default function Hero() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
   const [weatherIcon, setWeatherIcon] = useState<React.ReactNode>(
-    <BiSun className="text-ink-500 animate-pulse" />,
+    <BiSun className="text-white animate-pulse" />,
   );
   const [weatherText, setWeatherText] = useState("Detecting location...");
 
@@ -78,20 +78,20 @@ export default function Hero() {
         if (!current) throw new Error("No weather data");
 
         const mapping: Record<number, { label: string; icon: React.ReactNode }> = {
-          0: { label: "Clear", icon: <BiSun className="text-ink-500" /> },
-          1: { label: "Mainly Clear", icon: <BiSun className="text-ink-500" /> },
-          2: { label: "Partly Cloudy", icon: <BiCloud className="text-ink-500" /> },
-          3: { label: "Overcast", icon: <BiCloud className="text-ink-500" /> },
-          45: { label: "Foggy", icon: <BiCloud className="text-ink-400" /> },
-          51: { label: "Drizzle", icon: <BiCloudRain className="text-ink-500" /> },
-          61: { label: "Rainy", icon: <BiCloudRain className="text-ink-500" /> },
-          80: { label: "Showers", icon: <BiCloudRain className="text-ink-500" /> },
-          95: { label: "Stormy", icon: <BiCloudLightning className="text-ink-500" /> },
-          71: { label: "Snowy", icon: <BiCloudSnow className="text-ink-500" /> },
+          0: { label: "Clear", icon: <BiSun className="text-white" /> },
+          1: { label: "Mainly Clear", icon: <BiSun className="text-white" /> },
+          2: { label: "Partly Cloudy", icon: <BiCloud className="text-white" /> },
+          3: { label: "Overcast", icon: <BiCloud className="text-white" /> },
+          45: { label: "Foggy", icon: <BiCloud className="text-white/80" /> },
+          51: { label: "Drizzle", icon: <BiCloudRain className="text-white" /> },
+          61: { label: "Rainy", icon: <BiCloudRain className="text-white" /> },
+          80: { label: "Showers", icon: <BiCloudRain className="text-white" /> },
+          95: { label: "Stormy", icon: <BiCloudLightning className="text-white" /> },
+          71: { label: "Snowy", icon: <BiCloudSnow className="text-white" /> },
         };
         const { label, icon } = mapping[current.weathercode] || {
           label: "Cloudy",
-          icon: <BiCloud className="text-ink-500" />,
+          icon: <BiCloud className="text-white" />,
         };
 
         let city = "Your Location";
@@ -116,7 +116,7 @@ export default function Hero() {
         setWeatherText(`${Math.round(current.temperature)}°C ${label} | ${city}`);
       } catch (err) {
         console.warn("Weather fetch error, using default:", err);
-        setWeatherIcon(<BiSun className="text-ink-500" />);
+        setWeatherIcon(<BiSun className="text-white" />);
         setWeatherText("Weather unavailable");
       }
     };
@@ -133,10 +133,20 @@ export default function Hero() {
   }, []);
 
   return (
-    <section id="home" className="w-full bg-primary-50/60 pt-4 md:pt-6">
-      <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-        {/* Utility line: real date + live weather/location, sits above the card */}
-        <div className="hidden md:flex items-center justify-between px-2 pb-3 text-xs font-medium text-ink-500">
+    <section id="home" className="w-full bg-primary-50/60">
+      {/* Full-bleed hero photo: reaches the very top of the screen and spans
+          the whole viewport width, while its content stays aligned to the
+          1400px grid via an inner container. */}
+      <div className="relative left-1/2 -translate-x-1/2 w-screen h-[80vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
+        <img
+          src="/hero.jpg"
+          alt="24/7 DigiHealth care team"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink-900/35 via-ink-900/0 to-ink-900/50" />
+
+        {/* Utility line: real date + live weather/location, overlaid on the image */}
+        <div className="hidden md:flex relative z-10 mx-auto w-full max-w-[1400px] items-center justify-between px-5 md:px-10 pt-4 text-xs font-medium text-white/75">
           <span>{currentDate}</span>
           <span className="flex items-center gap-2">
             <span className="text-base leading-none">{weatherIcon}</span>
@@ -144,21 +154,8 @@ export default function Hero() {
           </span>
         </div>
 
-      </div>
-
-      {/* Full-bleed hero photo: breaks out of the max-w container to span the
-          whole viewport width, while its content stays aligned to the 1400px
-          grid via an inner container. */}
-      <div className="relative left-1/2 -translate-x-1/2 w-screen h-[80vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
-        <img
-          src="/LandingPage/bg-1.jpg"
-          alt="24/7 DigiHealth care team"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink-900/35 via-ink-900/0 to-ink-900/50" />
-
         {/* Nav row, transparent overlay directly on the image */}
-        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex items-center justify-between gap-4 px-5 py-5 md:px-10 md:py-8">
+        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex items-center justify-between gap-4 px-5 py-5 md:px-10 md:py-6">
           <Link href="/" className="shrink-0">
             <LogoMain width={170} height={34} alt={true} />
           </Link>
@@ -312,7 +309,7 @@ export default function Hero() {
             >
               
               <p className="text-xl md:text-6xl font-light text-ink-900 font-grotesk">{value}</p>
-              <p className="text-xs md:text-sm text-ink-500 leading-tight">{label}</p>
+              <p className="text-xs md:text-sm text-white leading-tight">{label}</p>
             </div>
           ))}
         </div>
