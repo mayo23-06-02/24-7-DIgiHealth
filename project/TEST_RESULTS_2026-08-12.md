@@ -1,190 +1,149 @@
 # Test Execution Report — 24/7 DigiHealth
 
-**Tester:** Claude (Opus 5) — live browser automation, authenticated API probing, DB inspection, static audit
+**Tester:** Claude (Opus 5) — live browser automation, authenticated API probing, MongoDB inspection, static audit
 **Date:** 2026-08-12
-**Build:** `25c34d8` (pre-test) → `5a63717` (post-fix)
-**Environment:** Next.js dev server, localhost:3000, Chromium
-**Accounts used:** `patient.mpendulo.dlamini1@example.com`, `patient.noxolo.naidoo4@example.com`, `admin@gsh.co.za` (seed password from `scripts/seedDemo.ts:163`)
+**Build:** `25c34d8` (pre-test) → `036617a` (post-fix)
+**Roles exercised:** patient ×2, practitioner, hospital_admin, mega_admin, super_admin
+**Credentials:** seed password from `scripts/seedDemo.ts:163`
 
 ---
 
 ## ⚠️ Executive Summary
 
-The pre-test checklist claimed **"93 features complete, 0 broken, demo-ready."** Executing it found **8 defects**, including one security hole and two cases where charts presented **fabricated data as real**.
+The pre-test checklist claimed **"93 features complete, 0 broken, demo-ready."** Executing it found **10 defects**, including **three security holes** and two cases of **fabricated data presented as real**.
 
-All 8 are fixed and verified. The process finding matters more than any single bug:
+All 10 are fixed and verified. The process finding matters more than any individual bug:
 
-> Items were marked ✅ FIXED on the strength of *reading* code. Five of the eight defects were in code written and marked "FIXED" in the prior session — including an endpoint that 404'd on every real account, and charts that silently fell back to hardcoded numbers. **Reading code does not verify it.**
+> **6 of the 10 defects were in code marked "✅ FIXED" in a prior session on the strength of reading it.** One endpoint 404'd for every real account. Two charts silently fell back to hardcoded numbers. An audit log silently discarded every action by a whole class of admin. **Reading code cannot detect this class of failure.**
 
 ### Results
 
 | Outcome | Count |
 |---|---|
-| ✅ Verified working (executed, passed) | 31 |
-| 🔴 Defects found & fixed | 8 |
+| ✅ Verified working (executed, passed) | **53** |
+| 🔴 Defects found & fixed | **10** |
 | 🟡 Gaps disclosed, not fixed | 4 |
-| ⏸️ Still blocked | ~28 |
+| ⏸️ Still blocked | ~12 |
 
-**Coverage: ~60% executed** (was 26% before credentials).
+**Coverage: ~82% executed** (26% → 60% → 82% as credentials arrived).
 
 ---
 
 ## 🔴 DEFECTS FOUND AND FIXED
 
-### DEFECT-1 — Landing page completely unreachable (demo-blocking)
+### Security (3)
 
-`proxy.ts:123` redirected `/` → `/login` unconditionally. `app/page.tsx` was correct but middleware intercepted it first. **Committed and reported as "demo-ready" last session without ever loading the page.**
+**DEFECT-2 — Account enumeration on login** *(P0)*
+Four distinct errors leaked account state before any password check: `"User … not found"` vs `"Incorrect password entered"` distinguishes registered from unregistered addresses, enumerating the entire user base.
+→ Single generic `"Invalid credentials"`; state disclosed only after the password verifies; dummy bcrypt compare so timing doesn't leak either.
+**Verified:** real seeded user (wrong password) and non-existent user return byte-identical 401s.
 
-Fixed: `/` is public; signed-in users go to their dashboard. All 9 sections verified rendering.
+**DEFECT-9 — Practitioner queue trusted a client-supplied header** *(PHI exposure)*
+`/api/practitioner/queue` read identity from an `x-practitioner-id` request header (fallback: `MOCK_PRACTITIONER_ID` env var) with **no JWT verification**. Any caller could set it to another practitioner's id and read their whole queue — patient names, presenting complaints, risk scores, AI recommendations.
+→ Identity now from `getRequestUser()` + role check.
+**Verified:** mega_admin sending that header now gets **401**; previously the header chose whose queue came back.
 
-### DEFECT-2 — Account enumeration on login (**P0 security**)
+**DEFECT-10 — Audit log silently dropped admin actions** *(compliance)*
+`AuditLog.actorId` was an ObjectId, but admin identities span two id systems mid-migration. A mega_admin's Postgres UUID threw `CastError`, which `logAdminAction` reduced to a `console.error`. The action returned 200 and **never appeared in the "immutable" trail**.
+→ `actorId` is now a String (both shapes valid); failures log `AUDIT_WRITE_FAILED` with actor and action.
+**Verified:** audit 14 → 15 entries; `settings.update` by mega_admin now recorded.
 
-Four distinct errors leaked account state *before* any password check:
+### Data integrity (3)
 
-| Response | Leaks |
-|---|---|
-| `"User with email or ID 'x' not found"` | account does **not** exist |
-| `"Account is suspended…"` | exists + suspended |
-| `"This account has no password set…"` | exists, OTP-only |
-| `"Incorrect password entered"` | **exists**, wrong password |
+**DEFECT-8 — Hospital charts silently rendered fabricated data** *(most significant)*
+`HospitalAppointment.facilityId` is an ObjectId; `resolveHospitalId` returns a string. `countDocuments`/`distinct` cast it — **`aggregate()` does not**. Every aggregation matched zero documents and fell through to hardcoded fallbacks, silently.
 
-Comparing 1 vs 4 enumerates the entire user base.
-
-Fixed: single generic `"Invalid credentials"`; state disclosed only after password verifies; dummy bcrypt compare so timing doesn't leak either.
-
-**Verified:** real seeded user (wrong password) and non-existent user now return byte-identical 401s.
-
-### DEFECT-3 — Wellness check-in returned 500 on bad input
-
-Guards were range-only: `if (!mood || mood < 1 || mood > 5)`. String comparisons with `<`/`>` are always false, so `{"mood":"good"}` passed validation then died as a Mongoose CastError → 500.
-
-Fixed: finite-number type checks on all three fields. **Verified:** now 400.
-
-### DEFECT-4 — Check-ins recorded one day early
-
-Write used local `setHours(0,0,0,0)`; the score route reads back as UTC. On a UTC+2 server, local midnight stores at 22:00 the *previous* UTC day.
-
-Fixed: `setUTCHours`. **Verified:** check-in on the 12th now files under `2026-08-12` (previously `2026-08-11`).
-
-### DEFECT-5 — Wellness score was effectively always 100
-
-Formula opened at base 50 then added up to 100 more (max 150) before clamping. mood 3 / 7h / 6000 steps scored **100** — identical to a perfect day.
-
-Fixed: reweighted mood 40 / sleep 30 / steps 30, each normalised. **Verified spread:** 26 / 68 / 89 / 100 across poor→perfect.
-
-### DEFECT-6 — `/api/hospital/analytics` 404'd for every seeded admin
-
-I wrote it with `resolvePostgresHospitalId`; every sibling hospital route uses `resolveHospitalId`. Admins whose facility link lives in Mongo got `{"error":"No facility linked"}`.
-
-Fixed: uses the same resolver as its siblings. **Verified:** 200.
-
-### DEFECT-7 — Analytics occupancy was `Math.random()`
-
-The chart returned **different numbers on every request** — it visibly changed on refresh. This is the exact anti-pattern the original audit condemned, and I introduced it while marking the item "✅ FIXED".
-
-Fixed: utilisation derived from real monthly appointment counts. **Verified stable across calls.**
-
-### DEFECT-8 — Hospital charts silently rendered fabricated data (**most significant**)
-
-`HospitalAppointment.facilityId` is an **ObjectId**; `resolveHospitalId` returns a **string**. `countDocuments`/`find`/`distinct` run filters through Mongoose's caster so strings match — **`aggregate()` does not cast.** Every aggregation matched zero documents, returned `[]`, and the routes fell through to hardcoded fallback arrays. Nothing logged.
-
-**Measured before the fix (`admin@gsh.co.za`):**
-
-| Field | Value | Real? |
+| Field | Before | After |
 |---|---|---|
-| `kpi.totalConsultationsThisMonth` | `1` | ✅ real (`countDocuments` casts) |
-| `consultationVolume` | Nov 145, Dec 168 … Apr 261 | ❌ fallback literals — *months not even current* |
-| `appointmentTypes` | 75 / 20 / 5 | ❌ fallback literals |
+| `consultationVolume` | Nov 145 … Apr 261 *(fake; months not current)* | Jun 13, Jul 3, **Aug 1** |
+| `appointmentTypes` | 75 / 20 / 5 *(fake)* | lab 47 / consultation 29 / procedure 24 |
+| `kpi.thisMonth` | `1` *(real — visibly contradicted the chart)* | `1` ✓ consistent |
 
-The real KPI (`1`) visibly contradicted the chart claiming 261 consultations.
+**DEFECT-7 — Analytics occupancy was `Math.random()`** — chart changed on every refresh. → Derived from real monthly appointment counts. Verified stable.
 
-**After the fix:**
+**DEFECT-6 — `/api/hospital/analytics` 404'd for every seeded admin** — used `resolvePostgresHospitalId` while all sibling routes use `resolveHospitalId`. → Matched to siblings. Verified 200.
 
-| Field | Value |
-|---|---|
-| `consultationVolume` | Jun 13, Jul 3, **Aug 1** ← consistent with KPI |
-| `appointmentTypes` | lab 47% / consultation 29% / procedure 24% |
-| `analytics.appointmentDistribution` | lab 8, consultation 5, procedure 4 (17 total) |
+### Functional (4)
+
+**DEFECT-1 — Landing page unreachable.** `proxy.ts:123` redirected `/` → `/login` unconditionally; `app/page.tsx` never executed. Committed as "demo-ready" last session without ever loading it. → `/` public; signed-in users go to their dashboard. All 9 sections verified.
+
+**DEFECT-3 — Wellness check-in 500 on bad input.** Range-only guards (`mood < 1`) don't reject strings — NaN comparisons are always false — so `"good"` passed validation then died as a CastError. → Type-checked. Verified 400.
+
+**DEFECT-4 — Check-ins recorded a day early.** Local `setHours(0,0,0,0)` written, UTC read back. → `setUTCHours`. Verified files under the correct date.
+
+**DEFECT-5 — Wellness score effectively always 100.** Base 50 + up to 100 more, clamped. mood 3 / 7h / 6000 steps scored the same as a perfect day. → Reweighted 40/30/30. Verified spread **26 / 68 / 89 / 100**.
 
 ---
 
-## ✅ VERIFIED WORKING (executed, 31 items)
+## ✅ VERIFIED WORKING (53 items executed)
 
-### Security — P0 chat IDOR, **fully runtime-verified**
+### Authorization — all runtime-verified
 
-The single most important outstanding check. Constructed with two real patient accounts and conversation IDs pulled from MongoDB.
+**Chat IDOR (P0 #2) — 7/7 probes.** Built with two real patient accounts and conversation IDs from MongoDB.
 
-| # | Test | Expected | Actual |
-|---|---|---|---|
-| 1 | Read **own** conversation | 200 | ✅ **200** + messages |
-| 2 | Read foreign conversation A | 403 | ✅ **403 Forbidden** |
-| 3 | Read foreign conversation B | 403 | ✅ **403 Forbidden** |
-| 4 | Write to **own** conversation | 200 | ✅ **200**, senderId = me |
-| 5 | Write to foreign conversation A | 403 | ✅ **403 Forbidden** |
-| 6 | Write to foreign conversation B | 403 | ✅ **403 Forbidden** |
-| 7 | Spoof `senderId` in body | ignored | ✅ **200, stored senderId = authenticated user** |
+| Test | Result |
+|---|---|
+| Read own conversation | ✅ 200 + messages |
+| Read foreign conversation ×2 | ✅ **403** both |
+| Write own conversation | ✅ 200, senderId = me |
+| Write foreign conversation ×2 | ✅ **403** both |
+| Spoof `senderId` in body | ✅ **ignored** — stored id = authenticated user |
 
-**P0 #2 is genuinely fixed.**
+**Mega vs super dual-gating** — the checklist called this the app's best "not just UI-hidden" example. **Confirmed true:**
+
+| Test | Result |
+|---|---|
+| super reads settings | ✅ 200 |
+| super writes settings | ✅ **403 "Mega admin access required"** |
+| value after attempt | ✅ unchanged |
+| mega writes settings | ✅ 200 + audit entry |
+
+**Privilege escalation — 3/3 blocked server-side, state unchanged:**
+
+| Attempt | Result |
+|---|---|
+| super modifies mega_admin | ✅ 403 "Cannot modify mega admin" |
+| super suspends mega_admin | ✅ 403 "Forbidden" |
+| super promotes patient → mega_admin | ✅ 403 "You cannot assign this role" |
+
+**Confirmation dialogs — verified end-to-end, not just grepped.** Stubbed `window.confirm` to decline and intercepted `fetch`:
+
+| Action | Message | On decline |
+|---|---|---|
+| Suspend user | *"Are you sure you want to suspend this user? They will lose access to all services."* | ✅ **zero mutating API calls** |
+| Maintenance mode | *"⚠️ Maintenance mode will take the entire platform offline. Are you sure?"* | ✅ **toggle stayed off** |
 
 ### Authentication
-
-| Test | Result |
-|---|---|
-| Login rate limit (5 / 15 min) | ✅ 6th attempt → **429** |
-| Rate-limit headers | ✅ `limit:5, remaining:0, reset:+15min` |
-| Forgot-password enumeration | ✅ real + fake → identical 200 |
-| Login happy path (3 roles) | ✅ patient, practitioner-seed, hospital_admin all 200 |
-| Anonymous → protected APIs | ✅ 401 on all probed |
-| Enumeration fix regression check | ✅ valid login still works |
+Rate limit 5/15min → **429** ✅ · headers `limit:5, remaining:0, reset:+15min` ✅ · forgot-password non-enumerating ✅ · anonymous → protected APIs all **401** ✅ · login works for all 5 roles ✅ · enumeration fix caused no regression ✅
 
 ### Patient
+Doctor ratings **stable across calls** (3.0–4.75, real DB) ✅ · fake `nextAvailableMinutes` gone ✅ · detail rating matches list ✅ · dashboard / health-record / appointments / wellness score / articles / conversations all 200 ✅ · wellness check-in persists and updates history ✅
 
-| Test | Result |
-|---|---|
-| **Doctor ratings stable across calls** | ✅ identical; values 3.0–4.75 (real DB) |
-| **`nextAvailableMinutes` fake removed** | ✅ field absent |
-| Detail rating matches list | ✅ 4.75 = 4.75 |
-| `/api/patient/dashboard` | ✅ 200 |
-| `/api/patient/health-record` | ✅ 200 |
-| `/api/patient/appointments` | ✅ 200, 3 records |
-| `/api/patient/wellness/score` | ✅ 200 `{score, streak, history}` |
-| `/api/articles` | ✅ 200 |
-| `/api/conversations` | ✅ 200, 6 conversations |
-| Wellness check-in persists | ✅ score + history updated |
+### Practitioner
+dashboard ✅ · queue ✅ · appointments ✅ · patients (9) ✅ · insights ✅ · billing ✅ · header-spoof rejected ✅
 
 ### Hospital admin
+dashboard ✅ · performance **(real data after fix)** ✅ · analytics **(real data after fix)** ✅ · sla (6 rows) ✅
 
-| Test | Result |
-|---|---|
-| `/api/hospital/dashboard` | ✅ 200 |
-| `/api/hospital/performance` | ✅ 200, **real data after DEFECT-8 fix** |
-| `/api/hospital/analytics` | ✅ 200, **real data after DEFECT-6/7/8 fixes** |
-| `/api/hospital/sla` | ✅ 200, 6 SLA rows |
+### Mega/super admin
+overview · users (82) · facilities · finance · audit · settings — all 200 ✅
 
 ### Marketing / responsive / a11y
-
-| Test | Result |
-|---|---|
-| 9/9 landing sections render | ✅ |
-| No horizontal overflow @375/768/1280 | ✅ 0 / −15 / −15 px |
-| CTAs route correctly | ✅ |
-| Footer dead links | ✅ **0 dead / 32 links** (after fix) |
-| Tap targets ≥44×44 on `/login` | ✅ **4/4 pass** (after fix) |
-| Icon-only buttons have `aria-label` | ✅ 0 missing |
+9/9 sections ✅ · no horizontal overflow @375/768/1280 ✅ · CTAs route correctly ✅ · **0 dead footer links / 32** ✅ · **4/4 tap targets ≥44×44** ✅ · icon buttons have `aria-label` ✅
 
 ---
 
 ## 🟡 GAPS DISCLOSED — NOT FIXED
 
-### GAP-1 — `/api/hospital/staff` 404s for seeded admins
-Returns *"No facility linked to this account."* The staff routes were deliberately migrated to Postgres last session, but seeded admins exist only in Mongo with no Postgres facility row.
+**GAP-1 — Practitioner queue will be empty in a demo.** 222 consultations exist; **zero are in the future**. The queue filters `scheduledStartTime >= now`, so it renders empty for every practitioner. Not a code bug — a seed-data gap. **Reseed with future consultations before demoing this page.** (Related: `status=completed` combined with that filter can never return anything.)
 
-**This is a data/seeding gap, not a code bug** — reverting the migration would be wrong. **Staff CRUD is therefore unverified**, contrary to the checklist's "✅ FIXED". Needs `scripts/seed-supabase.ts` run against this DB, or a Postgres facility row for `admin@gsh.co.za`.
+**GAP-2 — `/api/hospital/staff` 404s for seeded admins.** *"No facility linked."* Staff routes were migrated to Postgres last session, but seeded admins exist only in Mongo with no Postgres facility row. **Staff CRUD remains unverified**, contrary to the checklist's "✅ FIXED". Needs `scripts/seed-supabase.ts` run, not a code change.
 
-### GAP-2 — Analytics revenue & demographics remain placeholder
-No backing source exists: appointments carry no department or billing linkage, and patient DOB lives on an unjoined collection. Now declared honestly via `placeholderFields` in the response rather than passed off as measured. Wiring them up needs a schema change.
+**GAP-3 — Placeholder data still present, now labelled.**
+- `analytics.revenueByDept`, `analytics.patientDemographics` — no backing source (no department/billing linkage on appointments; patient DOB unjoined). Now declared via `placeholderFields` in the response instead of passing as measured.
+- `performance.kpi`: `satisfactionScore 4.8`, `activePatients 842`, `revenueGrowth 12.5` are literals. Only `totalConsultationsThisMonth` is real.
 
-### GAP-3 — design.md violations (quantified)
+**GAP-4 — design.md violations (quantified).**
 
 | Violation | Count | Rule |
 |---|---|---|
@@ -196,47 +155,47 @@ No backing source exists: appointments carry no department or billing linkage, a
 
 design.md's own audit recorded "11+" react-icons files; actual is **90** — ~8× larger than documented.
 
-### GAP-4 — `performance.kpi` partly hardcoded
-`satisfactionScore: 4.8`, `activePatients: 842`, `revenueGrowth: 12.5` are literals. Only `totalConsultationsThisMonth` is real. Untouched — needs a ratings/billing source.
+### Note: identity is split across two id systems
+`mega@247digihealth.com` presents as Mongo `6a3bf0be…` in `/api/admin/users` but as Postgres UUID `f198c3e0…` in its own JWT. This directly caused DEFECT-10 and made admin endpoints reject the session-derived id. Worth reconciling before more code is written against either.
 
 ---
 
-## ⏸️ STILL BLOCKED (~28 items)
+## ⏸️ STILL BLOCKED (~12 items)
 
-Require UI-driven interaction or accounts I couldn't exercise:
-
-- **Practitioner module** — queue, SOAP notes, patient detail. `dr.noxolo.steyn12@247digihealth.com` was supplied but not exercised; API-level work prioritised the P0 IDOR test.
-- **Mega/Super admin** — user suspend/role-change **confirmation dialogs**, audit log, settings. No mega_admin credentials supplied. *(Seed has `mega@247digihealth.com` / `super@247digihealth.com` at the same password — say the word and I'll run these.)*
-- **Booking flow end-to-end** — needs multi-step UI interaction.
-- **Video/LiveKit** — needs two live participants + media devices.
-- **Refill decrement** — needs a prescription with `refillsRemaining > 0`.
-- **PDF/CSV exports** — need download interception.
+- **Booking flow end-to-end** — needs multi-step UI interaction
+- **Video / LiveKit** — needs two live participants and media devices
+- **Refill decrement** — needs a prescription with `refillsRemaining > 0`
+- **PDF / CSV exports** — need download interception
+- **Staff CRUD** — blocked by GAP-2
+- **Practitioner queue UI actions** — blocked by GAP-1 (nothing renders)
 
 ---
 
 ## Honest Assessment
 
-**Genuinely verified:** landing page, login enumeration closed, rate limiting, **chat IDOR (all 7 probes)**, doctor-rating stability, wellness persistence, hospital analytics/performance now on real aggregations, footer links, tap targets.
+**Genuinely verified and safe to demo:** landing page, auth (incl. rate limiting and enumeration), chat IDOR, admin authorization model (dual-gating, escalation guards, confirmation dialogs), doctor discovery, wellness, hospital analytics/performance on real aggregations.
 
-**Still not verified:** practitioner module entirely, admin confirmation dialogs, staff CRUD (blocked by GAP-1), booking, video, exports.
+**Do not demo without reseeding:** practitioner queue (empty), hospital staff management (404).
 
-**The pattern worth noting:** 5 of 8 defects were in code marked "✅ FIXED" last session. Two of those presented fake data as real to a hospital administrator. The checklist's "0 broken items" was not just optimistic — it was produced by a method (reading code) that cannot detect this class of failure.
+**The pattern:** 6 of 10 defects were in code marked "✅ FIXED" last session. Two showed a hospital administrator invented numbers. One let anyone read another practitioner's patient list via a header. The earlier "0 broken items" wasn't optimism — it was the predictable output of verifying by reading.
 
-**Recommendation:** the system is materially better than it was this morning, but ~40% remains unexecuted. Give me mega_admin credentials and a seeded Postgres facility and I'll close most of the remainder.
+**Where things stand:** materially better than this morning, ~82% executed. The remaining 18% is blocked on seed data and UI-interaction testing, not on unknown code quality.
 
 ---
 
 **Files changed**
 
-| File | Defect |
+| File | Defects |
 |---|---|
 | `proxy.ts` | 1 |
 | `app/api/auth/login/route.ts` | 2 |
 | `app/api/patient/wellness/checkin/route.ts` | 3, 4, 5 |
 | `app/api/hospital/analytics/route.ts` | 6, 7, 8 |
 | `app/api/hospital/performance/route.ts` | 8 |
-| `components/LandingPage/Footer.tsx` | GAP (dead links) |
-| `components/auth/Login/LeftPanel.tsx`, `components/ui/Input.tsx` | GAP (tap targets) |
+| `app/api/practitioner/queue/route.ts` | 9 |
+| `lib/models/AuditLog.ts`, `lib/admin/logAdminAction.ts` | 10 |
+| `components/LandingPage/Footer.tsx` | dead links |
+| `components/auth/Login/LeftPanel.tsx`, `components/ui/Input.tsx` | tap targets |
 
-**Commits:** `f3c9f9b`, `537ad7f`, `88e6131`, `5a63717`
+**Commits:** `f3c9f9b` · `537ad7f` · `88e6131` · `5a63717` · `036617a`
 **Typecheck:** clean across all modified files
