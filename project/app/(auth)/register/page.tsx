@@ -93,7 +93,7 @@ export default function RegisterRoleSelection() {
               type="button"
               onMouseEnter={() => setHoveredRole(role.id)}
               onMouseLeave={() => setHoveredRole(null)}
-              onClick={() => navigate(`/register/`)}
+              onClick={() => navigate(`/register/${role.id}`)}
               disabled={isPending}
               className={`group  border-b border-slate-100 flex items-center pb-2 lg:pb-4 justify-between transition-all duration-500 cursor-pointer relative bg-transparent w-full text-left outline-none ${hoveredRole === role.id ? "px-6 md:px-10 bg-slate-50/50" : ""
                 }`}
@@ -132,7 +132,7 @@ export default function RegisterRoleSelection() {
                       : "scale-90 opacity-40 border-slate-200 text-slate-200"
                     }`}
                 >
-                  {pendingHref === `/register/` ? (
+                  {pendingHref === `/register/${role.id}` ? (
                     <BiLoaderAlt className="animate-spin" />
                   ) : (
                     <BiArrowToRight />
