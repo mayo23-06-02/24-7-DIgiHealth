@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import LogoMain from "@/components/ui/LogoMain";
@@ -46,6 +46,55 @@ const ratingAvatars = [
   "https://images.unsplash.com/photo-1622902046580-2b47f47f5471?q=80&w=100&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=100&auto=format&fit=crop",
 ];
+
+function CountUpValue({ value }: { value: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const hasAnimated = useRef(false);
+  const match = value.match(/^(\d+(?:\.\d+)?)(.*)$/);
+  const [display, setDisplay] = useState(match ? `0${match[2]}` : value);
+
+  useEffect(() => {
+    if (!match) return;
+    const target = parseFloat(match[1]);
+    const suffix = match[2];
+    const isDecimal = match[1].includes(".");
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting || hasAnimated.current) return;
+          hasAnimated.current = true;
+
+          const duration = 1500;
+          const start = performance.now();
+          const tick = (now: number) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = target * eased;
+            setDisplay(`${isDecimal ? current.toFixed(1) : Math.round(current)}${suffix}`);
+            if (progress < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        });
+      },
+      { threshold: 0.4 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return (
+    <p
+      ref={ref}
+      className="text-xl md:text-6xl font-light text-ink-900 font-grotesk tabular-nums"
+    >
+      {display}
+    </p>
+  );
+}
 
 export default function Hero() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -137,13 +186,13 @@ export default function Hero() {
       {/* Full-bleed hero photo: reaches the very top of the screen and spans
           the whole viewport width, while its content stays aligned to the
           1400px grid via an inner container. */}
-      <div className="relative left-1/2 -translate-x-1/2 w-screen h-[80vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
+      <div className="relative left-1/2 -translate-x-1/2 w-screen h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
         <img
-          src="/hero.jpg"
+          src="/hero2.jpg"
           alt="24/7 DigiHealth care team"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink-900/35 via-ink-900/0 to-ink-900/50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink-900/75 via-ink-900/0 to-ink-900/70" />
 
         {/* Utility line: real date + live weather/location, overlaid on the image */}
         <div className="hidden md:flex relative z-10 mx-auto w-full max-w-[1400px] items-center justify-between px-5 md:px-10 pt-4 text-xs font-medium text-white/75">
@@ -205,7 +254,7 @@ export default function Hero() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-white/90 text-sm font-medium py-2.5 px-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="text-white/90 text-sm font-medium py-2.5 px-2 rounded-lg hover:bg-white/10 transition-colors hover:ring-2 hover:ring-white"
               >
                 {link.name}
               </Link>
@@ -220,7 +269,7 @@ export default function Hero() {
 
         {/* Hero copy */}
         <div className="relative z-10 mx-auto w-full max-w-[1400px] flex-1 flex flex-col justify-center px-5 md:px-10">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl mt-[20vh]">
             <div className="flex items-center gap-2 text-white/80 text-sm mb-4">
               <Sparkle size={16} className="text-secondary" />
               We invite you to take charge of your family&apos;s health.
@@ -307,8 +356,7 @@ export default function Hero() {
               key={label}
               className="bg-surface-soft rounded-lg  p-4 md:p-6 flex flex-col gap-2"
             >
-              
-              <p className="text-xl md:text-6xl font-light text-ink-900 font-grotesk">{value}</p>
+              <CountUpValue value={value} />
               <p className="text-xs md:text-sm text-white leading-tight">{label}</p>
             </div>
           ))}
