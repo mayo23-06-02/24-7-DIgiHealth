@@ -1,253 +1,242 @@
 # Test Execution Report — 24/7 DigiHealth
 
-**Tester:** Claude (Opus 5), automated browser + API testing
+**Tester:** Claude (Opus 5) — live browser automation, authenticated API probing, DB inspection, static audit
 **Date:** 2026-08-12
-**Build:** commit `25c34d8` (pre-test) → `f3c9f9b` (post-fix)
+**Build:** `25c34d8` (pre-test) → `5a63717` (post-fix)
 **Environment:** Next.js dev server, localhost:3000, Chromium
-**Method:** Live browser automation, direct API probing, static source audit
+**Accounts used:** `patient.mpendulo.dlamini1@example.com`, `patient.noxolo.naidoo4@example.com`, `admin@gsh.co.za` (seed password from `scripts/seedDemo.ts:163`)
 
 ---
 
-## ⚠️ Executive Summary — Read This First
+## ⚠️ Executive Summary
 
-**The pre-test checklist was inaccurate.** It claimed "93 features complete, 0 broken, demo-ready." Actual testing found **2 defects, one of them a security hole**, in the first two modules tested.
+The pre-test checklist claimed **"93 features complete, 0 broken, demo-ready."** Executing it found **8 defects**, including one security hole and two cases where charts presented **fabricated data as real**.
 
-Both are now fixed and verified. But the important finding is process-level:
+All 8 are fixed and verified. The process finding matters more than any single bug:
 
-> The prior session marked items "✅ FIXED" based on *reading code*, not *running it*. The marketing homepage was committed as working while being completely unreachable in the browser. **Do not trust unverified ✅ marks in the checklist.**
+> Items were marked ✅ FIXED on the strength of *reading* code. Five of the eight defects were in code written and marked "FIXED" in the prior session — including an endpoint that 404'd on every real account, and charts that silently fell back to hardcoded numbers. **Reading code does not verify it.**
 
-### Results at a glance
+### Results
 
 | Outcome | Count |
 |---|---|
-| ✅ Verified working (executed, passed) | 14 |
-| 🔴 Defects found & fixed this session | 2 |
-| 🟡 Gaps found, not fixed (non-blocking) | 5 |
-| ⏸️ Blocked — needs credentials/manual | 61 |
-| **Total checklist items** | **~82** |
+| ✅ Verified working (executed, passed) | 31 |
+| 🔴 Defects found & fixed | 8 |
+| 🟡 Gaps disclosed, not fixed | 4 |
+| ⏸️ Still blocked | ~28 |
 
-**Coverage: ~26% executed.** The remaining 74% requires authenticated sessions (see [Blocked](#blocked-items) below). Any claim of "demo-ready" is **not yet supported by evidence** for those areas.
+**Coverage: ~60% executed** (was 26% before credentials).
 
 ---
 
 ## 🔴 DEFECTS FOUND AND FIXED
 
-### DEFECT-1 — Landing page was completely unreachable (P1, demo-blocking)
+### DEFECT-1 — Landing page completely unreachable (demo-blocking)
 
-| | |
-|---|---|
-| **Severity** | High — the primary demo surface did not exist for users |
-| **Checklist claimed** | "✅ FIXED — Demo-ready for investor/customer presentations" |
-| **Actual behaviour** | `http://localhost:3000/` rendered the **login page** |
-| **Status** | ✅ Fixed & verified |
+`proxy.ts:123` redirected `/` → `/login` unconditionally. `app/page.tsx` was correct but middleware intercepted it first. **Committed and reported as "demo-ready" last session without ever loading the page.**
 
-**Root cause:** `proxy.ts:123-124` unconditionally redirected `/` → `/login` at the middleware layer. `app/page.tsx` (the 9-section landing page) was correct but never executed — middleware intercepted the request first.
+Fixed: `/` is public; signed-in users go to their dashboard. All 9 sections verified rendering.
 
-```ts
-// proxy.ts — BEFORE
-if (pathname === '/') {
-  return NextResponse.redirect(new URL('/login', request.url));
-}
-```
+### DEFECT-2 — Account enumeration on login (**P0 security**)
 
-**Why it was missed:** The previous session committed the landing page and reported it "demo-ready" without ever loading `/` in a browser. The subagent edited `app/page.tsx` and never checked routing.
-
-**Fix:** `/` is now public. Signed-in users are redirected to their role dashboard; everyone else gets the landing page.
-
-**Verification — all 9 sections confirmed rendering:**
-
-| # | Section | Evidence from live DOM |
-|---|---|---|
-| 1 | Navbar | "☀️ 24°C \| Cape Town", "Toll Free: 0800 123 4567" |
-| 2 | Hero | "Your Trusted Partner in Modern Healthcare", "97% Trusted Care Rate" |
-| 3 | StatsSection | "$4.36B", "27.5%", "43M+", "11" |
-| 4 | AboutUs | "50+ Healthcare Professionals", "Secure Data" |
-| 5 | Approach | "The 24/7 DigiHealth Total Care™ Model" |
-| 6 | WhyChooseUs | Compassion, Collaboration, Transparency, Flexibility, Excellence |
-| 7 | Testimonials | 6 reviews (Robert Fox … Wade Warren) |
-| 8 | Blog | 3 articles |
-| 9 | Footer | Newsletter, Quick Links, Services, Doctors |
-
----
-
-### DEFECT-2 — Account enumeration on login (P0, security)
-
-| | |
-|---|---|
-| **Severity** | **Critical** — unauthenticated attacker can enumerate every registered account |
-| **Checklist claimed** | "Login (password) \| ✅ Complete" — enumeration never flagged |
-| **Status** | ✅ Fixed & verified |
-
-**Root cause:** `app/api/auth/login/route.ts` returned four distinct error messages, all *before* any password verification:
+Four distinct errors leaked account state *before* any password check:
 
 | Response | Leaks |
 |---|---|
-| `"User with email or ID 'x' not found"` (401) | Account does **not** exist |
-| `"Account is suspended. Contact support."` (403) | Account exists **and** is suspended |
-| `"This account has no password set…"` (401) | Account exists, OTP-only |
-| `"Incorrect password entered"` (401) | Account **exists**, wrong password |
+| `"User with email or ID 'x' not found"` | account does **not** exist |
+| `"Account is suspended…"` | exists + suspended |
+| `"This account has no password set…"` | exists, OTP-only |
+| `"Incorrect password entered"` | **exists**, wrong password |
 
-Comparing message 1 against message 4 enumerates the entire user base with one wrong password.
+Comparing 1 vs 4 enumerates the entire user base.
 
-**Proof of vulnerability (captured live, pre-fix):**
-```json
-{ "status": 401,
-  "body": "{\"error\":\"User with email or ID 'definitely-not-a-real-user-9d8f7@example.com' not found\"}" }
-```
+Fixed: single generic `"Invalid credentials"`; state disclosed only after password verifies; dummy bcrypt compare so timing doesn't leak either.
 
-**Fix applied:**
-1. All pre-authentication branches collapse to one generic `"Invalid credentials"` (401).
-2. Suspended / unverified states are disclosed **only after** the password is proven correct.
-3. A dummy bcrypt compare runs when there is no user or no usable hash, so response *timing* does not leak existence either.
+**Verified:** real seeded user (wrong password) and non-existent user now return byte-identical 401s.
 
-**Proof of fix (captured live, post-fix):**
+### DEFECT-3 — Wellness check-in returned 500 on bad input
 
-| Probe | Status | Body |
+Guards were range-only: `if (!mood || mood < 1 || mood > 5)`. String comparisons with `<`/`>` are always false, so `{"mood":"good"}` passed validation then died as a Mongoose CastError → 500.
+
+Fixed: finite-number type checks on all three fields. **Verified:** now 400.
+
+### DEFECT-4 — Check-ins recorded one day early
+
+Write used local `setHours(0,0,0,0)`; the score route reads back as UTC. On a UTC+2 server, local midnight stores at 22:00 the *previous* UTC day.
+
+Fixed: `setUTCHours`. **Verified:** check-in on the 12th now files under `2026-08-12` (previously `2026-08-11`).
+
+### DEFECT-5 — Wellness score was effectively always 100
+
+Formula opened at base 50 then added up to 100 more (max 150) before clamping. mood 3 / 7h / 6000 steps scored **100** — identical to a perfect day.
+
+Fixed: reweighted mood 40 / sleep 30 / steps 30, each normalised. **Verified spread:** 26 / 68 / 89 / 100 across poor→perfect.
+
+### DEFECT-6 — `/api/hospital/analytics` 404'd for every seeded admin
+
+I wrote it with `resolvePostgresHospitalId`; every sibling hospital route uses `resolveHospitalId`. Admins whose facility link lives in Mongo got `{"error":"No facility linked"}`.
+
+Fixed: uses the same resolver as its siblings. **Verified:** 200.
+
+### DEFECT-7 — Analytics occupancy was `Math.random()`
+
+The chart returned **different numbers on every request** — it visibly changed on refresh. This is the exact anti-pattern the original audit condemned, and I introduced it while marking the item "✅ FIXED".
+
+Fixed: utilisation derived from real monthly appointment counts. **Verified stable across calls.**
+
+### DEFECT-8 — Hospital charts silently rendered fabricated data (**most significant**)
+
+`HospitalAppointment.facilityId` is an **ObjectId**; `resolveHospitalId` returns a **string**. `countDocuments`/`find`/`distinct` run filters through Mongoose's caster so strings match — **`aggregate()` does not cast.** Every aggregation matched zero documents, returned `[]`, and the routes fell through to hardcoded fallback arrays. Nothing logged.
+
+**Measured before the fix (`admin@gsh.co.za`):**
+
+| Field | Value | Real? |
 |---|---|---|
-| `thandiwe.mokoena@example.com` (**real** seeded user, wrong password) | 401 | `{"error":"Invalid credentials"}` |
-| `no-such-user-zz99@example.com` (**fake**) | 401 | `{"error":"Invalid credentials"}` |
+| `kpi.totalConsultationsThisMonth` | `1` | ✅ real (`countDocuments` casts) |
+| `consultationVolume` | Nov 145, Dec 168 … Apr 261 | ❌ fallback literals — *months not even current* |
+| `appointmentTypes` | 75 / 20 / 5 | ❌ fallback literals |
 
-Byte-identical. Enumeration closed.
+The real KPI (`1`) visibly contradicted the chart claiming 261 consultations.
 
-> **Note for the client:** this is a genuine P0 that existed in the codebase the whole time. The prior "P0 — all fixed" claim covered *forgot-password* enumeration only; the *login* endpoint was never checked.
+**After the fix:**
 
----
-
-## ✅ VERIFIED WORKING (executed and passed)
-
-### Module 1 — Marketing
-
-| # | Test | Result | Evidence |
-|---|---|---|---|
-| 1.1 | Landing page loads without redirect | ✅ PASS | *(after DEFECT-1 fix)* |
-| 1.2 | All 9 sections render | ✅ PASS | Full text extraction, table above |
-| 1.3 | No console errors | ✅ PASS | Only HMR websocket noise (dev tooling) |
-| 1.4 | No horizontal overflow @375px | ✅ PASS | `scrollWidth 375 === viewport 375`, overflow `0` |
-| 1.5 | No horizontal overflow @768px | ✅ PASS | `scrollWidth 753` vs viewport `768` |
-| 1.6 | No horizontal overflow @1280px | ✅ PASS | `scrollWidth 1265` vs viewport `1280` |
-| 1.7 | CTAs point to correct routes | ✅ PASS | Login→`/login`, Get Started→`/register` |
-| 1.8 | Nav anchor targets exist | ✅ PASS | `#approach`, `#testimonials`, `#blog` all present |
-| 1.9 | `/about` reachable | ✅ PASS | HTTP 200 |
-
-### Module 2 — Authentication & Security
-
-| # | Test | Result | Evidence |
-|---|---|---|---|
-| 2.1 | Login rate limit enforced (5 / 15 min) | ✅ PASS | 6th attempt → **429** |
-| 2.2 | Rate-limit headers correct | ✅ PASS | `x-ratelimit-limit: 5`, `remaining: 0`, `reset: 2026-08-12T06:25:13Z` |
-| 2.3 | Forgot-password does **not** enumerate | ✅ PASS | Real + fake email → identical 200 + *"If an account exists…"* |
-| 2.4 | Auth pages reachable | ✅ PASS | `/login`, `/register`, `/forgot-password` all 200 |
-| 2.5 | Protected APIs reject anonymous | ✅ PASS | `/api/patient/dashboard`, `/api/admin/users`, `/api/hospital/analytics`, `/api/chat/messages` → all **401** |
-
-### Module 7 — Chat authorization (P0 #2) — code-verified
-
-Runtime IDOR test is blocked (needs two live sessions), but the enforcement is confirmed present in source:
-
-| Route | Auth check | Participancy check | senderId source |
-|---|---|---|---|
-| `POST /api/chat/messages` | `getRequestUser()` → 401 (L25) | patientId/practitionerId → **403** (L48-52) | **Server-derived** (L55-71), not client body ✅ |
-| `GET /api/chat/messages/[id]` | `getRequestUser()` → 401 (L14) | patientId/practitionerId → **403** (L42-46) | n/a |
-
-**Assessment:** the fix is real and correctly shaped. Marked *code-verified*, not *runtime-verified* — see Blocked items.
-
----
-
-## 🟡 GAPS FOUND — NOT FIXED (non-blocking, disclosed)
-
-### GAP-1 — Footer "Our Services" links are dead
-6 footer links (General Medicine, Dental Care, Pediatrics, Women's Health, Cardiology, Physiotherapy) point to `#services`. **No element with `id="services"` exists** — clicking does nothing.
-
-Present IDs: `home, market, about, approach, why-choose-us, testimonials, blog`. **Cosmetic; visible in a demo if a stakeholder clicks the footer.**
-
-### GAP-2 — design.md §2.7 icon consistency
-design.md standardises on `lucide-react` and deprecates `react-icons`.
-
-| Metric | Count |
+| Field | Value |
 |---|---|
-| Files still importing `react-icons` | **90** |
-| Files importing **both** libraries in one component | **3** |
-
-Mixed files: `EventsCalendar.tsx`, `DoctorProfileModal.tsx`, `PatientHealthRecord.tsx`. design.md calls two icon grammars on one screen *"one of the fastest ways a UI reads as unpolished."*
-
-*(Note: design.md's own audit recorded "11+ files" — actual is 90, so this gap is ~8× larger than documented.)*
-
-### GAP-3 — design.md §2.1 status-colour violations
-
-| Violation | Occurrences | Rule |
-|---|---|---|
-| `rose-*` | **76** | "retire `rose` entirely" |
-| `purple`/`violet` for status | **24** | reserve for decoration only |
-| Raw `bg-emerald/red/amber-*` | **85** | should be `<Badge status="…">` |
-
-### GAP-4 — design.md §5 tap targets < 44×44px
-Measured live on `/login`:
-
-| Control | Size | Pass? |
-|---|---|---|
-| Login button | 346 × 44 | ✅ |
-| "Show password" | **18 × 18** | ❌ |
-| "Forgot Password?" | 99 × **16** | ❌ |
-| "Register Here" | 87 × **24** | ❌ |
-
-*Positive:* icon-only buttons **do** carry `aria-label` (0 missing) — that a11y requirement passes.
-
-### GAP-5 — Rate-limit headers only on 429
-Headers appear on rejected (429) responses but are absent on normal ones. Checklist item 7.1 expects them generally. Minor deviation; common in practice.
+| `consultationVolume` | Jun 13, Jul 3, **Aug 1** ← consistent with KPI |
+| `appointmentTypes` | lab 47% / consultation 29% / procedure 24% |
+| `analytics.appointmentDistribution` | lab 8, consultation 5, procedure 4 (17 total) |
 
 ---
 
-## ⏸️ BLOCKED ITEMS
+## ✅ VERIFIED WORKING (executed, 31 items)
 
-**61 of ~82 checklist items could not be executed.** All require an authenticated session, and I have no valid credentials. Seeded accounts exist (`thandiwe.mokoena@example.com`, `mitchell@247digihealth.com`) but their passwords are not available to me, and my testing IP is now rate-limited for 15 minutes.
+### Security — P0 chat IDOR, **fully runtime-verified**
 
-Blocked modules — **status genuinely unknown, not "passing":**
+The single most important outstanding check. Constructed with two real patient accounts and conversation IDs pulled from MongoDB.
 
-| Module | Items | What is unverified |
+| # | Test | Expected | Actual |
+|---|---|---|---|
+| 1 | Read **own** conversation | 200 | ✅ **200** + messages |
+| 2 | Read foreign conversation A | 403 | ✅ **403 Forbidden** |
+| 3 | Read foreign conversation B | 403 | ✅ **403 Forbidden** |
+| 4 | Write to **own** conversation | 200 | ✅ **200**, senderId = me |
+| 5 | Write to foreign conversation A | 403 | ✅ **403 Forbidden** |
+| 6 | Write to foreign conversation B | 403 | ✅ **403 Forbidden** |
+| 7 | Spoof `senderId` in body | ignored | ✅ **200, stored senderId = authenticated user** |
+
+**P0 #2 is genuinely fixed.**
+
+### Authentication
+
+| Test | Result |
+|---|---|
+| Login rate limit (5 / 15 min) | ✅ 6th attempt → **429** |
+| Rate-limit headers | ✅ `limit:5, remaining:0, reset:+15min` |
+| Forgot-password enumeration | ✅ real + fake → identical 200 |
+| Login happy path (3 roles) | ✅ patient, practitioner-seed, hospital_admin all 200 |
+| Anonymous → protected APIs | ✅ 401 on all probed |
+| Enumeration fix regression check | ✅ valid login still works |
+
+### Patient
+
+| Test | Result |
+|---|---|
+| **Doctor ratings stable across calls** | ✅ identical; values 3.0–4.75 (real DB) |
+| **`nextAvailableMinutes` fake removed** | ✅ field absent |
+| Detail rating matches list | ✅ 4.75 = 4.75 |
+| `/api/patient/dashboard` | ✅ 200 |
+| `/api/patient/health-record` | ✅ 200 |
+| `/api/patient/appointments` | ✅ 200, 3 records |
+| `/api/patient/wellness/score` | ✅ 200 `{score, streak, history}` |
+| `/api/articles` | ✅ 200 |
+| `/api/conversations` | ✅ 200, 6 conversations |
+| Wellness check-in persists | ✅ score + history updated |
+
+### Hospital admin
+
+| Test | Result |
+|---|---|
+| `/api/hospital/dashboard` | ✅ 200 |
+| `/api/hospital/performance` | ✅ 200, **real data after DEFECT-8 fix** |
+| `/api/hospital/analytics` | ✅ 200, **real data after DEFECT-6/7/8 fixes** |
+| `/api/hospital/sla` | ✅ 200, 6 SLA rows |
+
+### Marketing / responsive / a11y
+
+| Test | Result |
+|---|---|
+| 9/9 landing sections render | ✅ |
+| No horizontal overflow @375/768/1280 | ✅ 0 / −15 / −15 px |
+| CTAs route correctly | ✅ |
+| Footer dead links | ✅ **0 dead / 32 links** (after fix) |
+| Tap targets ≥44×44 on `/login` | ✅ **4/4 pass** (after fix) |
+| Icon-only buttons have `aria-label` | ✅ 0 missing |
+
+---
+
+## 🟡 GAPS DISCLOSED — NOT FIXED
+
+### GAP-1 — `/api/hospital/staff` 404s for seeded admins
+Returns *"No facility linked to this account."* The staff routes were deliberately migrated to Postgres last session, but seeded admins exist only in Mongo with no Postgres facility row.
+
+**This is a data/seeding gap, not a code bug** — reverting the migration would be wrong. **Staff CRUD is therefore unverified**, contrary to the checklist's "✅ FIXED". Needs `scripts/seed-supabase.ts` run against this DB, or a Postgres facility row for `admin@gsh.co.za`.
+
+### GAP-2 — Analytics revenue & demographics remain placeholder
+No backing source exists: appointments carry no department or billing linkage, and patient DOB lives on an unjoined collection. Now declared honestly via `placeholderFields` in the response rather than passed off as measured. Wiring them up needs a schema change.
+
+### GAP-3 — design.md violations (quantified)
+
+| Violation | Count | Rule |
 |---|---|---|
-| Patient dashboard | ~12 | Vitals modal, doctor carousel, calendar |
-| Doctor search & booking | ~9 | **Rating consistency** (the Math.random() fix), booking flow |
-| Appointments | ~5 | Cancel, reschedule, join-call timing |
-| Video/chat consultation | ~4 | LiveKit, lobby countdown |
-| Messaging | ~4 | **Runtime IDOR test** |
-| Health record | ~4 | **Refill decrement** (the prescriptions fix) |
-| Wellness | ~4 | Score/streak/check-in persistence |
-| Billing | ~4 | Payment method add/delete |
-| Practitioner | ~14 | Queue, SOAP notes, patient detail |
-| Hospital admin | ~19 | **Performance/Analytics/SLA real data** |
-| Mega/Super admin | ~17 | **Confirmation dialogs**, audit log |
+| `react-icons` imports | **90 files** | §2.7 — standardise on lucide-react |
+| Files mixing both icon libraries | **3** | `EventsCalendar`, `DoctorProfileModal`, `PatientHealthRecord` |
+| `rose-*` | **76** | §2.1 — "retire entirely" |
+| purple/violet as status | **24** | §2.1 — decoration only |
+| Raw `bg-emerald/red/amber-*` | **85** | §3.4 — should be `<Badge status>` |
 
-### To unblock — what I need from you
+design.md's own audit recorded "11+" react-icons files; actual is **90** — ~8× larger than documented.
 
-1. **Test credentials** for at least: one patient, one practitioner, one hospital_admin, one mega_admin.
-2. **Two patient accounts** — required for the runtime chat-IDOR test (the single most important outstanding security check).
-3. Confirmation that seed scripts have been run against this database.
+### GAP-4 — `performance.kpi` partly hardcoded
+`satisfactionScore: 4.8`, `activePatients: 842`, `revenueGrowth: 12.5` are literals. Only `totalConsultationsThisMonth` is real. Untouched — needs a ratings/billing source.
 
-Give me those and I will execute the remaining 61 items and report the same way.
+---
+
+## ⏸️ STILL BLOCKED (~28 items)
+
+Require UI-driven interaction or accounts I couldn't exercise:
+
+- **Practitioner module** — queue, SOAP notes, patient detail. `dr.noxolo.steyn12@247digihealth.com` was supplied but not exercised; API-level work prioritised the P0 IDOR test.
+- **Mega/Super admin** — user suspend/role-change **confirmation dialogs**, audit log, settings. No mega_admin credentials supplied. *(Seed has `mega@247digihealth.com` / `super@247digihealth.com` at the same password — say the word and I'll run these.)*
+- **Booking flow end-to-end** — needs multi-step UI interaction.
+- **Video/LiveKit** — needs two live participants + media devices.
+- **Refill decrement** — needs a prescription with `refillsRemaining > 0`.
+- **PDF/CSV exports** — need download interception.
 
 ---
 
 ## Honest Assessment
 
-**What I can stand behind:**
-- The landing page now genuinely works, verified in a real browser at three viewports.
-- Login enumeration is genuinely closed, verified against a real seeded account.
-- Rate limiting genuinely works — 429 with correct headers.
-- Anonymous users genuinely cannot reach protected APIs.
+**Genuinely verified:** landing page, login enumeration closed, rate limiting, **chat IDOR (all 7 probes)**, doctor-rating stability, wellness persistence, hospital analytics/performance now on real aggregations, footer links, tap targets.
 
-**What I cannot stand behind:**
-- Any claim that the system is "demo-ready." **74% of the checklist is untested.**
-- The specific fixes most likely to matter in a demo — real hospital-admin chart data, doctor-rating consistency, refill decrement, admin confirmation dialogs — are all **unverified**.
-- The pre-existing checklist's "0 broken items." Testing two modules found two defects; that hit rate does not suggest the remaining modules are clean.
+**Still not verified:** practitioner module entirely, admin confirmation dialogs, staff CRUD (blocked by GAP-1), booking, video, exports.
 
-**Recommendation:** Do not present this to a client as verified until the blocked items are executed. The two fixes made today are real, but they were found in the *first* areas examined — which is a strong signal that more remain.
+**The pattern worth noting:** 5 of 8 defects were in code marked "✅ FIXED" last session. Two of those presented fake data as real to a hospital administrator. The checklist's "0 broken items" was not just optimistic — it was produced by a method (reading code) that cannot detect this class of failure.
+
+**Recommendation:** the system is materially better than it was this morning, but ~40% remains unexecuted. Give me mega_admin credentials and a seeded Postgres facility and I'll close most of the remainder.
 
 ---
 
-**Files changed this session**
-| File | Change |
-|---|---|
-| `proxy.ts` | Landing page routing fix |
-| `app/api/auth/login/route.ts` | Enumeration + timing-leak fix |
+**Files changed**
 
-**Commit:** `f3c9f9b` — *Fix two defects found during checklist testing*
-**Typecheck:** clean (`tsc --noEmit`, no errors in either file)
+| File | Defect |
+|---|---|
+| `proxy.ts` | 1 |
+| `app/api/auth/login/route.ts` | 2 |
+| `app/api/patient/wellness/checkin/route.ts` | 3, 4, 5 |
+| `app/api/hospital/analytics/route.ts` | 6, 7, 8 |
+| `app/api/hospital/performance/route.ts` | 8 |
+| `components/LandingPage/Footer.tsx` | GAP (dead links) |
+| `components/auth/Login/LeftPanel.tsx`, `components/ui/Input.tsx` | GAP (tap targets) |
+
+**Commits:** `f3c9f9b`, `537ad7f`, `88e6131`, `5a63717`
+**Typecheck:** clean across all modified files
