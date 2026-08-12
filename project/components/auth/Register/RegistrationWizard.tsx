@@ -44,8 +44,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
 
   return (
     <div
-      style={{ width: "100%", maxWidth: "1300px" }}
-      className="bg-white custom-scrollbar overflow-y-scroll h-full lg:min-h-[85vh] max-h-[90vh] px-6 lg:px-10 rounded-lg w-full max-w-4xl mx-auto relative animate-in fade-in duration-700"
+      className="bg-white fixed inset-0 z-50 w-screen h-screen rounded-none px-4 flex flex-col overflow-hidden animate-in fade-in duration-700 lg:relative lg:inset-auto lg:w-full lg:h-full lg:max-w-4xl xl:max-w-5xl lg:mx-auto lg:min-h-[85vh] lg:max-h-[90vh] lg:rounded-lg lg:mt-[8vh] lg:px-10"
     >
       {/* Offline banner */}
       {!isOnline && (
@@ -91,9 +90,9 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
         </div>
       )}
 
-      <div className="w-full">
+      <div className="w-full flex flex-col flex-1 min-h-0">
         {/* Header */}
-        <div className="flex pt-4 items-start justify-between sticky top-0 z-10 bg-white">
+        <div className="flex pt-4 items-start justify-between shrink-0 bg-white">
           <div className="py-4 flex flex-col gap-4">
             <div className="inline-flex items-center gap-2 px-[10px] rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -121,7 +120,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
         </div>
 
         {/* Step dots */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-8 shrink-0">
           {config.steps.map((label, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-2">
               <div
@@ -142,15 +141,15 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
 
         {/* Global error */}
         {globalError && (
-          <div className="mb-10 p-5 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-4 text-red-600">
+          <div className="mb-10 p-5 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-4 text-red-600 shrink-0">
             <span className="text-2xl">⚠</span>
             <p className="text-sm font-bold">{globalError}</p>
           </div>
         )}
 
         {/* Step content */}
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="custom-scrollbar">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col flex-1 min-h-0">
+          <div className="custom-scrollbar overflow-y-auto flex-1 min-h-0">
             <StepRenderer
               role={role}
               step={step}
@@ -162,7 +161,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
           </div>
 
           {/* Navigation */}
-          <div className="flex flex-col justify-end md:flex-row gap-4 lg:pt-16 mt-6 border-t border-slate-100 py-5">
+          <div className="flex flex-col justify-end md:flex-row gap-4 mt-6 border-t border-slate-100 py-5 shrink-0 bg-white">
             {step > 1 && (
               <Button type="button" variant="white" onClick={goToPrevious}>
                 Back
