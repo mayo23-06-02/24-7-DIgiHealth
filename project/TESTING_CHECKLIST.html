@@ -1,1374 +1,565 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>24/7 DigiHealth - Testing Checklist</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<title>24/7 DigiHealth — Test Execution Record</title>
+<style>
+  :root {
+    --paper:      #ffffff;
+    --surface:    #f2f6f8;
+    --surface-2:  #e8f0f4;
+    --ink:        #10232e;
+    --ink-2:      #43606d;
+    --ink-3:      #7590a0;
+    --rule:       #d3e0e6;
+    --rule-firm:  #a9c3ce;
+    --primary:    #2b7a9e;
+    --critical:   #b3261e;
+    --caution:    #8a5a00;
+    --good:       #16704a;
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #0A0A2E;
-            background: #f5f5f5;
-            padding: 20px;
-        }
+    --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+  }
 
-        .page {
-            background: white;
-            max-width: 900px;
-            margin: 0 auto 30px;
-            padding: 40px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            page-break-after: always;
-        }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:     #0d1a21;
+      --surface:   #142630;
+      --surface-2: #1a3039;
+      --ink:       #e6eef2;
+      --ink-2:     #a8c0cc;
+      --ink-3:     #7590a0;
+      --rule:      #24404c;
+      --rule-firm: #385b6a;
+      --primary:   #6cb6d4;
+      --critical:  #f08b84;
+      --caution:   #d8a53c;
+      --good:      #57bb8a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0d1a21; --surface:#142630; --surface-2:#1a3039;
+    --ink:#e6eef2; --ink-2:#a8c0cc; --ink-3:#7590a0;
+    --rule:#24404c; --rule-firm:#385b6a;
+    --primary:#6cb6d4; --critical:#f08b84; --caution:#d8a53c; --good:#57bb8a;
+  }
+  :root[data-theme="light"] {
+    --paper:#ffffff; --surface:#f2f6f8; --surface-2:#e8f0f4;
+    --ink:#10232e; --ink-2:#43606d; --ink-3:#7590a0;
+    --rule:#d3e0e6; --rule-firm:#a9c3ce;
+    --primary:#2b7a9e; --critical:#b3261e; --caution:#8a5a00; --good:#16704a;
+  }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #4493b8;
-            padding-bottom: 15px;
-        }
+  * { box-sizing: border-box; }
 
-        .header h1 {
-            color: #4493b8;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+  }
 
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
+  .sheet {
+    max-width: 62rem;
+    margin: 0 auto;
+    background: var(--paper);
+    padding: 3rem 3.25rem 4rem;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 2.75rem;
+  }
 
-        .meta-info {
-            background: #f0f0f0;
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-        }
+  /* ---------- masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 1rem; }
+  .rule-heavy { height: 3px; background: var(--ink); }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--primary);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 2.15rem;
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+    font-weight: 600;
+  }
+  .standfirst {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    color: var(--ink-2);
+    max-width: 46ch;
+    margin: 0;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: .85rem 1.5rem;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: .9rem 0;
+    font-size: .82rem;
+  }
+  .meta dt {
+    font-family: var(--mono);
+    font-size: .66rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 .15rem;
+  }
+  .meta dd { margin: 0; font-family: var(--mono); color: var(--ink); }
 
-        .module-title {
-            background: #4493b8;
-            color: white;
-            padding: 12px 15px;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
-            break-after: avoid;
-        }
+  /* ---------- scorecard ---------- */
+  .scorecard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .score { background: var(--paper); padding: 1.1rem 1rem; }
+  .score .n {
+    font-family: var(--serif);
+    font-size: 2.3rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+  .score .l {
+    font-family: var(--mono);
+    font-size: .66rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: .45rem;
+    display: block;
+  }
+  .score.is-good .n { color: var(--good); }
+  .score.is-crit .n { color: var(--critical); }
+  .score.is-warn .n { color: var(--caution); }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: .7rem;
+  }
+  h2 .count {
+    font-family: var(--mono);
+    font-size: .72rem;
+    color: var(--ink-3);
+    letter-spacing: .08em;
+  }
+  section { display: flex; flex-direction: column; gap: 1rem; }
+  .lede { margin: 0; color: var(--ink-2); max-width: 68ch; }
 
-        th {
-            background: #e8f4f8;
-            padding: 10px;
-            text-align: left;
-            font-weight: 600;
-            border: 1px solid #ddd;
-            color: #0A0A2E;
-        }
+  .callout {
+    border-left: 3px solid var(--critical);
+    background: var(--surface);
+    padding: .9rem 1.1rem;
+    font-size: .92rem;
+  }
+  .callout strong { color: var(--critical); }
 
-        td {
-            padding: 9px 10px;
-            border: 1px solid #ddd;
-        }
+  /* ---------- tables ---------- */
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+  caption {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: .66rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-bottom: .5rem;
+  }
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: .64rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 400;
+    padding: .5rem .7rem;
+    border-bottom: 1px solid var(--rule-firm);
+    white-space: nowrap;
+  }
+  td {
+    padding: .6rem .7rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .id { font-family: var(--mono); font-size: .76rem; color: var(--ink-3); white-space: nowrap; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  code {
+    font-family: var(--mono);
+    font-size: .82em;
+    background: var(--surface);
+    padding: .08em .32em;
+    border-radius: 2px;
+  }
 
-        tr:nth-child(even) {
-            background: #fafafa;
-        }
+  /* severity encoded in form as well as colour */
+  .sev { border-left: 3px solid transparent; padding-left: .55rem; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .sev-crit { border-left-color: var(--critical); color: var(--critical); }
+  .sev-high { border-left-color: var(--caution); color: var(--caution); }
+  .sev-med  { border-left-color: var(--rule-firm); color: var(--ink-2); }
 
-        tr:hover {
-            background: #f0f7fb;
-        }
+  .verdict { font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; white-space: nowrap; }
+  .v-fixed { color: var(--good); }
+  .v-open  { color: var(--caution); }
 
-        .checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
+  .pass { color: var(--good); font-family: var(--mono); font-size: .8rem; white-space: nowrap; }
+  .blocked { color: var(--ink-3); font-family: var(--mono); font-size: .8rem; }
 
-        .status-col {
-            width: 15%;
-            text-align: center;
-        }
+  .delta { font-family: var(--mono); font-size: .78rem; white-space: nowrap; }
+  .delta .was { color: var(--critical); }
+  .delta .now { color: var(--good); }
 
-        .test-col {
-            width: 50%;
-        }
+  .sign {
+    border: 1px solid var(--rule-firm);
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.5rem;
+  }
+  .sign .line { border-bottom: 1px solid var(--ink-3); height: 2rem; }
+  .sign .lbl {
+    font-family: var(--mono);
+    font-size: .64rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: .4rem;
+    display: block;
+  }
 
-        .date-col {
-            width: 20%;
-        }
+  .toolbar {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 1rem 3.25rem 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+  button {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: .6rem 1.1rem;
+    cursor: pointer;
+  }
+  button:hover { background: var(--primary); }
+  button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-        .notes-col {
-            width: 15%;
-        }
+  footer {
+    font-size: .78rem;
+    color: var(--ink-3);
+    border-top: 1px solid var(--rule);
+    padding-top: 1rem;
+  }
 
-        .status-complete {
-            color: #10b981;
-            font-weight: bold;
-        }
+  @media (max-width: 640px) {
+    .sheet { padding: 2rem 1.25rem 3rem; }
+    .toolbar { padding: 1rem 1.25rem 0; }
+    h1 { font-size: 1.7rem; }
+  }
 
-        .status-pending {
-            color: #f59e0b;
-            font-weight: bold;
-        }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none; }
+    .sheet { max-width: none; border: none; padding: 0; gap: 1.75rem; }
+    section { break-inside: avoid; }
+    tr { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
 
-        .section-header {
-            background: #e8f4f8;
-            padding: 8px 12px;
-            font-weight: bold;
-            border: 1px solid #ddd;
-        }
+<div class="toolbar">
+  <button onclick="window.print()">Save as PDF</button>
+</div>
 
-        .footer {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-        }
+<div class="sheet">
 
-        .legend {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            font-size: 12px;
-            flex-wrap: wrap;
-        }
+  <header class="masthead">
+    <div class="rule-heavy"></div>
+    <span class="eyebrow">Quality Assurance · Test Execution Record</span>
+    <h1>24/7 DigiHealth Platform Audit</h1>
+    <p class="standfirst">Every claim below was produced by running the system, not by reading its source. Figures are measured values captured from the live application.</p>
+    <dl class="meta">
+      <div><dt>Date</dt><dd>2026-08-12</dd></div>
+      <div><dt>Build tested</dt><dd>25c34d8 → 68ebb51</dd></div>
+      <div><dt>Roles exercised</dt><dd>5 of 6</dd></div>
+      <div><dt>Method</dt><dd>Browser + API + DB</dd></div>
+      <div><dt>Environment</dt><dd>localhost:3000</dd></div>
+      <div><dt>Coverage</dt><dd>92%</dd></div>
+    </dl>
+  </header>
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+  <div class="scorecard">
+    <div class="score is-good"><span class="n">68</span><span class="l">Verified passing</span></div>
+    <div class="score is-crit"><span class="n">17</span><span class="l">Defects fixed</span></div>
+    <div class="score is-warn"><span class="n">2</span><span class="l">Gaps disclosed</span></div>
+    <div class="score"><span class="n">6</span><span class="l">Still blocked</span></div>
+    <div class="score"><span class="n">92<span style="font-size:1.2rem">%</span></span><span class="l">Executed</span></div>
+  </div>
 
-        .legend-checkbox {
-            width: 14px;
-            height: 14px;
-        }
-
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-            .page {
-                box-shadow: none;
-                margin: 0;
-                page-break-inside: avoid;
-            }
-        }
-
-        .print-button {
-            background: #4493b8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .print-button:hover {
-            background: #326E8A;
-        }
-    </style>
-</head>
-<body>
-    <button class="print-button" onclick="window.print()">🖨️ Print to PDF</button>
-
-    <div class="page">
-        <div class="header">
-            <h1>24/7 DigiHealth Platform</h1>
-            <p>Comprehensive Testing Checklist</p>
-        </div>
-
-        <div class="meta-info">
-            <div><strong>Project:</strong> DigiHealth Telehealth Platform</div>
-            <div><strong>Status:</strong> Demo-Ready (Aug 12, 2026)</div>
-            <div><strong>Tester:</strong> ________________</div>
-        </div>
-
-        <div class="legend">
-            <div class="legend-item">
-                <span style="color: #10b981; font-weight: bold;">✓</span>
-                <span>Tested & Verified</span>
-            </div>
-            <div class="legend-item">
-                <span style="color: #f59e0b; font-weight: bold;">⊘</span>
-                <span>Issue Found</span>
-            </div>
-            <div class="legend-item">
-                <span style="color: #999; font-weight: bold;">—</span>
-                <span>Not Yet Tested</span>
-            </div>
-        </div>
-
-        <!-- MODULE 1: MARKETING -->
-        <div class="module-title">MODULE 1: PUBLIC / MARKETING</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Test Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Landing page loads without redirect to login</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>All 9 sections render: Navbar, Hero, Stats, About, Approach, Why Choose, Testimonials, Blog, Footer</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Hero carousel auto-advances and responds to clicks</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>All CTAs work: Login, Get Started, Explore Services</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Responsive at 375px (mobile), 768px (tablet), 1280px (desktop)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>No console errors on page load</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- MODULE 2: AUTHENTICATION -->
-        <div class="module-title">MODULE 2: AUTHENTICATION</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Test Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Patient registration creates user and sends OTP</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>OTP verification required before login access</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>OTP expires after 10 minutes</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Login with correct password succeeds, wrong password fails</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Forgot password sends reset email with token</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Reset token valid for 10 minutes, expires after</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Reset token single-use (can't be used twice)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Rate limiting: 5 login attempts per 15 minutes</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>OAuth login requires OTP verification</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Session persists on refresh, expires on browser close</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
+  <section>
+    <h2>Headline finding</h2>
+    <div class="callout">
+      <strong>11 of the 17 defects sat in code previously marked “complete”.</strong>
+      That prior status was assigned by reading the code rather than running it. One endpoint returned 404 for every real account; two dashboards silently substituted hardcoded numbers for live data; an audit log discarded every action performed by an entire class of administrator. None of these are visible to inspection — each one returns a success status while doing the wrong thing.
     </div>
+  </section>
 
-    <div class="page">
-        <!-- MODULE 3: PATIENT FEATURES -->
-        <div class="module-title">MODULE 3: PATIENT DASHBOARD & FEATURES</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Test Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="section-header">
-                    <td colspan="4">3.1 HOME DASHBOARD</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Dashboard loads with vitals KPI cards (weight, height)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>"Update Vitals" button opens modal, saves to API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Doctor carousel shows recently booked doctors</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Calendar widget shows upcoming appointments</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.2 DOCTOR SEARCH & DISCOVERY</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Doctor list loads with 10+ doctors, real ratings (not random)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Search filters doctors by name/specialty in real-time</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Filter & sort buttons work (specialty, language, rating)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Doctor ratings consistent on refresh (same doctor = same rating)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Responsive at 375px (cards), 768px (2-col), 1280px (3-col)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.3 DOCTOR PROFILE & BOOKING</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Doctor profile shows name, specialty, bio, rating, reviews</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Booking modal opens with multi-step flow (reason → date → type → confirm)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Booking confirmation calls API and creates appointment</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>New booking appears in appointments list/calendar</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.4 APPOINTMENTS & MANAGEMENT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Appointments list shows doctor, date/time, status, action buttons</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Cancel appointment triggers API call and confirmation dialog</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Reschedule appointment opens booking modal</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>"Join Call" button appears when appointment is within 15 min</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Calendar view toggle shows appointments on dates</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.5 VIDEO/CHAT CONSULTATION</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Lobby page shows appointment details and countdown timer</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Auto-join at appointment start time OR manual join when enabled</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Video call loads LiveKit with camera/mic controls</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Chat consultation loads message window</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.6 MESSAGING & CHAT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Messages page shows conversations with doctors</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Send message calls API and appears immediately in chat</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Non-participants cannot read/send messages (403 on API)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>File attachments upload correctly</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.7 HEALTH RECORD</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>All tabs load (Timeline, Vitals, Labs, Meds, Allergies, Immunizations)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Refill request decrements refills_remaining counter</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Add allergy saves to DB and appears in list</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>PDF report downloads with full health record</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.8 WELLNESS HUB</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Wellness score displays current score and streak count</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Daily check-in (mood, sleep, steps) saves via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Score updates immediately after check-in</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Articles/clinical library loads and displays correctly</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">3.9 BILLING</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Billing summary shows plan, cost, next billing date</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Add payment method modal opens and saves via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Delete payment method with confirmation dialog works via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Transaction history displays with dates, amounts, status</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
+  <section>
+    <h2>Defect register <span class="count">17 found · 17 resolved</span></h2>
+    <div class="scroll">
+      <table>
+        <caption>Ordered by severity, then by area</caption>
+        <thead>
+          <tr>
+            <th>Ref</th><th>Severity</th><th>Area</th><th>Defect</th><th>Evidence</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id">D-02</td><td><span class="sev sev-crit">Critical</span></td><td>Auth</td>
+            <td>Login returned four distinct errors before any password check, distinguishing registered from unregistered addresses — the whole user base was enumerable.</td>
+            <td class="delta"><span class="was">4 messages</span> → <span class="now">1 generic</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-09</td><td><span class="sev sev-crit">Critical</span></td><td>Practitioner</td>
+            <td>Patient queue took identity from a client-supplied <code>x-practitioner-id</code> header with no token verification — any caller could read another clinician’s patient list, complaints and risk scores.</td>
+            <td class="delta">spoof <span class="was">200</span> → <span class="now">401</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-10</td><td><span class="sev sev-crit">Critical</span></td><td>Compliance</td>
+            <td>Audit log silently discarded every action by a UUID-identified admin. The action succeeded, returned 200, and never appeared in the record presented as immutable.</td>
+            <td class="delta"><span class="was">14 entries</span> → <span class="now">15</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-08</td><td><span class="sev sev-high">High</span></td><td>Hospital</td>
+            <td>Charts rendered fabricated figures. An ObjectId/string mismatch meant aggregations matched nothing and fell through to hardcoded arrays — the chart contradicted the KPI beside it.</td>
+            <td class="delta"><span class="was">Nov 145…Apr 261</span> → <span class="now">Jun 13, Jul 3</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-06</td><td><span class="sev sev-high">High</span></td><td>Hospital</td>
+            <td>Analytics endpoint used a Postgres-only resolver where every sibling route used the Mongo-aware one — 404 for every seeded administrator.</td>
+            <td class="delta"><span class="was">404</span> → <span class="now">200</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-01</td><td><span class="sev sev-high">High</span></td><td>Marketing</td>
+            <td>Landing page was unreachable. Middleware redirected <code>/</code> to the login screen, so the page component never executed despite being committed as demo-ready.</td>
+            <td class="delta"><span class="was">login form</span> → <span class="now">9 sections</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-11</td><td><span class="sev sev-high">High</span></td><td>Identity</td>
+            <td>One account carried two identities. All 307 Postgres users had a null link column, so accounts present in both stores issued a UUID session while the rest of the app used ObjectIds. Root cause of D-10.</td>
+            <td class="delta">link now <span class="now">self-heals</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-12</td><td><span class="sev sev-high">High</span></td><td>Hospital</td>
+            <td>Facility resolver committed to one lookup path by identifier shape, so every staff endpoint answered “No facility linked”.</td>
+            <td class="delta"><span class="was">404</span> → <span class="now">200</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-15</td><td><span class="sev sev-high">High</span></td><td>Practitioner</td>
+            <td>Queue filtered on a status value that does not exist in the data (<code>ongoing</code> vs the stored <code>in_progress</code>), making all in-progress consultations unreachable.</td>
+            <td class="delta">10 rows <span class="now">recovered</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-16</td><td><span class="sev sev-high">High</span></td><td>Practitioner</td>
+            <td>Date filter excluded precisely the rows the page exists to show. History is always in the past; in-progress work started before “now”. All three tabs were permanently empty.</td>
+            <td class="delta">Cancelled <span class="was">0</span> → <span class="now">12</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-07</td><td><span class="sev sev-med">Medium</span></td><td>Hospital</td>
+            <td>Analytics occupancy was randomly generated — the chart changed on every page refresh.</td>
+            <td class="delta">now <span class="now">stable</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-03</td><td><span class="sev sev-med">Medium</span></td><td>Patient</td>
+            <td>Wellness check-in returned a server error on non-numeric input; range-only guards never reject strings.</td>
+            <td class="delta"><span class="was">500</span> → <span class="now">400</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-04</td><td><span class="sev sev-med">Medium</span></td><td>Patient</td>
+            <td>Check-ins were filed one day early — written at local midnight, read back as UTC.</td>
+            <td class="delta">date <span class="now">correct</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-05</td><td><span class="sev sev-med">Medium</span></td><td>Patient</td>
+            <td>Wellness score was effectively always 100 — a mediocre day scored identically to a perfect one, so the number carried no signal.</td>
+            <td class="delta"><span class="was">100 / 100</span> → <span class="now">26–100</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-13</td><td><span class="sev sev-med">Medium</span></td><td>Hospital</td>
+            <td>Toggle Duty failed on a column-name mismatch between the caller’s camelCase and the table’s snake_case.</td>
+            <td class="delta"><span class="was">500</span> → <span class="now">200</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-14</td><td><span class="sev sev-med">Medium</span></td><td>Hospital</td>
+            <td>Staff profile page errored for every record, dereferencing a Mongo-only key on Postgres rows.</td>
+            <td class="delta"><span class="was">500</span> → <span class="now">200</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+          <tr>
+            <td class="id">D-17</td><td><span class="sev sev-med">Medium</span></td><td>Practitioner</td>
+            <td>Every queue row displayed “Unknown Patient” — the name was read from a field the user model does not define.</td>
+            <td class="delta"><span class="was">100% unnamed</span> → <span class="now">0</span></td>
+            <td class="verdict v-fixed">Fixed</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <div class="page">
-        <!-- MODULE 4: PRACTITIONER -->
-        <div class="module-title">MODULE 4: PRACTITIONER DASHBOARD</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Test Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="section-header">
-                    <td colspan="4">4.1 QUEUE MANAGEMENT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Queue page loads with upcoming consultations list</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Status filters (Active, Completed, Cancelled) work</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>"Join Video/Chat" button navigates to lobby</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>"SOAP Note" button opens modal, saves via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>"Patient Profile" button navigates to patient detail page</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Risk score displays with color coding and factors</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">4.2 PATIENT MANAGEMENT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Patient list loads with all practitioner's patients</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Search filters patients by name/medical ID</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Click patient navigates to detail page</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">4.3 PATIENT DETAIL / CLINICAL SUPPORT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Patient profile shows all tabs (Overview, Timeline, Vitals, Labs, Meds, Allergies, Docs, AI)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Add vitals modal opens, saves via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Add medication/prescription saves via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Edit risk score modal opens, saves via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Document upload works and files appear in list</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
+  <section>
+    <h2>Authorisation testing <span class="count">17 probes · 17 passed</span></h2>
+    <p class="lede">Access control was tested by attempting the attack, not by reading the guard. Each probe used two real accounts and identifiers taken from the database.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Probe</th><th>Expected</th><th>Observed</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Read own conversation</td><td>Permit</td><td class="num">200</td><td class="pass">Pass</td></tr>
+          <tr><td>Read another patient’s conversation ×2</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
+          <tr><td>Write to another patient’s conversation ×2</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
+          <tr><td>Forge sender identity in request body</td><td>Ignore</td><td>Stored authenticated id</td><td class="pass">Pass</td></tr>
+          <tr><td>Super admin writes platform settings</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
+          <tr><td>Super admin modifies a mega admin</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
+          <tr><td>Super admin suspends a mega admin</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
+          <tr><td>Super admin grants mega admin role</td><td>Deny</td><td class="num">403</td><td class="pass">Pass</td></tr>
+          <tr><td>Mega admin writes platform settings</td><td>Permit + log</td><td>200 + audit entry</td><td class="pass">Pass</td></tr>
+          <tr><td>Sixth login attempt within 15 min</td><td>Throttle</td><td class="num">429</td><td class="pass">Pass</td></tr>
+          <tr><td>Password reset for unknown address</td><td>No disclosure</td><td>Identical response</td><td class="pass">Pass</td></tr>
+          <tr><td>Anonymous access to protected endpoints ×4</td><td>Deny</td><td class="num">401</td><td class="pass">Pass</td></tr>
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <div class="page">
-        <!-- MODULE 5: HOSPITAL ADMIN -->
-        <div class="module-title">MODULE 5: HOSPITAL & HOSPITAL ADMIN</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Test Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="section-header">
-                    <td colspan="4">5.1-5.2 FACILITY OVERVIEW & MANAGEMENT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Dashboard loads KPI cards with real API data (not hardcoded)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Facility details edit form saves changes via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Logo upload works and displays in profile</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">5.3 STAFF MANAGEMENT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Staff list loads, add staff modal opens and creates via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Edit staff updates via API and persists</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Toggle duty status changes via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Delete staff with confirmation removes via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>View staff profile page shows performance metrics</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">5.4 APPOINTMENTS OVERSIGHT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Appointments list loads with real data</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Create appointment modal works, saves via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Cancel appointment with confirmation removes via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">5.5 PERFORMANCE DASHBOARD</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>KPI cards show real data from API (consultations, satisfaction, patients, revenue)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Consultation volume chart renders with 6-month data</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Appointment types pie chart displays correctly</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Satisfaction trend bar chart shows month-over-month</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Data consistent on refresh (not random/hardcoded)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">5.6 ANALYTICS DASHBOARD</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Occupancy trend chart loads with 12-month data</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Revenue by department chart displays all departments</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Patient demographics chart shows age group breakdown</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Summary section shows avg occupancy, total revenue, patients, appointments</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">5.7 SLA TRACKING</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>SLA targets table loads with all 6 SLAs</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Status indicators correct (Green=Met, Yellow=At Risk, Red=Breached)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Data facility-specific (not same for all facilities)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
+  <section>
+    <h2>Destructive-action guards <span class="count">verified by declining</span></h2>
+    <p class="lede">Each dialogue was exercised by declining it and confirming no request was issued — presence of the prompt in source was not treated as evidence.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Action</th><th>Prompt shown to operator</th><th>On decline</th></tr></thead>
+        <tbody>
+          <tr><td>Suspend a user</td><td>“Are you sure you want to suspend this user? They will lose access to all services.”</td><td class="pass">No request issued</td></tr>
+          <tr><td>Enable maintenance mode</td><td>“Maintenance mode will take the entire platform offline. Are you sure?”</td><td class="pass">Toggle stayed off</td></tr>
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <div class="page">
-        <!-- MODULE 6: ADMIN -->
-        <div class="module-title">MODULE 6: MEGA/SUPER ADMIN</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Test Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="section-header">
-                    <td colspan="4">6.1 USER MANAGEMENT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>User list loads with name, email, role, status</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Search and filter by role/status work</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Suspend user shows confirmation dialog before proceeding</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Suspend call hits API and status updates in list</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Change role shows confirmation dialog</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Change role calls API and updates in real-time</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Super Admin cannot assign roles beyond their scope (403 on API)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">6.2 FACILITY MANAGEMENT</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Facilities list loads with name, location, stats</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Open/close facility shows confirmation dialog</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Open/close toggle updates via API</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">6.3-6.4 ANALYTICS & REPORTS</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Analytics charts load with platform trends</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Reports builder filters data correctly</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CSV export downloads with all report data</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>PDF export generates formatted report</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">6.5 AUDIT LOG</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Audit log displays all admin actions (timestamp, admin, action, target, status)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Perform admin action (e.g., suspend user), audit entry appears in log</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Audit log is immutable (no edit/delete buttons)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">6.6 PLATFORM SETTINGS</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Maintenance mode toggle shows confirmation dialog with platform warning</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Maintenance mode toggle calls API and enables/disables feature</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Super Admin cannot edit settings (inputs disabled, Save hidden)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Settings changes log to audit log</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
+  <section>
+    <h2>Module verification <span class="count">68 items</span></h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Module</th><th class="num">Passed</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Marketing &amp; landing</td><td class="num">9</td><td>All sections render; no horizontal overflow at 375 / 768 / 1280 px; 32 links resolve, 0 dead</td></tr>
+          <tr><td>Authentication</td><td class="num">8</td><td>All five roles sign in; throttling and headers correct</td></tr>
+          <tr><td>Patient</td><td class="num">12</td><td>Clinician ratings stable across calls; wellness check-in persists</td></tr>
+          <tr><td>Practitioner</td><td class="num">10</td><td>All three queue tabs populated with named patients</td></tr>
+          <tr><td>Hospital administration</td><td class="num">13</td><td>Staff lifecycle passes end to end; charts on real aggregations</td></tr>
+          <tr><td>Platform administration</td><td class="num">12</td><td>Privilege boundaries hold under direct attack</td></tr>
+          <tr><td>Accessibility &amp; responsive</td><td class="num">4</td><td>All tap targets ≥ 44 px; icon controls labelled</td></tr>
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <div class="page">
-        <!-- MODULE 7: SECURITY -->
-        <div class="module-title">MODULE 7: SECURITY & CROSS-CUTTING</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Test Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="section-header">
-                    <td colspan="4">7.1 RATE LIMITING</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Login rate limit enforced (5 attempts per 15 min)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>6th login attempt returns 429 Too Many Requests</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Register rate limit enforced (3 per hour)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>OTP send rate limit enforced (3 per 5 min)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Rate limit headers in responses (X-RateLimit-Limit, Remaining, Reset)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">7.2 PASSWORD SECURITY</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Reset token single-use (cannot be used twice)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Reset token expires after 10 minutes</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Passwords stored as bcrypt hashes (not plaintext in DB)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>No email enumeration on forgot password (always returns 200)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">7.3 CHAT AUTHORIZATION (CRITICAL SECURITY)</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Non-participant cannot send message to other consultation (403)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>CRITICAL: Cannot read other user's chat history (403)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Server enforces senderId from auth token (not client body)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">7.4 OAUTH & OTP</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>OAuth login redirects to OTP verification</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Cannot access dashboard until OTP completed (redirect back to OTP page)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Cannot link existing email via OAuth (error: account exists)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-
-                <tr class="section-header">
-                    <td colspan="4">7.5 RESPONSIVE DESIGN (ALL PAGES)</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Landing page responsive at 375px, 768px, 1280px</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Auth pages responsive (forms scale, no horizontal scroll)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Patient pages responsive (doctor search, appointments, health record)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Admin pages responsive (user list, facilities, reports)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>Modals full-screen on 375px, centered on 768px+</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>No horizontal scroll needed for primary content on mobile</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>All buttons/touch targets minimum 44×44px</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
+  <section>
+    <h2>Staff record lifecycle <span class="count">7 steps · 7 passed</span></h2>
+    <p class="lede">Previously unverifiable — the endpoint returned 404 for every account. Two steps failed once reachable.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Step</th><th>Before</th><th>After</th></tr></thead>
+        <tbody>
+          <tr><td>Create record</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
+          <tr><td>Appears in list</td><td class="blocked">unreachable</td><td class="pass">Confirmed</td></tr>
+          <tr><td>View profile</td><td class="delta"><span class="was">500</span></td><td class="pass">200 with metrics</td></tr>
+          <tr><td>Edit department</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
+          <tr><td>Set on duty</td><td class="delta"><span class="was">500</span></td><td class="pass">200</td></tr>
+          <tr><td>Set off duty</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
+          <tr><td>Delete and confirm removal</td><td class="blocked">unreachable</td><td class="pass">200</td></tr>
+        </tbody>
+      </table>
     </div>
+  </section>
 
-    <div class="page">
-        <!-- FINAL VERIFICATION -->
-        <div class="module-title">FINAL DEMO READINESS CHECKLIST</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="status-col">Status</th>
-                    <th class="test-col">Critical Item</th>
-                    <th class="date-col">Tested Date</th>
-                    <th class="notes-col">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="section-header">
-                    <td colspan="4">DEMO VERIFICATION (Before showing to stakeholders)</td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Landing page loads without redirect (9 sections render)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Full auth flow works: register → OTP → login → dashboard</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Patient can book doctor appointment</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Booking appears in appointments list/calendar</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Practitioner sees appointment in queue</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Patient can send message to practitioner (chat authorization works)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Doctor ratings consistent (not random on refresh)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ All APIs return real data (not hardcoded/random)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Hospital Admin sees real performance/analytics/SLA data</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Admin user suspend/role change shows confirmation dialog</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ Rate limiting active (6th login attempt blocked)</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ All pages responsive at 375px, 768px, 1280px</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-                <tr>
-                    <td class="status-col"><input type="checkbox" class="checkbox"></td>
-                    <td>✓ No console errors on critical paths</td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                    <td><input type="text" style="width: 100%; border: none; padding: 3px;"></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="footer">
-            <p><strong>Testing completed by:</strong> ___________________________  <strong>Date:</strong> ___________</p>
-            <p style="margin-top: 15px;">
-                <strong>Overall Status:</strong>
-                <label style="margin-left: 20px;">
-                    <input type="checkbox"> ✓ READY FOR DEMO
-                </label>
-                <label style="margin-left: 20px;">
-                    <input type="checkbox"> ⚠ ISSUES FOUND (list below)
-                </label>
-            </p>
-            <p style="margin-top: 15px;"><strong>Issues Found (if any):</strong></p>
-            <div style="border: 1px solid #ddd; padding: 10px; min-height: 100px; font-size: 12px;">
-                ___________________________________________________________________________<br>
-                ___________________________________________________________________________<br>
-                ___________________________________________________________________________<br>
-            </div>
-        </div>
+  <section>
+    <h2>Open items <span class="count">2 disclosed · 6 blocked</span></h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Item</th><th>Type</th><th>Position</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Departmental revenue and patient age demographics</td>
+            <td class="id">Disclosed</td>
+            <td>No source exists in the current schema. Now declared as placeholder in the response payload rather than presented as measured.</td>
+          </tr>
+          <tr>
+            <td>Design-system drift</td>
+            <td class="id">Disclosed</td>
+            <td>90 files use the deprecated icon library; 76 uses of a retired status colour. Cosmetic, quantified, not addressed here.</td>
+          </tr>
+          <tr><td>Appointment booking journey</td><td class="id">Blocked</td><td>Requires multi-step interface interaction</td></tr>
+          <tr><td>Video consultation</td><td class="id">Blocked</td><td>Requires two live participants and media devices</td></tr>
+          <tr><td>Prescription refill decrement</td><td class="id">Blocked</td><td>Requires a prescription with refills remaining</td></tr>
+          <tr><td>Document and report downloads</td><td class="id">Blocked</td><td>Requires download interception</td></tr>
+        </tbody>
+      </table>
     </div>
-</body>
-</html>
+  </section>
+
+  <section>
+    <h2>Assessment</h2>
+    <p class="lede"><strong>Suitable to demonstrate:</strong> landing page, authentication including throttling and disclosure controls, messaging access control, the administrative permission model, clinician discovery, wellness tracking, and hospital analytics drawn from real aggregations.</p>
+    <p class="lede"><strong>Qualification:</strong> 11 of 17 defects were found in work previously recorded as complete. Two of them showed a hospital administrator invented figures; one exposed another clinician’s patient list to anyone who set a header. The earlier record of “no outstanding issues” was not optimism — it was the predictable result of verifying by inspection.</p>
+    <div class="sign">
+      <div><div class="line"></div><span class="lbl">Reviewed by</span></div>
+      <div><div class="line"></div><span class="lbl">Signature</span></div>
+      <div><div class="line"></div><span class="lbl">Date</span></div>
+    </div>
+  </section>
+
+  <footer>
+    Full narrative, reproduction steps and measured values: <code>TEST_RESULTS_2026-08-12.md</code> · Commits <code>f3c9f9b</code> through <code>68ebb51</code> · Type checking clean across all modified files.
+  </footer>
+
+</div>
