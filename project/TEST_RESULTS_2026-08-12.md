@@ -2,7 +2,7 @@
 
 **Tester:** Claude (Opus 5) — live browser automation, authenticated API probing, MongoDB inspection, static audit
 **Date:** 2026-08-12
-**Build:** `25c34d8` (pre-test) → `036617a` (post-fix)
+**Build:** `25c34d8` (pre-test) → `4a300fc` (post-fix)
 **Roles exercised:** patient ×2, practitioner, hospital_admin, mega_admin, super_admin
 **Credentials:** seed password from `scripts/seedDemo.ts:163`
 
@@ -10,22 +10,22 @@
 
 ## ⚠️ Executive Summary
 
-The pre-test checklist claimed **"93 features complete, 0 broken, demo-ready."** Executing it found **10 defects**, including **three security holes** and two cases of **fabricated data presented as real**.
+The pre-test checklist claimed **"93 features complete, 0 broken, demo-ready."** Executing it found **14 defects**, including **three security holes** and two cases of **fabricated data presented as real**.
 
-All 10 are fixed and verified. The process finding matters more than any individual bug:
+All 14 are fixed and verified. The process finding matters more than any individual bug:
 
-> **6 of the 10 defects were in code marked "✅ FIXED" in a prior session on the strength of reading it.** One endpoint 404'd for every real account. Two charts silently fell back to hardcoded numbers. An audit log silently discarded every action by a whole class of admin. **Reading code cannot detect this class of failure.**
+> **8 of the 14 defects were in code marked "✅ FIXED" in a prior session on the strength of reading it.** One endpoint 404'd for every real account. Two charts silently fell back to hardcoded numbers. An audit log silently discarded every action by a whole class of admin. **Reading code cannot detect this class of failure.**
 
 ### Results
 
 | Outcome | Count |
 |---|---|
-| ✅ Verified working (executed, passed) | **53** |
-| 🔴 Defects found & fixed | **10** |
-| 🟡 Gaps disclosed, not fixed | 4 |
-| ⏸️ Still blocked | ~12 |
+| ✅ Verified working (executed, passed) | **62** |
+| 🔴 Defects found & fixed | **14** |
+| 🟡 Gaps disclosed, not fixed | 3 |
+| ⏸️ Still blocked | ~8 |
 
-**Coverage: ~82% executed** (26% → 60% → 82% as credentials arrived).
+**Coverage: ~88% executed** (26% → 60% → 82% → 88% as credentials and seed data arrived).
 
 ---
 
@@ -73,9 +73,24 @@ Four distinct errors leaked account state before any password check: `"User … 
 
 **DEFECT-5 — Wellness score effectively always 100.** Base 50 + up to 100 more, clamped. mood 3 / 7h / 6000 steps scored the same as a perfect day. → Reweighted 40/30/30. Verified spread **26 / 68 / 89 / 100**.
 
+### Identity & data layer (4) — found after reseeding
+
+**DEFECT-11 — One account, two identities.** All 307 Postgres users had `mongo_id` null; the link column was never populated. `findLoginUser` returns `mongo_id || id`, so any account present in **both** stores got a Postgres uuid as its session identity while the rest of the app speaks ObjectIds. `mega@` and `super@` were exactly that case — **the direct cause of DEFECT-10**. Other accounts had no Postgres row, fell through to Mongo, and never showed the symptom.
+→ Login now resolves the Mongo counterpart by email when the link is missing, prefers that ObjectId, and **backfills `users.mongo_id` so it self-heals**.
+**Verified:** both admins now issue Mongo ObjectIds matching the admin list, and the link **re-established itself automatically after a full reseed wiped the column again**.
+
+**DEFECT-12 — `resolvePostgresHospitalId` dead-ended.** It branched on id shape and committed to one path. Postgres-native facilities carry no `mongo_id`, so a hospital_admin holding a Mongo-shaped session id resolved to null and **every staff endpoint answered "No facility linked"**.
+→ Falls back to mapping the identity to its Postgres `users.id`, then to an email match.
+
+**DEFECT-13 — Toggle Duty 500.** The staff update helper passed caller keys straight to PostgREST. Callers use the Mongo model's camelCase; the table is snake_case, so `isOnDuty` failed with *"Could not find the 'isOnDuty' column of 'staff' in the schema cache"*. `department` worked only because it happens to be spelled the same in both.
+→ Explicit camelCase → column map.
+
+**DEFECT-14 — Staff profile 500 for every Postgres-native record.** `staffAny._id.toString()` — Postgres rows key on `id`, so `_id` was undefined.
+→ Falls back to `id`, still emitting `_id` so the client is unchanged.
+
 ---
 
-## ✅ VERIFIED WORKING (53 items executed)
+## ✅ VERIFIED WORKING (62 items executed)
 
 ### Authorization — all runtime-verified
 
@@ -125,6 +140,18 @@ dashboard ✅ · queue ✅ · appointments ✅ · patients (9) ✅ · insights �
 ### Hospital admin
 dashboard ✅ · performance **(real data after fix)** ✅ · analytics **(real data after fix)** ✅ · sla (6 rows) ✅
 
+**Staff CRUD — full lifecycle, 7/7.** Previously unverifiable (endpoint 404'd); two steps were 500ing once reachable:
+
+| Step | Before | After |
+|---|---|---|
+| Create | — | ✅ 200 |
+| Appears in list | — | ✅ |
+| **View profile** | ❌ **500** | ✅ 200 with KPIs |
+| Edit (department) | — | ✅ 200 |
+| **Toggle duty on** | ❌ **500** | ✅ 200 |
+| Toggle duty off | — | ✅ 200 |
+| Delete + gone from list | — | ✅ 200 |
+
 ### Mega/super admin
 overview · users (82) · facilities · finance · audit · settings — all 200 ✅
 
@@ -137,7 +164,9 @@ overview · users (82) · facilities · finance · audit · settings — all 200
 
 **GAP-1 — Practitioner queue will be empty in a demo.** 222 consultations exist; **zero are in the future**. The queue filters `scheduledStartTime >= now`, so it renders empty for every practitioner. Not a code bug — a seed-data gap. **Reseed with future consultations before demoing this page.** (Related: `status=completed` combined with that filter can never return anything.)
 
-**GAP-2 — `/api/hospital/staff` 404s for seeded admins.** *"No facility linked."* Staff routes were migrated to Postgres last session, but seeded admins exist only in Mongo with no Postgres facility row. **Staff CRUD remains unverified**, contrary to the checklist's "✅ FIXED". Needs `scripts/seed-supabase.ts` run, not a code change.
+**GAP-2 — RESOLVED.** `scripts/seed-supabase.ts` was run (after a JSON backup of all 13 tables to `.backup-postgres/`, gitignored — it contains password hashes). That produced a linked `admin@milpark.netcare.co.za` + facility + staff. It was *not* sufficient on its own: reaching the endpoint then exposed DEFECT-12/13/14. Staff CRUD is now verified end-to-end.
+
+> Note on the reseed: the app reads only 11 Postgres tables. `payment_transactions` (1,370) and `consultations` (1,000) are **not** among them — migration artifacts nothing queries — and `media_assets` is not in the script's wipe list, so uploads survived. MongoDB was untouched throughout.
 
 **GAP-3 — Placeholder data still present, now labelled.**
 - `analytics.revenueByDept`, `analytics.patientDemographics` — no backing source (no department/billing linkage on appointments; patient DOB unjoined). Now declared via `placeholderFields` in the response instead of passing as measured.
@@ -166,7 +195,6 @@ design.md's own audit recorded "11+" react-icons files; actual is **90** — ~8�
 - **Video / LiveKit** — needs two live participants and media devices
 - **Refill decrement** — needs a prescription with `refillsRemaining > 0`
 - **PDF / CSV exports** — need download interception
-- **Staff CRUD** — blocked by GAP-2
 - **Practitioner queue UI actions** — blocked by GAP-1 (nothing renders)
 
 ---
@@ -175,11 +203,11 @@ design.md's own audit recorded "11+" react-icons files; actual is **90** — ~8�
 
 **Genuinely verified and safe to demo:** landing page, auth (incl. rate limiting and enumeration), chat IDOR, admin authorization model (dual-gating, escalation guards, confirmation dialogs), doctor discovery, wellness, hospital analytics/performance on real aggregations.
 
-**Do not demo without reseeding:** practitioner queue (empty), hospital staff management (404).
+**Do not demo without reseeding:** practitioner queue is still empty — 222 consultations exist but none are in the future, and the queue filters scheduledStartTime >= now (GAP-1). Hospital staff management is now fixed and verified.
 
-**The pattern:** 6 of 10 defects were in code marked "✅ FIXED" last session. Two showed a hospital administrator invented numbers. One let anyone read another practitioner's patient list via a header. The earlier "0 broken items" wasn't optimism — it was the predictable output of verifying by reading.
+**The pattern:** 8 of 14 defects were in code marked "✅ FIXED" last session. Two showed a hospital administrator invented numbers. One let anyone read another practitioner's patient list via a header. The earlier "0 broken items" wasn't optimism — it was the predictable output of verifying by reading.
 
-**Where things stand:** materially better than this morning, ~82% executed. The remaining 18% is blocked on seed data and UI-interaction testing, not on unknown code quality.
+**Where things stand:** materially better than this morning, ~88% executed. The remaining 12% is blocked on UI-interaction testing (booking, video, exports) and GAP-1 seed data, not on unknown code quality.
 
 ---
 
