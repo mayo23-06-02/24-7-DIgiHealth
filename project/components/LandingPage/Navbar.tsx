@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { BiCalendar, BiUpArrow } from "react-icons/bi";
 import Button from "../ui/Button";
+import LogoMain from "../ui/LogoMain";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -18,7 +19,7 @@ export default function Navbar() {
   const [weather, setWeather] = useState("☀️ 24°C | Cape Town");
   const pathname = usePathname();
 
-  // Set current date
+  // Set current date and fetch real weather
   useEffect(() => {
     const now = new Date();
     const formattedDate = now.toLocaleDateString("en-ZA", {
@@ -28,7 +29,63 @@ export default function Navbar() {
       day: "numeric",
     });
     setCurrentDate(formattedDate);
-    // In a real app, fetch weather using geolocation
+
+    // Fetch real weather data based on geolocation
+    const fetchWeatherData = async (lat: number, lon: number) => {
+      try {
+        // Open-Meteo API (free, no key required)
+        const weatherRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`,
+        );
+        if (!weatherRes.ok) throw new Error("Weather fetch failed");
+        const weatherData = await weatherRes.json();
+        const temp = Math.round(weatherData.current.temperature_2m);
+        const code = weatherData.current.weather_code;
+
+        // Get emoji for weather code (WMO)
+        let emoji = "☀️";
+        if (code === 0) emoji = "☀️";
+        else if (code === 1 || code === 2) emoji = "⛅";
+        else if (code === 3) emoji = "☁️";
+        else if (code >= 45 && code <= 48) emoji = "🌫️";
+        else if (code >= 51 && code <= 67) emoji = "🌧️";
+        else if (code >= 71 && code <= 77) emoji = "❄️";
+        else if (code >= 80 && code <= 82) emoji = "🌧️";
+        else if (code >= 85 && code <= 86) emoji = "❄️";
+        else if (code === 80 || code === 81 || code === 82) emoji = "⛈️";
+
+        // Reverse geocode to get location name
+        const geoRes = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+        );
+        if (!geoRes.ok) throw new Error("Geocoding failed");
+        const geoData = await geoRes.json();
+        const city =
+          geoData.address?.city ||
+          geoData.address?.town ||
+          geoData.address?.county ||
+          "Your Location";
+
+        setWeather(`${emoji} ${temp}°C | ${city}`);
+      } catch (err) {
+        console.warn("Weather fetch error, using default:", err);
+        setWeather("☀️ 24°C | Your Location");
+      }
+    };
+
+    // Request geolocation
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchWeatherData(latitude, longitude);
+        },
+        (error) => {
+          console.warn("Geolocation denied, using default:", error);
+          setWeather("☀️ 24°C | South Africa");
+        },
+      );
+    }
   }, []);
 
   // Scroll effect for main navbar
@@ -55,8 +112,14 @@ export default function Navbar() {
 
   return (
     <div className=" w-full">
-      {/* Top Header Bar */}
-      <div className=" bg- w-full text-white text-sm py-2 z-50 transition-all p-1.25">
+      {/* Top Header Bar — transparent so the hero photo runs behind it. A thin
+          white rule separates it from the nav row without reintroducing a solid
+          band across the image. */}
+      <div
+        className={`w-full text-white text-sm py-2 z-50 transition-all p-1.25 border-b ${
+          scrolled ? "bg-primary border-transparent" : "bg-transparent border-white/15"
+        }`}
+      >
         <div className="container mx-auto max-w-[1600px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
           <div className="flex gap-4">
             <span className="flex gap-2 items-center">{weather}</span>
@@ -105,29 +168,14 @@ export default function Navbar() {
       <div
         className={`
           left-0 w-full z-40 transition-all duration-300
-          ${scrolled ? "bg-white backdrop-blur-xl border-b border-white/10" : "bg-transparent"}
+          ${scrolled ? "bg-primary backdrop-blur-xl border-b border-white/10" : "bg-transparent"}
           top-[44px] md:top-[44px] p-6.25
         `}
       >
         <div className="container mx-auto max-w-[1600px] px-4 md:px-8 flex justify-between items-center py-3 md:py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div
-              className={`
-              w-10 h-10 rounded-lg flex items-center justify-center transition-all
-              ${scrolled ? "bg-primary" : "bg-primary"}
-            `}
-            >
-              <span className="font-bold text-xl text-white">24</span>
-            </div>
-            <span
-              className={`
-              font-bold text-xl tracking-tight transition-colors
-              ${scrolled ? "text-white" : "text-white"}
-            `}
-            >
-              DigiHealth
-            </span>
+            <LogoMain width={200} height={40} alt={true} />
           </Link>
 
           {/* Desktop Navigation Links */}
