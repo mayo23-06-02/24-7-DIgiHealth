@@ -1,50 +1,67 @@
 "use client";
 import React from "react";
+import { CheckCircle2 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Link from "next/link";
+
+const features = [
+  {
+    title: "Verified Medical Specialists",
+    desc: "Every practitioner on 24/7 DigiHealth is HPCSA-registered and identity-verified before they can see a single patient.",
+  },
+  {
+    title: "AI-Powered Symptom Triage",
+    desc: "Describe how you're feeling and get an instant, structured assessment to help you and your doctor prioritize what matters.",
+  },
+  {
+    title: "Family Account Management",
+    desc: "Link your spouse, children, or parents to one account — manage bookings and billing for the whole household in one place.",
+  },
+  {
+    title: "24/7 Virtual Access",
+    desc: "No waiting rooms, no office hours. Book a consultation at 2am or 2pm — the choice is always yours.",
+  },
+];
 
 export default function Approach() {
   return (
-    <section
-      id="approach"
-      className="section bg-[#F8FAFC] text-slate-900 py-32 text-center"
-    >
-      <div className="container flex items-center flex-col mx-auto px-6 sm:px-10 xl:px-16 2xl:px-24 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
-        <div className="flex justify-center items-center gap-3 mb-6">
-          <span className="text-secondary text-3xl font-bold">✦</span>
-          <span className="text-secondary font-bold tracking-normal  text-sm">
-            Approach
-          </span>
-        </div>
-
-        <h2 className="text-4xl md:text-4xl font-medium text-slate-900 mb-8 tracking-tight font-grotesk">
-          The{" "}
-          <span className="text-primary font-bold">
-            24/7 DigiHealth Total Care™
-          </span>{" "}
-          Model
-        </h2>
-
-        <p className="text-lg text-slate-500 max-w-2xl mx-auto  mb-16 p-5">
-          Providing patient-centered care through expert guidance, innovative
-          solutions, and personalized support every step of the way.
-        </p>
-
-        <div className="relative bg-slate-200 rounded-lg overflow-hidden w-full max-w-[1400px] mx-auto h-[450px] md:h-[600px]  ring-1 ring-slate-200/50">
-          {/* Background Image */}
-
-          {/* Play Button Overlay */}
-          <div className="absolute inset-0 flex justify-center items-center z-10">
-            <button className="w-20 h-20 rounded-lg bg-white/20 border-2 border-primary flex place-items-center justify-center backdrop-blur-sm cursor-pointer transition-transform hover:scale-110">
-              <div className="w-0 h-0 border-y-12 border-y-transparent border-l-20 border-l-primary ml-2"></div>
-            </button>
+    <section id="approach" className="bg-surface-soft py-16 md:py-24">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[1920px]">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-12 items-center">
+          <div className="reveal-hidden reveal-visible">
+            <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
+              Our Approach
+            </span>
+            <h2 className="text-3xl md:text-4xl font-medium text-ink-900 mb-6 tracking-tight font-grotesk">
+              The{" "}
+              <span className="text-primary font-bold">
+                24/7 DigiHealth Total Care™
+              </span>{" "}
+              Model
+            </h2>
+            <p className="text-lg text-ink-600 leading-relaxed mb-8">
+              Providing patient-centered care through expert guidance,
+              AI-assisted triage, and personalized support — every step of
+              the way, from your first symptom to full recovery.
+            </p>
+            <Link href="/register">
+              <Button variant="primary">Get Started</Button>
+            </Link>
           </div>
 
-          {/* Gradient Bottom Overlay */}
-          <div className="absolute w-full flex justify-center items-center inset-x-0 bottom-0 bg-linear-to-t from-[#10689e]/95 via-[#10689e]/60 to-transparent pt-32 pb-8 px-8 md:px-12 text-left z-0">
-            <p className="text-white text-md text-center font-normal max-w-3xl p-5">
-              Our 24/7 DigiHealth™ model unites doctors, specialists, and
-              wellness experts in one place. From diagnostics to recovery, we
-              ensure holistic healing and long-term wellness.
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {features.map((f) => (
+              <div
+                key={f.title}
+                className="bg-white rounded-lg border border-border p-6 flex flex-col gap-3"
+              >
+                <CheckCircle2 size={22} className="text-success-500 shrink-0" />
+                <h3 className="text-base font-bold text-ink-900 font-grotesk">
+                  {f.title}
+                </h3>
+                <p className="text-sm text-ink-600 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
