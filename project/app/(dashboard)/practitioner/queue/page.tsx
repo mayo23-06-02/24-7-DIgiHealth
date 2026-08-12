@@ -61,12 +61,13 @@ function minutesUntil(dt: string) {
 const statusMap: Record<string, BadgeStatus> = {
   scheduled: "neutral",
   ongoing: "success",
+  in_progress: "success",
   completed: "info",
   cancelled: "error",
 };
 
 const FILTERS: { value: string; label: string }[] = [
-  { value: "scheduled,ongoing", label: "Active" },
+  { value: "scheduled,in_progress", label: "Active" },
   { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
 ];
@@ -82,7 +83,7 @@ export default function FullQueuePage() {
   });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("scheduled,ongoing");
+  const [statusFilter, setStatusFilter] = useState("scheduled,in_progress");
   const [soapModal, setSoapModal] = useState({
     isOpen: false,
     consultationId: "",

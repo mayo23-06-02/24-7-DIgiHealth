@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Consultation from '@/lib/models/Consultation';
 import Patient from '@/lib/models/Patient';
+import User from '@/lib/models/User';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { riskBandFromScore } from '@/lib/riskScore';
 
@@ -30,31 +31,68 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status') || 'scheduled,ongoing';
     const skip = (page - 1) * limit;
 
-    const now = new Date();
-    const statusFilter = status.split(',');
+    // The UI (and this route's own default) asks for "ongoing", but no
+    // consultation ever carries that status — the stored value is
+    // `in_progress`. Translate rather than break existing callers.
+    const STATUS_ALIASES: Record<string, string> = { ongoing: 'in_progress' };
+    const statusFilter = status
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => STATUS_ALIASES[s] ?? s);
+
+    const isHistorical = statusFilter.every((s) =>
+      ['completed', 'cancelled'].includes(s),
+    );
+
+    // The window used to be `scheduledStartTime >= now`, which emptied every
+    // tab. Completed and cancelled consultations are always in the past, so
+    // those tabs could never return a row; and an in-progress consultation
+    // started before "now" by definition, so it was excluded from the active
+    // tab too. A practitioner's active queue is today's outstanding work —
+    // anchor it to the start of today so appointments running late or already
+    // under way stay visible, and drop the constraint entirely for history.
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const query = {
+      practitionerId,
+      status: { $in: statusFilter },
+      ...(isHistorical ? {} : { scheduledStartTime: { $gte: startOfToday } }),
+    };
+
+    // History reads newest-first; the active queue reads soonest-first.
+    const sort: Record<string, 1 | -1> = { scheduledStartTime: isHistorical ? -1 : 1 };
 
     const [consultations, total] = await Promise.all([
-      Consultation.find({
-        practitionerId,
-        status: { $in: statusFilter },
-        scheduledStartTime: { $gte: now },
-      })
-        .sort({ scheduledStartTime: 1 })
+      Consultation.find(query)
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean(),
-      Consultation.countDocuments({
-        practitionerId,
-        status: { $in: statusFilter },
-        scheduledStartTime: { $gte: now },
-      }),
+      Consultation.countDocuments(query),
     ]);
 
     const queue = await Promise.all(
       consultations.map(async (c: any) => {
+        // `patientId` is a Patient record in some rows and a User id in
+        // others, so try the Patient join first and fall back to reading the
+        // user directly rather than giving up.
         const patient = await Patient.findById(c.patientId).populate('userId').lean();
-        const userDoc = patient?.userId as any;
-        const patientName = userDoc?.profile?.fullName || 'Unknown Patient';
+        let userDoc = (patient as any)?.userId;
+        if (!userDoc) {
+          userDoc = await User.findById(c.patientId)
+            .select('firstName lastName profile')
+            .lean();
+        }
+
+        // The name lives on firstName/lastName. This previously read
+        // `userDoc.profile.fullName`, a field the User model does not define,
+        // so every row in the queue rendered as "Unknown Patient".
+        const patientName =
+          [userDoc?.firstName, userDoc?.lastName].filter(Boolean).join(' ') ||
+          userDoc?.profile?.fullName ||
+          'Unknown Patient';
         const initials = patientName
           .split(' ')
           .map((n: string) => n[0])
