@@ -10,22 +10,22 @@
 
 ## ⚠️ Executive Summary
 
-The pre-test checklist claimed **"93 features complete, 0 broken, demo-ready."** Executing it found **14 defects**, including **three security holes** and two cases of **fabricated data presented as real**.
+The pre-test checklist claimed **"93 features complete, 0 broken, demo-ready."** Executing it found **17 defects**, including **three security holes** and two cases of **fabricated data presented as real**.
 
-All 14 are fixed and verified. The process finding matters more than any individual bug:
+All 17 are fixed and verified. The process finding matters more than any individual bug:
 
-> **8 of the 14 defects were in code marked "✅ FIXED" in a prior session on the strength of reading it.** One endpoint 404'd for every real account. Two charts silently fell back to hardcoded numbers. An audit log silently discarded every action by a whole class of admin. **Reading code cannot detect this class of failure.**
+> **11 of the 17 defects were in code marked "✅ FIXED" in a prior session on the strength of reading it.** One endpoint 404'd for every real account. Two charts silently fell back to hardcoded numbers. An audit log silently discarded every action by a whole class of admin. **Reading code cannot detect this class of failure.**
 
 ### Results
 
 | Outcome | Count |
 |---|---|
-| ✅ Verified working (executed, passed) | **62** |
-| 🔴 Defects found & fixed | **14** |
-| 🟡 Gaps disclosed, not fixed | 3 |
-| ⏸️ Still blocked | ~8 |
+| ✅ Verified working (executed, passed) | **68** |
+| 🔴 Defects found & fixed | **17** |
+| 🟡 Gaps disclosed, not fixed | 2 |
+| ⏸️ Still blocked | ~6 |
 
-**Coverage: ~88% executed** (26% → 60% → 82% → 88% as credentials and seed data arrived).
+**Coverage: ~92% executed** (26% → 82% → 88% → 92% as credentials and seed data arrived).
 
 ---
 
@@ -88,9 +88,22 @@ Four distinct errors leaked account state before any password check: `"User … 
 **DEFECT-14 — Staff profile 500 for every Postgres-native record.** `staffAny._id.toString()` — Postgres rows key on `id`, so `_id` was undefined.
 → Falls back to `id`, still emitting `_id` so the client is unchanged.
 
+### Practitioner queue (3) — all three tabs were empty
+
+**DEFECT-15 — The filtered status does not exist.** Route and UI both asked for `ongoing`; stored values are `scheduled / completed / cancelled / in_progress / requested`. All 10 in-progress consultations were unreachable.
+→ Route aliases `ongoing` → `in_progress`; UI sends the real value.
+
+**DEFECT-16 — `scheduledStartTime >= now` contradicted every tab.** Completed and cancelled rows are always in the past, so those tabs could never return anything; an in-progress consultation started before "now" by definition, so it was excluded from the active tab too. **The filter excluded exactly the rows the page exists to show.**
+→ Active anchors to start-of-today (late and in-flight appointments stay visible); history drops the constraint and sorts newest-first.
+**Verified:** on `dr.noxolo.steyn12` — Completed **0 → 4**, Cancelled **0 → 12**.
+
+**DEFECT-17 — Every row read "Unknown Patient".** Name read from `userDoc.profile.fullName`, a field the User model doesn't define; names live on `firstName`/`lastName`, so the fallback fired on every row.
+→ Reads the real fields, and loads the user directly when `patientId` points at a User rather than a Patient.
+**Verified:** 0 "Unknown Patient" across all tabs for both practitioners.
+
 ---
 
-## ✅ VERIFIED WORKING (62 items executed)
+## ✅ VERIFIED WORKING (68 items executed)
 
 ### Authorization — all runtime-verified
 
@@ -135,7 +148,7 @@ Rate limit 5/15min → **429** ✅ · headers `limit:5, remaining:0, reset:+15mi
 Doctor ratings **stable across calls** (3.0–4.75, real DB) ✅ · fake `nextAvailableMinutes` gone ✅ · detail rating matches list ✅ · dashboard / health-record / appointments / wellness score / articles / conversations all 200 ✅ · wellness check-in persists and updates history ✅
 
 ### Practitioner
-dashboard ✅ · queue ✅ · appointments ✅ · patients (9) ✅ · insights ✅ · billing ✅ · header-spoof rejected ✅
+dashboard ✅ · queue **(all 3 tabs populated, real patient names)** ✅ · appointments ✅ · patients (9) ✅ · insights ✅ · billing ✅ · header-spoof rejected ✅
 
 ### Hospital admin
 dashboard ✅ · performance **(real data after fix)** ✅ · analytics **(real data after fix)** ✅ · sla (6 rows) ✅
@@ -162,7 +175,7 @@ overview · users (82) · facilities · finance · audit · settings — all 200
 
 ## 🟡 GAPS DISCLOSED — NOT FIXED
 
-**GAP-1 — Practitioner queue will be empty in a demo.** 222 consultations exist; **zero are in the future**. The queue filters `scheduledStartTime >= now`, so it renders empty for every practitioner. Not a code bug — a seed-data gap. **Reseed with future consultations before demoing this page.** (Related: `status=completed` combined with that filter can never return anything.)
+**GAP-1 — RESOLVED, and it was mostly a code bug.** My first read ("a seed-data gap, not a code bug") was wrong. Investigating properly found three faults — see DEFECT-15/16/17. The status filtered on (`ongoing`) does not exist in the data, the date filter excluded precisely the rows the page exists to show, and every row rendered "Unknown Patient". Only after fixing those was a data top-up needed, via the revertible `scripts/schedule-demo-queue.mjs`.
 
 **GAP-2 — RESOLVED.** `scripts/seed-supabase.ts` was run (after a JSON backup of all 13 tables to `.backup-postgres/`, gitignored — it contains password hashes). That produced a linked `admin@milpark.netcare.co.za` + facility + staff. It was *not* sufficient on its own: reaching the endpoint then exposed DEFECT-12/13/14. Staff CRUD is now verified end-to-end.
 
@@ -203,11 +216,11 @@ design.md's own audit recorded "11+" react-icons files; actual is **90** — ~8�
 
 **Genuinely verified and safe to demo:** landing page, auth (incl. rate limiting and enumeration), chat IDOR, admin authorization model (dual-gating, escalation guards, confirmation dialogs), doctor discovery, wellness, hospital analytics/performance on real aggregations.
 
-**Do not demo without reseeding:** practitioner queue is still empty — 222 consultations exist but none are in the future, and the queue filters scheduledStartTime >= now (GAP-1). Hospital staff management is now fixed and verified.
+**Previously blocking, now cleared:** practitioner queue and hospital staff management are both fixed and verified end-to-end.
 
-**The pattern:** 8 of 14 defects were in code marked "✅ FIXED" last session. Two showed a hospital administrator invented numbers. One let anyone read another practitioner's patient list via a header. The earlier "0 broken items" wasn't optimism — it was the predictable output of verifying by reading.
+**The pattern:** 11 of 17 defects were in code marked "✅ FIXED" last session. Two showed a hospital administrator invented numbers. One let anyone read another practitioner's patient list via a header. The earlier "0 broken items" wasn't optimism — it was the predictable output of verifying by reading.
 
-**Where things stand:** materially better than this morning, ~88% executed. The remaining 12% is blocked on UI-interaction testing (booking, video, exports) and GAP-1 seed data, not on unknown code quality.
+**Where things stand:** materially better than this morning, ~92% executed. The remaining 8% is blocked on UI-interaction testing — booking flow, LiveKit video, PDF/CSV export downloads — not on unknown code quality.
 
 ---
 
