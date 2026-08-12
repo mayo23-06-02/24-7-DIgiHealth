@@ -35,15 +35,24 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { mood, sleepHours, steps } = body;
 
-    if (!mood || mood < 1 || mood > 5) {
+    // Each field is range-checked *and* type-checked. Comparing a non-numeric
+    // value with < / > yields false (NaN comparisons always do), so a string
+    // like "good" slipped past a range-only guard and then blew up as a
+    // Mongoose CastError — surfacing a 500 where the caller deserves a 400.
+    if (typeof mood !== 'number' || !Number.isFinite(mood) || mood < 1 || mood > 5) {
       return NextResponse.json({ error: 'Invalid mood' }, { status: 400 });
     }
 
-    if (sleepHours === undefined || sleepHours < 0 || sleepHours > 24) {
+    if (
+      typeof sleepHours !== 'number' ||
+      !Number.isFinite(sleepHours) ||
+      sleepHours < 0 ||
+      sleepHours > 24
+    ) {
       return NextResponse.json({ error: 'Invalid sleep hours' }, { status: 400 });
     }
 
-    if (steps === undefined || steps < 0) {
+    if (typeof steps !== 'number' || !Number.isFinite(steps) || steps < 0) {
       return NextResponse.json({ error: 'Invalid steps' }, { status: 400 });
     }
 
@@ -58,8 +67,12 @@ export async function POST(request: Request) {
 
     const score = calculateWellnessScore(mood, sleepHours, steps);
 
+    // UTC, not local, midnight. The score route reads these back with
+    // `date.toISOString().split('T')[0]`, so a local-midnight bucket written
+    // from a UTC+2 server lands at 22:00 the previous UTC day and the check-in
+    // is reported one day early. Both ends must agree on UTC.
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     await WellnessScore.findOneAndUpdate(
       { patientId: user.userId, date: today },
@@ -92,14 +105,26 @@ export async function POST(request: Request) {
   }
 }
 
+/**
+ * Weighted 0-100 score: mood 40, sleep 30, steps 30.
+ *
+ * The previous formula started at a base of 50 and added components summing to
+ * another 100 (max 150) before clamping, so nearly any plausible input hit a
+ * flat 100 — mood 3 / 7h / 6000 steps scored the same as a perfect day, which
+ * made the number carry no signal. Each component is now normalised against its
+ * own target so the full range is actually reachable in both directions.
+ *
+ * Targets: mood 5/5, 8h sleep, 10 000 steps. Tune the weights here if the
+ * clinical team wants a different emphasis.
+ */
 function calculateWellnessScore(mood: number, sleepHours: number, steps: number): number {
-  let score = 50;
+  const moodPoints = (Math.min(mood, 5) / 5) * 40;
+  const sleepPoints = Math.min(sleepHours / 8, 1) * 30;
+  const stepPoints = Math.min(steps / 10000, 1) * 30;
 
-  score += mood * 8;
-  score += Math.min(sleepHours * 5, 40);
-  score += Math.min((steps / 10000) * 20, 20);
-
-  return Math.min(Math.max(score, 0), 100);
+  return Math.round(
+    Math.min(Math.max(moodPoints + sleepPoints + stepPoints, 0), 100),
+  );
 }
 
 function calculateStreak(scores: any[]): number {
