@@ -41,7 +41,7 @@ export default {
       }
     },
     async jwt({ token, user }) {
-      if (user) {
+      if (user?.id) {
         token.id = user.id;
         try {
           await connectToDatabase();

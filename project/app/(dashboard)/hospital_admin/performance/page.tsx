@@ -172,7 +172,7 @@ export default function HospitalPerformancePage() {
                   paddingAngle={4}
                   dataKey="value"
                 >
-                  {appointmentTypes.map((_, i) => (
+                  {appointmentTypes.map((_: { name: string; value: number }, i: number) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
@@ -181,7 +181,7 @@ export default function HospitalPerformancePage() {
             </ResponsiveContainer>
           </div>
           <div className="flex flex-col gap-2 mt-2">
-            {appointmentTypes.map((t, i) => (
+            {appointmentTypes.map((t: { name: string; value: number }, i: number) => (
               <div key={t.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full" style={{ background: COLORS[i] }} />
