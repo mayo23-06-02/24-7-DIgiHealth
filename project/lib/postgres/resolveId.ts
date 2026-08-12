@@ -47,16 +47,52 @@ export async function resolvePostgresHospitalId(
   userId: string,
   userEmail?: string,
 ): Promise<string | null> {
-  if (!looksLikeMongoObjectId(userId)) {
-    const { data } = await getSupabaseAdmin()
+  const supabase = getSupabaseAdmin();
+
+  const profileFacility = async (pgUserId: string) => {
+    const { data } = await supabase
       .from("hospital_admin_profiles")
       .select("facility_id")
-      .eq("user_id", userId)
+      .eq("user_id", pgUserId)
       .maybeSingle();
     return data?.facility_id || null;
+  };
+
+  if (!looksLikeMongoObjectId(userId)) {
+    return profileFacility(userId);
   }
 
+  // Mongo-shaped identity. Try the legacy chain first: resolve the Mongo
+  // facility, then translate it via facilities.mongo_id.
   const mongoFacilityId = await resolveMongoHospitalId(userId, userEmail);
-  if (!mongoFacilityId) return null;
-  return resolvePgFacilityId(mongoFacilityId);
+  if (mongoFacilityId) {
+    const translated = await resolvePgFacilityId(mongoFacilityId);
+    if (translated) return translated;
+  }
+
+  // That chain only works when the Postgres facility carries a mongo_id back
+  // to its Mongo twin, which Postgres-native rows (anything from
+  // scripts/seed-supabase.ts) do not. So fall back to going through the user
+  // instead of the facility: map this identity to its Postgres users.id and
+  // read the admin profile directly. Without this, any hospital_admin holding
+  // a Mongo-shaped session id gets "No facility linked" even though their
+  // Postgres profile and facility both exist.
+  const pgUserId = await resolvePgUserId(userId);
+  if (pgUserId) {
+    const viaProfile = await profileFacility(pgUserId);
+    if (viaProfile) return viaProfile;
+  }
+
+  // Last resort: match the admin by email, for identities that exist in
+  // neither link column yet.
+  if (userEmail) {
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", userEmail)
+      .maybeSingle();
+    if (userRow?.id) return profileFacility(userRow.id);
+  }
+
+  return null;
 }

@@ -61,8 +61,49 @@ async function findLoginUser(identifier: string): Promise<LoginUser | null> {
   }
 
   if (!error && data) {
+    // `mongo_id` is the link between the two stores, and it is null on every
+    // Postgres row that predates the backfill. Falling straight through to
+    // `data.id` there hands out a Postgres uuid as the session identity for an
+    // account that also exists in Mongo — and the rest of the app (Mongo
+    // collections, their FKs, the admin user list, AuditLog.actorId) speaks
+    // ObjectIds. That split identity is what silently broke audit writes for
+    // mega_admin. So when the link is missing, look for a Mongo counterpart by
+    // the same identifier before settling for the uuid.
+    let identityId: string = data.mongo_id;
+
+    if (!identityId) {
+      await connectToDatabase();
+      const mongoUser = await User.findOne({
+        $or: [{ email: data.email }, { saId: identifier }],
+      })
+        .select("_id")
+        .lean<{ _id: unknown } | null>();
+
+      if (mongoUser?._id) {
+        identityId = String(mongoUser._id);
+
+        // Self-heal: persist the link so the next login skips this lookup and
+        // every other reader of `mongo_id` starts resolving too. Best-effort —
+        // a failure here must not block a valid login.
+        const { error: linkError } = await supabase
+          .from("users")
+          .update({ mongo_id: identityId })
+          .eq("id", data.id);
+
+        if (linkError) {
+          console.warn(
+            "[login] could not backfill users.mongo_id",
+            { email: data.email, error: linkError.message },
+          );
+        }
+      } else {
+        // Genuinely Postgres-only (e.g. seeded by scripts/seed-supabase.ts).
+        identityId = data.id;
+      }
+    }
+
     return {
-      identityId: data.mongo_id || data.id,
+      identityId,
       email: data.email,
       passwordHash: data.password_hash,
       role: data.role,

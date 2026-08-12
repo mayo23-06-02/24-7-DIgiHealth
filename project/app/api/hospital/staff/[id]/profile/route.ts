@@ -121,7 +121,13 @@ export async function GET(
       data: {
         staff: {
           ...staffAny,
-          _id: staffAny._id.toString(),
+          // Postgres rows key on `id`; only legacy Mongo documents have `_id`.
+          // Dereferencing `_id` unconditionally threw
+          // "Cannot read properties of undefined (reading 'toString')" and
+          // 500'd the whole profile page for every Postgres-native staff
+          // member — which is now all of them. `_id` is still emitted so the
+          // existing client keeps working.
+          _id: String(staffAny._id ?? staffAny.id),
         },
         practProfile,
         kpi: {
