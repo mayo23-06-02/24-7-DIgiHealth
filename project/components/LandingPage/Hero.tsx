@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { BiSun, BiCloud, BiCloudRain, BiCloudLightning, BiCloudSnow } from "react-icons/bi";
+import TickerBar from "./TickerBar";
 
 const badges = [
   { icon: Users, value: "50+", label: "Verified Specialists" },
@@ -151,7 +152,7 @@ export default function Hero() {
           alt="24/7 DigiHealth care team"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink-900/70 via-ink-900/15 to-ink-900/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink-900/35 via-ink-900/0 to-ink-900/50" />
 
         {/* Nav row, transparent overlay directly on the image */}
         <div className="relative z-10 mx-auto w-full max-w-[1400px] flex items-center justify-between gap-4 px-5 py-5 md:px-10 md:py-8">
@@ -296,20 +297,19 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      <TickerBar />
 
       <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         {/* Stat badges, lifted so they straddle the bottom edge of the photo. */}
-        <div className="relative z-10 -mt-12 md:-mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pb-16">
+        <div className="relative z-10  grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pb-16">
           {badges.map(({ icon: Icon, value, label }) => (
             <div
               key={label}
-              className="bg-white rounded-lg border border-border shadow-lg p-4 md:p-6 flex flex-col gap-2"
+              className="bg-surface-soft rounded-lg  p-4 md:p-6 flex flex-col gap-2"
             >
-              <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                <Icon size={18} />
-              </div>
-              <p className="text-2xl md:text-3xl font-bold text-ink-900 font-grotesk">{value}</p>
-              <p className="text-xs md:text-sm text-ink-500 font-medium leading-tight">{label}</p>
+              
+              <p className="text-xl md:text-6xl font-light text-ink-900 font-grotesk">{value}</p>
+              <p className="text-xs md:text-sm text-ink-500 leading-tight">{label}</p>
             </div>
           ))}
         </div>
