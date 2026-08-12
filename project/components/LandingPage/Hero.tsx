@@ -186,7 +186,7 @@ export default function Hero() {
       {/* Full-bleed hero photo: reaches the very top of the screen and spans
           the whole viewport width, while its content stays aligned to the
           1400px grid via an inner container. */}
-      <div className="relative left-1/2 -translate-x-1/2 w-screen h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
+      <div className="relative m-4 rounded-4xl h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
         <img
           src="/hero2.jpg"
           alt="24/7 DigiHealth care team"
@@ -204,7 +204,7 @@ export default function Hero() {
         </div>
 
         {/* Nav row, transparent overlay directly on the image */}
-        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex items-center justify-between gap-4 px-5 py-5 md:px-10 md:py-6">
+        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex items-center justify-between px-5 py-5 md:px-10 md:py-6">
           <Link href="/" className="shrink-0">
             <LogoMain width={170} height={34} alt={true} />
           </Link>
@@ -214,7 +214,7 @@ export default function Hero() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-white/85 hover:text-white transition-colors"
+                className="text-sm font-medium text-white/85 transition-all ease-in-out duration-600 hover:text-white hover:ring-2 hover:ring-white px-4 py-2 rounded-full"
               >
                 {link.name}
               </Link>
@@ -254,7 +254,7 @@ export default function Hero() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-white/90 text-sm font-medium py-2.5 px-2 rounded-lg hover:bg-white/10 transition-colors hover:ring-2 hover:ring-white"
+                className="text-white/90 text-sm font-medium py-2.5 px-2 rounded-lg  transition-colors hover:ring-2 hover:ring-white"
               >
                 {link.name}
               </Link>
@@ -315,10 +315,10 @@ export default function Hero() {
 
         {/* Floating rating card, aligned to the same 1400px content edge */}
         <div className="hidden md:block relative z-10 mx-auto w-full max-w-[1400px] px-5 md:px-10 pb-10">
-          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-4 w-fit ml-auto">
+          <div className="flex items-center gap-4 bg-white/10  border border-white/20 rounded-2xl px-5 py-4 w-fit ml-auto">
             <div className="flex items-center gap-1 text-3xl font-bold text-white font-grotesk">
               4.9
-              <Star size={18} className="fill-secondary text-secondary mb-3" />
+              <Star size={18} className="fill-green-500 text-green-500 mb-3" />
             </div>
             <div className="w-px h-10 bg-white/20" />
             <div className="flex items-center">
@@ -350,14 +350,14 @@ export default function Hero() {
 
       <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         {/* Stat badges, lifted so they straddle the bottom edge of the photo. */}
-        <div className="relative z-10  grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pb-16">
+        <div className="relative z-10  grid grid-cols-2 lg:grid-cols-none lg:flex lg:flex-row justify-between gap-3 md:gap-4 pb-4">
           {badges.map(({ icon: Icon, value, label }) => (
             <div
               key={label}
-              className="bg-surface-soft rounded-lg  p-4 md:p-6 flex flex-col gap-2"
+              className=" rounded-lg  p-4 md:p-6 flex flex-col gap-2"
             >
               <CountUpValue value={value} />
-              <p className="text-xs md:text-sm text-white leading-tight">{label}</p>
+              <p className="text-xs md:text-sm text-ink-600 leading-tight">{label}</p>
             </div>
           ))}
         </div>
