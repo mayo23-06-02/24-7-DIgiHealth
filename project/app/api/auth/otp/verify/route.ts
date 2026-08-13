@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("[POST /api/auth/otp/verify]", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to verify code" },
+      { error: "Failed to verify code. Please try again." },
       { status: 500 },
     );
   }

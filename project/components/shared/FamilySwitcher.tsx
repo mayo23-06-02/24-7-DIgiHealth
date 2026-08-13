@@ -199,7 +199,7 @@ export default function FamilySwitcher({
         <ChevronDown size={14} className="text-ink-400 hidden sm:block shrink-0" />
       </button>
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-72 z-[100]">
+        <div className="fixed sm:absolute top-16 sm:top-full left-0 sm:left-auto right-0 mx-4 sm:mx-0 sm:mt-2 w-auto sm:w-72 z-[100]">
           <FamilySwitcherMenu
             members={members}
             activeMemberId={activeMember?.id ?? null}

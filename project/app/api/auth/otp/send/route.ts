@@ -52,8 +52,12 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
+      // Log the real provider error server-side only — it can reveal
+      // internal infra details (sending domain, provider account state,
+      // etc.) that shouldn't reach an unauthenticated client.
+      console.error("[POST /api/auth/otp/send] Email provider error:", error);
       return NextResponse.json(
-        { error: `Failed to send verification code: ${error}` },
+        { error: "We couldn't send the verification code right now. Please try again shortly, or contact support if this continues." },
         { status: 502 },
       );
     }
@@ -66,7 +70,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("[POST /api/auth/otp/send]", err);
     return NextResponse.json(
-      { error: err?.message || "Failed to send verification code" },
+      { error: "Failed to send verification code. Please try again." },
       { status: 500 },
     );
   }
