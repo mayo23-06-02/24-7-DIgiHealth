@@ -10,7 +10,6 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import RefillForm from "./RefillForm";
 import { toast } from "react-hot-toast";
 import { Appointment } from "@/lib/hooks/useAppointments";
 
@@ -49,14 +48,8 @@ function createDefaultAddForm() {
     title: "",
     date: toLocalDateStr(now),
     time: toLocalTimeStr(rounded),
-    type: "reminder" as "reminder" | "refill" | "note",
+    type: "reminder" as "reminder" | "note",
     notes: "",
-    prescriptionId: "",
-    deliveryMethod: "pickup" as "pickup" | "delivery",
-    deliveryAddress: "",
-    pharmacyId: "",
-    paymentMethod: "insurance" as "insurance" | "card" | "cash",
-    reminderDays: 3,
   };
 }
 
@@ -91,17 +84,8 @@ interface AgendaItem {
   status?: string;
 }
 
-interface Prescription {
-  id: string;
-  medicationName: string;
-  dosage: string;
-  refillsRemaining: number;
-  expiryDate: string;
-}
-
 const EVENT_TYPES = [
   { label: "Reminder", value: "reminder", icon: <BiTrendingUp /> },
-  { label: "Refill", value: "refill", icon: <BiLoaderAlt /> },
   { label: "Note", value: "note", icon: <BiPencil /> },
 ];
 
@@ -111,13 +95,12 @@ export default function EventsCalendar() {
   const [selectedType, setSelectedType] = useState<EventFilterType>("all");
 
   const [selectedEvent, setSelectedEvent] = useState<AgendaItem | null>(null);
+  const [selectedDay, setSelectedDay] = useState<{ date: Date; items: AgendaItem[] } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Add-event modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
   const [addForm, setAddForm] = useState(createDefaultAddForm);
 
   const todayStr = toLocalDateStr(new Date());
@@ -145,25 +128,6 @@ export default function EventsCalendar() {
   useEffect(() => {
     if (showAddModal) setAddForm(createDefaultAddForm());
   }, [showAddModal]);
-
-  useEffect(() => {
-    if (showAddModal && addForm.type === "refill") {
-      setLoadingPrescriptions(true);
-      fetch("/api/patient/prescriptions")
-        .then((res) => res.json())
-        .then(setPrescriptions)
-        .finally(() => setLoadingPrescriptions(false));
-    }
-  }, [showAddModal, addForm.type]);
-
-  const prescriptionOptions = useMemo(() => {
-    const opts = prescriptions.map((p) => ({
-      value: p.id,
-      label: `${p.medicationName} (${p.dosage}) - ${p.refillsRemaining} refills left`,
-    }));
-    opts.unshift({ value: "new", label: "+ Request new prescription" });
-    return opts;
-  }, [prescriptions]);
 
   const filtered = useMemo(() => {
     if (selectedType === "all") return agenda;
@@ -212,8 +176,15 @@ export default function EventsCalendar() {
     if (original) setSelectedEvent(original);
   };
 
+  const handleDayClick = (date: Date, dayAppointments: Appointment[]) => {
+    const items = dayAppointments
+      .map((appt) => eventById.get(String(appt.id)))
+      .filter((item): item is AgendaItem => !!item);
+    setSelectedDay({ date, items });
+  };
+
   const handleAddSubmit = async () => {
-    if (!addForm.title.trim() && addForm.type !== "refill") return;
+    if (!addForm.title.trim()) return;
     if (isDateTimeInPast(addForm.date, addForm.time)) {
       toast.error("Please choose a future date and time");
       return;
@@ -340,11 +311,63 @@ export default function EventsCalendar() {
           <AppointmentCalendarView
             appointments={calendarAppointments}
             onAppointmentClick={handleAppointmentClick}
+            onDayClick={handleDayClick}
             userType="patient"
             emptyMessage="No events yet — click Add Event to create your first reminder, refill, or note."
           />
         )}
       </Card>
+
+      {/* Day Detail Modal — opened by tapping a day cell on small screens,
+          where individual event chips collapse to dots (see AppointmentCalendarView) */}
+      <Modal
+        isOpen={!!selectedDay}
+        onClose={() => setSelectedDay(null)}
+        title={
+          selectedDay
+            ? selectedDay.date.toLocaleDateString("en-ZA", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })
+            : "Day Events"
+        }
+      >
+        {selectedDay && (
+          <div className="space-y-2">
+            {selectedDay.items.length === 0 ? (
+              <p className="text-sm text-ink-600 py-4 text-center">
+                No events on this day.
+              </p>
+            ) : (
+              selectedDay.items.map((item) => {
+                const config = eventTabConfig[item.type === "doctor" ? "doctor" : (item.type as EventFilterType)];
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedDay(null);
+                      setSelectedEvent(item);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-surface-soft transition-colors text-left"
+                  >
+                    <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${config.badgeBg} ${config.badgeText}`}>
+                      {config.label}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-semibold text-ink-900 truncate">
+                        {item.title || item.dr || labelForType(item.type)}
+                      </span>
+                      <span className="block text-xs text-ink-600">{item.time}</span>
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        )}
+      </Modal>
 
       {/* Event Details Modal */}
       <Modal
@@ -535,14 +558,6 @@ export default function EventsCalendar() {
               </>
             )}
 
-            {addForm.type === "refill" && (
-              <RefillForm
-                addForm={addForm}
-                setAddForm={setAddForm}
-                loadingPrescriptions={loadingPrescriptions}
-                prescriptionOptions={prescriptionOptions}
-              />
-            )}
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -555,11 +570,7 @@ export default function EventsCalendar() {
             </Button>
             <Button
               className="flex-1"
-              disabled={
-                isSaving ||
-                isPastSelection ||
-                (addForm.type !== "refill" && !addForm.title.trim())
-              }
+              disabled={isSaving || isPastSelection || !addForm.title.trim()}
               onClick={handleAddSubmit}
             >
               {isSaving ? <BiLoaderAlt className="animate-spin mr-2" /> : <BiPlus className="mr-2" />}

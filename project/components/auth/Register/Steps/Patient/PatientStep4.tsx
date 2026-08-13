@@ -6,14 +6,14 @@ import { BiLockAlt } from "react-icons/bi";
 export default function PatientStep4({ formData, updateData, errors }: any) {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
-      <div className="bg-primary/5 p-8 rounded-lg border border-primary/10">
+      <div className=" p-8 rounded-lg border border-primary/10">
         <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white mb-6">
           <BiLockAlt size={24} />
         </div>
-        <h3 className="text-2xl font-bold text-slate-900 mb-2 font-grotesk">
+        <h3 className="lg:text-lg text-lg font-bold text-slate-900 mb-2 font-grotesk">
           Secure Your Account
         </h3>
-        <p className="text-sm text-slate-500 mb-8">
+        <p className="text-sm text-slate-600 mb-8">
           Create a strong password to protect your health data and access your
           profile.
         </p>

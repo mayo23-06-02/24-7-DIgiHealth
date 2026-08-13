@@ -8,10 +8,16 @@ interface Props {
   onAppointmentClick: (appointment: Appointment) => void;
   userType: "patient" | "practitioner";
   emptyMessage?: string;
+  /** Small screens render a compact dot-per-event day cell (see design note
+   * above the grid) — tapping the day, rather than an individual chip, opens
+   * a day-detail view. Optional: callers that don't pass it keep the desktop
+   * per-event-chip behavior at every width. */
+  onDayClick?: (date: Date, dayAppointments: Appointment[]) => void;
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MAX_VISIBLE_PER_DAY = 3;
+const MAX_VISIBLE_DOTS = 4;
 
 function chipClasses(appt: Appointment) {
   const status = appt.computedStatus || appt.status;
@@ -27,6 +33,23 @@ function chipClasses(appt: Appointment) {
       return "bg-accent/40 text-slate-800 hover:bg-accent/60";
     default:
       return "bg-primary/10 text-primary hover:bg-primary/20";
+  }
+}
+
+function dotClasses(appt: Appointment) {
+  const status = appt.computedStatus || appt.status;
+  switch (status) {
+    case "requests":
+      return "bg-amber-500";
+    case "ongoing":
+      return "bg-blue-500";
+    case "missed":
+    case "cancelled":
+      return "bg-red-500";
+    case "upcoming":
+      return "bg-accent";
+    default:
+      return "bg-primary";
   }
 }
 
@@ -47,6 +70,7 @@ export default function AppointmentCalendarView({
   onAppointmentClick,
   userType,
   emptyMessage = "No appointments in this period",
+  onDayClick,
 }: Props) {
   const [cursor, setCursor] = useState(() => {
     const d = new Date();
@@ -176,68 +200,101 @@ export default function AppointmentCalendarView({
                 : dayAppts.slice(0, MAX_VISIBLE_PER_DAY);
               const hiddenCount = dayAppts.length - visible.length;
 
+              const dayNumber = (
+                <span
+                  className={`text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full ${
+                    isToday
+                      ? "bg-primary text-white"
+                      : inMonth
+                        ? "text-slate-700"
+                        : "text-slate-300"
+                  }`}
+                >
+                  {day.getDate()}
+                </span>
+              );
+
               return (
                 <div
                   key={idx}
-                  className={`min-h-[110px] border-b border-r border-slate-100 p-1.5 sm:p-2 ${
+                  className={`min-h-[60px] sm:min-h-[110px] border-b border-r border-slate-100 ${
                     inMonth ? "bg-white" : "bg-slate-50/60"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span
-                      className={`text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full ${
-                        isToday
-                          ? "bg-primary text-white"
-                          : inMonth
-                            ? "text-slate-700"
-                            : "text-slate-300"
-                      }`}
-                    >
-                      {day.getDate()}
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    {visible.map((appt) => {
-                      const time = new Date(
-                        appt.scheduledStart,
-                      ).toLocaleTimeString("en-ZA", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
-                      const label =
-                        userType === "patient"
-                          ? appt.practitionerName || appt.patientName
-                          : appt.patientName;
-                      return (
+                  {/* Small screens: whole cell is a tap target, events collapse to
+                      status-colored dots so the grid stays readable at 320-420px —
+                      tapping opens the day-detail modal instead of an individual chip. */}
+                  <button
+                    type="button"
+                    onClick={() => onDayClick?.(day, dayAppts)}
+                    className="flex sm:hidden w-full h-full min-h-[60px] flex-col items-center gap-1 py-2 active:bg-slate-50 transition-colors"
+                  >
+                    {dayNumber}
+                    {dayAppts.length > 0 && (
+                      <span className="flex items-center gap-0.5">
+                        {dayAppts.slice(0, MAX_VISIBLE_DOTS).map((appt) => (
+                          <span
+                            key={appt.id}
+                            className={`w-1.5 h-1.5 rounded-full ${dotClasses(appt)}`}
+                          />
+                        ))}
+                        {dayAppts.length > MAX_VISIBLE_DOTS && (
+                          <span className="text-[9px] font-bold text-slate-400 leading-none">
+                            +{dayAppts.length - MAX_VISIBLE_DOTS}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* sm+: full per-event chip list, unchanged */}
+                  <div className="hidden sm:block p-1.5 sm:p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      {dayNumber}
+                    </div>
+                    <div className="space-y-1">
+                      {visible.map((appt) => {
+                        const time = new Date(
+                          appt.scheduledStart,
+                        ).toLocaleTimeString("en-ZA", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+                        const label =
+                          userType === "patient"
+                            ? appt.practitionerName || appt.patientName
+                            : appt.patientName;
+                        return (
+                          <button
+                            key={appt.id}
+                            type="button"
+                            onClick={() => onAppointmentClick(appt)}
+                            title={`${time} · ${label}`}
+                            className={`w-full text-left truncate px-2 py-1 rounded text-[11px] font-semibold transition-colors ${chipClasses(appt)}`}
+                          >
+                            {time} {label}
+                          </button>
+                        );
+                      })}
+                      {hiddenCount > 0 && (
                         <button
-                          key={appt.id}
                           type="button"
-                          onClick={() => onAppointmentClick(appt)}
-                          title={`${time} · ${label}`}
-                          className={`w-full text-left truncate px-2 py-1 rounded text-[11px] font-semibold transition-colors ${chipClasses(appt)}`}
+                          onClick={() => setExpandedDay(key)}
+                          className="w-full text-left px-2 text-[11px] font-bold text-primary hover:underline"
                         >
-                          {time} {label}
+                          +{hiddenCount} more
                         </button>
-                      );
-                    })}
-                    {hiddenCount > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setExpandedDay(key)}
-                        className="w-full text-left px-2 text-[11px] font-bold text-primary hover:underline"
-                      >
-                        +{hiddenCount} more
-                      </button>
-                    )}
-                    {isExpanded && dayAppts.length > MAX_VISIBLE_PER_DAY && (
-                      <button
-                        type="button"
-                        onClick={() => setExpandedDay(null)}
-                        className="w-full text-left px-2 text-[11px] font-bold text-slate-400 hover:underline"
-                      >
-                        Show less
-                      </button>
-                    )}
+                      )}
+                      {isExpanded && dayAppts.length > MAX_VISIBLE_PER_DAY && (
+                        <button
+                          type="button"
+                          onClick={() => setExpandedDay(null)}
+                          className="w-full text-left px-2 text-[11px] font-bold text-slate-400 hover:underline"
+                        >
+                          Show less
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

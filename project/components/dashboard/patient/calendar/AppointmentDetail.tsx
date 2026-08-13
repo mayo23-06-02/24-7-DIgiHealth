@@ -10,7 +10,7 @@ interface Appointment {
   dr_specialty?: string;
   time: string;
   date: string;
-  type: "appointment" | "reminder" | "refill" | "note";
+  type: "appointment" | "reminder" | "note" | "refill";
   status: "confirmed" | "pending" | "cancelled";
   concern?: string;
   notes?: string;
@@ -19,12 +19,6 @@ interface Appointment {
   img?: string;
   countdown?: string;
   durationMinutes?: number;
-  prescriptionId?: string;
-  prescriptionName?: string;
-  deliveryMethod?: "pickup" | "delivery";
-  deliveryAddress?: string;
-  pharmacyId?: string;
-  paymentMethod?: "insurance" | "card" | "cash";
   reminderDays?: number;
 }
 
@@ -90,41 +84,23 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
       )}
 
       {appt.type === "refill" && (
-        <div className="bg-slate-50 p-4 rounded-lg space-y-2">
-          {appt.prescriptionName && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Medication:</span>
-              <span className="font-bold">{appt.prescriptionName}</span>
-            </div>
-          )}
-          {appt.deliveryMethod && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Delivery:</span>
-              <span className="font-bold capitalize">{appt.deliveryMethod}</span>
-            </div>
-          )}
-          {appt.paymentMethod && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Payment:</span>
-              <span className="font-bold capitalize">{appt.paymentMethod}</span>
-            </div>
-          )}
+        <div className="bg-info-50 border border-info-500/20 p-4 rounded-lg">
+          <p className="text-xs font-medium text-info-700">
+            This prescription has refills remaining. Download it from your
+            health record and take it to your pharmacy of choice — DigiHealth
+            doesn't process medication orders or payments.
+          </p>
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-lg">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
           <BiMap className="text-primary text-lg shrink-0" />
-          {appt.location ||
-            (appt.type === "refill"
-              ? appt.deliveryMethod === "delivery"
-                ? appt.deliveryAddress || "To be delivered"
-                : "Pickup at pharmacy"
-              : "Generic Location")}
+          {appt.location || "Generic Location"}
         </div>
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
           <BiBuilding className="text-primary text-lg shrink-0" />
-          {appt.institution || (appt.type === "refill" ? appt.pharmacyId || "Your pharmacy" : "Main Office")}
+          {appt.institution || "Main Office"}
         </div>
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
           <BiCategory className="text-primary text-lg shrink-0" />

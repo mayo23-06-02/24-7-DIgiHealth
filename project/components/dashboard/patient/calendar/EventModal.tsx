@@ -14,7 +14,6 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Link from "next/link";
-import RefillForm from "./RefillForm";
 
 interface Appointment {
   id: string;
@@ -23,7 +22,7 @@ interface Appointment {
   dr_specialty?: string;
   time: string;
   date: string;
-  type: "appointment" | "reminder" | "refill" | "note";
+  type: "appointment" | "reminder" | "note" | "refill";
   status: "confirmed" | "pending" | "cancelled";
   concern?: string;
   notes?: string;
@@ -32,12 +31,6 @@ interface Appointment {
   img?: string;
   countdown?: string;
   durationMinutes?: number;
-  prescriptionId?: string;
-  prescriptionName?: string;
-  deliveryMethod?: "pickup" | "delivery";
-  deliveryAddress?: string;
-  pharmacyId?: string;
-  paymentMethod?: "insurance" | "card" | "cash";
   reminderDays?: number;
 }
 
@@ -54,8 +47,6 @@ interface EventModalProps {
   handleDelete: (appt: Appointment) => void;
   doctors: any[];
   doctorOptions: any[];
-  loadingPrescriptions: boolean;
-  prescriptionOptions: any[];
   isSaving: boolean;
   handleAddSubmit: () => void;
 }
@@ -73,8 +64,6 @@ const EventModal: React.FC<EventModalProps> = ({
   handleDelete,
   doctors,
   doctorOptions,
-  loadingPrescriptions,
-  prescriptionOptions,
   isSaving,
   handleAddSubmit,
 }) => {
@@ -83,13 +72,11 @@ const EventModal: React.FC<EventModalProps> = ({
       isOpen={!!showAddModal}
       onClose={onClose}
       title={`${editingId ? "Edit" : "Add"} ${
-        addForm.type === "refill"
-          ? "Refill"
-          : addForm.type === "reminder"
-            ? "Reminder"
-            : addForm.type === "note"
-              ? "Note"
-              : "Appointment"
+        addForm.type === "reminder"
+          ? "Reminder"
+          : addForm.type === "note"
+            ? "Note"
+            : "Appointment"
       } — ${
         showAddModal
           ? new Date(showAddModal).toLocaleDateString("en-ZA", {
@@ -109,7 +96,6 @@ const EventModal: React.FC<EventModalProps> = ({
           <div className="flex flex-wrap gap-2">
             {[
               { label: "Reminder", value: "reminder", icon: <BiTrendingUp /> },
-              { label: "Refill", value: "refill", icon: <BiLoaderAlt /> },
               { label: "Note", value: "note", icon: <BiPencil /> },
             ].map((opt) => (
               <button
@@ -180,14 +166,6 @@ const EventModal: React.FC<EventModalProps> = ({
             </>
           )}
 
-          {addForm.type === "refill" && (
-            <RefillForm
-              addForm={addForm}
-              setAddForm={setAddForm}
-              loadingPrescriptions={loadingPrescriptions}
-              prescriptionOptions={prescriptionOptions}
-            />
-          )}
         </div>
 
         <div className="flex gap-3 pt-2">

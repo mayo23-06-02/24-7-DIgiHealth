@@ -32,7 +32,7 @@ export default function AuthError({
       {error.digest && (
         <p className="text-[11px] text-slate-400">Reference: {error.digest}</p>
       )}
-      <Button onClick={() => reset()} icon={<BiRefresh size={18} />}>
+      <Button onClick={() => reset()} >
         Try again
       </Button>
     </div>

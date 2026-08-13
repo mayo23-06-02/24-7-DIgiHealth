@@ -6,6 +6,7 @@ import { Users, ArrowLeftRight, Bot } from "lucide-react";
 import { useAuthContext } from "../auth/AuthProvider";
 import Header from "@/components/shared/Header";
 import Sidebar from "./Sidebar";
+import MobileBottomNav from "./MobileBottomNav";
 import { useNavigationProgress } from "@/components/providers/NavigationProgressProvider";
 import {
   FamilyMemberProvider,
@@ -117,6 +118,8 @@ function DashboardShellInner({
   user: ReturnType<typeof useAuthContext>["user"];
   isNavigating: boolean;
 }) {
+  const hasBottomNav = user?.role === "patient" || user?.role === "practitioner";
+
   return (
     // Root container: fills screen, forbids body scroll
     <div className="flex h-screen overflow-hidden bg-slate-100 font-sans selection:bg-primary/10">
@@ -145,7 +148,9 @@ function DashboardShellInner({
         {/* ── CONTENT AREA ── */}
         <main
           aria-busy={isNavigating || undefined}
-          className="flex-1 overflow-y-auto overflow-x-hidden p-2 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 custom-scrollbar"
+          className={`flex-1 overflow-y-auto overflow-x-hidden p-2 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 custom-scrollbar ${
+            hasBottomNav ? "pb-24" : ""
+          } lg:pb-8`}
         >
           <div className="max-w-400 mx-auto">
             <ActiveMemberBanner />
@@ -153,12 +158,15 @@ function DashboardShellInner({
           </div>
         </main>
 
+        {/* ── MOBILE BOTTOM TAB BAR (Patient/Practitioner only) ── */}
+        {hasBottomNav && <MobileBottomNav role={user!.role} />}
+
         {/* ── FLOATING AI ASSISTANT BUTTON (Only for Practitioners) ── */}
         {user?.role === "practitioner" && (
           <>
             <button
               onClick={() => setIsTriageOpen(true)}
-              className="fixed bottom-[calc(2rem+env(safe-area-inset-bottom))] right-[calc(2rem+env(safe-area-inset-right))] z-[60] w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 animate-in zoom-in group"
+              className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-[calc(1.25rem+env(safe-area-inset-right))] lg:bottom-[calc(2rem+env(safe-area-inset-bottom))] lg:right-[calc(2rem+env(safe-area-inset-right))] z-[60] w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 animate-in zoom-in group"
               aria-label="Open AI clinical assistant"
               title="Open AI Clinical Assistant"
             >

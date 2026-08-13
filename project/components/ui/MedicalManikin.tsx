@@ -30,6 +30,29 @@ import {
 } from "react-icons/bi";
 import Button from "./Button";
 
+/**
+ * `<Environment>` fetches its HDRI from a GitHub raw CDN at render time — a
+ * transient CDN outage (e.g. a 503) throws inside the Canvas tree and would
+ * otherwise crash the whole dashboard page. Scoped tightly around just
+ * `<Environment>` so a failure only drops the reflection lighting; the
+ * existing ambientLight/spotLight keep the model visible either way.
+ */
+class EnvironmentErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.warn("[MedicalManikin] Environment HDRI failed to load:", error);
+  }
+  render() {
+    return this.state.hasError ? null : this.props.children;
+  }
+}
+
 // ==================== PREDEFINED ANATOMY PARTS ====================
 const ANATOMY_PARTS = [
   // Head & Neck
@@ -678,7 +701,11 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
             target={[0, 0, 0]}
             makeDefault
           />
-          <Environment preset="studio" />
+          <EnvironmentErrorBoundary>
+            <Suspense fallback={null}>
+              <Environment preset="studio" />
+            </Suspense>
+          </EnvironmentErrorBoundary>
         </Canvas>
 
         {/* Annotation Modal with Combobox (Datalist) */}

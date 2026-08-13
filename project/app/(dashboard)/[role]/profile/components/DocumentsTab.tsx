@@ -296,42 +296,39 @@ export default function DocumentsTab({
                 : "Drag and drop files here, or choose a type below. Photos: JPG, PNG, WebP, GIF (max 10MB). Documents: PDF or Word (max 15MB)."}
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-2.5 mt-5">
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
               <Button
                 type="button"
+                size="sm"
                 onClick={() => {
                   console.log("[DocumentsTab] Upload photos button clicked, ref:", photoInputRef.current);
                   photoInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                icon={<Images size={18} />}
-                iconPosition="left"
               >
                 Upload photos
               </Button>
               <Button
                 type="button"
+                size="sm"
                 variant="outline"
                 onClick={() => {
                   console.log("[DocumentsTab] Upload documents button clicked, ref:", localDocInputRef.current);
                   localDocInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                icon={<FileText size={18} />}
-                iconPosition="left"
               >
                 Upload documents
               </Button>
               <Button
                 type="button"
-                variant="ghost"
+                size="sm"
+                variant="secondary"
                 onClick={() => {
                   console.log("[DocumentsTab] Any file button clicked, ref:", docInputRef.current);
                   docInputRef.current?.click();
                 }}
                 disabled={isUploadingDoc || !!uploadError}
-                icon={<Upload size={18} />}
-                iconPosition="left"
               >
                 Any file
               </Button>
@@ -417,7 +414,7 @@ export default function DocumentsTab({
       <section className="rounded-lg border border-slate-200 bg-white overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-info-50 text-info-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md bg-primary-50 text-primary flex items-center justify-center">
               <ImageIcon size={20} />
             </div>
             <div>
@@ -500,7 +497,7 @@ export default function DocumentsTab({
       <section className="rounded-lg border border-slate-200 bg-white overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-warning-50 text-warning-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary flex items-center justify-center">
               <FileText size={20} />
             </div>
             <div>

@@ -23,20 +23,18 @@ export default function EmailOtpStep({
 
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
-      <div className="bg-primary/5 p-8 rounded-lg border border-primary/10">
-        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white mb-6">
-          <BiLockAlt size={24} />
-        </div>
-        <h3 className="text-2xl font-bold text-slate-900 mb-2 font-grotesk">
+      <div className="">
+        
+        <h3 className="text-xl lg:text-lg font-bold text-slate-900 mb-2 font-grotesk">
           Secure your account
         </h3>
-        <p className="text-sm text-slate-500 mb-8">
+        <p className="lg:text-sm text-xs text-slate-500 mb-8">
           Create a password for day-to-day sign-in. Once you finish
           registration, we'll email you a 6-digit code to confirm your
           address.
         </p>
 
-        <div className="space-y-6">
+        <div className="space-y-2 flex lg:space-y-0 lg:flex-row flex-col lg:gap-4">
           <Input
             label="Password *"
             type="password"
@@ -59,7 +57,7 @@ export default function EmailOtpStep({
           <p className="text-xs font-bold text-slate-500 tracking-widest">
             Password requirements
           </p>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <ul className="grid grid-cols-1 md:grid-cols-2 ">
             {[
               "Minimum 8 characters",
               "At least one uppercase letter",
@@ -77,7 +75,7 @@ export default function EmailOtpStep({
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 flex gap-3">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 flex gap-3">
         <BiEnvelope className="text-primary shrink-0 mt-0.5" size={22} />
         <div>
           <p className="text-sm font-bold text-slate-800">

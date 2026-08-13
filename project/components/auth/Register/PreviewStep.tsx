@@ -51,6 +51,9 @@ export default function PreviewStep({ formData }: { formData: any }) {
       }
       return value.join(", ");
     }
+    if (key === "profilePhoto" && typeof value === "string") {
+      return "1 document uploaded";
+    }
     if (typeof value === "object") {
       if (value && (value as any).url) return "Uploaded Document";
       return JSON.stringify(value);
@@ -85,7 +88,7 @@ export default function PreviewStep({ formData }: { formData: any }) {
           </h4>
           <div className="flex-1 h-px bg-slate-100" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:gap-4 gap-2">
           {entries.map((key) => {
             const value = formData[key];
             let displayValue: string | React.ReactNode = renderValue(value, key);
@@ -118,7 +121,7 @@ export default function PreviewStep({ formData }: { formData: any }) {
             return (
               <div
                 key={key}
-                className="p-4 bg-slate-50 rounded-lg border border-slate-100"
+                className=""
               >
                 <p className="text-xs font-bold text-slate-500 mb-1">
                   {formatKey(key)}

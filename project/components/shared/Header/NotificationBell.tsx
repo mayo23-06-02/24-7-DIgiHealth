@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Bell, Calendar, MessageSquare, ChevronDown } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -22,6 +23,11 @@ export default function NotificationBell({
   const previousUnreadCount = useRef(0);
   const previousNotifIds = useRef<Set<string>>(new Set());
   const ref = useRef<HTMLDivElement>(null);
+  // Dropdown is portaled to document.body (see render) so it always
+  // composites above the patient dashboard's WebGL manikin canvas, which on
+  // some devices ignores normal DOM z-index — it therefore falls outside
+  // `ref`, so click-outside detection needs its own ref too.
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const playNotificationSound = () => {
     // Shared sound helper (same asset as message badge)
@@ -78,7 +84,10 @@ export default function NotificationBell({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const insideTrigger = ref.current?.contains(target);
+      const insideDropdown = dropdownRef.current?.contains(target);
+      if (!insideTrigger && !insideDropdown) {
         setIsOpen(false);
         setIsDetailOpen(false);
       }
@@ -171,8 +180,11 @@ export default function NotificationBell({
         )}
       </button>
 
-      {isOpen && (
-        <div className="fixed sm:absolute top-16 sm:top-12 left-0 right-0 sm:left-auto sm:right-0 mx-4 sm:mx-0 w-auto sm:w-96 bg-white border border-border rounded-lg shadow-xl p-4 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 z-[100] max-h-[600px] flex flex-col">
+      {isOpen && typeof document !== "undefined" && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed top-16 left-0 right-0 sm:left-auto sm:right-6 mx-4 sm:mx-0 w-auto sm:w-96 bg-white border border-border rounded-lg shadow-xl p-4 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 z-[100] max-h-[600px] flex flex-col"
+        >
           {!isDetailOpen ? (
             <>
               <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
@@ -476,7 +488,8 @@ export default function NotificationBell({
               </div>
             )
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Users, UserPlus, Baby, Mail, Loader2, X, Trash2 } from "lucide-react";
+import { Users, UserPlus, Baby, Mail, Loader2, X, Trash2, Copy, Check, TriangleAlert } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import Badge, { BadgeStatus } from "@/components/ui/Badge";
 import Switch from "@/components/ui/Switch";
 import Card from "@/components/ui/Card";
+import Dialog from "@/components/ui/Dialog";
 import ProfileSection from "./ProfileSection";
+import { useFamilyMembers } from "@/lib/family/FamilyMemberContext";
 
 interface GuardianLink {
   id: string;
@@ -51,6 +53,13 @@ export default function FamilyTab({
 
   const [childForm, setChildForm] = useState({ firstName: "", lastName: "", dateOfBirth: "", gender: "male" });
   const [inviteForm, setInviteForm] = useState({ email: "", relationship: "spouse" });
+
+  const [confirmTarget, setConfirmTarget] = useState<GuardianLink | null>(null);
+  const [confirmInput, setConfirmInput] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const { refetch: refetchFamilyMembers } = useFamilyMembers();
 
   const load = useCallback(async () => {
     setIsLoading(true);
@@ -145,17 +154,39 @@ export default function FamilyTab({
     }
   };
 
-  const handleRevoke = async (memberId: string) => {
+  const handleRevoke = async (linkId: string) => {
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/patient/family/${memberId}`, { method: "DELETE" });
+      const res = await fetch(`/api/patient/family/${linkId}`, { method: "DELETE" });
       if (res.ok) {
         setToast({ message: "Family member removed.", type: "info" });
+        setConfirmTarget(null);
+        setConfirmInput("");
         load();
+        refetchFamilyMembers();
       } else {
         setToast({ message: "Failed to remove.", type: "error" });
       }
     } catch {
       setToast({ message: "Network error.", type: "error" });
+    }
+    setIsDeleting(false);
+  };
+
+  const confirmName = confirmTarget
+    ? confirmTarget.member.name || confirmTarget.member.email || ""
+    : "";
+  const confirmMatches =
+    confirmName.length > 0 &&
+    confirmInput.trim().toLowerCase() === confirmName.trim().toLowerCase();
+
+  const handleCopyConfirmName = async () => {
+    try {
+      await navigator.clipboard.writeText(confirmName);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable — user can still type it manually */
     }
   };
 
@@ -211,7 +242,10 @@ export default function FamilyTab({
                 />
               )}
               <button
-                onClick={() => link.member.id && handleRevoke(link.member.id)}
+                onClick={() => {
+                  setConfirmTarget(link);
+                  setConfirmInput("");
+                }}
                 aria-label="Remove family member"
                 className="shrink-0 p-2 text-slate-400 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors"
               >
@@ -354,6 +388,81 @@ export default function FamilyTab({
           </div>
         </ProfileSection>
       )}
+
+      <Dialog
+        isOpen={!!confirmTarget}
+        onClose={() => {
+          setConfirmTarget(null);
+          setConfirmInput("");
+        }}
+        title="Remove family member"
+        size="sm"
+      >
+        {confirmTarget && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 rounded-lg border border-danger-500/20 bg-danger-50 p-3">
+              <TriangleAlert size={18} className="text-danger-700 shrink-0 mt-0.5" />
+              <p className="text-sm text-danger-700">
+                This removes{" "}
+                <span className="font-bold">{confirmName}</span>
+                {confirmTarget.status === "pending"
+                  ? " — the pending invite will be cancelled."
+                  : " from your family account. They'll go back to self-pay."}{" "}
+                This can't be undone.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-ink-600 mb-1.5">
+                Type their name to confirm
+              </p>
+              <div className="flex items-center gap-2 mb-3 rounded-lg bg-surface-soft border border-border px-3 py-2">
+                <span className="flex-1 text-sm font-mono text-ink-900 truncate">
+                  {confirmName}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyConfirmName}
+                  aria-label="Copy name"
+                  className="shrink-0 flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-600 transition-colors"
+                >
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+              <Input
+                value={confirmInput}
+                onChange={(e) => setConfirmInput(e.target.value)}
+                placeholder={confirmName}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <Button
+                variant="ghost"
+                fullWidth
+                onClick={() => {
+                  setConfirmTarget(null);
+                  setConfirmInput("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                fullWidth
+                disabled={!confirmMatches || isDeleting}
+                loading={isDeleting}
+                icon={<Trash2 size={16} />}
+                iconPosition="left"
+                onClick={() => handleRevoke(confirmTarget.id)}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 }

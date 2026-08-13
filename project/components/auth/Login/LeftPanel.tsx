@@ -87,7 +87,7 @@ export default function LeftPanel({
       )}
 
       <form onSubmit={handleLogin} className="space-y-6">
-        <div className="space-y-6 mb-7.5">
+        <div className="space-y-2 mb-7.5">
           <Input
             label={roleLabel}
             required

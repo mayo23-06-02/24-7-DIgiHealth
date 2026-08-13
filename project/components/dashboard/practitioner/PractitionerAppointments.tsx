@@ -7,6 +7,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
 import Select from "@/components/ui/Select";
+import Pagination from "@/components/ui/Pagination";
 import {
   BiPlus,
   BiDownload,
@@ -67,6 +68,8 @@ export default function PractitionerAppointments() {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const tabs = ALL_TABS;
 
@@ -117,15 +120,41 @@ export default function PractitionerAppointments() {
     if (typeFilter && typeFilter !== "all") {
       list = list.filter((a) => (a.type || "video").toLowerCase() === typeFilter);
     }
-    list.sort((a, b) =>
-      sortBy === "newest"
-        ? new Date(b.scheduledStart).getTime() -
-          new Date(a.scheduledStart).getTime()
-        : new Date(a.scheduledStart).getTime() -
-          new Date(b.scheduledStart).getTime(),
-    );
+    if (activeTab === "all") {
+      // The All tab mixes upcoming and past appointments — a plain date sort
+      // would bury the next appointment under old ones. Soonest-upcoming
+      // always leads, then past appointments trail newest-first below it.
+      const now = Date.now();
+      list = [...list].sort((a, b) => {
+        const aTime = new Date(a.scheduledStart).getTime();
+        const bTime = new Date(b.scheduledStart).getTime();
+        const aFuture = aTime >= now;
+        const bFuture = bTime >= now;
+        if (aFuture !== bFuture) return aFuture ? -1 : 1;
+        return aFuture ? aTime - bTime : bTime - aTime;
+      });
+    } else {
+      list = [...list].sort((a, b) =>
+        sortBy === "newest"
+          ? new Date(b.scheduledStart).getTime() -
+            new Date(a.scheduledStart).getTime()
+          : new Date(a.scheduledStart).getTime() -
+            new Date(b.scheduledStart).getTime(),
+      );
+    }
     return list;
-  }, [appointments, activeTab, search, dateFrom, dateTo, sortBy]);
+  }, [appointments, activeTab, search, dateFrom, dateTo, sortBy, typeFilter]);
+
+  // Reset to page 1 whenever the underlying list changes shape
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, search, dateFrom, dateTo, sortBy, typeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page],
+  );
 
   // ─── Counts per tab ──────────────────────────────────────────────
   const counts = useMemo(() => {
@@ -348,16 +377,26 @@ export default function PractitionerAppointments() {
         {loading ? (
           <div className="animate-pulse space-y-3">Loading...</div>
         ) : view === "list" ? (
-          <AppointmentList
-            appointments={filtered}
-            onJoin={handleJoin}
-            onEdit={handleEdit}
-            onCancel={handleCancel}
-            onAccept={handleAccept}
-            onDecline={handleDecline}
-            onRebook={handleRebook}
-            emptyMessage={`No ${activeTab} appointments`}
-          />
+          <>
+            <AppointmentList
+              appointments={paginated}
+              onJoin={handleJoin}
+              onEdit={handleEdit}
+              onCancel={handleCancel}
+              onAccept={handleAccept}
+              onDecline={handleDecline}
+              onRebook={handleRebook}
+              emptyMessage={`No ${activeTab} appointments`}
+            />
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4">
+                <span className="text-xs text-ink-500">
+                  {filtered.length} appointment{filtered.length === 1 ? "" : "s"}
+                </span>
+                <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+              </div>
+            )}
+          </>
         ) : (
           <AppointmentCalendarView
             appointments={filtered}

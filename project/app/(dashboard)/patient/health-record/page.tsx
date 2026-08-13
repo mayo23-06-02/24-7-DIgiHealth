@@ -11,9 +11,6 @@ import {
   LineChart as LineChartIcon,
   Clock,
   Loader2,
-  MapPin,
-  Truck,
-  Store,
 } from "lucide-react";
 import {
   LineChart,
@@ -64,12 +61,6 @@ export default function HealthRecordPage() {
   const [isRefillModalOpen, setIsRefillModalOpen] = useState(false);
   const [selectedMedForRefill, setSelectedMedForRefill] =
     useState<Medication | null>(null);
-  const [refillForm, setRefillForm] = useState({
-    deliveryMethod: "pickup" as "pickup" | "delivery",
-    deliveryAddress: "",
-    pharmacyId: "dischem_sandton",
-    notes: "",
-  });
   const [isSavingRefill, setIsSavingRefill] = useState(false);
   const [isAllergyModalOpen, setIsAllergyModalOpen] = useState(false);
   const [isSavingAllergy, setIsSavingAllergy] = useState(false);
@@ -426,94 +417,12 @@ export default function HealthRecordPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant={
-                  refillForm.deliveryMethod === "pickup" ? "primary" : "ghost"
-                }
-                onClick={() =>
-                  setRefillForm((prev) => ({
-                    ...prev,
-                    deliveryMethod: "pickup",
-                  }))
-                }
-                className={`p-4 h-auto rounded-lg border flex flex-col items-center gap-2 transition-all !min-w-0 ${
-                  refillForm.deliveryMethod === "pickup"
-                    ? ""
-                    : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
-                }`}
-              >
-                <Store size={22} />
-                <span className="text-xs font-bold tracking-normal">
-                  Pharmacy Pickup
-                </span>
-              </Button>
-              <Button
-                variant={
-                  refillForm.deliveryMethod === "delivery" ? "primary" : "ghost"
-                }
-                onClick={() =>
-                  setRefillForm((prev) => ({
-                    ...prev,
-                    deliveryMethod: "delivery",
-                  }))
-                }
-                className={`p-4 h-auto rounded-lg border flex flex-col items-center gap-2 transition-all !min-w-0 ${
-                  refillForm.deliveryMethod === "delivery"
-                    ? ""
-                    : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
-                }`}
-              >
-                <Truck size={22} />
-                <span className="text-xs font-bold tracking-normal">
-                  Courier Delivery
-                </span>
-              </Button>
-            </div>
-
-            {refillForm.deliveryMethod === "delivery" ? (
-              <Input
-                label="Delivery Address"
-                placeholder="Enter your full street address"
-                value={refillForm.deliveryAddress}
-                onChange={(e) =>
-                  setRefillForm((prev) => ({
-                    ...prev,
-                    deliveryAddress: e.target.value,
-                  }))
-                }
-                icon={<MapPin size={16} />}
-              />
-            ) : (
-              <Select
-                label="Select Pharmacy"
-                value={refillForm.pharmacyId}
-                onChange={(val) =>
-                  setRefillForm((prev) => ({ ...prev, pharmacyId: val }))
-                }
-                options={[
-                  { value: "dischem_sandton", label: "Dis-Chem Sandton City" },
-                  { value: "clicks_rosebank", label: "Clicks Rosebank Mall" },
-                  {
-                    value: "netcare_pharmacy",
-                    label: "Netcare Hospital Pharmacy",
-                  },
-                ]}
-              />
-            )}
-
-            <Input
-              isTextArea
-              rows={3}
-              label="Additional Notes"
-              placeholder="Any special instructions for the pharmacist?"
-              value={refillForm.notes}
-              onChange={(e) =>
-                setRefillForm((prev) => ({ ...prev, notes: e.target.value }))
-              }
-            />
-          </div>
+          <Alert status="info" title="No delivery or payment through DigiHealth">
+            Confirming here just marks a refill as used against your doctor's
+            authorization. Download your prescription and take it to any
+            pharmacy of your choice — we don't handle medication orders,
+            delivery, or payment.
+          </Alert>
 
           <div className="flex gap-3">
             <Button

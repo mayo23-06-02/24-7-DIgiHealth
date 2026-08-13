@@ -485,96 +485,6 @@ function MiniBarChart({
     </Card>
   );
 }
-function OrderTable({ orders }: { orders: any[] }) {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const PER_PAGE = 5;
-
-  const filtered = useMemo(() => {
-    return (orders || []).filter(
-      (o) =>
-        !search ||
-        o.item?.toLowerCase().includes(search.toLowerCase()) ||
-        o.orderId?.includes(search),
-    );
-  }, [orders, search]);
-
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-
-  return (
-    <Card noPadding>
-      <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
-          My Orders & Refills
-        </h3>
-        <Input
-          fullWidth={false}
-          icon={<Search size={14} />}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search orders..."
-          aria-label="Search orders"
-          className="w-40 h-9 text-xs"
-        />
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left font-sans">
-          <thead>
-            <tr className="bg-slate-50/50">
-              {["Order ID", "Item", "Category", "Date", "Status"].map((h) => (
-                <th
-                  key={h}
-                  className="px-6 py-3 text-xs font-bold text-slate-500  tracking-normal"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {paginated.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="py-10 text-center text-slate-500 text-xs"
-                >
-                  No orders found
-                </td>
-              </tr>
-            ) : (
-              paginated.map((o, i) => (
-                <tr
-                  key={o.orderId || i}
-                  className="hover:bg-slate-50/30 transition-colors"
-                >
-                  <td className="px-6 py-4 text-xs font-bold text-slate-500">
-                    #{o.orderId}
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-xs font-bold text-slate-800">{o.item}</p>
-                    <p className="text-xs text-slate-500 font-medium">
-                      {o.pharmacy || "Express Pharmacy"}
-                    </p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge label={o.category} status="neutral" size="sm" />
-                  </td>
-                  <td className="px-6 py-4 text-xs text-slate-500 font-medium">
-                    {fmtDate(o.date)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusPill status={o.status} />
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
 
 // ─── Patient Billing View ──────────────────────────────────────────────────────
 function PatientBillingView({
@@ -596,20 +506,47 @@ function PatientBillingView({
   const [selectedTier, setSelectedTier] = useState(TIER_ORDER[0]);
   const [paymentMethodModal, setPaymentMethodModal] = useState(false);
 
-  const tiers = TIER_ORDER.map((id) => {
+  const BASELINE_FEATURES = [
+    "Video, chat & voice consultations",
+    "Digital prescriptions",
+    "Secure, POPIA-compliant health records",
+  ];
+
+  const tiers = TIER_ORDER.map((id, idx) => {
     const cfg = TIER_CONFIG[id];
-    const features = [
+    const prevLabel = idx > 0 ? TIER_CONFIG[TIER_ORDER[idx - 1]].label : null;
+    const consultLine =
       cfg.consultationsMax === Infinity
         ? "Unlimited consultations"
-        : `${cfg.consultationsMax} consultations/month`,
-      "24/7 access & AI triage",
-    ];
-    if (cfg.maxFamilyMembers > 0) {
-      features.push(
-        `Up to ${cfg.maxFamilyMembers} family member${cfg.maxFamilyMembers > 1 ? "s" : ""}`,
-      );
-    }
-    return { id: cfg.id, label: cfg.label, price: cfg.price, features };
+        : `${cfg.consultationsMax} consultations / month`;
+    const features = prevLabel
+      ? [
+          `Everything in ${prevLabel}, plus`,
+          consultLine,
+          ...(cfg.maxFamilyMembers > 0
+            ? [`Up to ${cfg.maxFamilyMembers} family members`]
+            : []),
+        ]
+      : [
+          consultLine,
+          ...(cfg.maxFamilyMembers > 0
+            ? [`Up to ${cfg.maxFamilyMembers} family members`]
+            : []),
+          ...BASELINE_FEATURES,
+        ];
+    return {
+      id: cfg.id,
+      label: cfg.label,
+      price: cfg.price,
+      tagline:
+        cfg.id === "individual"
+          ? "For one person's everyday care."
+          : cfg.id === "family"
+            ? "For couples and small households."
+            : "For larger families who need it all.",
+      popular: cfg.id === "family",
+      features,
+    };
   });
 
   const cardIcons: Record<string, string> = {
@@ -823,46 +760,12 @@ function PatientBillingView({
         </Card>
       </div>
 
-      {/* Transactions & Orders */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
-        <div className="xl:col-span-3">
-          <TransactionTable
-            transactions={transactions}
-            title="Payment History"
-            showDownload
-          />
-        </div>
-        <div className="xl:col-span-2">
-          <OrderTable
-            orders={[
-              {
-                orderId: "DH-9921",
-                item: "Cetirizine 10mg",
-                category: "Medication",
-                date: new Date(),
-                status: "pending",
-                pharmacy: "Dis-Chem Sandton",
-              },
-              {
-                orderId: "DH-8812",
-                item: "Blood Pressure Monitor",
-                category: "Apparatus",
-                date: new Date(Date.now() - 86400000 * 2),
-                status: "completed",
-                pharmacy: "DigiHealth Store",
-              },
-              {
-                orderId: "DH-7741",
-                item: "Vitamin D3 Supplements",
-                category: "Supplies",
-                date: new Date(Date.now() - 86400000 * 5),
-                status: "completed",
-                pharmacy: "Clicks Pharmacy",
-              },
-            ]}
-          />
-        </div>
-      </div>
+      {/* Transactions */}
+      <TransactionTable
+        transactions={transactions}
+        title="Payment History"
+        showDownload
+      />
 
       {/* Upgrade Modal — same centered-desktop/bottom-sheet-mobile contract as
           Dialog, but wider to fit the 3-column tier grid Dialog's max size can't. */}
@@ -885,39 +788,78 @@ function PatientBillingView({
                 <XCircle size={18} />
               </button>
             </div>
-            <div className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar">
-              {tiers.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedTier(t.id)}
-                  className={`p-5 rounded-lg border-2 text-left transition-all ${
-                    selectedTier === t.id
-                      ? "border-primary bg-primary/[0.03]"
-                      : "border-slate-100 hover:border-slate-200"
-                  }`}
-                >
-                  <p className="text-xs font-bold  tracking-normal text-slate-500 mb-1">
-                    {t.label}
-                  </p>
-                  <p className="text-2xl font-bold text-slate-800 mb-3">
-                    {t.price === 0 ? "Free" : `R${t.price}/mo`}
-                  </p>
-                  <ul className="space-y-2">
-                    {t.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-start gap-2 text-xs font-medium text-slate-600"
-                      >
-                        <CheckCircle2
-                          className="text-success-500 shrink-0 mt-0.5"
-                          size={13}
-                        />{" "}
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </button>
-              ))}
+            <div className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-3 gap-3 overflow-y-auto custom-scrollbar items-start">
+              {tiers.map((t) => {
+                const isSelected = selectedTier === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedTier(t.id)}
+                    className={`relative text-left rounded-2xl border p-4 transition-all ${
+                      t.popular
+                        ? "border-primary/40 bg-gradient-to-b from-primary/[0.06] to-transparent shadow-lg shadow-primary/10"
+                        : "border-slate-200"
+                    } ${
+                      isSelected
+                        ? "ring-2 ring-primary ring-offset-2"
+                        : "hover:border-slate-300"
+                    }`}
+                  >
+                    {t.popular && (
+                      <span className="absolute -top-3 left-4 px-2.5 py-1 rounded-full bg-ink-900 text-white text-[10px] font-bold tracking-wide">
+                        MOST POPULAR
+                      </span>
+                    )}
+
+                    <p className="text-xs font-bold text-slate-500 mt-1">
+                      {t.label}
+                    </p>
+
+                    <div className="flex items-baseline gap-1 mt-2 mb-1">
+                      <span className="text-3xl font-bold text-ink-900 font-grotesk tabular-nums">
+                        R{t.price}
+                      </span>
+                      <span className="text-xs font-medium text-slate-400">
+                        /mo
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-medium mb-4 leading-snug">
+                      {t.tagline}
+                    </p>
+
+                    <span
+                      className={`block w-full text-center py-2 rounded-full text-xs font-bold mb-4 transition-colors ${
+                        t.popular
+                          ? "bg-ink-900 text-white"
+                          : "bg-slate-100 text-slate-700"
+                      } ${isSelected ? "ring-2 ring-primary/50" : ""}`}
+                    >
+                      {isSelected ? "Selected" : "Select plan"}
+                    </span>
+
+                    <ul className="space-y-2">
+                      {t.features.map((f, i) => (
+                        <li
+                          key={f}
+                          className={`flex items-start gap-2 text-xs leading-snug ${
+                            i === 0 && t.features.length > 1 && f.startsWith("Everything")
+                              ? "font-bold text-ink-900"
+                              : "font-medium text-slate-600"
+                          }`}
+                        >
+                          {!(i === 0 && f.startsWith("Everything")) && (
+                            <CheckCircle2
+                              className="text-success-500 shrink-0 mt-0.5"
+                              size={13}
+                            />
+                          )}
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </button>
+                );
+              })}
             </div>
             <div className="px-6 sm:px-8 pb-6 sm:pb-8 pt-2 shrink-0">
               <Button

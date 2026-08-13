@@ -24,6 +24,10 @@ interface FamilyMemberContextValue {
   activeMember: FamilyMemberSummary | null;
   setActiveMemberId: (id: string | null) => void;
   isLoading: boolean;
+  /** Re-fetch the guardian's member list — call after adding/removing a
+   * family link so the sidebar switcher and header banner (both consumers
+   * of this same context) update without a full page reload. */
+  refetch: () => void;
 }
 
 const FamilyMemberContext = createContext<FamilyMemberContextValue>({
@@ -31,6 +35,7 @@ const FamilyMemberContext = createContext<FamilyMemberContextValue>({
   activeMember: null,
   setActiveMemberId: () => {},
   isLoading: false,
+  refetch: () => {},
 });
 
 export const useFamilyMembers = () => useContext(FamilyMemberContext);
@@ -50,8 +55,8 @@ export function FamilyMemberProvider({ children }: { children: React.ReactNode }
 
   const storageKey = user ? `family-active-member:${user.id}` : null;
 
-  useEffect(() => {
-    if (!user || user.role !== "patient") return;
+  const fetchMembers = useCallback(() => {
+    if (!user || user.role !== "patient") return () => {};
     let cancelled = false;
     setIsLoading(true);
     fetch("/api/patient/family")
@@ -80,6 +85,8 @@ export function FamilyMemberProvider({ children }: { children: React.ReactNode }
       cancelled = true;
     };
   }, [user]);
+
+  useEffect(() => fetchMembers(), [fetchMembers]);
 
   useEffect(() => {
     if (!storageKey) return;
@@ -115,7 +122,7 @@ export function FamilyMemberProvider({ children }: { children: React.ReactNode }
 
   return (
     <FamilyMemberContext.Provider
-      value={{ members, activeMember, setActiveMemberId, isLoading }}
+      value={{ members, activeMember, setActiveMemberId, isLoading, refetch: fetchMembers }}
     >
       {children}
     </FamilyMemberContext.Provider>

@@ -31,22 +31,16 @@ const CHANNELS: {
     title: "Email",
     description: "Appointments, prescriptions, and account notices",
     icon: <Mail size={20} />,
-    color: "bg-info-50 text-info-700",
+    color: "bg-primary-50 text-primary",
   },
   {
     key: "push",
     title: "Push notifications",
-    description: "Real-time alerts in the app and browser",
+    description: "Real-time alerts in browser",
     icon: <Monitor size={20} />,
-    color: "bg-violet-500/10 text-violet-600",
+    color: "bg-primary-50 text-primary",
   },
-  {
-    key: "sms",
-    title: "SMS",
-    description: "Critical reminders when you may be offline",
-    icon: <Smartphone size={20} />,
-    color: "bg-success-50 text-success-700",
-  },
+
 ];
 
 export default function NotificationsTab({
@@ -105,8 +99,7 @@ export default function NotificationsTab({
           <Button
             onClick={handleSaveNotifications}
             loading={isSaving}
-            icon={<CheckCircle2 size={18} />}
-            iconPosition="left"
+     
             className="shrink-0"
           >
             {isSaving ? "Saving…" : "Save preferences"}

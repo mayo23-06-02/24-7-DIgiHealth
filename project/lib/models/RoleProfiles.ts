@@ -6,6 +6,8 @@ export interface IPatientProfile extends Document {
   dateOfBirth: Date;
   gender: 'male' | 'female' | 'other';
   emergencyContact: { name: string; phone: string; relationship: string };
+  /** Up to 3 — enforced both in the schema validator and the API route. */
+  nextOfKin?: { name: string; phone: string; relationship: string }[];
   medicalAid?: { provider: string; planName: string; memberNumber: string };
   subscriptionTier: 'free' | 'pro';
   popiaConsentDate?: Date;
@@ -23,6 +25,14 @@ const PatientProfileSchema = new Schema<IPatientProfile>({
     name: String,
     phone: String,
     relationship: String
+  },
+  nextOfKin: {
+    type: [{ name: String, phone: String, relationship: String }],
+    validate: {
+      validator: (v: unknown[]) => v.length <= 3,
+      message: 'A patient can list at most 3 next of kin.',
+    },
+    default: [],
   },
   medicalAid: {
     provider: String,

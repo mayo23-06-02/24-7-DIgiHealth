@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
           ? {
               medicalAid: { provider: "", planName: "", memberNumber: "" },
               emergencyContact: { name: "", phone: "", relationship: "" },
+              nextOfKin: [],
               subscriptionTier: "free",
               dateOfBirth: null,
               gender: null,
@@ -90,6 +91,7 @@ export async function GET(req: NextRequest) {
           phone: "",
           relationship: "",
         },
+        nextOfKin: profile.nextOfKin || [],
         subscriptionTier: profile.subscriptionTier || "free",
         dateOfBirth: profile.dateOfBirth,
         gender: profile.gender,
@@ -195,6 +197,15 @@ export async function PUT(req: NextRequest) {
       if (body.medicalAid) update.medicalAid = body.medicalAid;
       if (body.emergencyContact)
         update.emergencyContact = body.emergencyContact;
+      if (body.nextOfKin) {
+        if (!Array.isArray(body.nextOfKin) || body.nextOfKin.length > 3) {
+          return NextResponse.json(
+            { error: "A patient can list at most 3 next of kin." },
+            { status: 400 },
+          );
+        }
+        update.nextOfKin = body.nextOfKin;
+      }
 
       await PatientProfile.findOneAndUpdate(
         { userId },

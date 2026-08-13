@@ -8,7 +8,6 @@ import {
   User,
   ShieldCheck,
   Bell,
-  Wallet,
   Briefcase,
   FileText,
   Loader2,
@@ -39,7 +38,6 @@ const DocumentsTab = dynamic(() => import("./components/DocumentsTab"), {
 });
 import SecurityTab from "./components/SecurityTab";
 import NotificationsTab from "./components/NotificationsTab";
-import BillingTab from "./components/BillingTab";
 import FamilyTab from "./components/FamilyTab";
 import ProfileSidebar from "./components/ProfileSidebar";
 
@@ -63,6 +61,7 @@ interface UserProfile {
 interface PatientRoleData {
   medicalAid: { provider: string; planName: string; memberNumber: string };
   emergencyContact: { name: string; phone: string; relationship: string };
+  nextOfKin: { name: string; phone: string; relationship: string }[];
   subscriptionTier: string;
   dateOfBirth?: string;
   gender?: string;
@@ -177,19 +176,16 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
 
-  const [billingData, setBillingData] = useState<any>(null);
-
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [profileRes, roleDataRes, notifsRes, devicesRes, docsRes, billingRes] =
+      const [profileRes, roleDataRes, notifsRes, devicesRes, docsRes] =
         await Promise.all([
           fetch("/api/user/profile"),
           fetch("/api/user/role-data"),
           fetch("/api/user/notifications"),
           fetch("/api/user/devices"),
           fetch("/api/user/documents"),
-          fetch("/api/billing"),
         ]);
 
       if (profileRes.ok) {
@@ -213,10 +209,6 @@ export default function ProfilePage() {
       if (docsRes.ok) {
         const d = await docsRes.json();
         setDocuments(d.data || []);
-      }
-      if (billingRes.ok) {
-        const d = await billingRes.json();
-        setBillingData(d);
       }
     } catch (err) {
       console.error("Failed to load profile data", err);
@@ -277,6 +269,7 @@ export default function ProfilePage() {
           ? {
               medicalAid: patientData?.medicalAid,
               emergencyContact: patientData?.emergencyContact,
+              nextOfKin: patientData?.nextOfKin,
             }
           : currentRole === "practitioner"
             ? {
@@ -908,7 +901,6 @@ export default function ProfilePage() {
     { id: "documents", label: "Documents", icon: FileText },
     { id: "security", label: "Security", icon: ShieldCheck },
     { id: "notifications", label: "Alerts", icon: Bell },
-    { id: "billing", label: "Billing", icon: Wallet },
     ...(currentRole === "patient" ? [{ id: "family", label: "Family", icon: Users }] : []),
   ];
 
@@ -1061,28 +1053,12 @@ export default function ProfilePage() {
             />
           )}
 
-          {activeTab === "billing" && (
-            <BillingTab
-              currentRole={currentRole}
-              patientData={patientData}
-              billingData={billingData}
-              setBillingData={setBillingData}
-              setToast={setToast}
-            />
-          )}
-
           {activeTab === "family" && currentRole === "patient" && (
             <FamilyTab setToast={setToast} />
           )}
         </div>
 
-        <ProfileSidebar
-          setToast={setToast}
-          completeness={health.completeness}
-          healthItems={healthItems}
-          accountFacts={accountFacts}
-          tips={health.tips}
-        />
+       
       </div>
 
       {toast && (

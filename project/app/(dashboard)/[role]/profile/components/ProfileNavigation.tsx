@@ -31,7 +31,7 @@ export default function ProfileNavigation({
   }, [activeTab]);
 
   return (
-    <section className="sticky top-0 z-20 -mx-1 px-1">
+    <section className=" px-1">
       <div
         ref={scrollerRef}
         className=""

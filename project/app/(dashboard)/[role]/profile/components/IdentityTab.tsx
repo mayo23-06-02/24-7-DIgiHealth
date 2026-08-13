@@ -40,7 +40,7 @@ export default function IdentityTab({
         description="Your legal name and contact details used across DigiHealth"
         color="primary"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4">
           <Input
             label="First name"
             value={user.firstName}
@@ -100,39 +100,6 @@ export default function IdentityTab({
         </div>
       </ProfileSection>
 
-      <ProfileSection
-        icon={<IdCard size={22} />}
-        title="Verified credentials"
-        description="Government ID and role identifiers on file"
-        color="slate"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-lg border border-slate-200 bg-surface-soft p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              National ID
-            </p>
-            <p className="text-sm font-semibold text-ink-900 font-mono tracking-wide">
-              {user.saId
-                ? `${user.saId.slice(0, 6)}••••${user.saId.slice(-2)}`
-                : "Not on file"}
-            </p>
-            <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
-              <Lock size={12} /> Encrypted · read-only
-            </p>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-surface-soft p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              Account role
-            </p>
-            <p className="text-sm font-semibold text-ink-900 capitalize">
-              {user.role?.replace(/_/g, " ") || "—"}
-            </p>
-            <p className="text-[11px] text-slate-400 mt-2 capitalize">
-              Status: {user.status || "active"}
-            </p>
-          </div>
-        </div>
-      </ProfileSection>
     </div>
   );
 }

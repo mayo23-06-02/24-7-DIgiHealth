@@ -19,7 +19,9 @@ interface Appointment {
   dr_specialty?: string;
   time: string;
   date: string;
-  type: "appointment" | "reminder" | "refill" | "note";
+  /** "refill" items are read-only, auto-generated prescription-refill-due
+   * reminders (see /api/patient/agenda) — not a creatable event type. */
+  type: "appointment" | "reminder" | "note" | "refill";
   status: "confirmed" | "pending" | "cancelled";
   concern?: string;
   notes?: string;
@@ -28,21 +30,7 @@ interface Appointment {
   img?: string;
   countdown?: string;
   durationMinutes?: number;
-  prescriptionId?: string;
-  prescriptionName?: string;
-  deliveryMethod?: "pickup" | "delivery";
-  deliveryAddress?: string;
-  pharmacyId?: string;
-  paymentMethod?: "insurance" | "card" | "cash";
   reminderDays?: number;
-}
-
-interface Prescription {
-  id: string;
-  medicationName: string;
-  dosage: string;
-  refillsRemaining: number;
-  expiryDate: string;
 }
 
 interface PatientCalendarProps {
@@ -59,8 +47,6 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
   const [selectedDateStr, setSelectedDateStr] = useState<string>("");
 
   const [doctors, setDoctors] = useState<{ name: string }[]>([]);
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -70,11 +56,6 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
     type: "reminder" as Appointment["type"],
     notes: "",
     doctor: "",
-    prescriptionId: "",
-    deliveryMethod: "pickup" as "pickup" | "delivery",
-    deliveryAddress: "",
-    pharmacyId: "",
-    paymentMethod: "insurance" as "insurance" | "card" | "cash",
     reminderDays: 3,
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -100,19 +81,7 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
     } catch { /* silent */ }
   };
 
-  useEffect(() => {
-    if (showAddModal && addForm.type === "refill") {
-      setLoadingPrescriptions(true);
-      fetch("/api/patient/prescriptions").then(res => res.json()).then(setPrescriptions).finally(() => setLoadingPrescriptions(false));
-    }
-  }, [showAddModal, addForm.type]);
-
   const doctorOptions = useMemo(() => [{ value: "", label: "No preference" }, ...doctors.map(d => ({ value: d.name, label: d.name }))], [doctors]);
-  const prescriptionOptions = useMemo(() => {
-    const opts = prescriptions.map(p => ({ value: p.id, label: `${p.medicationName} (${p.dosage}) - ${p.refillsRemaining} refills left` }));
-    opts.unshift({ value: "new", label: "+ Request new prescription" });
-    return opts;
-  }, [prescriptions]);
 
   const carouselDays = useMemo(() => {
     return Array.from({ length: 30 }, (_, i) => {
@@ -132,7 +101,7 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
   const filteredAppointments = useMemo(() => appointments.filter(a => a.date === selectedDateStr), [appointments, selectedDateStr]);
 
   const handleAddSubmit = async () => {
-    if (!addForm.title.trim() && addForm.type !== "refill") return;
+    if (!addForm.title.trim()) return;
     setIsSaving(true);
     try {
       const url = editingId ? `/api/patient/agenda/${editingId}` : "/api/patient/agenda";
@@ -206,7 +175,7 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
         showAddModal={showAddModal} onClose={() => setShowAddModal(null)} editingId={editingId} addForm={addForm} setAddForm={setAddForm}
         appointments={appointments} getMarkerColor={getMarkerColor} onDragStart={(e, id) => e.dataTransfer.setData("apptId", id)}
         handleEdit={handleEdit} handleDelete={handleDelete} doctors={doctors} doctorOptions={doctorOptions}
-        loadingPrescriptions={loadingPrescriptions} prescriptionOptions={prescriptionOptions} isSaving={isSaving} handleAddSubmit={handleAddSubmit}
+        isSaving={isSaving} handleAddSubmit={handleAddSubmit}
       />
 
       <Modal isOpen={!!selectedAppointment} onClose={() => setSelectedAppointment(null)} title="Event Details">

@@ -3,7 +3,7 @@
 import React from "react";
 
 const COLOR_MAP: Record<string, string> = {
-  primary: "bg-primary/10 text-primary ring-primary/10",
+  primary: "bg-primary-50 text-primary ring-primary/10",
   rose: "bg-danger-50 text-danger-700 ring-danger-500/10",
   emerald: "bg-success-50 text-success-700 ring-success-500/10",
   blue: "bg-info-50 text-info-700 ring-info-500/10",
@@ -35,17 +35,17 @@ export function ProfileSectionHead({
       <div className="flex items-start gap-4 min-w-0">
         <div
           className={`w-12 h-12 shrink-0 rounded-lg flex items-center justify-center ring-1 ${
-            COLOR_MAP[color] || COLOR_MAP.primary
+            COLOR_MAP.primary
           }`}
         >
           {icon}
         </div>
         <div className="min-w-0 pt-0.5">
-          <h3 className="text-h3 font-semibold text-ink-900 font-grotesk tracking-tight">
+          <h3 className="text-base lg:text-h3 font-semibold text-ink-900 font-grotesk tracking-tight">
             {title}
           </h3>
           {description && (
-            <p className="text-sm text-slate-500 mt-0.5 leading-relaxed">
+            <p className="text-xs lg:text-sm text-slate-500 mt-0.5 leading-relaxed">
               {description}
             </p>
           )}
@@ -85,7 +85,7 @@ export default function ProfileSection({
     <section
       className={`rounded-lg border border-slate-200 bg-white overflow-hidden ${className}`}
     >
-      <div className="px-5 sm:px-7 py-5 border-b border-slate-200 bg-surface-soft">
+      <div className="px-5 sm:px-7 py-5 border-b border-slate-200 ">
         <ProfileSectionHead
           icon={icon}
           title={title}

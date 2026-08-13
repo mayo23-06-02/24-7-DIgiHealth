@@ -11,6 +11,7 @@ import HospitalFacilityForm from "./HospitalFacilityForm";
 interface PatientRoleData {
   medicalAid: { provider: string; planName: string; memberNumber: string };
   emergencyContact: { name: string; phone: string; relationship: string };
+  nextOfKin: { name: string; phone: string; relationship: string }[];
   subscriptionTier: string;
   dateOfBirth?: string;
   gender?: string;
@@ -124,9 +125,8 @@ export default function RoleDataTab({
         <Button
           onClick={handleSaveRoleData}
           loading={isSaving}
-          icon={<CheckCircle2 size={18} />}
-          iconPosition="left"
           className="shrink-0"
+          size="sm"
         >
           {isSaving ? "Saving…" : "Save configuration"}
         </Button>
