@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { MediaAsset, MediaPurpose } from "@/lib/supabase/media-types";
 
 export type UploadedMedia = MediaAsset & { url: string };
@@ -19,18 +19,33 @@ interface UploadOptions {
   onProgress?: (pct: number) => void;
 }
 
+export class UploadAbortedError extends Error {
+  constructor() {
+    super("Upload cancelled");
+    this.name = "UploadAbortedError";
+  }
+}
+
 async function putWithProgress(
   url: string,
   file: File,
-  onProgress?: (pct: number) => void,
+  onProgress?: (pct: number, etaSeconds: number | null) => void,
+  registerXhr?: (xhr: XMLHttpRequest) => void,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    registerXhr?.(xhr);
+    const startedAt = performance.now();
     xhr.open("PUT", url);
     xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && onProgress) {
-        onProgress(Math.round((e.loaded / e.total) * 100));
+        const pct = Math.round((e.loaded / e.total) * 100);
+        const elapsedSec = (performance.now() - startedAt) / 1000;
+        const rate = e.loaded / Math.max(elapsedSec, 0.05); // bytes/sec
+        const remaining = e.total - e.loaded;
+        const eta = rate > 0 ? Math.max(1, Math.round(remaining / rate)) : null;
+        onProgress(pct, eta);
       }
     };
     xhr.onload = () => {
@@ -38,6 +53,7 @@ async function putWithProgress(
       else reject(new Error(`Storage upload failed (${xhr.status})`));
     };
     xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.onabort = () => reject(new UploadAbortedError());
     xhr.send(file);
   });
 }
@@ -48,17 +64,26 @@ async function putWithProgress(
  */
 export function useMediaUpload() {
   const [progress, setProgress] = useState(0);
+  const [etaSeconds, setEtaSeconds] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+
+  const abort = useCallback(() => {
+    xhrRef.current?.abort();
+  }, []);
 
   const upload = useCallback(
     async (file: File, options: UploadOptions): Promise<UploadedMedia> => {
       setUploading(true);
       setError(null);
       setProgress(0);
+      setEtaSeconds(null);
+      xhrRef.current = null;
 
-      const onProgress = (p: number) => {
+      const onProgress = (p: number, eta: number | null = null) => {
         setProgress(p);
+        if (eta !== null) setEtaSeconds(eta);
         options.onProgress?.(p);
       };
 
@@ -68,7 +93,6 @@ export function useMediaUpload() {
           ? "/api/media/sign-upload-public"
           : "/api/media/sign-upload";
 
-        console.log("[useMediaUpload] Attempting sign upload for:", file.name);
         const signRes = await fetch(signEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -88,10 +112,8 @@ export function useMediaUpload() {
         });
 
         const signJson = await signRes.json().catch(() => ({}));
-        console.log("[useMediaUpload] Sign response status:", signRes.status, "data:", signJson);
 
         if (!signRes.ok) {
-          console.log("[useMediaUpload] Sign upload failed, falling back to server upload");
           // Fallback: server multipart (auth only)
           if (!options.publicRegistration) {
             return await uploadViaServer(file, options, onProgress);
@@ -100,11 +122,16 @@ export function useMediaUpload() {
         }
 
         const signed = signJson.data;
-        onProgress(5);
+        onProgress(5, null);
 
         // 2) PUT to storage
-        await putWithProgress(signed.signedUrl, file, (p) =>
-          onProgress(5 + Math.round(p * 0.85)),
+        await putWithProgress(
+          signed.signedUrl,
+          file,
+          (p, eta) => onProgress(5 + Math.round(p * 0.85), eta),
+          (xhr) => {
+            xhrRef.current = xhr;
+          },
         );
 
         // 3) Complete
@@ -137,27 +164,29 @@ export function useMediaUpload() {
           throw new Error(completeJson.error || "Failed to finalize upload");
         }
 
-        onProgress(100);
+        onProgress(100, 0);
         return completeJson.data as UploadedMedia;
       } catch (e: any) {
-        setError(e.message || "Upload failed");
+        if (!(e instanceof UploadAbortedError)) {
+          setError(e.message || "Upload failed");
+        }
         throw e;
       } finally {
         setUploading(false);
+        xhrRef.current = null;
       }
     },
     [],
   );
 
-  return { upload, progress, uploading, error, setError };
+  return { upload, abort, progress, etaSeconds, uploading, error, setError };
 }
 
 async function uploadViaServer(
   file: File,
   options: UploadOptions,
-  onProgress: (p: number) => void,
+  onProgress: (p: number, eta: number | null) => void,
 ): Promise<UploadedMedia> {
-  console.log("[uploadViaServer] Starting server upload for:", file.name, "size:", file.size, "type:", file.type);
   const form = new FormData();
   form.append("file", file);
   form.append("purpose", options.purpose);
@@ -167,11 +196,10 @@ async function uploadViaServer(
   if (options.patientId) form.append("patientId", options.patientId);
   if (options.isPublic) form.append("isPublic", "true");
 
-  onProgress(20);
+  onProgress(20, null);
   const res = await fetch("/api/media/upload", { method: "POST", body: form });
   const json = await res.json().catch(() => ({}));
-  console.log("[uploadViaServer] Response status:", res.status, "data:", json);
   if (!res.ok) throw new Error(json.error || "Server upload failed");
-  onProgress(100);
+  onProgress(100, 0);
   return json.data as UploadedMedia;
 }
