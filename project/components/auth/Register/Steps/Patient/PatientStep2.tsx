@@ -156,7 +156,7 @@ function ChipsSelector({
 }
 
 // ─── Main Step Component ──────────────────────────────────────────────
-export default function PatientStep2({ formData, updateData }: any) {
+export default function PatientStep2({ formData, updateData, onSkip }: any) {
   const [unit, setUnit] = useState<"metric" | "imperial">("metric");
 
   const heightCm = parseFloat(formData.heightCm) || 0;
@@ -207,28 +207,41 @@ export default function PatientStep2({ formData, updateData }: any) {
   };
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-right-6 duration-500 py-[60px] mb-[30px]">
-      <div className="flex items-center gap-3 mb-[20px] mt-[10px]">
-        <span className="text-sm font-bold text-slate-500">Units:</span>
-        <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
-          {["metric", "imperial"].map((u) => (
-            <button
-              key={u}
-              type="button"
-              onClick={() => setUnit(u as any)}
-              className={`px-4 py-2 rounded text-xs font-bold transition-all ${
-                unit === u
-                  ? "bg-white text-primary shadow-none"
-                  : "text-slate-500"
-              }`}
-            >
-              {u === "metric" ? "cm / kg" : "in / lbs"}
-            </button>
-          ))}
+    <div className="space-y-8 animate-in slide-in-from-right-6 duration-500  ">
+      {onSkip && (
+          <button
+            type="button"
+            onClick={onSkip}
+            className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            Skip for now
+          </button>
+        )}
+      <div className="flex items-center justify-between gap-3 mb-[20px] mt-[10px]">
+        
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-bold text-slate-500">Units:</span>
+          <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
+            {["metric", "imperial"].map((u) => (
+              <button
+                key={u}
+                type="button"
+                onClick={() => setUnit(u as any)}
+                className={`px-4 py-2 rounded text-xs font-bold transition-all ${
+                  unit === u
+                    ? "bg-white text-primary shadow-none"
+                    : "text-slate-500"
+                }`}
+              >
+                {u === "metric" ? "cm / kg" : "in / lbs"}
+              </button>
+            ))}
+          </div>
         </div>
+        
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Input
           label={`Height (${unit === "metric" ? "cm" : "in"})`}
           type="number"

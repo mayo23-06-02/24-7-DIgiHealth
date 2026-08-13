@@ -38,5 +38,5 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
 };
 
 export const skippableSteps: Record<string, number[]> = {
-  // none for now
+  patient: [2], // Health Profile — optional, can be completed later
 };
