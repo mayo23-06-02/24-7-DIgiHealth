@@ -18,6 +18,11 @@ export function useRegistrationWizard(role: string) {
   const [isOnline, setIsOnline] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showDraftBanner, setShowDraftBanner] = useState(false);
+  // Guards the auto-save effect until the initial "is there a draft to
+  // resume?" check has resolved, so we don't overwrite a saved draft in
+  // storage with the fresh, empty in-memory state before the user gets a
+  // chance to click "Resume".
+  const [draftCheckDone, setDraftCheckDone] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [inviteInfo, setInviteInfo] = useState<{ facilityName: string } | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
@@ -79,13 +84,20 @@ export function useRegistrationWizard(role: string) {
         }
       } catch {
         /* ignore */
+      } finally {
+        setDraftCheckDone(true);
       }
     };
     loadDraft();
   }, [DRAFT_KEY]);
 
-  // Auto-save debounced
+  // Auto-save debounced. Suppressed until the initial draft check has
+  // resolved, and again while the "resume this draft?" banner is showing —
+  // otherwise this fires ~500ms after mount with the fresh, empty in-memory
+  // formData and clobbers the real draft in storage before the user gets a
+  // chance to click "Resume".
   useEffect(() => {
+    if (!draftCheckDone || showDraftBanner) return;
     const saveDraft = async () => {
       try {
         await localforage.setItem(DRAFT_KEY, { formData, step, ts: Date.now() });
@@ -93,7 +105,7 @@ export function useRegistrationWizard(role: string) {
     };
     const t = setTimeout(saveDraft, 500);
     return () => clearTimeout(t);
-  }, [formData, step, DRAFT_KEY]);
+  }, [formData, step, DRAFT_KEY, draftCheckDone, showDraftBanner]);
 
   const updateData = useCallback(
     (field: string, value: any) => {
