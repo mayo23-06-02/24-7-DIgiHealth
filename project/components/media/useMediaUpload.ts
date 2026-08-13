@@ -26,6 +26,11 @@ export class UploadAbortedError extends Error {
   }
 }
 
+// No response at all (not even an error event) within this window means the
+// connection is stuck, not just slow — surface it instead of hanging forever.
+const UPLOAD_TIMEOUT_MS = 60_000;
+const SIGN_TIMEOUT_MS = 15_000;
+
 async function putWithProgress(
   url: string,
   file: File,
@@ -36,6 +41,7 @@ async function putWithProgress(
     const xhr = new XMLHttpRequest();
     registerXhr?.(xhr);
     const startedAt = performance.now();
+    xhr.timeout = UPLOAD_TIMEOUT_MS;
     xhr.open("PUT", url);
     xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
     xhr.upload.onprogress = (e) => {
@@ -54,6 +60,8 @@ async function putWithProgress(
     };
     xhr.onerror = () => reject(new Error("Network error during upload"));
     xhr.onabort = () => reject(new UploadAbortedError());
+    xhr.ontimeout = () =>
+      reject(new Error("Upload timed out — check your connection and try again."));
     xhr.send(file);
   });
 }
@@ -109,6 +117,7 @@ export function useMediaUpload() {
             isPublic: options.isPublic,
             registrationToken: options.registrationToken,
           }),
+          signal: AbortSignal.timeout(SIGN_TIMEOUT_MS),
         });
 
         const signJson = await signRes.json().catch(() => ({}));
@@ -157,6 +166,7 @@ export function useMediaUpload() {
               signed.registrationToken || options.registrationToken,
             userId: signed.userId,
           }),
+          signal: AbortSignal.timeout(SIGN_TIMEOUT_MS),
         });
 
         const completeJson = await completeRes.json().catch(() => ({}));

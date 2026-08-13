@@ -145,7 +145,7 @@ export default function MultiUploadDropzone({
               onAdd(asset.url);
               setPending((prev) => prev.filter((p) => p.id !== item.id));
             }}
-            onCancelOrError={() => {
+            onCancelled={() => {
               setPending((prev) => prev.filter((p) => p.id !== item.id));
             }}
           />
