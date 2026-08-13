@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { BiCloudUpload, BiFile, BiLoaderAlt, BiX } from "react-icons/bi";
+import MediaPreviewModal from "./MediaPreviewModal";
 import { useMediaUpload, type UploadedMedia } from "./useMediaUpload";
 import type { MediaPurpose } from "@/lib/supabase/media-types";
 
@@ -42,12 +43,32 @@ export default function UploadDropzone({
   const { upload, progress, uploading, error } = useMediaUpload();
   const [fileName, setFileName] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [fileMimeType, setFileMimeType] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Revoke the blob URL when it's replaced or the component unmounts, so we
+  // don't leak memory holding the file in the browser indefinitely.
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+    };
+  }, [localPreviewUrl]);
 
   const handleFile = useCallback(
     async (file: File | null) => {
       if (!file) return;
       setLocalError(null);
       setFileName(file.name);
+      setFileMimeType(file.type || null);
+      // Preview from the in-memory file immediately — during registration
+      // there's no session yet, so the server's /api/media/file/[id] proxy
+      // would 401. This also means "View" works instantly, before the
+      // upload even finishes.
+      setLocalPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(file);
+      });
       try {
         const asset = await upload(file, {
           purpose,
@@ -132,16 +153,17 @@ export default function UploadDropzone({
               <p className="text-sm font-bold text-slate-800 truncate max-w-[220px]">
                 {fileName || "File attached"}
               </p>
-              {value && (
-                <a
-                  href={value}
-                  target="_blank"
-                  rel="noreferrer"
+              {(localPreviewUrl || value) && (
+                <button
+                  type="button"
                   className="text-xs text-primary font-semibold hover:underline"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPreviewOpen(true);
+                  }}
                 >
                   View
-                </a>
+                </button>
               )}
             </div>
             {onClear && (
@@ -151,6 +173,9 @@ export default function UploadDropzone({
                 onClick={(e) => {
                   e.stopPropagation();
                   setFileName(null);
+                  setFileMimeType(null);
+                  if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+                  setLocalPreviewUrl(null);
                   onClear();
                 }}
               >
@@ -174,6 +199,14 @@ export default function UploadDropzone({
       </div>
       {displayError && (
         <p className="text-xs text-red-600 font-medium">{displayError}</p>
+      )}
+      {previewOpen && (localPreviewUrl || value) && (
+        <MediaPreviewModal
+          url={(localPreviewUrl || value) as string}
+          mimeType={fileMimeType}
+          fileName={fileName}
+          onClose={() => setPreviewOpen(false)}
+        />
       )}
     </div>
   );
