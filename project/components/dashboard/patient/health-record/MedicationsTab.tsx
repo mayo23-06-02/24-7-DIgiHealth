@@ -24,7 +24,7 @@ export default function MedicationsTab({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-dissolve">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-dissolve">
       {medications.map((med) => (
         <div
           key={med.id}

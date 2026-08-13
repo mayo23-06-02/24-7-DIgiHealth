@@ -158,7 +158,7 @@ function DashboardShellInner({
           <>
             <button
               onClick={() => setIsTriageOpen(true)}
-              className="fixed bottom-8 right-8 z-[60] w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 animate-in zoom-in group"
+              className="fixed bottom-[calc(2rem+env(safe-area-inset-bottom))] right-[calc(2rem+env(safe-area-inset-right))] z-[60] w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 animate-in zoom-in group"
               aria-label="Open AI clinical assistant"
               title="Open AI Clinical Assistant"
             >

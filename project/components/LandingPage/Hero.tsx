@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import LogoMain from "@/components/ui/LogoMain";
@@ -187,10 +188,13 @@ export default function Hero() {
           the whole viewport width, while its content stays aligned to the
           1400px grid via an inner container. */}
       <div className="relative m-4 rounded-4xl h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
-        <img
+        <Image
           src="/hero2.jpg"
           alt="24/7 DigiHealth care team"
-          className="absolute inset-0 w-full h-full object-cover"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink-900/75 via-ink-900/0 to-ink-900/70" />
 
@@ -323,10 +327,12 @@ export default function Hero() {
             <div className="w-px h-10 bg-white/20" />
             <div className="flex items-center">
               {ratingAvatars.map((src, i) => (
-                <img
+                <Image
                   key={src}
                   src={src}
                   alt="Happy patient"
+                  width={36}
+                  height={36}
                   className="w-9 h-9 rounded-full object-cover border-2 border-white/40"
                   style={{ marginLeft: i === 0 ? 0 : -12 }}
                 />

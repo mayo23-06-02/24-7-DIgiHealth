@@ -100,18 +100,18 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
                 {config.label} Registry
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-medium text-slate-900 tracking-tight leading-tight font-grotesk">
+            <h2 className="text-lg md:text-xl  text-slate-900 tracking-tight leading-tight font-grotesk">
               {config.steps[step - 1]} <br />
-              <span className="font-bold text-primary">
+              <span className=" text-primary font-medium">
                 {config.label} Application
               </span>
             </h2>
           </div>
           <div className="text-right shrink-0 ml-6">
             <p className="text-xs text-slate-300 tracking-normal">Progress</p>
-            <p className="text-3xl font-semibold text-primary leading-none">
+            <p className="text-xl font-semibold text-primary leading-none">
               {String(step).padStart(2, "0")}
-              <span className="text-slate-200 font-light">
+              <span className="text-slate-400 font-light">
                 {" "}
                 / {String(totalSteps).padStart(2, "0")}
               </span>
@@ -124,12 +124,12 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
           {config.steps.map((label, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-2">
               <div
-                className={`h-1 w-full rounded-full transition-all duration-500 ${
+                className={`h-0.5 w-full rounded-full transition-all duration-500 ${
                   i < step ? "bg-primary" : "bg-slate-100"
                 }`}
               />
               <span
-                className={`text-xs font-bold tracking-wider hidden md:block transition-colors ${
+                className={`text-[10px] font-semibold uppercase tracking-wider hidden md:block transition-colors ${
                   i + 1 === step ? "text-primary" : "text-slate-300"
                 }`}
               >
@@ -149,7 +149,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
 
         {/* Step content */}
         <form onSubmit={handleSubmit} noValidate className="flex flex-col flex-1 min-h-0">
-          <div className="custom-scrollbar overflow-y-auto flex-1 min-h-0">
+          <div className="custom-scrollbar overflow-y-auto pr-1 lg:pr-2 flex-1 min-h-0">
             <StepRenderer
               role={role}
               step={step}

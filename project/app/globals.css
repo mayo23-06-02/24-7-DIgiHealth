@@ -403,7 +403,7 @@ html[data-navigating="true"] * {
 
   /* Scrollbar and Custom Elements */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
     height: 6px;
   }
 

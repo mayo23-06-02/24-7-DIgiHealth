@@ -188,7 +188,7 @@ export default function PatientProfileModals({
         title="Update Patient Vitals"
       >
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Heart Rate (BPM)"
               placeholder="e.g. 72"

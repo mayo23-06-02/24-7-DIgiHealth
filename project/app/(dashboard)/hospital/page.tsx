@@ -97,7 +97,7 @@ export default function HospitalOverviewPage() {
           icon={<BiPlus size={32} />}
           className="py-6"
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card
             className="p-8 hover:border-primary transition-all cursor-pointer group"
             onClick={() => (window.location.href = "/hospital_admin/facility")}

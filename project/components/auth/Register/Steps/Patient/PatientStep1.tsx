@@ -3,8 +3,8 @@ import React from "react";
 import Input from "@/components/ui/Input";
 
 const countryCodes = [
-  { code: "+27", label: "ZA (+27)", placeholder: "82 123 4567" },
-  { code: "+268", label: "SZ (+268)", placeholder: "76 123 456" },
+  { code: "+27", label: "(+27)", placeholder: "82 123 4567" },
+  { code: "+268", label: "(+268)", placeholder: "76 123 456" },
 ];
 
 const genders = ["Male", "Female"];
@@ -23,7 +23,7 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           label="First Name *"
           value={formData.firstName || ""}
@@ -56,11 +56,11 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
             Mobile Number *
           </label>
           <div className="flex gap-2">
-            <div className="w-36 shrink-0">
+            <div className="w-18 text-xs shrink-0">
               <select
                 value={countryCode}
                 onChange={(e) => updateData("countryCode", e.target.value)}
-                className="w-full px-3 py-4 bg-slate-50/80 border-none rounded-full focus:ring-4 focus:ring-primary/10 focus:bg-white text-slate-900 outline-none transition-all duration-500 font-medium text-sm"
+                className="w-full px-2 py-4   text-slate-900 outline-none transition-all duration-500 font-medium "
               >
                 {countryCodes.map((cc) => (
                   <option key={cc.code} value={cc.code}>
@@ -80,14 +80,8 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
               className="flex-1"
             />
           </div>
-          <p className="text-[11px] text-slate-400 px-1">
-            South Africa (+27) or Eswatini (+268)
-          </p>
-          {errors?.mobile && (
-            <p className="text-xs text-red-500 font-medium mt-1">
-              {errors.mobile}
-            </p>
-          )}
+         
+         
         </div>
 
         <Input

@@ -641,7 +641,7 @@ export default function BillingTab({
           Current Cycle Package Utilization
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Consultations */}
           <Card className="p-6 bg-white border border-slate-200 relative overflow-hidden">
             <div className="flex justify-between items-start mb-2">

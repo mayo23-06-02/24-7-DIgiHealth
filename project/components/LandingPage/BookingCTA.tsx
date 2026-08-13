@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { ArrowRight, ShieldCheck } from "lucide-react";
@@ -10,10 +11,12 @@ export default function BookingCTA() {
       <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         <div className="grid grid-cols-1 md:grid-cols-2 rounded-lg overflow-hidden">
           <div className="relative h-[280px] md:h-auto">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=1200&auto=format&fit=crop"
               alt="Doctor ready to help"
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
             />
           </div>
           <div className="bg-primary p-8 md:p-12 flex flex-col justify-center gap-6">

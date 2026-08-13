@@ -231,13 +231,13 @@ export default function MessagesView({
   if (activeCall) {
     if (activeCall.type === "video") {
       return (
-        <div className="flex flex-col h-[calc(100vh-64px)] -m-2 lg:-m-8 bg-slate-900 overflow-hidden">
+        <div className="flex flex-col h-[calc(100dvh-64px)] -m-2 lg:-m-8 bg-slate-900 overflow-hidden">
           <LiveKitCallPanel callInfo={activeCall} onEnded={handleCallEnd} />
         </div>
       );
     }
     return (
-      <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-2 lg:-m-8">
+      <div className="flex h-[calc(100dvh-64px)] overflow-hidden -m-2 lg:-m-8">
         <div className="w-full lg:w-1/2 min-w-0 border-r border-slate-800">
           <LiveKitCallPanel callInfo={activeCall} onEnded={handleCallEnd} />
         </div>
@@ -271,7 +271,7 @@ export default function MessagesView({
     <div className="w-full max-w-[1600px] mx-auto">
       <Card
         noPadding
-        className="flex overflow-hidden h-[calc(100vh-80px)] lg:h-[calc(100vh-128px)]"
+        className="flex overflow-hidden h-[calc(100dvh-80px)] lg:h-[calc(100dvh-128px)]"
       >
         <ConversationList
           conversations={conversations}

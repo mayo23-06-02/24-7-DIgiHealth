@@ -55,7 +55,7 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] max-h-[100vh] h-full flex items-center justify-end">
+    <div className="fixed inset-0 z-[9999] max-h-[100dvh] h-full flex items-center justify-end">
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}

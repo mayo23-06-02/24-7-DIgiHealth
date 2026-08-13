@@ -115,7 +115,7 @@ function ChipsSelector({
           <BiPlus /> Add custom
         </button>
       </div>
-      <div className="flex flex-wrap gap-2.5">
+      <div className="flex flex-wrap gap-2 lg:gap-2.5">
         {allItems.map((item) => {
           const isSelected = selected.includes(item);
           return (
@@ -123,7 +123,7 @@ function ChipsSelector({
               key={item}
               type="button"
               onClick={() => onSelect(item)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border-2 ${
+              className={`px-4 py-2 rounded-full md:text-sm text-xs font-medium transition-all duration-300 border-2 ${
                 isSelected
                   ? "bg-primary border-primary text-white"
                   : "bg-white border-slate-100 text-slate-500 hover:border-primary/30"
@@ -210,20 +210,16 @@ export default function PatientStep2({ formData, updateData, onSkip }: any) {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500  ">
       {onSkip && (
-          <div className="flex w-full flex-col items-end gap-1">
+          <div className="flex bg-primary/20  rounded-lg w-full justify-between px-2 py-2 items-center ">
+            <p className="text-xs  text-ink-600  max-w-[200px] lg:max-w-2xl">You can add or update once you're signed in.</p>
             <Button
-              type="button"
+            size="sm"
+              variant="white"
               onClick={onSkip}
-              className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
             >
               Skip for now
             </Button>
-            <p className="text-xs text-slate-400 text-right max-w-sm">
-              None of this is required to register. You can come back and add or
-              update your height, weight, blood type, allergies, and conditions
-              anytime from your health record once you're signed in.
-            </p>
-          </div>
+          </div>  
         )}
       <div className="flex items-center justify-between gap-3 mb-[20px] mt-[10px]">
         
@@ -267,13 +263,13 @@ export default function PatientStep2({ formData, updateData, onSkip }: any) {
         <div className="space-y-2">
           <h1 className="block text-sm font-bold text-slate-700">BMI (auto)</h1>
           <div
-            className={`px-5 py-4 rounded-lg flex items-center justify-between transition-all duration-500 min-h-[54px] ${
+            className={`px-5 py-2 rounded-lg flex items-center justify-between transition-all duration-500 min-h-[54px] ${
               bmiCategory
                 ? bmiCategory.color + " shadow-inner"
                 : "bg-slate-50 border-2 border-slate-100"
             }`}
           >
-            <span className="text-3xl font-bold tracking-tighter leading-none">
+            <span className="text-xl lg:text-3xl font-bold tracking-tighter leading-none">
               {bmi || "—"}
             </span>
             {bmiCategory && (
@@ -296,7 +292,7 @@ export default function PatientStep2({ formData, updateData, onSkip }: any) {
               key={bt}
               type="button"
               onClick={() => updateData("bloodType", bt)}
-              className={`h-10 rounded-lg text-sm font-semibold transition-all border-2 flex items-center justify-center ${
+              className={`lg:h-10   h-8 rounded-lg lg:text-sm text-xs  transition-all border-2 flex items-center justify-center ${
                 formData.bloodType === bt
                   ? "bg-rose-500 border-rose-500 text-white"
                   : "bg-white border-slate-100 text-slate-500"
@@ -313,13 +309,13 @@ export default function PatientStep2({ formData, updateData, onSkip }: any) {
         <h1 className="block text-sm font-bold text-slate-700">
           Typical Activity Level
         </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:gap-3 gap-2">
           {activityLevels.map((level) => (
             <button
               key={level}
               type="button"
               onClick={() => updateData("activityLevel", level)}
-              className={`px-4 py-4 rounded-lg text-left text-sm font-semibold transition-all border-2 flex items-center justify-between group ${
+              className={`lg:px-4 lg:py-4  px-2 py-3 rounded-lg text-left lg:text-sm text-xs  font-semibold transition-all border-2 flex items-center justify-between group ${
                 formData.activityLevel === level
                   ? "bg-primary border-primary text-white"
                   : "bg-white border-slate-100 text-slate-500"

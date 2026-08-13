@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 
 const blogPosts = [
   {
@@ -70,11 +71,13 @@ export default function Blog() {
               className="flex bg-white rounded-lg flex-col group cursor-pointer p-5"
             >
               {/* Image Container */}
-              <div className="rounded-lg  overflow-hidden mb-8 h-[240px] md:h-[300px] w-full bg-slate-100">
-                <img
+              <div className="relative rounded-lg overflow-hidden mb-8 h-[240px] md:h-[300px] w-full bg-slate-100">
+                <Image
                   src={post.image}
                   alt={post.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
 

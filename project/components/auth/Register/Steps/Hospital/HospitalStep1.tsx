@@ -11,7 +11,7 @@ export default function HospitalStep1({ formData, updateData, errors }: any) {
           Facility Details
         </span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           label="Facility Name *"
           value={formData.facilityName || ""}

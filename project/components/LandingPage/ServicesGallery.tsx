@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Video, Sparkles, Stethoscope, Pill, Users2 } from "lucide-react";
 
 const services = [
@@ -55,10 +56,12 @@ export default function ServicesGallery() {
               key={label}
               className="group relative rounded-lg overflow-hidden aspect-[3/4] cursor-pointer"
             >
-              <img
+              <Image
                 src={image}
                 alt={label}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 50vw, 20vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-ink-900/85 via-ink-900/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2">

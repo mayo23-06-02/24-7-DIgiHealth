@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 
@@ -29,12 +30,18 @@ export default function WhyChooseUs() {
         <div className="relative rounded-lg overflow-hidden">
           <div className="grid grid-cols-1 sm:grid-cols-3 h-56 sm:h-[320px] md:h-[420px]">
             {shots.map((src, i) => (
-              <img
+              <div
                 key={i}
-                src={src}
-                alt="24/7 DigiHealth in use"
-                className={`w-full h-full object-cover ${i === 1 ? "sm:col-span-1" : ""} ${i > 0 ? "hidden sm:block" : ""}`}
-              />
+                className={`relative h-full ${i === 1 ? "sm:col-span-1" : ""} ${i > 0 ? "hidden sm:block" : ""}`}
+              >
+                <Image
+                  src={src}
+                  alt="24/7 DigiHealth in use"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                  className="object-cover"
+                />
+              </div>
             ))}
           </div>
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-900/90 via-ink-900/40 to-transparent pt-24 pb-8 px-6 md:px-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">

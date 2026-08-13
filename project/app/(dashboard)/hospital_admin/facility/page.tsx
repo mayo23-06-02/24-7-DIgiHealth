@@ -189,7 +189,7 @@ export default function FacilitySettings() {
         <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 font-grotesk">
           General Information
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Facility Name"
             name="name"

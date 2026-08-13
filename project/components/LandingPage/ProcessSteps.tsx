@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { Clock, MapPin, CalendarCheck } from "lucide-react";
 
 const steps = [
@@ -29,10 +30,12 @@ export default function ProcessSteps() {
         </div>
 
         <div className="relative rounded-lg overflow-hidden h-[280px] md:h-[380px] mb-8">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1622902046580-2b47f47f5471?q=80&w=1600&auto=format&fit=crop"
             alt="Patient on a video consultation"
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            sizes="100vw"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-ink-900/40" />
           <div className="relative z-10 h-full grid grid-cols-2 md:grid-cols-4">

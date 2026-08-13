@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
 const testimonialsData = [
   {
@@ -202,9 +203,11 @@ export default function Testimonials() {
 
                       <div className="flex justify-between items-end mt-12">
                         <div className="flex items-center gap-3">
-                          <img
+                          <Image
                             src={item.image}
                             alt={item.name}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 rounded-lg object-cover border-2 border-slate-50"
                           />
                           <div>
@@ -247,10 +250,12 @@ export default function Testimonials() {
                           : "opacity-0 invisible scale-105"
                       }`}
                     >
-                      <img
+                      <Image
                         src={item.fullImage}
                         alt={item.name}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover transition-transform duration-700"
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-[#1b80b7]/90 via-[#1b80b7]/20 to-transparent"></div>
 

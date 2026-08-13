@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 
@@ -42,8 +43,14 @@ export default function TeamGrid() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
           {specialists.map((s) => (
             <div key={s.name} className="text-center">
-              <div className="rounded-lg overflow-hidden aspect-square mb-4">
-                <img src={s.image} alt={s.name} className="w-full h-full object-cover" />
+              <div className="relative rounded-lg overflow-hidden aspect-square mb-4">
+                <Image
+                  src={s.image}
+                  alt={s.name}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover"
+                />
               </div>
               <p className="font-bold text-ink-900 text-sm md:text-base font-grotesk">{s.name}</p>
               <p className="text-ink-500 text-xs md:text-sm mt-0.5">{s.role}</p>

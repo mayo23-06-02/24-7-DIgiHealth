@@ -119,7 +119,7 @@ export default function VitalsGrid({
         title="Update My Vitals"
       >
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Height (cm)"
               placeholder="e.g. 170"

@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "ui-avatars.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
       // Legacy assets (existing files left as-is)
       { protocol: "https", hostname: "res.cloudinary.com" },
       // Supabase storage (project ref subdomain)

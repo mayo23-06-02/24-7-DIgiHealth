@@ -36,7 +36,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex lg:hover:scale-[1.03] items-center cursor-pointer max-w-[400px] lg:max-w-[800px] text-sm font-grotesk justify-center font-semibold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full";
+    "inline-flex lg:hover:scale-[1.03] items-center cursor-pointer touch-manipulation max-w-[400px] lg:max-w-[800px] text-sm font-grotesk justify-center font-semibold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed rounded-full";
 
   const variants: Record<string, string> = {
     primary: "bg-primary text-white hover:bg-primary-600  shadow-primary/20",
