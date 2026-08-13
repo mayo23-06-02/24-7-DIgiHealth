@@ -27,13 +27,13 @@ export default function WhyChooseUs() {
         </div>
 
         <div className="relative rounded-lg overflow-hidden">
-          <div className="grid grid-cols-1 sm:grid-cols-3 h-[320px] md:h-[420px]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 h-56 sm:h-[320px] md:h-[420px]">
             {shots.map((src, i) => (
               <img
                 key={i}
                 src={src}
                 alt="24/7 DigiHealth in use"
-                className={`w-full h-full object-cover ${i === 1 ? "sm:col-span-1" : ""}`}
+                className={`w-full h-full object-cover ${i === 1 ? "sm:col-span-1" : ""} ${i > 0 ? "hidden sm:block" : ""}`}
               />
             ))}
           </div>

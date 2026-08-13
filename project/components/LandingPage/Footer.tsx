@@ -69,7 +69,7 @@ export default function Footer() {
 
           {/* Links Section */}
           <div
-            className="lg:w-8/12 flex w-full justify-between gap-10 md:gap-8 lg:pl-12 pt-5 pb-2.5"
+            className="lg:w-8/12 flex flex-col sm:flex-row w-full sm:justify-between gap-10 md:gap-8 lg:pl-12 pt-5 pb-2.5"
           >
             {/* Quick Links */}
             <div className="flex flex-col col-span-1 gap-4">
@@ -110,7 +110,7 @@ export default function Footer() {
             </div>
 
             {/* Doctors */}
-            <div className="flex flex-col col-span-1 gap-4 col-span-2 md:col-span-1 mt-6 md:mt-0">
+            <div className="flex flex-col gap-4">
               <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
                 Doctors
               </h4>
