@@ -108,21 +108,28 @@ export function useRegistrationWizard(role: string) {
   }, [formData, step, DRAFT_KEY, draftCheckDone, showDraftBanner]);
 
   const updateData = useCallback(
+    // `value` may also be an updater `(prevFieldValue) => nextFieldValue`,
+    // matching React's setState pattern — needed so callers updating a list
+    // (e.g. appending an uploaded file URL) always merge against the latest
+    // state instead of a closure snapshot. Two updates landing close together
+    // (two uploads finishing seconds apart) would otherwise race: both read
+    // the same stale array and the second overwrites the first's addition.
     (field: string, value: any) => {
-      setFormData((prev: any) => ({ ...prev, [field]: value }));
+      setFormData((prev: any) => {
+        const nextFieldValue =
+          typeof value === "function" ? value(prev[field]) : value;
+        const next = { ...prev, [field]: nextFieldValue };
+        // immediate save, computed from the same merge so it can't go stale either
+        localforage.setItem(DRAFT_KEY, { formData: next, step, ts: Date.now() });
+        return next;
+      });
       setErrors((prev) => {
         const n = { ...prev };
         delete n[field];
         return n;
       });
-      // immediate save
-      localforage.setItem(DRAFT_KEY, {
-        formData: { ...formData, [field]: value },
-        step,
-        ts: Date.now(),
-      });
     },
-    [formData, step, DRAFT_KEY]
+    [step, DRAFT_KEY]
   );
 
   const restoreDraft = useCallback(async () => {

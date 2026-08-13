@@ -38,14 +38,19 @@ export default function PreviewStep({ formData }: { formData: any }) {
     "allergies",
     "chronicConditions",
   ];
-  const documentFields = ["profilePhoto", "medicalDocument"];
+  const documentFields = ["profilePhoto", "medicalDocuments"];
   const securityFields = ["password", "confirmPassword"]; // we'll hide these
   const consentFields = ["consent"];
 
-  const renderValue = (value: any) => {
+  const renderValue = (value: any, key?: string) => {
     if (value === undefined || value === null || value === "") return "—";
     if (typeof value === "boolean") return value ? "Yes" : "No";
-    if (Array.isArray(value)) return value.join(", ");
+    if (Array.isArray(value)) {
+      if (key === "medicalDocuments") {
+        return `${value.length} document${value.length === 1 ? "" : "s"} uploaded`;
+      }
+      return value.join(", ");
+    }
     if (typeof value === "object") {
       if (value && (value as any).url) return "Uploaded Document";
       return JSON.stringify(value);
@@ -83,7 +88,7 @@ export default function PreviewStep({ formData }: { formData: any }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {entries.map((key) => {
             const value = formData[key];
-            let displayValue: string | React.ReactNode = renderValue(value);
+            let displayValue: string | React.ReactNode = renderValue(value, key);
             // Custom formatting for certain keys
             if (key === "dob") {
               const d = new Date(value);

@@ -147,8 +147,8 @@ export async function POST(request: Request) {
         popiaConsentDate: new Date(),
         subscriptionTier: "pro",
         profilePhoto: formData.profilePhoto,
-        medicalDocuments: formData.medicalDocument
-          ? [formData.medicalDocument]
+        medicalDocuments: Array.isArray(formData.medicalDocuments)
+          ? formData.medicalDocuments
           : [],
       });
       await syncPatientProfile(newUser._id.toString(), patientProfile as any);
