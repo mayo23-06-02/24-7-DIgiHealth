@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Input from "@/components/ui/Input";
-import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
+import DocumentUpload from "@/components/ui/DocumentUpload";
 
 const provinces = [
   "Gauteng",
@@ -18,7 +18,7 @@ const provinces = [
 export default function HospitalStep2({ formData, updateData, errors }: any) {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           label="Physical Address *"
           value={formData.street || ""}
@@ -78,7 +78,7 @@ export default function HospitalStep2({ formData, updateData, errors }: any) {
           onChange={(e) => updateData("adminEmail", e.target.value)}
           placeholder="admin@facility.co.za"
         />
-        <CloudinaryUpload
+        <DocumentUpload
           label="Proof of Employment (PDF) *"
           description="Upload a certified proof of employment for the administrator"
           accept="application/pdf"

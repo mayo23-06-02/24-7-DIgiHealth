@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
+import DocumentUpload from "@/components/ui/DocumentUpload";
 
 export default function PatientStep3({ formData, updateData }: any) {
   return (
@@ -13,14 +13,14 @@ export default function PatientStep3({ formData, updateData }: any) {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <CloudinaryUpload
+        <DocumentUpload
           label="Profile Photo / ID Photo *"
           description="Upload a clear photo of yourself or your ID card (JPG, PNG, or PDF)"
           value={formData.profilePhoto}
           onUploadComplete={(url) => updateData("profilePhoto", url)}
         />
 
-        <CloudinaryUpload
+        <DocumentUpload
           label="Medical Certificates / Documents"
           description="Upload any relevant medical certificates or health records (PDF or Images)"
           value={formData.medicalDocument}

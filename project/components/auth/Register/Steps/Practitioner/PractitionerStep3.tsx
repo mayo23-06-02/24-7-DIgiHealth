@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
+import DocumentUpload from "@/components/ui/DocumentUpload";
 
 export default function PractitionerStep3({
   formData,
@@ -9,14 +9,14 @@ export default function PractitionerStep3({
 }: any) {
   return (
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
-      <CloudinaryUpload
+      <DocumentUpload
         label="Profile Photo *"
         description="Select or drag a professional headshot for your practitioner profile"
         value={formData.profilePhoto}
         onUploadComplete={(url) => updateData("profilePhoto", url)}
       />
 
-      <CloudinaryUpload
+      <DocumentUpload
         label="HPCSA Registration Certificate *"
         description="Upload a certified copy of your HPCSA registration"
         accept="application/pdf"

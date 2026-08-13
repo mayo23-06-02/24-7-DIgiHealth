@@ -1,12 +1,13 @@
 "use client";
 /**
- * @deprecated Name kept for registration step imports.
- * Now uses unified Supabase media system (UploadDropzone).
+ * Registration-step upload field: wraps UploadDropzone (Supabase media
+ * system) with the sessionStorage registration-token handling needed
+ * before an account/JWT exists.
  */
 import React, { useEffect, useState } from "react";
 import UploadDropzone from "@/components/media/UploadDropzone";
 
-interface CloudinaryUploadProps {
+interface DocumentUploadProps {
   label: string;
   description?: string;
   onUploadComplete: (url: string) => void;
@@ -19,7 +20,7 @@ interface CloudinaryUploadProps {
 
 const REG_TOKEN_KEY = "digihealth_registration_media_token";
 
-const CloudinaryUpload: React.FC<CloudinaryUploadProps> = ({
+const DocumentUpload: React.FC<DocumentUploadProps> = ({
   label,
   description = "Upload photos, PDFs or certificates",
   onUploadComplete,
@@ -70,4 +71,4 @@ const CloudinaryUpload: React.FC<CloudinaryUploadProps> = ({
   );
 };
 
-export default CloudinaryUpload;
+export default DocumentUpload;

@@ -5,7 +5,7 @@ const ArticleSchema = new mongoose.Schema({
   slug: { type: String, required: true, unique: true },
   excerpt: { type: String, required: true },
   content: { type: String, required: true },      // HTML or markdown
-  coverImage: { type: String, required: true },   // Cloudinary / placeholder URL
+  coverImage: { type: String, required: true },   // Media URL / placeholder
   author: { type: String, required: true },
   publishedAt: { type: Date, default: Date.now },
   readTimeMinutes: { type: Number, default: 5 },
