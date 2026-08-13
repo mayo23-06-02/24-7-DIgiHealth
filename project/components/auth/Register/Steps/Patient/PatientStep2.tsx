@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Input from "@/components/ui/Input";
 import { BiPlus } from "react-icons/bi";
+import Button from "@/components/ui/Button";
 
 const bloodTypes = [
   "A+",
@@ -209,13 +210,20 @@ export default function PatientStep2({ formData, updateData, onSkip }: any) {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-6 duration-500  ">
       {onSkip && (
-          <button
-            type="button"
-            onClick={onSkip}
-            className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            Skip for now
-          </button>
+          <div className="flex w-full flex-col items-end gap-1">
+            <Button
+              type="button"
+              onClick={onSkip}
+              className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              Skip for now
+            </Button>
+            <p className="text-xs text-slate-400 text-right max-w-sm">
+              None of this is required to register. You can come back and add or
+              update your height, weight, blood type, allergies, and conditions
+              anytime from your health record once you're signed in.
+            </p>
+          </div>
         )}
       <div className="flex items-center justify-between gap-3 mb-[20px] mt-[10px]">
         
