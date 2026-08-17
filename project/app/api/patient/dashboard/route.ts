@@ -69,7 +69,9 @@ export async function GET(req: NextRequest) {
         },
         profile: {
           gender: profile?.gender || 'female',
-          subscriptionTier: profile?.subscriptionTier || 'free'
+          subscriptionTier: profile?.subscriptionTier || 'free',
+          ageRange: profile?.ageRange,
+          dateOfBirth: profile?.dateOfBirth
         },
         medicalSummary: {
           conditions: medicalCtx?.chronicConditions || [],

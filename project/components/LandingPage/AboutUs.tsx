@@ -1,73 +1,149 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import { Heart, Shield, Clock, Users, Sparkles, Globe, User, Stethoscope, MapPin } from "lucide-react";
+
+// Reuse the same counter component from Hero (or you can import it)
+function CountUpValue({ value }: { value: string }) {
+  const ref = React.useRef<HTMLParagraphElement>(null);
+  const hasAnimated = React.useRef(false);
+  const match = value.match(/^(\d+(?:\.\d+)?)(.*)$/);
+  const [display, setDisplay] = React.useState(match ? `0${match[2]}` : value);
+
+  React.useEffect(() => {
+    if (!match) return;
+    const target = parseFloat(match[1]);
+    const suffix = match[2];
+    const isDecimal = match[1].includes(".");
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting || hasAnimated.current) return;
+          hasAnimated.current = true;
+
+          const duration = 2500;
+          const start = performance.now();
+          const tick = (now: number) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = target * eased;
+            setDisplay(`${isDecimal ? current.toFixed(1) : Math.round(current)}${suffix}`);
+            if (progress < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        });
+      },
+      { threshold: 0.4 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return (
+    <p
+      ref={ref}
+      className="text-2xl md:text-4xl lg:text-5xl font-light text-ink-900 font-grotesk tabular-nums"
+    >
+      {display}
+    </p>
+  );
+}
+
+const aboutStats = [
+  { icon: User, value: "135K+", label: "Patients Cared For" },
+  { icon: Stethoscope, value: "50+", label: "Verified Specialists" },
+  { icon: MapPin, value: "9", label: "Provinces Covered" },
+];
+
+const values = [
+  {
+    icon: Heart,
+    title: "Patient First",
+    description: "Every decision we make starts with what's best for the patient.",
+  },
+  {
+    icon: Shield,
+    title: "Trust & Privacy",
+    description: "Your data is yours. We follow POPIA and global security standards.",
+  },
+  {
+    icon: Clock,
+    title: "24/7 Access",
+    description: "Healthcare doesn't clock out – and neither do we.",
+  },
+  {
+    icon: Users,
+    title: "Human Connection",
+    description: "Technology enables care, but our doctors and nurses deliver it with empathy.",
+  },
+  {
+    icon: Sparkles,
+    title: "Continuous Innovation",
+    description: "We're always improving – from AI triage to seamless digital prescriptions.",
+  },
+  {
+    icon: Globe,
+    title: "Inclusive Reach",
+    description: "Serving all nine provinces, with multi‑language support and fair pricing.",
+  },
+];
 
 export default function AboutUs() {
   return (
-    <section id="about" className="bg-white py-16 md:py-20">
+    <section id="about" className="bg-surface-soft py-16 md:py-24">
       <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-6 items-stretch">
-          {/* Consultations this month */}
-          <div className="bg-surface-soft rounded-2xl p-6 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-bold text-ink-500">Consultations Completed</p>
-              <span className="text-xs font-bold text-success-700 bg-success-50 px-2 py-1 rounded-full">
-                This month
-              </span>
-            </div>
-            <p className="text-4xl font-bold text-ink-900 font-grotesk mb-3">632</p>
-            <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
-              <div className="h-full bg-primary rounded-full" style={{ width: "78%" }} />
-            </div>
-          </div>
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
+            About 24/7 DigiHealth
+          </span>
+          <h2 className="text-3xl md:text-4xl font-medium text-ink-900 mb-6 tracking-tight font-grotesk">
+            Our Mission: <span className="text-primary font-bold">Telehealth for Everyone</span>
+          </h2>
+          <p className="text-lg text-ink-600 leading-relaxed">
+            We believe that quality healthcare should be accessible, affordable, and human –
+            no matter where you live. Our platform connects you with verified doctors,
+            AI‑powered triage, and a digital health record that puts you in control.
+          </p>
+        </div>
 
-          {/* Specialists online */}
-          <div className="bg-surface-soft rounded-lg p-6 flex flex-col justify-between">
-            <p className="text-sm font-bold text-ink-500 mb-4">Specialists Online Now</p>
-            <div className="flex items-center gap-1 mb-3">
-              {["ZN", "ML", "NK", "SZ"].map((initials, i) => (
-                <div
-                  key={i}
-                  className="w-10 h-10 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center border-2 border-white -ml-2 first:ml-0"
-                >
-                  {initials}
-                </div>
-              ))}
-              <div className="w-10 h-10 rounded-full bg-slate-200 text-ink-600 text-xs font-bold flex items-center justify-center border-2 border-white -ml-2">
-                +16
-              </div>
-            </div>
-            <p className="text-sm text-ink-500">
-              <span className="font-bold text-ink-900">20 doctors</span> ready to
-              see you right now
-            </p>
-          </div>
+        {/* Stats Row – matches hero style with animated counters */}
+      
 
-          {/* Wellness score gauge */}
-          <div className="bg-ink-900 rounded-lg p-6 flex items-center gap-5 md:w-[260px]">
-            <div className="relative w-20 h-20 shrink-0">
-              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.5"
-                  fill="none"
-                  stroke="var(--color-success-500, #10b981)"
-                  strokeWidth="3"
-                  strokeDasharray="97 100"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg font-grotesk">
-                97%
+        {/* Values Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {values.map(({ icon: Icon, title, description }) => (
+            <div
+              key={title}
+              className="bg-white border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <Icon className="w-6 h-6 text-primary" />
               </div>
+              <h3 className="text-lg font-bold text-ink-900 mb-2 font-grotesk">{title}</h3>
+              <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
             </div>
-            <div>
-              <p className="text-white font-bold text-sm mb-1">Wellness Score</p>
-              <p className="text-white/60 text-xs leading-relaxed">
-                Your personalized health snapshot, updated after every visit.
-              </p>
+          ))}
+        </div>
+
+        {/* Bottom CTA / Story */}
+        <div className="mt-16 bg-primary/5 rounded-2xl p-8 md:p-12 text-center">
+          <p className="text-lg md:text-xl text-ink-700 max-w-2xl mx-auto leading-relaxed">
+            “We're not just building an app – we're reimagining how South Africans
+            access healthcare. Join us in making quality care a right, not a privilege.”
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-primary font-bold text-lg">Dr</span>
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-ink-900 text-sm">Dr. Zanele Mthembu</p>
+              <p className="text-xs text-ink-500">Co‑founder & Chief Medical Officer</p>
             </div>
           </div>
         </div>

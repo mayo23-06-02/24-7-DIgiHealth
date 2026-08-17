@@ -11,6 +11,7 @@ import {
   BiPhone,
   BiPlus,
   BiPulse,
+  BiUser,
 } from "react-icons/bi";
 import type { PatientProfile } from "./types";
 
@@ -86,7 +87,7 @@ export default function PatientClinicalSidebar({
             onClick={onSyncRecords}
             className="flex items-center gap-1 text-sm text-primary hover:underline"
           >
-            <BiEditAlt size={12} /> Sync Records
+            <BiEditAlt size={12} /> Update Records
           </button>
         </div>
 
@@ -182,7 +183,7 @@ export default function PatientClinicalSidebar({
                       {p.dosage}
                     </p>
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100/50 gap-2">
-                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
                         Refills: {p.refillsRemaining}
                       </p>
                       {p.documentUrl || p.canDownload ? (
@@ -190,12 +191,12 @@ export default function PatientClinicalSidebar({
                           href={p.documentUrl || "#"}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[10px] font-bold text-primary hover:underline"
+                          className="text-xs font-bold uppercase text-primary hover:underline"
                         >
                           Download script
                         </a>
                       ) : (
-                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
                           {new Date(p.prescribedDate).toLocaleDateString()}
                         </p>
                       )}
@@ -248,6 +249,34 @@ export default function PatientClinicalSidebar({
           </p>
         )}
       </Card>
+
+      {(patient.ageRange || (patient.age && patient.age < 18)) && patient.emergencyContact?.name && (
+        <Card className="bg-blue-50/30 border-blue-100">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center">
+              <BiUser size={18} />
+            </div>
+            <h4 className="text-xs font-bold text-blue-900 tracking-normal font-grotesk">
+              Parent / Guardian
+            </h4>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-slate-800">
+              {patient.emergencyContact.name}
+            </p>
+            {patient.emergencyContact.relationship && (
+              <p className="text-xs font-bold text-slate-500 tracking-normal">
+                {patient.emergencyContact.relationship}
+              </p>
+            )}
+            {patient.emergencyContact.phone && (
+              <p className="text-base font-bold text-primary mt-2">
+                {patient.emergencyContact.phone}
+              </p>
+            )}
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

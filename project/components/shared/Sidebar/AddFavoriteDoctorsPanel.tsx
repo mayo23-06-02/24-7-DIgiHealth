@@ -140,7 +140,7 @@ export default function AddFavoriteDoctorsPanel({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 min-h-0">
+            <div className="flex-1 p-4 min-h-[400px]">
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 size={24} className="animate-spin text-primary" />
@@ -150,11 +150,11 @@ export default function AddFavoriteDoctorsPanel({
                   <p className="text-ink-600 text-sm">No doctors available</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 overflow-auto custom-scrollbar max-h-[80vh] pr-1">
                   {doctors.map((doctor) => (
                     <label
                       key={doctor.id}
-                      className="flex items-center gap-3 p-3 rounded-md border border-border hover:bg-surface-soft cursor-pointer transition-colors"
+                      className="flex items-center gap-3  rounded-md hover:bg-surface-soft cursor-pointer transition-colors"
                     >
                       <input
                         type="checkbox"

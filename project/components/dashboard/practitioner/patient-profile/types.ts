@@ -61,6 +61,7 @@ export interface PatientProfile {
   riskScore?: number;
   riskColor?: string;
   riskLabel?: string;
+  ageRange?: '0-2' | '3-5' | '5-12' | '13-18';
   pastConsultations: PatientConsultation[];
   vitals?: {
     heartRate?: number | string;

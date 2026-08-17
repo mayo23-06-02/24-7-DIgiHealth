@@ -324,20 +324,22 @@ export default function PatientDashboard() {
       {/* MID SECTION */}
       <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div className="xl:col-span-5 flex flex-col">
-          <Card className="h-[600px]" noPadding>
+          <Card className="h-[700px]" noPadding>
             <MedicalManikin
               gender={
                 dashboardData?.profile?.gender || (user.gender as any) || "male"
               }
               heightCm={dashboardData?.vitals?.height || 0}
               weightKg={dashboardData?.vitals?.weight || 0}
+              ageRange={dashboardData?.profile?.ageRange}
+              dateOfBirth={dashboardData?.profile?.dateOfBirth}
               onUpdateHeightWeight={() =>
                 handleUpdateClick("weight", "Body Mass & Height")
               }
             />
           </Card>
         </div>
-        <Card className="xl:col-span-7 h-[600px] overflow-hidden flex flex-col p-0">
+        <Card className="xl:col-span-7 h-[700px] overflow-hidden flex flex-col p-0">
           <PatientCalendar
             headerAction={
               <Link href="/patient/calendar">

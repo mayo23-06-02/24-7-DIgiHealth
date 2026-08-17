@@ -2,11 +2,14 @@
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useCall } from "../context/CallContext";
+import toast from "react-hot-toast";
 
 export default function GlobalCallPoller() {
   const { setIncomingCall, incomingCall, activeCall } = useCall();
   const { user } = useAuthContext();
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
+  const errorCountRef = useRef(0);
+  const toastShownRef = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -46,8 +49,20 @@ export default function GlobalCallPoller() {
             setIncomingCall(null);
           }
         }
+        // Reset error count and toast flag on success
+        errorCountRef.current = 0;
+        toastShownRef.current = false;
       } catch (error) {
+        errorCountRef.current += 1;
         console.error("Global call poll error:", error);
+        // Show toast after 3 consecutive failures, but only once
+        if (errorCountRef.current >= 3 && !toastShownRef.current) {
+          toast.error("Network connection lost. Please check your internet connection.", {
+            id: "network-error",
+            duration: 5000,
+          });
+          toastShownRef.current = true;
+        }
       }
     };
 

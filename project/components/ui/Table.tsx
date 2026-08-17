@@ -84,10 +84,10 @@ function Table<T extends Record<string, any>>({
   return (
     <div className={className}>
       {/* Desktop / tablet: real table */}
-      <Card noPadding className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm">
+      <Card noPadding className="hidden md:inline overflow-x-auto">
+        <table className="w-full text-sm rounded-xl border">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
+            <tr className="border-b bg-slate-50 border-slate-200 rounded-xl ">
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -119,7 +119,7 @@ function Table<T extends Record<string, any>>({
               <tr
                 key={String(row[keyField])}
                 onClick={() => onRowClick?.(row)}
-                className={`border-b border-slate-100 last:border-b-0 ${
+                className={`border-b border-slate-200 last:border-b-0 ${
                   onRowClick ? "cursor-pointer hover:bg-slate-50" : ""
                 }`}
               >
@@ -139,13 +139,13 @@ function Table<T extends Record<string, any>>({
         </table>
       </Card>
 
-      {/* Mobile: stacked cards */}
-      <div className="flex flex-col gap-3 md:hidden">
+      {/* Mobile: horizontal scroll cards */}
+      <div className="flex gap-3 md:hidden overflow-x-auto pb-2 snap-x snap-mandatory">
         {sorted.map((row) => (
           <Card
             key={String(row[keyField])}
             onClick={onRowClick ? () => onRowClick(row) : undefined}
-            className="!p-4"
+            className="!p-4 min-w-[calc((100vw-3rem)/3.5)] snap-start shrink-0"
           >
             <div className="mb-2 font-semibold text-ink-900">
               {titleCol.render ? titleCol.render(row) : row[titleCol.key]}

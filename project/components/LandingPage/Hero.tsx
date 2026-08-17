@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
@@ -27,20 +28,14 @@ const badges = [
 ];
 
 const navLinks = [
-  { name: "Home", href: "/" },
-  { name: "About Us", href: "/about" },
-  { name: "Approach", href: "/#approach" },
-  { name: "Testimonials", href: "/#testimonials" },
-  { name: "Blog", href: "/#blog" },
+  { name: "Platform", href: "/" },
+  { name: "Solutions", href: "/#approach" },
+  { name: "Security", href: "/#testimonials" },
+  { name: "Company", href: "/about" },
+  { name: "Resources", href: "/#blog" },
 ];
 
-const serviceTags = [
-  "Virtual Care",
-  "AI Triage",
-  "Specialists",
-  "Prescriptions",
-  "Family Plans",
-];
+const serviceTags = ["Tele-health Care", "E-Prescriptions", "Family Plans"];
 
 const ratingAvatars = [
   "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=100&auto=format&fit=crop",
@@ -48,13 +43,40 @@ const ratingAvatars = [
   "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=100&auto=format&fit=crop",
 ];
 
-function CountUpValue({ value }: { value: string }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-  const hasAnimated = useRef(false);
-  const match = value.match(/^(\d+(?:\.\d+)?)(.*)$/);
-  const [display, setDisplay] = useState(match ? `0${match[2]}` : value);
+const slides = [
+  {
+    videoSrc: "/landing-page/hero-section/slide01.mp4",
+    headline: "Compassionate Care.",
+    highlight: "Real Doctors, Anywhere.",
+    sub: "We invite you to take charge of your family's health.",
+    description:
+      "Skip the waiting room. Connect with verified South African doctors over secure video, chat, or AI-assisted triage — day or night, wherever you are.",
+  },
+  {
+    videoSrc: "/landing-page/hero-section/slide02.mp4",
+    headline: "Your Data, Your Health,",
+    highlight: "All in One Portal",
+    sub: "In our portal you have all data in one place and direct access to the telemedicine service.",
+    description:
+      "Track your vitals, manage appointments, and securely access your medical history from anywhere. Your health journey, unified.",
+  },
+  {
+    videoSrc: "/landing-page/hero-section/slide03.mp4",
+    headline: "Prescriptions & Certificates,",
+    highlight: "Digital & Secure",
+    sub: "Receive your prescription conveniently as a QR code: fast, discreet and paperless.",
+    description:
+      "Redeemable at any Swiss pharmacy or online pharmacy. Also request a certificate for incapacity to work with a single click.",
+  },
+];
 
-  useEffect(() => {
+function CountUpValue({ value }: { value: string }) {
+  const ref = React.useRef<HTMLParagraphElement>(null);
+  const hasAnimated = React.useRef(false);
+  const match = value.match(/^(\d+(?:\.\d+)?)(.*)$/);
+  const [display, setDisplay] = React.useState(match ? `0${match[2]}` : value);
+
+  React.useEffect(() => {
     if (!match) return;
     const target = parseFloat(match[1]);
     const suffix = match[2];
@@ -68,7 +90,7 @@ function CountUpValue({ value }: { value: string }) {
           if (!entry.isIntersecting || hasAnimated.current) return;
           hasAnimated.current = true;
 
-          const duration = 1500;
+          const duration = 2500;
           const start = performance.now();
           const tick = (now: number) => {
             const progress = Math.min((now - start) / duration, 1);
@@ -90,7 +112,7 @@ function CountUpValue({ value }: { value: string }) {
   return (
     <p
       ref={ref}
-      className="text-xl md:text-6xl font-light text-ink-900 font-grotesk tabular-nums"
+      className="text-xl md:text-6xl font-semibold text-secondary font-grotesk tabular-nums"
     >
       {display}
     </p>
@@ -104,8 +126,12 @@ export default function Hero() {
     <BiSun className="text-white animate-pulse" />,
   );
   const [weatherText, setWeatherText] = useState("Detecting location...");
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [isSticky, setIsSticky] = useState(false);
 
-  // Real date + live weather/location, matching components/shared/Header/WeatherWidget.tsx
+  // Weather and date (unchanged)
   useEffect(() => {
     setCurrentDate(
       new Date().toLocaleDateString("en-ZA", {
@@ -182,134 +208,308 @@ export default function Hero() {
     }
   }, []);
 
+  // Auto‑advance slides with smooth fade and loading reset
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        setVideoLoading(true);
+        setIsVisible(false);
+      }, 500);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setVideoLoading(true);
+    setIsVisible(false);
+  }, [currentSlide]);
+
+  const handleVideoLoaded = () => {
+    setVideoLoading(false);
+    setIsVisible(true);
+  };
+
+  const handleVideoError = () => {
+    setVideoLoading(false);
+    setIsVisible(true);
+  };
+
+  // Sticky header logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsSticky(scrollY > 80);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const slide = slides[currentSlide];
+
   return (
-    <section id="home" className="w-full bg-primary-50/60">
-      {/* Full-bleed hero photo: reaches the very top of the screen and spans
-          the whole viewport width, while its content stays aligned to the
-          1400px grid via an inner container. */}
-      <div className="relative m-4 rounded-4xl h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col">
-        <Image
-          src="/hero2.jpg"
-          alt="24/7 DigiHealth care team"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink-900/75 via-ink-900/0 to-ink-900/70" />
-
-        {/* Utility line: real date + live weather/location, overlaid on the image */}
-        <div className="hidden md:flex relative z-10 mx-auto w-full max-w-[1400px] items-center justify-between px-5 md:px-10 pt-4 text-xs font-medium text-white/75">
-          <span>{currentDate}</span>
-          <span className="flex items-center gap-2">
-            <span className="text-base leading-none">{weatherIcon}</span>
-            {weatherText}
-          </span>
-        </div>
-
-        {/* Nav row, transparent overlay directly on the image */}
-        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex items-center justify-between px-5 py-5 md:px-10 md:py-6">
-          <Link href="/" className="shrink-0">
-            <LogoMain width={170} height={34} alt={true} />
-          </Link>
-
-          <nav className="hidden lg:flex items-center gap-7">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium text-white/85 transition-all ease-in-out duration-600 hover:text-white hover:ring-2 hover:ring-white px-4 py-2 rounded-full"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="hidden lg:block">
-            <Link href="/register">
-              <button className="group flex items-center gap-3 pl-5 pr-1.5 py-1.5 rounded-full bg-primary hover:bg-primary-600 text-white text-sm font-semibold transition-colors">
-                Book Now
-                <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
-                  <ArrowRight size={15} />
-                </span>
-              </button>
-            </Link>
-          </div>
-
-          {/* Mobile menu toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
-        </div>
-
-        {/* Mobile menu panel */}
+    <section id="home" className="w-full  relative">
+      {/* Sticky Header Container */}
+      <div className="fixed top-0 left-0 w-full z-50">
+        {/* Top Utility Bar - fades out when sticky */}
         <div
-          className={`lg:hidden relative z-20 overflow-hidden transition-all duration-300 ${
-            mobileMenuOpen ? "max-h-96" : "max-h-0"
+          className={`hidden md:flex w-full  backdrop-blur-md text-white text-sm py-2 px-4 md:px-8  transition-all duration-500 ${
+            isSticky ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
-          <div className="mx-5 mb-4 flex flex-col gap-1 rounded-2xl bg-ink-900/80 backdrop-blur-xl border border-white/10 p-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-white/90 text-sm font-medium py-2.5 px-2 rounded-lg  transition-colors hover:ring-2 hover:ring-white"
+          <div className="container mx-auto max-w-[1400px] flex flex-col md:flex-row justify-between items-center gap-2">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-2">
+                <span className="text-base leading-none">{weatherIcon}</span>
+                {weatherText}
+              </span>
+              <span className="hidden md:inline text-white/60">|</span>
+              <span className="text-white/80 text-xs">{currentDate}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <a
+                href="#"
+                className="hover:opacity-80 transition"
+                aria-label="Facebook"
               >
-                {link.name}
-              </Link>
-            ))}
-            <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="mt-2">
-              <Button variant="primary" size="sm">
-                Book Now
-              </Button>
-            </Link>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                className="hover:opacity-80 transition"
+                aria-label="Twitter"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 24.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                className="hover:opacity-80 transition"
+                aria-label="Instagram"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                </svg>
+              </a>
+              <div className="w-px h-4 bg-white/30" />
+              <a
+                href="tel:08001234567"
+                className="flex items-center gap-2 font-medium hover:opacity-80 transition"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span>Toll Free: 0800 123 4567</span>
+              </a>
+            </div>
           </div>
+        </div>
+
+        {/* Main Navigation Bar - becomes sticky with background */}
+        <div
+          className={`w-full transition-all duration-300 ${
+            isSticky
+              ? "bg-white/95 backdrop-blur-md rounded-full px-2 max-w-[1080px] mx-auto   shadow-xs border-b border-slate-200"
+              : "bg-transparent lg:px-12 md:px-10"
+          }`}
+        >
+          <div className="container mx-auto max-w-[1400px] px-4 md:px-4 flex items-center justify-between py-2 md:py-2">
+            <Link href="/" className="shrink-0">
+              <LogoMain
+                width={isSticky ? 100 : 160}
+                height={isSticky ? 22 : 34}
+                alt={isSticky ? false : true }
+              />
+            </Link>
+
+            <nav className="hidden lg:flex items-center gap-8 ml-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`text-sm font-medium transition-colors ${
+                    isSticky
+                      ? "text-ink-700 hover:text-primary"
+                      : "text-white/85 hover:text-white"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="hidden lg:flex items-center gap-3">
+              <Link
+                href="/login"
+                
+              >
+                <Button variant="ghost">Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button
+                  variant={isSticky ? "primary" : "white"}
+                  size="sm"
+                  className={isSticky ? "" : "border border-white/30"}
+                >
+                  Get a demo
+                </Button>
+              </Link>
+            </div>
+
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden relative w-8 h-8 flex flex-col justify-center items-center gap-1.5 z-50"
+              aria-label="Toggle menu"
+            >
+              <span
+                className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
+                  isSticky ? "bg-ink-800" : "bg-white"
+                } ${mobileMenuOpen ? "rotate-45 translate-y-2" : ""}`}
+              />
+              <span
+                className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
+                  isSticky ? "bg-ink-800" : "bg-white"
+                } ${mobileMenuOpen ? "opacity-0" : ""}`}
+              />
+              <span
+                className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
+                  isSticky ? "bg-ink-800" : "bg-white"
+                } ${mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
+              />
+            </button>
+          </div>
+
+          <div
+            className={`lg:hidden overflow-hidden transition-all duration-300 ${
+              mobileMenuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 py-4 px-6 flex flex-col gap-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-ink-700 text-sm font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
+              <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center text-ink-700 font-medium py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center text-white bg-primary py-2 px-3 rounded-lg font-semibold hover:bg-primary-600 transition"
+                >
+                  Get a demo
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Content */}
+      <div className="relative m-1 rounded-xl h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col ">
+        {/* Video Background */}
+        <div className="absolute inset-0 overflow-hidden">
+          {videoLoading && (
+            <div className="absolute inset-0 z-10 bg-gradient-to-r from-primary/40 via-primary/20 to-primary/40 animate-pulse" />
+          )}
+          <video
+            key={currentSlide}
+            src={slide.videoSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            onLoadedData={handleVideoLoaded}
+            onError={handleVideoError}
+            className={`absolute inset-0 w-full h-full object-cover animate-slow-zoom transition-opacity duration-700 ${
+              videoLoading ? "opacity-0" : "opacity-100"
+            }`}
+          />
+          <div
+            className={`absolute inset-0 bg-linear-to-r from-primary/25 via-white/10 to-primary/70 transition-opacity duration-500 ${
+              isVisible && !videoLoading ? "opacity-100" : "opacity-0"
+            }`}
+          />
         </div>
 
         {/* Hero copy */}
-        <div className="relative z-10 mx-auto w-full max-w-[1400px] flex-1 flex flex-col justify-center px-5 md:px-10">
-          <div className="max-w-2xl mt-[20vh]">
-            <div className="flex items-center gap-2 text-white/80 text-sm mb-4">
-              <Sparkle size={16} className="text-secondary" />
-              We invite you to take charge of your family&apos;s health.
-            </div>
-
-            <h1 className="text-4xl md:text-6xl font-medium text-white leading-[1.05] tracking-tight font-grotesk mb-6 drop-shadow-sm">
-              Compassionate Care.
-              <br />
-              <span className="text-secondary font-bold">Real Doctors, Anywhere.</span>
-            </h1>
-
+        <div
+          className={`relative z-10 mx-auto w-full max-w-[1400px] flex-1 flex flex-col justify-center px-5 md:px-10 transition-opacity duration-500 ${
+            isVisible && !videoLoading ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="max-w-2xl mt-[10vh] md:mt-[15vh]">
             <div className="flex flex-wrap gap-2 mb-6">
-              {serviceTags.map((tag) => (
+              {serviceTags.map((tag, idx) => (
                 <span
                   key={tag}
-                  className="px-4 py-1.5 rounded-full border border-white/30 text-white/90 text-xs md:text-sm font-medium"
+                  className={`px-4 py-1.5 rounded-full border border-white/30 text-white/90 text-xs md:text-sm font-medium transition-all duration-700 delay-${idx * 100} ${
+                    isVisible && !videoLoading
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-4"
+                  }`}
                 >
                   {tag}
                 </span>
               ))}
             </div>
 
-            <p className="text-base md:text-lg text-white/80 leading-relaxed max-w-lg mb-8">
-              Skip the waiting room. Connect with verified South African doctors
-              over secure video, chat, or AI-assisted triage — day or night,
-              wherever you are.
+            <div
+              className={`flex items-center gap-2 leading-4 text-white/90 text-sm mb-4 transition-all duration-700 delay-300 ${
+                isVisible && !videoLoading
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
+              {slide.sub}
+            </div>
+
+            <h1
+              className={`text-2xl md:text-4xl lg:text-6xl font-medium text-white leading-6 md:leading-9 lg:leading-[1.01] tracking-tight font-grotesk mb-6 drop-shadow-sm transition-all duration-700 delay-500 ${
+                isVisible && !videoLoading
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
+              {slide.headline}
+              <br />
+              <span className="text-secondary font-bold">{slide.highlight}</span>
+            </h1>
+
+            <p
+              className={`text-base md:text-lg text-white/90 leading-6 max-w-lg mb-8 transition-all duration-700 delay-700 ${
+                isVisible && !videoLoading
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
+              {slide.description}
             </p>
 
-            <div className="flex flex-wrap gap-3 lg:hidden">
+            <div className="flex flex-wrap gap-3 mb-2 lg:hidden">
               <Link href="/register">
-                <Button variant="primary" size="lg">
+                <Button variant="primary" size="sm">
                   Book Appointment
                 </Button>
               </Link>
               <Link href="/#approach">
-                <Button variant="white" size="lg" icon={<PlayCircle size={18} />} iconPosition="left">
+                <Button variant="white" size="sm" iconPosition="left">
                   See How It Works
                 </Button>
               </Link>
@@ -317,50 +517,79 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Floating rating card, aligned to the same 1400px content edge */}
+        {/* Carousel Dot Indicators */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setIsVisible(false);
+                setVideoLoading(true);
+                setTimeout(() => {
+                  setCurrentSlide(idx);
+                }, 500);
+              }}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === currentSlide
+                  ? "bg-white w-8"
+                  : "bg-white/40 hover:bg-white/70"
+              }`}
+              aria-label={`Slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* ✨ UPGRADED RATING CARD ✨ */}
         <div className="hidden md:block relative z-10 mx-auto w-full max-w-[1400px] px-5 md:px-10 pb-10">
-          <div className="flex items-center gap-4 bg-white/10  border border-white/20 rounded-2xl px-5 py-4 w-fit ml-auto">
-            <div className="flex items-center gap-1 text-3xl font-bold text-white font-grotesk">
-              4.9
-              <Star size={18} className="fill-green-500 text-green-500 mb-3" />
+          <div className="flex items-center gap-4 md:gap-6 lg:gap-8 bg-white rounded-lg  px-2 py-2 md:px-6 md:py-5 lg:px-4 lg:py-2 w-fit ml-auto">
+            <div className="flex items-center gap-1 md:gap-2">
+              <span className="text-lg md:text-2xl lg:text-2xl font-bold text-ink-900 font-grotesk">
+                4.9
+              </span>
+              <Star
+                size={20}
+                className="fill-yellow-400 text-yellow-400 md:w-6 md:h-6 lg:w-7 lg:h-7"
+              />
             </div>
-            <div className="w-px h-10 bg-white/20" />
+            <div className="h-10 md:h-12 lg:h-14 w-px bg-slate-200" />
             <div className="flex items-center">
               {ratingAvatars.map((src, i) => (
                 <Image
                   key={src}
                   src={src}
                   alt="Happy patient"
-                  width={36}
-                  height={36}
-                  className="w-9 h-9 rounded-full object-cover border-2 border-white/40"
-                  style={{ marginLeft: i === 0 ? 0 : -12 }}
+                  width={40}
+                  height={40}
+                  className="w-8 h-8  rounded-full object-cover  shadow-sm"
+                  style={{ marginLeft: i === 0 ? 0 : -8 }}
                 />
               ))}
               <div
-                className="w-9 h-9 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-white text-[10px] font-bold"
-                style={{ marginLeft: -12 }}
+                className="w-8 h-8  rounded-full bg-primary text-white flex items-center justify-center text-[10px] md:text-xs  shadow-sm"
+                style={{ marginLeft: -8 }}
               >
                 +2K
               </div>
             </div>
-            <p className="text-white text-sm font-semibold leading-tight">
-              Happy
-              <br />
-              Customers
-            </p>
+            <div>
+              <p className="text-sm  font-bold text-ink-900 leading-tight font-grotesk">
+                Happy
+                <br />
+                Customers
+              </p>
+            </div>
           </div>
         </div>
       </div>
+
       <TickerBar />
 
       <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-        {/* Stat badges, lifted so they straddle the bottom edge of the photo. */}
-        <div className="relative z-10  grid grid-cols-2 lg:grid-cols-none lg:flex lg:flex-row justify-between gap-3 md:gap-4 pb-4">
+        <div className="relative z-10 grid grid-cols-2 lg:grid-cols-none lg:flex lg:flex-row justify-between gap-3 md:gap-4 pb-4">
           {badges.map(({ icon: Icon, value, label }) => (
             <div
               key={label}
-              className=" rounded-lg  p-4 md:p-6 flex flex-col gap-2"
+              className="rounded-lg p-4 md:p-6 flex flex-col gap-2"
             >
               <CountUpValue value={value} />
               <p className="text-xs md:text-sm text-ink-600 leading-tight">{label}</p>

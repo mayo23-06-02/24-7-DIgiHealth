@@ -31,10 +31,13 @@ export default function DoctorsCarouselSection({
         <p className="text-xs sm:text-sm text-slate-500 ml-2 shrink-0">{doctors.length} found</p>
       </div>
 
-      {/* Carousel: full width on mobile (85% per slide), 3-column grid layout on desktop */}
+      {/* Carousel: full width on mobile (85% per slide), 3-column on md, 3.5-column on lg+ */}
       <Carousel
         centerMode={true}
-        centerSlidePercentage={window?.innerWidth < 768 ? 85 : 33.33}
+        centerSlidePercentage={
+          window?.innerWidth < 768 ? 85 :
+          window?.innerWidth < 1024 ? 33.33 : 28.57
+        }
         className="-mx-4 sm:-mx-6 md:mx-0 px-4 sm:px-6 md:px-0 pb-2 sm:pb-3 md:pb-4"
       >
         {doctors.map((doc) => (

@@ -154,7 +154,7 @@ export default function PatientCalendar({ headerAction }: PatientCalendarProps =
 
       <div className="flex-1 flex flex-col overflow-y-auto py-4 space-y-4 custom-scrollbar">
         <div className="flex-shrink-0">
-          <Carousel selectedItem={carouselIndex} onChange={setCarouselIndex} centerMode slideClassName="w-[40%] md:w-[28.5714%] lg:w-[22.2222%]">
+          <Carousel selectedItem={carouselIndex} onChange={setCarouselIndex} centerMode slideClassName="w-[40%] md:w-[28.5714%] lg:w-[28.57%]">
             {carouselDays.map((day, idx) => (
               <DayCard key={idx} day={day} idx={idx} onSelect={setShowAddModal} onDrop={async (e, target) => {
                 const id = e.dataTransfer.getData("apptId");

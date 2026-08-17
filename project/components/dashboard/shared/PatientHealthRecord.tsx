@@ -31,6 +31,7 @@ import {
 import Button from "@/components/ui/Button";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
+import Tabs from "@/components/ui/Tabs";
 
 // --- Types ---
 interface TimelineEvent {
@@ -107,14 +108,9 @@ interface PatientHealthRecordProps {
 }
 
 export default function PatientHealthRecord({ patientId, isPractitioner = false }: PatientHealthRecordProps) {
-  const [activeTab, setActiveTab] = useState<
-    | "timeline"
-    | "vitals"
-    | "labs"
-    | "medications"
-    | "allergies"
-    | "immunizations"
-  >("timeline");
+  const [activeTab, setActiveTab] = useState("timeline");
+
+
   const [selectedVital, setSelectedVital] = useState<"weight" | "bp" | "heartRate">("weight");
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [vitals, setVitals] = useState<VitalsDataPoint[]>([]);
@@ -123,12 +119,19 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
   const [allergies, setAllergies] = useState<Allergy[]>([]);
   const [immunizations, setImmunizations] = useState<Immunization[]>([]);
   const [loadingRecords, setLoadingRecords] = useState(true);
-
+  const tabItems = [
+    { id: "timeline", label: "Timeline", icon: <Clock size={16} /> },
+    { id: "vitals", label: "Vitals", icon: <LineChartIcon size={16} /> },
+    { id: "labs", label: "Laboratory", icon: <Lab size={16} /> },
+    { id: "medications", label: "Meds", icon: <Pill size={16} /> },
+    { id: "allergies", label: "Allergies", icon: <Brain size={16} /> },
+    { id: "immunizations", label: "Vaccines", icon: <Syringe size={16} /> },
+  ];
   useEffect(() => {
     if (!patientId) return;
     setLoadingRecords(true);
 
-    const apiUrl = isPractitioner 
+    const apiUrl = isPractitioner
       ? `/api/practitioner/patients/${patientId}/health-record`
       : `/api/patient/health-record`;
 
@@ -190,30 +193,12 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
   return (
     <div className="space-y-6">
       {/* Tabs Row */}
-      <div className="flex p-1 gap-2 overflow-x-auto custom-scrollbar no-scrollbar bg-slate-50 rounded-lg">
-        {[
-          { id: "timeline", label: "Timeline", icon: <Clock size={16} /> },
-          { id: "vitals", label: "Vitals", icon: <LineChartIcon size={16} /> },
-          { id: "labs", label: "Laboratory", icon: <Lab size={16} /> },
-          { id: "medications", label: "Meds", icon: <Pill size={16} /> },
-          { id: "allergies", label: "Allergies", icon: <Brain size={16} /> },
-          { id: "immunizations", label: "Vaccines", icon: <Syringe size={16} /> },
-        ].map((tab) => (
-          <Button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            variant={activeTab === tab.id ? "primary" : "ghost"}
-            className={`flex items-center gap-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border-none py-2 px-4 ${
-              activeTab === tab.id
-                ? ""
-                : "text-slate-500 hover:text-primary hover:bg-white"
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </Button>
-        ))}
-      </div>
+      <Tabs
+        tabs={tabItems}
+        activeId={activeTab}
+        onChange={(id) => setActiveTab(id as any)}
+        className="mb-4" // optional spacing
+      />
 
       <div className="mt-4">
         {/* TIMELINE TAB */}
@@ -281,11 +266,10 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
                   <button
                     key={v.id}
                     onClick={() => setSelectedVital(v.id as any)}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                      selectedVital === v.id
+                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${selectedVital === v.id
                         ? "bg-white text-primary "
                         : "text-slate-500 hover:text-slate-800"
-                    }`}
+                      }`}
                   >
                     {v.label}
                   </button>
@@ -403,8 +387,8 @@ export default function PatientHealthRecord({ patientId, isPractitioner = false 
             {allergies.length === 0 ? (
               <div className="text-center py-10 text-slate-500">No allergies recorded.</div>
             ) : (
-              allergies.map((allergy) => (
-                <div key={allergy.id} className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between gap-4">
+              allergies.map((allergy, index) => (
+                <div key={allergy.id || `${allergy.allergen}-${allergy.reaction}-${index}`} className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${allergy.severity === "severe" ? "bg-rose-50 text-rose-500" : "bg-slate-50 text-slate-500"}`}>
                       <FilterIcon size={20} />

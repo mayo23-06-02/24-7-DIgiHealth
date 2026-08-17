@@ -26,11 +26,7 @@ export default function ScheduleList({ items, selectedDate }: ScheduleListProps)
         <h3 className="text-lg font-bold text-slate-800 font-grotesk">
           Schedule List ({dateStr})
         </h3>
-        <div className="flex gap-3">
-          <Button variant="outline" className="flex items-center gap-2 text-xs">
-            <BiFilter size={16} /> Filter
-          </Button>
-        </div>
+       
       </div>
 
       <div className="overflow-x-auto">

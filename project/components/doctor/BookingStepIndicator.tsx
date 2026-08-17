@@ -18,7 +18,7 @@ export default function BookingStepIndicator({
   const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
-    <div className="mb-2">
+    <div className="mb-6">
       <div className="flex items-start">
         {steps.map((s, idx) => {
           const isDone = step > s;
@@ -30,32 +30,30 @@ export default function BookingStepIndicator({
             <React.Fragment key={s}>
               <div className="flex flex-col items-center gap-2 shrink-0 w-16">
                 <div
-                  className={`relative flex items-center justify-center w-6 h-6 rounded-full shrink-0 transition-all duration-base ${
+                  className={`relative flex items-center justify-center w-6 lg:w-10 h-6 lg:h-10 rounded-full shrink-0 transition-all duration-base ${
                     isDone
                       ? "bg-success-500 text-white"
                       : isCurrent
-                        ? "bg-primary text-white ring-4 ring-primary/15"
-                        : "bg-surface-soft text-ink-400 border border-border"
+                        ? "bg-primary text-white "
+                        : "bg-surface-soft text-ink-400 "
                   }`}
                 >
                   {isDone ? (
                     <Check size={13} strokeWidth={3} />
                   ) : (
-                    <span className="text-[11px] font-bold">{s}</span>
+                    <span className="text-[11px] lg:text-xs font-semibold">{s}</span>
                   )}
                 </div>
                 {label && (
                   <div className="text-center">
                     <p
-                      className={`text-[11px] font-bold leading-tight ${
+                      className={`text-[11px]  font-bold leading-tight ${
                         isCurrent ? "text-ink-900" : isDone ? "text-success-700" : "text-ink-400"
                       }`}
                     >
                       {label}
                     </p>
-                    <p className="text-[10px] text-ink-400 font-medium mt-0.5">
-                      {status}
-                    </p>
+                    
                   </div>
                 )}
               </div>

@@ -18,6 +18,7 @@ export default function NotificationBell({
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [messageUnreadCount, setMessageUnreadCount] = useState(0);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedNotif, setSelectedNotif] = useState<Notification | null>(null);
   const previousUnreadCount = useRef(0);
@@ -47,7 +48,12 @@ export default function NotificationBell({
         const data = await res.json();
         setNotifications(data);
         const newUnreadCount = data.filter((n: any) => !n.isRead).length;
+        const newMessageUnreadCount = data.filter((n: any) => !n.isRead && (
+          n.type?.includes("message") || 
+          n.type === "new_message"
+        )).length;
         setUnreadCount(newUnreadCount);
+        setMessageUnreadCount(newMessageUnreadCount);
         if (isInitialLoad && newUnreadCount > 0) {
           playNotificationSound();
         } else if (!isInitialLoad && newUnreadCount > previousUnreadCount.current) {
@@ -205,6 +211,18 @@ export default function NotificationBell({
                   </button>
                 )}
               </div>
+
+              {/* Message notification indicator */}
+              {messageUnreadCount > 0 && (
+                <div className="mb-4 p-3 bg-info-50 border border-info-100 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare size={16} className="text-info-600" />
+                    <span className="text-xs font-semibold text-info-700">
+                      {messageUnreadCount} unread message{messageUnreadCount > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
                 {notifications.length === 0 ? (

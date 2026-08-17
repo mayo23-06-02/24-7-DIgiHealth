@@ -23,6 +23,8 @@ import {
 import { toast } from "react-hot-toast";
 import { riskBandStyle } from "@/lib/riskScore";
 import Input from "@/components/ui/Input";
+import Table, { Column } from "@/components/ui/Table";
+import Badge from "@/components/ui/Badge";
 
 const SORT_OPTIONS: { value: string; label: string }[] = [
   { value: "fullName", label: "Patient name" },
@@ -310,92 +312,93 @@ export default function PractitionerPatientsPage() {
   const fmtDateShort = (d?: string | Date | null) =>
     fmtDate(d, { day: "numeric", month: "short" });
 
-  const PatientActions = ({
-    patientId,
-    compact = false,
-  }: {
-    patientId: string;
-    compact?: boolean;
-  }) => (
-    <div
-      className={`flex items-center gap-2 ${compact ? "w-full sm:w-auto" : "justify-end"}`}
-    >
-      <Link
-        href={`/practitioner/patients/${patientId}`}
-        className={compact ? "flex-1 sm:flex-none" : undefined}
-      >
-        <Button
-          size="sm"
-          variant="primary"
-          className={`!rounded-full !max-w-none !px-3 !py-2 !normal-case !tracking-normal gap-1.5 ${
-            compact ? "w-full" : ""
-          }`}
-        >
-          <BiShow size={14} />
-          View
-        </Button>
-      </Link>
-      <Button
-        size="sm"
-        variant="outline"
-        type="button"
-        title="Message patient"
-        disabled={chatLoadingId === patientId}
-        loading={chatLoadingId === patientId}
-        onClick={(e) => handleStartChat(patientId, e)}
-        className={`!rounded-full !max-w-none !px-3 !py-2 !normal-case !tracking-normal gap-1.5 ${
-          compact ? "flex-1 sm:flex-none" : ""
-        }`}
-      >
-        {chatLoadingId !== patientId && <BiMessageDetail size={14} />}
-        Chat
-      </Button>
-    </div>
-  );
+  const getRiskStatus = (score: number): "success" | "warning" | "error" | "neutral" => {
+    if (score >= 76) return "error";
+    if (score >= 51) return "warning";
+    if (score >= 36) return "neutral";
+    return "success";
+  };
 
-  const Skeleton = () => (
-    <>
-      {/* Mobile skeleton cards */}
-      <div className="md:hidden animate-pulse divide-y divide-slate-100">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="px-4 py-4 space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-2 flex-1">
-                <div className="h-3.5 bg-slate-100 rounded w-36" />
-                <div className="h-2.5 bg-slate-100 rounded w-24" />
-              </div>
-              <div className="h-6 w-10 bg-slate-100 rounded-full" />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="h-8 bg-slate-50 rounded-lg" />
-              <div className="h-8 bg-slate-50 rounded-lg" />
-            </div>
-            <div className="flex gap-2">
-              <div className="h-9 flex-1 bg-slate-100 rounded-full" />
-              <div className="h-9 flex-1 bg-slate-100 rounded-full" />
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Desktop skeleton rows */}
-      <div className="hidden md:block animate-pulse divide-y divide-slate-50">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 px-5 py-4">
-            <div className="flex-1 space-y-2">
-              <div className="h-3 bg-slate-100 rounded w-32" />
-              <div className="h-2 bg-slate-100 rounded w-20" />
-            </div>
-            <div className="h-3 bg-slate-100 rounded w-10 hidden lg:block" />
-            <div className="h-3 bg-slate-100 rounded w-20 hidden xl:block" />
-            <div className="h-3 bg-slate-100 rounded w-20" />
-            <div className="h-3 bg-slate-100 rounded w-16 hidden lg:block" />
-            <div className="h-6 bg-slate-100 rounded-full w-10" />
-            <div className="h-8 bg-slate-100 rounded-full w-28" />
-          </div>
-        ))}
-      </div>
-    </>
-  );
+  const columns: Column<any>[] = [
+    {
+      key: "fullName",
+      header: "Patient",
+      isTitle: true,
+      sortable: true,
+      render: (row) => (
+        <div className="min-w-0">
+          <p className="font-semibold text-ink-900 truncate">{row.fullName}</p>
+          <p className="text-small text-slate-500 capitalize">
+            {row.gender || "—"}
+            {row.age != null && <span className="lg:hidden"> · {row.age} yrs</span>}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "age",
+      header: "Age",
+      sortable: true,
+      align: "right",
+      render: (row) => row.age != null ? row.age : "—",
+    },
+    {
+      key: "dateJoined",
+      header: "Date Joined",
+      sortable: true,
+      render: (row) => fmtDate(row.dateJoined),
+    },
+    {
+      key: "lastVisit",
+      header: "Last Visit",
+      sortable: true,
+      render: (row) => fmtDateShort(row.lastVisit),
+    },
+    {
+      key: "nextAppointment",
+      header: "Next Appt",
+      sortable: true,
+      render: (row) => fmtDateShort(row.nextAppointment),
+    },
+    {
+      key: "riskScore",
+      header: "Risk",
+      sortable: true,
+      align: "right",
+      render: (row) => (
+        <Badge
+          label={String(row.riskScore ?? 0)}
+          status={getRiskStatus(row.riskScore || 0)}
+        />
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      align: "right",
+      render: (row) => (
+        <div className="flex items-center gap-2 justify-end">
+          <Link href={`/practitioner/patients/${row.id}`}>
+            <Button size="sm" variant="primary">
+              View
+            </Button>
+          </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            type="button"
+            title="Message patient"
+            disabled={chatLoadingId === row.id}
+            loading={chatLoadingId === row.id}
+            onClick={(e) => handleStartChat(row.id, e)}
+          >
+            Chat
+          </Button>
+          
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
@@ -411,19 +414,11 @@ export default function PractitionerPatientsPage() {
         </div>
         <div className="relative" ref={exportMenuRef}>
           <Button
-            variant="outline"
+            variant="primary"
             size="sm"
             onClick={() => setExportOpen((o) => !o)}
             disabled={exportingPdf || loading}
-            icon={
-              exportingPdf ? (
-                <BiLoaderAlt size={16} className="animate-spin" />
-              ) : (
-                <BiDownload size={16} />
-              )
-            }
-            iconPosition="left"
-            className="!rounded-lg !max-w-none normal-case"
+        
           >
             <span className="inline-flex items-center gap-1.5">
               {exportingPdf ? "Exporting…" : "Export"}
@@ -568,184 +563,44 @@ export default function PractitionerPatientsPage() {
       )}
 
       {/* List / table */}
-      <Card className="flex flex-col p-0 overflow-hidden">
-        {loading ? (
-          <Skeleton />
-        ) : paginated.length === 0 ? (
-          <div className="py-12 px-5 text-center text-slate-500 text-sm">
-            No patients found.
-          </div>
-        ) : (
-          <>
-            {/* Mobile / small tablet: stacked cards */}
-            <div className="md:hidden divide-y divide-slate-100">
-              {paginated.map((p) => (
-                <article
-                  key={p.id}
-                  className="px-4 py-4 space-y-3 hover:bg-slate-50/40 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-800 truncate">
-                        {p.fullName}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-0.5 capitalize">
-                        {[p.gender, p.age != null ? `${p.age} yrs` : null]
-                          .filter(Boolean)
-                          .join(" · ") || "—"}
-                      </p>
-                    </div>
-                    <span
-                      className="shrink-0 inline-flex items-center justify-center min-w-[2.25rem] h-7 px-2 rounded-full text-sm font-bold tabular-nums text-white"
-                      style={{
-                        backgroundColor: riskBandStyle(p.riskScore || 0).bg,
-                      }}
-                      title={
-                        p.riskLabel ||
-                        riskBandStyle(p.riskScore || 0).label
-                      }
-                    >
-                      {p.riskScore ?? 0}
-                    </span>
-                  </div>
+      <Table
+        columns={columns}
+        data={paginated}
+        keyField="id"
+        loading={loading}
+        emptyTitle="No patients found"
+        emptyDescription="Try adjusting your search or filters."
+      />
 
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-lg bg-slate-50 px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                        Last visit
-                      </p>
-                      <p className="text-slate-700 font-medium mt-0.5">
-                        {fmtDateShort(p.lastVisit)}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-slate-50 px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                        Next appt
-                      </p>
-                      <p className="text-slate-700 font-medium mt-0.5">
-                        {fmtDateShort(p.nextAppointment)}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-slate-50 px-3 py-2 col-span-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                        Joined
-                      </p>
-                      <p className="text-slate-700 font-medium mt-0.5">
-                        {fmtDate(p.dateJoined)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <PatientActions patientId={p.id} compact />
-                </article>
-              ))}
-            </div>
-
-            {/* md+: responsive table (columns collapse on tablet) */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="py-3 px-4 lg:px-5 text-xs font-bold text-slate-500 tracking-wider">
-                      Patient
-                    </th>
-                    <th className="py-3 px-3 lg:px-5 text-xs font-bold text-slate-500 tracking-wider hidden lg:table-cell">
-                      Age
-                    </th>
-                    <th className="py-3 px-3 lg:px-5 text-xs font-bold text-slate-500 tracking-wider hidden xl:table-cell">
-                      Date Joined
-                    </th>
-                    <th className="py-3 px-3 lg:px-5 text-xs font-bold text-slate-500 tracking-wider">
-                      Last Visit
-                    </th>
-                    <th className="py-3 px-3 lg:px-5 text-xs font-bold text-slate-500 tracking-wider hidden lg:table-cell">
-                      Next Appt
-                    </th>
-                    <th className="py-3 px-3 lg:px-5 text-xs font-bold text-slate-500 tracking-wider">
-                      Risk
-                    </th>
-                    <th className="py-3 px-4 lg:px-5 text-xs font-bold text-slate-500 tracking-wider text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50 bg-white">
-                  {paginated.map((p) => (
-                    <tr
-                      key={p.id}
-                      className="hover:bg-slate-50/50 transition-colors"
-                    >
-                      <td className="py-3 px-4 lg:px-5">
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-800 truncate max-w-[12rem] lg:max-w-none">
-                            {p.fullName}
-                          </p>
-                          <p className="text-xs text-slate-500 capitalize">
-                            {p.gender || "—"}
-                            {p.age != null && (
-                              <span className="lg:hidden"> · {p.age} yrs</span>
-                            )}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 lg:px-5 text-sm font-semibold text-slate-700 tabular-nums hidden lg:table-cell">
-                        {p.age != null ? p.age : "—"}
-                      </td>
-                      <td className="py-3 px-3 lg:px-5 text-xs text-slate-500 hidden xl:table-cell whitespace-nowrap">
-                        {fmtDate(p.dateJoined)}
-                      </td>
-                      <td className="py-3 px-3 lg:px-5 text-xs text-slate-500 whitespace-nowrap">
-                        {fmtDateShort(p.lastVisit)}
-                      </td>
-                      <td className="py-3 px-3 lg:px-5 text-xs text-slate-500 hidden lg:table-cell whitespace-nowrap">
-                        {fmtDateShort(p.nextAppointment)}
-                      </td>
-                      <td className="py-3 px-3 lg:px-5">
-                        <span className="text-sm font-bold text-slate-800 tabular-nums">
-                          {p.riskScore ?? 0}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 lg:px-5">
-                        <PatientActions patientId={p.id} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-t border-slate-100 bg-slate-50">
-            <span className="text-xs text-slate-500 shrink-0">
-              <span className="hidden sm:inline">{sorted.length} patients total</span>
-              <span className="sm:hidden">{sorted.length} total</span>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-t border-slate-100 bg-slate-50">
+          <span className="text-xs text-slate-500 shrink-0">
+            <span className="hidden sm:inline">{sorted.length} patients total</span>
+            <span className="sm:hidden">{sorted.length} total</span>
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 text-sm border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-100 transition-colors"
+            >
+              ←
+            </button>
+            <span className="px-2 py-1 text-sm text-slate-600 tabular-nums">
+              {page} / {totalPages}
             </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-2 text-sm border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-100 transition-colors"
-              >
-                ←
-              </button>
-              <span className="px-2 py-1 text-sm text-slate-600 tabular-nums">
-                {page} / {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-2 text-sm border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-100 transition-colors"
-              >
-                →
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-2 text-sm border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-100 transition-colors"
+            >
+              →
+            </button>
           </div>
-        )}
-      </Card>
+        </div>
+      )}
 
       {/* Filter modal */}
       <Modal

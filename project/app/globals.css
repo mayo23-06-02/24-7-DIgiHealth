@@ -207,6 +207,7 @@ html[data-navigating="true"] * {
   a {
     color: inherit;
     text-decoration: none;
+    font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
   }
 
   label {

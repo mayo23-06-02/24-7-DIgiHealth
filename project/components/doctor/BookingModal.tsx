@@ -13,6 +13,7 @@ import {
   Search,
   ArrowLeft,
   ArrowRight,
+  Stethoscope,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "../ui/Card";
@@ -32,6 +33,7 @@ import {
 import TimeSlotPicker from "@/components/booking/TimeSlotPicker";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import BookingStepIndicator from "@/components/doctor/BookingStepIndicator";
+import { BiUser } from "react-icons/bi";
 
 interface Doctor {
   id: string;
@@ -456,7 +458,7 @@ export default function BookingModal({
               <h4 className="text-lg font-bold text-slate-800 tracking-tight mb-1 font-grotesk">
                 {isPractitionerMode ? "Select Patient" : "Medical Network"}
               </h4>
-              <p className="text-xs text-slate-500 font-bold tracking-normal opacity-80">
+              <p className="text-xs text-slate-500  tracking-normal opacity-80">
                 {isPractitionerMode
                   ? "Search and select a patient from your practice."
                   : "Choose from our verified network of practitioners."}
@@ -547,7 +549,7 @@ export default function BookingModal({
                     className="w-full"
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
                   {availableDocs
                     .filter(
                       (doc) =>
@@ -565,24 +567,21 @@ export default function BookingModal({
                         : `Dr. ${doc.name}`;
                       return (
                         <Card
+                          noPadding
                           key={doc.id}
                           onClick={() => {
                             setSelectedDoctorState(doc);
                             setStep(2);
                           }}
-                          className={`group p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
-                            isSelected
+                          className={`group p-4 rounded-lg cursor-pointer transition-all duration-300 ${isSelected
                               ? "border-primary bg-primary/5 shadow-none shadow-primary/10"
                               : "border-slate-100 bg-white hover:border-primary/20 hover:bg-slate-50/20"
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-4">
-                            <Avatar
-                              name={doc.name}
-                              src={doc.avatar}
-                              size="md"
-                              className="group-hover:scale-105 transition-transform duration-500 shadow-none shadow-slate-100"
-                            />
+                            <div className="bg-surface-soft text-primary p-3 rounded-full">
+                              <Stethoscope />
+                            </div>
                             <div className="min-w-0 flex-1">
                               <h1 className="font-bold text-slate-800 text-sm mb-0.5 truncate group-hover:text-primary transition-colors">
                                 {docDisplayName}
@@ -624,11 +623,10 @@ export default function BookingModal({
                         setSelectedDate(dateStr);
                         setSelectedTime("");
                       }}
-                      className={`flex flex-col items-center justify-center rounded-lg border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${
-                        isSelected
+                      className={`flex flex-col items-center justify-center rounded-lg border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${isSelected
                           ? "border-primary bg-primary text-white shadow-primary/30 scale-105"
                           : "border-slate-200 bg-white text-slate-500 hover:border-primary/30"
-                      }`}
+                        }`}
                     >
                       <span
                         className={`text-[9px] font-bold tracking-normal ${isSelected ? "text-white/70" : "text-slate-500"}`}

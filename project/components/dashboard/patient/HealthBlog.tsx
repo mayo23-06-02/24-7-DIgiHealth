@@ -360,7 +360,7 @@ export default function HealthBlog() {
 
   const visibleCount = isClient
     ? window.innerWidth >= 1200
-      ? 4
+      ? 3.5
       : window.innerWidth >= 800
         ? 2
         : 1

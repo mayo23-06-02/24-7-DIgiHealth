@@ -68,8 +68,8 @@ const DayCard: React.FC<DayCardProps> = ({
             </span>
           </div>
           {day.isToday && (
-            <div className="text-[10px] sm:text-xs uppercase font-bold bg-primary px-2 py-0.5 rounded-full text-white">
-              Today
+            <div className="text-[10px]  uppercase font-bold bg-primary px-3 py-1 rounded-full text-white">
+             <p> Today</p>
             </div>
           )}
         </div>

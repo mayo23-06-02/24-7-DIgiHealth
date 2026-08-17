@@ -345,26 +345,12 @@ export default function DoctorProfilePage() {
                         size={16}
                         className="text-success-500 shrink-0"
                       />
-                      {item}
+                      <p>{item}</p>
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="space-y-3">
-                <p className="text-label text-ink-500">Medical Aid Accepted</p>
-                <div className="flex flex-wrap gap-2">
-                  {(
-                    doc.medicalAids || [
-                      "Discovery",
-                      "Bonitas",
-                      "Momentum",
-                      "Medishield",
-                    ]
-                  ).map((aid: string) => (
-                    <Badge key={aid} label={aid} status="neutral" size="sm" />
-                  ))}
-                </div>
-              </div>
+             
             </div>
           </Card>
 
@@ -402,8 +388,7 @@ export default function DoctorProfilePage() {
             </div>
             <p className="text-xs text-ink-600 leading-relaxed">
               Consultations with {doc.name} are billed automatically under
-              your DigiHealth subscription — no upfront card details needed.
-            </p>
+              your DigiHealth subscription            </p>
             <Button fullWidth size="sm" onClick={() => setShowBooking(true)}>
               Book Consultation
             </Button>

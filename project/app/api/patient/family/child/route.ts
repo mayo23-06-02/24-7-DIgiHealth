@@ -29,6 +29,8 @@ export async function POST(req: NextRequest) {
     const lastName = String(body.lastName || '').trim();
     const dateOfBirth = body.dateOfBirth ? new Date(body.dateOfBirth) : null;
     const gender = body.gender;
+    const idNumber = body.idNumber ? String(body.idNumber).trim() : undefined;
+    const ageRange = ['0-2', '3-5', '5-12', '13-18'].includes(body.ageRange) ? body.ageRange : undefined;
     const relationship = ['child', 'spouse', 'parent', 'other'].includes(body.relationship) ? body.relationship : 'child';
 
     if (!firstName || !lastName) {
@@ -76,6 +78,8 @@ export async function POST(req: NextRequest) {
       userId: childUser._id,
       dateOfBirth,
       gender,
+      idNumber,
+      ageRange,
       subscriptionTier: 'pro',
     });
 

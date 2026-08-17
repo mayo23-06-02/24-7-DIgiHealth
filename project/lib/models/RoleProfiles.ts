@@ -5,6 +5,8 @@ export interface IPatientProfile extends Document {
   userId: Types.ObjectId;
   dateOfBirth: Date;
   gender: 'male' | 'female' | 'other';
+  idNumber?: string;
+  ageRange?: '0-2' | '3-5' | '5-12' | '13-18';
   emergencyContact: { name: string; phone: string; relationship: string };
   /** Up to 3 — enforced both in the schema validator and the API route. */
   nextOfKin?: { name: string; phone: string; relationship: string }[];
@@ -21,6 +23,8 @@ const PatientProfileSchema = new Schema<IPatientProfile>({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
   dateOfBirth: { type: Date, required: true },
   gender: { type: String, enum: ['male', 'female', 'other'], required: true },
+  idNumber: { type: String },
+  ageRange: { type: String, enum: ['0-2', '3-5', '5-12', '13-18'] },
   emergencyContact: {
     name: String,
     phone: String,

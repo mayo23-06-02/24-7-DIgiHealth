@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import FamilyLink from '@/lib/models/FamilyLink';
 import { getGuardianFamilySlots } from '@/lib/family/access';
+import { PatientProfile } from '@/lib/models/RoleProfiles';
 
 /** GET — the caller's family links, both as guardian (members they manage)
  * and as member (guardians who manage them, for transparency). */
@@ -12,7 +13,7 @@ export async function GET() {
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
-    const [asGuardian, asMember, slots] = await Promise.all([
+    const [asGuardian, asMember, slots, patientProfile] = await Promise.all([
       FamilyLink.find({ guardianId: user.userId, status: { $in: ['pending', 'active'] } })
         .populate('memberId', 'firstName lastName email')
         .sort({ createdAt: -1 })
@@ -22,11 +23,28 @@ export async function GET() {
         .sort({ createdAt: -1 })
         .lean(),
       getGuardianFamilySlots(user.userId),
+      PatientProfile.findOne({ userId: user.userId }).lean(),
     ]);
+
+    // Determine if user is a child (under 18)
+    let isChild = false;
+    if (patientProfile?.ageRange) {
+      isChild = true;
+    } else if (patientProfile?.dateOfBirth) {
+      const dob = new Date(patientProfile.dateOfBirth);
+      const now = new Date();
+      const ageInYears = now.getFullYear() - dob.getFullYear();
+      const monthDiff = now.getMonth() - dob.getMonth();
+      const adjustedAge = monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())
+        ? ageInYears - 1
+        : ageInYears;
+      isChild = adjustedAge < 18;
+    }
 
     return NextResponse.json({
       success: true,
       data: {
+        isChild,
         asGuardian: asGuardian.map((l: any) => ({
           id: l._id.toString(),
           member: l.memberId

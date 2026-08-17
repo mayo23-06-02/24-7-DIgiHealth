@@ -46,12 +46,13 @@ export default function FamilyTab({
   const [asGuardian, setAsGuardian] = useState<GuardianLink[]>([]);
   const [asMember, setAsMember] = useState<MemberLink[]>([]);
   const [slots, setSlots] = useState<Slots | null>(null);
+  const [isChild, setIsChild] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showChildForm, setShowChildForm] = useState(false);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [childForm, setChildForm] = useState({ firstName: "", lastName: "", dateOfBirth: "", gender: "male" });
+  const [childForm, setChildForm] = useState({ firstName: "", lastName: "", dateOfBirth: "", gender: "male", idNumber: "", ageRange: "" });
   const [inviteForm, setInviteForm] = useState({ email: "", relationship: "spouse" });
 
   const [confirmTarget, setConfirmTarget] = useState<GuardianLink | null>(null);
@@ -70,6 +71,7 @@ export default function FamilyTab({
         setAsGuardian(json.data.asGuardian);
         setAsMember(json.data.asMember);
         setSlots(json.data.slots);
+        setIsChild(json.data.isChild || false);
       }
     } catch {
       /* silent */
@@ -97,7 +99,7 @@ export default function FamilyTab({
       if (res.ok && json.success) {
         setToast({ message: "Child added.", type: "success" });
         setShowChildForm(false);
-        setChildForm({ firstName: "", lastName: "", dateOfBirth: "", gender: "male" });
+        setChildForm({ firstName: "", lastName: "", dateOfBirth: "", gender: "male", idNumber: "", ageRange: "" });
         load();
       } else {
         setToast({ message: json.error || "Failed to add child.", type: "error" });
@@ -200,173 +202,192 @@ export default function FamilyTab({
 
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
-      <ProfileSection
-        icon={<Users size={22} />}
-        title="Family account"
-        description="Link family members you manage and pay for. Adults keep their medical history private unless you flag them as a minor."
-        color="primary"
-      >
-        {slots && (
-          <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200 bg-surface-soft px-4 py-3">
-            <p className="text-sm font-semibold text-ink-900">
-              {slots.used} of {slots.maxFamilyMembers} family slot{slots.maxFamilyMembers === 1 ? "" : "s"} used
-              <span className="ml-1.5 font-normal text-slate-500 capitalize">({slots.tier.replace("_", " ")} plan)</span>
-            </p>
-            {slots.remaining <= 0 && (
-              <span className="text-xs font-semibold text-primary">Upgrade to add more</span>
+      {!isChild && (
+        <ProfileSection
+          icon={<Users size={22} />}
+          title="Family account"
+          description="Link family members you manage and pay for. Adults keep their medical history private unless you flag them as a minor."
+          color="primary"
+        >
+          {slots && (
+            <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200 bg-surface-soft px-4 py-3">
+              <p className="text-sm font-semibold text-ink-900">
+                {slots.used} of {slots.maxFamilyMembers} family slot{slots.maxFamilyMembers === 1 ? "" : "s"} used
+                <span className="ml-1.5 font-normal text-slate-500 capitalize">({slots.tier.replace("_", " ")} plan)</span>
+              </p>
+              {slots.remaining <= 0 && (
+                <span className="text-xs font-semibold text-primary">Upgrade to add more</span>
+              )}
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {asGuardian.length === 0 && !showChildForm && !showInviteForm && (
+              <p className="text-sm text-slate-500 text-center py-6">No family members linked yet.</p>
+            )}
+
+            {asGuardian.map((link) => (
+              <div key={link.id} className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-white">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-bold text-ink-900 truncate">{link.member.name || link.member.email}</p>
+                    <Badge label={link.relationship} status="neutral" size="sm" />
+                    <Badge label={link.status} status={STATUS_BADGE[link.status]} size="sm" />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">{link.member.email}</p>
+                </div>
+                {link.status === "active" && (
+                  <Switch
+                    checked={link.isMinor}
+                    onChange={(v) => link.member.id && handleToggleMinor(link.member.id, v)}
+                    label="Guardian can view medical records"
+                    className="shrink-0 max-w-[220px] text-right flex-row-reverse"
+                  />
+                )}
+                <button
+                  onClick={() => {
+                    setConfirmTarget(link);
+                    setConfirmInput("");
+                  }}
+                  aria-label="Remove family member"
+                  className="shrink-0 p-2 text-slate-400 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+
+            {showChildForm && (
+              <Card className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-ink-900 flex items-center gap-2">
+                    <Baby size={16} className="text-primary" /> Add child
+                  </h4>
+                  <button onClick={() => setShowChildForm(false)} aria-label="Cancel">
+                    <X size={16} className="text-slate-400" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input
+                    label="First name"
+                    value={childForm.firstName}
+                    onChange={(e) => setChildForm((p) => ({ ...p, firstName: e.target.value }))}
+                  />
+                  <Input
+                    label="Last name"
+                    value={childForm.lastName}
+                    onChange={(e) => setChildForm((p) => ({ ...p, lastName: e.target.value }))}
+                  />
+                  <Input
+                    label="Date of birth"
+                    type="date"
+                    value={childForm.dateOfBirth}
+                    onChange={(e) => setChildForm((p) => ({ ...p, dateOfBirth: e.target.value }))}
+                  />
+                  <Select
+                    label="Gender"
+                    value={childForm.gender}
+                    onChange={(v) => setChildForm((p) => ({ ...p, gender: v as string }))}
+                    options={[
+                      { value: "male", label: "Male" },
+                      { value: "female", label: "Female" },
+                      { value: "other", label: "Other" },
+                    ]}
+                  />
+                  <Select
+                    label="Age Range"
+                    value={childForm.ageRange}
+                    onChange={(v) => setChildForm((p) => ({ ...p, ageRange: v as string }))}
+                    options={[
+                      { value: "0-2", label: "0-2 years" },
+                      { value: "3-5", label: "3-5 years" },
+                      { value: "5-12", label: "5-12 years" },
+                      { value: "13-18", label: "13-18 years" },
+                    ]}
+                  />
+                  <Input
+                    label="ID Number"
+                    value={childForm.idNumber}
+                    onChange={(e) => setChildForm((p) => ({ ...p, idNumber: e.target.value }))}
+                    placeholder="Optional"
+                  />
+                </div>
+                <Button onClick={handleAddChild} loading={isSaving} fullWidth>
+                  Add child
+                </Button>
+              </Card>
+            )}
+
+            {showInviteForm && (
+              <Card className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-ink-900 flex items-center gap-2">
+                    <Mail size={16} className="text-primary" /> Invite family member
+                  </h4>
+                  <button onClick={() => setShowInviteForm(false)} aria-label="Cancel">
+                    <X size={16} className="text-slate-400" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input
+                    label="Email address"
+                    type="email"
+                    icon={<Mail size={16} />}
+                    value={inviteForm.email}
+                    onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))}
+                    placeholder="their@email.com"
+                  />
+                  <Select
+                    label="Relationship"
+                    value={inviteForm.relationship}
+                    onChange={(v) => setInviteForm((p) => ({ ...p, relationship: v as string }))}
+                    options={[
+                      { value: "spouse", label: "Spouse" },
+                      { value: "parent", label: "Parent" },
+                      { value: "other", label: "Other" },
+                    ]}
+                  />
+                </div>
+                <p className="text-xs text-slate-500">
+                  They'll get an email to accept — you won't get access until they do, and their medical history always stays private to them.
+                </p>
+                <Button onClick={handleInvite} loading={isSaving} fullWidth>
+                  Send invite
+                </Button>
+              </Card>
             )}
           </div>
-        )}
 
-        <div className="space-y-3">
-          {asGuardian.length === 0 && !showChildForm && !showInviteForm && (
-            <p className="text-sm text-slate-500 text-center py-6">No family members linked yet.</p>
-          )}
-
-          {asGuardian.map((link) => (
-            <div key={link.id} className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-white">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-bold text-ink-900 truncate">{link.member.name || link.member.email}</p>
-                  <Badge label={link.relationship} status="neutral" size="sm" />
-                  <Badge label={link.status} status={STATUS_BADGE[link.status]} size="sm" />
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">{link.member.email}</p>
-              </div>
-              {link.status === "active" && (
-                <Switch
-                  checked={link.isMinor}
-                  onChange={(v) => link.member.id && handleToggleMinor(link.member.id, v)}
-                  label="Guardian can view medical records"
-                  className="shrink-0 max-w-[220px] text-right flex-row-reverse"
-                />
-              )}
-              <button
-                onClick={() => {
-                  setConfirmTarget(link);
-                  setConfirmInput("");
-                }}
-                aria-label="Remove family member"
-                className="shrink-0 p-2 text-slate-400 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))}
-
-          {showChildForm && (
-            <Card className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-ink-900 flex items-center gap-2">
-                  <Baby size={16} className="text-primary" /> Add child
-                </h4>
-                <button onClick={() => setShowChildForm(false)} aria-label="Cancel">
-                  <X size={16} className="text-slate-400" />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="First name"
-                  value={childForm.firstName}
-                  onChange={(e) => setChildForm((p) => ({ ...p, firstName: e.target.value }))}
-                />
-                <Input
-                  label="Last name"
-                  value={childForm.lastName}
-                  onChange={(e) => setChildForm((p) => ({ ...p, lastName: e.target.value }))}
-                />
-                <Input
-                  label="Date of birth"
-                  type="date"
-                  value={childForm.dateOfBirth}
-                  onChange={(e) => setChildForm((p) => ({ ...p, dateOfBirth: e.target.value }))}
-                />
-                <Select
-                  label="Gender"
-                  value={childForm.gender}
-                  onChange={(v) => setChildForm((p) => ({ ...p, gender: v as string }))}
-                  options={[
-                    { value: "male", label: "Male" },
-                    { value: "female", label: "Female" },
-                    { value: "other", label: "Other" },
-                  ]}
-                />
-              </div>
-              <Button onClick={handleAddChild} loading={isSaving} fullWidth>
-                Add child
-              </Button>
-            </Card>
-          )}
-
-          {showInviteForm && (
-            <Card className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-ink-900 flex items-center gap-2">
-                  <Mail size={16} className="text-primary" /> Invite family member
-                </h4>
-                <button onClick={() => setShowInviteForm(false)} aria-label="Cancel">
-                  <X size={16} className="text-slate-400" />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="Email address"
-                  type="email"
-                  icon={<Mail size={16} />}
-                  value={inviteForm.email}
-                  onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))}
-                  placeholder="their@email.com"
-                />
-                <Select
-                  label="Relationship"
-                  value={inviteForm.relationship}
-                  onChange={(v) => setInviteForm((p) => ({ ...p, relationship: v as string }))}
-                  options={[
-                    { value: "spouse", label: "Spouse" },
-                    { value: "parent", label: "Parent" },
-                    { value: "other", label: "Other" },
-                  ]}
-                />
-              </div>
-              <p className="text-xs text-slate-500">
-                They'll get an email to accept — you won't get access until they do, and their medical history always stays private to them.
-              </p>
-              <Button onClick={handleInvite} loading={isSaving} fullWidth>
-                Send invite
-              </Button>
-            </Card>
-          )}
-        </div>
-
-        <div className="mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row gap-3">
-          <Button
-            variant="outline"
-            fullWidth
-            icon={<Baby size={16} />}
-            iconPosition="left"
-            onClick={() => {
-              setShowChildForm(true);
-              setShowInviteForm(false);
-            }}
-            disabled={!!slots && slots.remaining <= 0}
-          >
-            Add Child
-          </Button>
-          <Button
-            variant="outline"
-            fullWidth
-            icon={<UserPlus size={16} />}
-            iconPosition="left"
-            onClick={() => {
-              setShowInviteForm(true);
-              setShowChildForm(false);
-            }}
-            disabled={!!slots && slots.remaining <= 0}
-          >
-            Invite Family Member
-          </Button>
-        </div>
-      </ProfileSection>
+          <div className="mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row gap-3">
+            <Button
+              variant="outline"
+              fullWidth
+              icon={<Baby size={16} />}
+              iconPosition="left"
+              onClick={() => {
+                setShowChildForm(true);
+                setShowInviteForm(false);
+              }}
+              disabled={!!slots && slots.remaining <= 0}
+            >
+              Add Child
+            </Button>
+            <Button
+              variant="outline"
+              fullWidth
+              icon={<UserPlus size={16} />}
+              iconPosition="left"
+              onClick={() => {
+                setShowInviteForm(true);
+                setShowChildForm(false);
+              }}
+              disabled={!!slots && slots.remaining <= 0}
+            >
+              Invite Family Member
+            </Button>
+          </div>
+        </ProfileSection>
+      )}
 
       {asMember.length > 0 && (
         <ProfileSection

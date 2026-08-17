@@ -200,6 +200,10 @@ interface MedicalManikinProps {
   weightKg: number;
   /** Selects the body-proportion mesh; defaults to "adult" (today's only real assets). */
   ageGroup?: ManikinAgeGroup;
+  /** Age range from patient profile to auto-select appropriate mesh */
+  ageRange?: '0-2' | '3-5' | '5-12' | '13-18';
+  /** Date of birth to calculate age if ageRange is not provided */
+  dateOfBirth?: Date | string;
   readOnly?: boolean;
   patientId?: string;
   onUpdateHeightWeight?: () => void;
@@ -276,7 +280,7 @@ function HighlightMarker({
 type ModelVariant = "adult-male" | "adult-female" | "child" | "infant";
 
 /**
- * Per-mesh-file calibration, not per-gender: each .glb is authored at its
+ * Per-mesh-fiEsami Mahlalelale calibration, not per-gender: each .glb is authored at its
  * own native scale/origin, so these numbers compensate for that specific
  * file, not for the person's sex. child/infant reuse adult-male's numbers as
  * a placeholder — almost certainly wrong once those meshes actually exist,
@@ -288,8 +292,8 @@ const MODEL_CALIBRATION: Record<
 > = {
   "adult-female": { scale: (b) => [b.x * 1.4, b.y * 1.4, b.x * 1.4], position: [0, -2.8, 0] },
   "adult-male": { scale: (b) => [b.x * 0.7, b.y * 0.8, b.x * 0.8], position: [0, 1.0, 0] },
-  child: { scale: (b) => [b.x * 0.7, b.y * 0.8, b.x * 0.8], position: [0, 1.0, 0] }, // TODO recalibrate
-  infant: { scale: (b) => [b.x * 0.7, b.y * 0.8, b.x * 0.8], position: [0, 1.0, 0] }, // TODO recalibrate
+  child: { scale: (b) => [b.x * 0.6, b.y * 0.6, b.x * 0.6], position: [0, 0.5, 0] },
+  infant: { scale: () => [0.5, 0.6, 0.5], position: [0, -0.5, 0] },
 };
 
 function Model({
@@ -362,7 +366,9 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
       gender: rawGender,
       heightCm,
       weightKg,
-      ageGroup = "adult",
+      ageGroup: propAgeGroup,
+      ageRange,
+      dateOfBirth,
       readOnly = false,
       patientId,
       onUpdateHeightWeight,
@@ -370,6 +376,48 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
     ref,
   ) {
   const gender = rawGender.toLowerCase() === "female" ? "female" : "male";
+
+  // Determine ageGroup from ageRange or dateOfBirth if provided, otherwise use prop
+  const ageGroup = useMemo(() => {
+    if (propAgeGroup && propAgeGroup !== "adult") return propAgeGroup;
+
+    // First check ageRange
+    if (ageRange === "0-2" || ageRange === "3-5") {
+      console.log("MedicalManikin: ageRange =", ageRange, "-> rendering infant model");
+      return "infant";
+    }
+    if (ageRange === "5-12" || ageRange === "13-18") {
+      console.log("MedicalManikin: ageRange =", ageRange, "-> rendering child model");
+      return "child";
+    }
+
+    // Fallback to calculating from dateOfBirth
+    if (dateOfBirth) {
+      const dob = new Date(dateOfBirth);
+      const now = new Date();
+      const ageInYears = now.getFullYear() - dob.getFullYear();
+      const monthDiff = now.getMonth() - dob.getMonth();
+
+      // Adjust if birthday hasn't occurred yet this year
+      const adjustedAge = monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())
+        ? ageInYears - 1
+        : ageInYears;
+
+      console.log("MedicalManikin: dateOfBirth =", dateOfBirth, "calculated age =", adjustedAge);
+
+      if (adjustedAge < 10) {
+        console.log("MedicalManikin: age < 10 -> rendering infant model");
+        return "infant";
+      }
+      if (adjustedAge >= 10 && adjustedAge <= 18) {
+        console.log("MedicalManikin: age 10-18 -> rendering child model");
+        return "child";
+      }
+    }
+
+    console.log("MedicalManikin: rendering adult model");
+    return "adult";
+  }, [propAgeGroup, ageRange, dateOfBirth]);
   const [activePart, setActivePart] = useState<{
     name: string;
     point: THREE.Vector3;
@@ -377,7 +425,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [description, setDescription] = useState("");
-  const [customPartName, setCustomPartName] = useState("Select a part");
+  const [customPartName, setCustomPartName] = useState("Select name of body part placeholder");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const glRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -431,13 +479,12 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
     return gender === "female" ? "adult-female" : "adult-male";
   }, [ageGroup, gender]);
 
-  // Preload both adult models for zero-latency gender switching. Infant/child
-  // aren't preloaded yet — those .glb files don't exist in /public until
-  // sourced, and eagerly preloading a 404 on every mount is just noise.
-  // Drop the two new meshes in and add their preload calls here.
+  // Preload all models for zero-latency loading
   useEffect(() => {
     useGLTF.preload("/human_glb.glb");
     useGLTF.preload("/female.glb");
+    useGLTF.preload("/infant.glb");
+    useGLTF.preload("/child.glb");
   }, []);
 
   const bmi = useMemo(() => {
@@ -475,7 +522,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
   const handlePartClick = (name: string, point: THREE.Vector3) => {
     if (readOnly) return;
     setActivePart({ name, point });
-    setCustomPartName(name);
+    setCustomPartName("Select name of body part placeholder");
     setDescription("");
   };
 
@@ -546,7 +593,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
 
   if (isLoading) {
     return (
-      <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-lg">
+      <div className="w-full h-[700px] flex items-center justify-center bg-slate-50 rounded-lg">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-slate-500">Loading 3D model...</p>
@@ -556,7 +603,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
   }
 
   return (
-    <div className="w-full h-[600px] flex flex-col">
+    <div className="w-full h-[700px] flex flex-col">
       <div className="mb-4 p-4">
         <h1 className="text-lg font-bold text-slate-800">
           {readOnly ? "Clinical Anatomical Map" : "My Digital Twin"}
@@ -572,20 +619,13 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
         {/* HUD Metrics */}
         <div className="absolute top-5 left-5 z-30 pointer-events-none">
           <div className="space-y-4">
-            <div className="flex items-baseline gap-2">
-              <h4 className="text-2xl font-bold text-primary leading-none font-grotesk">
-                87%
-              </h4>
-              <span className="text-xs font-semibold text-slate-500 ">
-                Diagnostic Fidelity
-              </span>
-            </div>
+           
             <div className="flex gap-2">
               <div className="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold  tracking-normal">
-                BMI: {bmi.toFixed(1)}
+               <p> BMI: {bmi.toFixed(1)}</p>
               </div>
               <div className="bg-primary text-white px-3 py-2 rounded-full text-xs font-bold  tracking-normal">
-                {heightCm}cm / {weightKg}kg
+                <p>{heightCm}cm / {weightKg}kg</p>
               </div>
             </div>
           </div>
@@ -603,9 +643,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
         {(heightCm === 0 || weightKg === 0) && (
           <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 w-[90%] ">
             <div className="bg-white/80 backdrop-blur-xl border shadow border-primary/20 rounded-lg p-5  shadow-primary/10 flex items-center gap-4 animate-in slide-in-from-bottom-4 duration-700">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
-                <BiBody size={24} />
-              </div>
+              
               <div className="flex-1 min-w-0">
                 <h1 className="text-sm font-bold text-slate-900 leading-tight">
                   Incomplete Health Profile
@@ -648,14 +686,13 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
 
           <Suspense
             fallback={
-              <Html center>
-                <div className="flex flex-col items-center gap-6">
-                  <div className="w-16 h-16 border-[6px] border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-bold text-slate-500  tracking-normal">
-                    Syncing Neural Data...
-                  </p>
-                </div>
-              </Html>
+              <group>
+                {/* Skeleton placeholder */}
+                <mesh position={[0, 0, 0]}>
+                  <sphereGeometry args={[0.8, 16, 16]} />
+                  <meshStandardMaterial color="#e2e8f0" wireframe />
+                </mesh>
+              </group>
             }
           >
             <Float speed={1} rotationIntensity={0.05} floatIntensity={0.1}>
@@ -784,29 +821,27 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
                 )}
 
                 {!readOnly && (
-                  <div className="flex gap-4">
+                  <div className="flex gap-2">
                     <Button
                       onClick={() => {
                         setActivePart(null);
                         setEditingNote(null);
                       }}
                       size="sm"
-                      variant="outline"
-                      className="text-xs font-bold"
+                      variant="danger"
                     >
-                      ABANDON SYNC
+                      Cancel
                     </Button>
                     <Button
                       onClick={handleSave}
                       disabled={isSaving || !description.trim()}
                       size="sm"
                       variant="primary"
-                      className="text-xs font-bold flex items-center gap-2"
                     >
                       {isSaving && (
                         <BiLoaderAlt size={16} className="animate-spin" />
                       )}
-                      {editingNote ? "SYNC EDIT" : "COMMIT NODE"}
+                      {editingNote ? "Update" : "Save"}
                     </Button>
                   </div>
                 )}

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Notification } from "@/lib/models/Communications";
 import User from "@/lib/models/User";
+import { PatientProfile } from "@/lib/models/RoleProfiles";
 
 export type BookingNotificationEvent =
   | "request_created"
@@ -104,18 +105,31 @@ export async function notifyBookingEvent(
   ctx: BookingNotifyContext,
 ): Promise<void> {
   try {
-    const [patient, practitioner] = await Promise.all([
+    const [patient, practitioner, patientProfile] = await Promise.all([
       User.findById(ctx.patientId, "firstName lastName").lean() as Promise<any>,
       User.findById(
         ctx.practitionerId,
         "firstName lastName",
       ).lean() as Promise<any>,
+      PatientProfile.findOne({ userId: ctx.patientId }).lean() as Promise<any>,
     ]);
 
-    const patientName = patient
+    let patientName = patient
       ? `${patient.firstName || ""} ${patient.lastName || ""}`.trim() ||
         "Patient"
       : "Patient";
+
+    // Add guardian name for child accounts
+    if (patientProfile?.ageRange || patientProfile?.dateOfBirth) {
+      const dob = patientProfile.dateOfBirth ? new Date(patientProfile.dateOfBirth) : null;
+      const age = dob ? new Date().getFullYear() - dob.getFullYear() : null;
+      if (patientProfile.ageRange || (age && age < 18)) {
+        if (patientProfile.emergencyContact?.name) {
+          patientName = `${patientName} (Guardian: ${patientProfile.emergencyContact.name})`;
+        }
+      }
+    }
+
     const doctorName = practitioner
       ? `Dr. ${practitioner.firstName || ""} ${practitioner.lastName || ""}`.trim()
       : "Your practitioner";

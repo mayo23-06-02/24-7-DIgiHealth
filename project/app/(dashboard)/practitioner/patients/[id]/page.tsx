@@ -433,7 +433,7 @@ export default function PatientProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
-          <Card className="p-0 overflow-hidden h-[600px] relative">
+          <Card className="p-0 overflow-hidden h-[800px] relative">
             <MedicalManikin
               gender={(patient.gender as "male" | "female") || "female"}
               heightCm={
@@ -442,7 +442,8 @@ export default function PatientProfilePage() {
               weightKg={
                 patient.vitals?.weight ? Number(patient.vitals.weight) : 70
               }
-              readOnly
+              ageRange={patient.ageRange}
+              dateOfBirth={patient.dateOfBirth}
               patientId={patient.id}
             />
           </Card>
@@ -466,21 +467,13 @@ export default function PatientProfilePage() {
           />
 
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-slate-800 font-grotesk px-1">
+            <h3 className="text-lg font-bold text-slate-800 font-grotesk px-1">
               Complete Medical Context
             </h3>
             <PatientHealthRecord patientId={patient.id} isPractitioner />
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-slate-800 font-grotesk px-1">
-              AI Clinical Tools
-            </h3>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-              <AIDiagnosisPanel patientId={patient.id} />
-              <ClinicalDecisionSupport />
-            </div>
-          </div>
+         
         </div>
 
         <PatientClinicalSidebar
