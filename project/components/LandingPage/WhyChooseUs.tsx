@@ -22,8 +22,8 @@ export default function WhyChooseUs() {
             Built for Digital-First Care
           </h2>
           <p className="text-lg text-ink-600 max-w-2xl">
-            Video consultations, AI triage, and your full medical history —
-            all in one secure, POPIA-compliant platform.
+            Video consultations, Verified Doctors, and your full medical history —
+            all in one secure platform.
           </p>
         </div>
 

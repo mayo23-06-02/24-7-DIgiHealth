@@ -80,7 +80,7 @@ const Badge: React.FC<BadgeProps> = ({
     <span
       className={`inline-flex items-center gap-1.5 rounded-full font-semibold tracking-wide font-grotesk whitespace-nowrap ${sizeClass} ${colorClass} ${className}`}
     >
-      {dot && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />}
+      {dot && <span className={`uppercase w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />}
       {label}
     </span>
   );

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
 import User from "@/lib/models/User";
+import { PatientProfile } from "@/lib/models/RoleProfiles";
 import mongoose from "mongoose";
 import { expireStaleBookingRequests } from "@/lib/booking/expire";
 import { notifyBookingEvent } from "@/lib/booking/notifications";
@@ -127,12 +128,13 @@ export async function GET(req: NextRequest) {
 
     const enriched = await Promise.all(
       consultations.map(async (c: any) => {
-        const [patient, practitioner] = await Promise.all([
+        const [patient, practitioner, patientProfile] = await Promise.all([
           User.findById(c.patientId, "firstName lastName").lean() as any,
           User.findById(
             c.practitionerId,
             "firstName lastName avatarUrl",
           ).lean() as any,
+          PatientProfile.findOne({ userId: c.patientId }).lean() as any,
         ]);
 
         const patientName = patient
@@ -141,6 +143,27 @@ export async function GET(req: NextRequest) {
         const practitionerName = practitioner
           ? `Dr. ${practitioner.firstName} ${practitioner.lastName}`
           : "Unknown Practitioner";
+
+        // Determine if patient is a child
+        let isChild = false;
+        let guardianName = null;
+        if (patientProfile) {
+          if (patientProfile.ageRange) {
+            isChild = true;
+          } else if (patientProfile.dateOfBirth) {
+            const dob = new Date(patientProfile.dateOfBirth);
+            const now = new Date();
+            const ageInYears = now.getFullYear() - dob.getFullYear();
+            const monthDiff = now.getMonth() - dob.getMonth();
+            const adjustedAge = monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())
+              ? ageInYears - 1
+              : ageInYears;
+            isChild = adjustedAge < 18;
+          }
+          if (isChild && patientProfile.emergencyContact?.name) {
+            guardianName = patientProfile.emergencyContact.name;
+          }
+        }
 
         if (
           search &&
@@ -154,6 +177,8 @@ export async function GET(req: NextRequest) {
           patientName,
           practitionerName,
           practitionerAvatar: practitioner?.avatarUrl,
+          isChild,
+          guardianName,
         });
       }),
     );

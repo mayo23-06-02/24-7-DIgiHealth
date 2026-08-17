@@ -81,11 +81,7 @@ const values = [
     title: "Human Connection",
     description: "Technology enables care, but our doctors and nurses deliver it with empathy.",
   },
-  {
-    icon: Sparkles,
-    title: "Continuous Innovation",
-    description: "We're always improving – from AI triage to seamless digital prescriptions.",
-  },
+ 
   {
     icon: Globe,
     title: "Inclusive Reach",
@@ -139,11 +135,11 @@ export default function AboutUs() {
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-primary font-bold text-lg">Dr</span>
+              <span className="text-primary font-bold text-lg">AM</span>
             </div>
             <div className="text-left">
-              <p className="font-bold text-ink-900 text-sm">Dr. Zanele Mthembu</p>
-              <p className="text-xs text-ink-500">Co‑founder & Chief Medical Officer</p>
+              <p className="font-bold text-ink-900 text-sm">Amanda Mazwi</p>
+              <p className="text-xs text-ink-500">Founder</p>
             </div>
           </div>
         </div>

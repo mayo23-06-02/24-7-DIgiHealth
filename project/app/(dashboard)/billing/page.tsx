@@ -120,7 +120,7 @@ function SummaryCard({
     purple: "bg-purple-50 text-purple-600",
   };
   return (
-    <Card className="flex items-center gap-4">
+    <Card variant="glass" className="flex items-center gap-4">
       <div
         className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 text-xl ${accents[accent] ?? accents.primary}`}
       >
@@ -205,7 +205,7 @@ function TransactionTable({
   return (
     <Card noPadding>
       <div className="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
-        <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
+        <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
           {title}
         </h3>
         <div className="flex items-center gap-3 flex-wrap">
@@ -245,8 +245,6 @@ function TransactionTable({
                 size="sm"
                 onClick={() => void downloadReportPdf()}
                 loading={reportLoading}
-                icon={<Receipt size={14} />}
-                iconPosition="left"
               >
                 Report PDF
               </Button>
@@ -254,8 +252,6 @@ function TransactionTable({
                 type="button"
                 variant="outline"
                 size="sm"
-                icon={<Download size={14} />}
-                iconPosition="left"
                 onClick={() => {
                   const csv = [
                     [
@@ -286,7 +282,7 @@ function TransactionTable({
                   URL.revokeObjectURL(url);
                 }}
               >
-                CSV
+                Report CSV
               </Button>
             </>
           )}
@@ -505,6 +501,15 @@ function PatientBillingView({
   const [upgradeModal, setUpgradeModal] = useState(false);
   const [selectedTier, setSelectedTier] = useState(TIER_ORDER[0]);
   const [paymentMethodModal, setPaymentMethodModal] = useState(false);
+  const [newPaymentMethod, setNewPaymentMethod] = useState({
+    type: "card",
+    cardNumber: "",
+    cardHolder: "",
+    expiryMonth: "",
+    expiryYear: "",
+    cvv: "",
+  });
+  const [savingPaymentMethod, setSavingPaymentMethod] = useState(false);
 
   const BASELINE_FEATURES = [
     "Video, chat & voice consultations",
@@ -555,10 +560,18 @@ function PatientBillingView({
     "American Express": "🟦",
   };
 
+  const detectCardBrand = (cardNumber: string): string => {
+    const cleaned = cardNumber.replace(/\s/g, "");
+    if (/^4/.test(cleaned)) return "Visa";
+    if (/^5[1-5]/.test(cleaned) || /^2[2-7]/.test(cleaned)) return "Mastercard";
+    if (/^3[47]/.test(cleaned)) return "American Express";
+    return "Visa"; // Default fallback
+  };
+
   return (
     <div className="space-y-8">
       {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:gap-6 gap-2">
         <SummaryCard
           label="Total Spent"
           value={fmtZAR(summary.totalSpent)}
@@ -569,21 +582,21 @@ function PatientBillingView({
           label="Completed Transactions"
           value={summary.completedCount}
           icon={<CheckCircle2 />}
-          accent="success"
+          accent="primary"
         />
         <SummaryCard
           label="Pending Transactions"
           value={summary.pendingCount}
           icon={<Clock />}
-          accent="warning"
+          accent="primary"
         />
       </div>
 
       {/* Subscription Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
+            <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
               Subscription Plan
             </h3>
             <StatusPill status={subscription?.status || "free"} />
@@ -591,23 +604,9 @@ function PatientBillingView({
           {subscription ? (
             <div className="space-y-5">
               <div className="flex items-center gap-4">
-                <div
-                  className={`w-16 h-16 rounded-lg flex items-center justify-center text-2xl font-bold ${
-                    subscription.tier === "family_plus"
-                      ? "bg-purple-50 text-purple-600"
-                      : subscription.tier === "family"
-                        ? "bg-primary/10 text-primary"
-                        : "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  {subscription.tier === "family_plus"
-                    ? "👨‍👩‍👧‍👦"
-                    : subscription.tier === "family"
-                      ? "⭐"
-                      : "🆓"}
-                </div>
+              
                 <div>
-                  <p className="text-2xl font-bold text-slate-800">
+                  <p className="text-xl font-bold text-slate-800">
                     {(() => {
                       const rawTier: string = subscription.tier;
                       return isValidTier(rawTier)
@@ -663,7 +662,7 @@ function PatientBillingView({
         {/* Payment Methods */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
+            <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
               Payment Methods
             </h3>
             <button
@@ -767,6 +766,157 @@ function PatientBillingView({
         showDownload
       />
 
+      {/* Payment Method Modal */}
+      {paymentMethodModal && (
+        <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setPaymentMethodModal(false)}
+          />
+          <div className="relative w-full sm:max-w-md bg-white shadow-2xl overflow-hidden rounded-t-2xl sm:rounded-2xl max-h-[90vh] sm:max-h-none flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 sm:slide-in-from-bottom-0 fade-in duration-200">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
+              <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
+                Add Payment Method
+              </h3>
+              <button
+                onClick={() => setPaymentMethodModal(false)}
+                aria-label="Close"
+                className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-danger-50 hover:text-danger-500 flex items-center justify-center transition-all"
+              >
+                <XCircle size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">
+                  Card Number
+                </label>
+                <Input
+                  fullWidth
+                  value={newPaymentMethod.cardNumber}
+                  onChange={(e) => setNewPaymentMethod({ ...newPaymentMethod, cardNumber: e.target.value })}
+                  placeholder="1234 5678 9012 3456"
+                  maxLength={19}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">
+                  Cardholder Name
+                </label>
+                <Input
+                  fullWidth
+                  value={newPaymentMethod.cardHolder}
+                  onChange={(e) => setNewPaymentMethod({ ...newPaymentMethod, cardHolder: e.target.value })}
+                  placeholder="John Doe"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    Expiry Month
+                  </label>
+                  <Select
+                    fullWidth
+                    value={newPaymentMethod.expiryMonth}
+                    onChange={(v) => setNewPaymentMethod({ ...newPaymentMethod, expiryMonth: v })}
+                    options={[
+                      { value: "", label: "MM" },
+                      ...Array.from({ length: 12 }, (_, i) => ({
+                        value: String(i + 1).padStart(2, "0"),
+                        label: String(i + 1).padStart(2, "0"),
+                      })),
+                    ]}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    Expiry Year
+                  </label>
+                  <Select
+                    fullWidth
+                    value={newPaymentMethod.expiryYear}
+                    onChange={(v) => setNewPaymentMethod({ ...newPaymentMethod, expiryYear: v })}
+                    options={[
+                      { value: "", label: "YY" },
+                      ...Array.from({ length: 10 }, (_, i) => {
+                        const year = new Date().getFullYear() + i;
+                        return {
+                          value: String(year).slice(-2),
+                          label: String(year).slice(-2),
+                        };
+                      }),
+                    ]}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">
+                  CVV
+                </label>
+                <Input
+                  fullWidth
+                  value={newPaymentMethod.cvv}
+                  onChange={(e) => setNewPaymentMethod({ ...newPaymentMethod, cvv: e.target.value })}
+                  placeholder="123"
+                  maxLength={4}
+                  type="password"
+                />
+              </div>
+            </div>
+            <div className="px-6 pb-6 pt-2 shrink-0">
+              <Button
+                fullWidth
+                loading={savingPaymentMethod}
+                onClick={async () => {
+                  if (!newPaymentMethod.cardNumber || !newPaymentMethod.cardHolder || 
+                      !newPaymentMethod.expiryMonth || !newPaymentMethod.expiryYear || !newPaymentMethod.cvv) {
+                    alert("Please fill in all card details");
+                    return;
+                  }
+                  setSavingPaymentMethod(true);
+                  try {
+                    const res = await fetch("/api/billing/payment-methods", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        type: "card",
+                        cardNumber: newPaymentMethod.cardNumber.replace(/\s/g, ""),
+                        cardHolder: newPaymentMethod.cardHolder,
+                        expiryMonth: newPaymentMethod.expiryMonth,
+                        expiryYear: newPaymentMethod.expiryYear,
+                        last4: newPaymentMethod.cardNumber.slice(-4),
+                        cardBrand: detectCardBrand(newPaymentMethod.cardNumber),
+                      }),
+                    });
+                    if (res.ok) {
+                      setPaymentMethodModal(false);
+                      setNewPaymentMethod({
+                        type: "card",
+                        cardNumber: "",
+                        cardHolder: "",
+                        expiryMonth: "",
+                        expiryYear: "",
+                        cvv: "",
+                      });
+                      window.location.reload();
+                    } else {
+                      alert("Failed to add payment method");
+                    }
+                  } catch (err) {
+                    console.error("Failed to add payment method", err);
+                    alert("Failed to add payment method");
+                  } finally {
+                    setSavingPaymentMethod(false);
+                  }
+                }}
+              >
+                Add Payment Method
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Upgrade Modal — same centered-desktop/bottom-sheet-mobile contract as
           Dialog, but wider to fit the 3-column tier grid Dialog's max size can't. */}
       {upgradeModal && (
@@ -775,7 +925,7 @@ function PatientBillingView({
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setUpgradeModal(false)}
           />
-          <div className="relative w-full sm:max-w-2xl bg-white shadow-2xl overflow-hidden rounded-t-2xl sm:rounded-2xl max-h-[90vh] sm:max-h-none flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 sm:slide-in-from-bottom-0 fade-in duration-200">
+          <div className="relative w-full sm:max-w-4xl bg-white shadow-2xl overflow-hidden rounded-t-2xl sm:rounded-2xl max-h-[90vh] sm:max-h-none flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 sm:slide-in-from-bottom-0 fade-in duration-200">
             <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 shrink-0">
               <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
                 Choose Your Plan
@@ -788,14 +938,14 @@ function PatientBillingView({
                 <XCircle size={18} />
               </button>
             </div>
-            <div className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-3 gap-3 overflow-y-auto custom-scrollbar items-start">
+            <div className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-3 lg:gap-3 gap-6 overflow-y-auto custom-scrollbar items-start">
               {tiers.map((t) => {
                 const isSelected = selectedTier === t.id;
                 return (
                   <button
                     key={t.id}
                     onClick={() => setSelectedTier(t.id)}
-                    className={`relative text-left rounded-2xl border p-4 transition-all ${
+                    className={`relative text-left rounded-xl h-full border p-4 transition-all ${
                       t.popular
                         ? "border-primary/40 bg-gradient-to-b from-primary/[0.06] to-transparent shadow-lg shadow-primary/10"
                         : "border-slate-200"
@@ -806,7 +956,7 @@ function PatientBillingView({
                     }`}
                   >
                     {t.popular && (
-                      <span className="absolute -top-3 left-4 px-2.5 py-1 rounded-full bg-ink-900 text-white text-[10px] font-bold tracking-wide">
+                      <span className="absolute -top-3 left-4 px-2.5 py-1 rounded-full bg-accent text-ink-700 text-[10px] font-bold tracking-wide">
                         MOST POPULAR
                       </span>
                     )}
@@ -816,7 +966,7 @@ function PatientBillingView({
                     </p>
 
                     <div className="flex items-baseline gap-1 mt-2 mb-1">
-                      <span className="text-3xl font-bold text-ink-900 font-grotesk tabular-nums">
+                      <span className="text-3xl font-bold text-ink-700 font-grotesk tabular-nums">
                         R{t.price}
                       </span>
                       <span className="text-xs font-medium text-slate-400">
@@ -830,7 +980,7 @@ function PatientBillingView({
                     <span
                       className={`block w-full text-center py-2 rounded-full text-xs font-bold mb-4 transition-colors ${
                         t.popular
-                          ? "bg-ink-900 text-white"
+                          ? "bg-primary text-white"
                           : "bg-slate-100 text-slate-700"
                       } ${isSelected ? "ring-2 ring-primary/50" : ""}`}
                     >
@@ -1823,7 +1973,7 @@ export default function BillingPage() {
             )}
           </div>
           <div>
-            <h1 className="text-h1 font-bold text-ink-900 tracking-tight font-grotesk">
+            <h1 className="text-h3 font-bold text-ink-900 tracking-tight font-grotesk">
               {data ? (roleLabel[data.role] ?? "Billing") : "Billing"}
             </h1>
             <p className="text-sm text-slate-500 font-medium mt-0.5">
@@ -1842,8 +1992,9 @@ export default function BillingPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {data && (
-            <button
+            <Button
               type="button"
+              size="sm"
               onClick={async () => {
                 try {
                   await downloadBillingPdf(
@@ -1854,20 +2005,11 @@ export default function BillingPage() {
                   alert(e?.message || "Failed to download report");
                 }
               }}
-              className="flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-white font-bold text-xs tracking-normal hover:bg-primary/90 transition-all"
             >
-              <Receipt size={16} />
               Download report PDF
-            </button>
+            </Button>
           )}
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-200 text-slate-500 font-bold text-xs tracking-normal hover:border-primary/30 hover:text-primary transition-all disabled:opacity-40"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />{" "}
-            Refresh
-          </button>
+        
         </div>
       </div>
 

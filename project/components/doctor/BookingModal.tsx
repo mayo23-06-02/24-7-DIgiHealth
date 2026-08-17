@@ -50,6 +50,8 @@ interface Patient {
   name: string;
   email?: string;
   avatar?: string;
+  isChild?: boolean;
+  guardianName?: string;
 }
 
 interface BookingModalProps {
@@ -276,6 +278,8 @@ export default function BookingModal({
                 "Unknown Patient",
               email: p.email || p.mobile || "",
               avatar: p.avatar,
+              isChild: p.isChild || false,
+              guardianName: p.guardianName || null,
             })),
           );
         }
@@ -438,15 +442,25 @@ export default function BookingModal({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-bold text-slate-500 tracking-normal mb-0.5 font-grotesk">
-                {selectedPersonLabel}
-              </h4>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="text-sm font-bold text-slate-500 tracking-normal mb-0.5 font-grotesk">
+                  {selectedPersonLabel}
+                </h4>
+                {isPractitionerMode && selectedPatientState?.isChild && (
+                  <Badge label="Child" status="info" size="sm" className="rounded-lg px-2 text-xs" />
+                )}
+              </div>
               <h4 className="font-bold text-slate-800 text-lg leading-tight tracking-tight font-grotesk">
                 {selectedPersonName}
               </h4>
               <p className="text-slate-600 tracking-normal opacity-80 mt-0.5">
                 {selectedPersonSub}
               </p>
+              {isPractitionerMode && selectedPatientState?.isChild && selectedPatientState?.guardianName && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Guardian: {selectedPatientState.guardianName}
+                </p>
+              )}
             </div>
           </Card>
         )}

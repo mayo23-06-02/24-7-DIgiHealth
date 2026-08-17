@@ -403,7 +403,6 @@ export default function FamilyTab({
                   <p className="text-sm font-bold text-ink-900 truncate">{link.guardian.name}</p>
                   <p className="text-xs text-slate-500">{link.guardian.email} · {link.relationship === "spouse" || link.relationship === "parent" ? "manages your account" : "guardian"}</p>
                 </div>
-                <p className="text-xs font-semibold text-success-700">Your medical history stays private</p>
               </div>
             ))}
           </div>

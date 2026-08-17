@@ -135,11 +135,16 @@ export default function AppointmentCard({
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-slate-700 text-md truncate">
-              {userType === "patient" 
-                ? appointment.practitionerName || appointment.patientName 
-                : appointment.patientName}
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-semibold text-slate-700 text-md truncate">
+                {userType === "patient"
+                  ? appointment.practitionerName || appointment.patientName
+                  : appointment.patientName}
+              </p>
+              {appointment.isChild && (
+                <Badge label="Child" status="info" size="sm" className="rounded-lg px-2 text-xs" />
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
               <span className="flex items-center gap-1">
                 {appointment.type === "video" ? (
@@ -149,6 +154,11 @@ export default function AppointmentCard({
                 )}
                 {appointment.type || "video"}
               </span>
+              {appointment.isChild && appointment.guardianName && (
+                <span className="flex items-center gap-1">
+                  Guardian: {appointment.guardianName}
+                </span>
+              )}
             </div>
             {appointment.reason && (
               <p className="text-xs text-slate-500 truncate mt-1">

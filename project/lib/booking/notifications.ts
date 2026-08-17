@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Notification } from "@/lib/models/Communications";
 import User from "@/lib/models/User";
 import { PatientProfile } from "@/lib/models/RoleProfiles";
+import FamilyLink from "@/lib/models/FamilyLink";
 
 export type BookingNotificationEvent =
   | "request_created"
@@ -64,10 +65,22 @@ async function createNotification(input: {
   title: string;
   body: string;
   data?: Record<string, unknown>;
+  /** If true, will redirect notification to guardian if userId is a child */
+  checkForChild?: boolean;
 }) {
   try {
+    let recipientId = oid(input.userId);
+
+    // If checking for child and this is a patient ID, redirect to guardian if applicable
+    if (input.checkForChild) {
+      const guardianId = await getGuardianIdForChild(input.userId);
+      if (guardianId) {
+        recipientId = oid(guardianId);
+      }
+    }
+
     await Notification.create({
-      userId: oid(input.userId),
+      userId: recipientId,
       type: input.type,
       title: input.title,
       body: input.body,
@@ -77,6 +90,28 @@ async function createNotification(input: {
     });
   } catch (err) {
     console.error("[booking/notifications] Failed to create:", err);
+  }
+}
+
+/**
+ * Get the guardian user ID for a child patient.
+ * Returns the guardian's user ID if the patient is a child with an active guardian link,
+ * otherwise returns null.
+ */
+async function getGuardianIdForChild(patientId: string | mongoose.Types.ObjectId): Promise<string | null> {
+  try {
+    const familyLink = await FamilyLink.findOne({
+      memberId: oid(patientId),
+      status: "active",
+      relationship: "child",
+    }).lean();
+    if (familyLink?.guardianId) {
+      return String(familyLink.guardianId);
+    }
+    return null;
+  } catch (err) {
+    console.error("[booking/notifications] Failed to fetch guardian:", err);
+    return null;
   }
 }
 
@@ -161,13 +196,14 @@ export async function notifyBookingEvent(
     switch (event) {
       case "request_created": {
         if (actorIsPractitioner) {
-          // Practitioner proposed a pending appointment — notify the patient, not themselves
+          // Practitioner proposed a pending appointment — notify the patient (or guardian if child)
           await createNotification({
             userId: ctx.patientId,
             type: "appointment_proposed",
             title: "New appointment proposed",
             body: `${doctorName} proposed a consultation for ${when}.${reasonBit}`,
             data,
+            checkForChild: true,
           });
           break;
         }
@@ -179,37 +215,40 @@ export async function notifyBookingEvent(
           body: `${patientName} requested a consultation for ${when}.${reasonBit}`,
           data,
         });
-        // Confirm to patient
+        // Confirm to patient (or guardian if child)
         await createNotification({
           userId: ctx.patientId,
           type: "appointment_request_sent",
           title: "Appointment request sent",
           body: `Your request with ${doctorName} for ${when} was submitted. You'll be notified when they respond.`,
           data,
+          checkForChild: true,
         });
         break;
       }
 
       case "scheduled_created": {
-        // Practitioner/hospital booked for patient → notify patient
+        // Practitioner/hospital booked for patient → notify patient (or guardian if child)
         await createNotification({
           userId: ctx.patientId,
           type: "appointment_scheduled",
           title: "Appointment scheduled",
           body: `${doctorName} scheduled a consultation for ${when}.${reasonBit}`,
           data,
+          checkForChild: true,
         });
         break;
       }
 
       case "accepted": {
-        // Practitioner accepted → notify patient (the other party)
+        // Practitioner accepted → notify patient (the other party, or guardian if child)
         await createNotification({
           userId: ctx.patientId,
           type: "appointment_approved",
           title: "Appointment accepted",
           body: `${doctorName} accepted your consultation for ${when}.`,
           data,
+          checkForChild: true,
         });
         break;
       }
@@ -221,72 +260,84 @@ export async function notifyBookingEvent(
           title: "Appointment declined",
           body: `${doctorName} declined the consultation request for ${when}.`,
           data,
+          checkForChild: true,
         });
         break;
       }
 
       case "cancelled": {
         const recipient = otherPartyId(ctx);
+        const isPatientRecipient = sameId(recipient, ctx.patientId);
         await createNotification({
           userId: recipient,
           type: "appointment_cancelled",
           title: "Appointment cancelled",
           body: `${actorLabel} cancelled the consultation for ${when}.`,
           data,
+          checkForChild: isPatientRecipient,
         });
         break;
       }
 
       case "rescheduled": {
         const recipient = otherPartyId(ctx);
+        const isPatientRecipient = sameId(recipient, ctx.patientId);
         await createNotification({
           userId: recipient,
           type: "appointment_rescheduled",
           title: "Appointment rescheduled",
           body: `${actorLabel} rescheduled the consultation to ${when}.`,
           data,
+          checkForChild: isPatientRecipient,
         });
         break;
       }
 
       case "reschedule_requested": {
         const recipient = otherPartyId(ctx);
+        const isPatientRecipient = sameId(recipient, ctx.patientId);
         await createNotification({
           userId: recipient,
           type: "appointment_reschedule_request",
           title: "Reschedule request",
           body: `${actorLabel} proposed moving your consultation to ${when}. Accept to confirm the new time.`,
           data,
+          checkForChild: isPatientRecipient,
         });
         break;
       }
 
       case "reschedule_accepted": {
         const recipient = otherPartyId(ctx);
+        const isPatientRecipient = sameId(recipient, ctx.patientId);
         await createNotification({
           userId: recipient,
           type: "appointment_reschedule_accepted",
           title: "Reschedule accepted",
           body: `${actorLabel} accepted your reschedule to ${when}.`,
           data,
+          checkForChild: isPatientRecipient,
         });
         break;
       }
 
       case "reschedule_declined": {
         const recipient = otherPartyId(ctx);
+        const isPatientRecipient = sameId(recipient, ctx.patientId);
         await createNotification({
           userId: recipient,
           type: "appointment_reschedule_declined",
           title: "Reschedule declined",
           body: `${actorLabel} declined your reschedule request to ${when}. The appointment stays at its original time.`,
           data,
+          checkForChild: isPatientRecipient,
         });
         break;
       }
 
       case "updated": {
         const recipient = otherPartyId(ctx);
+        const isPatientRecipient = sameId(recipient, ctx.patientId);
         const detail =
           ctx.changeSummary ||
           `details were updated for the consultation on ${when}.`;
@@ -296,6 +347,7 @@ export async function notifyBookingEvent(
           title: "Appointment updated",
           body: `${actorLabel} ${detail}`,
           data,
+          checkForChild: isPatientRecipient,
         });
         break;
       }
@@ -307,6 +359,7 @@ export async function notifyBookingEvent(
           title: "Request expired",
           body: `Your appointment request with ${doctorName} for ${when} was not accepted in time and has been cancelled.`,
           data,
+          checkForChild: true,
         });
         await createNotification({
           userId: ctx.practitionerId,

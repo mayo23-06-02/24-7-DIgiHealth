@@ -6,7 +6,6 @@ const quickLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
   { name: "Services", href: "/#approach" },
-  { name: "Blog", href: "/#blog" },
   { name: "Contact", href: "/#testimonials" },
 ];
 // Both lists previously pointed at "#services" / "#team" — neither anchor

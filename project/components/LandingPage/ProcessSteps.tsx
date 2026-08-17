@@ -29,7 +29,7 @@ export default function ProcessSteps() {
           </h2>
         </div>
 
-        <div className="relative rounded-lg overflow-hidden h-[280px] md:h-[380px] mb-8">
+        <div className="relative rounded-lg overflow-hidden h-[380px] md:h-[180px] mb-8">
           <Image
             src="https://images.unsplash.com/photo-1622902046580-2b47f47f5471?q=80&w=1600&auto=format&fit=crop"
             alt="Patient on a video consultation"
@@ -48,7 +48,7 @@ export default function ProcessSteps() {
                 <h3 className="text-white font-bold text-base md:text-lg mb-1 font-grotesk">
                   {s.title}
                 </h3>
-                <p className="text-white/80 text-xs md:text-sm leading-relaxed">
+                <p className="text-white/80 text-xs md:text-sm ">
                   {s.desc}
                 </p>
               </div>
@@ -60,7 +60,7 @@ export default function ProcessSteps() {
           {infoCards.map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="bg-primary rounded-lg p-6 flex items-center gap-4 text-white"
+              className="bg-primary rounded-lg p-4 lg:p-6 flex items-center gap-4 text-white"
             >
               <div className="w-11 h-11 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
                 <Icon size={20} />

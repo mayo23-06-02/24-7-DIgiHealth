@@ -43,11 +43,11 @@ export async function GET(req: NextRequest) {
       'firstName lastName email mobile gender dateOfBirth createdAt',
     ).lean();
 
-    // Batch patient profiles for DOB
+    // Batch patient profiles for DOB and child status
     const profiles = await PatientProfile.find({
       userId: { $in: oids },
     })
-      .select('userId dateOfBirth gender')
+      .select('userId dateOfBirth gender ageRange emergencyContact')
       .lean();
     const profileByUser = new Map(
       profiles.map((p: any) => [p.userId.toString(), p]),
@@ -81,6 +81,20 @@ export async function GET(req: NextRequest) {
         const dob = pp?.dateOfBirth || p.dateOfBirth;
         const age = calcAge(dob);
         const gender = pp?.gender || p.gender || '';
+
+        // Determine if patient is a child
+        let isChild = false;
+        let guardianName = null;
+        if (pp) {
+          if (pp.ageRange) {
+            isChild = true;
+          } else if (dob && age !== null) {
+            isChild = age < 18;
+          }
+          if (isChild && pp.emergencyContact?.name) {
+            guardianName = pp.emergencyContact.name;
+          }
+        }
 
         const latestConsult = await Consultation.findOne({
           patientId: p._id,
@@ -130,6 +144,8 @@ export async function GET(req: NextRequest) {
           gender,
           age,
           dateOfBirth: dob || null,
+          isChild,
+          guardianName,
           dateJoined: p.createdAt || null,
           riskScore,
           riskColor,

@@ -262,17 +262,16 @@ export default function HealthRecordPage() {
   }, [searchQuery, timeline]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+    <div className="lg:space-y-8 space-y-4 animate-in fade-in duration-700 pb-20">
       {/* HEADER SECTION */}
       <PageHeader
         title="Medical Records"
-        subtitle="POPIA-Compliant Health History"
+        subtitle="Medical Health History"
         right={
           <Button
+          size="sm"
             onClick={handleDownloadReport}
             loading={isDownloading}
-            icon={<Download size={18} />}
-            iconPosition="left"
           >
             {isDownloading ? "Generating…" : "Download PDF"}
           </Button>

@@ -159,7 +159,7 @@ function DashboardShellInner({
         </main>
 
         {/* ── MOBILE BOTTOM TAB BAR (Patient/Practitioner only) ── */}
-        {hasBottomNav && <MobileBottomNav role={user!.role} />}
+        {/* {hasBottomNav && <MobileBottomNav role={user!.role} />} */}
 
         {/* ── FLOATING AI ASSISTANT BUTTON (Only for Practitioners) ── */}
         {user?.role === "practitioner" && (

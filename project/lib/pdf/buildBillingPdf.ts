@@ -317,7 +317,7 @@ export async function buildInvoiceReceiptPdf(opts: {
       .fontSize(9)
       .fillColor(BRAND.muted)
       .text("Platform fee", left + 10, feeY, { lineBreak: false })
-      .text(fmtZAR(t.platformFeeAmount), left + contentW - 90, feeY, {
+      .text(fmtZAR(20), left + contentW - 90, feeY, {
         width: 80,
         align: "right",
         lineBreak: false,
@@ -335,7 +335,6 @@ export async function buildInvoiceReceiptPdf(opts: {
 
   // Total
   doc.save();
-  doc.roundedRect(left + contentW - 200, doc.y, 200, 40, 6).fill(BRAND.soft);
   doc.restore();
   doc
     .font(fonts.mono)
@@ -348,7 +347,7 @@ export async function buildInvoiceReceiptPdf(opts: {
     .font(fonts.bold)
     .fontSize(14)
     .fillColor(BRAND.primaryDark)
-    .text(fmtZAR(t.amount), left + contentW - 188, doc.y + 20, {
+    .text(fmtZAR((t.amount) +20), left + contentW - 188, doc.y + 20, {
       width: 176,
       align: "right",
       lineBreak: false,

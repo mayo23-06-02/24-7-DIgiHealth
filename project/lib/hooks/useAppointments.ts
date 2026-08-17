@@ -31,6 +31,10 @@ export interface Appointment {
     proposedEnd: string;
     proposedByMe: boolean;
   } | null;
+  /** Child account indicator */
+  isChild?: boolean;
+  /** Guardian name for child accounts */
+  guardianName?: string;
 }
 
 export function useAppointments(fetchUrl: string) {

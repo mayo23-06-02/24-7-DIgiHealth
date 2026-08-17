@@ -29,7 +29,6 @@ export default function LandingPage() {
       <BookingCTA />
       <TeamGrid />
       <Testimonials />
-      <Blog />
       <Footer />
     </main>
   );

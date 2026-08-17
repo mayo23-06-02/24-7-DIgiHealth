@@ -29,10 +29,9 @@ const badges = [
 
 const navLinks = [
   { name: "Platform", href: "/" },
-  { name: "Solutions", href: "/#approach" },
-  { name: "Security", href: "/#testimonials" },
-  { name: "Company", href: "/about" },
-  { name: "Resources", href: "/#blog" },
+  { name: "Approch", href: "/#approach" },
+  { name: "Testimonials", href: "/#testimonials" },
+
 ];
 
 const serviceTags = ["Tele-health Care", "E-Prescriptions", "Family Plans"];
@@ -355,7 +354,7 @@ export default function Hero() {
                   size="sm"
                   className={isSticky ? "" : "border border-white/30"}
                 >
-                  Get a demo
+                  Get Started
                 </Button>
               </Link>
             </div>
@@ -412,7 +411,7 @@ export default function Hero() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-center text-white bg-primary py-2 px-3 rounded-lg font-semibold hover:bg-primary-600 transition"
                 >
-                  Get a demo
+                  Get Started
                 </Link>
               </div>
             </div>
@@ -434,12 +433,9 @@ export default function Hero() {
             loop
             muted
             playsInline
-            preload="metadata"
-            onLoadedData={handleVideoLoaded}
-            onError={handleVideoError}
-            className={`absolute inset-0 w-full h-full object-cover animate-slow-zoom transition-opacity duration-700 ${
-              videoLoading ? "opacity-0" : "opacity-100"
-            }`}
+            className={`absolute inset-0 w-full h-full object-cover animate-slow-zoom transition-opacity duration-700 
+              
+            `}
           />
           <div
             className={`absolute inset-0 bg-linear-to-r from-primary/25 via-white/10 to-primary/70 transition-opacity duration-500 ${
