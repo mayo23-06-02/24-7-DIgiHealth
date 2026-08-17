@@ -61,12 +61,7 @@ export default function DoctorsOverview({
                 key={d.staffId}
                 className="px-5 py-3.5 hover:bg-slate-50/80 transition-colors flex items-start gap-3"
               >
-                <Avatar
-                  name={d.name}
-                  size="md"
-                  status={d.isOnDuty ? "online" : "offline"}
-                  className="!w-11 !h-11"
-                />
+             
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-bold text-slate-800 truncate">

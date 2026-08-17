@@ -1,46 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolvePostgresHospitalId, resolvePgUserId } from '@/lib/postgres/resolveId';
-import { getSupabaseAdmin } from '@/lib/supabase/server';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import { connectToDatabase } from '@/lib/mongodb';
+import Staff from '@/lib/models/Staff';
 
 function toClientShape(s: any) {
   return {
-    _id: s.id,
-    userId: s.user_id
-      ? { _id: s.user_id, firstName: s.users?.first_name, lastName: s.users?.last_name, email: s.users?.email }
+    _id: s._id.toString(),
+    userId: s.userId
+      ? { _id: s.userId._id?.toString() || s.userId.toString(), firstName: s.userId.firstName, lastName: s.userId.lastName, email: s.userId.email }
       : null,
-    facilityId: s.facility_id,
+    facilityId: s.facilityId.toString(),
     role: s.role,
     department: s.department,
-    shiftSchedule: { start: s.shift_start, end: s.shift_end, days: s.shift_days || [] },
-    isOnDuty: s.is_on_duty,
-    hourlyRate: s.hourly_rate,
+    shiftSchedule: s.shiftSchedule || { start: '', end: '', days: [] },
+    isOnDuty: s.isOnDuty,
+    hourlyRate: s.hourlyRate,
     qualifications: s.qualifications || [],
-    createdAt: s.created_at,
+    createdAt: s.createdAt,
   };
 }
 
 export async function GET(_req: NextRequest) {
   try {
+    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const facilityId = await resolvePostgresHospitalId(user.userId, user.email);
-    if (!facilityId) {
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    
+    console.log('[GET /api/hospital/staff] Query details:', {
+      adminMongoId: user.userId,
+      adminEmail: user.email,
+      resolvedHospitalId: hospitalId,
+    });
+
+    if (!hospitalId) {
       return NextResponse.json({
         success: false,
         error: 'No facility linked to this account. Please complete your facility profile first.',
       }, { status: 404 });
     }
 
-    const { data: staffList, error } = await getSupabaseAdmin()
-      .from('staff')
-      .select('*, users(first_name, last_name, email)')
-      .eq('facility_id', facilityId)
-      .order('created_at', { ascending: false });
-    if (error) throw new Error(error.message);
+    const staffList = await Staff.find({ facilityId: hospitalId })
+      .populate('userId', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log('[GET /api/hospital/staff] Staff query result:', {
+      hospitalId,
+      staffCount: staffList?.length || 0,
+      staffList: staffList?.map(s => ({
+        id: s._id.toString(),
+        userId: s.userId?._id?.toString(),
+        role: s.role,
+        department: s.department,
+        userEmail: s.userId?.email,
+      })),
+    });
 
     return NextResponse.json({ success: true, data: (staffList || []).map(toClientShape) });
   } catch (error: any) {

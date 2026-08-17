@@ -53,12 +53,12 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
             />
           )}
           <h3
-            className={`${isCompact ? "text-h3" : "text-h2"} font-bold text-ink-900 tracking-tight leading-none font-grotesk`}
+            className={`${isCompact ? "text-h4" : "text-h4"} font-bold text-ink-900 tracking-tight leading-none font-grotesk`}
           >
             {title}
           </h3>
           {subtitle && (
-            <p className="text-xs font-semibold text-slate-500 tracking-normal mt-1.5">
+            <p className="text-xs  text-slate-500 tracking-normal mt-1.5">
               {subtitle}
             </p>
           )}

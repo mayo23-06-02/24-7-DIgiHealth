@@ -50,7 +50,6 @@ export default function StaffManagement() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterRole, setFilterRole] = useState("all");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any>(null);
@@ -150,39 +149,53 @@ export default function StaffManagement() {
 
     setLoading(true);
     try {
-      // Get facility ID first
-      const facRes = await fetch("/api/hospital/facility");
-      const facJson = await facRes.json();
-      const facilityId = facJson.data?._id;
+      // If editing existing staff, use the direct update endpoint
+      if (editingStaff) {
+        const payload = {
+          ...formData,
+          shiftSchedule: {
+            start: formData.shiftStart,
+            end: formData.shiftEnd,
+            days: [1, 2, 3, 4, 5],
+          },
+        };
 
-      const payload = {
-        ...formData,
-        facilityId,
-        shiftSchedule: {
-          start: formData.shiftStart,
-          end: formData.shiftEnd,
-          days: [1, 2, 3, 4, 5],
-        },
-      };
+        const res = await fetch(`/api/hospital/staff/${editingStaff._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      const url = editingStaff
-        ? `/api/hospital/staff/${editingStaff._id}`
-        : "/api/hospital/staff";
-      const method = editingStaff ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-      if (json.success) {
-        setIsModalOpen(false);
-        fetchStaff();
-        resetForm();
+        const json = await res.json();
+        if (json.success) {
+          setIsModalOpen(false);
+          fetchStaff();
+          resetForm();
+        } else {
+          alert(json.error || "Failed to update staff");
+        }
       } else {
-        alert(json.error || "Failed to save staff");
+        // Adding new existing doctor - send approval request
+        const res = await fetch("/api/hospital/staff/approval", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            doctorId: formData.userId,
+            department: formData.department,
+            shiftStart: formData.shiftStart,
+            shiftEnd: formData.shiftEnd,
+            hourlyRate: formData.hourlyRate,
+          }),
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          setIsModalOpen(false);
+          resetForm();
+          alert(`Approval request sent to ${json.data.email}. The doctor will receive an email to approve the facility link.`);
+        } else {
+          alert(json.error || "Failed to send approval request");
+        }
       }
     } catch (e) {
       console.error(e);
@@ -330,8 +343,7 @@ export default function StaffManagement() {
       s.userId &&
       (s.userId.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.userId.lastName?.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesRole = filterRole === "all" || s.role === filterRole;
-    return (matchesSearch || !searchTerm) && matchesRole;
+    return matchesSearch || !searchTerm;
   });
 
   return (
@@ -426,19 +438,6 @@ export default function StaffManagement() {
               icon={<Search size={18} />}
             />
           </div>
-          <div className="w-full sm:w-48">
-            <Select
-              value={filterRole}
-              onChange={setFilterRole}
-              options={[
-                { value: "all", label: "All Roles" },
-                { value: "doctor", label: "Doctor" },
-                { value: "nurse", label: "Nurse" },
-                { value: "admin", label: "Admin" },
-                { value: "technician", label: "Technician" },
-              ]}
-            />
-          </div>
         </div>
 
         {loading ? (
@@ -524,13 +523,20 @@ export default function StaffManagement() {
                     </td>
                     <td className="py-4 px-6 text-right">
                       <div className="flex justify-end gap-2">
-                        <Link
-                          href={`/hospital_admin/staff/${item._id}`}
+                        <button
+                          onClick={() => {
+                            console.log('View profile clicked for staff:', item);
+                            if (item._id) {
+                              window.location.href = `/hospital_admin/staff/${item._id}`;
+                            } else {
+                              alert('Staff ID is missing. Cannot view profile.');
+                            }
+                          }}
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
                           title="View Profile"
                         >
                           <User size={18} />
-                        </Link>
+                        </button>
                         <button
                           onClick={() => {
                             setEditingStaff(item);
