@@ -30,8 +30,16 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Doctor not found' }, { status: 404 });
     }
 
-    // Get practitioner profile
+    // Get practitioner profile – safely access properties
     const practProfile = await PractitionerProfile.findOne({ userId: id }).lean();
+    const profile = practProfile as any; // Type-safe access
+
+    // Safely extract values with fallbacks
+    const hourlyRate = profile?.hourlyRate || 500;
+    const isOnline = profile?.isOnline || false;
+    const specialisation = profile?.specialisation || 'General Practitioner';
+    const qualifications = profile?.qualifications || [];
+    const rating = profile?.rating || 0;
 
     // Get consultations
     const consultations = await Consultation.find({ practitionerId: id })
@@ -49,8 +57,6 @@ export async function GET(
     // Unique patients
     const uniquePatientIds = [...new Set(consultations.map((c: any) => c.patientId?._id?.toString()).filter(Boolean))];
 
-    // ✅ Fixed: safely access hourlyRate with fallback
-    const hourlyRate = (practProfile as any)?.hourlyRate || 500;
     const revenuePerConsultation = hourlyRate;
     const totalRevenue = completedConsultations * revenuePerConsultation;
 
@@ -70,7 +76,7 @@ export async function GET(
     // SLA Metrics
     const completionRate = totalConsultations > 0 ? Math.round((completedConsultations / totalConsultations) * 100) : 0;
     const cancellationRate = totalConsultations > 0 ? Math.round((cancelledConsultations / totalConsultations) * 100) : 0;
-    const patientSatisfaction = practProfile?.rating ? Math.round(practProfile.rating * 20) : 85;
+    const patientSatisfaction = rating ? Math.round(rating * 20) : 85;
     const avgResponseMinutes = 18;
 
     const sla = {
@@ -123,11 +129,11 @@ export async function GET(
             mobile: doctorUser.mobile,
           },
           role: 'doctor',
-          department: practProfile?.specialisation || 'General Practitioner',
+          department: specialisation,
           shiftSchedule: { start: '—', end: '—' },
-          isOnDuty: practProfile?.isOnline || false,
+          isOnDuty: isOnline,
           hourlyRate: hourlyRate,
-          qualifications: practProfile?.qualifications || [],
+          qualifications: qualifications,
         },
         practProfile,
         kpi: {
@@ -137,7 +143,7 @@ export async function GET(
           upcomingConsultations,
           uniquePatients: uniquePatientIds.length,
           totalRevenue,
-          rating: practProfile?.rating || 0,
+          rating: rating,
         },
         monthlyRevenue,
         sla,
