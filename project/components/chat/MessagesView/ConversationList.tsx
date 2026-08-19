@@ -70,58 +70,15 @@ export default function ConversationList({
       <div className="px-4 pt-4 pb-2 shrink-0">
         <div className="flex justify-between items-start mb-4 gap-2">
           <div className="min-w-0">
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+            <h2 className="lg:text-2xl text-lg font-bold text-slate-800 tracking-tight">
               {pageTitle}
             </h2>
             <p className="text-slate-500 font-medium text-sm">{pageSubtitle}</p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Mobile: jump back to open conversation */}
-            {hasActiveChat && onOpenActiveChat && (
-              <button
-                type="button"
-                onClick={onOpenActiveChat}
-                className="md:hidden h-10 px-3 rounded-lg bg-primary/10 text-primary text-sm font-bold flex items-center gap-1.5 hover:bg-primary/15 transition-all"
-                title="Back to conversation"
-              >
-                <BiMessageRoundedDetail size={18} />
-                <span>Chat</span>
-              </button>
-            )}
-            {onNewChat && (
-              <button
-                type="button"
-                onClick={onNewChat}
-                className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center hover:scale-105 transition-all"
-                title="Start New Chat"
-              >
-                <BiPlus size={24} />
-              </button>
-            )}
-          </div>
+        
         </div>
 
-        {/* Banner when a chat is open but user is viewing the list on mobile */}
-        {hasActiveChat && activeConversation && onOpenActiveChat && (
-          <button
-            type="button"
-            onClick={onOpenActiveChat}
-            className="md:hidden w-full mb-3 flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/15 text-left hover:bg-primary/10 transition-colors"
-          >
-            <div className="w-9 h-9 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
-              <BiMessageRoundedDetail size={18} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-primary uppercase tracking-wide">
-                Open conversation
-              </p>
-              <p className="text-sm font-semibold text-slate-800 truncate">
-                {activeConversation.contactName}
-              </p>
-            </div>
-            <span className="text-primary text-sm font-bold shrink-0">Open →</span>
-          </button>
-        )}
+       
 
         <div className="flex bg-slate-100 p-1 rounded-lg mb-4">
           {(["contacts", "pending"] as const).map((tab) => (

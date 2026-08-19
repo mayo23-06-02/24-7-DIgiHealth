@@ -48,7 +48,6 @@ const KPICard: React.FC<KPICardProps> = ({
 
   return (
     <Card
-      noPadding
       className={`
         flex justify-between flex-col h-full transition-transform group
         ${clickable && !loading ? "hover:scale-[1.01] sm:hover:scale-[1.02] cursor-pointer" : "cursor-default"}
@@ -60,7 +59,7 @@ const KPICard: React.FC<KPICardProps> = ({
         <div className="p-3 sm:p-4 lg:py-4 lg:px-4 flex items-start justify-between gap-2">
           <div
             className={`
-              w-8 h-8 sm:h-10 sm:w-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white
+              w-8 h-8 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center text-white
               transition-all duration-500 shrink-0 ${iconBg[color] || iconBg.primary}
             `}
           >
@@ -105,7 +104,7 @@ const KPICard: React.FC<KPICardProps> = ({
             ${showChevron ? "justify-between group-hover:bg-slate-50" : "justify-start"}
           `}
         >
-          <p className="text-[11px] sm:text-sm font-semibold text-slate-500 truncate pr-1">
+          <p className="text-xs sm:text-sm font-semibold text-slate-500 truncate pr-1">
             {label}
           </p>
           {showChevron && (

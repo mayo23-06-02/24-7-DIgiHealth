@@ -167,7 +167,7 @@ export default function DoctorCarousel() {
         showArrows={false}
         infiniteLoop={true}
         centerMode={true}
-        slideClassName="w-[90%] md:w-[31.25%] lg:w-[28.57%] xl:w-[28.57%]"
+        slideClassName="w-[90%] md:w-[45.25%] lg:w-[28.57%] xl:w-[28.57%]"
         className="py-2"
         showStatus={false}
         showIndicators={false}

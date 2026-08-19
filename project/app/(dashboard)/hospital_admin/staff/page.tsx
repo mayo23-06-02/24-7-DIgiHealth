@@ -172,14 +172,14 @@ export default function StaffManagement() {
               onClick={() => toggleDuty(row._id, row.isOnDuty)}
               disabled={isFallback}
               aria-label={row.isOnDuty ? "Set off duty" : "Set on duty"}
-              className={`w-10 h-5 rounded-full relative transition-colors ${isFallback ? "opacity-50 cursor-not-allowed" : ""
-                } ${row.isOnDuty ? "bg-success-500" : "bg-surface-soft"}`}
+              className={`w-10 h-5 rounded-full relative transition-colors ${
+                isFallback ? "opacity-50 cursor-not-allowed" : ""
+              } ${row.isOnDuty ? "bg-success-500" : "bg-surface-soft"}`}
             >
               <span
                 className={`absolute top-1 left-1 bg-surface w-3 h-3 rounded-full transition-transform ${row.isOnDuty ? "translate-x-5" : "translate-x-0"}`}
               ></span>
             </button>
-            
           </div>
         );
       },
@@ -224,7 +224,8 @@ export default function StaffManagement() {
                       department: row.department,
                       shiftStart: row.shiftSchedule?.start || "08:00",
                       shiftEnd: row.shiftSchedule?.end || "16:00",
-                      hourlyRate: row.hourlyRate,
+                      // ✅ Fix: ensure hourlyRate is a number, default to 0 if not a number
+                      hourlyRate: typeof row.hourlyRate === 'number' ? row.hourlyRate : 0,
                     });
                     setSelectedDoctor(row.userId);
                     setDoctorSearch(
@@ -599,8 +600,6 @@ export default function StaffManagement() {
         </div>
       </div>
 
-
-
       {/* Pending invites */}
       {!loadingInvites && pendingInvites.length > 0 && (
         <Card className="p-0 overflow-hidden">
@@ -652,7 +651,7 @@ export default function StaffManagement() {
 
       {/* Staff Table */}
       <Card className="min-h-[60vh] flex flex-col p-0 overflow-hidden">
-        <div className="py-4  flex flex-col sm:flex-row gap-4 ">
+        <div className="py-4 flex flex-col sm:flex-row gap-4">
           <div className="flex-1 max-w-sm">
             <Input
               type="text"
@@ -689,20 +688,22 @@ export default function StaffManagement() {
               <button
                 type="button"
                 onClick={() => setAddMode("existing")}
-                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${addMode === "existing"
+                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
+                  addMode === "existing"
                     ? "bg-white text-primary shadow-none"
                     : "text-slate-500 hover:text-slate-700"
-                  }`}
+                }`}
               >
                 Existing Doctor
               </button>
               <button
                 type="button"
                 onClick={() => setAddMode("invite")}
-                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${addMode === "invite"
+                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
+                  addMode === "invite"
                     ? "bg-white text-primary shadow-none"
                     : "text-slate-500 hover:text-slate-700"
-                  }`}
+                }`}
               >
                 Invite New Doctor
               </button>

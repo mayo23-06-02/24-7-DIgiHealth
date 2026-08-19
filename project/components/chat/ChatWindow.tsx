@@ -301,8 +301,8 @@ export default function ChatWindow({
                 opponentName
               )}
             </h2>
-            <p className="text-sm text-slate-500 truncate">
-              {isConnected ? "Live Encryption Active" : "Connecting Securely..."}
+            <p className="text-xs text-slate-500 truncate">
+              {isConnected ? "" : "Connecting Securely..."}
               {startedLabel && (
                 <>
                   <span className="mx-1.5 text-slate-300">·</span>

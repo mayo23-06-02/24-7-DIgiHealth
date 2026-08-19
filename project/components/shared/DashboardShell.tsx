@@ -38,7 +38,7 @@ function ActiveMemberBanner() {
     };
     return (
       <div className="mb-4 flex items-center gap-3 rounded-lg border border-info-500/20 bg-primary px-4 py-2.5">
-        <Users size={16} className="text-white shrink-0" />
+        <Users size={16} className="text-white hidden md:inline shrink-0" />
         <p className="flex-1 min-w-0 text-sm font-medium text-white">
           You&apos;re managing <span className="font-bold">{user.name}</span>&apos;s account
         </p>

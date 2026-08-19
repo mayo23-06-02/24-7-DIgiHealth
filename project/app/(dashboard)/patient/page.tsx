@@ -225,7 +225,7 @@ export default function PatientDashboard() {
       {/* HERO */}
       <Card
         variant="glass"
-        className="!p-6 sm:!p-8 border-primary/10 relative overflow-hidden"
+        className=" border-primary/10 relative overflow-hidden"
       >
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
