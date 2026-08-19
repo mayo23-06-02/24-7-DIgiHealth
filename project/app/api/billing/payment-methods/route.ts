@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { PaymentMethod } from "@/lib/models/Billing";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
@@ -14,7 +14,7 @@ async function getAuthUser() {
 }
 
 // POST /api/billing/payment-methods - Add a new payment method
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUser();
     if (!user) {

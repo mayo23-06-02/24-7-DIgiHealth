@@ -46,7 +46,9 @@ export async function GET(req: NextRequest) {
       });
       const canAccept =
         (c.status === 'requested' || c.status === 'pending') &&
-        userId !== blockedAcceptorId;
+        (c.requestedTo
+          ? c.requestedTo.toString() === userId
+          : userId !== blockedAcceptorId);
       return {
         id: c._id.toString(),
         consultationId: c._id.toString(),

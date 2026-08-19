@@ -86,7 +86,9 @@ export async function GET(
     });
     const canAccept =
       (status === "requested" || status === "pending") &&
-      auth.userId !== blockedAcceptorId;
+      ((c as any).requestedTo
+        ? (c as any).requestedTo.toString() === auth.userId
+        : auth.userId !== blockedAcceptorId);
 
     return NextResponse.json({
       success: true,

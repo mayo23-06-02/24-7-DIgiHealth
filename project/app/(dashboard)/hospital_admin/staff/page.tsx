@@ -16,13 +16,15 @@ import {
   User,
   Mail,
   X,
+  Users,
+  Stethoscope,
+  Clock,
+  Calendar,
+  DollarSign,
 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
-import Link from "next/link";
 
-// Mirrors the specialisation list offered at practitioner registration
-// (components/auth/Register/Steps/Practitioner/PractitionerStep1.tsx) so a
-// doctor's profile specialisation always has a matching Department option.
+// Helper to format invite expiry
 function formatInviteExpiry(expiresAt: string): { label: string; expired: boolean } {
   const diffMs = new Date(expiresAt).getTime() - Date.now();
   if (diffMs <= 0) {
@@ -46,15 +48,33 @@ const DEPARTMENTS = [
   "Ophthalmologist",
 ];
 
+// KPI Card component
+function KpiCard({ icon: Icon, label, value, subtext, color = "primary" }: any) {
+  return (
+    <div className="bg-white border border-border rounded-xl p-4 flex items-start gap-4">
+      <div className={`w-10 h-10 rounded-full bg-${color}-50 flex items-center justify-center shrink-0`}>
+        <Icon className={`w-5 h-5 text-${color}-600`} />
+      </div>
+      <div>
+        <p className="text-xs font-bold text-ink-500 uppercase tracking-wider">{label}</p>
+        <p className="text-2xl font-bold text-ink-900 font-grotesk">{value}</p>
+        {subtext && <p className="text-xs text-ink-400 mt-0.5">{subtext}</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function StaffManagement() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Dashboard KPIs
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any>(null);
-  // "existing" attaches an already-registered practitioner; "invite" sends
-  // a registration link to a doctor who hasn't signed up yet.
   const [addMode, setAddMode] = useState<"existing" | "invite">("existing");
 
   // Form State
@@ -97,6 +117,19 @@ export default function StaffManagement() {
     }
   };
 
+  const fetchDashboard = async () => {
+    setLoadingDashboard(true);
+    try {
+      const res = await fetch("/api/hospital/dashboard");
+      const json = await res.json();
+      if (json.success) setDashboard(json.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
+
   const fetchInvites = async () => {
     setLoadingInvites(true);
     try {
@@ -112,8 +145,33 @@ export default function StaffManagement() {
 
   useEffect(() => {
     fetchStaff();
+    fetchDashboard();
     fetchInvites();
   }, []);
+
+  // If staff is empty but dashboard has doctors, use dashboard doctors as fallback
+  useEffect(() => {
+    if (!loading && staff.length === 0 && dashboard && dashboard.doctors?.length > 0) {
+      // Map dashboard doctors to staff-like objects for display
+      const fallbackStaff = dashboard.doctors.map((doc: any) => ({
+        _id: doc.id,
+        userId: {
+          _id: doc.id,
+          firstName: doc.name.replace(/^Dr\.\s*/, '').split(' ')[0] || '',
+          lastName: doc.name.replace(/^Dr\.\s*/, '').split(' ').slice(1).join(' ') || '',
+          email: doc.email || '',
+        },
+        role: 'doctor',
+        department: doc.department || doc.specialisation || 'General',
+        isOnDuty: doc.isOnDuty,
+        shiftSchedule: { start: '—', end: '—' },
+        hourlyRate: '—',
+        // Keep original doctor data for actions
+        _doctorData: doc,
+      }));
+      setStaff(fallbackStaff);
+    }
+  }, [loading, staff, dashboard]);
 
   // Fetch doctors for searchable dropdown
   useEffect(() => {
@@ -149,7 +207,6 @@ export default function StaffManagement() {
 
     setLoading(true);
     try {
-      // If editing existing staff, use the direct update endpoint
       if (editingStaff) {
         const payload = {
           ...formData,
@@ -175,7 +232,6 @@ export default function StaffManagement() {
           alert(json.error || "Failed to update staff");
         }
       } else {
-        // Adding new existing doctor - send approval request
         const res = await fetch("/api/hospital/staff/approval", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -274,6 +330,12 @@ export default function StaffManagement() {
   };
 
   const toggleDuty = async (id: string, currentStatus: boolean) => {
+    // If this is a fallback doctor (no staffId), we can't update via staff API
+    const isFallback = staff.some(s => s._id === id && s._doctorData);
+    if (isFallback) {
+      alert("This doctor is not linked as staff yet. Add them to staff to manage duty status.");
+      return;
+    }
     try {
       const res = await fetch(`/api/hospital/staff/${id}`, {
         method: "PUT",
@@ -290,6 +352,11 @@ export default function StaffManagement() {
   };
 
   const handleDelete = async (id: string) => {
+    const isFallback = staff.some(s => s._id === id && s._doctorData);
+    if (isFallback) {
+      alert("This doctor is not linked as staff. Add them to staff to enable removal.");
+      return;
+    }
     if (!window.confirm("Are you sure you want to remove this staff member?"))
       return;
     try {
@@ -308,6 +375,7 @@ export default function StaffManagement() {
   const exportCSV = () => {
     if (staff.length === 0) return;
     const headers = [
+      "Name",
       "Role",
       "Department",
       "Shift Start",
@@ -317,16 +385,18 @@ export default function StaffManagement() {
     ];
     const csvContent = [
       headers.join(","),
-      ...staff.map((s) =>
-        [
+      ...staff.map((s) => {
+        const name = s.userId ? `${s.userId.firstName} ${s.userId.lastName}` : "Unknown";
+        return [
+          name,
           s.role,
           s.department,
-          s.shiftSchedule?.start,
-          s.shiftSchedule?.end,
-          s.isOnDuty,
+          s.shiftSchedule?.start || '—',
+          s.shiftSchedule?.end || '—',
+          s.isOnDuty ? "Yes" : "No",
           s.hourlyRate,
-        ].join(","),
-      ),
+        ].join(",");
+      }),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -339,15 +409,14 @@ export default function StaffManagement() {
   };
 
   const filteredStaff = staff.filter((s) => {
-    const matchesSearch =
-      s.userId &&
-      (s.userId.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.userId.lastName?.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesSearch || !searchTerm;
+    if (!s.userId) return false;
+    const fullName = `${s.userId.firstName || ''} ${s.userId.lastName || ''}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase()) || !searchTerm;
   });
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6 relative">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
@@ -378,6 +447,8 @@ export default function StaffManagement() {
         </div>
       </div>
 
+ 
+
       {/* Pending invites */}
       {!loadingInvites && pendingInvites.length > 0 && (
         <Card className="p-0 overflow-hidden">
@@ -391,42 +462,43 @@ export default function StaffManagement() {
             {pendingInvites.map((invite) => {
               const expiry = formatInviteExpiry(invite.expiresAt);
               return (
-              <div
-                key={invite._id}
-                className="flex items-center justify-between px-4 py-3"
-              >
-                <div className="flex items-center gap-2">
-                  <div>
-                    <p className="text-sm font-bold text-slate-700">
-                      {invite.email}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {expiry.expired ? "" : expiry.label}
-                    </p>
-                  </div>
-                  {expiry.expired && (
-                    <Badge label={expiry.label} status="error" size="sm" />
-                  )}
-                </div>
-                <button
-                  onClick={() => handleCancelInvite(invite._id)}
-                  disabled={cancellingInviteId === invite._id}
-                  className="flex items-center gap-1 text-xs font-bold text-danger-500 hover:text-danger-700 border border-danger-500/30 px-2 py-1 rounded-lg hover:bg-danger-50 transition-colors disabled:opacity-50"
+                <div
+                  key={invite._id}
+                  className="flex items-center justify-between px-4 py-3"
                 >
-                  {cancellingInviteId === invite._id ? (
-                    <Loader2 className="animate-spin" size={14} />
-                  ) : (
-                    <X size={14} />
-                  )}
-                  Cancel
-                </button>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="text-sm font-bold text-slate-700">
+                        {invite.email}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {expiry.expired ? "" : expiry.label}
+                      </p>
+                    </div>
+                    {expiry.expired && (
+                      <Badge label={expiry.label} status="error" size="sm" />
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleCancelInvite(invite._id)}
+                    disabled={cancellingInviteId === invite._id}
+                    className="flex items-center gap-1 text-xs font-bold text-danger-500 hover:text-danger-700 border border-danger-500/30 px-2 py-1 rounded-lg hover:bg-danger-50 transition-colors disabled:opacity-50"
+                  >
+                    {cancellingInviteId === invite._id ? (
+                      <Loader2 className="animate-spin" size={14} />
+                    ) : (
+                      <X size={14} />
+                    )}
+                    Cancel
+                  </button>
+                </div>
               );
             })}
           </div>
         </Card>
       )}
 
+      {/* Staff Table */}
       <Card className="min-h-[60vh] flex flex-col p-0 overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-4 bg-slate-50">
           <div className="flex-1 max-w-sm">
@@ -473,109 +545,136 @@ export default function StaffManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 bg-white">
-                {filteredStaff.map((item, idx) => (
-                  <tr
-                    key={item._id || idx}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="py-4 px-6">
-                      <p className="text-sm font-bold text-slate-700">
-                        {item.userId
-                          ? `${item.userId.firstName} ${item.userId.lastName}`
-                          : "Unassigned User"}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {item.userId?.email || "N/A"}
-                      </p>
-                    </td>
-                    <td className="py-4 px-6">
-                      <Badge
-                        label={item.role}
-                        status={
-                          item.role === "doctor"
-                            ? "info"
-                            : item.role === "nurse"
-                              ? "success"
-                              : "neutral"
-                        }
-                        size="sm"
-                        className="capitalize"
-                      />
-                    </td>
-                    <td className="py-4 px-6 text-sm text-slate-600">
-                      {item.department}
-                    </td>
-                    <td className="py-4 px-6 text-xs text-slate-500">
-                      {item.shiftSchedule?.start} - {item.shiftSchedule?.end}
-                    </td>
-                    <td className="py-4 px-6">
-                      <button
-                        onClick={() => toggleDuty(item._id, item.isOnDuty)}
-                        className={`w-10 h-5 rounded-full relative transition-colors ${item.isOnDuty ? "bg-success-500" : "bg-slate-300"}`}
-                      >
-                        <span
-                          className={`absolute top-1 left-1 bg-white w-3 h-3 rounded-full transition-transform ${item.isOnDuty ? "translate-x-5" : "translate-x-0"}`}
-                        ></span>
-                      </button>
-                    </td>
-                    <td className="py-4 px-6 text-sm text-slate-600 font-medium">
-                      R {item.hourlyRate}/hr
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex justify-end gap-2">
+                {filteredStaff.map((item, idx) => {
+                  const isFallback = !!item._doctorData;
+                  const name = item.userId
+                    ? `${item.userId.firstName || ''} ${item.userId.lastName || ''}`.trim()
+                    : "Unknown";
+                  const email = item.userId?.email || "N/A";
+                  return (
+                    <tr
+                      key={item._id || idx}
+                      className="hover:bg-slate-50/50 transition-colors"
+                    >
+                      <td className="py-4 px-6">
+                        <p className="text-sm font-bold text-slate-700">
+                          {name}
+                        </p>
+                        <p className="text-xs text-slate-500">{email}</p>
+                      </td>
+                      <td className="py-4 px-6">
+                        <Badge
+                          label={item.role || 'doctor'}
+                          status={item.role === "doctor" ? "info" : "success"}
+                          size="sm"
+                          className="capitalize"
+                        />
+                      </td>
+                      <td className="py-4 px-6 text-sm text-slate-600">
+                        {item.department || 'General'}
+                      </td>
+                      <td className="py-4 px-6 text-xs text-slate-500">
+                        {item.shiftSchedule?.start || '—'} - {item.shiftSchedule?.end || '—'}
+                      </td>
+                      <td className="py-4 px-6">
                         <button
-                          onClick={() => {
-                            console.log('View profile clicked for staff:', item);
-                            if (item._id) {
-                              window.location.href = `/hospital_admin/staff/${item._id}`;
-                            } else {
-                              alert('Staff ID is missing. Cannot view profile.');
-                            }
-                          }}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
-                          title="View Profile"
+                          onClick={() => toggleDuty(item._id, item.isOnDuty)}
+                          disabled={isFallback}
+                          className={`w-10 h-5 rounded-full relative transition-colors ${
+                            isFallback ? "opacity-50 cursor-not-allowed" : ""
+                          } ${item.isOnDuty ? "bg-success-500" : "bg-slate-300"}`}
                         >
-                          <User size={18} />
+                          <span
+                            className={`absolute top-1 left-1 bg-white w-3 h-3 rounded-full transition-transform ${item.isOnDuty ? "translate-x-5" : "translate-x-0"}`}
+                          ></span>
                         </button>
-                        <button
-                          onClick={() => {
-                            setEditingStaff(item);
-                            setFormData({
-                              userId: item.userId?._id || "",
-                              role: item.role,
-                              department: item.department,
-                              shiftStart: item.shiftSchedule?.start || "08:00",
-                              shiftEnd: item.shiftSchedule?.end || "16:00",
-                              hourlyRate: item.hourlyRate,
-                            });
-                            setSelectedDoctor(item.userId);
-                            setDoctorSearch(
-                              item.userId
-                                ? `${item.userId.firstName} ${item.userId.lastName}`
-                                : "",
-                            );
-                            setIsModalOpen(true);
-                          }}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
-                          title="Edit"
-                        >
-                          <Pencil size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-danger-50 hover:text-danger-500 transition-colors"
-                          title="Remove"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                        {isFallback && (
+                          <span className="text-[10px] text-ink-400 block mt-1">
+                            (not staff)
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-4 px-6 text-sm text-slate-600 font-medium">
+                        {item.hourlyRate !== '—' ? `R ${item.hourlyRate}/hr` : '—'}
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              if (item._id) {
+                                window.location.href = `/hospital_admin/staff/${item._id}`;
+                              }
+                            }}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
+                            title="View Profile"
+                          >
+                            <User size={18} />
+                          </button>
+                          {!isFallback && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditingStaff(item);
+                                  setFormData({
+                                    userId: item.userId?._id || "",
+                                    role: item.role,
+                                    department: item.department,
+                                    shiftStart: item.shiftSchedule?.start || "08:00",
+                                    shiftEnd: item.shiftSchedule?.end || "16:00",
+                                    hourlyRate: item.hourlyRate,
+                                  });
+                                  setSelectedDoctor(item.userId);
+                                  setDoctorSearch(
+                                    item.userId
+                                      ? `${item.userId.firstName} ${item.userId.lastName}`
+                                      : "",
+                                  );
+                                  setIsModalOpen(true);
+                                }}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
+                                title="Edit"
+                              >
+                                <Pencil size={18} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(item._id)}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-danger-50 hover:text-danger-500 transition-colors"
+                                title="Remove"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </>
+                          )}
+                          {isFallback && (
+                            <button
+                              onClick={() => {
+                                // Quick add to staff – open modal with this doctor preselected
+                                resetForm();
+                                setAddMode("existing");
+                                setSelectedDoctor(item._doctorData);
+                                setDoctorSearch(name);
+                                setFormData({
+                                  ...formData,
+                                  userId: item._id,
+                                  department: item.department,
+                                });
+                                setIsModalOpen(true);
+                              }}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center text-primary border border-primary/30 hover:bg-primary/10 transition-colors"
+                              title="Add to Staff"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {filteredStaff.length === 0 && (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-slate-500">
-                      No staff found matching criteria.
+                      No staff or doctors found matching criteria.
                     </td>
                   </tr>
                 )}
@@ -646,7 +745,7 @@ export default function StaffManagement() {
               {showDoctorDropdown &&
                 !selectedDoctor &&
                 (isSearchingDoctor || doctorResults.length > 0) && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-lg  z-50 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-lg z-50 max-h-48 overflow-y-auto">
                     {isSearchingDoctor && (
                       <div className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500">
                         <Loader2 className="animate-spin text-primary" size={16} />
@@ -663,7 +762,6 @@ export default function StaffManagement() {
                           setFormData({
                             ...formData,
                             userId: dr._id,
-                            // Auto-fill from their existing practitioner profile when available
                             department: dr.specialisation || formData.department,
                           });
                           setShowDoctorDropdown(false);
@@ -725,9 +823,7 @@ export default function StaffManagement() {
             </div>
           )}
 
-          {/* Department — hidden for invites, since the doctor sets their own
-              specialisation at registration. This system only manages
-              doctors, so department doubles as their specialisation. */}
+          {/* Department */}
           {(editingStaff || addMode === "existing") && (
             <Select
               label="Department"
@@ -737,7 +833,6 @@ export default function StaffManagement() {
                 { value: "", label: "-- Select department --" },
                 ...[
                   ...DEPARTMENTS,
-                  // Keep an unrecognised/legacy value selectable instead of silently dropping it
                   ...(formData.department && !DEPARTMENTS.includes(formData.department)
                     ? [formData.department]
                     : []),

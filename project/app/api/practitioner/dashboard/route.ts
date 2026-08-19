@@ -57,13 +57,15 @@ export async function GET(req: NextRequest) {
 
         const canAccept =
           !(c.status === 'requested' || c.status === 'pending') ||
-          practitionerId !==
-            getBlockedAcceptorId({
-              source: c.source,
-              patientId: c.patientId,
-              practitionerId: c.practitionerId,
-              pendingReschedule: c.pendingReschedule,
-            });
+          (c.requestedTo
+            ? c.requestedTo.toString() === practitionerId
+            : practitionerId !==
+              getBlockedAcceptorId({
+                source: c.source,
+                patientId: c.patientId,
+                practitionerId: c.practitionerId,
+                pendingReschedule: c.pendingReschedule,
+              }));
 
         return {
           consultationId: c._id.toString(),

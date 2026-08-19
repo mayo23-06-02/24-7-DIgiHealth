@@ -111,7 +111,9 @@ export async function GET(req: NextRequest) {
         });
         const canAccept =
           (c.status === 'requested' || c.status === 'pending') &&
-          practitionerId !== blockedAcceptorId;
+          (c.requestedTo
+            ? c.requestedTo.toString() === practitionerId
+            : practitionerId !== blockedAcceptorId);
 
         return {
           id: c._id.toString(),

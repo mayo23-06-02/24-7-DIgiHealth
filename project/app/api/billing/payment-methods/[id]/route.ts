@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { PaymentMethod } from "@/lib/models/Billing";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
@@ -15,7 +15,7 @@ async function getAuthUser() {
 
 // DELETE /api/billing/payment-methods/:id - Delete a payment method
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

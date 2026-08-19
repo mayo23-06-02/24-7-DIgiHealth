@@ -160,7 +160,8 @@ export default function BookingModal({
         setSelectedDoctorState(doctor || null);
       }
     }
-  }, [isOpen, doctor, patient, isPractitionerMode, initialForm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Real schedule-based slots (8am–midnight); past + booked are greyed out.
   // When editing/rescheduling, excludeBookingId frees the current appointment slot.
