@@ -459,7 +459,7 @@ export default function StaffProfilePage() {
               value: sla.cancellationRate,
               target: 10,
               icon: <XCircle size={20} />,
-              status: sla.cancellationRate <= 10 ? "success" : "danger",
+              status: sla.cancellationRate <= 10 ? "success" : "error",
               unit: "%",
               invert: true,
             },
@@ -469,21 +469,21 @@ export default function StaffProfilePage() {
               target: 30,
               unit: "min",
               icon: <Activity size={20} />,
-              status: sla.avgResponseMinutes <= 30 ? "success" : "danger",
+              status: sla.avgResponseMinutes <= 30 ? "success" : "error",
               invert: true,
             },
           ].map((m: any) => {
             const met = m.invert ? m.value <= m.target : m.value >= m.target;
-            const statusColor = m.status as "success" | "warning" | "danger";
+            const statusColor = m.status as "success" | "warning" | "error";
             const bgMap = {
               success: "bg-success-50",
               warning: "bg-warning-50",
-              danger: "bg-danger-50",
+              error: "bg-danger-50",
             };
             const textMap = {
               success: "text-success-700",
               warning: "text-warning-700",
-              danger: "text-danger-700",
+              error: "text-danger-700",
             };
             return (
               <Card key={m.label} variant="solid" className="flex flex-col gap-3 p-5">
@@ -494,7 +494,7 @@ export default function StaffProfilePage() {
                     {m.icon}
                   </div>
                   <Badge
-                    status={met ? "success" : "danger"}
+                    status={met ? "success" : "error"}
                     size="sm"
                     label={met ? "✓ Met" : "✗ Below Target"}
                   />
