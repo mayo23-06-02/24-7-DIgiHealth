@@ -38,7 +38,7 @@ export default function DoctorsCarouselSection({
           <h3 className="font-bold text-ink-900 text-lg md:text-xl lg:text-lg md:text-h3 font-grotesk leading-tight">
             {title}
           </h3>
-          <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-semibold">
+          <span className="text-xs bg-primary text-white px-2.5 py-0.5 rounded-full font-semibold">
             {doctors.length}
           </span>
         </div>
