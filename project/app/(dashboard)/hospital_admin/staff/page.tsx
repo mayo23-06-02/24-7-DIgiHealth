@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Badge from "@/components/ui/Badge";
+import Table, { Column } from "@/components/ui/Table";
 import {
   Search,
   Plus,
@@ -48,6 +50,25 @@ const DEPARTMENTS = [
   "Ophthalmologist",
 ];
 
+interface StaffMember {
+  _id: string;
+  userId?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  role: string;
+  department: string;
+  shiftSchedule?: {
+    start: string;
+    end: string;
+  };
+  isOnDuty: boolean;
+  hourlyRate: number | string;
+  _doctorData?: any;
+}
+
 // KPI Card component
 function KpiCard({ icon: Icon, label, value, subtext, color = "primary" }: any) {
   return (
@@ -65,34 +86,29 @@ function KpiCard({ icon: Icon, label, value, subtext, color = "primary" }: any) 
 }
 
 export default function StaffManagement() {
+  const router = useRouter();
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Dashboard KPIs
   const [dashboard, setDashboard] = useState<any>(null);
-  const [loadingDashboard, setLoadingDashboard] = useState(true);
-
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any>(null);
-  const [addMode, setAddMode] = useState<"existing" | "invite">("existing");
-
-  // Form State
+  const [addMode, setAddMode] = useState<"new" | "existing" | "invite">("new");
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [doctorSearch, setDoctorSearch] = useState("");
+  const [doctorResults, setDoctorResults] = useState<any[]>([]);
+  const [isSearchingDoctor, setIsSearchingDoctor] = useState(false);
+  const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
+  const [doctors, setDoctors] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     userId: "",
     role: "doctor",
-    department: "",
+    department: "General Practitioner",
     shiftStart: "08:00",
     shiftEnd: "16:00",
     hourlyRate: 0,
   });
-
-  // Doctor Search State
-  const [doctorSearch, setDoctorSearch] = useState("");
-  const [doctorResults, setDoctorResults] = useState<any[]>([]);
-  const [isSearchingDoctor, setIsSearchingDoctor] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
-  const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
 
   // Invite-by-email state
   const [inviteEmail, setInviteEmail] = useState("");
@@ -103,6 +119,142 @@ export default function StaffManagement() {
   const [pendingInvites, setPendingInvites] = useState<any[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(true);
   const [cancellingInviteId, setCancellingInviteId] = useState<string | null>(null);
+
+  // Define table columns for staff (defined inside component to access state/functions)
+  const staffColumns: Column<StaffMember>[] = [
+    {
+      key: "name",
+      header: "Name/User",
+      isTitle: true,
+      render: (row) => (
+        <div>
+          <p className="text-sm font-bold text-ink-900">
+            {row.userId ? `${row.userId.firstName || ''} ${row.userId.lastName || ''}`.trim() : "Unknown"}
+          </p>
+          <p className="text-xs text-ink-400">{row.userId?.email || "N/A"}</p>
+        </div>
+      ),
+    },
+    {
+      key: "role",
+      header: "Role",
+      render: (row) => (
+        <Badge
+          label={row.role || 'doctor'}
+          status={row.role === "doctor" ? "info" : "success"}
+          size="sm"
+          className="capitalize"
+        />
+      ),
+    },
+    {
+      key: "department",
+      header: "Department",
+    },
+    {
+      key: "shift",
+      header: "Shift",
+      render: (row) => (
+        <span className="text-xs text-ink-400">
+          {row.shiftSchedule?.start || '—'} - {row.shiftSchedule?.end || '—'}
+        </span>
+      ),
+    },
+    {
+      key: "onDuty",
+      header: "On Duty",
+      align: "center",
+      render: (row) => {
+        const isFallback = !!row._doctorData;
+        return (
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => toggleDuty(row._id, row.isOnDuty)}
+              disabled={isFallback}
+              aria-label={row.isOnDuty ? "Set off duty" : "Set on duty"}
+              className={`w-10 h-5 rounded-full relative transition-colors ${isFallback ? "opacity-50 cursor-not-allowed" : ""
+                } ${row.isOnDuty ? "bg-success-500" : "bg-surface-soft"}`}
+            >
+              <span
+                className={`absolute top-1 left-1 bg-surface w-3 h-3 rounded-full transition-transform ${row.isOnDuty ? "translate-x-5" : "translate-x-0"}`}
+              ></span>
+            </button>
+            
+          </div>
+        );
+      },
+    },
+    {
+      key: "rate",
+      header: "Rate",
+      render: (row) => (
+        <span className="text-sm text-ink-600 font-medium">
+          {row.hourlyRate !== '—' ? `R ${row.hourlyRate}/hr` : '—'}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      align: "right",
+      render: (row) => {
+        const isFallback = !!row._doctorData;
+        return (
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => {
+                if (row._id) {
+                  router.push(`/hospital_admin/staff/${row._id}`);
+                }
+              }}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-ink-400 hover:bg-surface-soft hover:text-primary-500 transition-colors"
+              title="View Profile"
+              aria-label="View profile"
+            >
+              <User size={18} />
+            </button>
+            {!isFallback && (
+              <>
+                <button
+                  onClick={() => {
+                    setEditingStaff(row);
+                    setFormData({
+                      userId: row.userId?._id || "",
+                      role: row.role,
+                      department: row.department,
+                      shiftStart: row.shiftSchedule?.start || "08:00",
+                      shiftEnd: row.shiftSchedule?.end || "16:00",
+                      hourlyRate: row.hourlyRate,
+                    });
+                    setSelectedDoctor(row.userId);
+                    setDoctorSearch(
+                      row.userId
+                        ? `${row.userId.firstName} ${row.userId.lastName}`
+                        : "",
+                    );
+                    setIsModalOpen(true);
+                  }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-ink-400 hover:bg-surface-soft hover:text-primary-500 transition-colors"
+                  title="Edit"
+                  aria-label="Edit staff"
+                >
+                  <Pencil size={18} />
+                </button>
+                <button
+                  onClick={() => handleDelete(row._id)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-ink-400 hover:bg-danger-50 hover:text-danger-500 transition-colors"
+                  title="Remove"
+                  aria-label="Remove staff"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
 
   const fetchStaff = async () => {
     setLoading(true);
@@ -417,9 +569,9 @@ export default function StaffManagement() {
   return (
     <div className="w-full pb-10 flex flex-col gap-6 relative">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex px-4 lg:px-0 flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-grotesk">
+          <h1 className="text-lg lg:text-2xl font-bold text-slate-800 font-grotesk">
             Staff Management
           </h1>
           <p className="text-sm text-slate-500">
@@ -429,25 +581,25 @@ export default function StaffManagement() {
 
         <div className="flex items-center gap-3">
           <Button
+            size="sm"
             variant="outline"
             onClick={exportCSV}
-            icon={<Download size={18} />}
           >
             Export CSV
           </Button>
           <Button
+            size="sm"
             onClick={() => {
               resetForm();
               setIsModalOpen(true);
             }}
-            icon={<Plus size={18} />}
           >
             Add Staff
           </Button>
         </div>
       </div>
 
- 
+
 
       {/* Pending invites */}
       {!loadingInvites && pendingInvites.length > 0 && (
@@ -500,7 +652,7 @@ export default function StaffManagement() {
 
       {/* Staff Table */}
       <Card className="min-h-[60vh] flex flex-col p-0 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-4 bg-slate-50">
+        <div className="py-4  flex flex-col sm:flex-row gap-4 ">
           <div className="flex-1 max-w-sm">
             <Input
               type="text"
@@ -517,170 +669,7 @@ export default function StaffManagement() {
             <Loader2 className="animate-spin text-primary text-4xl" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-white border-b border-slate-100">
-                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-left">
-                    Name/User
-                  </th>
-                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-left">
-                    Role
-                  </th>
-                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-left">
-                    Department
-                  </th>
-                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-center">
-                    Shift
-                  </th>
-                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-center">
-                    On Duty
-                  </th>
-                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-center">
-                    Rate
-                  </th>
-                  <th className="py-3 px-6 text-md font-bold text-slate-500 tracking-wider text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 bg-white">
-                {filteredStaff.map((item, idx) => {
-                  const isFallback = !!item._doctorData;
-                  const name = item.userId
-                    ? `${item.userId.firstName || ''} ${item.userId.lastName || ''}`.trim()
-                    : "Unknown";
-                  const email = item.userId?.email || "N/A";
-                  return (
-                    <tr
-                      key={item._id || idx}
-                      className="hover:bg-slate-50/50 transition-colors"
-                    >
-                      <td className="py-4 px-6">
-                        <p className="text-sm font-bold text-slate-700">
-                          {name}
-                        </p>
-                        <p className="text-xs text-slate-500">{email}</p>
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge
-                          label={item.role || 'doctor'}
-                          status={item.role === "doctor" ? "info" : "success"}
-                          size="sm"
-                          className="capitalize"
-                        />
-                      </td>
-                      <td className="py-4 px-6 text-sm text-slate-600">
-                        {item.department || 'General'}
-                      </td>
-                      <td className="py-4 px-6 text-xs text-slate-500">
-                        {item.shiftSchedule?.start || '—'} - {item.shiftSchedule?.end || '—'}
-                      </td>
-                      <td className="py-4 px-6">
-                        <button
-                          onClick={() => toggleDuty(item._id, item.isOnDuty)}
-                          disabled={isFallback}
-                          className={`w-10 h-5 rounded-full relative transition-colors ${
-                            isFallback ? "opacity-50 cursor-not-allowed" : ""
-                          } ${item.isOnDuty ? "bg-success-500" : "bg-slate-300"}`}
-                        >
-                          <span
-                            className={`absolute top-1 left-1 bg-white w-3 h-3 rounded-full transition-transform ${item.isOnDuty ? "translate-x-5" : "translate-x-0"}`}
-                          ></span>
-                        </button>
-                        {isFallback && (
-                          <span className="text-[10px] text-ink-400 block mt-1">
-                            (not staff)
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-slate-600 font-medium">
-                        {item.hourlyRate !== '—' ? `R ${item.hourlyRate}/hr` : '—'}
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              if (item._id) {
-                                window.location.href = `/hospital_admin/staff/${item._id}`;
-                              }
-                            }}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
-                            title="View Profile"
-                          >
-                            <User size={18} />
-                          </button>
-                          {!isFallback && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  setEditingStaff(item);
-                                  setFormData({
-                                    userId: item.userId?._id || "",
-                                    role: item.role,
-                                    department: item.department,
-                                    shiftStart: item.shiftSchedule?.start || "08:00",
-                                    shiftEnd: item.shiftSchedule?.end || "16:00",
-                                    hourlyRate: item.hourlyRate,
-                                  });
-                                  setSelectedDoctor(item.userId);
-                                  setDoctorSearch(
-                                    item.userId
-                                      ? `${item.userId.firstName} ${item.userId.lastName}`
-                                      : "",
-                                  );
-                                  setIsModalOpen(true);
-                                }}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-primary transition-colors"
-                                title="Edit"
-                              >
-                                <Pencil size={18} />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(item._id)}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-danger-50 hover:text-danger-500 transition-colors"
-                                title="Remove"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </>
-                          )}
-                          {isFallback && (
-                            <button
-                              onClick={() => {
-                                // Quick add to staff – open modal with this doctor preselected
-                                resetForm();
-                                setAddMode("existing");
-                                setSelectedDoctor(item._doctorData);
-                                setDoctorSearch(name);
-                                setFormData({
-                                  ...formData,
-                                  userId: item._id,
-                                  department: item.department,
-                                });
-                                setIsModalOpen(true);
-                              }}
-                              className="w-8 h-8 rounded-lg flex items-center justify-center text-primary border border-primary/30 hover:bg-primary/10 transition-colors"
-                              title="Add to Staff"
-                            >
-                              <Plus size={16} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredStaff.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-500">
-                      No staff or doctors found matching criteria.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <Table columns={staffColumns} data={filteredStaff} keyField="_id" />
         )}
       </Card>
 
@@ -700,22 +689,20 @@ export default function StaffManagement() {
               <button
                 type="button"
                 onClick={() => setAddMode("existing")}
-                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
-                  addMode === "existing"
+                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${addMode === "existing"
                     ? "bg-white text-primary shadow-none"
                     : "text-slate-500 hover:text-slate-700"
-                }`}
+                  }`}
               >
                 Existing Doctor
               </button>
               <button
                 type="button"
                 onClick={() => setAddMode("invite")}
-                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${
-                  addMode === "invite"
+                className={`flex-1 py-2 rounded-md text-sm font-bold transition-colors ${addMode === "invite"
                     ? "bg-white text-primary shadow-none"
                     : "text-slate-500 hover:text-slate-700"
-                }`}
+                  }`}
               >
                 Invite New Doctor
               </button>

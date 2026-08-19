@@ -182,11 +182,11 @@ export default function DoctorModal({
           >
             {isMyDoctor ? (
               <>
-                <BiUnlink className="mr-2 text-xl" /> Remove from Team
+                Remove from Team
               </>
             ) : (
               <>
-                <BiLinkAlt className="mr-2 text-xl" /> Add to Care Team
+                Add to Care Team
               </>
             )}
           </Button>
@@ -195,7 +195,7 @@ export default function DoctorModal({
             onClick={() => onBook(doctor.id)}
             fullWidth
           >
-            <BiCalendarPlus className="mr-2 text-xl" /> Book Consultation
+            Book Consultation
           </Button>
         </div>
 

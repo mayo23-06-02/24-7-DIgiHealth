@@ -36,6 +36,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${grotesk.variable} ${outfit.variable} antialiased`}
+      data-scroll-behavior="smooth"
     >
       <body className="font-outfit">
         {/* Mounted at the root so the bar also covers the (auth) group, which

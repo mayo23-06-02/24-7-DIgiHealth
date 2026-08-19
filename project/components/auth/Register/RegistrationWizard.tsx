@@ -123,14 +123,12 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
           {config.steps.map((label, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-2">
               <div
-                className={`h-0.5 w-full rounded-full transition-all duration-500 ${
-                  i < step ? "bg-primary" : "bg-slate-100"
-                }`}
+                className={`h-0.5 w-full rounded-full transition-all duration-500 ${i < step ? "bg-primary" : "bg-slate-100"
+                  }`}
               />
               <span
-                className={`text-[10px] font-semibold uppercase tracking-wider hidden md:block transition-colors ${
-                  i + 1 === step ? "text-primary" : "text-slate-300"
-                }`}
+                className={`text-[10px] font-semibold uppercase tracking-wider hidden md:block transition-colors ${i + 1 === step ? "text-primary" : "text-slate-300"
+                  }`}
               >
                 {label}
               </span>
@@ -158,10 +156,32 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
               errors={errors}
               onSkip={skipStep}
             />
+            <div className="flex-shrink-0 my-6  lg:hidden  md:flex-row gap-4 border-t border-slate-100 py-5 bg-white">
+              {step > 1 && (
+                <Button type="button" variant="white" onClick={goToPrevious} className="md:flex-1">
+                  Back
+                </Button>
+              )}
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                disabled={submitting || (!isOnline && isLastStep)}
+                className="md:flex-1"
+              >
+                {submitting
+                  ? "Processing…"
+                  : isLastStep
+                    ? "Complete Registration"
+                    : isSkippable
+                      ? "Save & Continue"
+                      : `Continue to ${config.steps[step]}`}
+              </Button>
+            </div>
           </div>
 
           {/* Fixed bottom navigation – always visible */}
-          <div className="flex-shrink-0 flex flex-col md:flex-row gap-4 border-t border-slate-100 py-5 bg-white">
+          <div className="flex-shrink-0 hidden lg:inline-flex flex-col md:flex-row gap-4 border-t border-slate-100 py-5 bg-white">
             {step > 1 && (
               <Button type="button" variant="white" onClick={goToPrevious} className="md:flex-1">
                 Back

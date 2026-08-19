@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
+import User from '@/lib/models/User';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
-import { getStaffByIdAndFacility } from '@/lib/postgres/staff';
 
 export async function GET(
   _req: Request,
@@ -15,59 +14,44 @@ export async function GET(
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    const hospitalId = await resolvePostgresHospitalId(user.userId, user.email);
-    if (!hospitalId) {
-      return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
-    }
 
     const { id } = await params;
 
-    console.log('[GET /api/hospital/staff/[id]/profile] Query details:', {
-      staffId: id,
-      staffIdLength: id.length,
-      hospitalId,
+    console.log('[GET /api/hospital/doctors/[id]/profile] Query details:', {
+      doctorId: id,
     });
 
-    const staffDoc = await getStaffByIdAndFacility(id, hospitalId);
-
-    if (!staffDoc) {
-      console.log('[GET /api/hospital/staff/[id]/profile] Staff not found:', {
-        staffId: id,
-        hospitalId,
-      });
-      return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
-    }
-
     await connectToDatabase();
-    const staffAny = staffDoc as any;
-    const userId = staffAny.user_id;
 
-    // ── Practitioner profile (optional - only doctors have one) ──────────
-    let practProfile: any = null;
-    if (userId) {
-      practProfile = await PractitionerProfile.findOne({ userId }).lean();
+    // Get the doctor user
+    const doctorUser = await User.findById(id);
+    if (!doctorUser || doctorUser.role !== 'practitioner') {
+      console.log('[GET /api/hospital/doctors/[id]/profile] Doctor not found:', id);
+      return NextResponse.json({ success: false, error: 'Doctor not found' }, { status: 404 });
     }
 
-    // ── Consultations ────────────────────────────────────────────────────
-    const consultations = userId
-      ? await Consultation.find({ practitionerId: userId })
-          .populate('patientId', 'firstName lastName email')
-          .sort({ scheduledStartTime: -1 })
-          .lean()
-      : [];
+    // Get practitioner profile
+    const practProfile = await PractitionerProfile.findOne({ userId: id }).lean();
 
-    const totalConsultations   = consultations.length;
+    // Get consultations
+    const consultations = await Consultation.find({ practitionerId: id })
+      .populate('patientId', 'firstName lastName email')
+      .sort({ scheduledStartTime: -1 })
+      .lean();
+
+    const totalConsultations = consultations.length;
     const completedConsultations = consultations.filter((c: any) => c.status === 'completed').length;
     const cancelledConsultations = consultations.filter((c: any) => c.status === 'cancelled').length;
-    const upcomingConsultations  = consultations.filter(
+    const upcomingConsultations = consultations.filter(
       (c: any) => ['scheduled', 'requested', 'pending'].includes(c.status) && new Date(c.scheduledStartTime) >= new Date()
     ).length;
 
-    // ── Unique patients ──────────────────────────────────────────────────
+    // Unique patients
     const uniquePatientIds = [...new Set(consultations.map((c: any) => c.patientId?._id?.toString()).filter(Boolean))];
 
-    // ── Revenue ──────────────────────────────────────────────────────────
-    const revenuePerConsultation = staffAny.hourlyRate * 1; // 1 hour per consultation (default)
+    // Revenue (using hourly rate from profile or default)
+    const hourlyRate = practProfile?.hourlyRate || 500;
+    const revenuePerConsultation = hourlyRate;
     const totalRevenue = completedConsultations * revenuePerConsultation;
 
     // Monthly revenue for chart (last 6 months)
@@ -83,21 +67,21 @@ export async function GET(
       return { month: label, revenue: count * revenuePerConsultation, consultations: count };
     });
 
-    // ── SLA Metrics ──────────────────────────────────────────────────────
+    // SLA Metrics
     const completionRate = totalConsultations > 0 ? Math.round((completedConsultations / totalConsultations) * 100) : 0;
     const cancellationRate = totalConsultations > 0 ? Math.round((cancelledConsultations / totalConsultations) * 100) : 0;
-    const patientSatisfaction = practProfile?.rating ? Math.round(practProfile.rating * 20) : 85; // convert 5-star to %
-    const avgResponseMinutes = 18; // mock – would come from message timestamps
+    const patientSatisfaction = practProfile?.rating ? Math.round(practProfile.rating * 20) : 85;
+    const avgResponseMinutes = 18;
 
     const sla = {
       completionRate,
       cancellationRate,
       patientSatisfaction,
       avgResponseMinutes,
-      onTimeRate: Math.max(0, completionRate - 5), // derived
+      onTimeRate: Math.max(0, completionRate - 5),
     };
 
-    // ── Recent appointments (last 10) ────────────────────────────────────
+    // Recent appointments (last 10)
     const recentAppointments = consultations.slice(0, 10).map((c: any) => ({
       id: c._id.toString(),
       patientName: c.patientId ? `${c.patientId.firstName} ${c.patientId.lastName}` : 'Unknown',
@@ -108,7 +92,7 @@ export async function GET(
       chiefComplaint: c.chiefComplaint || '',
     }));
 
-    // ── Recent patients (unique, last 10) ───────────────────────────────
+    // Recent patients (unique, last 10)
     const seen = new Set<string>();
     const recentPatients = consultations
       .filter((c: any) => {
@@ -130,14 +114,20 @@ export async function GET(
       success: true,
       data: {
         staff: {
-          ...staffAny,
-          // Postgres rows key on `id`; only legacy Mongo documents have `_id`.
-          // Dereferencing `_id` unconditionally threw
-          // "Cannot read properties of undefined (reading 'toString')" and
-          // 500'd the whole profile page for every Postgres-native staff
-          // member — which is now all of them. `_id` is still emitted so the
-          // existing client keeps working.
-          _id: String(staffAny._id ?? staffAny.id),
+          _id: doctorUser._id.toString(),
+          userId: {
+            _id: doctorUser._id.toString(),
+            firstName: doctorUser.firstName,
+            lastName: doctorUser.lastName,
+            email: doctorUser.email,
+            mobile: doctorUser.mobile,
+          },
+          role: 'doctor',
+          department: practProfile?.specialisation || 'General Practitioner',
+          shiftSchedule: { start: '—', end: '—' },
+          isOnDuty: practProfile?.isOnline || false,
+          hourlyRate: hourlyRate,
+          qualifications: practProfile?.qualifications || [],
         },
         practProfile,
         kpi: {
@@ -156,7 +146,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[GET /api/hospital/staff/[id]/profile]', error);
+    console.error('[GET /api/hospital/doctors/[id]/profile]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

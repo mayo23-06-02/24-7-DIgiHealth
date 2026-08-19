@@ -927,7 +927,7 @@ function PatientBillingView({
           />
           <div className="relative w-full sm:max-w-4xl bg-white shadow-2xl overflow-hidden rounded-t-2xl sm:rounded-2xl max-h-[90vh] sm:max-h-none flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 sm:slide-in-from-bottom-0 fade-in duration-200">
             <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 shrink-0">
-              <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
+              <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
                 Choose Your Plan
               </h3>
               <button
@@ -1145,7 +1145,7 @@ function PractitionerBillingView({
       {/* Payout History */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100">
-          <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
+          <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
             Payout History
           </h3>
         </div>
@@ -1349,7 +1349,7 @@ function HospitalAdminBillingView({
 
         <Card noPadding>
           <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
+            <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
               Revenue by Department
             </h3>
           </div>
@@ -1383,7 +1383,7 @@ function HospitalAdminBillingView({
       {/* Practitioner Payout Management */}
       <Card noPadding>
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-h3 font-bold text-ink-900 font-grotesk">
+          <h3 className="text-h4 font-bold text-ink-900 font-grotesk">
             Practitioner Payouts
           </h3>
           <div className="flex items-center gap-3">

@@ -87,13 +87,15 @@ export default function HospitalSLAPage() {
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      <PageHeader
-        title="Service Level Agreements"
-        subtitle="Monitor and manage operational performance targets"
-      />
+      <div className="px-4 lg:px-0">
+        <PageHeader
+          title="Service Level Agreements"
+          subtitle="Monitor and manage operational performance targets"
+        />
+      </div>
 
       {/* Summary KPIs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2">
         {[
           { label: "SLAs Met", value: met, color: "emerald" },
           { label: "At Risk", value: atRisk, color: "gray" },
@@ -108,7 +110,7 @@ export default function HospitalSLAPage() {
 
       {/* SLA Table */}
       <Card className="overflow-hidden p-0">
-        <div className="px-6 py-4 border-b border-slate-100">
+        <div className="lg:px-6 py-4 border-b border-slate-100">
           <h2 className="font-bold text-slate-800 font-grotesk">
             All SLA Targets
           </h2>
@@ -117,11 +119,9 @@ export default function HospitalSLAPage() {
           {slas.map((sla) => (
             <div
               key={sla.id}
-              className="px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
+              className="lg:px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <Clock size={20} />
-              </div>
+             
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1.5">
                   <p className="text-sm font-semibold text-slate-800">

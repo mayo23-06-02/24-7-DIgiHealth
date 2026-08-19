@@ -108,7 +108,8 @@ export default function HospitalReviewsPage() {
 
   return (
     <div className="w-full pb-10 flex flex-col gap-6">
-      <PageHeader
+      <div className="lg:px-0 px-4">
+        <PageHeader
         title="Patient Reviews"
         subtitle="Moderate and view all patient feedback"
         right={
@@ -119,9 +120,10 @@ export default function HospitalReviewsPage() {
           </div>
         }
       />
+      </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center px-4 lg:px-0">
         {(["all", "pending", "approved"] as const).map((f) => (
           <Button
             key={f}

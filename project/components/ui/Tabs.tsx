@@ -43,11 +43,11 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeId, onChange, className = "" })
             role="tab"
             aria-selected={active}
             onClick={() => onChange(tab.id)}
-            className={`relative flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors ${
+            className={`relative flex items-center gap-2 px-4 py-3 md:text-sm text-xs font-semibold whitespace-nowrap transition-colors ${
               active ? "text-primary" : "text-ink-600 hover:text-ink-900"
             }`}
           >
-            {tab.icon && <span className="[&>svg]:w-4 [&>svg]:h-4">{tab.icon}</span>}
+            {tab.icon && <span className="w-4 h-4 lg:w-6 lg:h-6">{tab.icon}</span>}
             {tab.label}
             {tab.badge !== undefined && (
               <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${colors.bg} ${colors.text}`}>

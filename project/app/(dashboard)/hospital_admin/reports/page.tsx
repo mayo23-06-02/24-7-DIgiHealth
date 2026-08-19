@@ -66,49 +66,49 @@ const REPORT_TYPES: {
   description: string;
   icon: React.ReactNode;
 }[] = [
-  {
-    id: "overview",
-    label: "Full overview",
-    description: "Facility, doctors, patients & intelligence",
-    icon: <BarChart3 size={22} />,
-  },
-  {
-    id: "facility",
-    label: "Facility",
-    description: "Capacity, departments, operational KPIs",
-    icon: <Building2 size={22} />,
-  },
-  {
-    id: "doctors",
-    label: "Doctors",
-    description: "Roster, duty, load, ratings",
-    icon: <Users size={22} />,
-  },
-  {
-    id: "patients",
-    label: "Patients",
-    description: "Visits, risk bands, follow-ups",
-    icon: <User size={22} />,
-  },
-  {
-    id: "financial",
-    label: "Financial",
-    description: "Transactions, revenue, methods",
-    icon: <CircleDollarSign size={22} />,
-  },
-  {
-    id: "staff",
-    label: "Staff",
-    description: "All roles, shifts, duty status",
-    icon: <Users size={22} />,
-  },
-  {
-    id: "appointments",
-    label: "Appointments",
-    description: "Clinic schedule and status mix",
-    icon: <Calendar size={22} />,
-  },
-];
+    {
+      id: "overview",
+      label: "Full overview",
+      description: "Facility, doctors, patients & intelligence",
+      icon: <BarChart3 size={22} />,
+    },
+    {
+      id: "facility",
+      label: "Facility",
+      description: "Capacity, departments, operational KPIs",
+      icon: <Building2 size={22} />,
+    },
+    {
+      id: "doctors",
+      label: "Doctors",
+      description: "Roster, duty, load, ratings",
+      icon: <Users size={22} />,
+    },
+    {
+      id: "patients",
+      label: "Patients",
+      description: "Visits, risk bands, follow-ups",
+      icon: <User size={22} />,
+    },
+    {
+      id: "financial",
+      label: "Financial",
+      description: "Transactions, revenue, methods",
+      icon: <CircleDollarSign size={22} />,
+    },
+    {
+      id: "staff",
+      label: "Staff",
+      description: "All roles, shifts, duty status",
+      icon: <Users size={22} />,
+    },
+    {
+      id: "appointments",
+      label: "Appointments",
+      description: "Clinic schedule and status mix",
+      icon: <Calendar size={22} />,
+    },
+  ];
 
 const SORT_OPTIONS: Record<ReportType, { value: string; label: string }[]> = {
   overview: [
@@ -446,23 +446,23 @@ export default function HospitalReportsPage() {
 
   type ChartSlot =
     | {
-        kind: "bar";
-        title: string;
-        icon: React.ReactNode;
-        data: any[];
-        xKey: string;
-        bars: { dataKey: string; name: string; color: string }[];
-      }
+      kind: "bar";
+      title: string;
+      icon: React.ReactNode;
+      data: any[];
+      xKey: string;
+      bars: { dataKey: string; name: string; color: string }[];
+    }
     | {
-        kind: "pie";
-        title: string;
-        icon: React.ReactNode;
-        data: any[];
-        dataKey: string;
-        nameKey: string;
-        colors?: string[];
-        donut?: boolean;
-      };
+      kind: "pie";
+      title: string;
+      icon: React.ReactNode;
+      data: any[];
+      dataKey: string;
+      nameKey: string;
+      colors?: string[];
+      donut?: boolean;
+    };
 
   const dutySplit = (rows: any[]) => {
     const on = rows.filter((r) => r.isOnDuty).length;
@@ -618,65 +618,40 @@ export default function HospitalReportsPage() {
 
   return (
     <div className="w-full pb-16 flex flex-col gap-6 max-w-[1400px] mx-auto">
-      <PageHeader
-        title="Facility reports"
-        subtitle="In-depth intelligence on your hospital, doctors, and patients"
-        right={
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => void load()}
-              disabled={loading}
-              icon={
-                loading ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <RefreshCw size={16} />
-                )
-              }
-              iconPosition="left"
-              className="!rounded-lg !max-w-none normal-case !tracking-normal"
-            >
-              Refresh
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => void downloadCsv()}
-              disabled={!!exporting || loading}
-              icon={
-                exporting === "csv" ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <Download size={16} />
-                )
-              }
-              iconPosition="left"
-              className="!rounded-lg !max-w-none normal-case !tracking-normal"
-            >
-              CSV
-            </Button>
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={() => void downloadPdf()}
-              disabled={!!exporting || loading}
-              icon={
-                exporting === "pdf" ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <FileText size={16} />
-                )
-              }
-              iconPosition="left"
-              className="!rounded-lg !max-w-none normal-case !tracking-normal"
-            >
-              Download PDF
-            </Button>
-          </div>
-        }
-      />
+      <div className="px-4 lg:px-0">
+        <PageHeader
+          title="Facility reports"
+          subtitle="In-depth intelligence on your hospital, doctors, and patients"
+          right={
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void load()}
+                disabled={loading}
+              >
+                Refresh
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void downloadCsv()}
+                disabled={!!exporting || loading}
+              >
+                CSV
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => void downloadPdf()}
+                disabled={!!exporting || loading}
+              >
+                Download PDF
+              </Button>
+            </div>
+          }
+        />
+      </div>
 
       {/* Intelligence */}
       {data && data.intelligence?.length > 0 && (
@@ -749,9 +724,8 @@ export default function HospitalReportsPage() {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setType(rt.id)}
-                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors ${
-                  isActive ? "text-primary" : "text-ink-600 hover:text-ink-900"
-                }`}
+                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors ${isActive ? "text-primary" : "text-ink-600 hover:text-ink-900"
+                  }`}
               >
                 {React.cloneElement(rt.icon as React.ReactElement<{ size?: number }>, {
                   size: 16,
@@ -903,82 +877,82 @@ export default function HospitalReportsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(type === "doctors" || type === "staff" || type === "overview") && (
-            <Select
-              label="Department"
-              value={department}
-              onChange={setDepartment}
-              options={[
-                { value: "", label: "All" },
-                ...(data?.departments || []).map((d: string) => ({
-                  value: d,
-                  label: d,
-                })),
-              ]}
-            />
-          )}
-          {type === "staff" && (
-            <Select
-              label="Role"
-              value={role}
-              onChange={setRole}
-              options={[
-                { value: "", label: "All" },
-                { value: "doctor", label: "Doctor" },
-                { value: "nurse", label: "Nurse" },
-                { value: "admin", label: "Admin" },
-                { value: "technician", label: "Technician" },
-              ]}
-            />
-          )}
-          {(type === "doctors" || type === "staff") && (
-            <Select
-              label="On duty"
-              value={onDuty}
-              onChange={setOnDuty}
-              options={[
-                { value: "", label: "All" },
-                { value: "true", label: "On duty" },
-                { value: "false", label: "Off duty" },
-              ]}
-            />
-          )}
-          {(type === "financial" || type === "appointments") && (
-            <Select
-              label="Status"
-              value={status}
-              onChange={setStatus}
-              options={
-                type === "financial"
-                  ? [
+              <Select
+                label="Department"
+                value={department}
+                onChange={setDepartment}
+                options={[
+                  { value: "", label: "All" },
+                  ...(data?.departments || []).map((d: string) => ({
+                    value: d,
+                    label: d,
+                  })),
+                ]}
+              />
+            )}
+            {type === "staff" && (
+              <Select
+                label="Role"
+                value={role}
+                onChange={setRole}
+                options={[
+                  { value: "", label: "All" },
+                  { value: "doctor", label: "Doctor" },
+                  { value: "nurse", label: "Nurse" },
+                  { value: "admin", label: "Admin" },
+                  { value: "technician", label: "Technician" },
+                ]}
+              />
+            )}
+            {(type === "doctors" || type === "staff") && (
+              <Select
+                label="On duty"
+                value={onDuty}
+                onChange={setOnDuty}
+                options={[
+                  { value: "", label: "All" },
+                  { value: "true", label: "On duty" },
+                  { value: "false", label: "Off duty" },
+                ]}
+              />
+            )}
+            {(type === "financial" || type === "appointments") && (
+              <Select
+                label="Status"
+                value={status}
+                onChange={setStatus}
+                options={
+                  type === "financial"
+                    ? [
                       { value: "", label: "All" },
                       { value: "paid", label: "Paid" },
                       { value: "pending", label: "Pending" },
                       { value: "refunded", label: "Refunded" },
                     ]
-                  : [
+                    : [
                       { value: "", label: "All" },
                       { value: "scheduled", label: "Scheduled" },
                       { value: "in_progress", label: "In progress" },
                       { value: "completed", label: "Completed" },
                       { value: "cancelled", label: "Cancelled" },
                     ]
-              }
-            />
-          )}
-          {type === "patients" && (
-            <Select
-              label="Risk band"
-              value={risk}
-              onChange={setRisk}
-              options={[
-                { value: "", label: "All" },
-                { value: "green", label: "Low" },
-                { value: "gray", label: "Mild" },
-                { value: "orange", label: "Moderate" },
-                { value: "red", label: "High" },
-              ]}
-            />
-          )}
+                }
+              />
+            )}
+            {type === "patients" && (
+              <Select
+                label="Risk band"
+                value={risk}
+                onChange={setRisk}
+                options={[
+                  { value: "", label: "All" },
+                  { value: "green", label: "Low" },
+                  { value: "gray", label: "Mild" },
+                  { value: "orange", label: "Moderate" },
+                  { value: "red", label: "High" },
+                ]}
+              />
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">

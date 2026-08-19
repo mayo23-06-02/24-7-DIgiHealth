@@ -72,7 +72,7 @@ const Dialog: React.FC<DialogProps> = ({
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
             {title && (
-              <h3 className="text-h3 font-bold text-ink-900 font-grotesk">{title}</h3>
+              <h3 className="text-h4 font-bold text-ink-900 font-grotesk">{title}</h3>
             )}
             {description && (
               <p className="text-sm text-slate-500 mt-1">{description}</p>

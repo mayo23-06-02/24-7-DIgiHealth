@@ -4,9 +4,8 @@ import { StaffApprovalRequest } from '@/lib/models/StaffApprovalRequest';
 import User from '@/lib/models/User';
 import Facility from '@/lib/models/Facility';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolvePgUserId } from '@/lib/postgres/resolveId';
+import { resolvePgUserId, resolvePgFacilityId } from '@/lib/postgres/resolveId';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
-import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
 
 /** POST — respond to approval request (approve/reject) */
 export async function POST(req: NextRequest) {
@@ -50,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     // Approve: Add doctor to staff
     const pgUserId = await resolvePgUserId(user.userId);
-    const pgFacilityId = await resolvePostgresHospitalId(request.facilityId.toString(), '');
+    const pgFacilityId = await resolvePgFacilityId(request.facilityId.toString());
 
     console.log('[POST /api/hospital/staff/approval/respond] Approval details:', {
       doctorMongoId: user.userId,

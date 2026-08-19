@@ -151,9 +151,6 @@ export default function HospitalOverviewPage() {
               variant="outline"
               size="sm"
               onClick={() => void load()}
-              icon={<BiRefresh size={16} />}
-              iconPosition="left"
-              className="!rounded-lg !max-w-none normal-case !tracking-normal"
             >
               Refresh
             </Button>
@@ -161,9 +158,6 @@ export default function HospitalOverviewPage() {
               <Button
                 variant="outline"
                 size="sm"
-                icon={<BiUserPlus size={16} />}
-                iconPosition="left"
-                className="!rounded-lg !max-w-none normal-case !tracking-normal"
               >
                 Staff
               </Button>
@@ -172,9 +166,6 @@ export default function HospitalOverviewPage() {
               <Button
                 variant="primary"
                 size="sm"
-                icon={<BiBarChartAlt2 size={16} />}
-                iconPosition="left"
-                className="!rounded-lg !max-w-none normal-case !tracking-normal"
               >
                 Reports
               </Button>

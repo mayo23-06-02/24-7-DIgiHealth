@@ -120,7 +120,7 @@ export default function DoctorCarousel() {
       <div className="flex justify-between items-center px-2">
         <div className="flex flex-col lg:flex-row  justify-between w-full ">
           <div className="mb-4 px-2">
-            <h3 className="font-bold text-h3 text-ink-900 font-grotesk">
+            <h3 className="font-bold lg:text-h2 text-h4 text-ink-900 font-grotesk">
               Available Doctors
             </h3>
             <p className="text-small text-ink-600">
@@ -167,7 +167,7 @@ export default function DoctorCarousel() {
         showArrows={false}
         infiniteLoop={true}
         centerMode={true}
-        slideClassName="w-[45.4545%] md:w-[31.25%] lg:w-[28.57%] xl:w-[28.57%]"
+        slideClassName="w-[90%] md:w-[31.25%] lg:w-[28.57%] xl:w-[28.57%]"
         className="py-2"
         showStatus={false}
         showIndicators={false}
