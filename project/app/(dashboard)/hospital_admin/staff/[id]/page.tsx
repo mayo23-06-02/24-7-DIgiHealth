@@ -169,9 +169,12 @@ export default function StaffProfilePage() {
       key: "status",
       header: "Status",
       render: (row: any) => (
-        <Badge status={APPT_STATUS_MAP[row.status] ?? "neutral"} size="sm" className="capitalize">
-          {row.status}
-        </Badge>
+        <Badge
+          status={APPT_STATUS_MAP[row.status] ?? "neutral"}
+          size="sm"
+          className="capitalize"
+          label={row.status}
+        />
       ),
     },
   ];
@@ -197,9 +200,7 @@ export default function StaffProfilePage() {
       key: "visits",
       header: "Total Visits",
       render: (row: any) => (
-        <Badge status="info" size="sm">
-          {row.totalVisits} visits
-        </Badge>
+        <Badge status="info" size="sm" label={`${row.totalVisits} visits`} />
       ),
     },
     {
@@ -221,18 +222,26 @@ export default function StaffProfilePage() {
     <div className="w-full pb-16 flex flex-col gap-6">
       {/* ----- Header ----- */}
       <div className="flex items-start lg:gap-4 gap-2">
-       
-        <div className="flex-1 flex  md:items-center gap-5">
+        <div className="flex-1 flex md:items-center gap-5">
           <Avatar name={fullName} size="md" />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-h4 font-bold text-ink-900">{fullName}</h1>
-              
+              <Badge
+                status={ROLE_STATUS[staff.role] ?? "neutral"}
+                className="capitalize"
+                label={staff.role}
+              />
+              <Badge
+                status={staff.isOnDuty ? "success" : "neutral"}
+                dot
+                label={staff.isOnDuty ? "On Duty" : "Off Duty"}
+              />
             </div>
-            <p className="text-xs text-ink-600 ">
-              {staff.department} 
+            <p className="text-xs text-ink-600">
+              {staff.department}
             </p>
-            <div className="flex gap-4  text-small text-ink-500">
+            <div className="flex gap-4 text-small text-ink-500">
               {user?.email && (
                 <span className="flex items-center line-clamp-1 gap-1">
                   <Mail size={13} />
@@ -484,19 +493,21 @@ export default function StaffProfilePage() {
                   >
                     {m.icon}
                   </div>
-                  <Badge status={met ? "success" : "danger"} size="sm">
-                    {met ? "✓ Met" : "✗ Below Target"}
-                  </Badge>
+                  <Badge
+                    status={met ? "success" : "danger"}
+                    size="sm"
+                    label={met ? "✓ Met" : "✗ Below Target"}
+                  />
                 </div>
                 <div>
-                  <p className="text-h1 font-normal  text-ink-900">
+                  <p className="text-h1 font-normal text-ink-900">
                     {m.value}
                     {m.unit || "%"}
                   </p>
-                  <p className="text-small  text-ink-600">{m.label}</p>
+                  <p className="text-small text-ink-600">{m.label}</p>
                 </div>
                 <div className="text-small font-bold text-ink-600 border-t border-border pt-3">
-                 <p> Target: {m.invert ? `≤ ${m.target}` : `≥ ${m.target}`}
+                  <p>Target: {m.invert ? `≤ ${m.target}` : `≥ ${m.target}`}
                   {m.unit || "%"}</p>
                 </div>
               </Card>
