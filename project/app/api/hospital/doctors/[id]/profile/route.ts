@@ -49,8 +49,8 @@ export async function GET(
     // Unique patients
     const uniquePatientIds = [...new Set(consultations.map((c: any) => c.patientId?._id?.toString()).filter(Boolean))];
 
-    // Revenue (using hourly rate from profile or default)
-    const hourlyRate = practProfile?.hourlyRate || 500;
+    // ✅ Fixed: safely access hourlyRate with fallback
+    const hourlyRate = (practProfile as any)?.hourlyRate || 500;
     const revenuePerConsultation = hourlyRate;
     const totalRevenue = completedConsultations * revenuePerConsultation;
 
