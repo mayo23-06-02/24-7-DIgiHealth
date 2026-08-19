@@ -394,7 +394,7 @@ export default function PatientProfilePage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
+    <div className="max-w-350 mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
       <PatientProfileHeader
         patient={patient}
         age={age}

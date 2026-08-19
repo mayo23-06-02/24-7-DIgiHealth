@@ -34,7 +34,7 @@ export default function AdminAlertsPage() {
   }, []);
 
   return (
-    <div className="w-full pb-16 flex flex-col gap-6 max-w-[1400px] mx-auto">
+    <div className="w-full pb-16 flex flex-col gap-6 max-w-350 mx-auto">
       <PageHeader
         title="Platform alerts"
         subtitle="Operational, billing, and system signals"

@@ -171,7 +171,7 @@ export default function DesignSystemPage() {
     <div className="min-h-screen bg-white">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-md">
-        <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-350 mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white">
               <HeartPulse size={16} />
@@ -189,7 +189,7 @@ export default function DesignSystemPage() {
         </div>
       </header>
 
-      <div className="max-w-[1400px] mx-auto px-6 flex gap-12">
+      <div className="max-w-350 mx-auto px-6 flex gap-12">
         {/* Sidebar TOC */}
         <aside className="hidden lg:block w-56 shrink-0 py-12">
           <nav className="sticky top-24 flex flex-col gap-1">

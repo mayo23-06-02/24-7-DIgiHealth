@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import Carousel from "@/components/ui/Carousel";
 import DoctorCard from "./DoctorCard";
 import DoctorModal from "./DoctorModal";
@@ -68,7 +69,7 @@ export default function DoctorCarousel() {
   };
 
   const handleBook = (doctorId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation(); // Prevent modal open
+    e?.stopPropagation();
     const dr = doctors.find((d) => d.id === doctorId);
     if (dr) {
       setBookingDoctor(dr);
@@ -76,10 +77,8 @@ export default function DoctorCarousel() {
   };
 
   const handleMessage = async (doctorId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation(); // Prevent modal open
+    e?.stopPropagation();
     if (!doctorId) return;
-    // This always ends in a navigation, so start the bar before the fetch —
-    // otherwise the button is completely dead for the whole round-trip.
     beginNavigation();
     try {
       const res = await fetch("/api/conversations", {
@@ -117,50 +116,60 @@ export default function DoctorCarousel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center px-2">
-        <div className="flex flex-col lg:flex-row  justify-between w-full ">
-          <div className="mb-4 px-2">
-            <h3 className="font-bold lg:text-h2 text-h4 text-ink-900 font-grotesk">
-              Available Doctors
-            </h3>
-            <p className="text-small text-ink-600">
-              Connect with our medical professionals for expert advice and care.
-            </p>
+      {/* Header with title, badge, arrows, and View All link */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-2">
+        <div>
+          <h3 className="font-bold lg:text-h2 text-h4 text-ink-900 font-grotesk">
+            Available Doctors
+          </h3>
+          <p className="text-small text-ink-600">
+            Connect with our medical professionals for expert advice and care.
+          </p>
+        </div>
+
+        <div className="flex items-center flex-wrap gap-3 w-full sm:w-auto">
+          <div className="text-label text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full font-bold whitespace-nowrap">
+            <span className="flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
+            <span>{doctors.length} Available</span>
           </div>
-          <div className="flex items-center lg:justify-end justify-between gap-3">
-            <div className="text-label text-white flex items-center justify-center gap-1 bg-primary px-3 h-8 rounded-full font-bold whitespace-nowrap">
-              <span className="flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-              </span>
-              <span>{doctors.length} Available Doctors</span>
-            </div>
-            <div className="flex gap-2 ml-4">
-              <button
-                onClick={() =>
-                  setCarouselIndex((prev) => Math.max(0, prev - 1))
-                }
-                aria-label="Previous doctors"
-                className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-              >
-                <ChevronLeft size={22} />
-              </button>
-              <button
-                onClick={() =>
-                  setCarouselIndex((prev) =>
-                    Math.min(doctors.length - 1, prev + 1),
-                  )
-                }
-                aria-label="Next doctors"
-                className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-              >
-                <ChevronRight size={22} />
-              </button>
-            </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() =>
+                setCarouselIndex((prev) => Math.max(0, prev - 1))
+              }
+              aria-label="Previous doctors"
+              className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            >
+              <ChevronLeft size={22} />
+            </button>
+            <button
+              onClick={() =>
+                setCarouselIndex((prev) =>
+                  Math.min(doctors.length - 1, prev + 1),
+                )
+              }
+              aria-label="Next doctors"
+              className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            >
+              <ChevronRight size={22} />
+            </button>
           </div>
+
+          {/* ✨ View All link */}
+          <Link
+            href="/patient/doctors"
+            className="text-sm font-semibold text-primary hover:underline whitespace-nowrap ml-1"
+          >
+            View All →
+          </Link>
         </div>
       </div>
 
+      {/* Carousel */}
       <Carousel
         selectedItem={carouselIndex}
         onChange={setCarouselIndex}
@@ -173,7 +182,7 @@ export default function DoctorCarousel() {
         showIndicators={false}
       >
         {doctors.map((doctor) => (
-          <div key={doctor.id} className="px-2 h-full ">
+          <div key={doctor.id} className="px-2 h-full">
             <DoctorCard
               doctor={doctor}
               onBook={handleBook}
@@ -202,7 +211,7 @@ export default function DoctorCarousel() {
         onClose={() => setBookingDoctor(null)}
         doctor={bookingDoctor}
         onSuccess={() => {
-          // Optional: refresh agenda or show success
+          // Optional refresh
         }}
       />
     </div>

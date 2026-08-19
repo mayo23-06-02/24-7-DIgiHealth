@@ -1,6 +1,9 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+import Link from "next/link";
 import Carousel from "@/components/ui/Carousel";
 import DoctorCard from "@/components/doctor/DoctorCard";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "@/hooks/useNavigate";
 
 interface DoctorsCarouselSectionProps {
@@ -9,6 +12,7 @@ interface DoctorsCarouselSectionProps {
   onBook: (doc: any) => void;
   onMessage: (doc: any) => void;
   onFavoriteChange?: (doctorId: string, isFavorite: boolean) => void;
+  viewAllHref?: string;
 }
 
 export default function DoctorsCarouselSection({
@@ -17,31 +21,62 @@ export default function DoctorsCarouselSection({
   onBook,
   onMessage,
   onFavoriteChange,
+  viewAllHref = "/patient/doctors",
 }: DoctorsCarouselSectionProps) {
   const { navigate } = useNavigate();
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   if (doctors.length === 0) return null;
 
+  const maxIndex = Math.max(0, doctors.length - 1);
+
   return (
-    <section className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-      <div className="flex items-center justify-between px-0.5">
-        <h3 className="font-bold text-ink-900 text-base sm:text-lg md:text-h3 font-grotesk leading-tight">
-          {title}
-        </h3>
-        <p className="text-xs sm:text-sm text-slate-500 ml-2 shrink-0">{doctors.length} found</p>
+    <section className="w-full animate-in fade-in slide-in-from-top-4 duration-500">
+      {/* Header row – minimal vertical spacing */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-2 pb-4">
+        <div className="flex items-center gap-3">
+          <h3 className="font-bold text-ink-900 text-lg md:text-xl lg:text-lg md:text-h3 font-grotesk leading-tight">
+            {title}
+          </h3>
+          <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-semibold">
+            {doctors.length}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCarouselIndex((prev) => Math.max(0, prev - 1))}
+            aria-label="Previous"
+            className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            onClick={() => setCarouselIndex((prev) => Math.min(maxIndex, prev + 1))}
+            aria-label="Next"
+            className="w-11 h-11 hover:bg-primary bg-surface-soft hover:text-white rounded-lg transition-all duration-200 border border-border flex items-center justify-center text-ink-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+
+          >
+            <ChevronRight size={18} />
+          </button>
+
+        </div>
       </div>
 
-      {/* Carousel: full width on mobile (85% per slide), 3-column on md, 3.5-column on lg+ */}
+      {/* Carousel – reduced vertical padding */}
       <Carousel
+        selectedItem={carouselIndex}
+        onChange={setCarouselIndex}
+        showArrows={false}
+        infiniteLoop={true}
         centerMode={true}
-        centerSlidePercentage={
-          window?.innerWidth < 768 ? 85 :
-          window?.innerWidth < 1024 ? 33.33 : 28.57
-        }
-        className="-mx-4 sm:-mx-6 md:mx-0 px-4 sm:px-6 md:px-0 pb-2 sm:pb-3 md:pb-4"
+        slideClassName="w-[90%] sm:w-[45.25%] lg:w-[28.57%] xl:w-[28.57%]"
+        showStatus={false}
+        showIndicators={false}
       >
         {doctors.map((doc) => (
-          <div key={doc.id} className="p-1 sm:p-2 h-full">
+          <div key={doc.id} className="px-2 h-full">
             <DoctorCard
               doctor={doc}
               onBook={(id, e) => {

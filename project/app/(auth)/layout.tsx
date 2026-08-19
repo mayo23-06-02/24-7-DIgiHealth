@@ -12,7 +12,7 @@ export default function AuthLayout({
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] z-0"></div>
       <div className="absolute inset-0 bg-linear-to-tr from-slate-900/60 via-transparent to-primary/10 z-0 h-screen"></div>
 
-      <div className="relative z-10 w-full max-w-[1400px]  mx-auto ">
+      <div className="relative z-10 w-full max-w-350  mx-auto ">
         <div className="mb-[20px] text-center flex justify-center items-center"></div>
         {children}
       </div>

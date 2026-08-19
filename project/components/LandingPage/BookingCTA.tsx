@@ -8,7 +8,7 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 export default function BookingCTA() {
   return (
     <section className="bg-surface-soft py-16 md:py-24">
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
         <div className="grid grid-cols-1 md:grid-cols-2 rounded-lg overflow-hidden">
           <div className="relative h-100 lg:h-180 md:h-auto">
             <Image

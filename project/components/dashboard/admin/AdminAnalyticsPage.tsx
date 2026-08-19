@@ -52,7 +52,7 @@ export default function AdminAnalyticsPage() {
   }, [days]);
 
   return (
-    <div className="w-full pb-16 flex flex-col gap-6 max-w-[1400px] mx-auto">
+    <div className="w-full pb-16 flex flex-col gap-6 max-w-350 mx-auto">
       <PageHeader
         title="System analytics"
         subtitle="Trends across users, consultations, and revenue"

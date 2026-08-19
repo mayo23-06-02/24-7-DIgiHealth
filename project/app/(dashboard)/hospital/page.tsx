@@ -57,7 +57,7 @@ export default function HospitalOverviewPage() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-[1400px] mx-auto space-y-4 pb-16">
+      <div className="w-full max-w-350 mx-auto space-y-4 pb-16">
         <SkeletonLoader className="h-40 w-full" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -132,7 +132,7 @@ export default function HospitalOverviewPage() {
   }
 
   return (
-    <div className="w-full pb-16 flex flex-col gap-6 max-w-[1400px] mx-auto">
+    <div className="w-full pb-16 flex flex-col gap-6 max-w-350 mx-auto">
       {error && (
         <Card className="!bg-amber-50 !border-amber-200 text-sm text-amber-800 font-medium">
           {error}

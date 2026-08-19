@@ -107,7 +107,7 @@ export default function Testimonials() {
       id="testimonials"
       className="bg-white text-slate-900 text-center relative overflow-hidden py-20"
     >
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
         {/* Header */}
         <div className="flex flex-col items-center gap-4 mb-10 relative z-10">
           <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export default function Testimonials() {
         </div>
 
         {/* Carousel Container */}
-        <div className="relative max-w-[1400px] mx-auto">
+        <div className="relative max-w-350 mx-auto">
           {/* Navigation Controls */}
           <div className="absolute top-1/2 -translate-y-1/2 -left-4 md:-left-12 z-20 hidden md:block">
             <button

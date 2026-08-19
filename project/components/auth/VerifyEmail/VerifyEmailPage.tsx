@@ -27,7 +27,7 @@ export default function VerifyEmailPage() {
         <div className="h-64 w-full max-w-lg bg-white/80 rounded-lg animate-pulse" />
       }
     >
-      <div className="flex flex-col lg:flex-row lg:min-h-[70vh] w-full max-w-[1400px] mx-auto rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-700">
+      <div className="flex flex-col lg:flex-row lg:min-h-[70vh] w-full max-w-350 mx-auto rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-700">
         <VerifyEmailForm />
         <RightPanel />
       </div>

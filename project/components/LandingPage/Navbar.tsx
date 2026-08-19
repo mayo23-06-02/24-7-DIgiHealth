@@ -141,7 +141,7 @@ export default function Navbar() {
           scrolled ? "t" : "bg-primary border-white/15"
         }`}
       >
-        <div className="container mx-auto max-w-[1400px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
+        <div className="container mx-auto max-w-350 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
           <div className="flex gap-4">
             <span className="flex gap-2 items-center">
               <span className="text-base leading-none">{weatherIcon}</span>
@@ -196,7 +196,7 @@ export default function Navbar() {
           top-[44px] md:top-[44px] p-6.25
         `}
       >
-        <div className="container mx-auto max-w-[1400px] px-4 md:px-8 flex justify-between items-center py-3 md:py-4">
+        <div className="container mx-auto max-w-350 px-4 md:px-8 flex justify-between items-center py-3 md:py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
             <LogoMain width={200} height={40} alt={true} />

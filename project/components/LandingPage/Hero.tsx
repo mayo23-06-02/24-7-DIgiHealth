@@ -257,7 +257,7 @@ export default function Hero() {
             isSticky ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
-          <div className="container mx-auto max-w-[1400px] flex flex-col md:flex-row justify-between items-center gap-2">
+          <div className="container mx-auto max-w-350 flex flex-col md:flex-row justify-between items-center gap-2">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-2">
                 <span className="text-base leading-none">{weatherIcon}</span>
@@ -316,7 +316,7 @@ export default function Hero() {
               : "bg-transparent lg:px-12 md:px-10"
           }`}
         >
-          <div className="container mx-auto max-w-[1400px] px-4 md:px-4 flex items-center justify-between py-2 md:py-2">
+          <div className="container mx-auto max-w-350 px-4 md:px-4 flex items-center justify-between py-2 md:py-2">
             <Link href="/" className="shrink-0">
               <LogoMain
                 width={isSticky ? 100 : 160}
@@ -446,7 +446,7 @@ export default function Hero() {
 
         {/* Hero copy */}
         <div
-          className={`relative z-10 mx-auto w-full max-w-[1400px] flex-1 flex flex-col justify-center px-5 md:px-10 transition-opacity duration-500 ${
+          className={`relative z-10 mx-auto w-full max-w-350 flex-1 flex flex-col justify-center px-5 md:px-10 transition-opacity duration-500 ${
             isVisible && !videoLoading ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -536,7 +536,7 @@ export default function Hero() {
         </div>
 
         {/* ✨ UPGRADED RATING CARD ✨ */}
-        <div className="hidden md:block relative z-10 mx-auto w-full max-w-[1400px] px-5 md:px-10 pb-10">
+        <div className="hidden md:block relative z-10 mx-auto w-full max-w-350 px-5 md:px-10 pb-10">
           <div className="flex items-center gap-4 md:gap-6 lg:gap-8 bg-white rounded-lg  px-2 py-2 md:px-6 md:py-5 lg:px-4 lg:py-2 w-fit ml-auto">
             <div className="flex items-center gap-1 md:gap-2">
               <span className="text-lg md:text-2xl lg:text-2xl font-bold text-ink-900 font-grotesk">
@@ -580,7 +580,7 @@ export default function Hero() {
 
       <TickerBar />
 
-      <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+      <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-350 xl:max-w-350 2xl:max-w-350">
         <div className="relative z-10 grid grid-cols-2 lg:grid-cols-none lg:flex lg:flex-row justify-between gap-3 md:gap-4 pb-4">
           {badges.map(({ icon: Icon, value, label }) => (
             <div

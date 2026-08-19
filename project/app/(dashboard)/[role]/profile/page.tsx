@@ -792,7 +792,7 @@ export default function ProfilePage() {
 
   if (isLoading || !user) {
     return (
-      <div className="w-full max-w-[1400px] mx-auto pb-16 space-y-6 animate-pulse">
+      <div className="w-full max-w-350 mx-auto pb-16 space-y-6 animate-pulse">
         <div className="h-48 rounded-lg bg-gradient-to-br from-primary/30 to-slate-200" />
         <div className="h-28 -mt-14 mx-4 rounded-lg bg-white border border-slate-200" />
         <div className="h-14 rounded-lg bg-surface-soft" />

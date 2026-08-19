@@ -30,7 +30,7 @@ const specialists = [
 export default function TeamGrid() {
   return (
     <section className="bg-white py-16 md:py-24">
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
         <div className="flex flex-col items-center gap-3 text-center mb-12">
           <span className="text-secondary font-bold tracking-normal text-sm">
             Our Specialists
