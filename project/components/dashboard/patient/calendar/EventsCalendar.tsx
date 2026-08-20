@@ -1,6 +1,12 @@
 "use client";
 import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { BiPlus, BiLoaderAlt, BiTrendingUp, BiPencil, BiTrash } from "react-icons/bi";
+import {
+  BiPlus,
+  BiLoaderAlt,
+  BiTrendingUp,
+  BiPencil,
+  BiTrash,
+} from "react-icons/bi";
 import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react";
 import AppointmentCalendarView from "@/components/shared/Appointments/AppointmentCalendarView";
 import PageHeader from "@/components/ui/PageHeader";
@@ -61,14 +67,35 @@ const QUICK_TIME_SLOTS = [
 
 type EventFilterType = "all" | "doctor" | "reminder" | "refill" | "note";
 
-const EVENT_FILTER_TABS: EventFilterType[] = ["all", "doctor", "reminder", "refill", "note"];
+const EVENT_FILTER_TABS: EventFilterType[] = [
+  "all",
+  "doctor",
+  "reminder",
+  "refill",
+  "note",
+];
 
 /** Mirrors the badge/underline pattern in AppointmentTabs.tsx for design-system consistency. */
-const eventTabConfig: Record<EventFilterType, { label: string; badgeBg: string; badgeText: string }> = {
+const eventTabConfig: Record<
+  EventFilterType,
+  { label: string; badgeBg: string; badgeText: string }
+> = {
   all: { label: "All", badgeBg: "bg-primary", badgeText: "text-white" },
-  doctor: { label: "Appointments", badgeBg: "bg-primary", badgeText: "text-white" },
-  reminder: { label: "Reminders", badgeBg: "bg-warning-500", badgeText: "text-warning-50" },
-  refill: { label: "Refills", badgeBg: "bg-success-500", badgeText: "text-success-50" },
+  doctor: {
+    label: "Appointments",
+    badgeBg: "bg-primary",
+    badgeText: "text-white",
+  },
+  reminder: {
+    label: "Reminders",
+    badgeBg: "bg-warning-500",
+    badgeText: "text-warning-50",
+  },
+  refill: {
+    label: "Refills",
+    badgeBg: "bg-success-500",
+    badgeText: "text-success-50",
+  },
   note: { label: "Notes", badgeBg: "bg-info-500", badgeText: "text-info-50" },
 };
 
@@ -95,7 +122,10 @@ export default function EventsCalendar() {
   const [selectedType, setSelectedType] = useState<EventFilterType>("all");
 
   const [selectedEvent, setSelectedEvent] = useState<AgendaItem | null>(null);
-  const [selectedDay, setSelectedDay] = useState<{ date: Date; items: AgendaItem[] } | null>(null);
+  const [selectedDay, setSelectedDay] = useState<{
+    date: Date;
+    items: AgendaItem[];
+  } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Add-event modal state
@@ -105,7 +135,9 @@ export default function EventsCalendar() {
 
   const todayStr = toLocalDateStr(new Date());
   const isFormDateToday = addForm.date === todayStr;
-  const minTimeForSelectedDate = isFormDateToday ? toLocalTimeStr(new Date()) : undefined;
+  const minTimeForSelectedDate = isFormDateToday
+    ? toLocalTimeStr(new Date())
+    : undefined;
   const isPastSelection = isDateTimeInPast(addForm.date, addForm.time);
 
   const fetchAgenda = useCallback(async () => {
@@ -131,12 +163,15 @@ export default function EventsCalendar() {
 
   const filtered = useMemo(() => {
     if (selectedType === "all") return agenda;
-    if (selectedType === "doctor") return agenda.filter((a) => a.type === "doctor");
+    if (selectedType === "doctor")
+      return agenda.filter((a) => a.type === "doctor");
     return agenda.filter((a) => a.type === selectedType);
   }, [agenda, selectedType]);
 
   const typeCounts = useMemo(() => {
-    const counts: Partial<Record<EventFilterType, number>> = { all: agenda.length };
+    const counts: Partial<Record<EventFilterType, number>> = {
+      all: agenda.length,
+    };
     agenda.forEach((item) => {
       const key = item.type as EventFilterType;
       counts[key] = (counts[key] ?? 0) + 1;
@@ -153,7 +188,9 @@ export default function EventsCalendar() {
           id: item.id,
           patientName: "",
           practitionerName:
-            item.type === "doctor" ? item.dr : item.title || labelForType(item.type),
+            item.type === "doctor"
+              ? item.dr
+              : item.title || labelForType(item.type),
           scheduledStart: start.toISOString(),
           scheduledEnd: new Date(start.getTime() + 30 * 60000).toISOString(),
           computedStatus: item.status || "upcoming",
@@ -233,27 +270,19 @@ export default function EventsCalendar() {
   return (
     <div className="flex flex-col gap-6">
       {/* Breadcrumbs */}
-      <Breadcrumbs
-        items={[
-          { label: "Dashboard", href: "/patient" },
-          { label: "Calendar" },
-        ]}
-      />
 
       {/* Page Header */}
-      <PageHeader
-        title="Events Calendar"
-        subtitle="View all your appointments, reminders, refills, and notes in one place"
-        right={
-          <Button
-            icon={<BiPlus size={18} />}
-            iconPosition="left"
-            onClick={() => setShowAddModal(true)}
-          >
-            Add Event
-          </Button>
-        }
-      />
+      <div className="px-4 lg:px-0">
+        <PageHeader
+          title="Events Calendar"
+          subtitle="View all your appointments, reminders, refills, and notes in one place"
+          right={
+            <Button onClick={() => setShowAddModal(true)} size="sm">
+              Add Event
+            </Button>
+          }
+        />
+      </div>
 
       {/* Type Filter — mirrors AppointmentTabs.tsx for design-system consistency */}
       {/* Mobile Dropdown */}
@@ -291,7 +320,9 @@ export default function EventsCalendar() {
             >
               <span>{config.label}</span>
               {count > 0 && (
-                <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${config.badgeBg} ${config.badgeText}`}>
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${config.badgeBg} ${config.badgeText}`}
+                >
                   {count}
                 </span>
               )}
@@ -341,7 +372,12 @@ export default function EventsCalendar() {
               </p>
             ) : (
               selectedDay.items.map((item) => {
-                const config = eventTabConfig[item.type === "doctor" ? "doctor" : (item.type as EventFilterType)];
+                const config =
+                  eventTabConfig[
+                    item.type === "doctor"
+                      ? "doctor"
+                      : (item.type as EventFilterType)
+                  ];
                 return (
                   <button
                     key={item.id}
@@ -352,14 +388,18 @@ export default function EventsCalendar() {
                     }}
                     className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-surface-soft transition-colors text-left"
                   >
-                    <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${config.badgeBg} ${config.badgeText}`}>
+                    <span
+                      className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${config.badgeBg} ${config.badgeText}`}
+                    >
                       {config.label}
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-sm font-semibold text-ink-900 truncate">
                         {item.title || item.dr || labelForType(item.type)}
                       </span>
-                      <span className="block text-xs text-ink-600">{item.time}</span>
+                      <span className="block text-xs text-ink-600">
+                        {item.time}
+                      </span>
                     </span>
                   </button>
                 );
@@ -378,7 +418,9 @@ export default function EventsCalendar() {
         {selectedEvent && (
           <div className="space-y-4">
             <p className="text-sm text-ink-600">
-              {new Date(`${selectedEvent.date} ${selectedEvent.time}`).toLocaleString("en-ZA", {
+              {new Date(
+                `${selectedEvent.date} ${selectedEvent.time}`,
+              ).toLocaleString("en-ZA", {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
@@ -418,7 +460,9 @@ export default function EventsCalendar() {
               {EVENT_TYPES.map((opt) => (
                 <button
                   key={opt.value}
-                  onClick={() => setAddForm({ ...addForm, type: opt.value as any })}
+                  onClick={() =>
+                    setAddForm({ ...addForm, type: opt.value as any })
+                  }
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
                     addForm.type === opt.value
                       ? "bg-primary text-white border-primary"
@@ -442,8 +486,15 @@ export default function EventsCalendar() {
                     const nextDate = e.target.value;
                     setAddForm((prev) => {
                       // Bumping to today shouldn't leave a stale past time behind
-                      if (nextDate === todayStr && isDateTimeInPast(nextDate, prev.time)) {
-                        return { ...prev, date: nextDate, time: toLocalTimeStr(roundUpToNext30(new Date())) };
+                      if (
+                        nextDate === todayStr &&
+                        isDateTimeInPast(nextDate, prev.time)
+                      ) {
+                        return {
+                          ...prev,
+                          date: nextDate,
+                          time: toLocalTimeStr(roundUpToNext30(new Date())),
+                        };
                       }
                       return { ...prev, date: nextDate };
                     });
@@ -455,7 +506,9 @@ export default function EventsCalendar() {
                   icon={<Clock size={18} />}
                   min={minTimeForSelectedDate}
                   value={addForm.time}
-                  onChange={(e) => setAddForm({ ...addForm, time: e.target.value })}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, time: e.target.value })
+                  }
                 />
               </div>
 
@@ -463,8 +516,14 @@ export default function EventsCalendar() {
               <div className="flex flex-wrap gap-2">
                 {[
                   { label: "Today", date: toLocalDateStr(new Date()) },
-                  { label: "Tomorrow", date: toLocalDateStr(new Date(Date.now() + 86400000)) },
-                  { label: "Next Week", date: toLocalDateStr(new Date(Date.now() + 7 * 86400000)) },
+                  {
+                    label: "Tomorrow",
+                    date: toLocalDateStr(new Date(Date.now() + 86400000)),
+                  },
+                  {
+                    label: "Next Week",
+                    date: toLocalDateStr(new Date(Date.now() + 7 * 86400000)),
+                  },
                 ].map((opt) => (
                   <button
                     key={opt.label}
@@ -472,7 +531,11 @@ export default function EventsCalendar() {
                     onClick={() =>
                       setAddForm((prev) => {
                         if (isDateTimeInPast(opt.date, prev.time)) {
-                          return { ...prev, date: opt.date, time: toLocalTimeStr(roundUpToNext30(new Date())) };
+                          return {
+                            ...prev,
+                            date: opt.date,
+                            time: toLocalTimeStr(roundUpToNext30(new Date())),
+                          };
                         }
                         return { ...prev, date: opt.date };
                       })
@@ -496,8 +559,12 @@ export default function EventsCalendar() {
                       key={slot.label}
                       type="button"
                       disabled={disabled}
-                      title={disabled ? "This time has already passed" : undefined}
-                      onClick={() => setAddForm({ ...addForm, time: slot.time })}
+                      title={
+                        disabled ? "This time has already passed" : undefined
+                      }
+                      onClick={() =>
+                        setAddForm({ ...addForm, time: slot.time })
+                      }
                       className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                         disabled
                           ? "bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed"
@@ -527,14 +594,18 @@ export default function EventsCalendar() {
                   type="text"
                   placeholder="e.g. Take medication"
                   value={addForm.title}
-                  onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, title: e.target.value })
+                  }
                 />
                 <Input
                   label="Notes (optional)"
                   textarea
                   placeholder="Additional info..."
                   value={addForm.notes}
-                  onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, notes: e.target.value })
+                  }
                 />
               </>
             )}
@@ -546,18 +617,21 @@ export default function EventsCalendar() {
                   type="text"
                   placeholder="e.g. Blood pressure reading"
                   value={addForm.title}
-                  onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, title: e.target.value })
+                  }
                 />
                 <Input
                   label="Note Content"
                   textarea
                   placeholder="Write your note here..."
                   value={addForm.notes}
-                  onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, notes: e.target.value })
+                  }
                 />
               </>
             )}
-
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -573,7 +647,7 @@ export default function EventsCalendar() {
               disabled={isSaving || isPastSelection || !addForm.title.trim()}
               onClick={handleAddSubmit}
             >
-              {isSaving ? <BiLoaderAlt className="animate-spin mr-2" /> : <BiPlus className="mr-2" />}
+              {isSaving ? <BiLoaderAlt className="animate-spin mr-2" /> : ""}
               Save Event
             </Button>
           </div>

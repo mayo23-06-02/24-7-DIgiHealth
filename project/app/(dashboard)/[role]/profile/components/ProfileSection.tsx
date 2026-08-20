@@ -45,7 +45,7 @@ export function ProfileSectionHead({
             {title}
           </h3>
           {description && (
-            <p className="text-xs lg:text-sm text-slate-500 mt-0.5 leading-relaxed">
+            <p className="text-xs lg:text-sm text-slate-500 mt-0.5 md:leading-relaxed">
               {description}
             </p>
           )}

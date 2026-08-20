@@ -60,7 +60,7 @@ export async function POST(
     const childToken = await new SignJWT({
       userId: (child as any)._id.toString(),
       role: (child as any).role,
-      email: (child as any).email,
+      email: guardian.email || (child as any).email,
       firstName: (child as any).firstName,
       lastName: (child as any).lastName,
     })

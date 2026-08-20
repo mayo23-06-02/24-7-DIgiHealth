@@ -305,12 +305,7 @@ export default function PractitionerAppointments() {
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs
-        items={[
-          { label: "Dashboard", href: "/practitioner" },
-          { label: "Appointments" },
-        ]}
-      />
+    
 
       <PageHeader
         title="Clinical Appointments"

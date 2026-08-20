@@ -81,12 +81,22 @@ export async function GET(
     const riskColor = riskBandFromScore(riskScore);
     const dob = patientProfile?.dateOfBirth || (user as any).dateOfBirth;
 
+    let email = user.email;
+    const { default: FamilyLink } = await import('@/lib/models/FamilyLink');
+    const link = await FamilyLink.findOne({ memberId: user._id, status: 'active', isMinor: true })
+      .populate('guardianId', 'email')
+      .lean();
+    const guardian = (link as any)?.guardianId;
+    if (guardian?.email) {
+      email = guardian.email;
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         id: user._id.toString(),
         fullName: `${user.firstName} ${user.lastName}`,
-        email: user.email,
+        email,
         mobile: user.mobile,
         bloodType: patientBase?.bloodType || 'Unknown',
         dateOfBirth: dob,

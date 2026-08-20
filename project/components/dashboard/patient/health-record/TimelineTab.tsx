@@ -110,16 +110,16 @@ export default function TimelineTab({
                 {event.description}
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="my-5 flex flex-wrap gap-3">
                 {event.type === "medication" && event.metadata?.documentUrl ? (
                   <a
                     href={event.metadata.documentUrl}
                     target="_blank"
                     rel="noreferrer"
                     download={event.metadata.documentName || undefined}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                    className="inline-flex border-2 border-primary rounded-full px-4 py-2 items-center gap-1.5 text-xs font-bold text-primary hover:underline"
                   >
-                    <Download size={16} /> Download pharmacy script
+                    Download pharmacy script
                   </a>
                 ) : null}
               </div>
@@ -157,14 +157,14 @@ export default function TimelineTab({
                 {event.description}
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="my-5 flex flex-wrap gap-3">
                 {event.type === "medication" && event.metadata?.documentUrl ? (
                   <a
                     href={event.metadata.documentUrl}
                     target="_blank"
                     rel="noreferrer"
                     download={event.metadata.documentName || undefined}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                    className="inline-flex items-center gap-1.5 py-2 text-xs font-bold text-primary hover:underline"
                   >
                     <Download size={16} /> Download pharmacy script
                   </a>
@@ -207,7 +207,9 @@ export default function TimelineTab({
                   aria-label={`Page ${pageNum}`}
                   aria-current={pageNum === page ? "page" : undefined}
                   className={`w-10 h-10 rounded-lg text-xs font-bold transition-all ${
-                    pageNum === page ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-50"
+                    pageNum === page
+                      ? "bg-primary text-white"
+                      : "text-slate-500 hover:bg-slate-50"
                   }`}
                 >
                   {pageNum}

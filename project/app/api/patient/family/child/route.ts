@@ -5,7 +5,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import User from '@/lib/models/User';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
 import { Subscription } from '@/lib/models/Billing';
-import FamilyLink from '@/lib/models/FamilyLink';
+import FamilyLink, { syncFamilyLinkIndexes } from '@/lib/models/FamilyLink';
 import { getGuardianFamilySlots } from '@/lib/family/access';
 
 /** guardian@example.com -> guardian+family-ab12cd34@example.com — a real,
@@ -21,6 +21,7 @@ function deriveChildEmail(guardianEmail: string): string {
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
+    await syncFamilyLinkIndexes();
     const guardian = await getRequestUser();
     if (!guardian) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 

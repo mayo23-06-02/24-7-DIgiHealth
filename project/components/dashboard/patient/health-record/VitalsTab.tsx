@@ -16,8 +16,8 @@ import type { VitalsDataPoint } from "./types";
 
 interface VitalsTabProps {
   vitals: VitalsDataPoint[];
-  selectedVital: "weight" | "bp" | "heartRate";
-  onSelectVital: (v: "weight" | "bp" | "heartRate") => void;
+  selectedVital: "weight" | "height";
+  onSelectVital: (v: "weight" | "height") => void;
   onVitalsUpdated?: () => void;
 }
 
@@ -44,9 +44,8 @@ export default function VitalsTab({
           <div className="flex bg-slate-100 p-1 rounded-lg">
             {(
               [
-                { id: "weight", label: "Weight" },
-               
-                { id: "heartRate", label: "Heart Rate" },
+                { id: "weight", label: "Weight (kg)" },
+                { id: "height", label: "Height (cm)" },
               ] as const
             ).map((v) => (
               <Button
@@ -64,6 +63,7 @@ export default function VitalsTab({
             ))}
           </div>
         </div>
+
         <div className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={vitals}>
@@ -84,7 +84,14 @@ export default function VitalsTab({
                 tickLine={false}
                 tick={{ fill: "#94a3b8", fontSize: 12 }}
               />
-              <Tooltip contentStyle={{ borderRadius: "8px", border: "none" }} />
+              <Tooltip
+                contentStyle={{ borderRadius: "8px", border: "none" }}
+                formatter={(value: any, name: string) =>
+                  name === "weight"
+                    ? [`${value} kg`, "Weight"]
+                    : [`${value} cm`, "Height"]
+                }
+              />
               {selectedVital === "weight" && (
                 <Line
                   type="monotone"
@@ -93,35 +100,18 @@ export default function VitalsTab({
                   strokeWidth={4}
                   dot={{ r: 6, fill: "#4493b8", strokeWidth: 3, stroke: "#fff" }}
                   activeDot={{ r: 8 }}
+                  name="weight"
                 />
               )}
-              {selectedVital === "bp" && (
-                <>
-                  <Line
-                    type="monotone"
-                    dataKey="systolicBP"
-                    stroke="#E03A3A"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name="Systolic"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="diastolicBP"
-                    stroke="#53CBF3"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name="Diastolic"
-                  />
-                </>
-              )}
-              {selectedVital === "heartRate" && (
+              {selectedVital === "height" && (
                 <Line
                   type="monotone"
-                  dataKey="heartRate"
-                  stroke="#FFDE42"
+                  dataKey="height"
+                  stroke="#53CBF3"
                   strokeWidth={4}
-                  dot={{ r: 6, fill: "#FFDE42", strokeWidth: 3, stroke: "#fff" }}
+                  dot={{ r: 6, fill: "#53CBF3", strokeWidth: 3, stroke: "#fff" }}
+                  activeDot={{ r: 8 }}
+                  name="height"
                 />
               )}
             </LineChart>

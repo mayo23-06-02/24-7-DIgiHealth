@@ -149,6 +149,7 @@ export async function GET(req: NextRequest) {
         vitals: vitals.map((v: any) => ({
           date: new Date(v.dateRecorded).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' }),
           weight: v.weightKg,
+          height: v.heightCm,
           systolicBP: v.vitalSigns?.systolicBP,
           diastolicBP: v.vitalSigns?.diastolicBP,
           heartRate: v.vitalSigns?.heartRateBpm

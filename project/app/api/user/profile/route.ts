@@ -44,6 +44,16 @@ export async function GET(req: NextRequest) {
     const user = await User.findById(userId).lean();
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+    let email = user.email;
+    const { default: FamilyLink } = await import('@/lib/models/FamilyLink');
+    const link = await FamilyLink.findOne({ memberId: user._id, status: 'active', isMinor: true })
+      .populate('guardianId', 'email')
+      .lean();
+    const guardian = (link as any)?.guardianId;
+    if (guardian?.email) {
+      email = guardian.email;
+    }
+
     const phoneE164 =
       (user as any).phoneE164 ||
       normalizePhoneZaSz(user.mobile || '')?.e164 ||
@@ -55,7 +65,7 @@ export async function GET(req: NextRequest) {
         id: user._id.toString(),
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email,
+        email,
         mobile: user.mobile || '',
         phoneE164,
         phoneMasked: phoneE164 ? maskE164(phoneE164) : '',

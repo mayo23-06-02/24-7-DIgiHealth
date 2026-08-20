@@ -164,8 +164,10 @@ export async function sendDueMessageReminders(options?: {
     let sent = 0;
     await Promise.allSettled(
       [...byRecipient.entries()].map(async ([recipientId, messages]) => {
-        const user = await User.findById(recipientId).select("firstName email").lean();
-        if (!user || !(user as any).email) return;
+        const userObj = await User.findById(recipientId).select("firstName email").lean();
+        if (!userObj || !(userObj as any).email) return;
+
+        const recipient = await resolveReminderRecipient(userObj as any);
 
         const ids = messages.map((m) => m._id);
         const now = new Date();
@@ -176,13 +178,14 @@ export async function sendDueMessageReminders(options?: {
         );
 
         const { error } = await sendEmail({
-          to: (user as any).email,
-          subject:
-            messages.length === 1
+          to: recipient.email,
+          subject: recipient.onBehalfOf
+            ? `New message for ${recipient.onBehalfOf}`
+            : messages.length === 1
               ? "You have a new message"
               : `You have ${messages.length} new messages`,
           html: newMessageReminderEmailHtml({
-            recipientName: (user as any).firstName,
+            recipientName: recipient.recipientName,
             unreadCount: messages.length,
             appUrl: APP_URL,
           }),

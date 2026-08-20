@@ -31,8 +31,12 @@ function FamilySwitcherMenu({
         }`}
       >
         <Avatar name="Me" size="xs" />
-        <span className="flex-1 text-sm font-medium text-ink-900">My Account</span>
-        {!activeMemberId && <Check size={16} className="text-primary shrink-0" />}
+        <span className="flex-1 text-sm font-medium text-ink-900">
+          My Account
+        </span>
+        {!activeMemberId && (
+          <Check size={16} className="text-primary shrink-0" />
+        )}
       </button>
       <div className="h-px bg-border my-1" />
       {members.map((m) => (
@@ -45,15 +49,14 @@ function FamilySwitcherMenu({
         >
           <Avatar name={m.name} size="xs" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-ink-900 truncate">{m.name}</p>
+            <p className="text-sm font-medium text-ink-900 truncate">
+              {m.name}
+            </p>
             <p className="text-[11px] text-ink-400 capitalize">
               {m.relationship}
               {m.isMinor ? " · minor" : ""}
             </p>
           </div>
-          {activeMemberId === m.id && (
-            <Check size={16} className="text-primary shrink-0" />
-          )}
         </button>
       ))}
     </div>
@@ -87,7 +90,8 @@ export default function FamilySwitcher({
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setIsOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -118,7 +122,9 @@ export default function FamilySwitcher({
     if (target?.isMinor) {
       setIsSwitching(true);
       try {
-        const res = await fetch(`/api/patient/family/${id}/switch`, { method: "POST" });
+        const res = await fetch(`/api/patient/family/${id}/switch`, {
+          method: "POST",
+        });
         if (!res.ok) {
           setIsSwitching(false);
           return;
@@ -154,7 +160,9 @@ export default function FamilySwitcher({
             <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-400">
               {user.isImpersonating || activeMember ? "Managing" : "Viewing"}
             </p>
-            <p className="text-sm font-semibold text-ink-900 truncate">{label}</p>
+            <p className="text-sm font-semibold text-ink-900 truncate">
+              {label}
+            </p>
           </div>
           {isSwitching ? (
             <Loader2 size={16} className="text-ink-400 animate-spin shrink-0" />
@@ -196,7 +204,10 @@ export default function FamilySwitcher({
         <span className="hidden lg:inline text-xs font-semibold text-ink-900 max-w-[100px] truncate">
           {label}
         </span>
-        <ChevronDown size={14} className="text-ink-400 hidden sm:block shrink-0" />
+        <ChevronDown
+          size={14}
+          className="text-ink-400 hidden sm:block shrink-0"
+        />
       </button>
       {isOpen && (
         <div className="fixed sm:absolute top-16 sm:top-full left-0 sm:left-auto right-0 mx-4 sm:mx-0 sm:mt-2 w-auto sm:w-72 z-[100]">

@@ -39,10 +39,31 @@ const FamilyLinkSchema = new Schema<IFamilyLink>(
 
 FamilyLinkSchema.index({ guardianId: 1, status: 1 });
 FamilyLinkSchema.index({ memberId: 1, status: 1 }, { sparse: true });
-FamilyLinkSchema.index({ guardianId: 1, memberId: 1 }, { unique: true, sparse: true });
+FamilyLinkSchema.index(
+  { guardianId: 1, memberId: 1 },
+  { unique: true, partialFilterExpression: { memberId: { $exists: true, $ne: null } } },
+);
 FamilyLinkSchema.index({ guardianId: 1, inviteEmail: 1 }, { sparse: true });
 FamilyLinkSchema.index({ inviteToken: 1 }, { unique: true, sparse: true });
 
 export const FamilyLink: Model<IFamilyLink> =
   mongoose.models.FamilyLink || mongoose.model<IFamilyLink>('FamilyLink', FamilyLinkSchema);
+
+let indexSynced = false;
+export async function syncFamilyLinkIndexes() {
+  if (indexSynced) return;
+  try {
+    const collection = FamilyLink.collection;
+    const indexes = await collection.indexes();
+    const badIndex = indexes.find((idx: any) => idx.name === 'guardianId_1_memberId_1');
+    if (badIndex && !badIndex.partialFilterExpression) {
+      await collection.dropIndex('guardianId_1_memberId_1');
+    }
+    await FamilyLink.syncIndexes();
+    indexSynced = true;
+  } catch {
+    indexSynced = true;
+  }
+}
+
 export default FamilyLink;

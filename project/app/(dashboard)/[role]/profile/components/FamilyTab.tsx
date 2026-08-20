@@ -1,7 +1,18 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Users, UserPlus, Baby, Mail, Loader2, X, Trash2, Copy, Check, TriangleAlert } from "lucide-react";
+import {
+  Users,
+  UserPlus,
+  Baby,
+  Mail,
+  Loader2,
+  X,
+  Trash2,
+  Copy,
+  Check,
+  TriangleAlert,
+} from "lucide-react";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
@@ -36,12 +47,18 @@ interface Slots {
   remaining: number;
 }
 
-const STATUS_BADGE: Record<string, BadgeStatus> = { pending: "warning", active: "success", revoked: "neutral" };
+const STATUS_BADGE: Record<string, BadgeStatus> = {
+  pending: "warning",
+  active: "success",
+  revoked: "neutral",
+};
 
 export default function FamilyTab({
   setToast,
 }: {
-  setToast: (t: { message: string; type: "success" | "error" | "info" } | null) => void;
+  setToast: (
+    t: { message: string; type: "success" | "error" | "info" } | null,
+  ) => void;
 }) {
   const [asGuardian, setAsGuardian] = useState<GuardianLink[]>([]);
   const [asMember, setAsMember] = useState<MemberLink[]>([]);
@@ -52,8 +69,18 @@ export default function FamilyTab({
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [childForm, setChildForm] = useState({ firstName: "", lastName: "", dateOfBirth: "", gender: "male", idNumber: "", ageRange: "" });
-  const [inviteForm, setInviteForm] = useState({ email: "", relationship: "spouse" });
+  const [childForm, setChildForm] = useState({
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    gender: "male",
+    idNumber: "",
+    ageRange: "",
+  });
+  const [inviteForm, setInviteForm] = useState({
+    email: "",
+    relationship: "spouse",
+  });
 
   const [confirmTarget, setConfirmTarget] = useState<GuardianLink | null>(null);
   const [confirmInput, setConfirmInput] = useState("");
@@ -84,8 +111,15 @@ export default function FamilyTab({
   }, [load]);
 
   const handleAddChild = async () => {
-    if (!childForm.firstName.trim() || !childForm.lastName.trim() || !childForm.dateOfBirth) {
-      setToast({ message: "First name, last name and date of birth are required.", type: "error" });
+    if (
+      !childForm.firstName.trim() ||
+      !childForm.lastName.trim() ||
+      !childForm.dateOfBirth
+    ) {
+      setToast({
+        message: "First name, last name and date of birth are required.",
+        type: "error",
+      });
       return;
     }
     setIsSaving(true);
@@ -99,10 +133,20 @@ export default function FamilyTab({
       if (res.ok && json.success) {
         setToast({ message: "Child added.", type: "success" });
         setShowChildForm(false);
-        setChildForm({ firstName: "", lastName: "", dateOfBirth: "", gender: "male", idNumber: "", ageRange: "" });
+        setChildForm({
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
+          gender: "male",
+          idNumber: "",
+          ageRange: "",
+        });
         load();
       } else {
-        setToast({ message: json.error || "Failed to add child.", type: "error" });
+        setToast({
+          message: json.error || "Failed to add child.",
+          type: "error",
+        });
       }
     } catch {
       setToast({ message: "Network error.", type: "error" });
@@ -124,12 +168,18 @@ export default function FamilyTab({
       });
       const json = await res.json();
       if (res.ok && json.success) {
-        setToast({ message: `Invite sent to ${inviteForm.email}.`, type: "success" });
+        setToast({
+          message: `Invite sent to ${inviteForm.email}.`,
+          type: "success",
+        });
         setShowInviteForm(false);
         setInviteForm({ email: "", relationship: "spouse" });
         load();
       } else {
-        setToast({ message: json.error || "Failed to send invite.", type: "error" });
+        setToast({
+          message: json.error || "Failed to send invite.",
+          type: "error",
+        });
       }
     } catch {
       setToast({ message: "Network error.", type: "error" });
@@ -138,7 +188,9 @@ export default function FamilyTab({
   };
 
   const handleToggleMinor = async (memberId: string, isMinor: boolean) => {
-    setAsGuardian((prev) => prev.map((l) => (l.member.id === memberId ? { ...l, isMinor } : l)));
+    setAsGuardian((prev) =>
+      prev.map((l) => (l.member.id === memberId ? { ...l, isMinor } : l)),
+    );
     try {
       const res = await fetch(`/api/patient/family/${memberId}`, {
         method: "PATCH",
@@ -147,11 +199,16 @@ export default function FamilyTab({
       });
       if (!res.ok) throw new Error();
       setToast({
-        message: isMinor ? "You can now view this member's medical records." : "Medical record access removed.",
+        message: isMinor
+          ? "You can now view this member's medical records."
+          : "Medical record access removed.",
         type: "success",
       });
     } catch {
-      setToast({ message: "Failed to update — please try again.", type: "error" });
+      setToast({
+        message: "Failed to update — please try again.",
+        type: "error",
+      });
       load();
     }
   };
@@ -159,7 +216,9 @@ export default function FamilyTab({
   const handleRevoke = async (linkId: string) => {
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/patient/family/${linkId}`, { method: "DELETE" });
+      const res = await fetch(`/api/patient/family/${linkId}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
         setToast({ message: "Family member removed.", type: "info" });
         setConfirmTarget(null);
@@ -212,36 +271,55 @@ export default function FamilyTab({
           {slots && (
             <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200 bg-surface-soft px-4 py-3">
               <p className="text-sm font-semibold text-ink-900">
-                {slots.used} of {slots.maxFamilyMembers} family slot{slots.maxFamilyMembers === 1 ? "" : "s"} used
-                <span className="ml-1.5 font-normal text-slate-500 capitalize">({slots.tier.replace("_", " ")} plan)</span>
+                {slots.used} of {slots.maxFamilyMembers} family slot
+                {slots.maxFamilyMembers === 1 ? "" : "s"} used
+                <span className="ml-1.5 font-normal text-slate-500 capitalize">
+                  ({slots.tier.replace("_", " ")} plan)
+                </span>
               </p>
-              {slots.remaining <= 0 && (
-                <span className="text-xs font-semibold text-primary">Upgrade to add more</span>
-              )}
             </div>
           )}
 
           <div className="space-y-3">
             {asGuardian.length === 0 && !showChildForm && !showInviteForm && (
-              <p className="text-sm text-slate-500 text-center py-6">No family members linked yet.</p>
+              <p className="text-sm text-slate-500 text-center py-6">
+                No family members linked yet.
+              </p>
             )}
 
             {asGuardian.map((link) => (
-              <div key={link.id} className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-white">
+              <div
+                key={link.id}
+                className="flex flex-col lg:flex-row lg:items-center gap-4 p-4 rounded-lg border border-slate-200 bg-white"
+              >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-bold text-ink-900 truncate">{link.member.name || link.member.email}</p>
-                    <Badge label={link.relationship} status="neutral" size="sm" />
-                    <Badge label={link.status} status={STATUS_BADGE[link.status]} size="sm" />
+                    <p className="text-sm font-bold text-ink-900 truncate">
+                      {link.member.name || link.member.email}
+                    </p>
+                    <Badge
+                      label={link.relationship}
+                      status="neutral"
+                      size="sm"
+                    />
+                    <Badge
+                      label={link.status}
+                      status={STATUS_BADGE[link.status]}
+                      size="sm"
+                    />
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{link.member.email}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {link.member.email}
+                  </p>
                 </div>
                 {link.status === "active" && (
                   <Switch
                     checked={link.isMinor}
-                    onChange={(v) => link.member.id && handleToggleMinor(link.member.id, v)}
+                    onChange={(v) =>
+                      link.member.id && handleToggleMinor(link.member.id, v)
+                    }
                     label="Guardian can view medical records"
-                    className="shrink-0 max-w-[220px] text-right flex-row-reverse"
+                    className="shrink-0 lg:max-w-[220px] text-right flex-row-reverse"
                   />
                 )}
                 <button
@@ -263,7 +341,10 @@ export default function FamilyTab({
                   <h4 className="text-sm font-bold text-ink-900 flex items-center gap-2">
                     <Baby size={16} className="text-primary" /> Add child
                   </h4>
-                  <button onClick={() => setShowChildForm(false)} aria-label="Cancel">
+                  <button
+                    onClick={() => setShowChildForm(false)}
+                    aria-label="Cancel"
+                  >
                     <X size={16} className="text-slate-400" />
                   </button>
                 </div>
@@ -271,23 +352,34 @@ export default function FamilyTab({
                   <Input
                     label="First name"
                     value={childForm.firstName}
-                    onChange={(e) => setChildForm((p) => ({ ...p, firstName: e.target.value }))}
+                    onChange={(e) =>
+                      setChildForm((p) => ({ ...p, firstName: e.target.value }))
+                    }
                   />
                   <Input
                     label="Last name"
                     value={childForm.lastName}
-                    onChange={(e) => setChildForm((p) => ({ ...p, lastName: e.target.value }))}
+                    onChange={(e) =>
+                      setChildForm((p) => ({ ...p, lastName: e.target.value }))
+                    }
                   />
                   <Input
                     label="Date of birth"
                     type="date"
                     value={childForm.dateOfBirth}
-                    onChange={(e) => setChildForm((p) => ({ ...p, dateOfBirth: e.target.value }))}
+                    onChange={(e) =>
+                      setChildForm((p) => ({
+                        ...p,
+                        dateOfBirth: e.target.value,
+                      }))
+                    }
                   />
                   <Select
                     label="Gender"
                     value={childForm.gender}
-                    onChange={(v) => setChildForm((p) => ({ ...p, gender: v as string }))}
+                    onChange={(v) =>
+                      setChildForm((p) => ({ ...p, gender: v as string }))
+                    }
                     options={[
                       { value: "male", label: "Male" },
                       { value: "female", label: "Female" },
@@ -297,7 +389,9 @@ export default function FamilyTab({
                   <Select
                     label="Age Range"
                     value={childForm.ageRange}
-                    onChange={(v) => setChildForm((p) => ({ ...p, ageRange: v as string }))}
+                    onChange={(v) =>
+                      setChildForm((p) => ({ ...p, ageRange: v as string }))
+                    }
                     options={[
                       { value: "0-2", label: "0-2 years" },
                       { value: "3-5", label: "3-5 years" },
@@ -308,7 +402,9 @@ export default function FamilyTab({
                   <Input
                     label="ID Number"
                     value={childForm.idNumber}
-                    onChange={(e) => setChildForm((p) => ({ ...p, idNumber: e.target.value }))}
+                    onChange={(e) =>
+                      setChildForm((p) => ({ ...p, idNumber: e.target.value }))
+                    }
                     placeholder="Optional"
                   />
                 </div>
@@ -322,9 +418,13 @@ export default function FamilyTab({
               <Card className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-bold text-ink-900 flex items-center gap-2">
-                    <Mail size={16} className="text-primary" /> Invite family member
+                    <Mail size={16} className="text-primary" /> Invite family
+                    member
                   </h4>
-                  <button onClick={() => setShowInviteForm(false)} aria-label="Cancel">
+                  <button
+                    onClick={() => setShowInviteForm(false)}
+                    aria-label="Cancel"
+                  >
                     <X size={16} className="text-slate-400" />
                   </button>
                 </div>
@@ -334,13 +434,20 @@ export default function FamilyTab({
                     type="email"
                     icon={<Mail size={16} />}
                     value={inviteForm.email}
-                    onChange={(e) => setInviteForm((p) => ({ ...p, email: e.target.value }))}
+                    onChange={(e) =>
+                      setInviteForm((p) => ({ ...p, email: e.target.value }))
+                    }
                     placeholder="their@email.com"
                   />
                   <Select
                     label="Relationship"
                     value={inviteForm.relationship}
-                    onChange={(v) => setInviteForm((p) => ({ ...p, relationship: v as string }))}
+                    onChange={(v) =>
+                      setInviteForm((p) => ({
+                        ...p,
+                        relationship: v as string,
+                      }))
+                    }
                     options={[
                       { value: "spouse", label: "Spouse" },
                       { value: "parent", label: "Parent" },
@@ -349,7 +456,9 @@ export default function FamilyTab({
                   />
                 </div>
                 <p className="text-xs text-slate-500">
-                  They'll get an email to accept — you won't get access until they do, and their medical history always stays private to them.
+                  They'll get an email to accept — you won't get access until
+                  they do, and their medical history always stays private to
+                  them.
                 </p>
                 <Button onClick={handleInvite} loading={isSaving} fullWidth>
                   Send invite
@@ -398,10 +507,21 @@ export default function FamilyTab({
         >
           <div className="space-y-3">
             {asMember.map((link) => (
-              <div key={link.id} className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-white">
+              <div
+                key={link.id}
+                className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-white"
+              >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-ink-900 truncate">{link.guardian.name}</p>
-                  <p className="text-xs text-slate-500">{link.guardian.email} · {link.relationship === "spouse" || link.relationship === "parent" ? "manages your account" : "guardian"}</p>
+                  <p className="text-sm font-bold text-ink-900 truncate">
+                    {link.guardian.name}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {link.guardian.email} ·{" "}
+                    {link.relationship === "spouse" ||
+                    link.relationship === "parent"
+                      ? "manages your account"
+                      : "guardian"}
+                  </p>
                 </div>
               </div>
             ))}
@@ -421,10 +541,12 @@ export default function FamilyTab({
         {confirmTarget && (
           <div className="space-y-4">
             <div className="flex items-start gap-3 rounded-lg border border-danger-500/20 bg-danger-50 p-3">
-              <TriangleAlert size={18} className="text-danger-700 shrink-0 mt-0.5" />
+              <TriangleAlert
+                size={18}
+                className="text-danger-700 shrink-0 mt-0.5"
+              />
               <p className="text-sm text-danger-700">
-                This removes{" "}
-                <span className="font-bold">{confirmName}</span>
+                This removes <span className="font-bold">{confirmName}</span>
                 {confirmTarget.status === "pending"
                   ? " — the pending invite will be cancelled."
                   : " from your family account. They'll go back to self-pay."}{" "}

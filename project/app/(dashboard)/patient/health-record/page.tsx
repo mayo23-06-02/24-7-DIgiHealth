@@ -195,7 +195,9 @@ export default function HealthRecordPage() {
         setSelectedMedForRefill(null);
         // Optionally refresh the medications list
       } else {
-        toast.error(data.error || "Failed to submit refill request", { id: tid });
+        toast.error(data.error || "Failed to submit refill request", {
+          id: tid,
+        });
       }
     } catch (err) {
       toast.error("Failed to submit refill request", { id: tid });
@@ -269,7 +271,7 @@ export default function HealthRecordPage() {
         subtitle="Medical Health History"
         right={
           <Button
-          size="sm"
+            size="sm"
             onClick={handleDownloadReport}
             loading={isDownloading}
           >
@@ -279,17 +281,25 @@ export default function HealthRecordPage() {
       />
 
       {/* Tabs Row */}
-      <div  className=" border-b border-gray-200 top-0 z-30 px-4">
+      <div className=" border-b border-gray-200 top-0 z-30 px-4">
         <Tabs
           activeId={activeTab}
           onChange={(id) => setActiveTab(id as any)}
           tabs={[
             { id: "timeline", label: "Timeline", icon: <Clock size={16} /> },
-            { id: "vitals", label: "Vitals", icon: <LineChartIcon size={16} /> },
+            {
+              id: "vitals",
+              label: "Vitals",
+              icon: <LineChartIcon size={16} />,
+            },
             { id: "labs", label: "Laboratory", icon: <Lab size={16} /> },
             { id: "medications", label: "Meds", icon: <Pill size={16} /> },
             { id: "allergies", label: "Allergies", icon: <Brain size={16} /> },
-            { id: "immunizations", label: "Vaccines", icon: <Syringe size={16} /> },
+            {
+              id: "immunizations",
+              label: "Vaccines",
+              icon: <Syringe size={16} />,
+            },
           ]}
           className="border-b-0"
         />
@@ -302,9 +312,7 @@ export default function HealthRecordPage() {
             {loadingRecords ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="animate-spin text-primary" size={40} />
-                <p className="text-slate-500 font-bold">
-                  Synchronizing medical records...
-                </p>
+                <p className="text-slate-500 font-bold">Loading records...</p>
               </div>
             ) : (
               <>
@@ -315,7 +323,6 @@ export default function HealthRecordPage() {
                     onOpenMedsTab={() => setActiveTab("medications")}
                   />
                 )}
-
 
                 {/* VITALS TAB */}
                 {activeTab === "vitals" && (
@@ -340,7 +347,6 @@ export default function HealthRecordPage() {
                     }}
                   />
                 )}
-
 
                 {/* ALLERGIES TAB */}
                 {activeTab === "allergies" && (
@@ -371,6 +377,8 @@ export default function HealthRecordPage() {
               }
               heightCm={dashboardData?.vitals?.height || 170}
               weightKg={dashboardData?.vitals?.weight || 75}
+              ageRange={dashboardData?.profile?.ageRange}
+              dateOfBirth={dashboardData?.profile?.dateOfBirth}
               readOnly={false}
             />
             <div className="absolute bottom-10 inset-x-10 z-40 pointer-events-none">
@@ -416,7 +424,10 @@ export default function HealthRecordPage() {
             </div>
           </div>
 
-          <Alert status="info" title="No delivery or payment through DigiHealth">
+          <Alert
+            status="info"
+            title="No delivery or payment through DigiHealth"
+          >
             Confirming here just marks a refill as used against your doctor's
             authorization. Download your prescription and take it to any
             pharmacy of your choice — we don't handle medication orders,

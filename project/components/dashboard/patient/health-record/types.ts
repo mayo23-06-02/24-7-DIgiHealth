@@ -27,6 +27,7 @@ export interface TimelineEvent {
 export interface VitalsDataPoint {
   date: string;
   weight?: number;
+  height?: number;
   systolicBP?: number;
   diastolicBP?: number;
   heartRate?: number;

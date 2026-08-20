@@ -48,7 +48,7 @@ export async function GET() {
         asGuardian: asGuardian.map((l: any) => ({
           id: l._id.toString(),
           member: l.memberId
-            ? { id: l.memberId._id.toString(), name: `${l.memberId.firstName} ${l.memberId.lastName}`, email: l.memberId.email }
+            ? { id: l.memberId._id.toString(), name: `${l.memberId.firstName} ${l.memberId.lastName}`, email: l.isMinor ? user.email : l.memberId.email }
             : { id: null, name: null, email: l.inviteEmail },
           relationship: l.relationship,
           isMinor: l.isMinor,

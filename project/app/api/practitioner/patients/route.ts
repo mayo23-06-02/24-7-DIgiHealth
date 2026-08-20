@@ -70,6 +70,15 @@ export async function GET(req: NextRequest) {
       latestRisks.map((r: any) => [r._id.toString(), r]),
     );
 
+    // Batch query FamilyLinks for minor check
+    const { default: FamilyLink } = await import('@/lib/models/FamilyLink');
+    const familyLinks = await FamilyLink.find({ memberId: { $in: oids }, status: 'active', isMinor: true })
+      .populate('guardianId', 'email')
+      .lean();
+    const familyLinkByMember = new Map(
+      familyLinks.map((l: any) => [l.memberId.toString(), l])
+    );
+
     const enriched = await Promise.all(
       patients.map(async (p: any) => {
         const fullName = `${p.firstName} ${p.lastName}`;
@@ -136,10 +145,13 @@ export async function GET(req: NextRequest) {
           /* ignore */
         }
 
+        const link = familyLinkByMember.get(p._id.toString());
+        const displayEmail = link?.guardianId?.email || p.email;
+
         return {
           id: p._id.toString(),
           fullName,
-          email: p.email,
+          email: displayEmail,
           mobile: p.mobile,
           gender,
           age,

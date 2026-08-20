@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PractitionerProfile, PatientProfile } from '@/lib/models/RoleProfiles';
 import Consultation from '@/lib/models/Consultation';
+import { Facility } from '@/lib/models/Facility';
 
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 
@@ -37,7 +38,8 @@ export async function GET(req: Request) {
     if (uniqueDoctorIds.length === 0) return NextResponse.json([]);
 
     const doctorUsers = await User.find({ _id: { $in: uniqueDoctorIds } });
-    const doctorProfiles = await PractitionerProfile.find({ userId: { $in: uniqueDoctorIds } });
+    const doctorProfiles = await PractitionerProfile.find({ userId: { $in: uniqueDoctorIds } })
+      .populate({ path: 'affiliatedFacilityIds', model: Facility, select: 'name' });
 
     const docs = doctorUsers.map(u => {
       const p = doctorProfiles.find(profile => profile.userId.toString() === u._id.toString());
@@ -47,10 +49,24 @@ export async function GET(req: Request) {
         id: u._id.toString(),
         name: `${u.firstName} ${u.lastName}`,
         specialisation: p.specialisation,
+        hpcsNumber: p.hpcsaNumber,
+        rating: p.rating || 4.8,
+        reviewCount: p.reviewCount || 0,
+        languages: p.languages || ['English'],
         avatar: avatarUrl,
         avatarUrl,
         isOnline: p.isOnline,
-        rating: 4.8, // Static for now as in practitioners API
+        experienceYears: p.experienceYears,
+        practicePhone: u.mobile,
+        practiceEmail: u.email,
+        facilityName: (p.affiliatedFacilityIds?.[0] as any)?.name || 'Independent Practice',
+        facilityId: (p.affiliatedFacilityIds?.[0] as any)?._id?.toString(),
+        location: p.address?.province || (p.affiliatedFacilityIds?.[0] as any)?.address?.province || 'Telehealth / Online',
+        city: p.address?.city || (p.affiliatedFacilityIds?.[0] as any)?.address?.city || 'South Africa',
+        about: p.bio,
+        bio: p.bio,
+        clinicalInterests: ['General Care', p.specialisation],
+        acceptsMedicalAid: p.acceptedMedicalAids || ['Cash'],
         isFavorite: favoriteDoctorIds.includes(u._id.toString()),
         hasConsulted: consultedDoctorIds.includes(u._id.toString())
       };
