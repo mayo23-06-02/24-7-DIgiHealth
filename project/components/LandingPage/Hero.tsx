@@ -433,8 +433,10 @@ export default function Hero() {
             loop
             muted
             playsInline
-            className={`absolute inset-0 w-full h-full object-cover animate-slow-zoom transition-opacity duration-700 
-              
+            onLoadedData={handleVideoLoaded}
+            onError={handleVideoError}
+            className={`absolute inset-0 w-full h-full object-cover animate-slow-zoom transition-opacity duration-700
+
             `}
           />
           <div
