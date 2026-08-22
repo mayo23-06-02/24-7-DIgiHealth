@@ -86,7 +86,7 @@ export default function VitalsTab({
               />
               <Tooltip
                 contentStyle={{ borderRadius: "8px", border: "none" }}
-                formatter={(value: any, name: string) =>
+                formatter={(value: any, name?: string) =>
                   name === "weight"
                     ? [`${value} kg`, "Weight"]
                     : [`${value} cm`, "Height"]
