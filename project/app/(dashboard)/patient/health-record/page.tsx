@@ -54,9 +54,9 @@ export default function HealthRecordPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<HealthRecordTab>("timeline");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVital, setSelectedVital] = useState<
-    "weight" | "bp" | "heartRate"
-  >("weight");
+  const [selectedVital, setSelectedVital] = useState<"weight" | "height">(
+    "weight"
+  );
   const [isDownloading, setIsDownloading] = useState(false);
   const [isRefillModalOpen, setIsRefillModalOpen] = useState(false);
   const [selectedMedForRefill, setSelectedMedForRefill] =
