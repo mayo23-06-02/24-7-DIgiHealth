@@ -44,7 +44,7 @@ const ratingAvatars = [
 
 const slides = [
   {
-    videoSrc: "/landing-page/hero-section/slide01.mp4",
+    videoSrc: "/landing-page/hero-section/Slide01.mp4",
     headline: "Compassionate Care.",
     highlight: "Real Doctors, Anywhere.",
     sub: "We invite you to take charge of your family's health.",
@@ -52,7 +52,7 @@ const slides = [
       "Skip the waiting room. Connect with verified South African doctors over secure video, chat, or AI-assisted triage — day or night, wherever you are.",
   },
   {
-    videoSrc: "/landing-page/hero-section/slide02.mp4",
+    videoSrc: "/landing-page/hero-section/Slide02.mp4",
     headline: "Your Data, Your Health,",
     highlight: "All in One Portal",
     sub: "In our portal you have all data in one place and direct access to the telemedicine service.",
@@ -60,7 +60,7 @@ const slides = [
       "Track your vitals, manage appointments, and securely access your medical history from anywhere. Your health journey, unified.",
   },
   {
-    videoSrc: "/landing-page/hero-section/slide03.mp4",
+    videoSrc: "/landing-page/hero-section/Slide03.mp4",
     headline: "Prescriptions & Certificates,",
     highlight: "Digital & Secure",
     sub: "Receive your prescription conveniently as a QR code: fast, discreet and paperless.",
