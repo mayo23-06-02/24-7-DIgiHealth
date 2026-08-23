@@ -6,6 +6,9 @@ import {
   RoomEvent,
   Track,
   RemoteTrackPublication,
+  ConnectionQuality,
+  VideoPresets,
+  AudioPresets,
   createLocalAudioTrack,
   createLocalVideoTrack,
 } from "livekit-client";
@@ -42,6 +45,13 @@ export default function LiveKitCallPanel({
   const [remoteConnected, setRemoteConnected] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
+  const [quality, setQuality] = useState<ConnectionQuality>(
+    ConnectionQuality.Unknown,
+  );
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  /** Set once we've offered to drop video, so we don't nag repeatedly. */
+  const [suggestVoiceOnly, setSuggestVoiceOnly] = useState(false);
+  const poorSinceRef = useRef<number | null>(null);
   // Track subscribed audio publications in state so React renders real <audio>
   // elements in the DOM — mirrors how @livekit/components-react RoomAudioRenderer works.
   const [remoteAudioPubs, setRemoteAudioPubs] = useState<RemoteTrackPublication[]>([]);
@@ -64,7 +74,52 @@ export default function LiveKitCallPanel({
     const connectRoom = async () => {
       // webAudioMix: true routes remote audio through LiveKit's internal
       // AudioContext pipeline so room.startAudio() can unlock it.
-      const room = new Room({ webAudioMix: true });
+      //
+      // Everything below it is bandwidth tuning. The room previously ran on
+      // LiveKit defaults with an uncapped camera capture, which on a South
+      // African mobile link is the difference between a usable consultation
+      // and an unusable one.
+      const room = new Room({
+        webAudioMix: true,
+
+        // Subscribe at the size actually being rendered rather than full
+        // resolution, and pause tracks that aren't visible. The remote feed in
+        // this panel is often a few hundred pixels wide — without this we pull
+        // a 720p stream to paint it.
+        adaptiveStream: true,
+
+        // Stop *sending* simulcast layers nobody is currently subscribed to.
+        // Saves the publisher's uplink, which is usually the scarcer direction
+        // on mobile.
+        dynacast: true,
+
+        // Cap what the camera captures in the first place. Uncapped, browsers
+        // commonly grab 720p/1080p and then spend uplink scaling it back down.
+        videoCaptureDefaults: {
+          resolution: VideoPresets.h360.resolution,
+        },
+
+        publishDefaults: {
+          // Multiple quality layers so the server can hand each subscriber the
+          // one their connection can actually carry.
+          simulcast: true,
+          videoEncoding: VideoPresets.h360.encoding,
+
+          // Audio is the clinically critical channel — a consultation survives
+          // degraded video, not degraded speech.
+          audioPreset: AudioPresets.speech,
+          // Discontinuous transmission: send nothing during silence.
+          dtx: true,
+          // Redundant audio encoding — materially better speech intelligibility
+          // on lossy mobile links, for very little extra bandwidth.
+          red: true,
+
+          // When bandwidth is short, give up resolution and framerate together
+          // rather than letting either collapse. 'maintain-resolution' is worth
+          // trialling if clinicians report they can't see enough detail.
+          degradationPreference: "balanced",
+        },
+      });
       roomRef.current = room;
 
       const syncAudioPubs = () => {
@@ -119,6 +174,30 @@ export default function LiveKitCallPanel({
         })
         .on(RoomEvent.AudioPlaybackStatusChanged, () => {
           setAudioBlocked(!room.canPlaybackAudio);
+        })
+        .on(RoomEvent.ConnectionQualityChanged, (q, participant) => {
+          // Only our own uplink is actionable by this user.
+          if (participant?.identity !== room.localParticipant.identity) return;
+          setQuality(q);
+
+          // Offer voice-only after quality has been Poor for a sustained
+          // stretch — not on the first blip, and never automatically, because
+          // silently killing a clinician's camera mid-examination is worse
+          // than a degraded picture. The user decides.
+          if (q === ConnectionQuality.Poor) {
+            if (poorSinceRef.current === null) {
+              poorSinceRef.current = Date.now();
+            } else if (Date.now() - poorSinceRef.current > 8000) {
+              setSuggestVoiceOnly(true);
+            }
+          } else {
+            poorSinceRef.current = null;
+          }
+        })
+        .on(RoomEvent.Reconnecting, () => setIsReconnecting(true))
+        .on(RoomEvent.Reconnected, () => {
+          setIsReconnecting(false);
+          poorSinceRef.current = null;
         })
         .on(RoomEvent.Disconnected, () => {
           setRemoteAudioPubs([]);
@@ -293,14 +372,38 @@ export default function LiveKitCallPanel({
         ))}
       </div>
 
-      {/* Audio blocked banner */}
-      {audioBlocked && (
-        <div className="absolute top-14 inset-x-0 z-30 flex justify-center pointer-events-none">
-          <div className="bg-amber-500/90 text-white text-xs font-semibold px-4 py-2 rounded-full  pointer-events-auto">
+      {/* Connection state banners — stacked so they never overlap. */}
+      <div className="absolute top-14 inset-x-0 z-30 flex flex-col items-center gap-2 pointer-events-none">
+        {isReconnecting && (
+          <div className="bg-amber-500/95 text-white text-xs font-semibold px-4 py-2 rounded-full pointer-events-auto">
+            Reconnecting…
+          </div>
+        )}
+        {!isReconnecting && quality === ConnectionQuality.Poor && (
+          <div className="bg-rose-500/95 text-white text-xs font-semibold px-4 py-2 rounded-full pointer-events-auto">
+            Weak connection — audio is being prioritised
+          </div>
+        )}
+        {suggestVoiceOnly && videoOn && callInfo.type === "video" && (
+          <button
+            onClick={async () => {
+              const room = roomRef.current;
+              if (!room) return;
+              await room.localParticipant.setCameraEnabled(false);
+              setVideoOn(false);
+              setSuggestVoiceOnly(false);
+            }}
+            className="bg-white text-slate-900 text-xs font-semibold px-4 py-2 rounded-full pointer-events-auto hover:bg-slate-100 transition-colors"
+          >
+            Turn off video to improve audio
+          </button>
+        )}
+        {audioBlocked && (
+          <div className="bg-amber-500/90 text-white text-xs font-semibold px-4 py-2 rounded-full pointer-events-auto">
             Click anywhere to enable audio
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Video area */}
       <div className="flex-1 relative overflow-hidden">
