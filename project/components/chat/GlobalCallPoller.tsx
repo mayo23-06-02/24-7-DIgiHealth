@@ -6,6 +6,13 @@ import toast from "react-hot-toast";
 
 /** Base cadence while the tab is in the foreground. */
 const POLL_MS = 6000;
+/**
+ * Slower cadence while the tab is backgrounded — deliberately slowed rather
+ * than stopped. A patient waiting on a doctor may well have the tab behind
+ * something else, and silently not noticing an incoming consultation is a much
+ * worse failure for a telehealth product than a few extra requests.
+ */
+const HIDDEN_POLL_MS = 30000;
 /** Ceiling used when the server keeps failing, so a bad backend isn't hammered. */
 const MAX_BACKOFF_MS = 60000;
 
@@ -36,10 +43,6 @@ export default function GlobalCallPoller() {
     if (!user) return;
 
     const poll = async () => {
-      // Nothing can be answered from a backgrounded tab, so don't spend a
-      // request (or a serverless invocation) on it. The visibility listener
-      // below polls immediately on return, so nothing is missed.
-      if (typeof document !== "undefined" && document.hidden) return;
       try {
         const res = await fetch("/api/chat/call/active");
         if (!res.ok) return;
@@ -100,10 +103,14 @@ export default function GlobalCallPoller() {
     // Reschedule after each attempt rather than using a fixed interval, so a
     // failing backend backs off instead of being polled at full rate forever.
     const schedule = () => {
+      const base =
+        typeof document !== "undefined" && document.hidden
+          ? HIDDEN_POLL_MS
+          : POLL_MS;
       const delay =
         errorCountRef.current > 0
-          ? Math.min(POLL_MS * 2 ** errorCountRef.current, MAX_BACKOFF_MS)
-          : POLL_MS;
+          ? Math.min(base * 2 ** errorCountRef.current, MAX_BACKOFF_MS)
+          : base;
       pollInterval.current = setTimeout(run, delay);
     };
 
