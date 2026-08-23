@@ -180,9 +180,15 @@ export default function Hero() {
     if (!canPlayVideo) return;
     const el = videoRef.current;
     if (!el) return;
-    el.load();
+
+    // React renders `muted` as an attribute, but browsers decide whether to
+    // allow autoplay by reading the *property* — which React does not reliably
+    // set. Without this the video loads fully and then just sits paused.
+    el.muted = true;
+    el.playsInline = true;
+
     el.play().catch(() => {
-      /* autoplay blocked — poster remains, which is a fine outcome */
+      /* Autoplay still refused — the poster stays up, which is a fine outcome. */
     });
   }, [canPlayVideo, currentSlide]);
 
