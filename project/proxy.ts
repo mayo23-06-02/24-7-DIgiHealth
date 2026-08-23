@@ -115,7 +115,12 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // people who aren't logged in yet — that's the whole point of an invite
     // link. Each route validates the token itself; this just lets the
     // request through to reach that check instead of 401ing first.
-    pathname.startsWith('/api/invites/')
+    pathname.startsWith('/api/invites/') ||
+    // Read-only doctor listing powering the public marketing pages
+    // (Home, /doctors) for anonymous visitors — exact path only, not the
+    // whole /api/hospital/ tree, since sibling routes (staff search, etc.)
+    // are genuinely hospital_admin-only.
+    pathname === '/api/hospital/doctors'
   ) {
     return NextResponse.next();
   }
