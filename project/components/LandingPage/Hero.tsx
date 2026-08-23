@@ -50,7 +50,7 @@ const ratingAvatars = [
  */
 const slides = [
   {
-    videoSrc: "/landing-page/hero-section/Slide01.mp4",
+    videoSrc: "/landing-page/hero-section/Slide01-web.mp4",
     poster:
       "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=75&w=1600&auto=format&fit=crop",
     headline: "Compassionate Care.",
@@ -60,7 +60,7 @@ const slides = [
       "Skip the waiting room. Connect with verified South African doctors over secure video, chat, or AI-assisted triage — day or night, wherever you are.",
   },
   {
-    videoSrc: "/landing-page/hero-section/Slide02.mp4",
+    videoSrc: "/landing-page/hero-section/Slide02-web.mp4",
     poster:
       "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=75&w=1600&auto=format&fit=crop",
     headline: "Your Data, Your Health,",
@@ -70,7 +70,7 @@ const slides = [
       "Track your vitals, manage appointments, and securely access your medical history from anywhere. Your health journey, unified.",
   },
   {
-    videoSrc: "/landing-page/hero-section/Slide03.mp4",
+    videoSrc: "/landing-page/hero-section/Slide03-web.mp4",
     poster:
       "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=75&w=1600&auto=format&fit=crop",
     headline: "Prescriptions & Certificates,",
@@ -142,19 +142,22 @@ export default function Hero() {
   const [isSticky, setIsSticky] = useState(false);
 
   /**
-   * Whether we're willing to spend the visitor's data on a ~22 MB hero video.
+   * The hero video plays for every visitor.
    *
-   * The hero previously autoplayed these eagerly, which pushed the page load
-   * event to ~16s and saturated the connection so hard that unrelated requests
-   * on the same origin timed out. It also flatly contradicted the platform's
-   * own promise of low-bandwidth, 2G/3G-friendly access — the visitors least
-   * able to afford 62 MB of decoration are exactly the ones this product is
-   * meant to reach.
+   * It used to be gated behind a connection check, because the three source
+   * MP4s totalled ~62 MB — enough to push the page load event to ~16s and
+   * saturate the connection so badly that unrelated same-origin requests timed
+   * out. The right answer was to make the files affordable, not to hide them:
+   * they are now re-encoded to 720p (~2.3 MB for all three), so there is no
+   * longer any bandwidth argument for withholding the video from anyone.
    *
-   * So: everyone gets the poster instantly, and the video is an enhancement
-   * that only loads for people on an unmetered, reasonably fast connection who
-   * haven't asked for reduced motion. Decided once on mount — flipping mid-view
-   * would be more distracting than useful.
+   * The only remaining condition is `prefers-reduced-motion`, which is the
+   * visitor's own explicit OS-level accessibility choice rather than a guess we
+   * make on their behalf — those users keep the poster.
+   *
+   * Playback is still deferred until after the window load event so the video
+   * never competes with content for bandwidth; the poster covers that gap, so
+   * the hero is never blank.
    */
   const [canPlayVideo, setCanPlayVideo] = useState(false);
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
@@ -162,13 +165,7 @@ export default function Hero() {
   useEffect(() => {
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
-    const conn = (navigator as any).connection;
-    if (conn?.saveData) return;
-    if (conn?.effectiveType && !/4g/.test(conn.effectiveType)) return;
-
-    // Wait for the page to finish loading so the video never competes with
-    // content for bandwidth, then start it.
-    const start = () => window.setTimeout(() => setCanPlayVideo(true), 600);
+    const start = () => window.setTimeout(() => setCanPlayVideo(true), 200);
     if (document.readyState === "complete") {
       start();
       return;
