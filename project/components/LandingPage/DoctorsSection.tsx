@@ -25,7 +25,7 @@ export default function DoctorsSection() {
             See how we vet every doctor <ArrowRight size={15} />
           </Link>
         </div>
-        <PublicDoctorGrid limit={4} />
+        <PublicDoctorGrid limit={8} />
       </div>
     </section>
   );

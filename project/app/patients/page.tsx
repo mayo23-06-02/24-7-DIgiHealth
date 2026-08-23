@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import SiteHeader from "@/components/LandingPage/SiteHeader";
+import WhyUrgentCare from "@/components/LandingPage/WhyUrgentCare";
 import Footer from "@/components/LandingPage/Footer";
 import Button from "@/components/ui/Button";
 import {
@@ -51,21 +52,29 @@ const features = [
     icon: Users,
     title: "Family Plans",
     description: "Add a partner, parent, or child to your account and manage everyone's care from one login.",
+    bg: "bg-primary/10",
+    iconColor: "text-primary",
   },
   {
     icon: FileText,
     title: "Digital Health Record",
     description: "Every consultation, prescription, and lab result — searchable, exportable, never lost between doctors.",
+    bg: "bg-secondary/15",
+    iconColor: "text-secondary",
   },
   {
     icon: Pill,
     title: "E-Prescriptions",
     description: "Redeemable at any partner pharmacy, no paper, no second trip.",
+    bg: "bg-accent/15",
+    iconColor: "text-ink-900",
   },
   {
     icon: Clock,
     title: "24/7 Availability",
     description: "3am fever or Sunday afternoon rash — a doctor is on the platform.",
+    bg: "bg-success-50",
+    iconColor: "text-success-700",
   },
 ];
 
@@ -160,14 +169,14 @@ export default function PatientsPage() {
               />
             </div>
             <div className="grid grid-cols-1 gap-4 order-1 md:order-2">
-              {features.map(({ icon: Icon, title, description }) => (
-                <div key={title} className="bg-white border border-border rounded-2xl p-5 flex gap-4">
-                  <div className="w-11 h-11 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              {features.map(({ icon: Icon, title, description, bg, iconColor }) => (
+                <div key={title} className={`rounded-2xl p-5 flex gap-4 ${bg}`}>
+                  <div className={`w-11 h-11 shrink-0 rounded-xl bg-white/70 flex items-center justify-center ${iconColor}`}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-ink-900 mb-1 font-grotesk">{title}</h3>
-                    <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
+                    <p className="text-sm text-ink-700 leading-relaxed">{description}</p>
                   </div>
                 </div>
               ))}
@@ -175,6 +184,8 @@ export default function PatientsPage() {
           </div>
         </div>
       </section>
+
+      <WhyUrgentCare />
 
       {/* Trust signals */}
       <section className="py-16 md:py-20 bg-white">
