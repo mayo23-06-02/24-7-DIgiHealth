@@ -1,9 +1,12 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Avatar from "../ui/Avatar";
 import { MessageSquare, CalendarPlus, Star, BadgeCheck, Clock } from "lucide-react";
+import { fetchDaySlots, todayDateString, type BookingSlot } from "@/lib/booking";
 
 interface Doctor {
   id: string;
@@ -49,6 +52,23 @@ export default function DoctorCard({
   const isHighlyRated = (doctor.rating || 0) >= 4.7;
   const isLoyal = (doctor.reviewCount || 0) >= 50;
 
+  // Real open slots for today, computed from actual booked consultations
+  // (see lib/booking/slots.ts) — the same source BookingModal uses, so
+  // these times are never fabricated.
+  const [openSlots, setOpenSlots] = useState<BookingSlot[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchDaySlots({ practitionerId: doctor.id, date: todayDateString() }).then((result) => {
+      if (cancelled) return;
+      if (result.success && result.data?.slots) {
+        setOpenSlots(result.data.slots.filter((s) => s.available).slice(0, 4));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [doctor.id]);
+
   return (
     <Card
       className="flex flex-col w-full h-full justify-between group relative overflow-hidden p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
@@ -74,17 +94,17 @@ export default function DoctorCard({
           {linkName ? (
             <Link
               href={linkName}
-              className="font-bold text-ink-900 text-base leading-tight cursor-pointer hover:text-primary transition-all truncate block w-full relative z-10"
+              className="font-semibold text-ink-900 text-base leading-tight cursor-pointer hover:text-primary transition-all block w-full relative z-10"
               onClick={(e) => e.stopPropagation()}
             >
               <span className="flex items-center gap-1 min-w-0">
-                <span className="truncate">{doctor.name}</span>
+                <span>{doctor.name}</span>
                 <BadgeCheck size={15} className="text-primary shrink-0" />
               </span>
             </Link>
           ) : (
-            <span className="text-ink-900 font-bold text-base flex items-center gap-1 min-w-0 w-full">
-              <span className="truncate">{doctor.name}</span>
+            <span className="text-ink-900 font-semibold text-base flex items-center gap-1 min-w-0 w-full">
+              <span>{doctor.name}</span>
               <BadgeCheck size={15} className="text-primary shrink-0" />
             </span>
           )}
@@ -135,9 +155,43 @@ export default function DoctorCard({
 
       {bio && (
         <div className="relative group/bio mb-3">
-          <p className="text-sm text-ink-600 bg-surface-soft rounded-lg px-3 py-2.5 line-clamp-3 cursor-default">
+          <p className="text-sm text-ink-600 px-3 py-2.5 line-clamp-6 cursor-default">
             {bio}
           </p>
+        </div>
+      )}
+
+      {openSlots.length > 0 && (
+        <div className="mb-3">
+          <p className="text-[11px] font-semibold text-ink-400 uppercase tracking-wide mb-1.5">
+            Today's open times
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {openSlots.map((slot) =>
+              onBook ? (
+                <button
+                  key={slot.time}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onBook(doctor.id, e);
+                  }}
+                  className="text-xs font-semibold text-primary bg-primary/5 border border-primary/20 px-2.5 py-1 rounded-full hover:bg-primary hover:text-white transition-colors"
+                >
+                  {slot.label}
+                </button>
+              ) : (
+                <Link
+                  key={slot.time}
+                  href="/register"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-xs font-semibold text-primary bg-primary/5 border border-primary/20 px-2.5 py-1 rounded-full hover:bg-primary hover:text-white transition-colors"
+                >
+                  {slot.label}
+                </Link>
+              ),
+            )}
+          </div>
         </div>
       )}
 
@@ -168,8 +222,8 @@ export default function DoctorCard({
 
         {showPrice && (
           <div className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2">
-            <span className="text-xs text-ink-600">Consultations from</span>
-            <span className="text-sm font-bold text-primary">R250/mo · Get Access</span>
+            <span className="text-[11px] text-ink-600">Consultations from</span>
+            <span className="text-xs font-bold text-primary">R250/mo · Get Access</span>
           </div>
         )}
 
