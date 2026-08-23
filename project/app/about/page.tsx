@@ -87,7 +87,7 @@ export default function AboutPage() {
 
       {/* Hero */}
       <section className="pt-36 pb-20 md:pt-44 md:pb-28 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-3xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
               Our Story
@@ -106,7 +106,7 @@ export default function AboutPage() {
 
       {/* The problem */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
@@ -139,7 +139,7 @@ export default function AboutPage() {
 
       {/* Our approach */}
       <section className="py-16 md:py-24 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1 relative h-72 md:h-96 rounded-2xl overflow-hidden">
               <Image
@@ -170,7 +170,7 @@ export default function AboutPage() {
 
       {/* Values */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               What We Stand For
@@ -198,7 +198,7 @@ export default function AboutPage() {
 
       {/* Stats */}
       <section className="py-16 md:py-24 bg-linear-to-br from-primary to-primary-600">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <h2 className="text-2xl md:text-3xl font-medium text-white text-center tracking-tight font-grotesk mb-12">
             The impact so far
           </h2>
@@ -216,7 +216,7 @@ export default function AboutPage() {
 
       {/* Team */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               Leadership
@@ -234,11 +234,11 @@ export default function AboutPage() {
                   </span>
                 </div>
                 <p className="font-bold text-ink-900 font-grotesk">{member.name}</p>
-                <p className="text-sm text-ink-500">{member.role}</p>
+                <p className="text-sm text-ink-400">{member.role}</p>
               </div>
             ))}
           </div>
-          <blockquote className="mt-14 max-w-2xl mx-auto text-center text-lg md:text-xl text-ink-700 leading-relaxed italic">
+          <blockquote className="mt-14 max-w-2xl mx-auto text-center text-lg md:text-xl text-ink-600 leading-relaxed italic">
             "We're not just building an app – we're reimagining how South
             Africans access healthcare. Join us in making quality care a
             right, not a privilege."

@@ -7,7 +7,6 @@ import LogoMain from "@/components/ui/LogoMain";
 import { usePathname } from "next/navigation";
 
 const navLinks = [
-  { name: "Platform", href: "/" },
   { name: "About", href: "/about" },
   { name: "For Patients", href: "/patients" },
   { name: "For Doctors", href: "/doctors" },
@@ -41,7 +40,7 @@ export default function SiteHeader() {
             : "bg-white border-b border-slate-100"
         }`}
       >
-        <div className="container mx-auto max-w-350 px-4 md:px-8 flex items-center justify-between py-3">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-8 flex items-center justify-between py-3">
           <Link href="/" className="shrink-0">
             <LogoMain width={140} height={30} alt={false} />
           </Link>
@@ -56,7 +55,7 @@ export default function SiteHeader() {
                   className={`text-sm font-medium transition-colors ${
                     active
                       ? "text-primary font-bold"
-                      : "text-ink-700 hover:text-primary"
+                      : "text-ink-600 hover:text-primary"
                   }`}
                 >
                   {link.name}
@@ -82,17 +81,17 @@ export default function SiteHeader() {
             aria-label="Toggle menu"
           >
             <span
-              className={`w-6 h-0.5 rounded-lg bg-ink-800 transition-all duration-300 ${
+              className={`w-6 h-0.5 rounded-lg bg-ink-900 transition-all duration-300 ${
                 mobileMenuOpen ? "rotate-45 translate-y-2" : ""
               }`}
             />
             <span
-              className={`w-6 h-0.5 rounded-lg bg-ink-800 transition-all duration-300 ${
+              className={`w-6 h-0.5 rounded-lg bg-ink-900 transition-all duration-300 ${
                 mobileMenuOpen ? "opacity-0" : ""
               }`}
             />
             <span
-              className={`w-6 h-0.5 rounded-lg bg-ink-800 transition-all duration-300 ${
+              className={`w-6 h-0.5 rounded-lg bg-ink-900 transition-all duration-300 ${
                 mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
               }`}
             />
@@ -110,7 +109,7 @@ export default function SiteHeader() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-ink-700 text-sm font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition-colors"
+                className="text-ink-600 text-sm font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition-colors"
               >
                 {link.name}
               </Link>
@@ -119,7 +118,7 @@ export default function SiteHeader() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-center text-ink-700 font-medium py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
+                className="text-center text-ink-600 font-medium py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
               >
                 Login
               </Link>

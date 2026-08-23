@@ -76,7 +76,7 @@ export default function PatientsPage() {
 
       {/* Hero */}
       <section className="pt-36 pb-20 md:pt-44 md:pb-28 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-2xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
               For Patients
@@ -103,7 +103,7 @@ export default function PatientsPage() {
 
       {/* How it works */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               How It Works
@@ -131,7 +131,7 @@ export default function PatientsPage() {
 
       {/* What you get */}
       <section className="py-16 md:py-24 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               What You Get
@@ -158,11 +158,11 @@ export default function PatientsPage() {
 
       {/* Trust signals */}
       <section className="py-16 md:py-20 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 text-center">
             <div>
               <p className="text-3xl font-bold text-ink-900 font-grotesk tabular-nums">135K+</p>
-              <p className="text-sm text-ink-500 mt-1">Patients cared for</p>
+              <p className="text-sm text-ink-400 mt-1">Patients cared for</p>
             </div>
             <div className="hidden md:block w-px h-12 bg-border" />
             <div className="flex flex-col items-center">
@@ -170,7 +170,7 @@ export default function PatientsPage() {
                 <span className="text-3xl font-bold text-ink-900 font-grotesk">4.9</span>
                 <Star size={22} className="fill-accent text-accent" />
               </div>
-              <p className="text-sm text-ink-500 mt-1">Average patient rating</p>
+              <p className="text-sm text-ink-400 mt-1">Average patient rating</p>
             </div>
             <div className="hidden md:block w-px h-12 bg-border" />
             <div className="max-w-xs text-sm text-ink-600 leading-relaxed">
@@ -187,7 +187,7 @@ export default function PatientsPage() {
       {/* Pricing clarity */}
       <section className="py-10 bg-surface-soft border-y border-border">
         <div className="container mx-auto px-4 md:px-8 text-center">
-          <p className="text-ink-700 font-medium">
+          <p className="text-ink-600 font-medium">
             From <span className="text-primary font-bold">R250/month</span> ·
             Medical aid accepted · Cancel anytime
           </p>

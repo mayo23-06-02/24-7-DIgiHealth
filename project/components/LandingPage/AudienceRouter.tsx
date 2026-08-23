@@ -7,7 +7,7 @@ import { HeartPulse, Stethoscope, ArrowRight } from "lucide-react";
 export default function AudienceRouter() {
   return (
     <section className="bg-surface-soft py-16 md:py-24">
-      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+      <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
             Where do you fit in?

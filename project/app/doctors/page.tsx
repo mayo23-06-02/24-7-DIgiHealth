@@ -74,7 +74,7 @@ export default function DoctorsPage() {
 
       {/* Hero */}
       <section className="pt-36 pb-20 md:pt-44 md:pb-28 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-3xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
               For Doctors
@@ -93,7 +93,7 @@ export default function DoctorsPage() {
 
       {/* Vetting process */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               Our Vetting Process
@@ -120,7 +120,7 @@ export default function DoctorsPage() {
 
       {/* How consultations work */}
       <section className="py-16 md:py-24 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-3xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               How Consultations Work
@@ -140,7 +140,7 @@ export default function DoctorsPage() {
 
       {/* Specialties */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               Specialties Covered
@@ -153,7 +153,7 @@ export default function DoctorsPage() {
             {specialties.map((s) => (
               <span
                 key={s}
-                className="px-5 py-2.5 rounded-full border border-border text-sm font-medium text-ink-700 bg-surface-soft"
+                className="px-5 py-2.5 rounded-full border border-border text-sm font-medium text-ink-600 bg-surface-soft"
               >
                 {s}
               </span>
@@ -164,7 +164,7 @@ export default function DoctorsPage() {
 
       {/* Meet a few doctors */}
       <section className="py-16 md:py-24 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
               On The Platform
@@ -181,7 +181,7 @@ export default function DoctorsPage() {
                 </div>
                 <p className="font-bold text-ink-900 font-grotesk">{doc.name}</p>
                 <p className="text-sm text-primary font-medium mt-0.5">{doc.specialty}</p>
-                <p className="text-xs text-ink-500 mt-1 flex items-center justify-center gap-1">
+                <p className="text-xs text-ink-400 mt-1 flex items-center justify-center gap-1">
                   <Stethoscope size={12} /> {doc.facility}
                 </p>
               </div>
@@ -197,7 +197,7 @@ export default function DoctorsPage() {
 
       {/* Practitioner note — deliberately no signup funnel */}
       <section className="py-16 md:py-20 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-2xl mx-auto text-center bg-surface-soft rounded-2xl p-10">
             <h2 className="text-2xl md:text-3xl font-medium text-ink-900 tracking-tight font-grotesk mb-4">
               If you're a practitioner reading this

@@ -28,7 +28,6 @@ const badges = [
 ];
 
 const navLinks = [
-  { name: "Platform", href: "/" },
   { name: "About", href: "/about" },
   { name: "For Patients", href: "/patients" },
   { name: "For Doctors", href: "/doctors" },

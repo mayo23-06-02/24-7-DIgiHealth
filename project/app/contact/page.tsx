@@ -58,7 +58,7 @@ export default function ContactPage() {
 
       {/* Hero */}
       <section className="pt-36 pb-16 md:pt-44 md:pb-20 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-2xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
               Contact
@@ -76,7 +76,7 @@ export default function ContactPage() {
 
       {/* Routed contact paths */}
       <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-20">
             <div className="bg-surface-soft rounded-2xl p-7">
               <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-4 text-primary shadow-xs">
@@ -134,7 +134,7 @@ export default function ContactPage() {
             <h2 className="text-xl font-bold text-ink-900 mb-1 font-grotesk">
               Practitioner Inquiry
             </h2>
-            <p className="text-sm text-ink-500 mb-6">
+            <p className="text-sm text-ink-400 mb-6">
               We grow our practitioner network directly, one conversation at
               a time. Tell us a bit about yourself and our clinical team
               will follow up.
@@ -178,7 +178,7 @@ export default function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-ink-700 mb-1.5">
+                  <label className="block text-sm font-medium text-ink-600 mb-1.5">
                     Message (optional)
                   </label>
                   <textarea
@@ -209,7 +209,7 @@ export default function ContactPage() {
 
       {/* Practical details */}
       <section className="py-16 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
+        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
             <div>
               <Phone className="w-5 h-5 text-primary mx-auto mb-2" />
