@@ -24,6 +24,58 @@ import {
 import { FaCompress } from "react-icons/fa";
 import type { ActiveCallInfo } from "@/components/chat/CallButton";
 
+/**
+ * Capture ladder, lowest → highest.
+ *
+ * Rather than pinning one safe-but-mediocre resolution for everybody, we start
+ * as high as the connection looks able to carry and move along this ladder as
+ * LiveKit reports actual call quality. Someone on hotel wifi gets 720p; someone
+ * on a congested 3G cell drops to 180p and keeps a working consultation instead
+ * of a frozen 720p one.
+ */
+const CAPTURE_LADDER = [
+  VideoPresets.h180,
+  VideoPresets.h360,
+  VideoPresets.h540,
+  VideoPresets.h720,
+] as const;
+
+/** Camera restarts are visibly disruptive, so changes are rate-limited. */
+const MIN_MS_BETWEEN_CAPTURE_CHANGES = 20000;
+/** How long a new quality reading must hold before we act on it. */
+const QUALITY_SETTLE_MS = 6000;
+
+/**
+ * Opening rung, guessed from the Network Information API before any call
+ * statistics exist. Deliberately optimistic when the API says nothing —
+ * real quality feedback will pull us down within seconds if we guessed high,
+ * whereas guessing low leaves good connections stuck at a poor picture.
+ */
+function initialLadderIndex(): number {
+  const conn = (navigator as any)?.connection;
+  if (conn?.saveData) return 0;
+  const effective = conn?.effectiveType;
+  if (effective === "slow-2g" || effective === "2g") return 0;
+  if (effective === "3g") return 1;
+  return CAPTURE_LADDER.length - 1;
+}
+
+/** Target rung for a reported connection quality, or null if not actionable. */
+function ladderIndexForQuality(q: ConnectionQuality): number | null {
+  switch (q) {
+    case ConnectionQuality.Excellent:
+      return 3;
+    case ConnectionQuality.Good:
+      return 2;
+    case ConnectionQuality.Poor:
+      // Survival mode — a small moving picture beats a stalled sharp one. The
+      // voice-only offer appears alongside this if it stays bad.
+      return 0;
+    default:
+      return null;
+  }
+}
+
 export default function LiveKitCallPanel({
   callInfo,
   onEnded,
@@ -52,6 +104,16 @@ export default function LiveKitCallPanel({
   /** Set once we've offered to drop video, so we don't nag repeatedly. */
   const [suggestVoiceOnly, setSuggestVoiceOnly] = useState(false);
   const poorSinceRef = useRef<number | null>(null);
+
+  // Adaptive capture state. Kept in refs because the quality handler is
+  // registered once and must not re-subscribe on every change.
+  const localVideoTrackRef = useRef<Awaited<
+    ReturnType<typeof createLocalVideoTrack>
+  > | null>(null);
+  const ladderIndexRef = useRef<number>(CAPTURE_LADDER.length - 1);
+  const lastCaptureChangeRef = useRef<number>(0);
+  const pendingTargetRef = useRef<{ index: number; since: number } | null>(null);
+  const [captureLabel, setCaptureLabel] = useState<string>("");
   // Track subscribed audio publications in state so React renders real <audio>
   // elements in the DOM — mirrors how @livekit/components-react RoomAudioRenderer works.
   const [remoteAudioPubs, setRemoteAudioPubs] = useState<RemoteTrackPublication[]>([]);
@@ -93,17 +155,10 @@ export default function LiveKitCallPanel({
         // on mobile.
         dynacast: true,
 
-        // Cap what the camera captures in the first place. Uncapped, browsers
-        // commonly grab 720p/1080p and then spend uplink scaling it back down.
-        videoCaptureDefaults: {
-          resolution: VideoPresets.h360.resolution,
-        },
-
         publishDefaults: {
           // Multiple quality layers so the server can hand each subscriber the
           // one their connection can actually carry.
           simulcast: true,
-          videoEncoding: VideoPresets.h360.encoding,
 
           // Audio is the clinically critical channel — a consultation survives
           // degraded video, not degraded speech.
@@ -180,6 +235,48 @@ export default function LiveKitCallPanel({
           if (participant?.identity !== room.localParticipant.identity) return;
           setQuality(q);
 
+          // ── Adaptive capture ────────────────────────────────────────────
+          // Move along the ladder toward the rung this quality warrants, but
+          // only once the reading has held for a while and not more often than
+          // the rate limit — restarting the camera is visibly disruptive, so
+          // oscillating on noisy readings would be worse than a wrong rung.
+          const target = ladderIndexForQuality(q);
+          if (target !== null && localVideoTrackRef.current) {
+            if (target === ladderIndexRef.current) {
+              pendingTargetRef.current = null;
+            } else {
+              const now = Date.now();
+              const pending = pendingTargetRef.current;
+
+              if (!pending || pending.index !== target) {
+                pendingTargetRef.current = { index: target, since: now };
+              } else if (
+                now - pending.since >= QUALITY_SETTLE_MS &&
+                now - lastCaptureChangeRef.current >= MIN_MS_BETWEEN_CAPTURE_CHANGES
+              ) {
+                // Step one rung at a time so we glide rather than jump; a
+                // genuinely bad link will keep reporting Poor and keep pulling
+                // us down on subsequent ticks.
+                const next =
+                  target > ladderIndexRef.current
+                    ? ladderIndexRef.current + 1
+                    : ladderIndexRef.current - 1;
+                const preset = CAPTURE_LADDER[next];
+
+                ladderIndexRef.current = next;
+                lastCaptureChangeRef.current = now;
+                pendingTargetRef.current = null;
+
+                void localVideoTrackRef.current
+                  .restartTrack({ resolution: preset.resolution })
+                  .then(() => setCaptureLabel(`${preset.resolution.height}p`))
+                  .catch((e) =>
+                    console.warn("Adaptive capture change failed:", e),
+                  );
+              }
+            }
+          }
+
           // Offer voice-only after quality has been Poor for a sustained
           // stretch — not on the first blip, and never automatically, because
           // silently killing a clinician's camera mid-examination is worse
@@ -225,8 +322,22 @@ export default function LiveKitCallPanel({
         const localAudioTrack = await createLocalAudioTrack();
         await room.localParticipant.publishTrack(localAudioTrack);
         if (callType === "video") {
-          const localVideoTrack = await createLocalVideoTrack();
-          await room.localParticipant.publishTrack(localVideoTrack);
+          // Open at the highest rung this connection plausibly supports rather
+          // than a fixed low default; ConnectionQualityChanged then moves us
+          // up or down from here.
+          const startIndex = initialLadderIndex();
+          ladderIndexRef.current = startIndex;
+          const startPreset = CAPTURE_LADDER[startIndex];
+          setCaptureLabel(`${startPreset.resolution.height}p`);
+
+          const localVideoTrack = await createLocalVideoTrack({
+            resolution: startPreset.resolution,
+          });
+          localVideoTrackRef.current = localVideoTrack;
+          await room.localParticipant.publishTrack(localVideoTrack, {
+            simulcast: true,
+            videoEncoding: startPreset.encoding,
+          });
           if (localVideoRef.current) localVideoTrack.attach(localVideoRef.current);
         }
       } catch (trackErr) {
@@ -255,6 +366,8 @@ export default function LiveKitCallPanel({
       isActive = false;
       const room = roomRef.current;
       roomRef.current = null;
+      localVideoTrackRef.current = null;
+      pendingTargetRef.current = null;
       setRemoteAudioPubs([]);
       if (room) {
         shouldClosePanelRef.current = false;
@@ -342,6 +455,13 @@ export default function LiveKitCallPanel({
           </span>
         </div>
         <div className="flex items-center gap-3 pointer-events-auto">
+          {callInfo.type === "video" && captureLabel && (
+            <div className="bg-white/10 px-3 py-2 rounded-full border border-white/10">
+              <span className="text-white/80 text-xs font-semibold tabular-nums">
+                {captureLabel}
+              </span>
+            </div>
+          )}
           <div className="bg-primary px-3 py-2 rounded-full border border-white/10">
             <span className="text-white text-xs font-bold tabular-nums">{fmt(elapsed)}</span>
           </div>
