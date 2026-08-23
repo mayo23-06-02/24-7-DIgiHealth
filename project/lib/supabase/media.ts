@@ -353,7 +353,10 @@ export async function getUserAvatarUrl(userId: string): Promise<string | null> {
       .from("media_assets")
       .select("*")
       .eq("user_id", userId)
-      .eq("purpose", "avatar")
+      // `purpose` isn't a column — createAsset folds it into `related_type`
+      // (see the .insert() above), which is what avatar uploads set to
+      // "avatar".
+      .eq("related_type", "avatar")
       .order("created_at", { ascending: false })
       .limit(1);
 
