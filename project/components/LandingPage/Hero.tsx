@@ -52,7 +52,7 @@ const rotatingLines = [
   {
     phrase: "for all your family's medical needs",
     description:
-      "Skip the waiting room. Connect with verified South African doctors over secure video, chat, or AI-assisted triage — day or night, wherever you are.",
+      "Skip the waiting room. Connect with verified South African doctors over secure video, chat, or voice — day or night, wherever you are.",
   },
   {
     phrase: "for care in minutes, not weeks",
@@ -426,7 +426,7 @@ export default function Hero() {
             {serviceTags.map((tag) => (
               <span
                 key={tag}
-                className="px-4 py-1.5 rounded-full border border-primary/20 bg-white/60 text-ink-700 text-xs md:text-sm font-medium"
+                className="px-4 py-1.5 rounded-full border border-primary/25 bg-white text-primary-600 text-xs md:text-sm font-semibold shadow-xs"
               >
                 {tag}
               </span>
@@ -444,10 +444,17 @@ export default function Hero() {
               below never shifts as phrases of different lengths swap in, and
               the `key` restarts the slide-down animation on each change.
             */}
-            <span className="block overflow-hidden mt-2 h-[2.6em] md:h-[1.5em]">
+            {/*
+              The size classes live on the CLIPPING span, not the inner one, so
+              `h-[Xem]` resolves against the phrase's own font-size. Previously
+              they sat on the inner span, so `em` resolved against the h1's
+              inherited 16px and the box was ~24px tall — which is what was
+              slicing the descenders off the rotating line.
+            */}
+            <span className="block overflow-hidden mt-3 text-xl md:text-3xl lg:text-4xl leading-[1.3] h-[2.6em] sm:h-[1.3em]">
               <span
                 key={currentSlide}
-                className="block text-xl md:text-3xl lg:text-4xl font-light text-primary leading-[1.25] md:leading-[1.4] hero-line-in"
+                className="block font-light text-primary hero-line-in"
               >
                 {line.phrase}
               </span>

@@ -5,7 +5,7 @@ import { Clock, MapPin, CalendarCheck } from "lucide-react";
 
 const steps = [
   { n: "01", title: "Sign Up & Verify", desc: "Create your account in under two minutes — no paperwork, no clinic visit." },
-  { n: "02", title: "AI Symptom Check", desc: "Tell us how you're feeling and get an instant triage assessment." },
+  { n: "02", title: "Describe Your Concern", desc: "Tell us what you're dealing with so we can match you to the right practitioner." },
   { n: "03", title: "Book a Specialist", desc: "Choose from verified doctors available right now, in your language." },
   { n: "04", title: "Consult & Get Care", desc: "Video, chat, or voice — with prescriptions and follow-ups handled digitally." },
 ];

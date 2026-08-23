@@ -104,7 +104,7 @@ export default function AboutUs() {
           <p className="text-lg text-ink-600 leading-relaxed">
             We believe that quality healthcare should be accessible, affordable, and human –
             no matter where you live. Our platform connects you with verified doctors,
-            AI‑powered triage, and a digital health record that puts you in control.
+            same-day consultations, and a digital health record that puts you in control.
           </p>
         </div>
 

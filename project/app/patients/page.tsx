@@ -25,7 +25,7 @@ const steps = [
     icon: MessageSquareText,
     title: "Tell us what's wrong",
     description:
-      "Answer a few quick questions — or start with our AI triage if you're not sure what you need.",
+      "Answer a few quick questions about your symptoms so we can point you to the right kind of care.",
   },
   {
     icon: UserSearch,

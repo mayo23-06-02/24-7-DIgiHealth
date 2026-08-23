@@ -12,7 +12,7 @@ const services = [
       "https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=800&auto=format&fit=crop",
   },
   {
-    label: "AI Symptom Triage",
+    label: "Same-Day Consultations",
     icon: Sparkles,
     image:
       "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=800&auto=format&fit=crop",

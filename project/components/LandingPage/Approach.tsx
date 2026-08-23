@@ -10,8 +10,8 @@ const features = [
     desc: "Every practitioner on 24/7 DigiHealth is HPCSA-registered and identity-verified before they can see a single patient.",
   },
   {
-    title: "AI-Powered Symptom Triage",
-    desc: "Describe how you're feeling and get an instant, structured assessment to help you and your doctor prioritize what matters.",
+    title: "Same-Day Consultations",
+    desc: "Describe what you're dealing with when you book, so your doctor arrives at the consultation already across your concern.",
   },
   {
     title: "Family Account Management",
@@ -41,7 +41,7 @@ export default function Approach() {
             </h2>
             <p className="text-lg text-ink-600 leading-relaxed mb-8">
               Providing patient-centered care through expert guidance,
-              AI-assisted triage, and personalized support — every step of
+              same-day consultations, and personalized support — every step of
               the way, from your first symptom to full recovery.
             </p>
             <Link href="/register">

@@ -4,17 +4,42 @@ import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useCall } from "../context/CallContext";
 import toast from "react-hot-toast";
 
+/** Base cadence while the tab is in the foreground. */
+const POLL_MS = 6000;
+/** Ceiling used when the server keeps failing, so a bad backend isn't hammered. */
+const MAX_BACKOFF_MS = 60000;
+
 export default function GlobalCallPoller() {
   const { setIncomingCall, incomingCall, activeCall } = useCall();
   const { user } = useAuthContext();
-  const pollInterval = useRef<NodeJS.Timeout | null>(null);
+  const pollInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
   const errorCountRef = useRef(0);
   const toastShownRef = useRef(false);
+
+  /**
+   * `incomingCall` and `activeCall` are read inside the poll but kept in refs
+   * rather than in the effect's dependency array. They used to be dependencies,
+   * which meant every context change tore the interval down, rebuilt it, and
+   * fired an extra immediate poll — so the real request rate was higher and far
+   * less predictable than the configured interval suggested.
+   */
+  const incomingRef = useRef(incomingCall);
+  const activeRef = useRef(activeCall);
+  useEffect(() => {
+    incomingRef.current = incomingCall;
+  }, [incomingCall]);
+  useEffect(() => {
+    activeRef.current = activeCall;
+  }, [activeCall]);
 
   useEffect(() => {
     if (!user) return;
 
     const poll = async () => {
+      // Nothing can be answered from a backgrounded tab, so don't spend a
+      // request (or a serverless invocation) on it. The visibility listener
+      // below polls immediately on return, so nothing is missed.
+      if (typeof document !== "undefined" && document.hidden) return;
       try {
         const res = await fetch("/api/chat/call/active");
         if (!res.ok) return;
@@ -23,9 +48,12 @@ export default function GlobalCallPoller() {
         const incoming = data.calls?.find(
           (c: any) => c.initiatedBy !== user.id,
         );
-        if (incoming && activeCall?.callId !== incoming.callId) {
+        if (incoming && activeRef.current?.callId !== incoming.callId) {
           // Only set if it's a new incoming call (different callId) and we're not already in it
-          if (!incomingCall || incomingCall.callId !== incoming.callId) {
+          if (
+            !incomingRef.current ||
+            incomingRef.current.callId !== incoming.callId
+          ) {
             setIncomingCall({
               callId: incoming.callId,
               roomUrl: incoming.roomUrl || "",
@@ -41,7 +69,10 @@ export default function GlobalCallPoller() {
           }
         } else {
           // If there is no incoming call, clear the state (only if we were showing an incoming call)
-          if (incomingCall && incomingCall.initiatedBy !== user.id) {
+          if (
+            incomingRef.current &&
+            incomingRef.current.initiatedBy !== user.id
+          ) {
             // But we should only clear if the call is no longer active.
             // We could check the call status, but for simplicity we clear after a short delay.
             // To avoid flickering, we'll clear only if the same callId is gone.
@@ -66,14 +97,37 @@ export default function GlobalCallPoller() {
       }
     };
 
-    // Poll immediately and then every 3 seconds
-    poll();
-    pollInterval.current = setInterval(poll, 3000);
+    // Reschedule after each attempt rather than using a fixed interval, so a
+    // failing backend backs off instead of being polled at full rate forever.
+    const schedule = () => {
+      const delay =
+        errorCountRef.current > 0
+          ? Math.min(POLL_MS * 2 ** errorCountRef.current, MAX_BACKOFF_MS)
+          : POLL_MS;
+      pollInterval.current = setTimeout(run, delay);
+    };
+
+    const run = async () => {
+      await poll();
+      schedule();
+    };
+
+    void run();
+
+    // Coming back to the tab should feel instant, so poll straight away rather
+    // than waiting out the remainder of the current delay.
+    const onVisible = () => {
+      if (!document.hidden) void poll();
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
-      if (pollInterval.current) clearInterval(pollInterval.current);
+      if (pollInterval.current) clearTimeout(pollInterval.current);
+      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [user, setIncomingCall, incomingCall, activeCall]);
+    // Intentionally excludes incomingCall/activeCall — see the refs above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, setIncomingCall]);
 
   return null;
 }

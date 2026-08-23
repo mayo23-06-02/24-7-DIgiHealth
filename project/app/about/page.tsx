@@ -167,10 +167,10 @@ export default function AboutPage() {
                 Technology that gets out of the way
               </h2>
               <p className="text-ink-600 leading-relaxed text-lg">
-                We're not trying to replace doctors with algorithms. AI
-                handles the parts that don't need a human yet — initial
-                triage, symptom sorting, scheduling — so the time you do get
-                with a real practitioner is spent on care, not admin.
+                We're not trying to replace doctors with software. The
+                platform handles the parts that don't need a clinician —
+                booking, records, prescriptions, follow-ups — so the time you
+                do get with a real practitioner is spent on care, not admin.
               </p>
             </div>
           </div>
