@@ -199,3 +199,41 @@ function normalizeBooking(raw: any): BookingRecord {
     updatedAt: raw.updatedAt,
   };
 }
+
+/**
+ * Batch availability for many practitioners in ONE request.
+ *
+ * Doctor cards previously each fetched their own slots, so a list of 20
+ * doctors fired 20 requests (and 20 serverless invocations) just to render
+ * one screen. Prefer this whenever rendering a list; `fetchDaySlots` above
+ * stays as-is for the single-practitioner booking flow.
+ *
+ * Resolves to a map keyed by practitioner id, and to `{}` on any failure —
+ * an availability strip is supporting detail and must never break the list
+ * rendered around it.
+ */
+export async function fetchDaySlotsBatch(params: {
+  practitionerIds: string[];
+  date: string;
+  durationMinutes?: number;
+}): Promise<Record<string, BookingSlot[]>> {
+  const ids = Array.from(new Set(params.practitionerIds.filter(Boolean)));
+  if (ids.length === 0) return {};
+
+  try {
+    const qs = new URLSearchParams({
+      practitionerIds: ids.join(","),
+      date: params.date,
+    });
+    if (params.durationMinutes) {
+      qs.set("durationMinutes", String(params.durationMinutes));
+    }
+
+    const res = await fetch(`/api/bookings/slots?${qs.toString()}`, { cache: "no-store" });
+    if (!res.ok) return {};
+    const json = await res.json();
+    return json?.data?.slots ?? {};
+  } catch {
+    return {};
+  }
+}

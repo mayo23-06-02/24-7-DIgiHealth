@@ -9,6 +9,7 @@ import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import { useNavigate } from "@/hooks/useNavigate";
+import { useTodaySlots } from "@/hooks/useTodaySlots";
 
 interface Doctor {
   id: string;
@@ -31,6 +32,8 @@ export default function DoctorCarousel() {
   const [bookingDoctor, setBookingDoctor] = useState<Doctor | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const { navigate, beginNavigation } = useNavigate();
+  // One batched request for the whole carousel, not one per card.
+  const slotsByDoctor = useTodaySlots(doctors.map((d) => d.id));
 
   const fetchData = async () => {
     setLoading(true);
@@ -189,6 +192,7 @@ export default function DoctorCarousel() {
               onMessage={handleMessage}
               onClick={() => setSelectedDoctor(doctor)}
               linkName={`/patient/doctors/${doctor.id}`}
+              slots={slotsByDoctor[doctor.id]}
             />
           </div>
         ))}

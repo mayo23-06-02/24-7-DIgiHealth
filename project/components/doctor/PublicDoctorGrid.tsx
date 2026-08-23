@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Carousel from "@/components/ui/Carousel";
 import DoctorCard from "./DoctorCard";
+import { useTodaySlots } from "@/hooks/useTodaySlots";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Doctor {
@@ -30,6 +31,8 @@ export default function PublicDoctorGrid({ limit = 8 }: { limit?: number }) {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
+  // One batched request for the whole list, not one per card.
+  const slotsByDoctor = useTodaySlots(doctors.map((d) => d.id));
 
   useEffect(() => {
     fetch("/api/hospital/doctors")
@@ -85,7 +88,7 @@ export default function PublicDoctorGrid({ limit = 8 }: { limit?: number }) {
       >
         {doctors.map((doctor) => (
           <div key={doctor.id} className="px-2 h-full">
-            <DoctorCard doctor={doctor} showPrice />
+            <DoctorCard doctor={doctor} showPrice slots={slotsByDoctor[doctor.id]} />
           </div>
         ))}
       </Carousel>

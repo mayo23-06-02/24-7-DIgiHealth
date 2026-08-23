@@ -5,6 +5,7 @@ import Carousel from "@/components/ui/Carousel";
 import DoctorCard from "@/components/doctor/DoctorCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "@/hooks/useNavigate";
+import { useTodaySlots } from "@/hooks/useTodaySlots";
 
 interface DoctorsCarouselSectionProps {
   title: string;
@@ -25,6 +26,8 @@ export default function DoctorsCarouselSection({
 }: DoctorsCarouselSectionProps) {
   const { navigate } = useNavigate();
   const [carouselIndex, setCarouselIndex] = useState(0);
+  // One batched request for the whole carousel, not one per card.
+  const slotsByDoctor = useTodaySlots(doctors.map((d) => d.id));
 
   if (doctors.length === 0) return null;
 
@@ -89,6 +92,7 @@ export default function DoctorsCarouselSection({
               }}
               onClick={() => navigate(`/patient/doctors/${doc.id}`)}
               onFavoriteChange={onFavoriteChange}
+              slots={slotsByDoctor[doc.id]}
             />
           </div>
         ))}
