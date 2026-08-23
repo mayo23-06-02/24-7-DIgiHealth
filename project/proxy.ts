@@ -120,7 +120,11 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // (Home, /doctors) for anonymous visitors — exact path only, not the
     // whole /api/hospital/ tree, since sibling routes (staff search, etc.)
     // are genuinely hospital_admin-only.
-    pathname === '/api/hospital/doctors'
+    pathname === '/api/hospital/doctors' ||
+    // Real slot availability (from actual consultations, no fabricated
+    // data) for the same public doctor cards — reveals only free/busy
+    // times for a given practitionerId+date, no PII.
+    pathname === '/api/bookings/slots'
   ) {
     return NextResponse.next();
   }

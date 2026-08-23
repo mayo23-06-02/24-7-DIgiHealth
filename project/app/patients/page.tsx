@@ -149,18 +149,29 @@ export default function PatientsPage() {
               Everything your care needs, in one account
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {features.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="bg-white border border-border rounded-2xl p-6 flex gap-4">
-                <div className="w-11 h-11 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Icon className="w-5 h-5" />
+          <div className="grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto">
+            <div className="relative h-64 sm:h-80 md:h-[440px] rounded-2xl overflow-hidden order-2 md:order-1">
+              <Image
+                src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?q=80&w=900&auto=format&fit=crop"
+                alt="Family checking a prescription on a phone at home"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 order-1 md:order-2">
+              {features.map(({ icon: Icon, title, description }) => (
+                <div key={title} className="bg-white border border-border rounded-2xl p-5 flex gap-4">
+                  <div className="w-11 h-11 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-ink-900 mb-1 font-grotesk">{title}</h3>
+                    <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-ink-900 mb-1 font-grotesk">{title}</h3>
-                  <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
