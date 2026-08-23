@@ -54,20 +54,43 @@ export default function DoctorCard({
 
   // Real open slots for today, computed from actual booked consultations
   // (see lib/booking/slots.ts) — the same source BookingModal uses, so
-  // these times are never fabricated.
+  // these times are never fabricated. BookingModal's TimeSlotPicker shows
+  // the whole day and greys out past/booked slots; this compact pill row
+  // only ever shows bookable ones, so a slot must clear TWO independent
+  // "not in the past" checks: the server's `available` flag (as of fetch
+  // time) AND a live client-side re-check against the browser's own clock
+  // — the card can stay mounted well past when it first fetched.
+  const today = todayDateString();
+  const isFuture = (time: string) => new Date(`${today}T${time}:00`).getTime() > Date.now();
+
   const [openSlots, setOpenSlots] = useState<BookingSlot[]>([]);
   useEffect(() => {
     let cancelled = false;
-    fetchDaySlots({ practitionerId: doctor.id, date: todayDateString() }).then((result) => {
+    fetchDaySlots({ practitionerId: doctor.id, date: today }).then((result) => {
       if (cancelled) return;
       if (result.success && result.data?.slots) {
-        setOpenSlots(result.data.slots.filter((s) => s.available).slice(0, 4));
+        setOpenSlots(
+          result.data.slots.filter((s) => s.available && isFuture(s.time)).slice(0, 4),
+        );
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [doctor.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doctor.id, today]);
+
+  // Re-filter every minute so a pill disappears the moment its time passes,
+  // instead of lingering bookable until the next full refetch.
+  const visibleSlots = openSlots.filter((s) => isFuture(s.time));
+  useEffect(() => {
+    if (openSlots.length === 0) return;
+    const id = setInterval(() => {
+      setOpenSlots((prev) => prev.filter((s) => isFuture(s.time)));
+    }, 60_000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSlots.length]);
 
   return (
     <Card
@@ -161,13 +184,13 @@ export default function DoctorCard({
         </div>
       )}
 
-      {openSlots.length > 0 && (
+      {visibleSlots.length > 0 && (
         <div className="mb-3">
           <p className="text-[11px] font-semibold text-ink-400 uppercase tracking-wide mb-1.5">
             Today's open times
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {openSlots.map((slot) =>
+            {visibleSlots.map((slot) =>
               onBook ? (
                 <button
                   key={slot.time}
