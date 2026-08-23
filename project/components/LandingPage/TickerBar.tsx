@@ -21,7 +21,7 @@ export default function TickerBar() {
             {track.map((text, i) => (
               <span
                 key={`${copy}-${i}`}
-                className="flex items-center text-primary font-bold text-sm md:text-base px-6 font-grotesk"
+                className="flex items-center text-ink-900 font-bold text-sm md:text-base px-6 font-grotesk"
               >
                 {text}
                 <span className="ml-6 opacity-50">•</span>
