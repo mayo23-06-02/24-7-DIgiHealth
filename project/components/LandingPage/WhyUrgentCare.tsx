@@ -10,6 +10,7 @@ import {
   Star,
   ArrowRight,
   TriangleAlert,
+  ClipboardList,
 } from "lucide-react";
 
 const benefits = [
@@ -58,6 +59,14 @@ const conditions = [
   "Prescription refills",
 ];
 
+const treatmentTypes = [
+  "Antibiotics, for bacterial infections",
+  "Antivirals, for viral illnesses like the flu or cold sores",
+  "Allergy & asthma medication, for respiratory issues and mild reactions",
+  "Anti-inflammatories, for pain, inflammation, or fever",
+  "Gastrointestinal medication, for nausea, vomiting, or diarrhoea",
+];
+
 const cannotTreat = [
   "Emergency symptoms — chest pain, trouble breathing, severe bleeding, or signs of stroke",
   "Serious injuries needing X-rays, stitches, or hands-on treatment",
@@ -94,15 +103,34 @@ export default function WhyUrgentCare() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           <div className="bg-surface-soft rounded-2xl p-7">
             <h3 className="text-lg font-bold text-ink-900 mb-4 font-grotesk">
               Conditions we can help with
             </h3>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <ul className="space-y-2.5">
               {conditions.map((c) => (
                 <li key={c} className="text-sm text-ink-700 flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-secondary/10 rounded-2xl p-7">
+            <h3 className="text-lg font-bold text-ink-900 mb-1 font-grotesk flex items-center gap-2">
+              <ClipboardList size={18} className="text-secondary" />
+              Treatment we can prescribe
+            </h3>
+            <p className="text-sm text-ink-600 mb-4">
+              Many urgent concerns are treated with medication we can
+              prescribe directly during your consultation, including:
+            </p>
+            <ul className="space-y-2.5">
+              {treatmentTypes.map((c) => (
+                <li key={c} className="text-sm text-ink-700 flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0" />
                   {c}
                 </li>
               ))}
