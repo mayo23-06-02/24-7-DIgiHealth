@@ -29,9 +29,10 @@ const badges = [
 
 const navLinks = [
   { name: "Platform", href: "/" },
-  { name: "Approch", href: "/#approach" },
-  { name: "Testimonials", href: "/#testimonials" },
-
+  { name: "About", href: "/about" },
+  { name: "For Patients", href: "/patients" },
+  { name: "For Doctors", href: "/doctors" },
+  { name: "Contact", href: "/contact" },
 ];
 
 const serviceTags = ["Tele-health Care", "E-Prescriptions", "Family Plans"];
@@ -506,7 +507,7 @@ export default function Hero() {
                   Book Appointment
                 </Button>
               </Link>
-              <Link href="/#approach">
+              <Link href="/patients">
                 <Button variant="white" size="sm" iconPosition="left">
                   See How It Works
                 </Button>
