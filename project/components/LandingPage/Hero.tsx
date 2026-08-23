@@ -44,40 +44,30 @@ const ratingAvatars = [
 ];
 
 /**
- * Each slide carries a poster so the hero shows a real image on first paint,
- * covering the gap before the video is ready. The MP4s are re-encoded to 720p
- * (~0.4–1.0 MB each), so the video itself now loads on any connection.
+ * The headline's first line is fixed; only this second line rotates, sliding
+ * down from above as it changes. Each entry keeps its own supporting sentence
+ * so the copy underneath stays coherent with whichever phrase is showing.
  */
-const slides = [
+const rotatingLines = [
   {
-    videoSrc: "/landing-page/hero-section/Slide01-web.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=75&w=1600&auto=format&fit=crop",
-    headline: "Compassionate Care.",
-    highlight: "Real Doctors, Anywhere.",
-    sub: "We invite you to take charge of your family's health.",
+    phrase: "for all your family's medical needs",
     description:
       "Skip the waiting room. Connect with verified South African doctors over secure video, chat, or AI-assisted triage — day or night, wherever you are.",
   },
   {
-    videoSrc: "/landing-page/hero-section/Slide02-web.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=75&w=1600&auto=format&fit=crop",
-    headline: "Your Data, Your Health,",
-    highlight: "All in One Portal",
-    sub: "In our portal you have all data in one place and direct access to the telemedicine service.",
+    phrase: "for care in minutes, not weeks",
     description:
-      "Track your vitals, manage appointments, and securely access your medical history from anywhere. Your health journey, unified.",
+      "Most patients are seen the same day. Book a consultation and speak to a practitioner without leaving home.",
   },
   {
-    videoSrc: "/landing-page/hero-section/Slide03-web.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=75&w=1600&auto=format&fit=crop",
-    headline: "Prescriptions & Certificates,",
-    highlight: "Digital & Secure",
-    sub: "Receive your prescription conveniently as a QR code: fast, discreet and paperless.",
+    phrase: "for prescriptions, digital and secure",
     description:
-      "Redeemable at any Swiss pharmacy or online pharmacy. Also request a certificate for incapacity to work with a single click.",
+      "Receive your prescription as a QR code — fast, discreet and paperless, redeemable at any partner pharmacy.",
+  },
+  {
+    phrase: "for your whole health record, in one place",
+    description:
+      "Track your vitals, manage appointments, and securely access your medical history from anywhere. Your health journey, unified.",
   },
 ];
 
@@ -134,7 +124,7 @@ export default function Hero() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
   const [weatherIcon, setWeatherIcon] = useState<React.ReactNode>(
-    <BiSun className="text-white animate-pulse" />,
+    <BiSun className="text-primary animate-pulse" />,
   );
   const [weatherText, setWeatherText] = useState("Detecting location...");
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -142,47 +132,18 @@ export default function Hero() {
   const [isSticky, setIsSticky] = useState(false);
 
   /**
-   * The hero renders video for every visitor, from first paint.
-   *
-   * Two earlier attempts got this wrong: the original eagerly autoplayed three
-   * ~22 MB MP4s (≈16s page load, connection saturated), and the fix after that
-   * over-corrected by hiding the video behind a connection check and showing a
-   * still instead. The actual answer was to make the files affordable — they
-   * are now 720p at 0.4–1.0 MB each — so the video can simply be the hero,
-   * with no deferral and no still standing in for it.
-   *
-   * `prefers-reduced-motion` is the one remaining exception: the video element
-   * still renders, it just doesn't autoplay, so those visitors see its poster
-   * frame. That is the visitor's own explicit accessibility setting rather
-   * than a guess made on their behalf.
+   * The hero background is now a slow, self-contained CSS gradient rather than
+   * video or imagery — nothing to download, so it paints instantly on any
+   * connection. Visitors who ask for reduced motion get the same gradient held
+   * still, and the rotating line stops advancing rather than sliding.
    */
   const [reducedMotion, setReducedMotion] = useState(false);
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     setReducedMotion(
       !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
     );
   }, []);
-
-  // Belt-and-braces alongside the element's own autoPlay attribute: React
-  // renders `muted` as an attribute only, and some browsers decide autoplay by
-  // reading the property, so we set it explicitly and re-issue play().
-  useEffect(() => {
-    if (reducedMotion) return;
-    const el = videoRef.current;
-    if (!el) return;
-
-    // React renders `muted` as an attribute, but browsers decide whether to
-    // allow autoplay by reading the *property* — which React does not reliably
-    // set. Without this the video loads fully and then just sits paused.
-    el.muted = true;
-    el.playsInline = true;
-
-    el.play().catch(() => {
-      /* Autoplay still refused — the poster stays up, which is a fine outcome. */
-    });
-  }, [reducedMotion, currentSlide]);
 
   // Weather and date (unchanged)
   useEffect(() => {
@@ -207,20 +168,20 @@ export default function Hero() {
         if (!current) throw new Error("No weather data");
 
         const mapping: Record<number, { label: string; icon: React.ReactNode }> = {
-          0: { label: "Clear", icon: <BiSun className="text-white" /> },
-          1: { label: "Mainly Clear", icon: <BiSun className="text-white" /> },
-          2: { label: "Partly Cloudy", icon: <BiCloud className="text-white" /> },
-          3: { label: "Overcast", icon: <BiCloud className="text-white" /> },
-          45: { label: "Foggy", icon: <BiCloud className="text-white/80" /> },
-          51: { label: "Drizzle", icon: <BiCloudRain className="text-white" /> },
-          61: { label: "Rainy", icon: <BiCloudRain className="text-white" /> },
-          80: { label: "Showers", icon: <BiCloudRain className="text-white" /> },
-          95: { label: "Stormy", icon: <BiCloudLightning className="text-white" /> },
-          71: { label: "Snowy", icon: <BiCloudSnow className="text-white" /> },
+          0: { label: "Clear", icon: <BiSun className="text-primary" /> },
+          1: { label: "Mainly Clear", icon: <BiSun className="text-primary" /> },
+          2: { label: "Partly Cloudy", icon: <BiCloud className="text-primary" /> },
+          3: { label: "Overcast", icon: <BiCloud className="text-primary" /> },
+          45: { label: "Foggy", icon: <BiCloud className="text-primary/80" /> },
+          51: { label: "Drizzle", icon: <BiCloudRain className="text-primary" /> },
+          61: { label: "Rainy", icon: <BiCloudRain className="text-primary" /> },
+          80: { label: "Showers", icon: <BiCloudRain className="text-primary" /> },
+          95: { label: "Stormy", icon: <BiCloudLightning className="text-primary" /> },
+          71: { label: "Snowy", icon: <BiCloudSnow className="text-primary" /> },
         };
         const { label, icon } = mapping[current.weathercode] || {
           label: "Cloudy",
-          icon: <BiCloud className="text-white" />,
+          icon: <BiCloud className="text-primary" />,
         };
 
         let city = "Your Location";
@@ -245,7 +206,7 @@ export default function Hero() {
         setWeatherText(`${Math.round(current.temperature)}°C ${label} | ${city}`);
       } catch (err) {
         console.warn("Weather fetch error, using default:", err);
-        setWeatherIcon(<BiSun className="text-white" />);
+        setWeatherIcon(<BiSun className="text-primary" />);
         setWeatherText("Weather unavailable");
       }
     };
@@ -261,20 +222,16 @@ export default function Hero() {
     }
   }, []);
 
-  // Auto‑advance slides with smooth fade and loading reset
-  // Auto-advance: fade the copy out, swap slide, fade back in. Deliberately
-  // decoupled from video load state — the headline and CTAs must never wait on
-  // a media file, which is what previously left the hero blank.
+  // Advance the rotating line. Only the second line and its supporting
+  // sentence change; the first line is fixed, so there is no fade of the whole
+  // block — the incoming phrase animates itself in via the `key` change below.
   useEffect(() => {
+    if (reducedMotion) return;
     const interval = setInterval(() => {
-      setIsVisible(false);
-      setTimeout(() => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-        setIsVisible(true);
-      }, 500);
-    }, 7000);
+      setCurrentSlide((prev) => (prev + 1) % rotatingLines.length);
+    }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [reducedMotion]);
 
   // Sticky header logic
   useEffect(() => {
@@ -286,7 +243,7 @@ export default function Hero() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const slide = slides[currentSlide];
+  const line = rotatingLines[currentSlide];
 
   return (
     <section id="home" className="w-full  relative">
@@ -294,7 +251,7 @@ export default function Hero() {
       <div className="fixed top-0 left-0 w-full z-50">
         {/* Top Utility Bar - fades out when sticky */}
         <div
-          className={`hidden md:flex w-full  backdrop-blur-md text-white text-sm py-2 px-4 md:px-8  transition-all duration-500 ${
+          className={`hidden md:flex w-full  backdrop-blur-md text-ink-700 text-sm py-2 px-4 md:px-8  transition-all duration-500 ${
             isSticky ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
@@ -304,8 +261,8 @@ export default function Hero() {
                 <span className="text-base leading-none">{weatherIcon}</span>
                 {weatherText}
               </span>
-              <span className="hidden md:inline text-white/60">|</span>
-              <span className="text-white/80 text-xs">{currentDate}</span>
+              <span className="hidden md:inline text-ink-300">|</span>
+              <span className="text-ink-500 text-xs">{currentDate}</span>
             </div>
             <div className="flex items-center gap-4">
               <a
@@ -362,7 +319,7 @@ export default function Hero() {
               <LogoMain
                 width={isSticky ? 100 : 160}
                 height={isSticky ? 22 : 34}
-                alt={isSticky ? false : true }
+                alt={false}
               />
             </Link>
 
@@ -374,7 +331,7 @@ export default function Hero() {
                   className={`text-sm font-medium transition-colors ${
                     isSticky
                       ? "text-ink-600 hover:text-primary"
-                      : "text-white/85 hover:text-white"
+                      : "text-ink-600 hover:text-primary"
                   }`}
                 >
                   {link.name}
@@ -386,16 +343,16 @@ export default function Hero() {
               <Link href="/login">
                 <Button
                   variant="ghost"
-                  className={isSticky ? "" : "!text-white hover:!bg-white/10"}
+                  className=""
                 >
                   Login
                 </Button>
               </Link>
               <Link href="/register">
                 <Button
-                  variant={isSticky ? "primary" : "white"}
+                  variant="primary"
                   size="sm"
-                  className={isSticky ? "" : "border border-white/30"}
+                  className=""
                 >
                   Get Started
                 </Button>
@@ -409,17 +366,17 @@ export default function Hero() {
             >
               <span
                 className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
-                  isSticky ? "bg-ink-900" : "bg-white"
+                  "bg-ink-900"
                 } ${mobileMenuOpen ? "rotate-45 translate-y-2" : ""}`}
               />
               <span
                 className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
-                  isSticky ? "bg-ink-900" : "bg-white"
+                  "bg-ink-900"
                 } ${mobileMenuOpen ? "opacity-0" : ""}`}
               />
               <span
                 className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
-                  isSticky ? "bg-ink-900" : "bg-white"
+                  "bg-ink-900"
                 } ${mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
               />
             </button>
@@ -462,131 +419,79 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Hero Content */}
-      <div className="relative m-1 rounded-xl h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col ">
-        {/* Background: poster always, video only when we've decided it's affordable */}
-        <div className="absolute inset-0 overflow-hidden">
-          {/*
-            The video IS the hero — rendered immediately on first paint, not
-            swapped in after a still. The separate poster <img> layer that used
-            to sit here is gone; the video's own `poster` attribute covers the
-            few hundred ms before the first frame decodes, so there is never a
-            blank frame without a still standing in for the video.
+      {/* Hero Content — animated gradient ground, centred copy */}
+      <div className="relative m-1 rounded-xl min-h-[640px] h-[88vh] max-h-[860px] overflow-hidden flex flex-col items-center justify-center hero-gradient">
+        <div className="relative z-10 mx-auto w-full max-w-3xl px-5 md:px-10 text-center">
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            {serviceTags.map((tag) => (
+              <span
+                key={tag}
+                className="px-4 py-1.5 rounded-full border border-primary/20 bg-white/60 text-ink-700 text-xs md:text-sm font-medium"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
 
-            This is only affordable because the slides are re-encoded to
-            0.4–1.0 MB (from 22–27 MB). At the old sizes this would have put
-            the page back to a ~16s load.
-          */}
-          <video
-            key={`video-${currentSlide}`}
-            ref={videoRef}
-            src={slide.videoSrc}
-            poster={slide.poster}
-            autoPlay={!reducedMotion}
-            preload="auto"
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover animate-slow-zoom"
-          />
-          <div className="absolute inset-0 bg-linear-to-r from-primary/25 via-white/10 to-primary/70" />
-        </div>
+          <h1 className="font-grotesk tracking-tight text-ink-900">
+            {/* Fixed line — never changes, so it stays perfectly still. */}
+            <span className="block text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05]">
+              Choose DigiHealth
+            </span>
 
-        {/* Hero copy */}
-        <div
-          className={`relative z-10 mx-auto w-full max-w-[1400px] flex-1 flex flex-col justify-center px-5 md:px-10 transition-opacity duration-500 ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="max-w-xl mt-[22vh] md:mt-[30vh]">
-            <div className="flex flex-wrap gap-2 mb-6">
-              {serviceTags.map((tag, idx) => (
-                <span
-                  key={tag}
-                  className={`px-4 py-1.5 rounded-full border border-white/30 text-white/90 text-xs md:text-sm font-medium transition-all duration-700 delay-${idx * 100} ${
-                    isVisible
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-4"
-                  }`}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            {/*
+              Rotating line. The clip container is a fixed height so the block
+              below never shifts as phrases of different lengths swap in, and
+              the `key` restarts the slide-down animation on each change.
+            */}
+            <span className="block overflow-hidden mt-2 h-[2.6em] md:h-[1.5em]">
+              <span
+                key={currentSlide}
+                className="block text-xl md:text-3xl lg:text-4xl font-light text-primary leading-[1.25] md:leading-[1.4] hero-line-in"
+              >
+                {line.phrase}
+              </span>
+            </span>
+          </h1>
 
-            <div
-              className={`flex items-center gap-2 leading-4 text-white/90 text-sm mb-4 transition-all duration-700 delay-300 ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
-            >
-              {slide.sub}
-            </div>
+          <p
+            key={`desc-${currentSlide}`}
+            className="mt-6 text-sm md:text-base text-ink-600 leading-relaxed max-w-xl mx-auto hero-desc-in"
+          >
+            {line.description}
+          </p>
 
-            <h1
-              className={`text-xl md:text-3xl lg:text-[2.75rem] font-medium text-white leading-tight md:leading-[1.15] lg:leading-[1.01] tracking-tight font-grotesk mb-6 drop-shadow-sm transition-all duration-700 delay-500 ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
-            >
-              {slide.headline}
-              <br />
-              <span className="text-secondary font-bold">{slide.highlight}</span>
-            </h1>
+          <div className="flex flex-wrap justify-center gap-3 mt-9">
+            <Link href="/register">
+              <Button variant="primary">Book Appointment</Button>
+            </Link>
+            <Link href="/patients">
+              <Button variant="white" iconPosition="left">
+                See How It Works
+              </Button>
+            </Link>
+          </div>
 
-            <p
-              className={`text-sm md:text-base text-white/90 leading-6 max-w-lg mb-8 transition-all duration-700 delay-700 ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4"
-              }`}
-            >
-              {slide.description}
-            </p>
-
-            <div className="flex flex-wrap gap-3 mb-2 lg:hidden">
-              <Link href="/register">
-                <Button variant="primary" size="sm">
-                  Book Appointment
-                </Button>
-              </Link>
-              <Link href="/patients">
-                <Button variant="white" size="sm" iconPosition="left">
-                  See How It Works
-                </Button>
-              </Link>
-            </div>
+          {/* Progress dots double as manual controls for the rotating line. */}
+          <div className="flex justify-center gap-2 mt-10">
+            {rotatingLines.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`h-2 rounded-full transition-all ${
+                  idx === currentSlide
+                    ? "bg-primary w-8"
+                    : "bg-primary/25 w-2 hover:bg-primary/50"
+                }`}
+                aria-label={`Show: ${rotatingLines[idx].phrase}`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Carousel Dot Indicators */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                if (idx === currentSlide) return;
-                setIsVisible(false);
-                setTimeout(() => {
-                  setCurrentSlide(idx);
-                  setIsVisible(true);
-                }, 500);
-              }}
-              className={`w-2 h-2 rounded-full transition-all ${
-                idx === currentSlide
-                  ? "bg-white w-8"
-                  : "bg-white/40 hover:bg-white/70"
-              }`}
-              aria-label={`Slide ${idx + 1}`}
-            />
-          ))}
-        </div>
-
         {/* ✨ UPGRADED RATING CARD ✨ */}
-        <div className="hidden md:block relative z-10 mx-auto w-full max-w-[1400px] px-5 md:px-10 pb-10">
-          <div className="flex items-center gap-4 md:gap-6 lg:gap-8 bg-white rounded-lg  px-2 py-2 md:px-6 md:py-5 lg:px-4 lg:py-2 w-fit ml-auto">
+        <div className="hidden md:block absolute bottom-0 inset-x-0 z-10 mx-auto w-full max-w-[1400px] px-5 md:px-10 pb-10">
+          <div className="flex items-center gap-4 md:gap-6 lg:gap-8 bg-white rounded-lg shadow-sm px-2 py-2 md:px-6 md:py-5 lg:px-4 lg:py-2 w-fit ml-auto">
             <div className="flex items-center gap-1 md:gap-2">
               <span className="text-lg md:text-2xl lg:text-2xl font-bold text-ink-900 font-grotesk">
                 4.9
@@ -644,6 +549,77 @@ export default function Hero() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        /* Subtle drifting gradient — pure CSS, so nothing is downloaded and it
+           paints on the first frame regardless of connection. */
+        .hero-gradient {
+          background: linear-gradient(
+            125deg,
+            #eaf5f9 0%,
+            #f6fbfd 22%,
+            #dbeef7 45%,
+            #eef7fb 68%,
+            #d7ecf6 85%,
+            #eaf5f9 100%
+          );
+          background-size: 300% 300%;
+          animation: heroDrift 24s ease-in-out infinite;
+        }
+
+        @keyframes heroDrift {
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+
+        /* The rotating line enters from above and settles — the fixed line
+           above it never moves. */
+        .hero-line-in {
+          animation: lineDown 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes lineDown {
+          from {
+            opacity: 0;
+            transform: translateY(-100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .hero-desc-in {
+          animation: descFade 620ms ease both;
+          animation-delay: 90ms;
+        }
+
+        @keyframes descFade {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hero-gradient {
+            animation: none;
+          }
+          .hero-line-in,
+          .hero-desc-in {
+            animation: none;
+          }
+        }
+      `}</style>
     </section>
   );
 }
