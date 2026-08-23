@@ -28,15 +28,12 @@ import { isMongoObjectId } from "@/lib/utils/mongoId";
  * loss — those should keep throwing loudly.
  */
 
-/** Read-ish operations only — see note above about writes. */
-const GUARDED_OPS = [
-  "find",
-  "findOne",
-  "countDocuments",
-  "estimatedDocumentCount",
-  "distinct",
-  "exists",
-] as const;
+/**
+ * Read-only operations — see the note above about why writes are excluded.
+ * Anchored so `find` does not also match `findOneAndUpdate`/`findOneAndDelete`.
+ */
+const GUARDED_OPS =
+  /^(find|findOne|countDocuments|estimatedDocumentCount|distinct|exists)$/;
 
 /** A filter that is valid, cheap, and can never match a real document. */
 const MATCH_NOTHING = { _id: { $in: [] as unknown[] } };
@@ -109,7 +106,7 @@ function applyGuardToSchema(schema: mongoose.Schema): void {
   if ((schema as any)[GUARDED]) return;
   (schema as any)[GUARDED] = true;
 
-  schema.pre(GUARDED_OPS as unknown as string[], function (this: mongoose.Query<any, any>) {
+  schema.pre(GUARDED_OPS, function (this: mongoose.Query<any, any>) {
     try {
       const filter = this.getFilter();
       if (!filterIsUncastable(filter, schema, 0)) return;
