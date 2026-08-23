@@ -123,7 +123,7 @@ function CountUpValue({ value }: { value: string }) {
   return (
     <p
       ref={ref}
-      className="text-xl md:text-6xl font-semibold text-secondary font-grotesk tabular-nums"
+      className="text-xl md:text-6xl font-semibold text-ink-900 font-grotesk tabular-nums"
     >
       {display}
     </p>
@@ -142,43 +142,34 @@ export default function Hero() {
   const [isSticky, setIsSticky] = useState(false);
 
   /**
-   * The hero video plays for every visitor.
+   * The hero renders video for every visitor, from first paint.
    *
-   * It used to be gated behind a connection check, because the three source
-   * MP4s totalled ~62 MB — enough to push the page load event to ~16s and
-   * saturate the connection so badly that unrelated same-origin requests timed
-   * out. The right answer was to make the files affordable, not to hide them:
-   * they are now re-encoded to 720p (~2.3 MB for all three), so there is no
-   * longer any bandwidth argument for withholding the video from anyone.
+   * Two earlier attempts got this wrong: the original eagerly autoplayed three
+   * ~22 MB MP4s (≈16s page load, connection saturated), and the fix after that
+   * over-corrected by hiding the video behind a connection check and showing a
+   * still instead. The actual answer was to make the files affordable — they
+   * are now 720p at 0.4–1.0 MB each — so the video can simply be the hero,
+   * with no deferral and no still standing in for it.
    *
-   * The only remaining condition is `prefers-reduced-motion`, which is the
-   * visitor's own explicit OS-level accessibility choice rather than a guess we
-   * make on their behalf — those users keep the poster.
-   *
-   * Playback is still deferred until after the window load event so the video
-   * never competes with content for bandwidth; the poster covers that gap, so
-   * the hero is never blank.
+   * `prefers-reduced-motion` is the one remaining exception: the video element
+   * still renders, it just doesn't autoplay, so those visitors see its poster
+   * frame. That is the visitor's own explicit accessibility setting rather
+   * than a guess made on their behalf.
    */
-  const [canPlayVideo, setCanPlayVideo] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-
-    const start = () => window.setTimeout(() => setCanPlayVideo(true), 200);
-    if (document.readyState === "complete") {
-      start();
-      return;
-    }
-    window.addEventListener("load", start, { once: true });
-    return () => window.removeEventListener("load", start);
+    setReducedMotion(
+      !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
+    );
   }, []);
 
   // Belt-and-braces alongside the element's own autoPlay attribute: React
   // renders `muted` as an attribute only, and some browsers decide autoplay by
   // reading the property, so we set it explicitly and re-issue play().
   useEffect(() => {
-    if (!canPlayVideo) return;
+    if (reducedMotion) return;
     const el = videoRef.current;
     if (!el) return;
 
@@ -191,7 +182,7 @@ export default function Hero() {
     el.play().catch(() => {
       /* Autoplay still refused — the poster stays up, which is a fine outcome. */
     });
-  }, [canPlayVideo, currentSlide]);
+  }, [reducedMotion, currentSlide]);
 
   // Weather and date (unchanged)
   useEffect(() => {
@@ -475,31 +466,29 @@ export default function Hero() {
       <div className="relative m-1 rounded-xl h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col ">
         {/* Background: poster always, video only when we've decided it's affordable */}
         <div className="absolute inset-0 overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            key={`poster-${currentSlide}`}
-            src={slide.poster}
-            alt=""
-            aria-hidden="true"
+          {/*
+            The video IS the hero — rendered immediately on first paint, not
+            swapped in after a still. The separate poster <img> layer that used
+            to sit here is gone; the video's own `poster` attribute covers the
+            few hundred ms before the first frame decodes, so there is never a
+            blank frame without a still standing in for the video.
+
+            This is only affordable because the slides are re-encoded to
+            0.4–1.0 MB (from 22–27 MB). At the old sizes this would have put
+            the page back to a ~16s load.
+          */}
+          <video
+            key={`video-${currentSlide}`}
+            ref={videoRef}
+            src={slide.videoSrc}
+            poster={slide.poster}
+            autoPlay={!reducedMotion}
+            preload="auto"
+            loop
+            muted
+            playsInline
             className="absolute inset-0 w-full h-full object-cover animate-slow-zoom"
           />
-          {canPlayVideo && (
-            <video
-              key={`video-${currentSlide}`}
-              ref={videoRef}
-              src={slide.videoSrc}
-              poster={slide.poster}
-              // Now that a slide is <1 MB, the native attribute is far more
-              // reliable than driving playback imperatively — the effect below
-              // only exists as a fallback for the muted-property quirk.
-              autoPlay
-              preload="auto"
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover animate-slow-zoom"
-            />
-          )}
           <div className="absolute inset-0 bg-linear-to-r from-primary/25 via-white/10 to-primary/70" />
         </div>
 
@@ -640,17 +629,19 @@ export default function Hero() {
 
       <TickerBar />
 
-      <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-        <div className="relative z-10 grid grid-cols-2 lg:grid-cols-none lg:flex lg:flex-row justify-between gap-3 md:gap-4 pb-4">
-          {badges.map(({ icon: Icon, value, label }) => (
-            <div
-              key={label}
-              className="rounded-lg p-4 md:p-6 flex flex-col gap-2"
-            >
-              <CountUpValue value={value} />
-              <p className="text-xs md:text-sm text-ink-600 leading-tight">{label}</p>
-            </div>
-          ))}
+      <div className="bg-secondary">
+        <div className="container mx-auto px-4 md:px-6 xl:px-8 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-none lg:flex lg:flex-row justify-between gap-3 md:gap-4 py-4">
+            {badges.map(({ icon: Icon, value, label }) => (
+              <div
+                key={label}
+                className="rounded-lg p-4 md:p-6 flex flex-col gap-2"
+              >
+                <CountUpValue value={value} />
+                <p className="text-xs md:text-sm text-ink-900 leading-tight">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
