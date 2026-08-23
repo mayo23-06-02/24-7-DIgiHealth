@@ -14,14 +14,14 @@ export default function TickerBar() {
   const track = [...items, ...items];
 
   return (
-    <div className="bg-primary py-2 overflow-hidden">
+    <div className="bg-secondary py-2 overflow-hidden">
       <div className="flex whitespace-nowrap animate-marquee motion-reduce:animate-none">
         {[0, 1].map((copy) => (
           <div key={copy} className="flex shrink-0">
             {track.map((text, i) => (
               <span
                 key={`${copy}-${i}`}
-                className="flex items-center text-white font-bold text-sm md:text-base px-6 font-grotesk"
+                className="flex items-center text-primary font-bold text-sm md:text-base px-6 font-grotesk"
               >
                 {text}
                 <span className="ml-6 opacity-50">•</span>
