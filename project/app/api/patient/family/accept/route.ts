@@ -4,6 +4,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import FamilyLink from '@/lib/models/FamilyLink';
 import { Subscription } from '@/lib/models/Billing';
 import { normalizeEmail } from '@/lib/supabase/auth';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 /** POST — the invited adult accepts, now that they're logged in. Only the
  * actual invited email can consume the token — being logged in with the
@@ -13,6 +14,13 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
+    if (!isMongoObjectId(user.userId)) {
+      return NextResponse.json(
+        { success: false, error: 'Family accounts are not yet available for this account.' },
+        { status: 400 },
+      );
+    }
 
     const { token } = await req.json();
     if (!token) return NextResponse.json({ success: false, error: 'Missing invite token' }, { status: 400 });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Prescription } from "@/lib/models/ClinicalData";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 /** GET — patient's prescriptions (with downloadable script URL when available) */
 export async function GET() {
@@ -10,6 +11,13 @@ export async function GET() {
     const user = await getRequestUser();
     if (!user || user.role !== "patient") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
+    // — Prescription is still Mongo-only, so they genuinely have none rather
+    // than a lookup failure.
+    if (!isMongoObjectId(user.userId)) {
+      return NextResponse.json([]);
     }
 
     const list = await Prescription.find({ patientId: user.userId })
@@ -44,6 +52,13 @@ export async function POST(request: Request) {
     const user = await getRequestUser();
     if (!user || user.role !== "patient") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!isMongoObjectId(user.userId)) {
+      return NextResponse.json(
+        { error: "Prescriptions are not yet available for this account." },
+        { status: 400 },
+      );
     }
 
     const { prescriptionId } = await request.json();

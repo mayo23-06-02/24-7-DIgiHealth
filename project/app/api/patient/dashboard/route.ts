@@ -5,6 +5,7 @@ import { PatientProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
 
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,11 +14,18 @@ export async function GET(req: NextRequest) {
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     const userId = user.userId;
 
+    // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
+    // — Anthropometric/MedicalContext are still Mongo-only, so they genuinely
+    // have no vitals/medical history recorded rather than a lookup failure.
+    const hasMongoIdentity = isMongoObjectId(userId);
+
     // Fetch two latest vitals for trend calculation
-    const vitalsHistory = await Anthropometric.find({ patientId: userId })
-      .sort({ dateRecorded: -1 })
-      .limit(2)
-      .lean();
+    const vitalsHistory = hasMongoIdentity
+      ? await Anthropometric.find({ patientId: userId })
+          .sort({ dateRecorded: -1 })
+          .limit(2)
+          .lean()
+      : [];
 
     const latest = vitalsHistory[0];
     const previous = vitalsHistory[1];
@@ -36,10 +44,14 @@ export async function GET(req: NextRequest) {
     };
 
     // Fetch patient profile for demographics
-    const profile = await PatientProfile.findOne({ userId }).lean();
+    const profile = hasMongoIdentity
+      ? await PatientProfile.findOne({ userId }).lean()
+      : null;
 
     // Fetch medical history summary
-    const medicalCtx = await MedicalContext.findOne({ patientId: userId }).lean();
+    const medicalCtx = hasMongoIdentity
+      ? await MedicalContext.findOne({ patientId: userId }).lean()
+      : null;
 
     return NextResponse.json({
       success: true,

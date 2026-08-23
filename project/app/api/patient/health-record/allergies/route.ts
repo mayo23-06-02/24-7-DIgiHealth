@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { MedicalContext } from '@/lib/models/ClinicalData';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
@@ -24,6 +25,13 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
+    if (!isMongoObjectId(userId)) {
+      return NextResponse.json(
+        { success: false, error: 'Allergy tracking is not yet available for this account.' },
+        { status: 400 },
+      );
+    }
 
     const body = await req.json();
     const { allergen, severity, reaction } = body;
@@ -56,6 +64,13 @@ export async function DELETE(req: NextRequest) {
     await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
+    if (!isMongoObjectId(userId)) {
+      return NextResponse.json(
+        { success: false, error: 'Allergy tracking is not yet available for this account.' },
+        { status: 400 },
+      );
+    }
 
     const { searchParams } = new URL(req.url);
     const allergyId = searchParams.get('id');

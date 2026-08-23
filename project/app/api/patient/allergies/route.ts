@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { MedicalContext } from '@/lib/models/ClinicalData';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
+    if (!isMongoObjectId(user.userId)) {
+      return NextResponse.json(
+        { success: false, error: 'Allergy tracking is not yet available for this account.' },
+        { status: 400 },
+      );
+    }
 
     const body = await req.json();
     const { allergen, severity, reaction } = body;

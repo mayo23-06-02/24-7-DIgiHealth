@@ -1,15 +1,21 @@
 import FamilyLink, { IFamilyLink } from '@/lib/models/FamilyLink';
 import { Subscription } from '@/lib/models/Billing';
 import { TIER_CONFIG, isValidTier, SubscriptionTier } from '@/lib/billing/tiers';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 /** The one active link between a guardian and a member, or null. Mirrors the
  * bespoke-check style already used for practitioner→patient access (see
  * app/api/practitioner/patients/[id]/health-record/route.ts) rather than a
- * generic ACL system. */
+ * generic ACL system.
+ *
+ * FamilyLink is still Mongo-only, so a Postgres-native guardian or member
+ * (uuid id, see lib/utils/mongoId.ts) can have no such link — short-circuit
+ * before Mongoose casts a uuid into an ObjectId query and throws. */
 export async function getActiveFamilyLink(
   guardianId: string,
   memberId: string,
 ): Promise<IFamilyLink | null> {
+  if (!isMongoObjectId(guardianId) || !isMongoObjectId(memberId)) return null;
   return FamilyLink.findOne({ guardianId, memberId, status: 'active' });
 }
 
@@ -37,8 +43,15 @@ export interface FamilySlots {
   remaining: number;
 }
 
-/** How many more family members this guardian's plan allows them to add. */
+/** How many more family members this guardian's plan allows them to add.
+ * Subscription/FamilyLink are still Mongo-only — a Postgres-native guardian
+ * (uuid id) has no rows in either, so report zero slots rather than let
+ * Mongoose throw casting the uuid into an ObjectId query. */
 export async function getGuardianFamilySlots(guardianId: string): Promise<FamilySlots> {
+  if (!isMongoObjectId(guardianId)) {
+    return { tier: 'individual', maxFamilyMembers: 0, used: 0, remaining: 0 };
+  }
+
   const sub = await Subscription.findOne({ patientId: guardianId, status: 'active' }).lean();
   const tier: SubscriptionTier = sub && isValidTier((sub as any).tier) ? (sub as any).tier : 'individual';
   const maxFamilyMembers = TIER_CONFIG[tier].maxFamilyMembers;
