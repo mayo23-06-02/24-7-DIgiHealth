@@ -78,6 +78,8 @@ export default function FamilyTab({
     ageRange: "",
   });
   const [inviteForm, setInviteForm] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     relationship: "spouse",
   });
@@ -155,6 +157,10 @@ export default function FamilyTab({
   };
 
   const handleInvite = async () => {
+    if (!inviteForm.firstName.trim() || !inviteForm.lastName.trim()) {
+      setToast({ message: "Their first and last name are required.", type: "error" });
+      return;
+    }
     if (!inviteForm.email.trim()) {
       setToast({ message: "An email address is required.", type: "error" });
       return;
@@ -164,16 +170,20 @@ export default function FamilyTab({
       const res = await fetch("/api/patient/family/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(inviteForm),
+        body: JSON.stringify({
+          name: `${inviteForm.firstName.trim()} ${inviteForm.lastName.trim()}`,
+          email: inviteForm.email,
+          relationship: inviteForm.relationship,
+        }),
       });
       const json = await res.json();
       if (res.ok && json.success) {
         setToast({
-          message: `Invite sent to ${inviteForm.email}.`,
+          message: `Request sent to ${inviteForm.email}.`,
           type: "success",
         });
         setShowInviteForm(false);
-        setInviteForm({ email: "", relationship: "spouse" });
+        setInviteForm({ firstName: "", lastName: "", email: "", relationship: "spouse" });
         load();
       } else {
         setToast({
@@ -396,7 +406,7 @@ export default function FamilyTab({
                       { value: "0-2", label: "0-2 years" },
                       { value: "3-5", label: "3-5 years" },
                       { value: "5-12", label: "5-12 years" },
-                      { value: "13-18", label: "13-18 years" },
+                      { value: "13-15", label: "13-15 years" },
                     ]}
                   />
                   <Input
@@ -408,6 +418,10 @@ export default function FamilyTab({
                     placeholder="Optional"
                   />
                 </div>
+                <p className="text-xs text-slate-500">
+                  16 or older? Use "Invite Family Member" instead — they'll
+                  manage their own consent.
+                </p>
                 <Button onClick={handleAddChild} loading={isSaving} fullWidth>
                   Add child
                 </Button>
@@ -430,6 +444,20 @@ export default function FamilyTab({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
+                    label="First name"
+                    value={inviteForm.firstName}
+                    onChange={(e) =>
+                      setInviteForm((p) => ({ ...p, firstName: e.target.value }))
+                    }
+                  />
+                  <Input
+                    label="Last name"
+                    value={inviteForm.lastName}
+                    onChange={(e) =>
+                      setInviteForm((p) => ({ ...p, lastName: e.target.value }))
+                    }
+                  />
+                  <Input
                     label="Email address"
                     type="email"
                     icon={<Mail size={16} />}
@@ -451,6 +479,7 @@ export default function FamilyTab({
                     options={[
                       { value: "spouse", label: "Spouse" },
                       { value: "parent", label: "Parent" },
+                      { value: "child", label: "Child (16 and older)" },
                       { value: "other", label: "Other" },
                     ]}
                   />
@@ -461,7 +490,7 @@ export default function FamilyTab({
                   them.
                 </p>
                 <Button onClick={handleInvite} loading={isSaving} fullWidth>
-                  Send invite
+                  Send request
                 </Button>
               </Card>
             )}

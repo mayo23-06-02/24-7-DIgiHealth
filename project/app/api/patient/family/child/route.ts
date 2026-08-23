@@ -44,6 +44,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Gender is required' }, { status: 400 });
     }
 
+    // 16+ manages their own consent — send them a request email instead of
+    // creating a guardian-controlled account with no independent sign-off.
+    const now = new Date();
+    let age = now.getFullYear() - dateOfBirth.getFullYear();
+    const monthDiff = now.getMonth() - dateOfBirth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < dateOfBirth.getDate())) age -= 1;
+    if (age >= 16) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Family members 16 and older manage their own account — use "Invite Family Member" to send them a request instead.',
+        },
+        { status: 400 },
+      );
+    }
+
     const slots = await getGuardianFamilySlots(guardian.userId);
     if (slots.remaining <= 0) {
       return NextResponse.json(
