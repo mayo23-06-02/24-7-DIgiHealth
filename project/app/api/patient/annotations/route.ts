@@ -4,6 +4,7 @@ import BodyAnnotation from '@/lib/models/BodyAnnotation';
 import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
@@ -37,6 +38,13 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
+  // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
+  // — BodyAnnotation is still Mongo-only, so they genuinely have none rather
+  // than a lookup failure.
+  if (!isMongoObjectId(patientId)) {
+    return NextResponse.json([]);
+  }
+
   await connectToDatabase();
   const annotations = await BodyAnnotation.find({ patientId }).sort({ createdAt: -1 }).lean();
   return NextResponse.json(annotations);
@@ -58,6 +66,13 @@ export async function POST(request: Request) {
 
   if (!description?.trim()) {
     return NextResponse.json({ error: 'Description is required' }, { status: 400 });
+  }
+
+  if (!isMongoObjectId(patientId)) {
+    return NextResponse.json(
+      { error: 'Body annotations are not yet available for this account.' },
+      { status: 400 },
+    );
   }
 
   const annotation = await BodyAnnotation.create({

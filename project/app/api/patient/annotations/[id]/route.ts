@@ -4,6 +4,7 @@ import BodyAnnotation from '@/lib/models/BodyAnnotation';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
@@ -23,6 +24,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const patientId = await getPatientId();
   if (!patientId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!isMongoObjectId(patientId)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   await connectToDatabase();
   const { description, part } = await request.json();
@@ -43,6 +47,9 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const patientId = await getPatientId();
   if (!patientId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!isMongoObjectId(patientId)) {
+    return NextResponse.json({ ok: true });
+  }
 
   await connectToDatabase();
   await BodyAnnotation.findOneAndDelete({ _id: id, patientId });
