@@ -11,7 +11,7 @@ export default function RightPanel() {
         <LogoMain width={300} height={300} alt={true} />
 
         <div className="w-16 h-px bg-white/40 mb-5" />
-        <h3 className="text-4xl lg:text-5xl font-bold tracking-tighter font-grotesk">
+        <h3 className="text-xl lg:text-3xl font-bold tracking-tighter font-grotesk">
           Smart Healthcare <br /> for a Digital World
         </h3>
         <p className="text-white/80 font-light leading-relaxed max-w-md mb-2.5">
