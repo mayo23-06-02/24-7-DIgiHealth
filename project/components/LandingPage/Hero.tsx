@@ -43,9 +43,16 @@ const ratingAvatars = [
   "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=100&auto=format&fit=crop",
 ];
 
+/**
+ * Each slide carries a poster so the hero has a real image immediately, before
+ * (or instead of) any video byte is fetched. The MP4s are ~22/14/27 MB, so on
+ * a constrained connection the poster IS the hero — see canPlayVideo below.
+ */
 const slides = [
   {
     videoSrc: "/landing-page/hero-section/Slide01.mp4",
+    poster:
+      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=75&w=1600&auto=format&fit=crop",
     headline: "Compassionate Care.",
     highlight: "Real Doctors, Anywhere.",
     sub: "We invite you to take charge of your family's health.",
@@ -54,6 +61,8 @@ const slides = [
   },
   {
     videoSrc: "/landing-page/hero-section/Slide02.mp4",
+    poster:
+      "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=75&w=1600&auto=format&fit=crop",
     headline: "Your Data, Your Health,",
     highlight: "All in One Portal",
     sub: "In our portal you have all data in one place and direct access to the telemedicine service.",
@@ -62,6 +71,8 @@ const slides = [
   },
   {
     videoSrc: "/landing-page/hero-section/Slide03.mp4",
+    poster:
+      "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=75&w=1600&auto=format&fit=crop",
     headline: "Prescriptions & Certificates,",
     highlight: "Digital & Secure",
     sub: "Receive your prescription conveniently as a QR code: fast, discreet and paperless.",
@@ -128,8 +139,55 @@ export default function Hero() {
   const [weatherText, setWeatherText] = useState("Detecting location...");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [videoLoading, setVideoLoading] = useState(true);
   const [isSticky, setIsSticky] = useState(false);
+
+  /**
+   * Whether we're willing to spend the visitor's data on a ~22 MB hero video.
+   *
+   * The hero previously autoplayed these eagerly, which pushed the page load
+   * event to ~16s and saturated the connection so hard that unrelated requests
+   * on the same origin timed out. It also flatly contradicted the platform's
+   * own promise of low-bandwidth, 2G/3G-friendly access — the visitors least
+   * able to afford 62 MB of decoration are exactly the ones this product is
+   * meant to reach.
+   *
+   * So: everyone gets the poster instantly, and the video is an enhancement
+   * that only loads for people on an unmetered, reasonably fast connection who
+   * haven't asked for reduced motion. Decided once on mount — flipping mid-view
+   * would be more distracting than useful.
+   */
+  const [canPlayVideo, setCanPlayVideo] = useState(false);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const conn = (navigator as any).connection;
+    if (conn?.saveData) return;
+    if (conn?.effectiveType && !/4g/.test(conn.effectiveType)) return;
+
+    // Wait for the page to finish loading so the video never competes with
+    // content for bandwidth, then start it.
+    const start = () => window.setTimeout(() => setCanPlayVideo(true), 600);
+    if (document.readyState === "complete") {
+      start();
+      return;
+    }
+    window.addEventListener("load", start, { once: true });
+    return () => window.removeEventListener("load", start);
+  }, []);
+
+  // Once allowed, actually begin playback (autoplay attribute is deliberately
+  // not used — it would fetch immediately and defeat the whole point).
+  useEffect(() => {
+    if (!canPlayVideo) return;
+    const el = videoRef.current;
+    if (!el) return;
+    el.load();
+    el.play().catch(() => {
+      /* autoplay blocked — poster remains, which is a fine outcome */
+    });
+  }, [canPlayVideo, currentSlide]);
 
   // Weather and date (unchanged)
   useEffect(() => {
@@ -209,32 +267,19 @@ export default function Hero() {
   }, []);
 
   // Auto‑advance slides with smooth fade and loading reset
+  // Auto-advance: fade the copy out, swap slide, fade back in. Deliberately
+  // decoupled from video load state — the headline and CTAs must never wait on
+  // a media file, which is what previously left the hero blank.
   useEffect(() => {
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
         setCurrentSlide((prev) => (prev + 1) % slides.length);
-        setVideoLoading(true);
-        setIsVisible(false);
+        setIsVisible(true);
       }, 500);
     }, 7000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    setVideoLoading(true);
-    setIsVisible(false);
-  }, [currentSlide]);
-
-  const handleVideoLoaded = () => {
-    setVideoLoading(false);
-    setIsVisible(true);
-  };
-
-  const handleVideoError = () => {
-    setVideoLoading(false);
-    setIsVisible(true);
-  };
 
   // Sticky header logic
   useEffect(() => {
@@ -424,35 +469,36 @@ export default function Hero() {
 
       {/* Hero Content */}
       <div className="relative m-1 rounded-xl h-[90vh] min-h-[560px] max-h-[880px] overflow-hidden flex flex-col ">
-        {/* Video Background */}
+        {/* Background: poster always, video only when we've decided it's affordable */}
         <div className="absolute inset-0 overflow-hidden">
-          {videoLoading && (
-            <div className="absolute inset-0 z-10 bg-gradient-to-r from-primary/40 via-primary/20 to-primary/40 animate-pulse" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={`poster-${currentSlide}`}
+            src={slide.poster}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover animate-slow-zoom"
+          />
+          {canPlayVideo && (
+            <video
+              key={`video-${currentSlide}`}
+              ref={videoRef}
+              src={slide.videoSrc}
+              poster={slide.poster}
+              preload="none"
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover animate-slow-zoom"
+            />
           )}
-          <video
-            key={currentSlide}
-            src={slide.videoSrc}
-            autoPlay
-            loop
-            muted
-            playsInline
-            onLoadedData={handleVideoLoaded}
-            onError={handleVideoError}
-            className={`absolute inset-0 w-full h-full object-cover animate-slow-zoom transition-opacity duration-700
-
-            `}
-          />
-          <div
-            className={`absolute inset-0 bg-linear-to-r from-primary/25 via-white/10 to-primary/70 transition-opacity duration-500 ${
-              isVisible && !videoLoading ? "opacity-100" : "opacity-0"
-            }`}
-          />
+          <div className="absolute inset-0 bg-linear-to-r from-primary/25 via-white/10 to-primary/70" />
         </div>
 
         {/* Hero copy */}
         <div
           className={`relative z-10 mx-auto w-full max-w-[1400px] flex-1 flex flex-col justify-center px-5 md:px-10 transition-opacity duration-500 ${
-            isVisible && !videoLoading ? "opacity-100" : "opacity-0"
+            isVisible ? "opacity-100" : "opacity-0"
           }`}
         >
           <div className="max-w-2xl mt-[10vh] md:mt-[15vh]">
@@ -461,7 +507,7 @@ export default function Hero() {
                 <span
                   key={tag}
                   className={`px-4 py-1.5 rounded-full border border-white/30 text-white/90 text-xs md:text-sm font-medium transition-all duration-700 delay-${idx * 100} ${
-                    isVisible && !videoLoading
+                    isVisible
                       ? "opacity-100 translate-y-0"
                       : "opacity-0 translate-y-4"
                   }`}
@@ -473,7 +519,7 @@ export default function Hero() {
 
             <div
               className={`flex items-center gap-2 leading-4 text-white/90 text-sm mb-4 transition-all duration-700 delay-300 ${
-                isVisible && !videoLoading
+                isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
               }`}
@@ -483,7 +529,7 @@ export default function Hero() {
 
             <h1
               className={`text-2xl md:text-4xl lg:text-6xl font-medium text-white leading-tight md:leading-[1.15] lg:leading-[1.01] tracking-tight font-grotesk mb-6 drop-shadow-sm transition-all duration-700 delay-500 ${
-                isVisible && !videoLoading
+                isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
               }`}
@@ -495,7 +541,7 @@ export default function Hero() {
 
             <p
               className={`text-base md:text-lg text-white/90 leading-6 max-w-lg mb-8 transition-all duration-700 delay-700 ${
-                isVisible && !videoLoading
+                isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
               }`}
