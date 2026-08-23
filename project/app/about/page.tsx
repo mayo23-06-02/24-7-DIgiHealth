@@ -86,16 +86,25 @@ export default function AboutPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="pt-36 pb-20 md:pt-44 md:pb-28 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=80&w=1600&auto=format&fit=crop"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-ink-900/90 via-ink-900/70 to-ink-900/40" />
+        <div className="relative container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-3xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
               Our Story
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-ink-900 leading-[1.1] tracking-tight font-grotesk mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.1] tracking-tight font-grotesk mb-6">
               Healthcare shouldn't depend on your postal code.
             </h1>
-            <p className="text-lg md:text-xl text-ink-600 leading-relaxed max-w-2xl">
+            <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl">
               24/7 DigiHealth started with a simple frustration: too many South
               Africans wait weeks for a GP appointment, or drive hours to
               reach a specialist. We built the platform we wished existed.

@@ -75,18 +75,27 @@ export default function PatientsPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="pt-36 pb-20 md:pt-44 md:pb-28 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1600&auto=format&fit=crop"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-ink-900/90 via-ink-900/70 to-ink-900/40" />
+        <div className="relative container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-2xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
               For Patients
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-ink-900 leading-[1.1] tracking-tight font-grotesk mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.1] tracking-tight font-grotesk mb-6">
               See a doctor today.
               <br />
-              <span className="text-primary font-bold">Not next Tuesday.</span>
+              <span className="text-secondary font-bold">Not next Tuesday.</span>
             </h1>
-            <p className="text-lg md:text-xl text-ink-600 leading-relaxed max-w-xl mb-8">
+            <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-xl mb-8">
               Skip the waiting room. Video or chat consultations with
               verified South African doctors, prescriptions sent straight to
               your pharmacy, and your full medical history in one place —
@@ -189,7 +198,10 @@ export default function PatientsPage() {
         <div className="container mx-auto px-4 md:px-8 text-center">
           <p className="text-ink-600 font-medium">
             From <span className="text-primary font-bold">R250/month</span> ·
-            Medical aid accepted · Cancel anytime
+            Medical aid accepted · Cancel anytime ·{" "}
+            <Link href="/pricing" className="text-primary font-semibold hover:underline">
+              See all plans
+            </Link>
           </p>
         </div>
       </section>

@@ -31,6 +31,7 @@ const navLinks = [
   { name: "About", href: "/about" },
   { name: "For Patients", href: "/patients" },
   { name: "For Doctors", href: "/doctors" },
+  { name: "Pricing", href: "/pricing" },
   { name: "Contact", href: "/contact" },
 ];
 
@@ -332,7 +333,7 @@ export default function Hero() {
                   href={link.href}
                   className={`text-sm font-medium transition-colors ${
                     isSticky
-                      ? "text-ink-700 hover:text-primary"
+                      ? "text-ink-600 hover:text-primary"
                       : "text-white/85 hover:text-white"
                   }`}
                 >
@@ -366,17 +367,17 @@ export default function Hero() {
             >
               <span
                 className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
-                  isSticky ? "bg-ink-800" : "bg-white"
+                  isSticky ? "bg-ink-900" : "bg-white"
                 } ${mobileMenuOpen ? "rotate-45 translate-y-2" : ""}`}
               />
               <span
                 className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
-                  isSticky ? "bg-ink-800" : "bg-white"
+                  isSticky ? "bg-ink-900" : "bg-white"
                 } ${mobileMenuOpen ? "opacity-0" : ""}`}
               />
               <span
                 className={`w-6 h-0.5 rounded-lg transition-all duration-300 ${
-                  isSticky ? "bg-ink-800" : "bg-white"
+                  isSticky ? "bg-ink-900" : "bg-white"
                 } ${mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
               />
             </button>
@@ -393,7 +394,7 @@ export default function Hero() {
                   key={link.name}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-ink-700 text-sm font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="text-ink-600 text-sm font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition-colors"
                 >
                   {link.name}
                 </Link>
@@ -402,7 +403,7 @@ export default function Hero() {
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-center text-ink-700 font-medium py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
+                  className="text-center text-ink-600 font-medium py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
                 >
                   Login
                 </Link>

@@ -53,7 +53,7 @@ export default function TeamGrid() {
                 />
               </div>
               <p className="font-bold text-ink-900 text-sm md:text-base font-grotesk">{s.name}</p>
-              <p className="text-ink-500 text-xs md:text-sm mt-0.5">{s.role}</p>
+              <p className="text-ink-400 text-xs md:text-sm mt-0.5">{s.role}</p>
             </div>
           ))}
         </div>
