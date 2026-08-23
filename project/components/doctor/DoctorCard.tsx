@@ -49,8 +49,6 @@ export default function DoctorCard({
   const visibleLanguages = doctor.languages?.slice(0, 2) || [];
   const extraLanguages = (doctor.languages?.length || 0) - visibleLanguages.length;
   const bio = doctor.bio || (doctor as any).about;
-  const isHighlyRated = (doctor.rating || 0) >= 4.7;
-  const isLoyal = (doctor.reviewCount || 0) >= 50;
 
   // Real open slots for today, computed from actual booked consultations
   // (see lib/booking/slots.ts) — the same source BookingModal uses, so
@@ -153,27 +151,6 @@ export default function DoctorCard({
           </span>
         </div>
       </div>
-
-      {/* Real-data-derived trust badges */}
-      {(doctor.isOnline || isHighlyRated || isLoyal) && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {doctor.isOnline && (
-            <span className="text-[11px] font-semibold bg-success-50 text-success-700 px-2.5 py-1 rounded-full">
-              Available today
-            </span>
-          )}
-          {isHighlyRated && (
-            <span className="text-[11px] font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
-              Highly rated
-            </span>
-          )}
-          {isLoyal && (
-            <span className="text-[11px] font-semibold bg-accent/20 text-ink-900 px-2.5 py-1 rounded-full">
-              Loyal patients
-            </span>
-          )}
-        </div>
-      )}
 
       {bio && (
         <div className="mb-3">

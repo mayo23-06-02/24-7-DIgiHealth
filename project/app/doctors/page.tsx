@@ -168,7 +168,7 @@ export default function DoctorsPage() {
               Meet a few of our doctors
             </h2>
           </div>
-          <PublicDoctorGrid limit={4} />
+          <PublicDoctorGrid limit={8} />
           <div className="text-center mt-8">
             <Link href="/patients" className="text-primary font-semibold text-sm hover:underline">
               See how patients book a consultation →
