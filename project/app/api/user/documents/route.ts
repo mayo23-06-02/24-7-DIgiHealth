@@ -10,6 +10,7 @@ import {
   uploadBuffer,
 } from "@/lib/supabase/media";
 import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
+import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 // GET /api/user/documents – list all documents for the current user
 export async function GET(_req: NextRequest) {
@@ -165,7 +166,25 @@ export async function POST(req: NextRequest) {
       mediaId = asset.id;
 
       if (isAvatar) {
-        await User.findByIdAndUpdate(user.userId, { avatarUrl: fileUrl });
+        // The Supabase asset (purpose: "avatar") is now the source of truth —
+        // see getUserAvatarUrl(). Nothing else needs to be written for the
+        // picture to take effect.
+        //
+        // The Mongo column is still mirrored, best-effort, purely so any
+        // remaining reader of `User.avatarUrl` stays consistent. It is skipped
+        // for Postgres-native accounts, whose uuid can never be a Mongo `_id` —
+        // attempting it is what used to make this whole endpoint 500.
+        if (isMongoObjectId(user.userId)) {
+          try {
+            await User.findByIdAndUpdate(user.userId, { avatarUrl: fileUrl });
+          } catch (mirrorErr) {
+            console.warn(
+              "[POST /api/user/documents] avatar mirror to Mongo failed:",
+              mirrorErr,
+            );
+          }
+        }
+
         return NextResponse.json({
           success: true,
           data: { url: fileUrl, mediaId: asset.id },

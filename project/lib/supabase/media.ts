@@ -332,6 +332,39 @@ export async function listMedia(filter: ListMediaFilter): Promise<MediaAsset[]> 
   return (data || []).map((r) => mapRow(r as DbRow));
 }
 
+/**
+ * The user's current profile picture, or null if they've never set one.
+ *
+ * Avatars used to be pointed at by `User.avatarUrl` in Mongo, which broke for
+ * every Postgres-native account: the write threw a CastError (a uuid can't be a
+ * Mongo `_id`) and the read returned a hardcoded null. Since media assets live
+ * in Supabase and carry `user_id` as a plain string, the asset row itself is a
+ * store-agnostic source of truth — it works identically whether the caller's id
+ * is a uuid or an ObjectId, with no schema migration.
+ *
+ * "Current" is simply the newest avatar-purpose asset; uploading a new picture
+ * supersedes the old one rather than mutating anything.
+ */
+export async function getUserAvatarUrl(userId: string): Promise<string | null> {
+  if (!userId) return null;
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("media_assets")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("purpose", "avatar")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error || !data?.length) return null;
+    return durableUrl(mapRow(data[0] as DbRow));
+  } catch {
+    // A missing avatar must never take a profile page down with it.
+    return null;
+  }
+}
+
 export async function deleteMedia(id: string): Promise<void> {
   const asset = await getMediaById(id);
   if (!asset) return;

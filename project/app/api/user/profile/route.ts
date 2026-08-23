@@ -4,6 +4,7 @@ import User from '@/lib/models/User';
 import { normalizePhoneZaSz, maskE164 } from '@/lib/phone/normalizePhone';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
+import { getUserAvatarUrl } from '@/lib/supabase/media';
 
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get('x-user-id') || null;
@@ -35,7 +36,11 @@ export async function GET(req: NextRequest) {
           saId: '',
           role: requestUser.role,
           mfaEnabled: false,
-          avatarUrl: null,
+          // Resolved from the Supabase media asset rather than the Mongo
+          // column, which these accounts have no row in. This used to be a
+          // hardcoded null, so their picture never appeared even once the
+          // upload succeeded.
+          avatarUrl: await getUserAvatarUrl(requestUser.userId),
           status: 'active',
         },
       });
@@ -72,7 +77,7 @@ export async function GET(req: NextRequest) {
         saId: user.saId || '',
         role: user.role,
         mfaEnabled: user.mfaEnabled,
-        avatarUrl: (user as any).avatarUrl || null,
+        avatarUrl: (await getUserAvatarUrl(userId)) || (user as any).avatarUrl || null,
         status: user.status,
       },
     });
@@ -128,7 +133,7 @@ export async function PUT(req: NextRequest) {
         mobile: user.mobile || '',
         phoneE164,
         phoneMasked: phoneE164 ? maskE164(phoneE164) : '',
-        avatarUrl: (user as any).avatarUrl || null,
+        avatarUrl: (await getUserAvatarUrl(userId)) || (user as any).avatarUrl || null,
         mfaEnabled: user.mfaEnabled,
       },
     });
