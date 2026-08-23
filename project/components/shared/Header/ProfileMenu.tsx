@@ -80,7 +80,7 @@ export default function ProfileMenu({ user }: { user: User | null }) {
 
           <Link
             href={`/${user?.role}/profile`}
-            className="flex items-center gap-3 px-4 py-2.5 text-ink-700 hover:bg-surface-soft transition-colors group"
+            className="flex items-center gap-3 px-4 py-2.5 text-ink-600 hover:bg-surface-soft transition-colors group"
             onClick={() => setIsOpen(false)}
           >
             <div className="w-8 h-8 rounded-md bg-surface-soft flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
@@ -92,7 +92,7 @@ export default function ProfileMenu({ user }: { user: User | null }) {
           <div className="h-px bg-border my-1" />
 
           <button
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-ink-700 hover:bg-surface-soft transition-colors group"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-ink-600 hover:bg-surface-soft transition-colors group"
             onClick={() => {
               setIsOpen(false);
               logout();

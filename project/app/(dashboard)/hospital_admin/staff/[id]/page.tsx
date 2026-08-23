@@ -138,7 +138,7 @@ export default function StaffProfilePage() {
       key: "date",
       header: "Date",
       render: (row: any) => (
-        <span className="text-small text-ink-500">
+        <span className="text-small text-ink-600">
           {new Date(row.date).toLocaleDateString("en-ZA", {
             day: "numeric",
             month: "short",
@@ -160,7 +160,7 @@ export default function StaffProfilePage() {
       key: "complaint",
       header: "Complaint",
       render: (row: any) => (
-        <span className="text-small text-ink-500 max-w-[200px] truncate block">
+        <span className="text-small text-ink-600 max-w-[200px] truncate block">
           {row.chiefComplaint || "—"}
         </span>
       ),
@@ -194,7 +194,7 @@ export default function StaffProfilePage() {
     {
       key: "email",
       header: "Email",
-      render: (row: any) => <span className="text-small text-ink-500">{row.email}</span>,
+      render: (row: any) => <span className="text-small text-ink-600">{row.email}</span>,
     },
     {
       key: "visits",
@@ -207,7 +207,7 @@ export default function StaffProfilePage() {
       key: "lastSeen",
       header: "Last Seen",
       render: (row: any) => (
-        <span className="text-small text-ink-500">
+        <span className="text-small text-ink-600">
           {new Date(row.lastSeen).toLocaleDateString("en-ZA", {
             day: "numeric",
             month: "short",
@@ -241,7 +241,7 @@ export default function StaffProfilePage() {
             <p className="text-xs text-ink-600">
               {staff.department}
             </p>
-            <div className="flex gap-4 text-small text-ink-500">
+            <div className="flex gap-4 text-small text-ink-600">
               {user?.email && (
                 <span className="flex items-center line-clamp-1 gap-1">
                   <Mail size={13} />
@@ -342,7 +342,7 @@ export default function StaffProfilePage() {
                 </div>
               ))}
               <div className="pt-3 border-t border-border">
-                <p className="text-small text-ink-500">Avg Response Time</p>
+                <p className="text-small text-ink-600">Avg Response Time</p>
                 <p className="text-h2 font-bold text-ink-900">
                   {sla.avgResponseMinutes} <span className="text-body font-normal">min</span>
                 </p>
@@ -400,21 +400,21 @@ export default function StaffProfilePage() {
             <h3 className="text-h4 font-bold text-ink-900 mb-4">Revenue Summary</h3>
             <div className="space-y-4">
               <div className="p-4 bg-primary-50 rounded-lg">
-                <p className="text-small text-ink-500">Total Earned</p>
+                <p className="text-small text-ink-600">Total Earned</p>
                 <p className="text-h1 font-bold text-primary">R {kpi.totalRevenue.toLocaleString()}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-surface-soft rounded-lg">
-                  <p className="text-small text-ink-500">Rate/hr</p>
+                  <p className="text-small text-ink-600">Rate/hr</p>
                   <p className="text-h4 font-bold text-ink-900">R {staff.hourlyRate}</p>
                 </div>
                 <div className="p-3 bg-surface-soft rounded-lg">
-                  <p className="text-small text-ink-500">Paid Consults</p>
+                  <p className="text-small text-ink-600">Paid Consults</p>
                   <p className="text-h4 font-bold text-ink-900">{kpi.completedConsultations}</p>
                 </div>
               </div>
               <div className="pt-3 border-t border-border">
-                <p className="text-small font-bold text-ink-500 mb-2">Monthly Breakdown</p>
+                <p className="text-small font-bold text-ink-600 mb-2">Monthly Breakdown</p>
                 {monthlyRevenue.slice(-3).map((m: any) => (
                   <div key={m.month} className="flex justify-between text-body py-1">
                     <span className="text-ink-600">{m.month}</span>

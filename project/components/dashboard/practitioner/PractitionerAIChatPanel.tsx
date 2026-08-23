@@ -82,7 +82,7 @@ export default function PractitionerAIChatPanel({
               >
                 <div
                   className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                    m.role === "user" ? "bg-primary text-white" : "bg-surface-soft text-ink-500"
+                    m.role === "user" ? "bg-primary text-white" : "bg-surface-soft text-ink-600"
                   }`}
                 >
                   {m.role === "user" ? <UserIcon size={14} /> : <Bot size={14} />}

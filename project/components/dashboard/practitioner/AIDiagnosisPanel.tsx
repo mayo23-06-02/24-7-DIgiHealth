@@ -139,7 +139,7 @@ export default function AIDiagnosisPanel({ patientId }: { patientId: string }) {
             </Card>
           ))}
       </div>
-      <div className="flex flex-wrap items-center gap-2 text-xs text-ink-500">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-ink-600">
         <Badge
           label={`Risk: ${record.riskScore}/100`}
           status={record.riskScore >= 60 ? "error" : record.riskScore >= 30 ? "warning" : "success"}
@@ -149,7 +149,7 @@ export default function AIDiagnosisPanel({ patientId }: { patientId: string }) {
       </div>
       {record.recommendedTests.length > 0 && (
         <div>
-          <p className="text-label text-ink-500 mb-1">Recommended tests</p>
+          <p className="text-label text-ink-600 mb-1">Recommended tests</p>
           <div className="flex flex-wrap gap-1.5">
             {record.recommendedTests.map((t) => (
               <Badge key={t} label={t} status="info" size="sm" />
@@ -191,7 +191,7 @@ export default function AIDiagnosisPanel({ patientId }: { patientId: string }) {
         </div>
         <div>
           <h3 className="text-h4 font-bold text-ink-900 font-grotesk">AI Diagnosis Support</h3>
-          <p className="text-xs text-ink-500">Differential suggestions from Claude</p>
+          <p className="text-xs text-ink-600">Differential suggestions from Claude</p>
         </div>
       </div>
 
@@ -217,7 +217,7 @@ export default function AIDiagnosisPanel({ patientId }: { patientId: string }) {
       <div className="pt-2 border-t border-border">
         <div className="flex items-center gap-2 mb-3">
           <History size={16} className="text-ink-400" />
-          <p className="text-label text-ink-500">History</p>
+          <p className="text-label text-ink-600">History</p>
         </div>
         {historyLoading ? (
           <p className="text-xs text-ink-400">Loading…</p>

@@ -108,7 +108,7 @@ export default function FavoriteDoctors({
 
         {favoriteDoctors.length === 0 ? (
           <div className="text-center py-4">
-            <p className="text-xs text-ink-500 mb-3">
+            <p className="text-xs text-ink-600 mb-3">
               No favorite doctors yet
             </p>
             <button
@@ -140,7 +140,7 @@ export default function FavoriteDoctors({
                     <p className="text-xs font-semibold text-ink-900 truncate">
                       {doctor.name}
                     </p>
-                    <p className="text-[10px] text-ink-500 truncate">
+                    <p className="text-[10px] text-ink-600 truncate">
                       {doctor.specialisation || "Doctor"}
                     </p>
                   </div>

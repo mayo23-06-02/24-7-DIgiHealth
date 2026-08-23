@@ -956,7 +956,7 @@ function PatientBillingView({
                     }`}
                   >
                     {t.popular && (
-                      <span className="absolute -top-3 left-4 px-2.5 py-1 rounded-full bg-accent text-ink-700 text-[10px] font-bold tracking-wide">
+                      <span className="absolute -top-3 left-4 px-2.5 py-1 rounded-full bg-accent text-ink-600 text-[10px] font-bold tracking-wide">
                         MOST POPULAR
                       </span>
                     )}
@@ -966,7 +966,7 @@ function PatientBillingView({
                     </p>
 
                     <div className="flex items-baseline gap-1 mt-2 mb-1">
-                      <span className="text-3xl font-bold text-ink-700 font-grotesk tabular-nums">
+                      <span className="text-3xl font-bold text-ink-600 font-grotesk tabular-nums">
                         R{t.price}
                       </span>
                       <span className="text-xs font-medium text-slate-400">

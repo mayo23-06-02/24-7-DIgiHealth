@@ -38,7 +38,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-[11px] font-bold uppercase tracking-wide text-ink-400">
         {label}
       </p>
-      <p className="text-sm font-bold text-ink-700">{value}</p>
+      <p className="text-sm font-bold text-ink-600">{value}</p>
     </div>
   );
 }
@@ -233,7 +233,7 @@ export default function DoctorProfilePage() {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
                 <Badge label={doc.specialisation} status="neutral" />
                 {doc.hpcsaNumber ? (
-                  <span className="text-xs font-bold text-ink-500">
+                  <span className="text-xs font-bold text-ink-600">
                     HPCSA {doc.hpcsaNumber}
                   </span>
                 ) : (
@@ -260,7 +260,7 @@ export default function DoctorProfilePage() {
                 <span className="text-sm font-bold text-ink-900 tabular-nums">
                   {doc.rating?.toFixed(1) || "0.0"}
                 </span>
-                <span className="text-xs text-ink-500">
+                <span className="text-xs text-ink-600">
                   ({doc.reviewCount || 0})
                 </span>
               </div>
@@ -297,7 +297,7 @@ export default function DoctorProfilePage() {
                   className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all disabled:opacity-50 ${
                     isFavorite
                       ? "bg-danger-50 border-danger-500/30 text-danger-500"
-                      : "border-border text-ink-500 hover:text-danger-500 hover:border-danger-500/30"
+                      : "border-border text-ink-600 hover:text-danger-500 hover:border-danger-500/30"
                   }`}
                 >
                   <Heart size={18} className={isFavorite ? "fill-current" : ""} />
@@ -305,7 +305,7 @@ export default function DoctorProfilePage() {
                 <button
                   onClick={handleShare}
                   aria-label="Copy profile link"
-                  className="w-11 h-11 rounded-full border border-border text-ink-500 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all"
+                  className="w-11 h-11 rounded-full border border-border text-ink-600 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all"
                 >
                   <Share2 size={18} />
                 </button>
@@ -328,7 +328,7 @@ export default function DoctorProfilePage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-border">
               <div className="space-y-3">
-                <p className="text-label text-ink-500">Clinical Focus</p>
+                <p className="text-label text-ink-600">Clinical Focus</p>
                 <ul className="space-y-2.5">
                   {(
                     doc.clinicalFocus || [
@@ -339,7 +339,7 @@ export default function DoctorProfilePage() {
                   ).map((item: string) => (
                     <li
                       key={item}
-                      className="flex items-center gap-2 text-sm font-medium text-ink-700"
+                      className="flex items-center gap-2 text-sm font-medium text-ink-600"
                     >
                       <CheckCircle2
                         size={16}
@@ -407,7 +407,7 @@ export default function DoctorProfilePage() {
                   key={period}
                   className="flex items-center justify-between p-3 rounded-lg bg-surface-soft"
                 >
-                  <span className="text-sm font-semibold text-ink-700">
+                  <span className="text-sm font-semibold text-ink-600">
                     {period}
                   </span>
                   {slotsLoading ? (

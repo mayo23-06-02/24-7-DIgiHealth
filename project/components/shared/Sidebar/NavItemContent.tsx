@@ -31,7 +31,7 @@ export default function NavItemContent({
         flex items-center gap-3 py-3 px-4 font-medium text-sm transition-all duration-200 group rounded-xl
         ${isActive
           ? "bg-primary text-white  "
-          : "text-ink-700 hover:bg-primary/8 hover:text-primary hover:"
+          : "text-ink-600 hover:bg-primary/8 hover:text-primary hover:"
         }
         ${isCollapsed ? "justify-center px-2" : ""}
         ${pending ? "opacity-60" : ""}

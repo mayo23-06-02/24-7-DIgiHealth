@@ -191,7 +191,7 @@ export default function ManageFamilyMemberPage() {
                     {healthRecord.medications.length === 0 ? (
                       <p className="text-sm text-slate-500">None on record</p>
                     ) : (
-                      <p className="text-sm text-ink-700">
+                      <p className="text-sm text-ink-600">
                         {healthRecord.medications.map((m) => m.name).join(", ")}
                       </p>
                     )}
@@ -207,7 +207,7 @@ export default function ManageFamilyMemberPage() {
                     {healthRecord.allergies.length === 0 ? (
                       <p className="text-sm text-slate-500">None on record</p>
                     ) : (
-                      <p className="text-sm text-ink-700">{healthRecord.allergies.join(", ")}</p>
+                      <p className="text-sm text-ink-600">{healthRecord.allergies.join(", ")}</p>
                     )}
                   </div>
                 </div>
@@ -221,7 +221,7 @@ export default function ManageFamilyMemberPage() {
                     {healthRecord.immunizations.length === 0 ? (
                       <p className="text-sm text-slate-500">None on record</p>
                     ) : (
-                      <p className="text-sm text-ink-700">
+                      <p className="text-sm text-ink-600">
                         {healthRecord.immunizations.map((i) => i.vaccine).join(", ")}
                       </p>
                     )}

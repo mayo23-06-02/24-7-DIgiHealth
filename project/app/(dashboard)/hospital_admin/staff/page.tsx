@@ -77,7 +77,7 @@ function KpiCard({ icon: Icon, label, value, subtext, color = "primary" }: any) 
         <Icon className={`w-5 h-5 text-${color}-600`} />
       </div>
       <div>
-        <p className="text-xs font-bold text-ink-500 uppercase tracking-wider">{label}</p>
+        <p className="text-xs font-bold text-ink-600 uppercase tracking-wider">{label}</p>
         <p className="text-2xl font-bold text-ink-900 font-grotesk">{value}</p>
         {subtext && <p className="text-xs text-ink-400 mt-0.5">{subtext}</p>}
       </div>

@@ -98,7 +98,7 @@ export default function WhyUrgentCare() {
                 <Icon className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-ink-900 mb-1.5 font-grotesk">{title}</h3>
-              <p className="text-sm text-ink-700 leading-relaxed">{description}</p>
+              <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
             </div>
           ))}
         </div>
@@ -110,7 +110,7 @@ export default function WhyUrgentCare() {
             </h3>
             <ul className="space-y-2.5">
               {conditions.map((c) => (
-                <li key={c} className="text-sm text-ink-700 flex items-start gap-2">
+                <li key={c} className="text-sm text-ink-600 flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
                   {c}
                 </li>
@@ -129,7 +129,7 @@ export default function WhyUrgentCare() {
             </p>
             <ul className="space-y-2.5">
               {treatmentTypes.map((c) => (
-                <li key={c} className="text-sm text-ink-700 flex items-start gap-2">
+                <li key={c} className="text-sm text-ink-600 flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0" />
                   {c}
                 </li>
@@ -144,7 +144,7 @@ export default function WhyUrgentCare() {
             </h3>
             <ul className="space-y-2.5 mt-4">
               {cannotTreat.map((c) => (
-                <li key={c} className="text-sm text-ink-700 flex items-start gap-2">
+                <li key={c} className="text-sm text-ink-600 flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-danger-500 mt-1.5 shrink-0" />
                   {c}
                 </li>

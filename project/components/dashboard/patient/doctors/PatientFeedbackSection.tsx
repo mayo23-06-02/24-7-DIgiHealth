@@ -139,7 +139,7 @@ export default function PatientFeedbackSection({
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 bg-surface-soft rounded-lg flex items-center justify-center text-ink-500 font-bold text-xs uppercase overflow-hidden shrink-0">
+                  <div className="w-10 h-10 bg-surface-soft rounded-lg flex items-center justify-center text-ink-600 font-bold text-xs uppercase overflow-hidden shrink-0">
                     {rev.patientAvatar ? (
                       <img
                         src={rev.patientAvatar}
@@ -154,7 +154,7 @@ export default function PatientFeedbackSection({
                     <p className="text-sm font-bold text-ink-900 leading-none mb-1 truncate">
                       {rev.patientName}
                     </p>
-                    <p className="text-[11px] text-ink-500 font-medium">
+                    <p className="text-[11px] text-ink-600 font-medium">
                       {new Date(rev.date).toLocaleDateString()}
                     </p>
                   </div>
@@ -170,7 +170,7 @@ export default function PatientFeedbackSection({
           ))
         ) : (
           <div className="col-span-2 text-center py-10 bg-surface-soft rounded-lg border border-dashed border-border">
-            <p className="text-sm font-semibold text-ink-500">
+            <p className="text-sm font-semibold text-ink-600">
               No patient feedback yet.
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function PatientFeedbackSection({
       >
         <div className="space-y-5">
           <div className="space-y-2">
-            <p className="text-label text-ink-500">Your Rating</p>
+            <p className="text-label text-ink-600">Your Rating</p>
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button

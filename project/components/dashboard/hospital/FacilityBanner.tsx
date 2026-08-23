@@ -18,7 +18,7 @@ export default function FacilityBanner({
     <Card
       
       noPadding
-      className="rounded-lg bg-none overflow-hidden border-0   text-ink-800"
+      className="rounded-lg bg-none overflow-hidden border-0   text-ink-900"
     >
       <div className="p-5 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         <div className="min-w-0">

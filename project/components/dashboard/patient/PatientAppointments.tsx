@@ -335,7 +335,7 @@ export default function PatientAppointments() {
             />
             {totalPages > 1 && (
               <div className="flex items-center justify-between pt-4">
-                <span className="text-xs text-ink-500">
+                <span className="text-xs text-ink-600">
                   {filtered.length} appointment{filtered.length === 1 ? "" : "s"}
                 </span>
                 <Pagination page={page} totalPages={totalPages} onChange={setPage} />

@@ -176,7 +176,7 @@ export default function PatientsPage() {
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-ink-900 mb-1 font-grotesk">{title}</h3>
-                    <p className="text-sm text-ink-700 leading-relaxed">{description}</p>
+                    <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
                   </div>
                 </div>
               ))}

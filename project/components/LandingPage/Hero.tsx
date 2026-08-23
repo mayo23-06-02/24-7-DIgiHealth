@@ -251,7 +251,7 @@ export default function Hero() {
       <div className="fixed top-0 left-0 w-full z-50">
         {/* Top Utility Bar - fades out when sticky */}
         <div
-          className={`hidden md:flex w-full  backdrop-blur-md text-ink-700 text-sm py-2 px-4 md:px-8  transition-all duration-500 ${
+          className={`hidden md:flex w-full  backdrop-blur-md text-ink-600 text-sm py-2 px-4 md:px-8  transition-all duration-500 ${
             isSticky ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
@@ -261,8 +261,8 @@ export default function Hero() {
                 <span className="text-base leading-none">{weatherIcon}</span>
                 {weatherText}
               </span>
-              <span className="hidden md:inline text-ink-300">|</span>
-              <span className="text-ink-500 text-xs">{currentDate}</span>
+              <span className="hidden md:inline text-ink-400">|</span>
+              <span className="text-ink-600 text-xs">{currentDate}</span>
             </div>
             <div className="flex items-center gap-4">
               <a
