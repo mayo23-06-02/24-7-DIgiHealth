@@ -67,7 +67,7 @@ export async function GET() {
           id: l._id.toString(),
           member: l.memberId
             ? { id: l.memberId._id.toString(), name: `${l.memberId.firstName} ${l.memberId.lastName}`, email: l.isMinor ? user.email : l.memberId.email }
-            : { id: null, name: null, email: l.inviteEmail },
+            : { id: null, name: l.inviteName || null, email: l.inviteEmail },
           relationship: l.relationship,
           isMinor: l.isMinor,
           status: l.status,

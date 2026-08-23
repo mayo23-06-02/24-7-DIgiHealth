@@ -6,6 +6,9 @@ export interface IFamilyLink extends Document {
    * an account yet at invite time) — inviteEmail identifies them until then. */
   memberId?: Types.ObjectId;
   inviteEmail?: string;
+  /** Name the guardian gave when sending the invite — shown for a pending
+   * invite before the invitee has an account to pull a name from. */
+  inviteName?: string;
   relationship: 'child' | 'spouse' | 'parent' | 'other';
   /** Guardian-controlled toggle — the only thing that gates medical-history access. */
   isMinor: boolean;
@@ -25,6 +28,7 @@ const FamilyLinkSchema = new Schema<IFamilyLink>(
     guardianId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     memberId: { type: Schema.Types.ObjectId, ref: 'User' },
     inviteEmail: { type: String, lowercase: true, trim: true },
+    inviteName: { type: String, trim: true },
     relationship: { type: String, enum: ['child', 'spouse', 'parent', 'other'], required: true },
     isMinor: { type: Boolean, default: false },
     status: { type: String, enum: ['pending', 'active', 'revoked'], default: 'pending' },

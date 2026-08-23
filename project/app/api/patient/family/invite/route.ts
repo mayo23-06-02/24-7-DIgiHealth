@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const email = normalizeEmail(body.email || '');
-    const relationship = ['spouse', 'parent', 'other'].includes(body.relationship) ? body.relationship : 'other';
+    const relationship = ['child', 'spouse', 'parent', 'other'].includes(body.relationship) ? body.relationship : 'other';
+    const inviteName = String(body.name || '').trim() || undefined;
 
     if (!isValidEmail(email)) {
       return NextResponse.json({ success: false, error: 'A valid email address is required' }, { status: 400 });
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest) {
     const linkData: any = {
       guardianId: guardian.userId,
       inviteEmail: email,
+      inviteName,
       relationship,
       isMinor: false,
       status: 'pending',
@@ -82,14 +84,14 @@ export async function POST(req: NextRequest) {
     const { error } = await sendEmail({
       to: email,
       subject: `${guardianName} invited you to a family account on 24/7 DigiHealth`,
-      html: familyInviteEmailHtml({ guardianName, relationship, inviteUrl }),
+      html: familyInviteEmailHtml({ guardianName, relationship, inviteUrl, inviteeName: inviteName }),
     });
 
     if (error) {
       console.warn('[POST /api/patient/family/invite] Email provider warning (proceeding for testing):', error);
     }
 
-    return NextResponse.json({ success: true, data: { email, expiresAt: inviteExpiresAt, inviteUrl } });
+    return NextResponse.json({ success: true, data: { email, name: inviteName, expiresAt: inviteExpiresAt, inviteUrl } });
   } catch (err: any) {
     console.error('[POST /api/patient/family/invite]', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

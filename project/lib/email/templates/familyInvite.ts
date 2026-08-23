@@ -7,8 +7,10 @@ export function familyInviteEmailHtml(params: {
   guardianName: string;
   relationship: string;
   inviteUrl: string;
+  inviteeName?: string;
 }): string {
-  const { guardianName, relationship, inviteUrl } = params;
+  const { guardianName, relationship, inviteUrl, inviteeName } = params;
+  const greeting = inviteeName ? `Hi ${escapeHtml(inviteeName)}, ` : '';
 
   return `
 <!DOCTYPE html>
@@ -38,7 +40,7 @@ export function familyInviteEmailHtml(params: {
             <tr>
               <td style="padding:36px 32px 8px;">
                 <h2 style="margin:0 0 12px; color:#0f172a; font-size:20px; font-weight:700;">
-                  ${escapeHtml(guardianName)} wants to add you as their ${escapeHtml(relationship)}
+                  ${greeting}${escapeHtml(guardianName)} wants to add you as their ${escapeHtml(relationship)}
                 </h2>
                 <p style="margin:0 0 20px; color:#475569; font-size:15px; line-height:1.6;">
                   Accepting links your account so ${escapeHtml(guardianName)} can manage your
