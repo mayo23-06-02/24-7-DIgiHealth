@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 
 const quickLinks = [
@@ -27,6 +27,41 @@ const doctors = [
 ];
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (status === "sending") return;
+
+    setStatus("sending");
+    setMessage("");
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "footer" }),
+      });
+      const json = await res.json().catch(() => ({}));
+
+      if (res.ok && json.success) {
+        setStatus("done");
+        setMessage("You're subscribed — look out for our next update.");
+        setEmail("");
+      } else if (res.status === 429) {
+        setStatus("error");
+        setMessage("Too many attempts. Please try again shortly.");
+      } else {
+        setStatus("error");
+        setMessage(json.error || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setMessage("Network error. Please check your connection and try again.");
+    }
+  };
+
   return (
     <footer
       className="bg-[#1a5b78] text-white pt-20 pb-10 pt-10 pb-5"
@@ -45,24 +80,39 @@ export default function Footer() {
               monthly.
             </p>
 
-            <form
-              className="relative max-w-lg pt-5 pb-2.5"
-              onSubmit={(e) => e.preventDefault()}
-            >
+            <form className="relative max-w-lg pt-5 pb-2.5" onSubmit={handleSubscribe}>
               <div className="flex items-center border border-white/30 rounded-lg p-1.5 pl-6 bg-white/5 focus-within:border-white/60 transition-colors">
+                <label htmlFor="newsletter-email" className="sr-only">
+                  Email address
+                </label>
                 <input
+                  id="newsletter-email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter Your Email"
                   className="bg-transparent border-none outline-none text-white placeholder-white/60 w-full text-[0.95rem] grow pr-4"
                   required
                 />
                 <button
                   type="submit"
-                  className="bg-white text-[#1a5b78] font-semibold px-8 py-3 rounded-lg hover:bg-slate-100 transition-colors text-[0.95rem] hover:scale-105 duration-300 whitespace-nowrap"
+                  disabled={status === "sending"}
+                  className="bg-white text-[#1a5b78] font-semibold px-8 py-3 rounded-lg hover:bg-slate-100 transition-colors text-[0.95rem] hover:scale-105 duration-300 whitespace-nowrap disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed"
                 >
-                  Subscribe
+                  {status === "sending" ? "Subscribing…" : "Subscribe"}
                 </button>
               </div>
+              {message && (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={`mt-3 text-sm ${
+                    status === "done" ? "text-white" : "text-amber-200"
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
             </form>
           </div>
 
