@@ -570,10 +570,11 @@ export default function Hero() {
             <button
               key={idx}
               onClick={() => {
+                if (idx === currentSlide) return;
                 setIsVisible(false);
-                setVideoLoading(true);
                 setTimeout(() => {
                   setCurrentSlide(idx);
+                  setIsVisible(true);
                 }, 500);
               }}
               className={`w-2 h-2 rounded-full transition-all ${
