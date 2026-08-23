@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Avatar from "../ui/Avatar";
 import { Star, BadgeCheck } from "lucide-react";
-import { fetchDaySlots, todayDateString, type BookingSlot } from "@/lib/booking";
+import type { BookingSlot } from "@/lib/booking";
 
 interface Doctor {
   id: string;
@@ -36,6 +36,10 @@ interface DoctorCardProps {
   /** "From R250 · Get Access" band — for marketing pages only. Platform
    * dashboards default this to false since the patient already has access. */
   showPrice?: boolean;
+  /** Today's open slots, already filtered. Supplied by the parent list via
+   * useTodaySlots() so the whole list costs one request rather than one per
+   * card — do not fetch these here. Omit to hide the availability strip. */
+  slots?: BookingSlot[];
 }
 
 export default function DoctorCard({
@@ -45,49 +49,18 @@ export default function DoctorCard({
   onClick,
   linkName,
   showPrice = false,
+  slots,
 }: DoctorCardProps) {
   const visibleLanguages = doctor.languages?.slice(0, 2) || [];
   const extraLanguages = (doctor.languages?.length || 0) - visibleLanguages.length;
   const bio = doctor.bio || (doctor as any).about;
 
-  // Real open slots for today, computed from actual booked consultations
-  // (see lib/booking/slots.ts) — the same source BookingModal uses, so
-  // these times are never fabricated. Unlike BookingModal's TimeSlotPicker
-  // (a real picker — click a slot to select it), this row is read-only: it
-  // exists purely to show at-a-glance immediate availability. The one
-  // action on this card is the Book button, which for a new/anonymous
-  // visitor routes to /register — booking itself happens after sign-up.
-  const today = todayDateString();
-  const isFuture = (time: string) => new Date(`${today}T${time}:00`).getTime() > Date.now();
-
-  const [openSlots, setOpenSlots] = useState<BookingSlot[]>([]);
-  useEffect(() => {
-    let cancelled = false;
-    fetchDaySlots({ practitionerId: doctor.id, date: today }).then((result) => {
-      if (cancelled) return;
-      if (result.success && result.data?.slots) {
-        setOpenSlots(
-          result.data.slots.filter((s) => s.available && isFuture(s.time)).slice(0, 6),
-        );
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doctor.id, today]);
-
-  // Re-filter every minute so a slot disappears the moment its time passes,
-  // instead of lingering visible until the next full refetch.
-  const visibleSlots = openSlots.filter((s) => isFuture(s.time));
-  useEffect(() => {
-    if (openSlots.length === 0) return;
-    const id = setInterval(() => {
-      setOpenSlots((prev) => prev.filter((s) => isFuture(s.time)));
-    }, 60_000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openSlots.length]);
+  // Read-only availability strip. The times come from real consultations via
+  // the parent's batched useTodaySlots() call — never fabricated, and never
+  // fetched here (that produced one request per card). Unlike BookingModal's
+  // TimeSlotPicker this is not a picker: the card's single action is the Book
+  // button, which routes an anonymous visitor to /register first.
+  const visibleSlots = slots ?? [];
 
   const nameContent = (
     <span className="flex items-center gap-1 min-w-0">

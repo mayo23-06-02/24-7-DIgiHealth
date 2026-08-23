@@ -135,15 +135,12 @@ export function buildScheduleSlots(input: BuildSlotsInput): BookingSlot[] {
     ? String(input.excludeBookingId)
     : null;
 
-  console.log("[buildScheduleSlots] excludeBookingId:", excludeId);
-  console.log("[buildScheduleSlots] input.bookings:", input.bookings);
 
   const bookings = (input.bookings || [])
     .filter((b) => {
       if (!excludeId) return true;
       const bid = b.id != null ? String(b.id) : "";
       const shouldExclude = bid !== excludeId;
-      console.log(`[buildScheduleSlots] Checking booking ${bid} against exclude ${excludeId}: ${shouldExclude ? "KEEP" : "EXCLUDE"}`);
       return shouldExclude;
     })
     .map((b) => ({
