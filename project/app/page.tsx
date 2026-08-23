@@ -12,6 +12,7 @@ import BookingCTA from "@/components/LandingPage/BookingCTA";
 import TeamGrid from "@/components/LandingPage/TeamGrid";
 import Testimonials from "@/components/LandingPage/Testimonials";
 import Blog from "@/components/LandingPage/Blog";
+import AudienceRouter from "@/components/LandingPage/AudienceRouter";
 import Footer from "@/components/LandingPage/Footer";
 
 export default function LandingPage() {
@@ -29,6 +30,7 @@ export default function LandingPage() {
       <BookingCTA />
       <TeamGrid />
       <Testimonials />
+      <AudienceRouter />
       <Footer />
     </main>
   );
