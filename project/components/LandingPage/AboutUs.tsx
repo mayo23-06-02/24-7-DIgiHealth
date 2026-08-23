@@ -129,7 +129,7 @@ export default function AboutUs() {
 
         {/* Bottom CTA / Story */}
         <div className="mt-16 bg-primary/5 rounded-2xl p-8 md:p-12 text-center">
-          <p className="text-lg md:text-xl text-ink-700 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-ink-600 max-w-2xl mx-auto leading-relaxed">
             “We're not just building an app – we're reimagining how South Africans
             access healthcare. Join us in making quality care a right, not a privilege.”
           </p>
@@ -139,7 +139,7 @@ export default function AboutUs() {
             </div>
             <div className="text-left">
               <p className="font-bold text-ink-900 text-sm">Amanda Mazwi</p>
-              <p className="text-xs text-ink-500">Founder</p>
+              <p className="text-xs text-ink-400">Founder</p>
             </div>
           </div>
         </div>

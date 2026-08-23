@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import SiteHeader from "@/components/LandingPage/SiteHeader";
 import Footer from "@/components/LandingPage/Footer";
 import Button from "@/components/ui/Button";
@@ -57,16 +58,25 @@ export default function ContactPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="pt-36 pb-16 md:pt-44 md:pb-20 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
+      <section className="relative pt-36 pb-16 md:pt-44 md:pb-20 overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?q=80&w=1600&auto=format&fit=crop"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-ink-900/90 via-ink-900/70 to-ink-900/40" />
+        <div className="relative container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="max-w-2xl">
             <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
               Contact
             </span>
-            <h1 className="text-4xl md:text-5xl font-medium text-ink-900 leading-[1.1] tracking-tight font-grotesk mb-4">
+            <h1 className="text-4xl md:text-5xl font-medium text-white leading-[1.1] tracking-tight font-grotesk mb-4">
               Talk to a real person.
             </h1>
-            <p className="text-lg text-ink-600 leading-relaxed">
+            <p className="text-lg text-white/80 leading-relaxed">
               Whatever brought you here, there's a faster way to reach us
               than one generic form.
             </p>
