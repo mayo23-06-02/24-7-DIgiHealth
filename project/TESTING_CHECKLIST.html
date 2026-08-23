@@ -94,6 +94,15 @@
   }
   h1 { margin: 0 0 .4rem; font-size: 1.9rem; letter-spacing: -0.01em; }
   .standfirst { margin: 0; color: var(--ink-2); font-size: .96rem; max-width: 42rem; line-height: 1.5; }
+  .stamp {
+    margin: .9rem 0 0; padding-top: .7rem; border-top: 1px solid var(--rule);
+    color: var(--ink-3); font-size: .8rem; font-family: var(--mono);
+    display: flex; flex-wrap: wrap; gap: .45rem; align-items: baseline;
+  }
+  .stamp strong { color: var(--ink-2); font-weight: 600; }
+  .stamp code { color: var(--primary); }
+  .stamp .age { color: var(--ink-3); }
+  .stamp .age.stale { color: #a8621b; }
 
   nav.toc {
     display: flex;
@@ -238,6 +247,11 @@
       Walk through each area below against <code>localhost:3000</code>. Check items off as you verify them —
       your progress is saved automatically in this browser, so you can close the tab and pick up later.
     </p>
+    <p class="stamp">
+      Last updated <time datetime="2026-08-23T22:55+02:00"><strong>23 August 2026, 22:55 SAST</strong></time>
+      · against build <code>b7e2870</code>
+      · <span id="staleness"></span>
+    </p>
   </header>
 
   <nav class="toc" id="toc"></nav>
@@ -361,6 +375,25 @@ const AREAS = [
     ],
   },
   {
+    id: "profile",
+    title: "Profile & Media",
+    route: "/[role]/profile",
+    items: [
+      "Upload a profile photo — it saves without an error toast",
+      "The new photo appears immediately, without a manual refresh",
+      "The photo is still there after a full page reload (not just a local preview)",
+      "The photo appears in the header/profile menu, not only on the profile page",
+      "Repeat the upload as each role — patient, practitioner, hospital admin, admin",
+      "Replacing an existing photo shows the new one, not the old cached one",
+      "A non-image file (e.g. a .txt) is rejected with a clear message",
+      "An oversized image (>10MB) is rejected with a clear message",
+      "Signed out, pasting an avatar URL directly does not serve the image",
+      "Another user's avatar URL returns 403, not the image",
+      "Upload a medical document and confirm it lists under Documents",
+      "Editing name and mobile saves and survives a reload",
+    ],
+  },
+  {
     id: "crosscutting",
     title: "Cross-Cutting Checks",
     route: "all roles",
@@ -377,6 +410,25 @@ const AREAS = [
 ];
 
 const STORAGE_KEY = "digihealth-qa-checklist-v1";
+
+/**
+ * Show how old this checklist is, so a stale pass can't be mistaken for a
+ * current one. Reads the <time> stamp in the masthead rather than a second
+ * hardcoded date, so there is only ever one date to update.
+ */
+function renderStaleness() {
+  const el = document.getElementById("staleness");
+  const stamp = document.querySelector(".stamp time");
+  if (!el || !stamp) return;
+  const then = new Date(stamp.getAttribute("datetime"));
+  const days = Math.floor((Date.now() - then) / 86400000);
+  const label =
+    days <= 0 ? "updated today" :
+    days === 1 ? "1 day ago" :
+    `${days} days ago`;
+  el.className = "age" + (days > 14 ? " stale" : "");
+  el.textContent = label + (days > 14 ? " — re-run before trusting these results" : "");
+}
 
 function loadState() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
@@ -477,4 +529,5 @@ function resetAll() {
 }
 
 render();
+renderStaleness();
 </script>
