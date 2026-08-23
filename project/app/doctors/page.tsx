@@ -6,12 +6,12 @@ import Image from "next/image";
 import SiteHeader from "@/components/LandingPage/SiteHeader";
 import Footer from "@/components/LandingPage/Footer";
 import Button from "@/components/ui/Button";
+import PublicDoctorGrid from "@/components/doctor/PublicDoctorGrid";
 import {
   BadgeCheck,
   FileCheck2,
   GraduationCap,
   Star,
-  Stethoscope,
   ArrowRight,
 } from "lucide-react";
 
@@ -51,21 +51,6 @@ const specialties = [
   "Women's Health",
   "Endocrinology",
   "Physiotherapy",
-];
-
-const doctors = [
-  {
-    name: "Dr. Oliver Mitchell",
-    specialty: "General Practitioner",
-    facility: "Netcare Milpark Hospital",
-    initials: "OM",
-  },
-  {
-    name: "Dr. Anke van Wyk",
-    specialty: "Cardiologist",
-    facility: "Netcare Milpark Hospital",
-    initials: "AV",
-  },
 ];
 
 export default function DoctorsPage() {
@@ -183,20 +168,7 @@ export default function DoctorsPage() {
               Meet a few of our doctors
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {doctors.map((doc) => (
-              <div key={doc.name} className="bg-white border border-border rounded-2xl p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-primary font-bold font-grotesk">{doc.initials}</span>
-                </div>
-                <p className="font-bold text-ink-900 font-grotesk">{doc.name}</p>
-                <p className="text-sm text-primary font-medium mt-0.5">{doc.specialty}</p>
-                <p className="text-xs text-ink-400 mt-1 flex items-center justify-center gap-1">
-                  <Stethoscope size={12} /> {doc.facility}
-                </p>
-              </div>
-            ))}
-          </div>
+          <PublicDoctorGrid limit={4} />
           <div className="text-center mt-8">
             <Link href="/patients" className="text-primary font-semibold text-sm hover:underline">
               See how patients book a consultation →

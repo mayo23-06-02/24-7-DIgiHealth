@@ -7,6 +7,7 @@ import TickerBar from "@/components/LandingPage/TickerBar";
 import Approach from "@/components/LandingPage/Approach";
 import WhyChooseUs from "@/components/LandingPage/WhyChooseUs";
 import TrustStrip from "@/components/LandingPage/TrustStrip";
+import DoctorsSection from "@/components/LandingPage/DoctorsSection";
 import ProcessSteps from "@/components/LandingPage/ProcessSteps";
 import BookingCTA from "@/components/LandingPage/BookingCTA";
 import TeamGrid from "@/components/LandingPage/TeamGrid";
@@ -26,6 +27,7 @@ export default function LandingPage() {
       <Approach />
       <WhyChooseUs />
       <TrustStrip />
+      <DoctorsSection />
       <ProcessSteps />
       <BookingCTA />
       <TeamGrid />
