@@ -36,6 +36,19 @@ export async function canViewMedicalHistory(guardianId: string, memberId: string
   return !!link && link.isMinor === true;
 }
 
+/**
+ * Match a guardian's FamilyLink rows regardless of id shape.
+ *
+ * `guardianKey` is written for every new link; `guardianId` is only set when
+ * the id can be cast to an ObjectId, and remains the only field on rows
+ * created before this existed.
+ */
+export function guardianFilter(guardianId: string) {
+  const or: Record<string, unknown>[] = [{ guardianKey: String(guardianId) }];
+  if (isMongoObjectId(guardianId)) or.push({ guardianId });
+  return { $or: or };
+}
+
 export interface FamilySlots {
   tier: SubscriptionTier;
   maxFamilyMembers: number;
@@ -43,20 +56,28 @@ export interface FamilySlots {
   remaining: number;
 }
 
-/** How many more family members this guardian's plan allows them to add.
- * Subscription/FamilyLink are still Mongo-only — a Postgres-native guardian
- * (uuid id) has no rows in either, so report zero slots rather than let
- * Mongoose throw casting the uuid into an ObjectId query. */
+/**
+ * How many more family members this guardian's plan allows them to add.
+ *
+ * Postgres-native guardians used to be short-circuited to zero slots on the
+ * assumption they had no subscription row. Since checkout writes `patientKey`
+ * they do — so a patient who had just paid for a Family plan was told their
+ * "individual plan includes 0 family member(s)" and could never invite anyone.
+ * The subscription is now resolved through the shared filter, which matches on
+ * either id shape.
+ */
 export async function getGuardianFamilySlots(guardianId: string): Promise<FamilySlots> {
-  if (!isMongoObjectId(guardianId)) {
-    return { tier: 'individual', maxFamilyMembers: 0, used: 0, remaining: 0 };
-  }
-
-  const sub = await Subscription.findOne({ patientId: guardianId, status: 'active' }).lean();
+  const sub = await Subscription.findOne({
+    ...subscriptionFilter(guardianId),
+    status: 'active',
+  }).lean();
   const tier: SubscriptionTier = sub && isValidTier((sub as any).tier) ? (sub as any).tier : 'individual';
   const maxFamilyMembers = TIER_CONFIG[tier].maxFamilyMembers;
 
-  const used = await FamilyLink.countDocuments({ guardianId, status: { $in: ['pending', 'active'] } });
+  const used = await FamilyLink.countDocuments({
+    ...guardianFilter(guardianId),
+    status: { $in: ['pending', 'active'] },
+  });
 
   return { tier, maxFamilyMembers, used, remaining: Math.max(0, maxFamilyMembers - used) };
 }

@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IFamilyLink extends Document {
-  guardianId: Types.ObjectId;
+  guardianId?: Types.ObjectId;
+  guardianKey?: string;
+  memberKey?: string;
   /** Unset until an email-invited adult actually accepts (they may not have
    * an account yet at invite time) — inviteEmail identifies them until then. */
   memberId?: Types.ObjectId;
@@ -25,7 +27,13 @@ export interface IFamilyLink extends Document {
 
 const FamilyLinkSchema = new Schema<IFamilyLink>(
   {
-    guardianId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    // Not required: a Postgres-native guardian has a uuid, which cannot be
+    // cast into an ObjectId field. Those rows carry guardianKey instead.
+    guardianId: { type: Schema.Types.ObjectId, ref: 'User' },
+    /** Guardian's session id as a plain string — works for uuid and ObjectId alike. */
+    guardianKey: { type: String, index: true },
+    /** Member's session id as a plain string, once the invite is accepted. */
+    memberKey: { type: String, index: true },
     memberId: { type: Schema.Types.ObjectId, ref: 'User' },
     inviteEmail: { type: String, lowercase: true, trim: true },
     inviteName: { type: String, trim: true },

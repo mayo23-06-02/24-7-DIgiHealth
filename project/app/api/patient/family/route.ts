@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import FamilyLink from '@/lib/models/FamilyLink';
-import { getGuardianFamilySlots } from '@/lib/family/access';
+import { getGuardianFamilySlots , guardianFilter } from '@/lib/family/access';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
@@ -30,17 +30,31 @@ export async function GET() {
     };
     let patientProfile: any = null;
 
+    // The guardian side and the slot count work for both id shapes: links now
+    // carry guardianKey, and the subscription behind the slot count is resolved
+    // the same way. Previously this whole block was skipped for a uuid account,
+    // so someone who had paid for a Family plan saw an empty family page and a
+    // zero allowance.
+    [asGuardian, slots] = await Promise.all([
+      FamilyLink.find({
+        ...guardianFilter(String(user.userId)),
+        status: { $in: ['pending', 'active'] },
+      })
+        .populate('memberId', 'firstName lastName email')
+        .sort({ createdAt: -1 })
+        .lean(),
+      getGuardianFamilySlots(user.userId),
+    ]);
+
+    // The member side still resolves through ObjectId-typed memberId/guardianId
+    // and its populate, so it stays gated. A uuid account can invite family but
+    // will not yet see a family it has been invited into.
     if (hasMongoIdentity) {
-      [asGuardian, asMember, slots, patientProfile] = await Promise.all([
-        FamilyLink.find({ guardianId: user.userId, status: { $in: ['pending', 'active'] } })
-          .populate('memberId', 'firstName lastName email')
-          .sort({ createdAt: -1 })
-          .lean(),
+      [asMember, patientProfile] = await Promise.all([
         FamilyLink.find({ memberId: user.userId, status: 'active' })
           .populate('guardianId', 'firstName lastName email')
           .sort({ createdAt: -1 })
           .lean(),
-        getGuardianFamilySlots(user.userId),
         PatientProfile.findOne({ userId: user.userId }).lean(),
       ]);
     }

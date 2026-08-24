@@ -4,7 +4,8 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import User from '@/lib/models/User';
 import FamilyLink, { syncFamilyLinkIndexes } from '@/lib/models/FamilyLink';
-import { getGuardianFamilySlots } from '@/lib/family/access';
+import { getGuardianFamilySlots, guardianFilter } from '@/lib/family/access';
+import { isMongoObjectId } from '@/lib/utils/mongoId';
 import { getAppOrigin, normalizeEmail, isValidEmail } from '@/lib/supabase/auth';
 import { sendEmail } from '@/lib/email/postmark';
 import { familyInviteEmailHtml } from '@/lib/email/templates/familyInvite';
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     // Superseding a prior pending invite avoids two live links to the same person.
     await FamilyLink.updateMany(
-      { guardianId: guardian.userId, inviteEmail: email, status: 'pending' },
+      { ...guardianFilter(String(guardian.userId)), inviteEmail: email, status: 'pending' },
       { status: 'revoked', revokedAt: new Date() },
     );
 
@@ -62,7 +63,11 @@ export async function POST(req: NextRequest) {
     const inviteExpiresAt = new Date(Date.now() + INVITE_TTL_MINUTES * 60 * 1000);
 
     const linkData: any = {
-      guardianId: guardian.userId,
+      // guardianKey works for both id shapes; guardianId is only set when the
+      // id can actually be cast to an ObjectId. Writing the uuid into the
+      // ObjectId field would throw and fail the invite outright.
+      guardianKey: String(guardian.userId),
+      ...(isMongoObjectId(guardian.userId) ? { guardianId: guardian.userId } : {}),
       inviteEmail: email,
       inviteName,
       relationship,
