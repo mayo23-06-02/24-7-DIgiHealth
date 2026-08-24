@@ -27,13 +27,11 @@ export default function LandingPage() {
       <TickerBar />
       <Approach />
       <WhyChooseUs />
-      <TrustStrip />
       <WhyUrgentCare />
       <DoctorsSection />
       <ProcessSteps />
       <BookingCTA />
-      <TeamGrid />
-      <Testimonials />
+   
       <AudienceRouter />
       <Footer />
     </main>

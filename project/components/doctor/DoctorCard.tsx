@@ -126,7 +126,7 @@ export default function DoctorCard({
       </div>
 
       {bio && (
-        <div className="">
+        <div className="mb-6">
           <p className="text-sm text-ink-600  line-clamp-3 cursor-default">
             "{bio}"
           </p>
@@ -184,11 +184,7 @@ export default function DoctorCard({
                 {lang}
               </span>
             ))}
-            {extraLanguages > 0 && (
-              <span className="text-[10px] font-semibold bg-surface-soft text-ink-600 px-2 py-0.5 rounded-full">
-                +{extraLanguages}
-              </span>
-            )}
+           
           </div>
         </div>
 

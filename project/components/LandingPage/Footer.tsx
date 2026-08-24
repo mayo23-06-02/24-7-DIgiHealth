@@ -1,30 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-
-const quickLinks = [
-  { name: "Home", href: "/" },
-  { name: "About", href: "/about" },
-  { name: "Services", href: "/#approach" },
-  { name: "Contact", href: "/#testimonials" },
-];
-// Both lists previously pointed at "#services" / "#team" — neither anchor
-// exists on the page, so every one of these links was a no-op. They now target
-// sections that actually render, or the signup flow where that's the real intent.
-const services = [
-  { name: "General Medicine", href: "/#approach" },
-  { name: "Dental Care", href: "/#approach" },
-  { name: "Pediatrics", href: "/#approach" },
-  { name: "Women's Health", href: "/#approach" },
-  { name: "Cardiology", href: "/#approach" },
-  { name: "Physiotherapy", href: "/#approach" },
-];
-const doctors = [
-  { name: "Our Specialists", href: "/#why-choose-us" },
-  { name: "Qualifications & Expertise", href: "/about" },
-  { name: "Patient Reviews", href: "/#testimonials" },
-  { name: "Join Our Team", href: "/register" },
-];
+import { FOOTER_COLUMNS } from "@/config/site";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -120,62 +97,27 @@ export default function Footer() {
           <div
             className="lg:w-8/12 flex flex-col sm:flex-row w-full sm:justify-between gap-10 md:gap-8 lg:pl-12 pt-5 pb-2.5"
           >
-            {/* Quick Links */}
-            <div className="flex flex-col col-span-1 gap-4">
-              <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
-                Quick Links
-              </h4>
-              <ul className="flex flex-col gap-4">
-                {quickLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-white/80 hover:text-white transition-colors text-[0.95rem]"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Our Services */}
-            <div className="flex flex-col col-span-1 gap-4">
-              <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
-                Our Services
-              </h4>
-              <ul className="flex flex-col gap-4">
-                {services.map((service) => (
-                  <li key={service.name}>
-                    <Link
-                      href={service.href}
-                      className="text-white/80 hover:text-white transition-colors text-[0.95rem] inline-flex items-center min-h-11"
-                    >
-                      {service.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Doctors */}
-            <div className="flex flex-col gap-4">
-              <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
-                Doctors
-              </h4>
-              <ul className="flex flex-col gap-4">
-                {doctors.map((doc) => (
-                  <li key={doc.name}>
-                    <Link
-                      href={doc.href}
-                      className="text-white/80 hover:text-white transition-colors text-[0.95rem] inline-flex items-center min-h-11"
-                    >
-                      {doc.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Columns come from config/site.ts, so adding a footer link is a
+                one-line change there rather than an edit to this markup. */}
+            {FOOTER_COLUMNS.map((column) => (
+              <div key={column.heading} className="flex flex-col gap-4">
+                <h4 className="font-semibold text-[1.05rem] text-white mb-3 font-grotesk">
+                  {column.heading}
+                </h4>
+                <ul className="flex flex-col gap-4">
+                  {column.links.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-white/80 hover:text-white transition-colors text-[0.95rem] inline-flex items-center min-h-11"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
