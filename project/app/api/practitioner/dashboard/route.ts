@@ -43,10 +43,29 @@ export async function GET(req: NextRequest) {
       }).sort({ scheduledStartTime: 1 }).lean()
     ]);
 
-    // Populate patient names for both sets
+    // Patient names for both sets, fetched in one query rather than one per
+    // consultation. The previous version issued a findById inside the map, so
+    // a practitioner with a full book paid a round trip per row — twice, since
+    // mapCons runs over the upcoming and pending lists separately.
+    const patientIds = [
+      ...new Set(
+        [...consultations, ...pendingConsultations]
+          .map((c: any) => c.patientId?.toString())
+          .filter(Boolean),
+      ),
+    ];
+    const patientDocs = patientIds.length
+      ? await User.find({ _id: { $in: patientIds } })
+          .select('firstName lastName')
+          .lean()
+      : [];
+    const patientsById = new Map(
+      patientDocs.map((u: any) => [u._id.toString(), u]),
+    );
+
     const mapCons = async (list: any[]) => Promise.all(
       list.map(async (c: any) => {
-        const userDoc = await User.findById(c.patientId).lean();
+        const userDoc = patientsById.get(c.patientId?.toString());
         const patientName = userDoc ? `${userDoc.firstName} ${userDoc.lastName}` : 'Unknown Patient';
         const initials = patientName
           .split(' ')
@@ -105,32 +124,38 @@ export async function GET(req: NextRequest) {
         factors: q.riskFactors,
       }));
 
-    // Total count for today
-    const upcomingCount = await Consultation.countDocuments({
-      practitionerId,
-      scheduledStartTime: { $gte: now, $lte: todayEnd },
-      status: { $in: ['scheduled', 'in_progress'] },
-    });
-
-    // --- Metric Calculations ---
-    // 1. Total unique visitors (patients)
-    const uniquePatientIds = await Consultation.find({ practitionerId }).distinct('patientId');
-    const totalVisitors = uniquePatientIds.length;
-
-    // 2. Canceled appointments this week
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
-    const canceledThisWeek = await Consultation.countDocuments({
-      practitionerId,
-      status: 'cancelled',
-      scheduledStartTime: { $gte: startOfWeek }
-    });
 
-    // 3. Patient Growth (New patients over time)
-    // Get first consultation date for each patient
-    const allConsultations = await Consultation.find({ practitionerId })
-      .sort({ createdAt: 1 })
-      .lean();
+    // These four don't depend on one another, so they go out together instead
+    // of paying four sequential round trips. This route was the slowest
+    // endpoint on the platform at ~3.8s, and it is the one a doctor waits on
+    // at the start of every shift.
+    const [
+      upcomingCount,
+      uniquePatientIds,
+      canceledThisWeek,
+      allConsultations,
+    ] = await Promise.all([
+      // Total count for today
+      Consultation.countDocuments({
+        practitionerId,
+        scheduledStartTime: { $gte: now, $lte: todayEnd },
+        status: { $in: ['scheduled', 'in_progress'] },
+      }),
+      // 1. Total unique visitors (patients)
+      Consultation.find({ practitionerId }).distinct('patientId'),
+      // 2. Canceled appointments this week
+      Consultation.countDocuments({
+        practitionerId,
+        status: 'cancelled',
+        scheduledStartTime: { $gte: startOfWeek },
+      }),
+      // 3. Patient growth — first consultation date per patient
+      Consultation.find({ practitionerId }).sort({ createdAt: 1 }).lean(),
+    ]);
+
+    const totalVisitors = uniquePatientIds.length;
     
     // Track first consultation for each patient
     const patientFirstConsultation = new Map<string, Date>();
@@ -175,31 +200,43 @@ export async function GET(req: NextRequest) {
     const yesterdayEnd = new Date(yesterdayStart);
     yesterdayEnd.setHours(23,59,59,999);
 
-    const countYesterday = await Consultation.countDocuments({
-      practitionerId,
-      scheduledStartTime: { $gte: yesterdayStart, $lte: yesterdayEnd },
-      status: { $in: ['scheduled', 'in_progress', 'completed'] },
-    });
-    const upcomingTrend = countYesterday === 0 ? 0 : parseFloat((((upcomingCount - countYesterday) / countYesterday) * 100).toFixed(1));
-
     const lastWeekStart = new Date(now);
     lastWeekStart.setDate(now.getDate() - 7);
-    const uniquePatientIdsLastWeek = await Consultation.find({ 
-      practitionerId,
-      createdAt: { $lt: lastWeekStart }
-    }).distinct('patientId');
-    const totalVisitorsLastWeek = uniquePatientIdsLastWeek.length;
-    const visitorsTrend = totalVisitorsLastWeek === 0 ? 0 : parseFloat((((totalVisitors - totalVisitorsLastWeek) / totalVisitorsLastWeek) * 100).toFixed(1));
 
     // 4. Earnings & Payout Tracker Data
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const recentTransactions = await PaymentTransaction.find({
-      practitionerId,
-      status: 'completed',
-      timestamp: { $gte: sevenDaysAgo }
-    }).lean();
+    // Second independent batch: two trend queries and both transaction reads.
+    const [
+      countYesterday,
+      uniquePatientIdsLastWeek,
+      recentTransactions,
+      allTransactions,
+    ] = await Promise.all([
+      Consultation.countDocuments({
+        practitionerId,
+        scheduledStartTime: { $gte: yesterdayStart, $lte: yesterdayEnd },
+        status: { $in: ['scheduled', 'in_progress', 'completed'] },
+      }),
+      Consultation.find({
+        practitionerId,
+        createdAt: { $lt: lastWeekStart },
+      }).distinct('patientId'),
+      PaymentTransaction.find({
+        practitionerId,
+        status: 'completed',
+        timestamp: { $gte: sevenDaysAgo },
+      }).lean(),
+      PaymentTransaction.find({
+        practitionerId,
+        status: 'completed',
+      }).lean(),
+    ]);
+
+    const upcomingTrend = countYesterday === 0 ? 0 : parseFloat((((upcomingCount - countYesterday) / countYesterday) * 100).toFixed(1));
+    const totalVisitorsLastWeek = uniquePatientIdsLastWeek.length;
+    const visitorsTrend = totalVisitorsLastWeek === 0 ? 0 : parseFloat((((totalVisitors - totalVisitorsLastWeek) / totalVisitorsLastWeek) * 100).toFixed(1));
 
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const earningsMap: Record<string, number> = {};
@@ -232,11 +269,6 @@ export async function GET(req: NextRequest) {
       fees: parseFloat(feesMap[label].toFixed(2))
     }));
 
-    const allTransactions = await PaymentTransaction.find({
-      practitionerId,
-      status: 'completed'
-    }).lean();
-
     let totalGross = 0;
     let totalNet = 0;
     let totalFees = 0;
@@ -246,10 +278,16 @@ export async function GET(req: NextRequest) {
       totalFees += tx.platformFeeAmount || 0;
     });
 
-    const recentPayouts = await PayoutRequest.find({ practitionerId })
-      .sort({ requestedAt: -1 })
-      .limit(5)
-      .lean();
+    // Final independent batch: payouts plus the practitioner's own record.
+    const [recentPayouts, practitionerUser, practitionerProfile] =
+      await Promise.all([
+        PayoutRequest.find({ practitionerId })
+          .sort({ requestedAt: -1 })
+          .limit(5)
+          .lean(),
+        User.findById(practitionerId).lean(),
+        PractitionerProfile.findOne({ userId: practitionerId }).lean(),
+      ]);
 
     const formattedPayouts = recentPayouts.map((p: any) => ({
       payoutId: p._id.toString(),
@@ -260,10 +298,6 @@ export async function GET(req: NextRequest) {
       periodTo: p.periodTo,
       consultationCount: p.consultationCount
     }));
-
-    // Fetch practitioner profile details for the response
-    const practitionerUser = await User.findById(practitionerId).lean();
-    const practitionerProfile = await PractitionerProfile.findOne({ userId: practitionerId }).lean();
 
     return NextResponse.json({
       success: true,

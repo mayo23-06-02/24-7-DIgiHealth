@@ -106,24 +106,32 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        const latestConsult = await Consultation.findOne({
-          patientId: p._id,
-          practitionerId,
-          status: { $in: ['completed', 'cancelled'] },
-        })
-          .sort({ scheduledStartTime: -1 })
-          .select('scheduledStartTime clinicalRisk')
-          .lean();
-
-        const nextConsult = await Consultation.findOne({
-          patientId: p._id,
-          practitionerId,
-          scheduledStartTime: { $gte: new Date() },
-          status: { $in: ['scheduled', 'in_progress', 'pending', 'requested'] },
-        })
-          .sort({ scheduledStartTime: 1 })
-          .select('scheduledStartTime')
-          .lean();
+        // These three lookups are independent of one another, so they go out
+        // together. Run sequentially they cost three round trips per patient,
+        // which is what made this route the second slowest on the platform.
+        const [latestConsult, nextConsult, medicalCtx] = await Promise.all([
+          Consultation.findOne({
+            patientId: p._id,
+            practitionerId,
+            status: { $in: ['completed', 'cancelled'] },
+          })
+            .sort({ scheduledStartTime: -1 })
+            .select('scheduledStartTime clinicalRisk')
+            .lean(),
+          Consultation.findOne({
+            patientId: p._id,
+            practitionerId,
+            scheduledStartTime: { $gte: new Date() },
+            status: { $in: ['scheduled', 'in_progress', 'pending', 'requested'] },
+          })
+            .sort({ scheduledStartTime: 1 })
+            .select('scheduledStartTime')
+            .lean(),
+          MedicalContext.findOne({ patientId: p._id })
+            .select('chronicConditions')
+            .lean()
+            .catch(() => null),
+        ]);
 
         const storedRisk = riskByUser.get(p._id.toString());
         const riskScore =
@@ -136,15 +144,9 @@ export async function GET(req: NextRequest) {
         // Optional risk filter: green | gray | orange | red
         if (riskFilter && riskColor !== riskFilter) return null;
 
-        let chronicConditions: string[] = [];
-        try {
-          const ctx = await MedicalContext.findOne({ patientId: p._id })
-            .select('chronicConditions')
-            .lean();
-          if (ctx) chronicConditions = ctx.chronicConditions || [];
-        } catch {
-          /* ignore */
-        }
+        const chronicConditions: string[] =
+          (medicalCtx as { chronicConditions?: string[] } | null)
+            ?.chronicConditions || [];
 
         const link = familyLinkByMember.get(p._id.toString());
         const displayEmail = link?.guardianId?.email || p.email;
