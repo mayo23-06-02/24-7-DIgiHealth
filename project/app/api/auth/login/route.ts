@@ -55,8 +55,20 @@ interface LoginUser {
  */
 async function findLoginUser(identifier: string): Promise<LoginUser | null> {
   await connectToDatabase();
+
+  /*
+   * Addresses are stored lower-cased (User schema sets `lowercase: true`), so
+   * an identifier typed with any capitals matched nothing and the account was
+   * told its credentials were invalid. Phone keyboards capitalise the first
+   * letter by default, which made this easy to hit and impossible to diagnose
+   * from the error message.
+   *
+   * SA ID numbers are digits, so lower-casing is a no-op for that branch.
+   */
+  const normalized = identifier.toLowerCase();
+
   const mongoUser = await User.findOne({
-    $or: [{ email: identifier }, { saId: identifier }],
+    $or: [{ email: normalized }, { saId: identifier }],
   });
 
   if (mongoUser) {
@@ -72,11 +84,14 @@ async function findLoginUser(identifier: string): Promise<LoginUser | null> {
     };
   }
 
-  return findPostgresOnlyUser(identifier);
+  return findPostgresOnlyUser(identifier, normalized);
 }
 
 /** Accounts with no Mongo row at all — seeded straight into Postgres. */
-async function findPostgresOnlyUser(identifier: string): Promise<LoginUser | null> {
+async function findPostgresOnlyUser(
+  identifier: string,
+  normalized: string,
+): Promise<LoginUser | null> {
   // Two separate parameterized .eq() lookups rather than a single .or()
   // filter string — PostgREST's .or() syntax interpolates the raw string,
   // so passing user input straight into it (commas/periods/parens are
@@ -88,7 +103,7 @@ async function findPostgresOnlyUser(identifier: string): Promise<LoginUser | nul
   let { data, error } = await supabase
     .from("users")
     .select(columns)
-    .eq("email", identifier)
+    .eq("email", normalized)
     .maybeSingle();
 
   if (!error && !data) {

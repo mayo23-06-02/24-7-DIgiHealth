@@ -1,0 +1,70 @@
+24/7 DigiHealth — AUTH use-case suite
+Environment : https://24-7-d-igi-health.vercel.app
+Started     : 2026-08-24T15:55:34.643Z (2026/08/24, 17:55:34 SAST)
+
+════════════════════════════════════════════════════════════════════════
+1 · INPUT VALIDATION
+════════════════════════════════════════════════════════════════════════
+  FAIL  V-01    empty body rejected as 400  — HTTP 429 {"error":"Too many requests. Please try again later."}
+  FAIL  V-02    password missing rejected as 400  — HTTP 429 {"error":"Too many requests. Please try again later."}
+  PASS  V-05    Malformed JSON does not 500  — HTTP 429
+
+════════════════════════════════════════════════════════════════════════
+2 · SESSION & AUTHORIZATION
+════════════════════════════════════════════════════════════════════════
+  PASS  S-01    /api/user/profile requires auth  — HTTP 401
+  PASS  S-02    /api/billing requires auth  — HTTP 401
+  PASS  S-03    /api/patient/family requires auth  — HTTP 401
+  PASS  S-04    /api/practitioner/dashboard requires auth  — HTTP 401
+  PASS  S-05    Forged session token rejected  — HTTP 401
+  PASS  S-06    x-user-id header alone grants nothing  — HTTP 401 {"error":"Unauthorized"}
+  PASS  S-07    Dashboard redirects anonymous users to login  — HTTP 307 -> /login
+
+════════════════════════════════════════════════════════════════════════
+3 · PASSWORD RESET
+════════════════════════════════════════════════════════════════════════
+  FAIL  R-01    Missing token refused  — HTTP 429 Too many requests. Please try again later.
+  FAIL  R-02    Invalid token refused  — HTTP 429 Too many requests. Please try again later.
+  FAIL  R-03    Confirmation mismatch refused  — HTTP 429 Too many requests. Please try again later.
+  PASS  R-05    Forgot-password does not reveal whether an account exists  — known 200 vs unknown 200, identical bodies
+
+════════════════════════════════════════════════════════════════════════
+4 · EMAIL VERIFICATION
+════════════════════════════════════════════════════════════════════════
+  PASS  E-01    OTP send handles an unknown address without leaking  — HTTP 429 {"error":"Too many requests. Please try again later."}
+  PASS  E-02    OTP send resolves a Postgres-native account  — HTTP 429 {"error":"Too many requests. Please try again later."}  [known gap: otp/send reads Mongo only]
+  PASS  E-03    Wrong code refused  — HTTP 404 {"error":"Account not found"}
+  PASS  E-04    Verify never issues a session cookie  — 0 cookie(s), none a session token
+  PASS  E-05    Malformed code refused  — HTTP 404
+
+════════════════════════════════════════════════════════════════════════
+5 · CREDENTIALS  (uses the 5-per-15-min login budget)
+════════════════════════════════════════════════════════════════════════
+  ..  waiting out the login window so these are measured, not rate-limited
+  PASS  C-01    Wrong password rejected  — HTTP 401
+  PASS  C-02    Unknown account is indistinguishable from a wrong password  — wrong-pw 401 vs unknown 401, identical bodies
+  FAIL  C-03    Identifier is case-insensitive  — HTTP 401 for an upper-cased address
+  PASS  C-04    Correct password signs in  — HTTP 200 {"mfaRequired":false,"emailVerified":true,"userId":"7d247e2c-ca4a-4140-b6f8-6da7
+  PASS  C-05    Session cookie is HttpOnly and SameSite  — Path=/; Expires=Tue, 25 Aug 2026 16:11:14 GMT; Max-Age=86400; Secure; HttpOnly; SameSite=lax
+  PASS  C-06    Session authenticates a protected route  — HTTP 200 {"success":true,"data":{"id":"7d247e2c-ca4a-4140-b6f8-6da7f2
+  PASS  C-07    Logout succeeds  — HTTP 200
+  PASS  C-08    Session is dead after logout  — HTTP 401
+
+════════════════════════════════════════════════════════════════════════
+6 · RATE LIMITING
+════════════════════════════════════════════════════════════════════════
+  PASS  L-01    Login rate limiting engages  — 9/10 returned 429 · codes: 401, 429
+  PASS  L-02    429 carries rate-limit headers  — limit=5 reset=2026-08-24T16:26:17.390Z
+
+════════════════════════════════════════════════════════════════════════
+SUMMARY
+════════════════════════════════════════════════════════════════════════
+  29 checks · PASS 23 · FAIL 6 · SKIP 0
+
+  Failures:
+   · V-01 empty body rejected as 400 — HTTP 429 {"error":"Too many requests. Please try again later."}
+   · V-02 password missing rejected as 400 — HTTP 429 {"error":"Too many requests. Please try again later."}
+   · R-01 Missing token refused — HTTP 429 Too many requests. Please try again later.
+   · R-02 Invalid token refused — HTTP 429 Too many requests. Please try again later.
+   · R-03 Confirmation mismatch refused — HTTP 429 Too many requests. Please try again later.
+   · C-03 Identifier is case-insensitive — HTTP 401 for an upper-cased address

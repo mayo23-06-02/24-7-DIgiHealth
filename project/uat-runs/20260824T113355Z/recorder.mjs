@@ -30,20 +30,30 @@ export class Recorder {
     this.line("═".repeat(72));
   }
 
-  /** Record one verified expectation. */
+  /**
+   * Record one verified expectation.
+   *
+   * A detail mentioning 429 is recorded as INCONCLUSIVE rather than PASS or
+   * FAIL. The rate limiter is global and shared with the suite itself, so a
+   * throttled request proves nothing either way — and a check whose assertion
+   * happens to tolerate a 429 would otherwise report a hollow pass.
+   */
   check(id, area, name, pass, detail, extra = {}) {
+    const throttled = /429|Too many requests/i.test(String(detail));
     const step = {
       id,
       area,
       name,
-      status: pass === null ? "SKIP" : pass ? "PASS" : "FAIL",
+      status: throttled
+        ? "INCONCLUSIVE"
+        : pass === null ? "SKIP" : pass ? "PASS" : "FAIL",
       detail,
       at: new Date().toISOString(),
       ...extra,
     };
     this.steps.push(step);
     fs.appendFileSync(this.jsonl, JSON.stringify(step) + "\n");
-    const tag = { PASS: "PASS", FAIL: "FAIL", SKIP: "SKIP" }[step.status];
+    const tag = { PASS: "PASS", FAIL: "FAIL", SKIP: "SKIP", INCONCLUSIVE: "----" }[step.status];
     this.line(`  ${tag}  ${id.padEnd(7)} ${name}${detail ? "  — " + detail : ""}`);
     return pass;
   }
@@ -92,8 +102,14 @@ export class Recorder {
     );
     this.section("SUMMARY");
     this.line(
-      `  ${this.steps.length} checks · PASS ${counts.PASS || 0} · FAIL ${counts.FAIL || 0} · SKIP ${counts.SKIP || 0}`,
+      `  ${this.steps.length} checks · PASS ${counts.PASS || 0} · FAIL ${counts.FAIL || 0}` +
+        ` · SKIP ${counts.SKIP || 0} · INCONCLUSIVE ${counts.INCONCLUSIVE || 0}`,
     );
+    const throttled = this.steps.filter((s) => s.status === "INCONCLUSIVE");
+    if (throttled.length) {
+      this.line("\n  Rate-limited, so proving nothing — re-run these in isolation:");
+      for (const t of throttled) this.line(`   · ${t.id} ${t.name}`);
+    }
     const failures = this.steps.filter((s) => s.status === "FAIL");
     if (failures.length) {
       this.line("\n  Failures:");
