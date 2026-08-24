@@ -1,14 +1,35 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useNavigate } from "@/hooks/useNavigate";
 import {
   validatePassword,
   validatePasswordConfirmation,
 } from "@/lib/auth/passwordRules";
 
+/**
+ * The /forgot-password screen serves two stages of one flow:
+ *
+ *   "request" — no token in the URL. Ask for the account's email or SA ID and
+ *               have /api/auth/forgot-password send a reset link.
+ *   "reset"   — arrived from that emailed link, which carries ?token=. Choose
+ *               the new password.
+ *
+ * Previously the screen only ever rendered the second stage and posted
+ * { identifier, password } to /api/auth/reset-password — which requires a
+ * token. The two were never compatible, so the form failed with "Reset token
+ * is required." every single time, for everyone. It was not an edge case.
+ *
+ * The token is deliberately still required. Resetting a password from an
+ * identifier alone would let anyone who knows an email address take over the
+ * account, so proving control of the inbox is the whole point of the flow.
+ */
 export function useForgotPassword() {
   const { navigate, isPending } = useNavigate();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token")?.trim() || "";
+  const mode: "request" | "reset" = token ? "reset" : "request";
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -17,28 +38,47 @@ export function useForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [sent, setSent] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{
     identifier?: string;
     password?: string;
     confirmPassword?: string;
   }>({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    // Client-side checks are UX only — the API re-validates.
-    const next: typeof fieldErrors = {};
+  /** Stage 1 — ask for a reset link. */
+  const requestLink = async () => {
     if (!identifier.trim()) {
-      next.identifier = "Enter the email or ID for your account.";
+      setFieldErrors({ identifier: "Enter the email or ID for your account." });
+      return;
     }
+    setFieldErrors({});
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        // The response is deliberately the same whether or not the account
+        // exists, so this must not claim an email "has been sent".
+        setSent(true);
+      } else {
+        setError(data.error || "Could not send a reset link. Try again.");
+      }
+    } catch {
+      setError("Network error");
+    }
+    setLoading(false);
+  };
+
+  /** Stage 2 — set the new password using the emailed token. */
+  const submitNewPassword = async () => {
+    const next: typeof fieldErrors = {};
     const passwordError = validatePassword(password);
     if (passwordError) next.password = passwordError;
-
-    const confirmError = validatePasswordConfirmation(
-      password,
-      confirmPassword,
-    );
+    const confirmError = validatePasswordConfirmation(password, confirmPassword);
     if (confirmError) next.confirmPassword = confirmError;
 
     setFieldErrors(next);
@@ -49,25 +89,15 @@ export function useForgotPassword() {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          identifier: identifier.trim(),
-          password,
-          confirmPassword,
-        }),
+        body: JSON.stringify({ token, password, confirmPassword }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSuccess(true);
         // Deliberately leave `loading` set: the button keeps its spinner
         // through the redirect rather than going idle mid-navigation.
-        // `email` is the param LoginForm already reads to prefill the
-        // identifier field, so the user lands with it filled in.
-        setTimeout(() => {
-          navigate(
-            `/login?reset=true&email=${encodeURIComponent(identifier.trim())}`,
-          );
-        }, 1200);
+        setTimeout(() => navigate("/login?reset=true"), 1200);
         return;
       }
 
@@ -79,17 +109,27 @@ export function useForgotPassword() {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (mode === "request") return requestLink();
+    return submitNewPassword();
+  };
+
   return {
+    mode,
+    sent,
     identifier,
     setIdentifier,
     password,
     setPassword,
     confirmPassword,
     setConfirmPassword,
-    loading: loading || isPending,
+    loading,
     error,
     success,
     fieldErrors,
     handleSubmit,
+    isPending,
   };
 }

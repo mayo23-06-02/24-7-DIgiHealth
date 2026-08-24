@@ -84,7 +84,7 @@ export default function DoctorCard({
           {doctor.avatar ? (
             <img src={doctor.avatar} alt={doctor.name} className="w-full h-full object-cover" />
           ) : (
-            <Avatar name={doctor.name} size="sm" />
+            <Avatar name={doctor.name} size="md" />
           )}
         </Link>
         <div className="flex-1 flex flex-col items-start min-w-0">

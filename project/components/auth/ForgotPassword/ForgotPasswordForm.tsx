@@ -19,20 +19,25 @@ export default function ForgotPasswordForm() {
     loading,
     error,
     success,
+    sent,
+    mode,
     fieldErrors,
     handleSubmit,
   } = useForgotPassword();
+
+  const isReset = mode === "reset";
 
   return (
     <div className="bg-white rounded-lg w-full max-w-lg mx-auto p-6 md:p-10 py-12 flex flex-col justify-center">
       {/* Header */}
       <div className="mb-6 gap-4 flex flex-col">
         <h2 className="text-2xl font-bold text-slate-900 leading-[0.95] tracking-tighter mb-2.5 font-grotesk">
-          Reset Password
+          {isReset ? "Choose a New Password" : "Reset Password"}
         </h2>
         <p className="text-slate-500 max-w-[380px] text-sm lg:text-base">
-          Choose a new password for your account. You&apos;ll use it to sign in
-          from now on.
+          {isReset
+            ? "Choose a new password for your account. You'll use it to sign in from now on."
+            : "Enter the email or SA ID on your account and we'll send you a link to reset your password."}
         </p>
       </div>
 
@@ -44,19 +49,34 @@ export default function ForgotPasswordForm() {
           <BiCheckCircle size={20} />
           Password updated — taking you to sign in…
         </div>
+      ) : sent ? (
+        // Worded so it holds whether or not the address is registered — the
+        // API answers identically either way so that this page can't be used
+        // to find out which addresses have accounts.
+        <div
+          className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm font-semibold text-center"
+          role="status"
+        >
+          <BiCheckCircle size={20} className="inline mb-1 mr-1" />
+          If that account exists, a reset link is on its way. The link is valid
+          for 10 minutes.
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-6 mb-7.5">
-            <Input
-              label="Email or SA ID"
-              required
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              error={fieldErrors.identifier}
-              placeholder="you@example.com"
-              autoComplete="username"
-            />
+            {!isReset && (
+              <Input
+                label="Email or SA ID"
+                required
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                error={fieldErrors.identifier}
+                placeholder="you@example.com"
+                autoComplete="username"
+              />
+            )}
 
+            {isReset && (
             <Input
               label="New Password"
               type="password"
@@ -67,8 +87,10 @@ export default function ForgotPasswordForm() {
               placeholder="••••••••••••••••"
               autoComplete="new-password"
             />
+            )}
 
             {/* Live strength checklist */}
+            {isReset && (
             <ul className="flex flex-col gap-1.5 px-1">
               {PASSWORD_RULES.map((rule) => {
                 const met = rule.test(password);
@@ -94,17 +116,20 @@ export default function ForgotPasswordForm() {
                 );
               })}
             </ul>
+            )}
 
-            <Input
-              label="Confirm New Password"
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              error={fieldErrors.confirmPassword}
-              placeholder="••••••••••••••••"
-              autoComplete="new-password"
-            />
+            {isReset && (
+              <Input
+                label="Confirm New Password"
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                error={fieldErrors.confirmPassword}
+                placeholder="••••••••••••••••"
+                autoComplete="new-password"
+              />
+            )}
           </div>
 
           {error && (
@@ -114,7 +139,7 @@ export default function ForgotPasswordForm() {
           )}
 
           <Button type="submit" fullWidth={true} loading={loading}>
-            Update Password
+            {isReset ? "Update Password" : "Send Reset Link"}
           </Button>
         </form>
       )}
