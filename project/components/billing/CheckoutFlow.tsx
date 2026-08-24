@@ -10,8 +10,6 @@ import Alert from "@/components/ui/Alert";
 import Badge from "@/components/ui/Badge";
 import {
   Check,
-  ArrowRight,
-  ArrowLeft,
   CreditCard,
   Landmark,
   ShieldCheck,
@@ -326,11 +324,14 @@ export default function CheckoutFlow() {
           )}
 
           <div className="mt-6 flex justify-end">
+            {/* Deliberately no `icon` prop: Button hides its label below sm
+                when one is present, which turned this primary CTA into an
+                unlabelled arrow on a phone. The words matter more than the
+                chevron here. */}
             <Button
               onClick={() => setStep(1)}
               disabled={!selected}
-              icon={<ArrowRight size={16} />}
-              iconPosition="right"
+              className="w-full sm:w-auto"
             >
               {plan ? `Continue with ${plan.label}` : "Choose a plan"}
             </Button>
@@ -546,8 +547,6 @@ export default function CheckoutFlow() {
                   variant="ghost"
                   fullWidth
                   onClick={() => setStep(0)}
-                  icon={<ArrowLeft size={16} />}
-                  iconPosition="left"
                 >
                   Back to plans
                 </Button>
