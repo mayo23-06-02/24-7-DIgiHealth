@@ -2,6 +2,7 @@ import FamilyLink, { IFamilyLink } from '@/lib/models/FamilyLink';
 import { Subscription } from '@/lib/models/Billing';
 import { TIER_CONFIG, isValidTier, SubscriptionTier } from '@/lib/billing/tiers';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
+import { subscriptionFilter } from '@/lib/billing/entitlement';
 
 /** The one active link between a guardian and a member, or null. Mirrors the
  * bespoke-check style already used for practitioner→patient access (see
