@@ -1,10 +1,19 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { BiPhoneCall, BiX, BiVolumeMute, BiVolumeFull } from "react-icons/bi";
+import { usePathname } from "next/navigation";
 import { useCall } from "../context/CallContext";
 
 export default function CallNotification() {
   const { incomingCall, acceptCall, declineCall } = useCall();
+  const pathname = usePathname();
+  /**
+   * Already in the waiting room for this consultation — the call is expected
+   * and the lobby shows it, so ringing and a full-screen prompt are noise. The
+   * ring is for someone who is somewhere else in the app and would otherwise
+   * miss it.
+   */
+  const inLobby = !!pathname && pathname.includes("/lobby/");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [audioReady, setAudioReady] = useState(false);
@@ -75,7 +84,7 @@ export default function CallNotification() {
   useEffect(() => {
     if (!audioRef.current) return;
 
-    if (incomingCall && !isMuted) {
+    if (incomingCall && !isMuted && !inLobby) {
       // Try to play the audio
       const playPromise = audioRef.current.play();
       
@@ -105,7 +114,10 @@ export default function CallNotification() {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-  }, [incomingCall, isMuted]);
+    // inLobby is a dependency so that walking into the lobby while it is
+    // already ringing stops the ring, rather than only suppressing rings that
+    // start after arrival.
+  }, [incomingCall, isMuted, inLobby]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -133,7 +145,7 @@ export default function CallNotification() {
     }
   };
 
-  if (!incomingCall) return null;
+  if (!incomingCall || inLobby) return null;
 
   const handleAccept = () => {
     // Stop ringtone before accepting

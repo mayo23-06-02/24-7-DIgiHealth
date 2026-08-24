@@ -11,8 +11,23 @@ const POLL_MS = 20000;
 export default function AppointmentAlertPoller() {
   const { user } = useAuthContext();
   const pathname = usePathname();
-  const { activeAlert, showAlert, hasShown, markShown } =
+  const { activeAlert, showAlert, dismissAlert, hasShown, markShown } =
     useAppointmentAlert();
+
+  /**
+   * Clear a reminder the moment its own link lands the user in the lobby.
+   *
+   * New alerts were already suppressed while in the waiting area, but one
+   * already on screen stayed there — so tapping "Join" left the reminder
+   * hovering over the lobby it had just taken you to, still inviting you to
+   * join something you were already in.
+   */
+  useEffect(() => {
+    const inWaitingArea =
+      !!pathname &&
+      (pathname.includes("/lobby/") || pathname.includes("/messages"));
+    if (inWaitingArea && activeAlert) dismissAlert();
+  }, [pathname, activeAlert, dismissAlert]);
   const appointmentsRef = useRef<Appointment[]>([]);
 
   const role: "patient" | "practitioner" =

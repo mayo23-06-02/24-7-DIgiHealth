@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import {
   Room,
   RoomEvent,
@@ -90,6 +91,87 @@ export default function LiveKitCallPanel({
   useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  /* ---------------------------------------------------------------------- */
+  /*  Self-view: aspect-preserving and draggable                            */
+  /* ---------------------------------------------------------------------- */
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const selfViewRef = useRef<HTMLDivElement | null>(null);
+  /** Camera's own width/height, read from the track's metadata. 3:4 until known. */
+  const [selfAspect, setSelfAspect] = useState(3 / 4);
+  /**
+   * Position within the stage, in px from the top-left. Null until first
+   * placed or dragged, so the tile can sit in its default corner and stay
+   * there while the panel is resized.
+   */
+  const [selfPos, setSelfPos] = useState<{ x: number; y: number } | null>(null);
+  const [draggingSelf, setDraggingSelf] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+
+  /**
+   * The tile is capped on its longest side, so a portrait camera gets a tall
+   * narrow tile and a landscape one a short wide tile — both bounded, neither
+   * cropped.
+   */
+  const selfViewStyle: CSSProperties = (() => {
+    const landscape = selfAspect >= 1;
+    const cap = 176; // px — the long edge
+    const width = landscape ? cap : Math.round(cap * selfAspect);
+    const height = landscape ? Math.round(cap / selfAspect) : cap;
+    return selfPos
+      ? { width, height, left: selfPos.x, top: selfPos.y }
+      : { width, height, right: 16, top: 80 };
+  })();
+
+  const startDragSelfView = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const tile = selfViewRef.current;
+    const stage = stageRef.current;
+    if (!tile || !stage) return;
+    const tileBox = tile.getBoundingClientRect();
+    const stageBox = stage.getBoundingClientRect();
+    // Switch from the default corner anchoring to explicit coordinates at the
+    // moment the drag starts, so the tile doesn't jump.
+    setSelfPos({ x: tileBox.left - stageBox.left, y: tileBox.top - stageBox.top });
+    dragOffset.current = {
+      x: e.clientX - tileBox.left,
+      y: e.clientY - tileBox.top,
+    };
+    setDraggingSelf(true);
+    tile.setPointerCapture(e.pointerId);
+  };
+
+  useEffect(() => {
+    if (!draggingSelf) return;
+
+    const move = (e: PointerEvent) => {
+      const tile = selfViewRef.current;
+      const stage = stageRef.current;
+      if (!tile || !stage) return;
+      const stageBox = stage.getBoundingClientRect();
+      const tileBox = tile.getBoundingClientRect();
+      // Clamped so the tile can be parked against any edge or corner but never
+      // dragged out of the call.
+      const x = Math.min(
+        Math.max(0, e.clientX - stageBox.left - dragOffset.current.x),
+        Math.max(0, stageBox.width - tileBox.width),
+      );
+      const y = Math.min(
+        Math.max(0, e.clientY - stageBox.top - dragOffset.current.y),
+        Math.max(0, stageBox.height - tileBox.height),
+      );
+      setSelfPos({ x, y });
+    };
+    const stop = () => setDraggingSelf(false);
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
+  }, [draggingSelf]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [micOn, setMicOn] = useState(true);
   const [videoOn, setVideoOn] = useState(callInfo.type === "video");
@@ -526,7 +608,7 @@ export default function LiveKitCallPanel({
       </div>
 
       {/* Video area */}
-      <div className="flex-1 relative overflow-hidden">
+      <div ref={stageRef} className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0 bg-slate-950">
           {callInfo.type === "video" ? (
             <video
@@ -568,15 +650,35 @@ export default function LiveKitCallPanel({
         </div>
 
         {callInfo.type === "video" && (
-          <div className="absolute top-20 right-4 w-24 h-36 md:w-48 md:h-72 rounded-lg md:rounded-lg overflow-hidden bg-slate-800 border border-white/10">
+          <div
+            ref={selfViewRef}
+            onPointerDown={startDragSelfView}
+            style={selfViewStyle}
+            className={`absolute z-20 touch-none overflow-hidden rounded-lg border border-white/10 bg-slate-800 shadow-lg ${
+              draggingSelf ? "cursor-grabbing" : "cursor-grab"
+            }`}
+          >
+            {/*
+              object-contain, not object-cover: the tile takes the camera's own
+              aspect ratio (see onLoadedMetadata below), so a landscape camera
+              gets a landscape tile and a portrait one a portrait tile. The
+              previous fixed 2:3 box with object-cover cropped the sides off
+              every landscape feed and zoomed in on the middle.
+            */}
             <video
               ref={localVideoRef}
               autoPlay
               muted
               playsInline
-              className="w-full h-full object-cover"
+              onLoadedMetadata={(e) => {
+                const v = e.currentTarget;
+                if (v.videoWidth && v.videoHeight) {
+                  setSelfAspect(v.videoWidth / v.videoHeight);
+                }
+              }}
+              className="h-full w-full object-contain"
             />
-            <div className="absolute left-3 bottom-3 rounded-full bg-black/40 px-2 py-1 text-sm font-bold text-white">
+            <div className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/50 px-2 py-0.5 text-xs font-bold text-white">
               You
             </div>
           </div>
