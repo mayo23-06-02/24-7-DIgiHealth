@@ -187,6 +187,60 @@ export async function POST(request: Request) {
         currentMedications: [],
         familyHistory: [],
       });
+
+      // Attach to an inviting family.
+      //
+      // Two ways in: the emailed link (which carries the token and locks the
+      // address), or the invitee registering independently and answering the
+      // prompt at the review step. In both cases the invite is matched
+      // server-side on the registered address — the client never supplies the
+      // token from the second path, so a pending invite cannot be claimed by
+      // typing someone else's address into a form.
+      const wantsFamily =
+        !!formData.familyInviteToken || formData.joinFamily === true;
+
+      if (wantsFamily) {
+        try {
+          const { default: FamilyLink } = await import("@/lib/models/FamilyLink");
+          const query: Record<string, unknown> = {
+            inviteEmail: formEmail,
+            status: "pending",
+          };
+          if (formData.familyInviteToken) {
+            query.inviteToken = formData.familyInviteToken;
+          }
+
+          const invite = await FamilyLink.findOne(query).sort({ createdAt: -1 });
+          const notExpired =
+            invite &&
+            (!invite.inviteExpiresAt ||
+              new Date(invite.inviteExpiresAt) > new Date());
+
+          if (invite && notExpired) {
+            invite.memberId = newUser._id;
+            invite.status = "active";
+            invite.acceptedAt = new Date();
+            invite.inviteToken = undefined;
+            await invite.save();
+          }
+        } catch (err) {
+          // The account is already created; a failed link must not fail the
+          // registration. The guardian's invite simply stays pending.
+          console.error("[register] family link failed", err);
+        }
+      } else if (formData.joinFamily === false) {
+        // Declined at the review step — retire the invite rather than leaving
+        // the guardian looking at one that will never be answered.
+        try {
+          const { default: FamilyLink } = await import("@/lib/models/FamilyLink");
+          await FamilyLink.updateMany(
+            { inviteEmail: formEmail, status: "pending" },
+            { status: "revoked", revokedAt: new Date() },
+          );
+        } catch (err) {
+          console.error("[register] declining family invite failed", err);
+        }
+      }
     } else if (wizardRole === "practitioner") {
       const practitionerProfile = await PractitionerProfile.create({
         userId: newUser._id,

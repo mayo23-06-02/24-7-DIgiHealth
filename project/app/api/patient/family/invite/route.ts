@@ -80,7 +80,16 @@ export async function POST(req: NextRequest) {
 
     const guardianName = [guardian.firstName, guardian.lastName].filter(Boolean).join(' ') || 'A 24/7 DigiHealth user';
     const origin = getAppOrigin(req.url);
-    const inviteUrl = `${origin}/patient/family/accept?invite=${token}`;
+    // New invitees land in the patient registration wizard, which prefills and
+    // locks the invited address. The old link went straight to the in-app
+    // accept page, which is behind auth — someone without an account was
+    // bounced to /login with no way back to the invite.
+    //
+    // Someone who already has an account is sent to the accept page instead;
+    // registering again would only fail on the duplicate address.
+    const inviteUrl = existingUser
+      ? `${origin}/patient/family/accept?invite=${token}`
+      : `${origin}/register/patient?invite=${token}`;
 
     const { error } = await sendEmail({
       to: email,

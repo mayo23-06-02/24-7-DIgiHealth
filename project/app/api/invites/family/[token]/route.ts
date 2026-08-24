@@ -36,12 +36,18 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
 
     const guardian = await User.findById(inv.guardianId).select('firstName lastName').lean();
 
+    // Lets the registration wizard tell someone who already has an account to
+    // sign in and accept, rather than walking them through a signup that would
+    // fail on the duplicate address.
+    const existing = await User.findOne({ email: inv.inviteEmail }).select('_id').lean();
+
     return NextResponse.json({
       success: true,
       data: {
         guardianName: guardian ? `${(guardian as any).firstName} ${(guardian as any).lastName}` : 'A 24/7 DigiHealth user',
         relationship: inv.relationship,
         inviteEmail: inv.inviteEmail,
+        hasAccount: !!existing,
       },
     });
   } catch (error: any) {

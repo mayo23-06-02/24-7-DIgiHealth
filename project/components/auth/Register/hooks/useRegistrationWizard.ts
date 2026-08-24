@@ -28,6 +28,56 @@ export function useRegistrationWizard(role: string) {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [inviteInfo, setInviteInfo] = useState<{ facilityName: string } | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  /** Set when arriving from a family invite link — locks the email field. */
+  const [familyInvite, setFamilyInvite] = useState<{
+    guardianName: string;
+    relationship?: string;
+    email: string;
+    hasAccount: boolean;
+  } | null>(null);
+
+  /**
+   * Family invite link: /register/patient?invite=<token>
+   *
+   * Prefills and locks the invited address, and tags formData so
+   * /api/auth/register attaches the new account to the inviting family. The
+   * address is locked because the invite was issued to that mailbox — letting
+   * it be edited would either break the link or attach a stranger's address to
+   * someone else's family account.
+   */
+  useEffect(() => {
+    const token = searchParams.get("invite");
+    if (!token || safeRole !== "patient") return;
+
+    let cancelled = false;
+    fetch(`/api/invites/family/${token}`)
+      .then(async (res) => {
+        const json = await res.json();
+        if (cancelled) return;
+        if (!res.ok || !json.success) {
+          setInviteError(json.error || "This invite link is not valid.");
+          return;
+        }
+        setFamilyInvite({
+          guardianName: json.data.guardianName,
+          relationship: json.data.relationship,
+          email: json.data.inviteEmail,
+          hasAccount: !!json.data.hasAccount,
+        });
+        setFormData((prev: any) => ({
+          ...prev,
+          email: json.data.inviteEmail,
+          familyInviteToken: token,
+        }));
+      })
+      .catch(() => {
+        if (!cancelled) setInviteError("Could not verify this invite link.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, safeRole]);
 
   // Hospital-admin invite link: /register/practitioner?invite=<token>
   // Pre-fills + locks the email and tags formData so /api/auth/register
@@ -250,6 +300,7 @@ export function useRegistrationWizard(role: string) {
     updateData,
     restoreDraft,
     clearDraft,
+    familyInvite,
     stepScrollRef,
     goToNext,
     goToPrevious,
