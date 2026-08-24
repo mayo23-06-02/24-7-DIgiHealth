@@ -395,7 +395,20 @@ export async function buildHealthProfilePdf(
         (patientProfile as any)?.mobileNumber ||
         "N/A",
     ],
-    ["Blood type", (patientBase as any)?.bloodType || "Unknown"],
+    // Same source order as the practitioner patient view: MedicalContext is
+    // where registration writes it, with the legacy Patient row and the
+    // Anthropometric reading as fallbacks for older records.
+    [
+      "Blood type",
+      (medicalCtx as any)?.bloodType ||
+        (patientBase as any)?.bloodType ||
+        (latestVitals as any)?.bloodType ||
+        "Unknown",
+    ],
+    [
+      "Activity level",
+      (medicalCtx as any)?.activityLevel || "Not recorded",
+    ],
     [
       "Emergency",
       (patientProfile as any)?.emergencyContact

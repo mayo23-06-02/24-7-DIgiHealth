@@ -181,6 +181,13 @@ export async function GET(req: NextRequest) {
           canDownload: !!p.documentUrl,
         })),
         allergies: medContext?.allergies || [],
+        // Surfaced back to the patient so they can see -- and later correct --
+        // what they entered at registration.
+        bloodType:
+          (medContext as any)?.bloodType ||
+          (vitals?.[0] as any)?.bloodType ||
+          null,
+        activityLevel: (medContext as any)?.activityLevel || null,
         immunizations: immunizations.map((i: any) => ({
           id: i._id.toString(),
           vaccine: i.vaccineName,

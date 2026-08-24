@@ -40,6 +40,20 @@ export interface IMedicalContext extends Document {
   allergies: { allergen: string; severity: 'mild' | 'moderate' | 'severe'; reaction: string; source: 'patient' | 'clinician' }[];
   currentMedications: string[];
   familyHistory: string[];
+  /**
+   * Standing clinical facts captured at registration.
+   *
+   * Blood type previously lived only on Anthropometric, which is a
+   * point-in-time measurement record written only when height or weight was
+   * supplied — so a patient who gave their blood type but skipped both
+   * measurements lost it. It belongs here, alongside the other facts that
+   * describe the patient rather than a single reading.
+   *
+   * Activity level was collected at registration and never stored anywhere
+   * at all.
+   */
+  bloodType?: string;
+  activityLevel?: string;
 }
 const MedicalContextSchema = new Schema<IMedicalContext>({
   patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
@@ -51,7 +65,9 @@ const MedicalContextSchema = new Schema<IMedicalContext>({
     source: { type: String, enum: ['patient', 'clinician'] }
   }],
   currentMedications: [{ type: String }],
-  familyHistory: [{ type: String }]
+  familyHistory: [{ type: String }],
+  bloodType: { type: String },
+  activityLevel: { type: String }
 });
 
 // ==== Prescription ====

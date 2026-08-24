@@ -169,8 +169,14 @@ export async function POST(request: Request) {
         });
       }
 
+      // Written unconditionally, unlike the Anthropometric record above which
+      // only exists when a measurement was supplied. Blood type and activity
+      // level are facts about the patient, not measurements, so they must not
+      // depend on whether height or weight happened to be filled in.
       await MedicalContext.create({
         patientId: newUser._id,
+        bloodType: formData.bloodType || undefined,
+        activityLevel: formData.activityLevel || undefined,
         chronicConditions: formData.chronicConditions || [],
         allergies: (formData.allergies || []).map((a: string) => ({
           allergen: a,

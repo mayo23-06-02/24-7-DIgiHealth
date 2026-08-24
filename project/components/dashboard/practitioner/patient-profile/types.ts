@@ -49,6 +49,7 @@ export interface PatientProfile {
   gender: string;
   mobileNumber: string;
   bloodType: string;
+  activityLevel?: string | null;
   medicalHistory: string[];
   allergies: string[];
   currentMedications: string[];

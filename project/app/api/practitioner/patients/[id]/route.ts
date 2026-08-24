@@ -98,7 +98,16 @@ export async function GET(
         fullName: `${user.firstName} ${user.lastName}`,
         email,
         mobile: user.mobile,
-        bloodType: patientBase?.bloodType || 'Unknown',
+        // MedicalContext is where registration writes this now. The other two
+        // are fallbacks for records created before that: the legacy Patient
+        // collection, and the Anthropometric row that used to be the only
+        // place a new signup's blood type landed.
+        bloodType:
+          (medicalContext as any)?.bloodType ||
+          patientBase?.bloodType ||
+          latestVitals?.bloodType ||
+          'Unknown',
+        activityLevel: (medicalContext as any)?.activityLevel || null,
         dateOfBirth: dob,
         age: calcAge(dob),
         dateJoined: (user as any).createdAt || null,

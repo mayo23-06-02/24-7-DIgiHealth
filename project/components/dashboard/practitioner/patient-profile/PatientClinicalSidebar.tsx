@@ -6,11 +6,13 @@ import Badge, { type BadgeStatus } from "@/components/ui/Badge";
 import {
   BiCapsule,
   BiCheckShield,
+  BiDroplet,
   BiEditAlt,
   BiError,
   BiPhone,
   BiPlus,
   BiPulse,
+  BiRun,
   BiUser,
 } from "react-icons/bi";
 import type { PatientProfile } from "./types";
@@ -63,7 +65,7 @@ export default function PatientClinicalSidebar({
               <span className="text-sm font-normal text-white/80"> / 100</span>
             </p>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white">
                 <BiCheckShield size={16} />
@@ -73,6 +75,35 @@ export default function PatientClinicalSidebar({
             <span className="px-2 py-1 rounded-lg bg-white/20 text-white text-xs font-bold">
               {patient.riskLabel || "—"}
             </span>
+          </div>
+
+          {/* Both are captured at registration. Until now neither reached this
+              screen — blood type was written to a collection nothing read, and
+              activity level was never stored at all. */}
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white">
+                <BiDroplet size={16} />
+              </div>
+              <h1 className="font-bold text-white">Blood Type</h1>
+            </div>
+            <p className="text-lg font-bold text-white">
+              {patient.bloodType && patient.bloodType !== "Unknown"
+                ? patient.bloodType
+                : "—"}
+            </p>
+          </div>
+
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white">
+                <BiRun size={16} />
+              </div>
+              <h1 className="font-bold text-white">Activity</h1>
+            </div>
+            <p className="text-sm font-semibold text-white text-right leading-snug">
+              {patient.activityLevel || "—"}
+            </p>
           </div>
         </div>
       </div>

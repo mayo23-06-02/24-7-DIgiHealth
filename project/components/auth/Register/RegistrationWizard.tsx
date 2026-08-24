@@ -25,6 +25,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
     updateData,
     restoreDraft,
     clearDraft,
+    stepScrollRef,
     goToNext,
     goToPrevious,
     skipStep,
@@ -147,7 +148,10 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
         {/* Form – flex column with scrollable content and fixed footer */}
         <form onSubmit={handleSubmit} noValidate className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Scrollable step content */}
-          <div className="flex-1 overflow-y-auto pr-1 lg:pr-2 custom-scrollbar pb-4">
+          <div
+            ref={stepScrollRef}
+            className="flex-1 overflow-y-auto pr-1 lg:pr-2 custom-scrollbar pb-4"
+          >
             <StepRenderer
               role={role}
               step={step}
@@ -156,7 +160,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
               errors={errors}
               onSkip={skipStep}
             />
-            <div className="flex-shrink-0 my-6  lg:hidden  md:flex-row gap-4 border-t border-slate-100 py-5 bg-white">
+            <div className="flex my-6  lg:hidden   gap-4 border-t border-slate-100 py-5 bg-white">
               {step > 1 && (
                 <Button type="button" variant="white" onClick={goToPrevious} className="md:flex-1">
                   Back

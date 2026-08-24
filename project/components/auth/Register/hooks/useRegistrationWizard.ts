@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import localforage from "localforage";
 import { roleConfig, skippableSteps } from "../constants";
@@ -13,6 +13,8 @@ export function useRegistrationWizard(role: string) {
   const DRAFT_KEY = `reg_draft_v2_${safeRole}`;
 
   const [step, setStep] = useState(1);
+  /** Attach to the element that actually scrolls the steps. See scrollToTop. */
+  const stepScrollRef = useRef<HTMLDivElement | null>(null);
   const [formData, setFormData] = useState<any>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isOnline, setIsOnline] = useState(true);
@@ -148,6 +150,28 @@ export function useRegistrationWizard(role: string) {
     setStep(1);
   }, [DRAFT_KEY]);
 
+  /**
+   * Return to the top of the step that is being shown.
+   *
+   * This used to call window.scrollTo, which does nothing here: the wizard
+   * shell is `overflow-hidden` and the steps scroll inside an inner element,
+   * so the window has nothing to scroll. Advancing while scrolled down left
+   * the next step opened part-way through it, and anyone who did not think to
+   * scroll back up would simply not see the fields above.
+   *
+   * The ref is registered by the wizard (see `stepScrollRef`); the window call
+   * remains as a fallback for any caller that renders the steps in normal page
+   * flow instead.
+   */
+  const scrollToTop = () => {
+    const el = stepScrollRef.current;
+    if (el) {
+      el.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const goToNext = () => {
     const errs = validateStep(safeRole, step, formData);
     if (Object.keys(errs).length) {
@@ -156,19 +180,19 @@ export function useRegistrationWizard(role: string) {
     }
     setErrors({});
     setStep(step + 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollToTop();
     return true;
   };
 
   const goToPrevious = () => {
     setStep(step - 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollToTop();
   };
 
   const skipStep = () => {
     setErrors({});
     setStep(step + 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollToTop();
   };
 
   const isSkippable = (skippableSteps[safeRole] ?? []).includes(step);
