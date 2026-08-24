@@ -14,9 +14,9 @@ const { auth } = NextAuth(authConfig);
 /* ------------------------------------------------------------------ */
 /*  Rate limiting                                                      */
 /*                                                                     */
-/*  Security-critical buckets (everything under /api/auth, plus the    */
-/*  public newsletter capture) count against a shared Postgres counter */
-/*  so the budget is global rather than per serverless instance.       */
+/*  Security-critical buckets (everything under /api/auth) count       */
+/*  against a shared Postgres counter, so the budget is global rather  */
+/*  than per serverless instance.                                      */
 /*  High-frequency chat traffic keeps the cheap local counter: there   */
 /*  the limit protects throughput, not credentials, and a database     */
 /*  round trip on every message is not worth paying.                   */
@@ -30,7 +30,6 @@ const RATE_LIMIT_CONFIG: Record<string, { windowMs: number; maxRequests: number 
   '/api/auth/otp/verify': { windowMs: 300_000, maxRequests: 5 },     // 5 verify attempts per 5 minutes
   '/api/auth/forgot-password': { windowMs: 900_000, maxRequests: 3 }, // 3 forgot-password per 15 minutes
   '/api/auth/reset-password': { windowMs: 900_000, maxRequests: 3 },  // 3 reset-password per 15 minutes
-  '/api/newsletter': { windowMs: 900_000, maxRequests: 5 },          // 5 signups per 15 minutes (public, unauthenticated)
   default:              { windowMs: 60_000, maxRequests: 100 },
 };
 
@@ -58,7 +57,7 @@ function getRateLimitBucket(pathname: string): { key: string; config: { windowMs
  * multiple of the documented allowance.
  */
 function needsSharedCounter(pathname: string): boolean {
-  return pathname.startsWith('/api/auth') || pathname === '/api/newsletter';
+  return pathname.startsWith('/api/auth');
 }
 
 function checkRateLimit(
@@ -98,8 +97,7 @@ export default auth(async function middleware(request: NextRequest & { auth: any
   if (
     pathname.startsWith('/api/chat') ||
     pathname.startsWith('/api/ably') ||
-    pathname.startsWith('/api/auth') ||
-    pathname === '/api/newsletter'
+    pathname.startsWith('/api/auth')
   ) {
     const { key, config } = getRateLimitBucket(pathname);
     // For auth routes, bucket by IP + specific endpoint to prevent brute force attacks.
@@ -144,10 +142,7 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // Real slot availability (from actual consultations, no fabricated
     // data) for the same public doctor cards — reveals only free/busy
     // times for a given practitionerId+date, no PII.
-    pathname === '/api/bookings/slots' ||
-    // Public footer newsletter capture — anonymous by definition. Rate-limited
-    // below, since an unauthenticated write endpoint is otherwise a spam target.
-    pathname === '/api/newsletter'
+    pathname === '/api/bookings/slots'
   ) {
     return NextResponse.next();
   }

@@ -18,7 +18,7 @@ export default function RegisterRoleSelection() {
   const paths = [
     {
       id: "patient",
-      title: "Create your patient account",
+      title: "Create your Medical Cover",
       description:
         "Book same-day consultations and manage your health records in one place.",
       icon: "👩‍⚕️",
