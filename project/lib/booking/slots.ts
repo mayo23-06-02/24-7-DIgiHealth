@@ -36,11 +36,38 @@ export function generateTimeSlots(options?: {
 /**
  * Combine local date (YYYY-MM-DD) + time (HH:mm) into a Date in local timezone.
  */
+/**
+ * South African Standard Time. A fixed offset is correct here — South Africa
+ * has never observed daylight saving — and every clinic on this platform runs
+ * on it.
+ */
+export const CLINIC_UTC_OFFSET = "+02:00";
+
+/**
+ * Resolve a booking's date + time to the actual instant it occurs.
+ *
+ * This used to build the Date from local components, which meant "09:00 on the
+ * 24th" was interpreted in whatever zone the process happened to run in. On
+ * Vercel that is UTC, two hours behind the clinic — so at 09:25 in
+ * Johannesburg the server believed it was 07:25 and marked nothing before
+ * 08:00 as past. Every already-elapsed morning slot stayed bookable.
+ *
+ * Anchoring to the clinic's offset makes the comparison against `now` correct
+ * no matter where the code runs.
+ */
 export function combineLocalDateTime(date: string, time: string): Date {
-  // Explicit local components avoid UTC parse ambiguity on some engines
   const [y, mo, d] = date.split("-").map(Number);
   const [hh, mm] = time.split(":").map(Number);
-  return new Date(y, (mo || 1) - 1, d || 1, hh || 0, mm || 0, 0, 0);
+  const iso =
+    `${String(y).padStart(4, "0")}-${String(mo || 1).padStart(2, "0")}-` +
+    `${String(d || 1).padStart(2, "0")}T${String(hh || 0).padStart(2, "0")}:` +
+    `${String(mm || 0).padStart(2, "0")}:00${CLINIC_UTC_OFFSET}`;
+  const parsed = new Date(iso);
+  // Fall back to local components if anything about the date string was odd,
+  // rather than handing back an Invalid Date.
+  return Number.isNaN(parsed.getTime())
+    ? new Date(y, (mo || 1) - 1, d || 1, hh || 0, mm || 0, 0, 0)
+    : parsed;
 }
 
 export function addMinutes(date: Date, minutes: number): Date {
@@ -48,12 +75,15 @@ export function addMinutes(date: Date, minutes: number): Date {
 }
 
 export function formatBookingDate(dateStr: string): string {
-  const d = combineLocalDateTime(dateStr, "00:00");
-  return d.toLocaleDateString("en-US", {
+  // Formatted in the clinic's zone. Midnight SAST is 22:00 the previous day in
+  // UTC, so a server-zone format would name the wrong day for every booking.
+  const d = combineLocalDateTime(dateStr, "12:00");
+  return d.toLocaleDateString("en-ZA", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "Africa/Johannesburg",
   });
 }
 
