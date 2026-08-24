@@ -48,6 +48,7 @@ const KPICard: React.FC<KPICardProps> = ({
 
   return (
     <Card
+      noPadding
       className={`
         flex justify-between flex-col h-full transition-transform group
         ${clickable && !loading ? "hover:scale-[1.01] sm:hover:scale-[1.02] cursor-pointer" : "cursor-default"}
