@@ -78,7 +78,7 @@ export default function DoctorCard({
       <div className="flex flex-row items-start gap-3 mb-3">
         <Link
           href={`/patient/doctors/${doctor.id}`}
-          className="w-14 h-14 rounded-full overflow-hidden shrink-0 flex items-center justify-center cursor-pointer hover:ring-4 hover:ring-primary/10 transition-all group-hover:scale-105 duration-300 relative z-10 border-2 border-white shadow-xs"
+          className=" rounded-full overflow-hidden shrink-0 flex items-center justify-center cursor-pointer hover:ring-4 hover:ring-primary/10 transition-all group-hover:scale-105 duration-300 relative z-10 border-2 border-white shadow-xs"
           onClick={(e) => e.stopPropagation()}
         >
           {doctor.avatar ? (
@@ -97,7 +97,7 @@ export default function DoctorCard({
               {nameContent}
             </Link>
           ) : (
-            <span className="text-ink-900 font-semibold text-base leading-snug flex items-center gap-1 min-w-0 w-full">
+            <span className="text-ink-900 font-semibold text-base leading-snug line-clamp-1 flex items-center gap-1 min-w-0 w-full">
               {nameContent}
             </span>
           )}
