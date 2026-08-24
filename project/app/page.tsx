@@ -23,6 +23,7 @@ export default function LandingPage() {
       {/* Hero renders its own nav row inside the inset hero card. */}
       <Hero />
       <AboutUs />
+      <WhyUrgentCare />
       <ServicesGallery />
       <TickerBar />
       <Approach />

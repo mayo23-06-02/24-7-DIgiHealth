@@ -92,7 +92,6 @@ export default function Footer() {
               )}
             </form>
           </div>
-
           {/* Links Section */}
           <div
             className="lg:w-8/12 flex flex-col sm:flex-row w-full sm:justify-between gap-10 md:gap-8 lg:pl-12 pt-5 pb-2.5"

@@ -59,7 +59,7 @@ export default function DoctorsPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+      <section className="relative pt-10 pb-20 lg:pt-44 md:pb-28 overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=1600&auto=format&fit=crop"
           alt=""

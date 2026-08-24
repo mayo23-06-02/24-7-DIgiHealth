@@ -58,7 +58,7 @@ export default function ContactPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-16 md:pt-44 md:pb-20 overflow-hidden">
+      <section className="relative pt-10 pb-16 lg:pt-44 md:pb-20 overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?q=80&w=1600&auto=format&fit=crop"
           alt=""

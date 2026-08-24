@@ -84,7 +84,7 @@ export default function PatientsPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+      <section className="relative pt-10 pb-20 lg:pt-44 md:pb-28 overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1600&auto=format&fit=crop"
           alt=""

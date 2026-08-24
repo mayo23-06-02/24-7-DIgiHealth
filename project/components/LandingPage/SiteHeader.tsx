@@ -60,14 +60,21 @@ export default function SiteHeader({
 
   const navBarClass = transparent
     ? isSticky
-      ? "bg-white/95 backdrop-blur-md rounded-full px-2 max-w-[1080px] mx-auto shadow-xs border-b border-slate-200"
-      : "bg-transparent lg:px-12 md:px-10"
+      ? "bg-white/95 backdrop-blur-md lg:rounded-full lg:px-2 lg:max-w-[1080px] lg:mx-auto shadow-xs border-b border-slate-200"
+      : // Solid on mobile: the header sits in the flow there rather than over
+        // the hero, so a transparent bar would put nav text on bare page
+        // background. It only goes transparent once it starts floating.
+        "bg-white border-b border-slate-100 lg:bg-transparent lg:border-transparent lg:px-12 md:px-10"
     : isSticky
       ? "bg-white/95 backdrop-blur-md shadow-xs border-b border-slate-200"
       : "bg-white border-b border-slate-100";
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50">
+    // Floats from lg up, where the nav is laid out horizontally over the hero.
+    // Below that it stays in the document flow: a fixed bar eats a meaningful
+    // share of a phone screen, and the expanded mobile menu has to push content
+    // rather than overlay it.
+    <header className="relative lg:fixed lg:top-0 lg:left-0 w-full z-50">
       {withUtilityBar && (
         <div
           className={`hidden md:flex w-full text-ink-600 text-sm py-2 px-4 md:px-8 transition-all duration-500 ${

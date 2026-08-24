@@ -32,8 +32,10 @@ const services = [
   {
     label: "Family Health Management",
     icon: Users2,
+    // The previous photo id returned 404 from Unsplash, which is why this card
+    // rendered as broken alt text.
     image:
-      "https://images.unsplash.com/photo-1602052793312-b62d34dfe6e5?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1581056771107-24ca5f033842?q=80&w=800&auto=format&fit=crop",
   },
 ];
 
@@ -63,7 +65,10 @@ export default function ServicesGallery() {
                 sizes="(max-width: 768px) 50vw, 20vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink-900/85 via-ink-900/20 to-transparent" />
+              {/* Lightened from 85/20 — the overlay was dimming the whole
+                  photo rather than just seating the caption. Enough contrast
+                  remains at the base for white text to stay legible. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-ink-900/60 via-ink-900/10 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2">
                 <div className="w-8 h-8 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center text-white">
                   <Icon size={16} />
