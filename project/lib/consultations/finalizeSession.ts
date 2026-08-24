@@ -7,6 +7,7 @@ import { publishCallSignalTo } from "@/lib/realtime/callSignals";
 
 type CallDoc = NonNullable<Awaited<ReturnType<typeof Call.findOne>>>;
 
+
 /**
  * Close out a call and bill it — exactly once, no matter how many times this is
  * called or from where.
@@ -18,11 +19,52 @@ type CallDoc = NonNullable<Awaited<ReturnType<typeof Call.findOne>>>;
  * loses that transition returns without touching the ledger. Double-billing a
  * consultation is a much worse outcome than not being sure who closed it.
  */
+/**
+ * The shortest a session can be and still be a consultation.
+ *
+ * Two people connecting, realising the line is bad and dropping is not a
+ * consultation that happened, and billing or recording it as one is worse than
+ * calling it missed and letting them rebook.
+ */
+const MIN_MEANINGFUL_SECONDS = 60;
+
+/**
+ * Did this session actually happen?
+ *
+ * Both parties have to have entered the room, and it has to have lasted long
+ * enough to be a conversation. Anything else is `missed` — which is a real
+ * status the schema already had and nothing was ever setting.
+ *
+ * A practitioner ending the session explicitly overrides all of this: if they
+ * say it is finished, it is finished, whatever the clock says. Their judgement
+ * about their own consultation beats a heuristic.
+ */
+function consultationOutcome(
+  call: CallDoc,
+  durationSeconds: number,
+  explicitlyEnded: boolean,
+): "completed" | "missed" {
+  if (explicitlyEnded) return "completed";
+
+  const longEnough = durationSeconds >= MIN_MEANINGFUL_SECONDS;
+  const attended = new Set(
+    (call.participantUserIds ?? []).map((id) => String(id)),
+  );
+
+  // No attendance recorded at all means this call started before we began
+  // recording it, not that nobody came. Absence of evidence is not evidence of
+  // absence: judge those on duration alone rather than marking a real
+  // consultation missed on the strength of data we never collected.
+  if (attended.size === 0) return longEnough ? "completed" : "missed";
+
+  return attended.size >= 2 && longEnough ? "completed" : "missed";
+}
+
 export async function finalizeCall(
   scope: string,
   call: CallDoc,
-  reason: "hangup" | "window_closed" | "declined",
-): Promise<{ finalized: boolean; durationSeconds: number }> {
+  reason: "hangup" | "window_closed" | "declined" | "practitioner_ended",
+): Promise<{ finalized: boolean; durationSeconds: number; outcome?: string }> {
   const endedAt = new Date();
   const durationSeconds = Math.max(
     0,
@@ -58,16 +100,16 @@ export async function finalizeCall(
     await conversation.save();
   }
 
-  if (call.consultationId) {
+  let outcome: "completed" | "missed" | undefined;
+  if (call.consultationId && reason !== "declined") {
+    outcome = consultationOutcome(
+      call,
+      durationSeconds,
+      reason === "practitioner_ended",
+    );
     await Consultation.findByIdAndUpdate(call.consultationId, {
       $inc: { callMinutesUsed: minutes },
-      // A consultation whose session is over is completed. Driven by the
-      // session's own lifecycle rather than by a button someone has to
-      // remember to press — which is why appointments used to sit at
-      // "scheduled" forever.
-      ...(reason === "window_closed" || reason === "hangup"
-        ? { $set: { status: "completed" } }
-        : {}),
+      $set: { status: outcome },
     });
   }
 
@@ -108,7 +150,9 @@ export async function finalizeCall(
     durationSeconds,
     minutes,
     reason,
+    outcome,
+    attended: (call.participantUserIds ?? []).length,
   });
 
-  return { finalized: true, durationSeconds };
+  return { finalized: true, durationSeconds, outcome };
 }

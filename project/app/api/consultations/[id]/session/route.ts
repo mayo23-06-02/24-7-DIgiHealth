@@ -162,6 +162,17 @@ export async function POST(
       apiLogger.info(scope, "consultation_in_progress", { consultationId: id });
     }
 
+    // Record attendance. A token issued while the session is live is someone
+    // walking into the room, and it is the only evidence we keep of who
+    // actually turned up — which is what decides, later, whether this was a
+    // consultation that happened or one that was missed.
+    if (state === "live") {
+      await Call.updateOne(
+        { _id: call._id },
+        { $addToSet: { participantUserIds: currentUser.userId } },
+      );
+    }
+
     const token = await createLiveKitParticipantToken({
       identity: `${currentUser.role}:${currentUser.userId}`,
       name:

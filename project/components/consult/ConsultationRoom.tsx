@@ -172,12 +172,67 @@ export default function ConsultationRoom({
 
   const handleEnded = useCallback(() => setLeft(true), []);
 
+  /**
+   * While standing outside, keep checking whether the other party is still in.
+   *
+   * Asked of LiveKit rather than of Ably presence, so the answer is about the
+   * room itself and holds even where realtime presence is switched off. It is
+   * the difference between "they're waiting for you, go back in" and a blank
+   * screen that tells someone nothing.
+   */
+  const [otherInRoom, setOtherInRoom] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!left || state !== "live") {
+      setOtherInRoom(null);
+      return;
+    }
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const res = await fetch(`/api/consultations/${consultationId}/presence`);
+        const data = await res.json();
+        if (!cancelled) setOtherInRoom(data.known ? Boolean(data.otherInRoom) : null);
+      } catch {
+        /* keep the last known answer */
+      }
+    };
+    void check();
+    const timer = setInterval(check, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [left, state, consultationId]);
+
   const rejoin = useCallback(() => {
     setLeft(false);
     // The token we hold may belong to a call that has since been closed out;
     // asking again is cheap and always returns the current one.
     void loadSession();
   }, [loadSession]);
+
+  const [ending, setEnding] = useState(false);
+  /**
+   * Declare the consultation finished. Practitioner only — see the route.
+   *
+   * Distinct from hanging up: leaving the room is "I've stepped out", ending
+   * it is "this encounter is concluded". Conflating the two is why every
+   * consultation was being recorded as completed regardless of whether anyone
+   * turned up.
+   */
+  const endConsultation = useCallback(async () => {
+    setEnding(true);
+    try {
+      await fetch(`/api/consultations/${consultationId}/complete`, {
+        method: "POST",
+      });
+    } finally {
+      setEnding(false);
+      // Re-read rather than assuming: the server decides the final status.
+      await loadSession();
+      setLeft(false);
+    }
+  }, [consultationId, loadSession]);
 
   const appointmentsHref = `/${userType}/appointments`;
 
@@ -211,21 +266,51 @@ export default function ConsultationRoom({
   if (state === "live" && callInfo && !left) {
     return (
       <div className="flex flex-col h-[calc(100dvh-64px)] -m-2 lg:-m-8 bg-slate-900 overflow-hidden">
-        <LiveKitCallPanel callInfo={callInfo} onEnded={handleEnded} />
+        <LiveKitCallPanel
+          callInfo={callInfo}
+          onEnded={handleEnded}
+          // The room belongs to the appointment, not to whoever is in it. If
+          // the other party drops, stay — they may be coming back.
+          closeWhenAlone={false}
+        />
       </div>
     );
   }
 
   if (state === "closed") {
+    // Say which of the two it was. "Missed" is not a failure message — it is
+    // the difference between a consultation the patient should be charged and
+    // notes written for, and one they should be able to rebook.
+    const missed = session.consultationStatus === "missed";
     return (
       <Shell>
-        <BiCheckCircle className="mx-auto text-5xl text-emerald-500" />
+        {missed ? (
+          <BiCalendarEdit className="mx-auto text-5xl text-amber-500" />
+        ) : (
+          <BiCheckCircle className="mx-auto text-5xl text-emerald-500" />
+        )}
         <div>
-          <h2 className="text-xl font-bold text-slate-800">This session has ended</h2>
+          <h2 className="text-xl font-bold text-slate-800">
+            {missed ? "This consultation didn't take place" : "Consultation complete"}
+          </h2>
           <p className="text-slate-500 mt-1">
-            Your consultation with{" "}
-            <span className="font-semibold text-slate-700">{session.contact.name}</span>{" "}
-            is over.
+            {missed ? (
+              <>
+                The session with{" "}
+                <span className="font-semibold text-slate-700">
+                  {session.contact.name}
+                </span>{" "}
+                closed without both of you joining. You can book another time.
+              </>
+            ) : (
+              <>
+                Your consultation with{" "}
+                <span className="font-semibold text-slate-700">
+                  {session.contact.name}
+                </span>{" "}
+                is finished.
+              </>
+            )}
           </p>
         </div>
         <Button variant="outline" fullWidth onClick={() => navigate(appointmentsHref)}>
@@ -236,25 +321,59 @@ export default function ConsultationRoom({
   }
 
   if (left) {
+    // LiveKit's answer is about the room itself, so prefer it; fall back to
+    // Ably presence, which at least knows whether they still have the page open.
+    const stillThere = otherInRoom ?? (presence.available ? presence.otherPresent : null);
+
     return (
       <Shell>
         <Avatar name={session.contact.name} src={contactAvatar} size="xl" className="mx-auto" />
         <div>
           <h2 className="text-xl font-bold text-slate-800">You left the consultation</h2>
-          <p className="text-slate-500 mt-1">
-            {presence.otherPresent
-              ? `${session.contact.name} is still in the room.`
-              : "You can rejoin at any time while the session is open."}
-          </p>
+          {stillThere === true ? (
+            <p className="mt-2 flex items-center justify-center gap-2 text-sm font-semibold text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              {session.contact.name} is still in the room, waiting for you
+            </p>
+          ) : (
+            <p className="text-slate-500 mt-1">
+              {stillThere === false
+                ? `${session.contact.name} has left too. You can still rejoin while the session is open.`
+                : "You can rejoin at any time while the session is open."}
+            </p>
+          )}
         </div>
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Button variant="ghost" fullWidth onClick={() => navigate(appointmentsHref)}>
-            Back to appointments
-          </Button>
           <Button fullWidth onClick={rejoin}>
             Rejoin
           </Button>
+          {userType === "practitioner" ? (
+            <Button
+              variant="outline"
+              icon={<BiCheckCircle size={16} />}
+              iconPosition="left"
+              onClick={endConsultation}
+              loading={ending}
+              fullWidth
+            >
+              End consultation
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              fullWidth
+              onClick={() => navigate(appointmentsHref)}
+            >
+              Back to appointments
+            </Button>
+          )}
         </div>
+        {userType === "practitioner" && (
+          <p className="text-xs text-slate-400">
+            Ending marks this consultation complete and closes the room for both
+            of you.
+          </p>
+        )}
       </Shell>
     );
   }

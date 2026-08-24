@@ -11,6 +11,16 @@ export interface ICall extends Document {
   status: 'requested' | 'active' | 'ended' | 'missed' | 'declined';
   livekitRoomName?: string;
   livekitRoomUrl?: string;
+  /**
+   * Everyone who was actually issued a token to enter the room.
+   *
+   * This is what makes "did the consultation happen?" answerable. Without it,
+   * a session where one party sat alone and gave up is indistinguishable from
+   * one where both attended — and both were being recorded as completed.
+   */
+  participantUserIds: Types.ObjectId[];
+  /** Set when a practitioner explicitly declared the consultation finished. */
+  endedBy?: Types.ObjectId;
 }
 
 const CallSchema = new Schema<ICall>({
@@ -24,6 +34,8 @@ const CallSchema = new Schema<ICall>({
   status: { type: String, enum: ['requested', 'active', 'ended', 'missed', 'declined'], default: 'active' },
   livekitRoomName: { type: String },
   livekitRoomUrl: { type: String },
+  participantUserIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  endedBy: { type: Schema.Types.ObjectId, ref: 'User' },
 });
 
 /**

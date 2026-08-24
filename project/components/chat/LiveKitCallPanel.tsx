@@ -80,15 +80,29 @@ function ladderIndexForQuality(q: ConnectionQuality): number | null {
 export default function LiveKitCallPanel({
   callInfo,
   onEnded,
+  closeWhenAlone = true,
 }: {
   callInfo: ActiveCallInfo;
   onEnded: () => void;
+  /**
+   * Whether being left alone in the room means the call is over.
+   *
+   * True for an ad-hoc call: the other person hanging up is the end of it.
+   * False for a scheduled consultation, where the room belongs to the
+   * appointment rather than to whoever happens to be in it — the other party
+   * may be reconnecting, and evicting the one who stayed is exactly the bug
+   * that "the doctor got chucked out when the patient dropped" describes.
+   */
+  closeWhenAlone?: boolean;
 }) {
   const roomRef = useRef<Room | null>(null);
   const shouldClosePanelRef = useRef(false);
   const connectAttemptRef = useRef(0);
   const onEndedRef = useRef(onEnded);
   useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
+  // Read through a ref so changing it never tears down a live connection.
+  const closeWhenAloneRef = useRef(closeWhenAlone);
+  useEffect(() => { closeWhenAloneRef.current = closeWhenAlone; }, [closeWhenAlone]);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -177,6 +191,8 @@ export default function LiveKitCallPanel({
   const [videoOn, setVideoOn] = useState(callInfo.type === "video");
   const [elapsed, setElapsed] = useState(0);
   const [remoteConnected, setRemoteConnected] = useState(false);
+  /** They were here and went. Distinguishes "left" from "hasn't arrived yet". */
+  const [remoteLeft, setRemoteLeft] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
   const [quality, setQuality] = useState<ConnectionQuality>(
@@ -285,6 +301,8 @@ export default function LiveKitCallPanel({
           if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
             track.attach(remoteVideoRef.current);
             setRemoteConnected(true);
+            // They came back — stop saying they left.
+            setRemoteLeft(false);
           } else if (track.kind === Track.Kind.Audio) {
             syncAudioPubs();
           }
@@ -300,6 +318,10 @@ export default function LiveKitCallPanel({
           syncAudioPubs();
           if (room.remoteParticipants.size === 0) {
             setRemoteConnected(false);
+            setRemoteLeft(true);
+            // For a consultation, being alone is not the end — stay connected
+            // and wait. The session's own window decides when it is over.
+            if (!closeWhenAloneRef.current) return;
             // Other side ended the call — close our panel after a brief moment
             setTimeout(() => {
               if (roomRef.current === room) {
@@ -633,8 +655,15 @@ export default function LiveKitCallPanel({
                   size="xl"
                 />
                 <p className="mt-4 text-sm font-semibold">
-                  Waiting for {callInfo.participantName || "participant"} to join
+                  {remoteLeft
+                    ? `${callInfo.participantName || "They"} left the call`
+                    : `Waiting for ${callInfo.participantName || "participant"} to join`}
                 </p>
+                {remoteLeft && !closeWhenAlone && (
+                  <p className="mt-1 text-xs text-white/70">
+                    You&apos;re still in the room — they can rejoin at any time.
+                  </p>
+                )}
               </div>
             </div>
           )}
