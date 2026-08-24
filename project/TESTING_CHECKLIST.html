@@ -248,8 +248,8 @@
       your progress is saved automatically in this browser, so you can close the tab and pick up later.
     </p>
     <p class="stamp">
-      Last updated <time datetime="2026-08-23T22:55+02:00"><strong>23 August 2026, 22:55 SAST</strong></time>
-      · against build <code>b7e2870</code>
+      Last updated <time datetime="2026-08-24T05:16+02:00"><strong>24 August 2026, 05:16 SAST</strong></time>
+      · against build <code>1c12546</code>
       · <span id="staleness"></span>
     </p>
   </header>
@@ -372,6 +372,23 @@ const AREAS = [
       "Alerts page surfaces real system alerts, not stale/fake ones",
       "Analytics and Reports pages load without errors",
       "Settings page saves changes and they persist after reload",
+    ],
+  },
+  {
+    id: "security",
+    title: "Security & Access",
+    route: "all roles",
+    items: [
+      "Signed out, /api/ably/auth returns 401 (never a token)",
+      "Signed in, the Ably token lists only your own conversations — no conversation:* wildcard",
+      "A 500 from any endpoint returns generic copy plus a ref, never a raw error",
+      "That ref appears in the server logs against the real error",
+      "Wrong password and unknown email give byte-identical responses",
+      "Repeated failed logins are refused (429) after the documented allowance",
+      "A patient hitting a practitioner-only endpoint gets 401/403",
+      "Setting an x-user-id header by hand does not change whose data you see",
+      "Another user's media id returns 403, not the file",
+      "Signing out then pressing back does not reach a protected page",
     ],
   },
   {
