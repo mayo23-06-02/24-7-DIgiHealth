@@ -1,7 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
-import { BiLoaderAlt, BiTime, BiLockAlt, BiCheck } from "react-icons/bi";
+import { useMemo, useState } from "react";
+import {
+  BiLoaderAlt,
+  BiTime,
+  BiLockAlt,
+  BiCheck,
+  BiChevronDown,
+} from "react-icons/bi";
 import type { BookingSlot, SlotStatus } from "@/lib/booking";
 import { periodOfDay } from "@/lib/booking/slots";
 
@@ -48,6 +54,9 @@ export default function TimeSlotPicker({
   durationMinutes?: number;
   emptyMessage?: string;
 }) {
+  /** Periods the user has chosen to reopen after they collapsed themselves. */
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
   const groups = useMemo(() => {
     const order: Array<"Morning" | "Afternoon" | "Evening"> = [
       "Morning",
@@ -111,19 +120,62 @@ export default function TimeSlotPicker({
         <LegendDot className="bg-slate-100 border-slate-100" label="Past / booked" />
       </div>
 
-      <div className="max-h-[280px] overflow-y-auto custom-scrollbar pr-1 space-y-5">
-        {groups.map(({ period, items }) => (
+      <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-1 space-y-3">
+        {groups.map(({ period, items }) => {
+          const freeCount = items.filter((i) => i.available).length;
+          const isExhausted = freeCount === 0 && items.length > 0;
+          const isExpanded = expanded[period] ?? false;
+
+          /*
+           * A period with nothing left collapses to its heading.
+           *
+           * Booking late in the day meant scrolling past two full grids of
+           * greyed-out morning and afternoon slots to reach the one or two
+           * that were still open. The count stays visible so the day still
+           * reads as accounted for, and the row expands if someone wants to
+           * see what was there.
+           */
+          if (isExhausted && !isExpanded) {
+            return (
+              <button
+                key={period}
+                type="button"
+                onClick={() => setExpanded((e) => ({ ...e, [period]: true }))}
+                className="flex w-full items-center gap-2 px-1 py-1 text-left group"
+              >
+                <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-300">
+                  {period}
+                </h5>
+                <div className="flex-1 h-px bg-slate-100" />
+                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-slate-600">
+                  {items.length} {items.length === 1 ? "slot" : "slots"} unavailable
+                </span>
+                <BiChevronDown size={14} className="text-slate-300 group-hover:text-slate-500" />
+              </button>
+            );
+          }
+
+          return (
           <div key={period}>
-            <div className="flex items-center gap-2 mb-2 px-1">
+            <div className="flex items-center gap-2 mb-1.5 px-1">
               <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 {period}
               </h5>
               <div className="flex-1 h-px bg-slate-100" />
               <span className="text-[10px] font-semibold text-slate-400">
-                {items.filter((i) => i.available).length} free
+                {freeCount} free
               </span>
+              {isExhausted && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((e) => ({ ...e, [period]: false }))}
+                  className="text-[10px] font-semibold text-slate-400 hover:text-slate-600"
+                >
+                  Hide
+                </button>
+              )}
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
               {items.map((slot) => {
                 const isSelected = selectedTime === slot.time;
                 const disabled = !slot.available;
@@ -142,7 +194,7 @@ export default function TimeSlotPicker({
                     onClick={() => {
                       if (!disabled) onSelect(slot.time);
                     }}
-                    className={`relative p-2 px-1 rounded-lg text-xs font-bold transition-all duration-200 border-2 ${
+                    className={`relative py-1.5 px-1 rounded-md text-[11px] font-bold transition-all duration-200 border ${
                       isSelected && !disabled ? styles.selected : styles.idle
                     } ${styles.cursor}`}
                   >
@@ -154,14 +206,12 @@ export default function TimeSlotPicker({
                         <BiCheck size={12} />
                       </span>
                     )}
+                    {/* The reason text is a tooltip only. Rendered inside every
+                        disabled tile it doubled their height, which is most of
+                        what made the grid long. */}
                     {slot.status === "booked" && (
-                      <span className="absolute top-1 right-1 text-slate-300">
-                        <BiLockAlt size={10} />
-                      </span>
-                    )}
-                    {disabled && slot.reason && (
-                      <span className="block text-[9px] font-semibold mt-0.5 opacity-70 normal-case">
-                        {slot.reason}
+                      <span className="absolute top-0.5 right-0.5 text-slate-300">
+                        <BiLockAlt size={9} />
                       </span>
                     )}
                   </button>
@@ -169,7 +219,8 @@ export default function TimeSlotPicker({
               })}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {summary.available === 0 && (
