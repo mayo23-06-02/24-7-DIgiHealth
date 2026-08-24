@@ -4,7 +4,13 @@ import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { Subscription, PaymentTransaction } from "@/lib/models/Billing";
 import { TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
 import { getEntitlement, subscriptionFilter } from "@/lib/billing/entitlement";
-import { chargeMockCard, validateCard } from "@/lib/billing/mockGateway";
+import {
+  chargeMockCard,
+  chargeMockDebitOrder,
+  validateCard,
+  validateBankAccount,
+  validateBillingAddress,
+} from "@/lib/billing/mockGateway";
 import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { signSessionToken, setSessionCookie } from "@/lib/auth/sessionToken";
 import { apiError } from "@/lib/api/errors";
@@ -66,7 +72,13 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { tier, card } = body as { tier?: string; card?: any };
+    const { tier, card, billing } = body as {
+      tier?: string;
+      card?: any;
+      billing?: any;
+      method?: string;
+    };
+    const method = body?.method === "eft" ? "eft" : "card";
 
     if (!tier || !isValidTier(tier)) {
       return NextResponse.json(
@@ -75,10 +87,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const cardErrors = validateCard(card || {});
-    if (Object.keys(cardErrors).length) {
+    // Validated per method — a card form's rules would reject every valid
+    // bank account and vice versa.
+    const fieldErrors = {
+      ...(method === "card"
+        ? validateCard(card || {})
+        : validateBankAccount(card || {})),
+      ...validateBillingAddress(billing || {}),
+    };
+    if (Object.keys(fieldErrors).length) {
       return NextResponse.json(
-        { error: "Check your card details.", fieldErrors: cardErrors },
+        {
+          error:
+            method === "card"
+              ? "Check your card and billing details."
+              : "Check your bank and billing details.",
+          fieldErrors,
+        },
         { status: 400 },
       );
     }
@@ -87,7 +112,10 @@ export async function POST(request: Request) {
 
     // The amount charged is read from the server's own config, never from the
     // request. A price in the payload would let a caller pay what they liked.
-    const payment = await chargeMockCard(card, plan.price);
+    const payment =
+      method === "card"
+        ? await chargeMockCard(card, plan.price)
+        : await chargeMockDebitOrder(card, plan.price);
     if (!payment.ok) {
       return NextResponse.json({ error: payment.error }, { status: 402 });
     }
@@ -124,7 +152,7 @@ export async function POST(request: Request) {
       ...(isMongoObjectId(key) ? { patientId: key } : {}),
       amount: plan.price,
       currency: "ZAR",
-      provider: "card",
+      provider: method === "card" ? "card" : "eft",
       status: "completed",
       description: `${plan.label} plan — monthly subscription`,
       category: "subscription",

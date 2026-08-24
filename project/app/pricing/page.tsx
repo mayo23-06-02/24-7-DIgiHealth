@@ -8,37 +8,9 @@ import Footer from "@/components/LandingPage/Footer";
 import Button from "@/components/ui/Button";
 import { Check, ArrowRight } from "lucide-react";
 import { TIER_CONFIG, TIER_ORDER } from "@/lib/billing/tiers";
-
-const tierCopy: Record<string, { tagline: string; highlight?: boolean; features: string[] }> = {
-  individual: {
-    tagline: "For one person, sorted.",
-    features: [
-      "Up to 5 consultations a month",
-      "Video, chat, or voice with any GP or specialist",
-      "E-prescriptions & digital health record",
-      "24/7 platform access",
-    ],
-  },
-  family: {
-    tagline: "The most popular way to cover a household.",
-    highlight: true,
-    features: [
-      "Up to 10 consultations a month",
-      "Add up to 2 family members",
-      "Everything in Individual",
-      "One login manages the whole family's care",
-    ],
-  },
-  family_plus: {
-    tagline: "Unlimited care for bigger families.",
-    features: [
-      "Unlimited consultations",
-      "Add up to 4 family members",
-      "Everything in Family",
-      "Priority specialist scheduling",
-    ],
-  },
-};
+// Shared with the checkout wizard so the plan a visitor reads about here is
+// described identically at the point of payment.
+import { TIER_COPY } from "@/lib/billing/tierCopy";
 
 export default function PricingPage() {
   return (
@@ -78,7 +50,7 @@ export default function PricingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
             {TIER_ORDER.map((tierId) => {
               const tier = TIER_CONFIG[tierId];
-              const copy = tierCopy[tierId];
+              const copy = TIER_COPY[tierId];
               return (
                 <div
                   key={tierId}

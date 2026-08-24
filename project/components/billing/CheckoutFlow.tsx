@@ -4,7 +4,20 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { BiCheckCircle, BiLockAlt, BiInfoCircle } from "react-icons/bi";
+import Select from "@/components/ui/Select";
+import Card from "@/components/ui/Card";
+import Alert from "@/components/ui/Alert";
+import Badge from "@/components/ui/Badge";
+import {
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  CreditCard,
+  Landmark,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
+import { TIER_COPY } from "@/lib/billing/tierCopy";
 
 type Plan = {
   id: string;
@@ -14,19 +27,58 @@ type Plan = {
   consultationsMax: number | null;
 };
 
-const BLANK_CARD = { number: "", name: "", expiry: "", cvv: "" };
+type Method = "card" | "eft";
 
+const STEPS = ["Choose a plan", "Payment details"] as const;
+
+const BLANK = {
+  number: "",
+  name: "",
+  expiry: "",
+  cvv: "",
+  accountHolder: "",
+  bankName: "",
+  accountNumber: "",
+  branchCode: "",
+  addressLine: "",
+  city: "",
+  postalCode: "",
+};
+
+const SA_BANKS = [
+  "Absa",
+  "Capitec",
+  "Discovery Bank",
+  "FNB",
+  "Investec",
+  "Nedbank",
+  "Standard Bank",
+  "TymeBank",
+];
+
+/**
+ * Two-step checkout: pick a plan, then pay.
+ *
+ * Built on the shared primitives and tokens from design.md — lucide icons
+ * only, Card/Input/Select/Alert/Badge rather than hand-rolled equivalents,
+ * semantic status colours via the success/warning/danger scales, and laid out
+ * mobile-first. The plan cards deliberately mirror the public /pricing cards
+ * (same copy source, same shape) so the plan a patient chose on the marketing
+ * site is recognisably the same thing here.
+ */
 export default function CheckoutFlow() {
   const router = useRouter();
 
+  const [step, setStep] = useState(0);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [card, setCard] = useState(BLANK_CARD);
+  const [method, setMethod] = useState<Method>("card");
+  const [form, setForm] = useState(BLANK);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
-  const [done, setDone] = useState<{ tier: string; last4: string } | null>(null);
+  const [done, setDone] = useState<{ label: string; last4: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,19 +87,15 @@ export default function CheckoutFlow() {
         const res = await fetch("/api/billing/checkout");
         const json = await res.json();
         if (cancelled) return;
-        if (json?.data?.plans) {
-          setPlans(json.data.plans);
-          // Billing's "Upgrade Plan" links here with ?tier=, so the plan the
-          // user picked there is already selected when they arrive.
-          const wanted = new URLSearchParams(window.location.search).get("tier");
-          const preselect = json.data.plans.find((p: Plan) => p.id === wanted);
-          setSelected(preselect?.id ?? json.data.plans[0]?.id ?? null);
-        }
-        // Someone who already holds a plan has no business on this page —
-        // send them on rather than inviting a second payment.
         if (json?.data?.entitlement?.hasPlan) {
           router.replace("/patient");
           return;
+        }
+        if (json?.data?.plans) {
+          setPlans(json.data.plans);
+          const wanted = new URLSearchParams(window.location.search).get("tier");
+          const pre = json.data.plans.find((p: Plan) => p.id === wanted);
+          setSelected(pre?.id ?? json.data.plans[1]?.id ?? json.data.plans[0]?.id ?? null);
         }
       } catch {
         if (!cancelled) setError("Could not load plans. Refresh to try again.");
@@ -60,6 +108,8 @@ export default function CheckoutFlow() {
   }, [router]);
 
   const plan = plans.find((p) => p.id === selected) || null;
+  const set = (k: keyof typeof BLANK, v: string) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   const pay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +117,7 @@ export default function CheckoutFlow() {
     setFieldErrors({});
     if (!selected) {
       setError("Choose a plan to continue.");
+      setStep(0);
       return;
     }
     setPaying(true);
@@ -74,20 +125,19 @@ export default function CheckoutFlow() {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier: selected, card }),
+        body: JSON.stringify({ tier: selected, method, card: form, billing: form }),
       });
       const json = await res.json();
 
       if (res.ok) {
-        setDone({ tier: json.data.tier, last4: json.data.last4 });
-        // A full navigation, not a client push: the session cookie was just
-        // re-issued with the plan claim and middleware has to read the new one.
+        setDone({ label: plan?.label ?? "", last4: json.data.last4 });
+        // Full navigation, not a router push: the session cookie was just
+        // re-issued with the plan claim and middleware must read the new one.
         setTimeout(() => {
           window.location.href = "/patient";
-        }, 1600);
+        }, 1800);
         return;
       }
-
       if (json.fieldErrors) setFieldErrors(json.fieldErrors);
       setError(json.error || "Payment could not be completed.");
     } catch {
@@ -96,159 +146,421 @@ export default function CheckoutFlow() {
     setPaying(false);
   };
 
+  /* ---------------------------------------------------------- loading --- */
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="h-64 rounded-lg bg-slate-100 animate-pulse" />
-      </div>
-    );
-  }
-
-  if (done) {
-    return (
-      <div className="max-w-lg mx-auto p-6 text-center">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-8">
-          <BiCheckCircle size={40} className="text-emerald-600 mx-auto mb-3" />
-          <h1 className="text-xl font-bold text-ink-900 font-grotesk mb-1">
-            You&apos;re all set
-          </h1>
-          <p className="text-sm text-ink-600">
-            Your {done.tier.replace("_", " ")} plan is active — card ending{" "}
-            {done.last4}. Taking you to your dashboard…
-          </p>
+      <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 space-y-6">
+        <div className="h-8 w-56 rounded-md bg-surface-soft animate-pulse" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-80 rounded-2xl bg-surface-soft animate-pulse" />
+          ))}
         </div>
       </div>
     );
   }
 
+  /* ------------------------------------------------------ confirmation --- */
+  if (done) {
+    return (
+      <div className="mx-auto w-full max-w-lg p-4 sm:p-6">
+        <Card className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success-50">
+            <CheckCircle2 size={28} className="text-success-500" />
+          </div>
+          <h1 className="text-h3 font-grotesk text-ink-900 mb-2">
+            Your cover is active
+          </h1>
+          <p className="text-body text-ink-600">
+            {done.label} plan confirmed
+            {done.last4 ? ` — card ending ${done.last4}` : ""}. Taking you to
+            your dashboard…
+          </p>
+          <div className="mt-6">
+            <Button onClick={() => (window.location.href = "/patient")} fullWidth>
+              Go to dashboard
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  /* -------------------------------------------------------------- ui --- */
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6">
+    <div className="mx-auto w-full max-w-5xl p-4 sm:p-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-ink-900 font-grotesk mb-1">
-          Choose your medical cover
+        <h1 className="text-h2 font-grotesk text-ink-900 mb-1">
+          Activate your medical cover
         </h1>
-        <p className="text-sm text-ink-600">
-          Select a plan to activate your account. You can change or cancel it
-          later from Billing.
+        <p className="text-body text-ink-600">
+          Choose a plan and complete payment to start using the platform.
         </p>
       </header>
 
-      {/* Nobody should mistake this for a real payment screen. */}
-      <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 mb-6 text-amber-900">
-        <BiInfoCircle size={18} className="mt-0.5 shrink-0" />
-        <p className="text-xs leading-relaxed">
-          <b>Demonstration checkout.</b> No payment gateway is connected and no
-          card is charged. Any valid-looking card number is accepted; one ending
-          in <code className="font-mono">0000</code> will be declined so the
-          failure path can be tested.
-        </p>
-      </div>
-
-      <form onSubmit={pay} className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <fieldset className="space-y-3">
-          <legend className="sr-only">Available plans</legend>
-          {plans.map((p) => {
-            const active = p.id === selected;
-            return (
-              <label
-                key={p.id}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
-                  active
-                    ? "border-primary bg-primary/5"
-                    : "border-slate-200 hover:border-slate-300"
+      {/* Step indicator. Non-interactive on purpose: step 2 is not reachable
+          until a plan is chosen, and a clickable-looking dead control is worse
+          than a plain one. */}
+      <ol className="mb-6 flex items-center gap-3" aria-label="Checkout progress">
+        {STEPS.map((label, i) => {
+          const state = i < step ? "done" : i === step ? "current" : "todo";
+          return (
+            <li key={label} className="flex flex-1 items-center gap-3">
+              <span
+                aria-current={state === "current" ? "step" : undefined}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-small font-semibold transition-colors ${
+                  state === "done"
+                    ? "bg-success-500 text-white"
+                    : state === "current"
+                      ? "bg-primary text-white"
+                      : "bg-surface-soft text-ink-400"
                 }`}
               >
-                <input
-                  type="radio"
-                  name="plan"
-                  value={p.id}
-                  checked={active}
-                  onChange={() => setSelected(p.id)}
-                  className="mt-1 accent-[#4493b8]"
-                />
-                <span className="flex-1">
-                  <span className="flex items-baseline justify-between gap-2">
-                    <span className="font-bold text-ink-900 font-grotesk">
+                {state === "done" ? <Check size={16} /> : i + 1}
+              </span>
+              <span
+                className={`text-small font-semibold ${
+                  state === "todo" ? "text-ink-400" : "text-ink-900"
+                }`}
+              >
+                {label}
+              </span>
+              {i < STEPS.length - 1 && (
+                <span className="hidden h-px flex-1 bg-border sm:block" />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+
+      <Alert status="warning" title="Demonstration checkout" className="mb-6">
+        No payment gateway is connected and no money moves. Any valid-looking
+        card is accepted; one ending <b>0000</b> is declined so the failure path
+        can be tested.
+      </Alert>
+
+      {/* ---------------------------------------------- step 1: plans --- */}
+      {step === 0 && (
+        <>
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
+            {plans.map((p) => {
+              const copy = TIER_COPY[p.id];
+              const active = p.id === selected;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setSelected(p.id)}
+                  aria-pressed={active}
+                  className={`flex h-full flex-col rounded-2xl p-6 text-left transition-all duration-200 ${
+                    active
+                      ? "bg-primary text-white shadow-md ring-2 ring-primary"
+                      : "bg-surface-soft text-ink-900 hover:ring-2 hover:ring-primary/30"
+                  }`}
+                >
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <h2
+                      className={`text-h3 font-grotesk ${
+                        active ? "text-white" : "text-ink-900"
+                      }`}
+                    >
                       {p.label}
-                    </span>
-                    <span className="font-bold text-ink-900 tabular-nums">
-                      R{p.price}
-                      <span className="text-xs font-normal text-ink-600">
-                        /month
+                    </h2>
+                    {copy?.highlight && !active && (
+                      <Badge label="Popular" status="info" />
+                    )}
+                    {active && (
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                        <Check size={14} className="text-white" />
                       </span>
+                    )}
+                  </div>
+
+                  <p
+                    className={`text-small mb-5 ${
+                      active ? "text-white/80" : "text-ink-600"
+                    }`}
+                  >
+                    {copy?.tagline}
+                  </p>
+
+                  <p className="mb-5">
+                    <span className="font-grotesk text-3xl font-bold tabular-nums">
+                      R{p.price}
                     </span>
-                  </span>
-                  <span className="mt-1 block text-xs text-ink-600">
-                    {p.consultationsMax === null
-                      ? "Unlimited consultations"
-                      : `${p.consultationsMax} consultations a month`}
-                    {p.maxFamilyMembers > 0
-                      ? ` · up to ${p.maxFamilyMembers} family members`
-                      : " · one person"}
-                  </span>
-                </span>
-              </label>
-            );
-          })}
-        </fieldset>
+                    <span
+                      className={`text-small ${
+                        active ? "text-white/70" : "text-ink-400"
+                      }`}
+                    >
+                      /month
+                    </span>
+                  </p>
 
-        <div className="rounded-lg border border-slate-200 p-4 space-y-4 h-fit">
-          <h2 className="font-bold text-ink-900 font-grotesk flex items-center gap-2">
-            <BiLockAlt size={16} className="text-primary" />
-            Card details
-          </h2>
-
-          <Input
-            label="Card number"
-            value={card.number}
-            onChange={(e) => setCard({ ...card, number: e.target.value })}
-            error={fieldErrors.number}
-            placeholder="4111 1111 1111 1111"
-            inputMode="numeric"
-            autoComplete="off"
-          />
-          <Input
-            label="Name on card"
-            value={card.name}
-            onChange={(e) => setCard({ ...card, name: e.target.value })}
-            error={fieldErrors.name}
-            placeholder="T Mokoena"
-            autoComplete="off"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Expiry"
-              value={card.expiry}
-              onChange={(e) => setCard({ ...card, expiry: e.target.value })}
-              error={fieldErrors.expiry}
-              placeholder="MM/YY"
-              autoComplete="off"
-            />
-            <Input
-              label="CVV"
-              value={card.cvv}
-              onChange={(e) => setCard({ ...card, cvv: e.target.value })}
-              error={fieldErrors.cvv}
-              placeholder="123"
-              inputMode="numeric"
-              autoComplete="off"
-            />
+                  <ul className="flex-1 space-y-2.5">
+                    {(copy?.features ?? []).map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <Check
+                          size={16}
+                          className={`mt-0.5 shrink-0 ${
+                            active ? "text-white" : "text-primary"
+                          }`}
+                        />
+                        <span
+                          className={`text-small ${
+                            active ? "text-white/90" : "text-ink-600"
+                          }`}
+                        >
+                          {f}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </button>
+              );
+            })}
           </div>
 
           {error && (
-            <p className="text-sm font-bold text-red-600" role="alert">
-              {error}
-            </p>
+            <Alert status="error" title={error} className="mt-6" />
           )}
 
-          <Button type="submit" fullWidth loading={paying}>
-            {plan ? `Pay R${plan.price} & activate` : "Choose a plan"}
-          </Button>
-          <p className="text-center text-[11px] text-ink-400">
-            Billed monthly. Cancel any time from Billing.
-          </p>
-        </div>
-      </form>
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={() => setStep(1)}
+              disabled={!selected}
+              icon={<ArrowRight size={16} />}
+              iconPosition="right"
+            >
+              {plan ? `Continue with ${plan.label}` : "Choose a plan"}
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* -------------------------------------------- step 2: payment --- */}
+      {step === 1 && (
+        <form onSubmit={pay} className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
+          <div className="space-y-6">
+            <Card>
+              <h2 className="text-h4 font-grotesk text-ink-900 mb-4">
+                How would you like to pay?
+              </h2>
+
+              <div
+                role="radiogroup"
+                aria-label="Payment method"
+                className="grid grid-cols-2 gap-3"
+              >
+                {(
+                  [
+                    { id: "card", label: "Card", icon: CreditCard },
+                    { id: "eft", label: "Bank / EFT", icon: Landmark },
+                  ] as const
+                ).map(({ id, label, icon: Icon }) => {
+                  const active = method === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setMethod(id)}
+                      className={`flex min-h-11 items-center justify-center gap-2 rounded-md border px-4 py-3 text-small font-semibold transition-colors ${
+                        active
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border bg-surface text-ink-600 hover:border-primary/40"
+                      }`}
+                    >
+                      <Icon size={16} />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
+
+            <Card>
+              <h2 className="text-h4 font-grotesk text-ink-900 mb-4">
+                {method === "card" ? "Card details" : "Bank account details"}
+              </h2>
+
+              {method === "card" ? (
+                <div className="space-y-4">
+                  <Input
+                    label="Card number"
+                    value={form.number}
+                    onChange={(e) => set("number", e.target.value)}
+                    error={fieldErrors.number}
+                    placeholder="4111 1111 1111 1111"
+                    inputMode="numeric"
+                    autoComplete="off"
+                  />
+                  <Input
+                    label="Name on card"
+                    value={form.name}
+                    onChange={(e) => set("name", e.target.value)}
+                    error={fieldErrors.name}
+                    placeholder="T Mokoena"
+                    autoComplete="off"
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Expiry"
+                      value={form.expiry}
+                      onChange={(e) => set("expiry", e.target.value)}
+                      error={fieldErrors.expiry}
+                      placeholder="MM/YY"
+                      autoComplete="off"
+                    />
+                    <Input
+                      label="CVV"
+                      value={form.cvv}
+                      onChange={(e) => set("cvv", e.target.value)}
+                      error={fieldErrors.cvv}
+                      placeholder="123"
+                      inputMode="numeric"
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Input
+                    label="Account holder"
+                    value={form.accountHolder}
+                    onChange={(e) => set("accountHolder", e.target.value)}
+                    error={fieldErrors.accountHolder}
+                    placeholder="T Mokoena"
+                  />
+                  <Select
+                    label="Bank"
+                    value={form.bankName}
+                    onChange={(v) => set("bankName", v)}
+                    error={fieldErrors.bankName}
+                    options={[
+                      { value: "", label: "Select your bank" },
+                      ...SA_BANKS.map((b) => ({ value: b, label: b })),
+                    ]}
+                  />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Input
+                      label="Account number"
+                      value={form.accountNumber}
+                      onChange={(e) => set("accountNumber", e.target.value)}
+                      error={fieldErrors.accountNumber}
+                      inputMode="numeric"
+                    />
+                    <Input
+                      label="Branch code"
+                      value={form.branchCode}
+                      onChange={(e) => set("branchCode", e.target.value)}
+                      error={fieldErrors.branchCode}
+                      inputMode="numeric"
+                    />
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            <Card>
+              <h2 className="text-h4 font-grotesk text-ink-900 mb-4">
+                Billing address
+              </h2>
+              <div className="space-y-4">
+                <Input
+                  label="Street address"
+                  value={form.addressLine}
+                  onChange={(e) => set("addressLine", e.target.value)}
+                  error={fieldErrors.addressLine}
+                  placeholder="12 Long Street"
+                />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    label="City"
+                    value={form.city}
+                    onChange={(e) => set("city", e.target.value)}
+                    error={fieldErrors.city}
+                    placeholder="Johannesburg"
+                  />
+                  <Input
+                    label="Postal code"
+                    value={form.postalCode}
+                    onChange={(e) => set("postalCode", e.target.value)}
+                    error={fieldErrors.postalCode}
+                    inputMode="numeric"
+                    placeholder="2000"
+                  />
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Order summary. Sticky only from lg up — on a phone it belongs in
+              the flow, above the submit button, not pinned over the form. */}
+          <aside className="lg:sticky lg:top-6 lg:self-start">
+            <Card>
+              <h2 className="text-h4 font-grotesk text-ink-900 mb-4">
+                Order summary
+              </h2>
+
+              <dl className="space-y-3 text-small">
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-ink-600">Plan</dt>
+                  <dd className="font-semibold text-ink-900">{plan?.label}</dd>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-ink-600">Consultations</dt>
+                  <dd className="font-semibold text-ink-900">
+                    {plan?.consultationsMax === null
+                      ? "Unlimited"
+                      : `${plan?.consultationsMax} / month`}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-ink-600">Family members</dt>
+                  <dd className="font-semibold text-ink-900">
+                    {plan?.maxFamilyMembers
+                      ? `Up to ${plan.maxFamilyMembers}`
+                      : "One person"}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
+                  <dt className="font-semibold text-ink-900">Billed monthly</dt>
+                  <dd className="font-grotesk text-h3 font-bold text-ink-900 tabular-nums">
+                    R{plan?.price ?? 0}
+                  </dd>
+                </div>
+              </dl>
+
+              {error && (
+                <Alert status="error" title={error} className="mt-4" />
+              )}
+
+              <div className="mt-5 space-y-3">
+                <Button type="submit" fullWidth loading={paying}>
+                  Pay R{plan?.price ?? 0} &amp; activate
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  fullWidth
+                  onClick={() => setStep(0)}
+                  icon={<ArrowLeft size={16} />}
+                  iconPosition="left"
+                >
+                  Back to plans
+                </Button>
+              </div>
+
+              <p className="mt-4 flex items-start gap-2 text-small text-ink-400">
+                <ShieldCheck size={14} className="mt-0.5 shrink-0" />
+                Cancel any time from Billing. No lock-in contract.
+              </p>
+            </Card>
+          </aside>
+        </form>
+      )}
     </div>
   );
 }

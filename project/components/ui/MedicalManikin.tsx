@@ -419,7 +419,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
               <div className="bg-white/80 backdrop-blur-xl border shadow border-primary/20 rounded-lg p-5 shadow-primary/10 flex items-center gap-4 animate-in slide-in-from-bottom-4 duration-700">
                 <div className="flex-1 min-w-0">
                   <h1 className="text-sm font-bold text-slate-900 leading-tight">Incomplete Health Profile</h1>
-                  <p className="text-sm text-slate-500 leading-tight mt-0.5">
+                  <p className="text-xs text-slate-500 leading-tight mt-0.5">
                     Height and weight are missing. Add them to calibrate your 3D digital twin and BMI accuracy.
                   </p>
                 </div>

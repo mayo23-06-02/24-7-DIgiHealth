@@ -35,6 +35,71 @@ export function detectBrand(number: string): string {
   return "Card";
 }
 
+export type MockBankAccount = {
+  accountHolder: string;
+  bankName: string;
+  accountNumber: string;
+  branchCode: string;
+};
+
+export type BillingAddress = {
+  addressLine: string;
+  city: string;
+  postalCode: string;
+};
+
+/** Debit-order details. Validated for shape only — nothing is verified. */
+export function validateBankAccount(
+  acc: MockBankAccount,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!acc?.accountHolder?.trim()) {
+    errors.accountHolder = "Enter the account holder's name.";
+  }
+  if (!acc?.bankName?.trim()) errors.bankName = "Select your bank.";
+
+  const number = digitsOf(acc?.accountNumber);
+  if (number.length < 6 || number.length > 13) {
+    errors.accountNumber = "Enter a valid account number.";
+  }
+  // South African branch codes are six digits.
+  if (!/^\d{6}$/.test(digitsOf(acc?.branchCode))) {
+    errors.branchCode = "Branch code is 6 digits.";
+  }
+  return errors;
+}
+
+export function validateBillingAddress(
+  addr: BillingAddress,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!addr?.addressLine?.trim()) errors.addressLine = "Enter your street address.";
+  if (!addr?.city?.trim()) errors.city = "Enter your city.";
+  if (!/^\d{4}$/.test(digitsOf(addr?.postalCode))) {
+    errors.postalCode = "Postal code is 4 digits.";
+  }
+  return errors;
+}
+
+/**
+ * Charge a bank account by debit order. Always succeeds — a real debit order
+ * fails days later, not at capture, so there is no sensible instant decline to
+ * simulate here.
+ */
+export async function chargeMockDebitOrder(
+  acc: MockBankAccount,
+  amount: number,
+): Promise<MockPaymentResult> {
+  await new Promise((r) => setTimeout(r, 900));
+  if (amount <= 0) return { ok: false, error: "Invalid amount." };
+  return {
+    ok: true,
+    reference: `MOCK-EFT-${Date.now().toString(36).toUpperCase()}`,
+    last4: digitsOf(acc.accountNumber).slice(-4),
+    brand: acc.bankName || "Bank",
+  };
+}
+
 /** Field-level validation, matching what a real gateway would reject up front. */
 export function validateCard(card: MockCard): Record<string, string> {
   const errors: Record<string, string> = {};
