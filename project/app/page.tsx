@@ -28,11 +28,9 @@ export default function LandingPage() {
       <TickerBar />
       <Approach />
       <WhyChooseUs />
-      <WhyUrgentCare />
       <DoctorsSection />
       <ProcessSteps />
       <BookingCTA />
-   
       <AudienceRouter />
       <Footer />
     </main>

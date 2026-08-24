@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { guardianFilter } from '@/lib/family/access';
 import FamilyLink from '@/lib/models/FamilyLink';
 import { Subscription } from '@/lib/models/Billing';
 import { getActiveFamilyLink } from '@/lib/family/access';
 import { Notification } from '@/lib/models/Communications';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
 /** PATCH — guardian toggles isMinor (the medical-history access switch) or
@@ -45,12 +45,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     if (!guardian) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
     const { memberId: linkId } = await params;
-    if (!isMongoObjectId(guardian.userId)) {
-      return NextResponse.json({ success: false, error: 'No family link found' }, { status: 404 });
-    }
+    // Matched through guardianFilter so this works for both id shapes. It
+    // previously refused every Postgres-native guardian outright, which meant
+    // a patient who had invited someone could never revoke that invite.
     const link = await FamilyLink.findOne({
       _id: linkId,
-      guardianId: guardian.userId,
+      ...guardianFilter(String(guardian.userId)),
       status: { $ne: 'revoked' },
     });
     if (!link) return NextResponse.json({ success: false, error: 'No family link found' }, { status: 404 });

@@ -20,8 +20,12 @@ export type SiteHeaderProps = {
   variant?: Variant;
   /**
    * The strip above the nav carrying weather, date, socials and the toll-free
-   * number. On by default for the transparent (home) treatment, off elsewhere,
-   * but either page type can ask for it.
+   * number.
+   *
+   * On everywhere by default. It used to be on for home only, which is what
+   * made the header look like two different headers depending on which
+   * marketing page you were on — the nav itself was already identical.
+   * Individual pages can still opt out.
    */
   showUtilityBar?: boolean;
 };
@@ -46,7 +50,7 @@ export default function SiteHeader({
   const [isSticky, setIsSticky] = useState(false);
 
   const transparent = variant === "transparent";
-  const withUtilityBar = showUtilityBar ?? transparent;
+  const withUtilityBar = showUtilityBar ?? true;
 
   useEffect(() => {
     // The transparent treatment overlays a tall hero, so it waits longer before
