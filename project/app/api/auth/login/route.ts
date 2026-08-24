@@ -5,6 +5,8 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 import { getEntitlement } from "@/lib/billing/entitlement";
+import { isMongoObjectId } from "@/lib/utils/mongoId";
+import { updateUserByMongoId } from "@/lib/postgres/users";
 
 /**
  * A real bcrypt digest that no supplied password can match. Compared against
@@ -167,12 +169,56 @@ export async function POST(request: Request) {
     // Always run a bcrypt compare, even with no user/hash, so the response time
     // doesn't leak existence either. DUMMY_HASH is a valid bcrypt digest of a
     // value nothing can match.
-    const isMatch = await bcrypt.compare(
+    let isMatch = await bcrypt.compare(
       password,
       usablePasswordHash ?? DUMMY_HASH,
     );
 
-    if (!user || !usablePasswordHash || !isMatch) {
+    /*
+     * Second chance against Mongo, which is still the source of truth for
+     * credentials during the migration.
+     *
+     * The Postgres row can hold a stale hash: syncUser upserts on `mongo_id`,
+     * and when a row already existed for the address under a different link
+     * the write collided on the unique email and was swallowed as best-effort.
+     * Login reads Postgres first and never looked further, so those accounts
+     * were locked out with the correct password — and a reset could not repair
+     * them either, because that also keyed on the missing link.
+     *
+     * Only reached after the Postgres comparison has already failed, so a
+     * correct password is never rejected on a stale mirror. On success the
+     * mirror is repaired so this path is not needed again.
+     */
+    if (user && !isMatch && isMongoObjectId(user.identityId)) {
+      await connectToDatabase();
+      const mongoUser = await User.findById(user.identityId).select(
+        "passwordHash email",
+      );
+      const mongoHash = (mongoUser as any)?.passwordHash;
+      if (
+        mongoHash &&
+        mongoHash !== usablePasswordHash &&
+        !String(mongoHash).startsWith("otp_only:") &&
+        (await bcrypt.compare(password, mongoHash))
+      ) {
+        isMatch = true;
+        console.warn(
+          "[login] Postgres password hash was stale; repairing from Mongo",
+          { email: user.email },
+        );
+        await updateUserByMongoId(
+          user.identityId,
+          { password_hash: mongoHash },
+          user.email,
+        );
+      }
+    }
+
+    // Gated on isMatch alone: a Postgres row with no hash at all still has to
+    // be able to succeed via the Mongo fallback above. isMatch can only be
+    // true if a real stored hash verified — an absent hash compares against
+    // DUMMY_HASH and always fails.
+    if (!user || !isMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 },

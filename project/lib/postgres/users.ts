@@ -42,41 +42,81 @@ export async function syncUser(mongoUser: {
   otpCodeHash?: string | null;
   otpExpiresAt?: Date | null;
 }) {
-  await safe("syncUser", async () =>
-    admin()
+  const row = {
+    mongo_id: mongoUser._id.toString(),
+    email: mongoUser.email,
+    password_hash: mongoUser.passwordHash || null,
+    role: mongoUser.role,
+    status: mongoUser.status || "active",
+    first_name: mongoUser.firstName,
+    last_name: mongoUser.lastName,
+    sa_id: mongoUser.saId || null,
+    mobile: mongoUser.mobile || null,
+    phone_e164: mongoUser.phoneE164 || null,
+    mfa_enabled: !!mongoUser.mfaEnabled,
+    supabase_uid: mongoUser.supabaseUid || null,
+    email_verified: mongoUser.emailVerified !== false,
+    email_verified_at: mongoUser.emailVerifiedAt || null,
+    otp_code_hash: mongoUser.otpCodeHash || null,
+    otp_expires_at: mongoUser.otpExpiresAt || null,
+  };
+
+  await safe("syncUser", async () => {
+    const result = await admin()
       .from("users")
-      .upsert(
-        {
-          mongo_id: mongoUser._id.toString(),
-          email: mongoUser.email,
-          password_hash: mongoUser.passwordHash || null,
-          role: mongoUser.role,
-          status: mongoUser.status || "active",
-          first_name: mongoUser.firstName,
-          last_name: mongoUser.lastName,
-          sa_id: mongoUser.saId || null,
-          mobile: mongoUser.mobile || null,
-          phone_e164: mongoUser.phoneE164 || null,
-          mfa_enabled: !!mongoUser.mfaEnabled,
-          supabase_uid: mongoUser.supabaseUid || null,
-          email_verified: mongoUser.emailVerified !== false,
-          email_verified_at: mongoUser.emailVerifiedAt || null,
-          otp_code_hash: mongoUser.otpCodeHash || null,
-          otp_expires_at: mongoUser.otpExpiresAt || null,
-        },
-        { onConflict: "mongo_id" },
-      ),
-  );
+      .upsert(row, { onConflict: "mongo_id" });
+
+    if (!result.error) return result;
+
+    /*
+     * `email` is unique as well as `mongo_id`. When a Postgres row already
+     * exists for this address under a different (or null) mongo_id, the upsert
+     * above resolves to an INSERT and dies on the email constraint — and this
+     * helper is best-effort, so the failure was logged and dropped.
+     *
+     * That left Postgres holding a stale password_hash while Mongo held the
+     * real one. Login reads Postgres first and never consults Mongo when a row
+     * exists, so the account was locked out permanently: correct password,
+     * "Invalid credentials", and a password reset could not repair it either
+     * because updateUserByMongoId keys on the very mongo_id that was missing.
+     *
+     * Reconciling by email adopts the existing row and stamps the link on it.
+     */
+    return admin().from("users").update(row).eq("email", mongoUser.email);
+  });
 }
 
-/** Partial update by mongo_id — for status/role/otp-only changes. */
+/**
+ * Partial update by mongo_id — for status/role/otp-only changes.
+ *
+ * `email` is accepted as a fallback key because a row whose `mongo_id` was
+ * never linked matches nothing here. That is how a password reset could report
+ * success while leaving the Postgres hash untouched — and Postgres is what
+ * login reads.
+ */
 export async function updateUserByMongoId(
   mongoId: string,
   updates: Record<string, unknown>,
+  email?: string,
 ) {
-  await safe("updateUserByMongoId", async () =>
-    admin().from("users").update(updates).eq("mongo_id", mongoId),
-  );
+  await safe("updateUserByMongoId", async () => {
+    const result = await admin()
+      .from("users")
+      .update(updates)
+      .eq("mongo_id", mongoId)
+      .select("id");
+
+    if (result.error || (result.data && result.data.length > 0) || !email) {
+      return result;
+    }
+
+    // Nothing matched on the link — fall back to the address, and stamp the
+    // link on so the next write finds it directly.
+    return admin()
+      .from("users")
+      .update({ ...updates, mongo_id: mongoId })
+      .eq("email", email);
+  });
 }
 
 async function pgUserIdFor(mongoId: string): Promise<string | null> {

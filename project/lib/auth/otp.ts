@@ -21,10 +21,11 @@ export async function issueOtpCode(params: {
   const otpExpiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
   await User.findByIdAndUpdate(params.userId, { otpCodeHash, otpExpiresAt });
-  await updateUserByMongoId(params.userId, {
-    otp_code_hash: otpCodeHash,
-    otp_expires_at: otpExpiresAt.toISOString(),
-  });
+  await updateUserByMongoId(
+    params.userId,
+    { otp_code_hash: otpCodeHash, otp_expires_at: otpExpiresAt.toISOString() },
+    params.email,
+  );
 
   const { error } = await sendEmail({
     to: params.email,

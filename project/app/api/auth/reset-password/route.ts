@@ -106,9 +106,11 @@ export async function POST(request: Request) {
     await user.save();
 
     // Sync to Postgres
-    await updateUserByMongoId(user._id.toString(), {
-      password_hash: user.passwordHash,
-    });
+    await updateUserByMongoId(
+      user._id.toString(),
+      { password_hash: user.passwordHash },
+      user.email,
+    );
 
     return NextResponse.json({
       success: true,
