@@ -3,6 +3,65 @@ import { Notification } from "@/lib/models/Communications";
 import User from "@/lib/models/User";
 import { PatientProfile } from "@/lib/models/RoleProfiles";
 import FamilyLink from "@/lib/models/FamilyLink";
+import { sendEmail, isPostmarkConfigured } from "@/lib/email/postmark";
+import { resolveRecipientById } from "@/lib/email/recipients";
+import { appointmentRequestEmailHtml } from "@/lib/email/templates/appointmentRequest";
+
+const APP_URL = (
+  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+).replace(/\/$/, "");
+
+/**
+ * Email the person a booking is waiting on.
+ *
+ * An in-app notification only reaches someone who is already in the app, which
+ * is precisely the person who did not need telling. A request sits unanswered
+ * until the recipient happens to log in — so the one event that requires a
+ * human response is also the one that has to leave the platform to find them.
+ *
+ * Best-effort throughout: a booking must never fail because a mail relay was
+ * down, so every failure here is logged and swallowed. The in-app notification
+ * has already been written by the time this runs.
+ */
+async function emailActionRequired(input: {
+  recipientUserId: string | mongoose.Types.ObjectId;
+  recipientRole: "patient" | "practitioner";
+  requesterName: string;
+  scheduledStart: Date | string;
+  consultationType: string;
+  isReschedule?: boolean;
+  reason?: string;
+}): Promise<void> {
+  try {
+    if (!isPostmarkConfigured()) return;
+
+    const recipient = await resolveRecipientById(input.recipientUserId);
+    if (!recipient?.email) return;
+
+    const start = new Date(input.scheduledStart);
+    if (isNaN(start.getTime())) return;
+
+    const html = appointmentRequestEmailHtml({
+      recipientName: recipient.recipientName,
+      onBehalfOf: recipient.onBehalfOf,
+      requesterName: input.requesterName,
+      scheduledStartTime: start,
+      consultationType: input.consultationType,
+      isReschedule: input.isReschedule,
+      reason: input.reason,
+      reviewUrl: `${APP_URL}/${input.recipientRole}/appointments`,
+    });
+
+    const subject = input.isReschedule
+      ? `New time proposed by ${input.requesterName}`
+      : `${input.requesterName} requested an appointment`;
+
+    const { error } = await sendEmail({ to: recipient.email, subject, html });
+    if (error) console.warn("[booking/notifications] email failed:", error);
+  } catch (err) {
+    console.warn("[booking/notifications] email threw:", err);
+  }
+}
 
 export type BookingNotificationEvent =
   | "request_created"
@@ -205,6 +264,14 @@ export async function notifyBookingEvent(
             data,
             checkForChild: true,
           });
+          await emailActionRequired({
+            recipientUserId: ctx.patientId,
+            recipientRole: "patient",
+            requesterName: doctorName,
+            scheduledStart: ctx.scheduledStart,
+            consultationType: ctx.type || "video",
+            reason: ctx.reason,
+          });
           break;
         }
         // Patient requested → notify the practitioner
@@ -214,6 +281,14 @@ export async function notifyBookingEvent(
           title: "New appointment request",
           body: `${patientName} requested a consultation for ${when}.${reasonBit}`,
           data,
+        });
+        await emailActionRequired({
+          recipientUserId: ctx.practitionerId,
+          recipientRole: "practitioner",
+          requesterName: patientName,
+          scheduledStart: ctx.scheduledStart,
+          consultationType: ctx.type || "video",
+          reason: ctx.reason,
         });
         // Confirm to patient (or guardian if child)
         await createNotification({
@@ -304,6 +379,19 @@ export async function notifyBookingEvent(
           data,
           checkForChild: isPatientRecipient,
         });
+        // The other event that stalls until a human answers it, so it gets the
+        // same treatment as a new request.
+        if (recipient) {
+          await emailActionRequired({
+            recipientUserId: recipient,
+            recipientRole: isPatientRecipient ? "patient" : "practitioner",
+            requesterName: actorLabel,
+            scheduledStart: ctx.scheduledStart,
+            consultationType: ctx.type || "video",
+            isReschedule: true,
+            reason: ctx.reason,
+          });
+        }
         break;
       }
 
