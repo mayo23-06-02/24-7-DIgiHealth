@@ -1,44 +1,9 @@
-"use client";
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
+import LogoMain from "@/components/ui/LogoMain";
 import { FOOTER_COLUMNS } from "@/config/site";
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
-  const [message, setMessage] = useState("");
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (status === "sending") return;
-
-    setStatus("sending");
-    setMessage("");
-    try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "footer" }),
-      });
-      const json = await res.json().catch(() => ({}));
-
-      if (res.ok && json.success) {
-        setStatus("done");
-        setMessage("You're subscribed — look out for our next update.");
-        setEmail("");
-      } else if (res.status === 429) {
-        setStatus("error");
-        setMessage("Too many attempts. Please try again shortly.");
-      } else {
-        setStatus("error");
-        setMessage(json.error || "Something went wrong. Please try again.");
-      }
-    } catch {
-      setStatus("error");
-      setMessage("Network error. Please check your connection and try again.");
-    }
-  };
-
   return (
     <footer
       className="bg-[#1a5b78] text-white pt-20 pb-10 pt-10 pb-5"
@@ -46,52 +11,18 @@ export default function Footer() {
       <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-350 xl:max-w-350 2xl:max-w-350">
         {/* Top Section */}
         <div className="flex flex-col lg:flex-row justify-between mb-16 gap-16 lg:gap-8">
-          {/* Newsletter Section */}
+          {/* Brand mark. This column previously held a newsletter capture,
+              removed at the client's request. */}
           <div className="lg:w-5/12 flex flex-col">
-            <h2 className="text-4xl md:text-4xl font-medium tracking-tight mb-4 leading-tight font-grotesk">
-              Stay ahead of your <br className="hidden md:block" /> health
-              journey
-            </h2>
-            <p className="text-white/80 text-[1.05rem] leading-relaxed max-w-md mb-8">
-              Get expert insights, wellness guides, and clinic news — delivered
-              monthly.
+            <Link href="/" className="inline-flex" aria-label="24/7 DigiHealth home">
+              <LogoMain width={220} height={48} alt />
+            </Link>
+            <p className="text-white/80 text-[1.05rem] leading-relaxed max-w-md mt-6">
+              Same-day virtual consultations with vetted South African doctors,
+              for your whole family — day or night, wherever you are.
             </p>
-
-            <form className="relative max-w-lg pt-5 pb-2.5" onSubmit={handleSubscribe}>
-              <div className="flex items-center border border-white/30 rounded-lg p-1.5 pl-6 bg-white/5 focus-within:border-white/60 transition-colors">
-                <label htmlFor="newsletter-email" className="sr-only">
-                  Email address
-                </label>
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter Your Email"
-                  className="bg-transparent border-none outline-none text-white placeholder-white/60 w-full text-[0.95rem] grow pr-4"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={status === "sending"}
-                  className="bg-white text-[#1a5b78] font-semibold px-8 py-3 rounded-lg hover:bg-slate-100 transition-colors text-[0.95rem] hover:scale-105 duration-300 whitespace-nowrap disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed"
-                >
-                  {status === "sending" ? "Subscribing…" : "Subscribe"}
-                </button>
-              </div>
-              {message && (
-                <p
-                  role="status"
-                  aria-live="polite"
-                  className={`mt-3 text-sm ${
-                    status === "done" ? "text-white" : "text-amber-200"
-                  }`}
-                >
-                  {message}
-                </p>
-              )}
-            </form>
           </div>
+
           {/* Links Section */}
           <div
             className="lg:w-8/12 flex flex-col sm:flex-row w-full sm:justify-between gap-10 md:gap-8 lg:pl-12 pt-5 pb-2.5"
