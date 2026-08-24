@@ -63,7 +63,15 @@ export async function POST(req: NextRequest) {
     await user.save();
 
     // Construct the reset link
-    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/forgot-password?token=${encodeURIComponent(resetToken)}`;
+    // NEXT_PUBLIC_BASE_URL is not a variable this project sets — only
+    // NEXT_PUBLIC_APP_URL is — so this silently fell back to localhost and
+    // production reset emails carried a link nobody could open.
+    const appUrl = (
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      'https://24-7-d-igi-health.vercel.app'
+    ).replace(/\/$/, '');
+    const resetLink = `${appUrl}/forgot-password?token=${encodeURIComponent(resetToken)}`;
 
     // Send the reset email
     const emailResult = await sendEmail({

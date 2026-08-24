@@ -4,6 +4,8 @@ import { TIER_ORDER } from '@/lib/billing/tiers';
 // ─── Payment Transaction ──────────────────────────────────────────────────────
 export interface IPaymentTransaction extends Document {
   patientId: Types.ObjectId;
+  /** Plain-string owner id — see ISubscription.patientKey. */
+  patientKey?: string;
   /** Set when a family guardian pays on this patient's behalf; unset = pays for self (default, unchanged behavior). */
   payerId?: Types.ObjectId;
   practitionerId?: Types.ObjectId;
@@ -24,6 +26,7 @@ export interface IPaymentTransaction extends Document {
 }
 const PaymentTransactionSchema = new Schema<IPaymentTransaction>({
   patientId:              { type: Schema.Types.ObjectId, ref: 'User' },
+  patientKey:             { type: String, index: true },
   payerId:                { type: Schema.Types.ObjectId, ref: 'User' },
   practitionerId:         { type: Schema.Types.ObjectId, ref: 'User' },
   facilityId:             { type: Schema.Types.ObjectId, ref: 'Facility' },
@@ -45,6 +48,16 @@ const PaymentTransactionSchema = new Schema<IPaymentTransaction>({
 // ─── Subscription ─────────────────────────────────────────────────────────────
 export interface ISubscription extends Document {
   patientId: Types.ObjectId;
+  /**
+   * The owner's session id as a plain string, for accounts whose id is a
+   * Postgres uuid and therefore cannot be stored in the ObjectId-typed
+   * `patientId` above.
+   *
+   * Every new subscription writes this regardless of id type, so lookups have
+   * one field that works for both. Without it, subscriptions were unreachable
+   * for exactly the accounts every new signup creates.
+   */
+  patientKey?: string;
   /** Set when a family guardian pays for this patient; unset = pays for self (default, unchanged behavior). */
   payerId?: Types.ObjectId;
   tier: 'individual' | 'family' | 'family_plus';
@@ -57,6 +70,7 @@ export interface ISubscription extends Document {
 }
 const SubscriptionSchema = new Schema<ISubscription>({
   patientId:       { type: Schema.Types.ObjectId, ref: 'User' },
+  patientKey:      { type: String, index: true },
   payerId:         { type: Schema.Types.ObjectId, ref: 'User' },
   tier:            { type: String, enum: TIER_ORDER, default: 'individual' },
   status:          { type: String, enum: ['active', 'trial', 'cancelled', 'past_due'] },

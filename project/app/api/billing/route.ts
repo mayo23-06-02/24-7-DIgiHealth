@@ -14,6 +14,7 @@ import { Facility } from "@/lib/models/Facility";
 
 import Consultation from "@/lib/models/Consultation";
 import { TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
+import { subscriptionFilter } from "@/lib/billing/entitlement";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { isMongoObjectId } from "@/lib/utils/mongoId";
 
@@ -46,43 +47,27 @@ export async function GET(request: Request) {
 
     // ── Patient View ──────────────────────────────────────────────────────────
     if (role === "patient") {
-      // Postgres-native accounts have no Mongo identity (see
-      // lib/utils/mongoId.ts) — every collection here is still Mongo-only,
-      // so they genuinely have none of this data yet. Same shape the route
-      // already returns for a brand-new Mongo patient with no subscription.
-      if (!isMongoObjectId(user._id)) {
-        return NextResponse.json({
-          role: "patient",
-          summary: { totalSpent: 0, pendingCount: 0, completedCount: 0 },
-          transactions: [],
-          subscription: {
-            patientId: user._id,
-            tier: "individual",
-            status: "active",
-            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-            nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-            price: 0,
-            autoRenew: false,
-          },
-          paymentMethods: [],
-          utilization: {
-            consultationsUsed: 0,
-            consultationsMax: TIER_CONFIG.individual.consultationsMax,
-            chatsUsed: 0,
-            chatsMax: 999,
-          },
-        });
-      }
+      // Postgres-native accounts used to get an early return here that
+      // fabricated an "active individual" subscription. That made this page
+      // claim a plan the account did not hold — and now that access depends on
+      // holding one, it would have contradicted the gate outright. Both id
+      // shapes are queried for real instead; an account with nothing simply
+      // gets nothing.
+      const ownerFilter = subscriptionFilter(String(user._id));
 
       const [transactions, subscription, paymentMethods] = await Promise.all([
-        PaymentTransaction.find({ patientId: user._id })
+        PaymentTransaction.find(ownerFilter)
           .sort({ timestamp: -1 })
           .limit(50)
           .lean(),
-        Subscription.findOne({ patientId: user._id })
+        Subscription.findOne(ownerFilter)
           .sort({ createdAt: -1 })
           .lean(),
-        PaymentMethod.find({ patientId: user._id }).lean(),
+        // Payment methods are still ObjectId-keyed only; a uuid filter would
+        // match nothing, which is the correct answer for those accounts.
+        isMongoObjectId(user._id)
+          ? PaymentMethod.find({ patientId: user._id }).lean()
+          : Promise.resolve([]),
       ]);
 
       // Count consultations completed since subscription started (or fallback last 30 days)
@@ -112,13 +97,18 @@ export async function GET(request: Request) {
         (t: any) => t.status === "pending",
       ).length;
 
-      // Provide a clean fallback subscription if none is active in DB
+      // Placeholder for an account that has never bought a plan. It reports
+      // "none" rather than the "active individual" this used to claim: with
+      // access now depending on holding a plan, a billing page saying the
+      // patient has one while the gate says otherwise is the worst outcome.
+      // `tier` is still populated so the UI's tier lookup has something to
+      // match, but the status is honest.
       const activeSubscription = subscription || {
         patientId: user._id,
         tier: "individual",
-        status: "active",
-        startDate: user.createdAt || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        status: "none",
+        startDate: null,
+        nextBillingDate: null,
         price: 0,
         autoRenew: false,
       };
@@ -398,14 +388,8 @@ export async function PATCH(request: Request) {
 
     // Cancel subscription
     if (body.action === "cancel_subscription") {
-      if (!isMongoObjectId(user._id)) {
-        return NextResponse.json(
-          { error: "Subscription management is not yet available for this account." },
-          { status: 400 },
-        );
-      }
       const sub = await Subscription.findOneAndUpdate(
-        { patientId: user._id },
+        subscriptionFilter(String(user._id)),
         { status: "cancelled", autoRenew: false },
         { new: true },
       );
@@ -414,20 +398,16 @@ export async function PATCH(request: Request) {
 
     // Upgrade subscription
     if (body.action === "upgrade_subscription") {
-      if (!isMongoObjectId(user._id)) {
-        return NextResponse.json(
-          { error: "Subscription management is not yet available for this account." },
-          { status: 400 },
-        );
-      }
       const requestedTier: string = body.tier;
       if (!isValidTier(requestedTier)) {
         return NextResponse.json({ error: "Unknown subscription tier" }, { status: 400 });
       }
       const price = TIER_CONFIG[requestedTier].price;
       const sub = await Subscription.findOneAndUpdate(
-        { patientId: user._id },
+        subscriptionFilter(String(user._id)),
         {
+          patientKey: String(user._id),
+          ...(isMongoObjectId(user._id) ? { patientId: user._id } : {}),
           tier: requestedTier,
           status: "active",
           price,

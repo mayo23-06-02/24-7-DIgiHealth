@@ -4,6 +4,7 @@ import User from "@/lib/models/User";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
+import { getEntitlement } from "@/lib/billing/entitlement";
 
 /**
  * A real bcrypt digest that no supplied password can match. Compared against
@@ -196,6 +197,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Patients are gated on holding a plan, and middleware cannot reach Mongo
+    // to check — so the answer is resolved once here and carried on the token.
+    // See lib/auth/sessionToken.ts for why this is a cache, not the truth.
+    const hasPlan =
+      user.role === "patient"
+        ? (await getEntitlement(user.identityId)).hasPlan
+        : true;
+
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const token = await new SignJWT({
       userId: user.identityId,
@@ -203,6 +212,7 @@ export async function POST(request: Request) {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      hasPlan,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("24h")

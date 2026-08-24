@@ -60,6 +60,30 @@ function needsSharedCounter(pathname: string): boolean {
   return pathname.startsWith('/api/auth');
 }
 
+/* ------------------------------------------------------------------ */
+/*  Plan gate                                                          */
+/*                                                                     */
+/*  Patients must hold a plan before using the platform. The gate      */
+/*  reads the `hasPlan` claim on the session token because middleware  */
+/*  runs on the edge and cannot reach Mongo; the claim is refreshed at */
+/*  login and after checkout. Authoritative checks stay server-side in */
+/*  lib/billing/entitlement.ts.                                        */
+/* ------------------------------------------------------------------ */
+const PLAN_CHECKOUT_PATH = '/patient/checkout';
+
+/**
+ * Routes a patient without a plan may still reach. Checkout itself obviously,
+ * plus billing — leaving those out would trap the user on a page that could
+ * not load its own data or send them anywhere.
+ */
+function isPlanExempt(pathname: string): boolean {
+  return (
+    pathname === PLAN_CHECKOUT_PATH ||
+    pathname.startsWith(`${PLAN_CHECKOUT_PATH}/`) ||
+    pathname.startsWith('/patient/billing')
+  );
+}
+
 function checkRateLimit(
   pathname: string,
   identifier: string,
@@ -217,15 +241,25 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     try {
       let role: string | undefined;
       let userId: string | undefined;
+      let hasPlan = true;
 
       if (token) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
         role = payload.role as string;
         userId = payload.userId as string;
+        hasPlan = payload.hasPlan !== false;
       } else if (user) {
         role = user.role;
         userId = user.id;
+      }
+
+      // ---- Plan gate ----
+      // A patient without an active plan can only reach checkout. Applies to
+      // patients alone: gating a practitioner or an admin would lock staff out
+      // of a platform they never buy a plan for.
+      if (role === 'patient' && !hasPlan && isDashboardRoute && !isPlanExempt(pathname)) {
+        return NextResponse.redirect(new URL(PLAN_CHECKOUT_PATH, request.url));
       }
 
       // Role mismatch protection
