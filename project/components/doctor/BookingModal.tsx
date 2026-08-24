@@ -12,8 +12,6 @@ import {
   Loader2,
   X,
   Search,
-  ArrowLeft,
-  ArrowRight,
   Stethoscope,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -589,7 +587,7 @@ export default function BookingModal({
                             setSelectedDoctorState(doc);
                             setStep(2);
                           }}
-                          className={`group p-4 rounded-lg cursor-pointer transition-all duration-300 ${isSelected
+                          className={`group p-2.5 rounded-lg cursor-pointer transition-all duration-200 ${isSelected
                               ? "border-primary bg-primary/5 shadow-none shadow-primary/10"
                               : "border-slate-100 bg-white hover:border-primary/20 hover:bg-slate-50/20"
                             }`}
@@ -599,10 +597,10 @@ export default function BookingModal({
                               <Stethoscope />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h1 className="font-bold text-slate-800 text-sm mb-0.5 truncate group-hover:text-primary transition-colors">
+                              <h1 className="font-bold text-slate-800 text-[13px] truncate group-hover:text-primary transition-colors">
                                 {docDisplayName}
                               </h1>
-                              <p className="font-semibold text-slate-500 text-xs tracking-normal">
+                              <p className="font-medium text-slate-500 text-[11px] truncate">
                                 {doc.specialisation}
                               </p>
                             </div>
@@ -623,7 +621,7 @@ export default function BookingModal({
               <label className="text-sm font-bold text-slate-500 tracking-normal flex items-center gap-2 px-1">
                 <Calendar size={14} className="text-primary" /> Select date
               </label>
-              <div className="flex gap-2 overflow-x-auto py-3 px-1 -mx-1 custom-scrollbar">
+              <div className="flex gap-1.5 overflow-x-auto py-2 px-1 -mx-1 custom-scrollbar">
                 {dateOptions.map((dateStr) => {
                   const d = new Date(dateStr + "T12:00:00");
                   const dayName = d.toLocaleDateString("en-US", {
@@ -639,18 +637,18 @@ export default function BookingModal({
                         setSelectedDate(dateStr);
                         setSelectedTime("");
                       }}
-                      className={`flex flex-col items-center justify-center rounded-lg border-2 transition-all duration-300 p-0 !min-w-[68px] h-[72px] ${isSelected
-                          ? "border-primary bg-primary text-white shadow-primary/30 scale-105"
+                      className={`flex flex-col items-center justify-center rounded-lg border transition-all duration-200 p-0 !min-w-[48px] h-[52px] ${isSelected
+                          ? "border-primary bg-primary text-white shadow-primary/30"
                           : "border-slate-200 bg-white text-slate-500 hover:border-primary/30"
                         }`}
                     >
                       <span
-                        className={`text-[9px] font-bold tracking-normal ${isSelected ? "text-white/70" : "text-slate-500"}`}
+                        className={`text-[8px] font-bold uppercase tracking-wide ${isSelected ? "text-white/70" : "text-slate-400"}`}
                       >
                         {dayName}
                       </span>
                       <span
-                        className={`text-2xl font-bold tabular-nums tracking-tighter ${isSelected ? "text-white" : "text-slate-800"}`}
+                        className={`text-base font-bold tabular-nums tracking-tight ${isSelected ? "text-white" : "text-slate-800"}`}
                       >
                         {dayNum}
                       </span>
@@ -814,8 +812,6 @@ export default function BookingModal({
             <Button
               variant="ghost"
               onClick={handlePrev}
-              icon={<ArrowLeft size={16} />}
-              iconPosition="left"
             >
               Back
             </Button>
@@ -827,8 +823,6 @@ export default function BookingModal({
           {step < totalSteps ? (
             <Button
               onClick={handleNext}
-              icon={<ArrowRight size={16} />}
-              iconPosition="right"
               fullWidth
             >
               Continue
@@ -839,8 +833,6 @@ export default function BookingModal({
               disabled={isSubmitting}
               loading={isSubmitting}
               size="lg"
-              icon={<CheckCircle2 size={18} />}
-              iconPosition="right"
               fullWidth
             >
               {isSubmitting
