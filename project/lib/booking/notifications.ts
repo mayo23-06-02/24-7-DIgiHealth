@@ -255,12 +255,21 @@ export async function notifyBookingEvent(
     switch (event) {
       case "request_created": {
         if (actorIsPractitioner) {
-          // Practitioner proposed a pending appointment — notify the patient (or guardian if child)
+          /*
+           * A practitioner asking for a consultation is requesting one, not
+           * proposing one.
+           *
+           * "Proposed" belongs to rescheduling, where there is an existing
+           * agreed time and someone is putting a different one forward. Using
+           * it here told a patient their appointment already existed and was
+           * merely being moved — see the reschedule_requested case below, which
+           * is the event that word is actually for.
+           */
           await createNotification({
             userId: ctx.patientId,
-            type: "appointment_proposed",
-            title: "New appointment proposed",
-            body: `${doctorName} proposed a consultation for ${when}.${reasonBit}`,
+            type: "appointment_request",
+            title: "New appointment request",
+            body: `${doctorName} requested a consultation with you for ${when}.${reasonBit}`,
             data,
             checkForChild: true,
           });
