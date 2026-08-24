@@ -6,6 +6,7 @@ import Staff from '@/lib/models/Staff';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request, { params }: { params: Promise<{ type: string }> }) {
   try {
     await connectToDatabase();
@@ -77,6 +78,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ type: st
     return NextResponse.json({ success: true, data: { headers, rows: reportData } });
 
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

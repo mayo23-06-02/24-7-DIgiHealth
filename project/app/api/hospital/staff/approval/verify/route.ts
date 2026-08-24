@@ -4,6 +4,7 @@ import { StaffApprovalRequest } from '@/lib/models/StaffApprovalRequest';
 import User from '@/lib/models/User';
 import Facility from '@/lib/models/Facility';
 
+import { apiError } from "@/lib/api/errors";
 /** GET — verify approval request by token */
 export async function GET(req: Request) {
   try {
@@ -49,6 +50,6 @@ export async function GET(req: Request) {
     });
   } catch (error: any) {
     console.error('[GET /api/hospital/staff/approval/verify]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

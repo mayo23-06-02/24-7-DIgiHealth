@@ -3,13 +3,24 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 import NextAuth from 'next-auth';
 import authConfig from '@/lib/auth/auth.config';
+import {
+  checkLocalRateLimit,
+  checkSharedRateLimit,
+  sweepLocalCounters,
+} from '@/lib/security/rateLimit';
 
 const { auth } = NextAuth(authConfig);
 
 /* ------------------------------------------------------------------ */
-/*  Rate‑limit map (in‑memory – replace with Redis in production)      */
+/*  Rate limiting                                                      */
+/*                                                                     */
+/*  Security-critical buckets (everything under /api/auth, plus the    */
+/*  public newsletter capture) count against a shared Postgres counter */
+/*  so the budget is global rather than per serverless instance.       */
+/*  High-frequency chat traffic keeps the cheap local counter: there   */
+/*  the limit protects throughput, not credentials, and a database     */
+/*  round trip on every message is not worth paying.                   */
 /* ------------------------------------------------------------------ */
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 const RATE_LIMIT_CONFIG: Record<string, { windowMs: number; maxRequests: number }> = {
   '/api/chat/messages': { windowMs: 60_000, maxRequests: 60 },
@@ -40,24 +51,27 @@ function getRateLimitBucket(pathname: string): { key: string; config: { windowMs
   return config ? { key: pathname, config } : { key: 'default', config: RATE_LIMIT_CONFIG.default };
 }
 
-function checkRateLimit(identifier: string, config: { windowMs: number; maxRequests: number }): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(identifier);
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(identifier, { count: 1, resetTime: now + config.windowMs });
-    return true;
-  }
-  if (record.count >= config.maxRequests) return false;
-  record.count++;
-  return true;
+/**
+ * Whether this path's budget has to hold across instances. Credential-guessing
+ * is the case where a per-instance counter is not merely imprecise but
+ * misleading — an attacker spreading attempts across warm instances gets a
+ * multiple of the documented allowance.
+ */
+function needsSharedCounter(pathname: string): boolean {
+  return pathname.startsWith('/api/auth') || pathname === '/api/newsletter';
 }
 
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of rateLimitMap.entries()) {
-    if (now > value.resetTime) rateLimitMap.delete(key);
-  }
-}, 60_000);
+function checkRateLimit(
+  pathname: string,
+  identifier: string,
+  config: { windowMs: number; maxRequests: number },
+): Promise<boolean> {
+  return needsSharedCounter(pathname)
+    ? checkSharedRateLimit(identifier, config)
+    : Promise.resolve(checkLocalRateLimit(identifier, config));
+}
+
+setInterval(sweepLocalCounters, 60_000);
 
 /* ------------------------------------------------------------------ */
 /*  Dashboard roles & helpers                                          */
@@ -92,7 +106,7 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // For chat routes, bucket by identifier + route group so high-frequency traffic
     // on other chat endpoints can't eat into the stricter budget for sending messages.
     const identifier = `${getClientIdentifier(request)}:${key}`;
-    if (!checkRateLimit(identifier, config)) {
+    if (!(await checkRateLimit(pathname, identifier, config))) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
         {

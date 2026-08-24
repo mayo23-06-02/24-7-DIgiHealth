@@ -5,6 +5,7 @@ import Staff from "@/lib/models/Staff";
 import HospitalAppointment from "@/lib/models/HospitalAppointment";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -60,9 +61,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: rows });
   } catch (err: any) {
     console.error("[GET /api/admin/facilities]", err);
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

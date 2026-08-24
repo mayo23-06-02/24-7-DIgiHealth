@@ -5,6 +5,7 @@ import { PatientProfile, PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { isMongoObjectId } from "@/lib/utils/mongoId";
 
+import { apiError } from "@/lib/api/errors";
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get("x-user-id") || null;
 }
@@ -168,7 +169,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: roleData });
   } catch (err: any) {
     console.error("[GET /api/user/role-data]", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -245,6 +246,6 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error("[PUT /api/user/role-data]", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

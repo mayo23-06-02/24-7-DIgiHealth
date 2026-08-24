@@ -1,10 +1,16 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useCall } from "../context/CallContext";
+import { getAblyClient } from "@/lib/ablyClient";
+import { getUserCallChannel, ABLY_CONFIG } from "@/config/ably-config";
 import toast from "react-hot-toast";
 
-/** Base cadence while the tab is in the foreground. */
+/**
+ * Base cadence while the tab is in the foreground and realtime is NOT carrying
+ * call signals. When the Ably ring channel is attached, the poll drops to
+ * PUSHED_POLL_MS and exists only as a safety net.
+ */
 const POLL_MS = 6000;
 /**
  * Slower cadence while the tab is backgrounded — deliberately slowed rather
@@ -13,6 +19,12 @@ const POLL_MS = 6000;
  * worse failure for a telehealth product than a few extra requests.
  */
 const HIDDEN_POLL_MS = 30000;
+/**
+ * Cadence once invitations arrive by push. The poll is kept rather than removed
+ * so a dropped realtime connection degrades to a slower ring instead of a
+ * missed consultation — but at this rate it is a backstop, not the mechanism.
+ */
+const PUSHED_POLL_MS = 60000;
 /** Ceiling used when the server keeps failing, so a bad backend isn't hammered. */
 const MAX_BACKOFF_MS = 60000;
 
@@ -32,6 +44,13 @@ export default function GlobalCallPoller() {
    */
   const incomingRef = useRef(incomingCall);
   const activeRef = useRef(activeCall);
+  /**
+   * True once the Ably ring channel is attached, meaning invitations arrive by
+   * push and the poll can back right off. A ref rather than state because the
+   * poll loop reads it without needing to be torn down and rebuilt.
+   */
+  const pushedRef = useRef(false);
+  const [, forcePollRefresh] = useState(0);
   useEffect(() => {
     incomingRef.current = incomingCall;
   }, [incomingCall]);
@@ -103,8 +122,9 @@ export default function GlobalCallPoller() {
     // Reschedule after each attempt rather than using a fixed interval, so a
     // failing backend backs off instead of being polled at full rate forever.
     const schedule = () => {
-      const base =
-        typeof document !== "undefined" && document.hidden
+      const base = pushedRef.current
+        ? PUSHED_POLL_MS
+        : typeof document !== "undefined" && document.hidden
           ? HIDDEN_POLL_MS
           : POLL_MS;
       const delay =
@@ -134,6 +154,87 @@ export default function GlobalCallPoller() {
     };
     // Intentionally excludes incomingCall/activeCall — see the refs above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, setIncomingCall]);
+
+  /**
+   * Realtime ring channel. The server publishes an invitation here the moment a
+   * call is created, so the callee rings immediately instead of waiting out a
+   * poll interval — and the poll above drops to a slow backstop while this is
+   * attached.
+   */
+  useEffect(() => {
+    if (!user || !ABLY_CONFIG.enabled) return;
+
+    let channel: ReturnType<
+      ReturnType<typeof getAblyClient>["channels"]["get"]
+    > | null = null;
+    let cancelled = false;
+
+    try {
+      const client = getAblyClient(user.id);
+      client.connect();
+      channel = client.channels.get(getUserCallChannel(user.id));
+
+      const onIncoming = (msg: { data?: unknown }) => {
+        const d = msg?.data as Record<string, unknown> | undefined;
+        if (!d?.callId) return;
+        // Ignore a ring for a call we are already in, and re-rings of the same
+        // invitation, exactly as the poll path does.
+        if (activeRef.current?.callId === d.callId) return;
+        if (incomingRef.current?.callId === d.callId) return;
+        setIncomingCall({
+          callId: String(d.callId),
+          roomUrl: String(d.roomUrl || ""),
+          roomName: String(d.roomName || ""),
+          token: "", // obtained on join, same as the polled path
+          type: d.type as never,
+          initiatedBy: String(d.initiatedBy || ""),
+          participantName: (d.participantName as string) || "",
+          participantAvatar: (d.participantAvatar as string) || "",
+          conversationId: String(d.conversationId || ""),
+          consultationId: (d.consultationId as string) || undefined,
+        });
+      };
+
+      const onCleared = (msg: { data?: unknown }) => {
+        const d = msg?.data as Record<string, unknown> | undefined;
+        if (!d?.callId) return;
+        if (incomingRef.current?.callId === d.callId) setIncomingCall(null);
+      };
+
+      void channel.subscribe("incoming", onIncoming);
+      void channel.subscribe("ended", onCleared);
+      void channel.subscribe("declined", onCleared);
+
+      void channel
+        .attach()
+        .then(() => {
+          if (cancelled) return;
+          pushedRef.current = true;
+          // Nudge the poll loop so it reschedules at the slower backstop rate
+          // rather than finishing out the current fast interval.
+          forcePollRefresh((n) => n + 1);
+        })
+        .catch((err: unknown) => {
+          // Falling back to polling alone is correct here — a call must still
+          // ring if realtime is unavailable.
+          console.warn("[GlobalCallPoller] ring channel unavailable", err);
+          pushedRef.current = false;
+        });
+    } catch (err) {
+      console.warn("[GlobalCallPoller] realtime setup failed", err);
+      pushedRef.current = false;
+    }
+
+    return () => {
+      cancelled = true;
+      pushedRef.current = false;
+      try {
+        channel?.unsubscribe();
+      } catch {
+        // ignore
+      }
+    };
   }, [user, setIncomingCall]);
 
   return null;

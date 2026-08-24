@@ -9,6 +9,7 @@ import {
 } from '@/lib/booking/notifications';
 import { expireStaleBookingRequests } from '@/lib/booking/expire';
 
+import { apiError } from "@/lib/api/errors";
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
@@ -66,7 +67,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -98,6 +99,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

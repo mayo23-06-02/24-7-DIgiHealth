@@ -7,6 +7,7 @@ import { jwtVerify } from 'jose';
 import { getBlockedAcceptorId } from '@/lib/booking/requester';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -77,6 +78,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: enriched });
   } catch (err: any) {
     console.error('[GET /api/patient/appointments]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

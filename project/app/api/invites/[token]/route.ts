@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import StaffInvite from '@/lib/models/StaffInvite';
 import Facility from '@/lib/models/Facility';
 
+import { apiError } from "@/lib/api/errors";
 /**
  * GET /api/invites/[token] — public lookup used by the registration wizard
  * to confirm an invite link is real before the doctor fills anything in.
@@ -47,6 +48,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     });
   } catch (error: any) {
     console.error('[GET /api/invites/[token]]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

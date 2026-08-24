@@ -4,6 +4,7 @@ import User from '@/lib/models/User';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { escapeRegex } from '@/lib/escapeRegex';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
@@ -26,6 +27,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ success: true, data: patients });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

@@ -5,6 +5,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import User from '@/lib/models/User';
 import { canViewMedicalHistory } from '@/lib/family/access';
 
+import { apiError } from "@/lib/api/errors";
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -74,6 +75,6 @@ export async function POST(
     return response;
   } catch (err: any) {
     console.error('[POST /api/patient/family/[memberId]/switch]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

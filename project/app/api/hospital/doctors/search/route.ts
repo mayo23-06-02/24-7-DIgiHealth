@@ -5,6 +5,7 @@ import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { escapeRegex } from '@/lib/escapeRegex';
 
+import { apiError } from "@/lib/api/errors";
 // Staff management is doctor-only — search always targets practitioner accounts.
 export async function GET(req: Request) {
   try {
@@ -46,6 +47,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

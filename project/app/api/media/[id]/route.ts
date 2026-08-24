@@ -12,6 +12,7 @@ import {
 import Conversation from "@/lib/models/Conversation";
 import { connectToDatabase } from "@/lib/mongodb";
 
+import { apiError } from "@/lib/api/errors";
 async function canAccess(
   asset: NonNullable<Awaited<ReturnType<typeof getMediaById>>>,
   userId: string,
@@ -64,7 +65,7 @@ export async function GET(
       data: { ...asset, url: durableUrl(asset) },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -89,7 +90,7 @@ export async function DELETE(
     await deleteMedia(id);
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 

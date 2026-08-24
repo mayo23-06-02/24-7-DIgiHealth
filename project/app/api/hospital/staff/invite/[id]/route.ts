@@ -5,6 +5,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 import { updateStaffInviteByMongoId } from '@/lib/postgres/facility';
 
+import { apiError } from "@/lib/api/errors";
 /** DELETE — cancel a pending invite */
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -32,6 +33,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[DELETE /api/hospital/staff/invite/[id]]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

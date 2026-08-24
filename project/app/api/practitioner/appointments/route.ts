@@ -7,6 +7,7 @@ import { jwtVerify } from 'jose';
 import { riskBandFromScore } from '@/lib/riskScore';
 import { getBlockedAcceptorId } from '@/lib/booking/requester';
 
+import { apiError } from "@/lib/api/errors";
 async function getPractitionerId(req: NextRequest): Promise<string> {
   // 1. Try JWT token from cookie
   try {
@@ -150,7 +151,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: result });
   } catch (err: any) {
     console.error('[GET /api/practitioner/appointments]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -192,6 +193,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

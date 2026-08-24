@@ -6,6 +6,7 @@ import { getGuardianFamilySlots } from '@/lib/family/access';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 /** GET — the caller's family links, both as guardian (members they manage)
  * and as member (guardians who manage them, for transparency). */
 export async function GET() {
@@ -86,6 +87,6 @@ export async function GET() {
     });
   } catch (err: any) {
     console.error('[GET /api/patient/family]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

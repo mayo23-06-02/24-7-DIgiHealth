@@ -10,6 +10,7 @@ import User from "@/lib/models/User";
 import Ably from "ably";
 import mongoose from "mongoose";
 
+import { apiError } from "@/lib/api/errors";
 async function publishChatMessage(channelName: string, event: string, data: unknown) {
   try {
     if (!process.env.ABLY_API_KEY) return;
@@ -105,15 +106,7 @@ export async function POST(req: NextRequest) {
         mediaId = asset.id;
       } catch (err: any) {
         console.error("[prescriptions] Upload failed:", err);
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              err?.message ||
-              "Could not upload prescription document. Check Supabase media config or try again.",
-          },
-          { status: 500 },
-        );
+        return apiError(err, "Could not upload prescription document. Check Supabase media config or try again.");
       }
     }
 
@@ -262,10 +255,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("[POST /api/practitioner/prescriptions]", err);
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }
 
@@ -295,9 +285,6 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

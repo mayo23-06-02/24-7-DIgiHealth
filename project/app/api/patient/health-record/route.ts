@@ -13,6 +13,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 async function getUserId(req: NextRequest): Promise<string | null> {
@@ -194,6 +195,6 @@ export async function GET(req: NextRequest) {
 
   } catch (err: any) {
     console.error('[GET /api/patient/health-record]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

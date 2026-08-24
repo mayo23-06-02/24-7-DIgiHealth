@@ -5,6 +5,7 @@ import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import mongoose from 'mongoose';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -63,7 +64,7 @@ export async function POST(
     return NextResponse.json({ success: true, data: newReview });
   } catch (err: any) {
     console.error('[POST /api/practitioners/[id]/reviews]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -83,6 +84,6 @@ export async function GET(
     return NextResponse.json({ success: true, data: reviews });
   } catch (err: any) {
     console.error('[GET /api/practitioners/[id]/reviews]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

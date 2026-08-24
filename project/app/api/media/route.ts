@@ -7,6 +7,7 @@ import {
   type MediaFileType,
 } from "@/lib/supabase/media";
 
+import { apiError } from "@/lib/api/errors";
 /** GET — list current user's media assets */
 export async function GET(req: NextRequest) {
   try {
@@ -38,9 +39,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("[GET /api/media]", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to list media" },
-      { status: 500 },
-    );
+    return apiError(err, "Failed to list media");
   }
 }

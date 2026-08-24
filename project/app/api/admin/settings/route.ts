@@ -4,6 +4,7 @@ import { SystemConfig } from "@/lib/models/System";
 import { requirePlatformAdmin, requireMegaAdmin } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET() {
@@ -37,10 +38,7 @@ export async function GET() {
       canEdit: gate.user.role === "mega_admin",
     });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }
 
@@ -85,9 +83,6 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: cfg });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

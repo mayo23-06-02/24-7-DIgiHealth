@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { notifyAppointmentChange } from '@/lib/booking/notifications';
 
+import { apiError } from "@/lib/api/errors";
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 async function getUserId(): Promise<string | null> {
@@ -120,9 +121,6 @@ export async function PATCH(
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {
     console.error('[PATCH /api/practitioner/consultations/[id]]', err);
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

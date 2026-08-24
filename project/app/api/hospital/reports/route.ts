@@ -8,6 +8,7 @@ import {
   type ReportType,
 } from "@/lib/hospital/buildHospitalReports";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 /**
@@ -75,9 +76,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: report });
   } catch (err: any) {
     console.error("[GET /api/hospital/reports]", err);
-    return NextResponse.json(
-      { success: false, error: err.message || "Report failed" },
-      { status: 500 },
-    );
+    return apiError(err, "Report failed");
   }
 }

@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import bcrypt from 'bcryptjs';
 
+import { apiError } from "@/lib/api/errors";
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get('x-user-id') || null;
 }
@@ -47,6 +48,6 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ success: true, message: 'Password updated successfully' });
   } catch (err: any) {
     console.error('[PUT /api/user/password]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

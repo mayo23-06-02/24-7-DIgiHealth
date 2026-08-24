@@ -10,6 +10,7 @@ import {
   legacyRiskColor,
 } from "@/lib/riskScore";
 
+import { apiError } from "@/lib/api/errors";
 /**
  * GET latest risk score for a patient (as assessed by this practitioner or overall latest)
  */
@@ -65,10 +66,7 @@ export async function GET(
       },
     });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }
 
@@ -142,9 +140,6 @@ export async function PUT(
     });
   } catch (err: any) {
     console.error("[PUT risk]", err);
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

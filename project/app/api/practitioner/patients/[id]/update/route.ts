@@ -4,6 +4,7 @@ import { MedicalContext } from '@/lib/models/ClinicalData';
 import Patient from '@/lib/models/Patient';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 
+import { apiError } from "@/lib/api/errors";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
@@ -58,6 +59,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
   } catch (err: any) {
     console.error('[POST /api/practitioner/patients/[id]/update]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

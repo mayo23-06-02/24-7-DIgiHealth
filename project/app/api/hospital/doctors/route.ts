@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -45,6 +46,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: doctors });
   } catch (error: any) {
     console.error('[GET /api/hospital/doctors]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

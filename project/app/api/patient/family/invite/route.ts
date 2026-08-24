@@ -9,6 +9,7 @@ import { getAppOrigin, normalizeEmail, isValidEmail } from '@/lib/supabase/auth'
 import { sendEmail } from '@/lib/email/postmark';
 import { familyInviteEmailHtml } from '@/lib/email/templates/familyInvite';
 
+import { apiError } from "@/lib/api/errors";
 const INVITE_TTL_MINUTES = 15;
 
 /** POST — guardian invites an adult (spouse/parent) by email. Requires their
@@ -94,6 +95,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: { email, name: inviteName, expiresAt: inviteExpiresAt, inviteUrl } });
   } catch (err: any) {
     console.error('[POST /api/patient/family/invite]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -70,6 +70,18 @@ export function getPresenceChannel(): string {
 }
 
 /**
+ * Per-user "ring" channel. Call invitations are published here by the server so
+ * the recipient learns about them by push, instead of every client polling
+ * /api/chat/call/active on a timer.
+ *
+ * One channel per user, and the token capability grants subscribe on the
+ * caller's own channel only — a user cannot listen in on anyone else's calls.
+ */
+export function getUserCallChannel(userId: string): string {
+  return `calls:${userId}`;
+}
+
+/**
  * Check if we should use Ably or fallback to Socket.IO
  */
 export function shouldUseAbly(): boolean {

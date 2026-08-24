@@ -10,6 +10,17 @@ import {
   getLiveKitServerUrl,
   getLiveKitRoomService,
 } from "@/lib/livekit";
+import { publishCallSignalTo } from "@/lib/realtime/callSignals";
+
+function displayNameOf(u: {
+  firstName?: string | null;
+  lastName?: string | null;
+  role: string;
+}) {
+  return (
+    [u.firstName, u.lastName].filter(Boolean).join(" ").trim() || u.role
+  );
+}
 
 function buildRoomName(conversationId: string, consultationId?: string) {
   return consultationId
@@ -159,6 +170,26 @@ export async function POST(req: Request) {
         conversationId: conversation._id.toString(),
         initiatedBy: currentUser.userId,
       });
+
+      // Ring the other party immediately rather than making them wait out a
+      // poll interval. Awaited so the publish isn't cut short when the
+      // serverless invocation ends, but it never throws — see publishCallSignal.
+      const calleeId = [
+        String(conversation.patientId),
+        String(conversation.practitionerId),
+      ].find((id) => id !== String(currentUser.userId));
+
+      await publishCallSignalTo([calleeId], {
+        kind: "incoming",
+        callId: call._id.toString(),
+        conversationId: conversation._id.toString(),
+        consultationId: consultationId || null,
+        type,
+        initiatedBy: currentUser.userId,
+        roomName: call.livekitRoomName,
+        roomUrl: call.livekitRoomUrl,
+        participantName: displayNameOf(currentUser),
+      });
     }
 
     if (!hasUsableLiveKitState(call)) {
@@ -174,11 +205,7 @@ export async function POST(req: Request) {
     }
 
     const identity = `${currentUser.role}:${currentUser.userId}`;
-    const displayName =
-      [currentUser.firstName, currentUser.lastName]
-        .filter(Boolean)
-        .join(" ")
-        .trim() || currentUser.role;
+    const displayName = displayNameOf(currentUser);
 
     const token = await createLiveKitParticipantToken({
       identity,

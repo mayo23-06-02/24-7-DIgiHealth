@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Article } from '@/lib/models/Article';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
@@ -22,6 +23,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, data: articles });
   } catch (error: any) {
     console.error('[GET /api/articles]', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

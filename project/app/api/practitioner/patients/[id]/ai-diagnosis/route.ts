@@ -8,6 +8,7 @@ import { ClinicalDecisionSupport } from '@/lib/models/AIDecision';
 import { getPatientClinicalSummary, formatClinicalSummaryForPrompt } from '@/lib/ai/patientContext';
 import { getDiagnosisSupport } from '@/lib/ai/anthropic';
 
+import { apiError } from "@/lib/api/errors";
 /** Shared with GET/PATCH — mirrors the ownership check already used in
  * app/api/practitioner/patients/[id]/health-record/route.ts: assigned to
  * this practitioner OR a consultation exists between them. */
@@ -71,7 +72,7 @@ export async function POST(
     return NextResponse.json({ success: true, data: record });
   } catch (err: any) {
     console.error('[POST /api/practitioner/patients/[id]/ai-diagnosis]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -109,6 +110,6 @@ export async function GET(
     return NextResponse.json({ success: true, data: history });
   } catch (err: any) {
     console.error('[GET /api/practitioner/patients/[id]/ai-diagnosis]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

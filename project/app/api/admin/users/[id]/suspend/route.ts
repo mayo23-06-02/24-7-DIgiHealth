@@ -5,6 +5,7 @@ import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
 import { updateUserByMongoId } from "@/lib/postgres/users";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function POST(
@@ -49,6 +50,6 @@ export async function POST(
       data: { id, status: user.status },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -4,6 +4,7 @@ import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { resolveHospitalId } from "@/lib/hospital/resolveHospitalId";
 import { buildHospitalOverview } from "@/lib/hospital/buildHospitalOverview";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(_req: NextRequest) {
@@ -26,9 +27,6 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
     console.error("[GET /api/hospital/dashboard]", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 },
-    );
+    return apiError(error);
   }
 }

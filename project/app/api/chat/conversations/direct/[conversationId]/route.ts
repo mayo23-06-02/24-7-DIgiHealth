@@ -4,6 +4,7 @@ import { Conversation } from '@/lib/models/Conversation';
 import User from '@/lib/models/User';
 import Consultation from '@/lib/models/Consultation';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request, { params }: { params: Promise<{ conversationId: string }> }) {
   try {
     await connectToDatabase();
@@ -46,6 +47,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ conversa
         : c.consultationId,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

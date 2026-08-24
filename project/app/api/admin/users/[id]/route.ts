@@ -9,6 +9,7 @@ import {
 import { logAdminAction } from "@/lib/admin/logAdminAction";
 import { updateUserByMongoId } from "@/lib/postgres/users";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(
@@ -42,7 +43,7 @@ export async function GET(
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -115,6 +116,6 @@ export async function PATCH(
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

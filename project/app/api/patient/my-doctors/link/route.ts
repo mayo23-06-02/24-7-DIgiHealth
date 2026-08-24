@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -65,6 +66,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('Link API error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

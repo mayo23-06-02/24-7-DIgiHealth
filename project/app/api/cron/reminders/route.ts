@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { sendDueAppointmentReminders, sendDueMessageReminders } from "@/lib/email/reminders";
 
+import { apiError } from "@/lib/api/errors";
 /**
  * Always-on backstop for the two reminder jobs. The opportunistic checks
  * wired into /api/patient|practitioner/appointments and /api/notifications
@@ -38,6 +39,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("[cron/reminders] error:", err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -4,6 +4,7 @@ import { Anthropometric } from '@/lib/models/ClinicalData';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import mongoose from 'mongoose';
 
+import { apiError } from "@/lib/api/errors";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
@@ -91,6 +92,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   } catch (err: any) {
     console.error('Vitals API POST Error:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -5,6 +5,7 @@ import HospitalTransaction from "@/lib/models/HospitalTransaction";
 import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -83,10 +84,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("[GET /api/admin/finance]", err);
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }
 
@@ -128,6 +126,6 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: { id: payoutId, status } });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

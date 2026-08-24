@@ -8,6 +8,7 @@ import { Subscription } from '@/lib/models/Billing';
 import FamilyLink, { syncFamilyLinkIndexes } from '@/lib/models/FamilyLink';
 import { getGuardianFamilySlots } from '@/lib/family/access';
 
+import { apiError } from "@/lib/api/errors";
 /** guardian@example.com -> guardian+family-ab12cd34@example.com — a real,
  * technically-unique address that still lands in the guardian's inbox via
  * standard plus-addressing, since the child never logs in independently. */
@@ -132,6 +133,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[POST /api/patient/family/child]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -6,6 +6,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
 import { getStaffByIdAndFacility } from '@/lib/postgres/staff';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -157,6 +158,6 @@ export async function GET(
     });
   } catch (error: any) {
     console.error('[GET /api/hospital/staff/[id]/profile]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

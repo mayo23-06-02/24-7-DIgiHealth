@@ -8,6 +8,7 @@ import {
 import Conversation from "@/lib/models/Conversation";
 import { connectToDatabase } from "@/lib/mongodb";
 
+import { apiError } from "@/lib/api/errors";
 /**
  * Permanent app URL for media: redirects to a fresh signed Supabase URL.
  * Stored as Message.fileUrl / Prescription.documentUrl for new uploads.
@@ -111,6 +112,6 @@ export async function GET(
     return NextResponse.redirect(signed);
   } catch (err: any) {
     console.error("[GET /api/media/file/[id]]", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

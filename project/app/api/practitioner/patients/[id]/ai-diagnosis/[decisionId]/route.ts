@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { ClinicalDecisionSupport } from '@/lib/models/AIDecision';
 
+import { apiError } from "@/lib/api/errors";
 /** PATCH — the doctor accepts or dismisses an AI-generated suggestion. This
  * is the audit trail: the AI never auto-writes to the chart, the doctor's
  * explicit action here is what gets recorded. */
@@ -52,6 +53,6 @@ export async function PATCH(
     return NextResponse.json({ success: true, data: record });
   } catch (err: any) {
     console.error('[PATCH /api/practitioner/patients/[id]/ai-diagnosis/[decisionId]]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

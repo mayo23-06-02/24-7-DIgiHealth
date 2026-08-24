@@ -7,6 +7,7 @@ import { getActiveFamilyLink } from '@/lib/family/access';
 import { Notification } from '@/lib/models/Communications';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 /** PATCH — guardian toggles isMinor (the medical-history access switch) or
  * updates the relationship label. This is the single write path that
  * changes whether the guardian can see a member's clinical data. */
@@ -28,7 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
     return NextResponse.json({ success: true, data: { id: link._id.toString(), isMinor: link.isMinor, relationship: link.relationship } });
   } catch (err: any) {
     console.error('[PATCH /api/patient/family/[memberId]]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -81,6 +82,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error('[DELETE /api/patient/family/[memberId]]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

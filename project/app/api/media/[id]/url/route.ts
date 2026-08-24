@@ -8,6 +8,7 @@ import {
 import Conversation from "@/lib/models/Conversation";
 import { connectToDatabase } from "@/lib/mongodb";
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -44,6 +45,6 @@ export async function GET(
     const url = await getSignedDownloadUrl(asset.filePath, 3600);
     return NextResponse.json({ success: true, url, expiresIn: 3600 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

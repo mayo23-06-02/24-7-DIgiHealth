@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 import { buildPlatformOverview } from "@/lib/admin/buildPlatformOverview";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 /** Alerts derived from platform intelligence + payout backlog */
@@ -49,9 +50,6 @@ export async function GET() {
       },
     });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

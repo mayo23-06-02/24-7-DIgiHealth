@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 async function getUserId(req: NextRequest): Promise<string | null> {
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: { ...added, id: added?._id?.toString() } });
   } catch (err: any) {
     console.error('[POST /api/patient/health-record/allergies]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -84,6 +85,6 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error('[DELETE /api/patient/health-record/allergies]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

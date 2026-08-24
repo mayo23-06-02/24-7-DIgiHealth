@@ -6,6 +6,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 import { getUserAvatarUrl } from '@/lib/supabase/media';
 
+import { apiError } from "@/lib/api/errors";
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get('x-user-id') || null;
 }
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[GET /api/user/profile]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -139,6 +140,6 @@ export async function PUT(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[PUT /api/user/profile]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

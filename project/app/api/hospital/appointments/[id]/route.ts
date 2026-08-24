@@ -5,6 +5,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 import { updateHospitalAppointmentByMongoId } from '@/lib/postgres/facility';
 
+import { apiError } from "@/lib/api/errors";
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
@@ -38,6 +39,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

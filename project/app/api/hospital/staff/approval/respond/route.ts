@@ -7,6 +7,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolvePgUserId, resolvePgFacilityId } from '@/lib/postgres/resolveId';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
 
+import { apiError } from "@/lib/api/errors";
 /** POST — respond to approval request (approve/reject) */
 export async function POST(req: NextRequest) {
   try {
@@ -98,6 +99,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[POST /api/hospital/staff/approval/respond]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

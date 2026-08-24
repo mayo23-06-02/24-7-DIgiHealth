@@ -4,6 +4,7 @@ import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
 import { Review } from '@/lib/models/ReviewsDocs';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -62,6 +63,6 @@ export async function GET(
     return NextResponse.json({ success: true, data });
   } catch (err: any) {
     console.error('[GET /api/practitioners/[id]]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

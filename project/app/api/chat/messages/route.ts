@@ -6,6 +6,7 @@ import { Conversation } from '@/lib/models/Conversation';
 import Ably from 'ably';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 
+import { apiError } from "@/lib/api/errors";
 function serializeMessage(message: any, clientId?: string) {
   const obj = typeof message.toObject === 'function' ? message.toObject() : { ...message };
   return {
@@ -115,6 +116,6 @@ export async function POST(req: Request) {
     return NextResponse.json(payload);
   } catch (error: any) {
     console.error('Message send error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

@@ -5,6 +5,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { AIChatLog } from '@/lib/models/AIChatLog';
 import { getChatResponse, type ChatMessage } from '@/lib/ai/anthropic';
 
+import { apiError } from "@/lib/api/errors";
 /** POST — general clinical chat, not tied to a specific patient. Appends to
  * (or creates) an AIChatLog for audit purposes. */
 export async function POST(req: NextRequest) {
@@ -58,6 +59,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[POST /api/practitioner/ai-chat]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

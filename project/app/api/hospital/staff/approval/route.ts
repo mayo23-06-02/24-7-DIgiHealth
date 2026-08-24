@@ -10,6 +10,7 @@ import { getAppOrigin } from '@/lib/supabase/auth';
 import { sendEmail } from '@/lib/email/resend';
 import { staffApprovalEmailHtml } from '@/lib/email/templates/staffApproval';
 
+import { apiError } from "@/lib/api/errors";
 const APPROVAL_TTL_HOURS = 48;
 
 /** POST — send approval request to an existing doctor */
@@ -107,6 +108,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: { email: doctor.email, expiresAt } });
   } catch (error: any) {
     console.error('[POST /api/hospital/staff/approval]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

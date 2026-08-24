@@ -12,6 +12,7 @@ import { staffInviteEmailHtml } from '@/lib/email/templates/staffInvite';
 import { syncStaffInvite, facilityIdFor } from '@/lib/postgres/facility';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
 
+import { apiError } from "@/lib/api/errors";
 const INVITE_TTL_MINUTES = 15;
 
 /** GET — list this facility's pending invites */
@@ -34,7 +35,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: invites });
   } catch (error: any) {
     console.error('[GET /api/hospital/staff/invite]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }
 
@@ -130,6 +131,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: { id: invite._id.toString(), email, role: 'practitioner', inviteUrl } });
   } catch (error: any) {
     console.error('[POST /api/hospital/staff/invite]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

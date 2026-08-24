@@ -5,6 +5,7 @@ import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -102,6 +103,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('GET /api/hospital/performance error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

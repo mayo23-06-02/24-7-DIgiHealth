@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -42,7 +43,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 

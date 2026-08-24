@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Conversation } from '@/lib/models/Conversation';
 
+import { apiError } from "@/lib/api/errors";
 export async function POST(req: Request, { params }: { params: Promise<{ consultationId: string }> }) {
   try {
     await connectToDatabase();
@@ -16,6 +17,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ consult
 
     return NextResponse.json({ success: true, conversation });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

@@ -6,6 +6,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(_req: Request) {
   try {
     const user = await getRequestUser();
@@ -120,6 +121,6 @@ export async function GET(_req: Request) {
     return NextResponse.json({ success: true, data: enrichedDoctors });
   } catch (error: any) {
     console.error('[GET /api/hospital/staff/enriched]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

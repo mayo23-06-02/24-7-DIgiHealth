@@ -4,6 +4,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { Anthropometric, MedicalContext, Prescription, LabResult, Immunization } from '@/lib/models/ClinicalData';
 import { canViewMedicalHistory } from '@/lib/family/access';
 
+import { apiError } from "@/lib/api/errors";
 /**
  * GET — guardian views a member's clinical record. This is the core privacy
  * boundary of the whole feature: gated by canViewMedicalHistory, which is
@@ -76,6 +77,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ mem
     });
   } catch (err: any) {
     console.error('[GET /api/patient/family/[memberId]/health-record]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

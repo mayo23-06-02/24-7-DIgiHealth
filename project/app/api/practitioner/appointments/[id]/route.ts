@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { notifyAppointmentChange } from '@/lib/booking/notifications';
 
+import { apiError } from "@/lib/api/errors";
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
 
 export async function PUT(
@@ -76,10 +77,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, data: consultation });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }
 

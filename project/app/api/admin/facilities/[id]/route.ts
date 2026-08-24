@@ -5,6 +5,7 @@ import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
 import { buildHospitalOverview } from "@/lib/hospital/buildHospitalOverview";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(
@@ -26,7 +27,7 @@ export async function GET(
       data: { facility, overview },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -63,6 +64,6 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, data: { id, isOpen: facility.isOpen } });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

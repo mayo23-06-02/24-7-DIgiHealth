@@ -5,6 +5,7 @@ import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -153,6 +154,6 @@ export async function GET(
     });
   } catch (error: any) {
     console.error('[GET /api/hospital/doctors/[id]/profile]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

@@ -7,6 +7,7 @@ import User from '@/lib/models/User';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -94,6 +95,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[GET /api/patient/dashboard]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

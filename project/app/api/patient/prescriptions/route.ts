@@ -4,6 +4,7 @@ import { Prescription } from "@/lib/models/ClinicalData";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { isMongoObjectId } from "@/lib/utils/mongoId";
 
+import { apiError } from "@/lib/api/errors";
 /** GET — patient's prescriptions (with downloadable script URL when available) */
 export async function GET() {
   try {
@@ -41,7 +42,7 @@ export async function GET() {
     );
   } catch (err: any) {
     console.error("[GET /api/patient/prescriptions]", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -92,6 +93,6 @@ export async function POST(request: Request) {
     });
   } catch (err: any) {
     console.error("[POST /api/patient/prescriptions]", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

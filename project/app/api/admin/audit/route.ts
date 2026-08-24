@@ -4,6 +4,7 @@ import AuditLog from "@/lib/models/AuditLog";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 import { escapeRegex } from "@/lib/escapeRegex";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -56,9 +57,6 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

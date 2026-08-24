@@ -4,6 +4,7 @@ import HospitalTransaction from '@/lib/models/HospitalTransaction';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { HospitalAdminProfile } from '@/lib/models/RoleProfiles';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -50,6 +51,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: transactions });
   } catch (error: any) {
     console.error('[GET /api/hospital/reports/financial]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

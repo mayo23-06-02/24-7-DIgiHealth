@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 import { buildPlatformOverview } from "@/lib/admin/buildPlatformOverview";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -18,9 +19,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data });
   } catch (err: any) {
     console.error("[GET /api/admin/overview]", err);
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

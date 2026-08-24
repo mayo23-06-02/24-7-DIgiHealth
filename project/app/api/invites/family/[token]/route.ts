@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import FamilyLink from '@/lib/models/FamilyLink';
 import User from '@/lib/models/User';
 
+import { apiError } from "@/lib/api/errors";
 /**
  * GET /api/invites/family/[token] — public lookup used by the accept page to
  * confirm an invite link is real before the invitee is asked to act on it.
@@ -45,6 +46,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     });
   } catch (error: any) {
     console.error('[GET /api/invites/family/[token]]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

@@ -5,6 +5,7 @@ import Staff from '@/lib/models/Staff';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
+import { apiError } from "@/lib/api/errors";
 async function assertReviewInFacility(reviewId: string, hospitalId: string) {
   const review = await Review.findById(reviewId).lean();
   if (!review) return null;
@@ -41,7 +42,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[PATCH /api/hospital/reviews/[id]]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }
 
@@ -68,6 +69,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[DELETE /api/hospital/reviews/[id]]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

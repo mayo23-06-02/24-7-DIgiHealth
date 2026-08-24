@@ -4,6 +4,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { Consultation } from '@/lib/models/Consultation';
 import { canManageMember } from '@/lib/family/access';
 
+import { apiError } from "@/lib/api/errors";
 /** GET — guardian views a member's bookings for scheduling/management
  * purposes. Deliberately omits chiefComplaint/SOAP notes — management
  * access is separate from medical access, which requires isMinor === true
@@ -37,6 +38,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ mem
     });
   } catch (err: any) {
     console.error('[GET /api/patient/family/[memberId]/appointments]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

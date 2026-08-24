@@ -8,6 +8,7 @@ import {
 } from "@/lib/pdf/buildPatientsListPdf";
 import { pdfResponse } from "@/lib/pdf/createPdfDocument";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 /**
@@ -51,9 +52,6 @@ export async function POST(req: NextRequest) {
     return pdfResponse(buffer, filename);
   } catch (err: any) {
     console.error("[POST /api/practitioner/patients/export]", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to export PDF" },
-      { status: 500 },
-    );
+    return apiError(err, "Failed to export PDF");
   }
 }

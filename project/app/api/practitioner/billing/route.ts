@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
 
+import { apiError } from "@/lib/api/errors";
 async function getPractitionerId(req: NextRequest): Promise<string> {
   try {
     const cookieStore = await cookies();
@@ -108,6 +109,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[GET /api/practitioner/billing]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -9,6 +9,7 @@ import {
 import { buildHospitalReportPdf } from "@/lib/pdf/buildHospitalReportPdf";
 import { pdfResponse } from "@/lib/pdf/createPdfDocument";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 /**
@@ -60,9 +61,6 @@ export async function GET(req: NextRequest) {
     return pdfResponse(buffer, filename);
   } catch (err: any) {
     console.error("[GET /api/hospital/reports/export]", err);
-    return NextResponse.json(
-      { error: err.message || "PDF export failed" },
-      { status: 500 },
-    );
+    return apiError(err, "PDF export failed");
   }
 }

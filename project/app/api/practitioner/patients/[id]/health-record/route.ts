@@ -13,6 +13,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import mongoose from 'mongoose';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -186,6 +187,6 @@ export async function GET(
 
   } catch (err: any) {
     console.error('[GET /api/practitioner/patients/[id]/health-record]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -17,6 +17,7 @@ import { TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { isMongoObjectId } from "@/lib/utils/mongoId";
 
+import { apiError } from "@/lib/api/errors";
 async function getAuthUser() {
   const requestUser = await getRequestUser();
   if (!requestUser) return null;
@@ -308,7 +309,7 @@ export async function GET(request: Request) {
     );
   } catch (err: any) {
     console.error("[GET /api/billing]", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -448,6 +449,6 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (err: any) {
     console.error("[PATCH /api/billing]", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

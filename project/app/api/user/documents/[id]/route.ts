@@ -5,6 +5,7 @@ import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { deleteMedia, isSupabaseConfigured } from "@/lib/supabase/media";
 import { isLegacyMediaUrl } from "@/lib/supabase/media-validation";
 
+import { apiError } from "@/lib/api/errors";
 // DELETE /api/user/documents/[id]
 export async function DELETE(
   _req: NextRequest,
@@ -49,7 +50,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }
 
@@ -92,6 +93,6 @@ export async function PATCH(
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

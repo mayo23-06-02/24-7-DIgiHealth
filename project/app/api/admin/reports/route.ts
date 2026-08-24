@@ -7,6 +7,7 @@ import {
   type AdminReportType,
 } from "@/lib/admin/buildAdminReports";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -43,9 +44,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: report });
   } catch (err: any) {
     console.error("[GET /api/admin/reports]", err);
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

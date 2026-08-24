@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Conversation } from '@/lib/models/Conversation';
 import Consultation from '@/lib/models/Consultation';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request, { params }: { params: Promise<{ consultationId: string }> }) {
   try {
     const { consultationId } = await params;
@@ -34,6 +35,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ consulta
 
     return NextResponse.json(conv);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

@@ -10,6 +10,7 @@ import User from "@/lib/models/User";
 import Ably from "ably";
 import mongoose from "mongoose";
 
+import { apiError } from "@/lib/api/errors";
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -57,13 +58,7 @@ export async function POST(req: NextRequest) {
       mediaId = asset.id;
     } catch (err: any) {
       console.error("Media upload failed", err);
-      return NextResponse.json(
-        {
-          success: false,
-          error: err.message || "File upload failed. Please try again.",
-        },
-        { status: 500 },
-      );
+      return apiError(err, "File upload failed. Please try again.");
     }
 
     const record = await AttachedRecord.create({
@@ -196,9 +191,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("[POST /api/chat/attach-record]", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 },
-    );
+    return apiError(error);
   }
 }

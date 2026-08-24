@@ -3,6 +3,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
 import { updateStaffByIdAndFacility, deleteStaffByIdAndFacility, getStaffByIdAndFacility } from '@/lib/postgres/staff';
 
+import { apiError } from "@/lib/api/errors";
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getRequestUser();
@@ -22,7 +23,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json({ success: true, data: updatedStaff });
 
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }
 
@@ -44,6 +45,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ success: true, data: {} });
 
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

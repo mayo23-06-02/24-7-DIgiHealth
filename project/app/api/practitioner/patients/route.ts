@@ -9,6 +9,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { calcAge, riskBandFromScore, riskBandStyle } from '@/lib/riskScore';
 import mongoose from 'mongoose';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -173,6 +174,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: result, total: result.length });
   } catch (err: any) {
     console.error('[GET /api/practitioner/patients]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

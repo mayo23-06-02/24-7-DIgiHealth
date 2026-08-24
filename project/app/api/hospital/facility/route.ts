@@ -3,6 +3,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
 
+import { apiError } from "@/lib/api/errors";
 function toClientShape(f: any) {
   return {
     _id: f.id,
@@ -58,7 +59,7 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({ success: true, data: toClientShape(facility) });
   } catch (error: any) {
     console.error('[GET /api/hospital/facility]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }
 
@@ -114,6 +115,6 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ success: true, data: updatedFacility ? toClientShape(updatedFacility) : null });
   } catch (error: any) {
     console.error('[PUT /api/hospital/facility]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

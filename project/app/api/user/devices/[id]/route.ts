@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 
+import { apiError } from "@/lib/api/errors";
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get('x-user-id') || null;
 }
@@ -32,6 +33,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error('[DELETE /api/user/devices/:id]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

@@ -5,6 +5,7 @@ import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 import { syncHospitalAppointment } from '@/lib/postgres/facility';
 
+import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: appointments });
   } catch (error: any) {
     console.error('[GET /api/hospital/appointments]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }
 
@@ -72,6 +73,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: appointment });
   } catch (error: any) {
     console.error('[POST /api/hospital/appointments]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return apiError(error);
   }
 }

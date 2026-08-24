@@ -5,6 +5,7 @@ import { buildPractitionerInsights } from "@/lib/insights/buildPractitionerInsig
 import { buildInsightsPdf } from "@/lib/pdf/buildInsightsPdf";
 import { pdfResponse } from "@/lib/pdf/createPdfDocument";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 /**
@@ -41,9 +42,6 @@ export async function GET(req: NextRequest) {
     return pdfResponse(buffer, filename);
   } catch (err: any) {
     console.error("[GET /api/practitioner/insights/export]", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to export insights PDF" },
-      { status: 500 },
-    );
+    return apiError(err, "Failed to export insights PDF");
   }
 }

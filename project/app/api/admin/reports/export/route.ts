@@ -8,6 +8,7 @@ import {
 import { buildPlatformReportPdf } from "@/lib/pdf/buildPlatformReportPdf";
 import { pdfResponse } from "@/lib/pdf/createPdfDocument";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -34,9 +35,6 @@ export async function GET(req: NextRequest) {
     return pdfResponse(buffer, filename);
   } catch (err: any) {
     console.error("[GET /api/admin/reports/export]", err);
-    return NextResponse.json(
-      { error: err.message || "PDF failed" },
-      { status: 500 },
-    );
+    return apiError(err, "PDF failed");
   }
 }

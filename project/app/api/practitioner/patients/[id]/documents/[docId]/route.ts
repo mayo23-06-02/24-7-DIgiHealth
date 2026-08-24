@@ -6,6 +6,7 @@ import { Consultation } from "@/lib/models/Consultation";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import mongoose from "mongoose";
 
+import { apiError } from "@/lib/api/errors";
 async function assertAccess(practitionerId: string, patientUserId: string) {
   const practitionerProfile = await PractitionerProfile.findOne({
     userId: practitionerId,
@@ -86,9 +87,6 @@ export async function PATCH(
     });
   } catch (err: any) {
     console.error("[PATCH /api/practitioner/patients/[id]/documents/[docId]]", err);
-    return NextResponse.json(
-      { success: false, error: err.message || "Update failed" },
-      { status: 500 },
-    );
+    return apiError(err, "Update failed");
   }
 }

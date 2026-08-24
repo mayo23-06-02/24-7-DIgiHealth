@@ -7,6 +7,7 @@ import Consultation from "@/lib/models/Consultation";
 import { apiLogger } from "@/lib/apiLogger";
 import { getLiveKitRoomService } from "@/lib/livekit";
 
+import { publishCallSignalTo } from "@/lib/realtime/callSignals";
 export async function POST(req: Request) {
   const scope = "api/chat/call/end";
   try {
@@ -98,6 +99,16 @@ export async function POST(req: Request) {
         });
       }
     }
+
+    // Clear the ring on both sides immediately. Without this the callee's
+    // device keeps ringing until its next poll for a call that is already over.
+    await publishCallSignalTo(
+      [
+        conversation ? String(conversation.patientId) : null,
+        conversation ? String(conversation.practitionerId) : null,
+      ],
+      { kind: "ended", callId: String(callId) },
+    );
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

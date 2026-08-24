@@ -8,6 +8,7 @@ import { notifyBookingEvent } from '@/lib/booking/notifications';
 import { expireStaleBookingRequests } from '@/lib/booking/expire';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 /**
  * Legacy patient booking endpoint.
  * Prefer POST /api/bookings for new code (unified booking system).
@@ -97,6 +98,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[POST /api/consultations/book]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

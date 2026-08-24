@@ -6,6 +6,7 @@ import { Subscription } from '@/lib/models/Billing';
 import { normalizeEmail } from '@/lib/supabase/auth';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
 
+import { apiError } from "@/lib/api/errors";
 /** POST — the invited adult accepts, now that they're logged in. Only the
  * actual invited email can consume the token — being logged in with the
  * link isn't enough on its own. */
@@ -57,6 +58,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: { linkId: link._id.toString() } });
   } catch (err: any) {
     console.error('[POST /api/patient/family/accept]', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return apiError(err);
   }
 }

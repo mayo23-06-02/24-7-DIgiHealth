@@ -16,6 +16,7 @@ import {
 import { pdfResponse } from "@/lib/pdf/createPdfDocument";
 import { resolveHospitalId } from "@/lib/hospital/resolveHospitalId";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 async function getAuthUser() {
@@ -317,9 +318,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (err: any) {
     console.error("[POST /api/billing/export]", err);
-    return NextResponse.json(
-      { error: err.message || "Failed to export PDF" },
-      { status: 500 },
-    );
+    return apiError(err, "Failed to export PDF");
   }
 }

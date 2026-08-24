@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { buildPractitionerInsights } from "@/lib/insights/buildPractitionerInsights";
 
+import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -31,9 +32,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data });
   } catch (err: any) {
     console.error("[GET /api/practitioner/insights]", err);
-    return NextResponse.json(
-      { success: false, error: err.message || "Failed to load insights" },
-      { status: 500 },
-    );
+    return apiError(err, "Failed to load insights");
   }
 }
