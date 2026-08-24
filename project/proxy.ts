@@ -22,14 +22,26 @@ const { auth } = NextAuth(authConfig);
 /*  round trip on every message is not worth paying.                   */
 /* ------------------------------------------------------------------ */
 
+/*
+ * These are per-IP allowances, and an IP is not a person: a clinic, a
+ * household, or any office behind one NAT shares a single bucket across
+ * everybody on it. The original limits were set as though one IP meant one
+ * user, so five logins per fifteen minutes locked out a whole waiting room
+ * after a handful of typos.
+ *
+ * The per-IP numbers are therefore sized to stop spraying, not to police an
+ * individual account. Brute force against one account is bounded separately
+ * inside the login route, keyed on the identifier being tried — see
+ * ACCOUNT_LOGIN_LIMIT there.
+ */
 const RATE_LIMIT_CONFIG: Record<string, { windowMs: number; maxRequests: number }> = {
   '/api/chat/messages': { windowMs: 60_000, maxRequests: 60 },
-  '/api/auth/login': { windowMs: 900_000, maxRequests: 5 },          // 5 attempts per 15 minutes
-  '/api/auth/register': { windowMs: 3_600_000, maxRequests: 3 },     // 3 registrations per hour
-  '/api/auth/otp/send': { windowMs: 300_000, maxRequests: 3 },       // 3 OTP sends per 5 minutes
-  '/api/auth/otp/verify': { windowMs: 300_000, maxRequests: 5 },     // 5 verify attempts per 5 minutes
-  '/api/auth/forgot-password': { windowMs: 900_000, maxRequests: 3 }, // 3 forgot-password per 15 minutes
-  '/api/auth/reset-password': { windowMs: 900_000, maxRequests: 3 },  // 3 reset-password per 15 minutes
+  '/api/auth/login': { windowMs: 900_000, maxRequests: 30 },         // shared by everyone behind one IP
+  '/api/auth/register': { windowMs: 3_600_000, maxRequests: 10 },    // a family signing up together
+  '/api/auth/otp/send': { windowMs: 300_000, maxRequests: 10 },
+  '/api/auth/otp/verify': { windowMs: 300_000, maxRequests: 15 },
+  '/api/auth/forgot-password': { windowMs: 900_000, maxRequests: 10 },
+  '/api/auth/reset-password': { windowMs: 900_000, maxRequests: 10 },
   default:              { windowMs: 60_000, maxRequests: 100 },
 };
 

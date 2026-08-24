@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 import { getEntitlement } from "@/lib/billing/entitlement";
+import { checkSharedRateLimit } from "@/lib/security/rateLimit";
 
 /**
  * A real bcrypt digest that no supplied password can match. Compared against
@@ -14,6 +15,14 @@ import { getEntitlement } from "@/lib/billing/entitlement";
  */
 const DUMMY_HASH =
   "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+
+/**
+ * Failed-or-not attempts allowed against one account before it is throttled.
+ * Counted per identifier rather than per IP, so an attacker cannot buy more
+ * guesses by changing address, and a legitimate user is never locked out by
+ * a stranger sharing their network.
+ */
+const ACCOUNT_LOGIN_LIMIT = { windowMs: 900_000, maxRequests: 8 };
 
 interface LoginUser {
   /**
@@ -189,6 +198,28 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Missing credentials" },
         { status: 400 },
+      );
+    }
+
+    /*
+     * Per-account throttle.
+     *
+     * The middleware limit is per IP, and an IP is not a person — a clinic or
+     * household behind one NAT shares it. Sizing that bucket tightly enough to
+     * stop brute force locked out everyone on the same connection instead.
+     *
+     * This bounds attempts against a specific account, which is the thing
+     * guessing actually targets, and it holds however many addresses an
+     * attacker spreads across.
+     */
+    const attemptKey = `login:account:${identifier.trim().toLowerCase()}`;
+    if (!(await checkSharedRateLimit(attemptKey, ACCOUNT_LOGIN_LIMIT))) {
+      return NextResponse.json(
+        {
+          error:
+            "Too many sign-in attempts for this account. Try again in 15 minutes, or reset your password.",
+        },
+        { status: 429 },
       );
     }
 
