@@ -5,6 +5,7 @@ import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
 import { listLiveKitParticipants } from "@/lib/livekit";
 import { finalizeCall } from "@/lib/consultations/finalizeSession";
+import { apiError } from "@/lib/api/errors";
 
 /**
  * One participant is leaving.
@@ -66,9 +67,6 @@ export async function POST(req: Request) {
     const { finalized, durationSeconds } = await finalizeCall(scope, call, "hangup");
     return NextResponse.json({ success: true, ended: finalized, durationSeconds });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Failed to end call";
-    apiLogger.error(scope, "failed", { message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiError(error, "The call could not be ended. Please try again.");
   }
 }

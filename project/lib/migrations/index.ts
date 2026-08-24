@@ -1,6 +1,7 @@
 import Migration from "@/lib/models/Migration";
 import { apiLogger } from "@/lib/apiLogger";
 import { collapseDuplicateActiveCalls } from "./collapseDuplicateActiveCalls";
+import { scopeActiveCallIndexToSession } from "./scopeActiveCallIndexToSession";
 
 const scope = "migrations";
 
@@ -31,6 +32,13 @@ const MIGRATIONS: MigrationDef[] = [
     run: () =>
       collapseDuplicateActiveCalls({
         log: (line) => apiLogger.info(scope, "collapse_progress", { line }),
+      }),
+  },
+  {
+    key: "2026-08-24-scope-active-call-index-to-session",
+    run: () =>
+      scopeActiveCallIndexToSession({
+        log: (line) => apiLogger.info(scope, "scope_index_progress", { line }),
       }),
   },
 ];

@@ -11,6 +11,7 @@ import { Call } from "@/lib/models/Call";
 import { ensureActiveCall, hasUsableLiveKitState } from "@/lib/calls/activeCall";
 import { finalizeCall } from "@/lib/consultations/finalizeSession";
 import { isJoinable, sessionStateAt, sessionWindow } from "@/lib/consultations/window";
+import { apiError } from "@/lib/api/errors";
 
 /**
  * The one authority on a scheduled consultation's live session.
@@ -208,9 +209,6 @@ export async function POST(
       conversationId: conversation._id.toString(),
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Failed to open session";
-    apiLogger.error(scope, "failed", { message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiError(error, "This consultation could not be opened. Please try again.");
   }
 }

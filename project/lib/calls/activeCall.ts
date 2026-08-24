@@ -2,6 +2,7 @@ import type { Types } from "mongoose";
 import { Call } from "@/lib/models/Call";
 import { apiLogger } from "@/lib/apiLogger";
 import { ensureLiveKitRoom, getLiveKitServerUrl } from "@/lib/livekit";
+import { PublicError } from "@/lib/api/errors";
 
 /**
  * Room naming.
@@ -127,7 +128,31 @@ export async function ensureActiveCall({
     // together, not an error: re-read and join what they made.
     const existing = await Call.findOne(lookup).sort({ startedAt: -1 });
     if (!existing) {
-      throw new Error("Active call vanished immediately after a duplicate-key conflict");
+      /*
+       * The write collided with a row our own lookup cannot see, which means
+       * some index other than the one we key on rejected it. That used to be
+       * routine — a unique index on `conversationId` alone blocked a second
+       * live session in the same thread — and it is a dead end rather than a
+       * race, so retrying achieves nothing.
+       *
+       * The conflicting key is recorded here and nowhere else. It names an
+       * index and the identifiers inside it, so it goes to the log and the
+       * caller gets copy written for a person.
+       */
+      const conflict = error as {
+        keyPattern?: Record<string, unknown>;
+        keyValue?: Record<string, unknown>;
+      };
+      apiLogger.error(scope, "duplicate_key_no_matching_row", {
+        conversationId: convIdStr,
+        consultationId: consultationId || null,
+        keyPattern: conflict.keyPattern,
+        keyValue: conflict.keyValue,
+      });
+      throw new PublicError(
+        "This session could not be opened. Please try again in a moment.",
+        503,
+      );
     }
     apiLogger.info(scope, "joined_concurrently_created_call", {
       callId: existing._id.toString(),

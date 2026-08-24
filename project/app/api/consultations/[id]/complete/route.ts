@@ -6,6 +6,7 @@ import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
 import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { finalizeCall } from "@/lib/consultations/finalizeSession";
+import { apiError } from "@/lib/api/errors";
 
 /**
  * The practitioner declares the consultation finished.
@@ -76,9 +77,6 @@ export async function POST(
     apiLogger.info(scope, "completed_without_session", { consultationId: id });
     return NextResponse.json({ success: true, status: "completed" });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Failed to complete consultation";
-    apiLogger.error(scope, "failed", { message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiError(error, "We could not complete this consultation. Please try again.");
   }
 }

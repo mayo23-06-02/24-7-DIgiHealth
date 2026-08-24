@@ -6,6 +6,7 @@ import { apiLogger } from "@/lib/apiLogger";
 import { createLiveKitParticipantToken } from "@/lib/livekit";
 import { ensureActiveCall, hasUsableLiveKitState } from "@/lib/calls/activeCall";
 import { publishCallSignalTo } from "@/lib/realtime/callSignals";
+import { apiError } from "@/lib/api/errors";
 
 function displayNameOf(u: {
   firstName?: string | null;
@@ -154,9 +155,6 @@ export async function POST(req: Request) {
       initiatedBy: call.initiatedBy,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Failed to start call";
-    apiLogger.error(scope, "failed", { message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiError(error, "The call could not be started. Please try again.");
   }
 }

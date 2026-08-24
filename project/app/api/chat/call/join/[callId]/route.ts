@@ -5,6 +5,7 @@ import { Conversation } from "@/lib/models/Conversation";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
 import { createLiveKitParticipantToken } from "@/lib/livekit";
+import { apiError } from "@/lib/api/errors";
 
 export async function POST(
   req: Request,
@@ -89,9 +90,6 @@ export async function POST(
       initiatedBy: call.initiatedBy,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Failed to join call";
-    apiLogger.error(scope, "failed", { message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiError(error, "The call could not be joined. Please try again.");
   }
 }
