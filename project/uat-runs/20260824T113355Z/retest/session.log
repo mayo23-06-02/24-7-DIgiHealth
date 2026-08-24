@@ -1,0 +1,7 @@
+  PASS  B-01    Wrong password rejected  — HTTP 401
+  PASS  B-02    No account enumeration  — wrong-pw 401 vs unknown 401, identical bodies
+
+════════════════════════════════════════════════════════════════════════
+SUMMARY
+════════════════════════════════════════════════════════════════════════
+  2 checks · PASS 2 · FAIL 0 · SKIP 0

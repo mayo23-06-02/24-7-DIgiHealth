@@ -1,0 +1,26 @@
+{
+  "environment": "https://24-7-d-igi-health.vercel.app",
+  "note": "isolated re-run of B-01/B-02",
+  "counts": {
+    "PASS": 2
+  },
+  "total": 2,
+  "steps": [
+    {
+      "id": "B-01",
+      "area": "Auth",
+      "name": "Wrong password rejected",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "at": "2026-08-24T12:00:33.629Z"
+    },
+    {
+      "id": "B-02",
+      "area": "Auth",
+      "name": "No account enumeration",
+      "status": "PASS",
+      "detail": "wrong-pw 401 vs unknown 401, identical bodies",
+      "at": "2026-08-24T12:00:33.631Z"
+    }
+  ]
+}

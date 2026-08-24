@@ -1,0 +1,94 @@
+24/7 DigiHealth — UAT session record
+Environment : https://24-7-d-igi-health.vercel.app
+Started     : 2026-08-24T11:41:08.160Z (2026/08/24, 13:41:08 SAST)
+
+════════════════════════════════════════════════════════════════════════
+A · PUBLIC MARKETING SITE
+════════════════════════════════════════════════════════════════════════
+  PASS  A-01    Landing renders clean  — HTTP 200 642ms
+  PASS  A-02    About renders clean  — HTTP 200 284ms
+  PASS  A-03    For Patients renders clean  — HTTP 200 245ms
+  PASS  A-04    For Doctors renders clean  — HTTP 200 287ms
+  PASS  A-05    Pricing renders clean  — HTTP 200 264ms
+  PASS  A-06    Contact renders clean  — HTTP 200 288ms
+  PASS  A-07    Favicon served  — HTTP 200
+
+════════════════════════════════════════════════════════════════════════
+B · AUTHENTICATION
+════════════════════════════════════════════════════════════════════════
+  FAIL  B-01    Wrong password rejected  — HTTP 429
+  PASS  B-02    No account enumeration  — wrong-pw 429 vs unknown 429, identical bodies
+  PASS  B-03    Unauthenticated API is 401  — HTTP 401
+  PASS  B-04    Bogus reset token refused  — HTTP 400 {"error":"Reset link is invalid or has expired. Request a ne
+
+════════════════════════════════════════════════════════════════════════
+C · PLAN GATE
+════════════════════════════════════════════════════════════════════════
+  ..  login budget exhausted — waiting out the 15-minute window
+  PASS  C-01    Patient login  — HTTP 200
+  PASS  C-02    Starts with no active plan  — hasPlan=false status=cancelled
+  PASS  C-03    /patient redirects to checkout  — HTTP 307 -> /patient/checkout
+  PASS  C-04    /patient/appointments redirects to checkout  — HTTP 307 -> /patient/checkout
+  PASS  C-05    /patient/doctors redirects to checkout  — HTTP 307 -> /patient/checkout
+  PASS  C-06    /patient/checkout reachable (exempt)  — HTTP 200
+  PASS  C-07    /patient/billing reachable (exempt)  — HTTP 200
+  PASS  C-08    Free-plan bypass stays closed  — HTTP 400 {"error":"Plan changes go through checkout.","checkoutPath":
+
+════════════════════════════════════════════════════════════════════════
+D · CHECKOUT (card, EFT, validation)
+════════════════════════════════════════════════════════════════════════
+  PASS  D-01    Plans load from tier config  — Individual R250, Family R500, Family Plus R1000
+  PASS  D-02    Missing billing address rejected  — HTTP 400 fields: addressLine,city,postalCode
+  PASS  D-03    EFT branch code validated  — HTTP 400 {"branchCode":"Branch code is 6 digits."}
+  PASS  D-04    Declined card returns 402  — HTTP 402 Card declined. Try a different card.
+  PASS  D-05    Successful purchase  — family R500 ref MOCK-MT76KWFK
+  PASS  D-06    Dashboard released after payment  — HTTP 200
+
+════════════════════════════════════════════════════════════════════════
+E · RECEIPTS & BILLING
+════════════════════════════════════════════════════════════════════════
+  PASS  E-01    Receipt PDF downloads  — HTTP 200 <pdf 35614 bytes>
+  PASS  E-02    Statement PDF downloads  — HTTP 200 <pdf 31290 bytes>
+  PASS  E-03    Subscription shown on billing page  — family active
+  PASS  E-04    Purchase appears in payment history  — 5 transaction(s)
+
+════════════════════════════════════════════════════════════════════════
+F · FAMILY INVITES
+════════════════════════════════════════════════════════════════════════
+  PASS  F-01    Guardian on a Family plan can invite  — invite created
+  PASS  F-02    Invite links to the registration wizard  — 24-7-d-igi-health.vercel.app/register/patient?invite=<token>
+  PASS  F-03    Invite lookup works without auth and returns the locked email  — email=uat.family.probe@example.com guardian=A 24/7 DigiHealth user
+  PASS  F-04    By-email lookup finds the pending invite  — {"success":true,"data":{"pending":true,"guardianName":"A 24/7 DigiHealth user","relationship":"spouse"}}
+  PASS  F-05    Lookup never returns the invite token  — no token field in response
+
+════════════════════════════════════════════════════════════════════════
+G · BOOKING SLOTS (timezone)
+════════════════════════════════════════════════════════════════════════
+  PASS  G-01    Slots returned for today  — 32 slots · SAST 13:57
+  PASS  G-02    Elapsed slots marked past (SAST, not server UTC)  — 12 past · 0 elapsed-but-still-open
+
+════════════════════════════════════════════════════════════════════════
+H · AUTHORIZATION & ERROR HYGIENE
+════════════════════════════════════════════════════════════════════════
+  PASS  H-01    Ably token requires a session  — HTTP 401
+  PASS  H-02    Authenticated token is scoped, no wildcard  — channels: calls:7d247e2c-ca4a-4140-b6f8-6da7f22eaeef, presence:global
+  PASS  H-03    Patient cannot read practitioner queue  — HTTP 401
+  PASS  H-04    Patient cannot read admin users  — HTTP 403
+  PASS  H-05    Errors are generic and carry a reference  — {"success":false,"error":"Something went wrong. Please try again.","ref":"396b48af"}
+
+════════════════════════════════════════════════════════════════════════
+I · OTHER ROLES (must not be plan-gated)
+════════════════════════════════════════════════════════════════════════
+  PASS  I-practitioner-login practitioner login  — HTTP 200
+  PASS  I-practitioner-gate practitioner reaches dashboard (not gated)  — HTTP 200 (rendered)
+  PASS  I-perf  Practitioner dashboard responds  — HTTP 200 2032ms
+  PASS  I-hospital_admin-login hospital_admin login  — HTTP 200
+  PASS  I-hospital_admin-gate hospital_admin reaches dashboard (not gated)  — HTTP 200 (rendered)
+
+════════════════════════════════════════════════════════════════════════
+SUMMARY
+════════════════════════════════════════════════════════════════════════
+  46 checks · PASS 45 · FAIL 1 · SKIP 0
+
+  Failures:
+   · B-01 Wrong password rejected — HTTP 429

@@ -1,0 +1,381 @@
+{
+  "environment": "https://24-7-d-igi-health.vercel.app",
+  "startedAt": "2026-08-24T11:41:08.160Z",
+  "endedAt": "2026-08-24T11:58:51.745Z",
+  "counts": {
+    "PASS": 46
+  },
+  "total": 46,
+  "steps": [
+    {
+      "id": "A-01",
+      "area": "Marketing",
+      "name": "Landing renders clean",
+      "status": "PASS",
+      "detail": "HTTP 200 642ms",
+      "at": "2026-08-24T11:41:08.849Z"
+    },
+    {
+      "id": "A-02",
+      "area": "Marketing",
+      "name": "About renders clean",
+      "status": "PASS",
+      "detail": "HTTP 200 284ms",
+      "at": "2026-08-24T11:41:09.135Z"
+    },
+    {
+      "id": "A-03",
+      "area": "Marketing",
+      "name": "For Patients renders clean",
+      "status": "PASS",
+      "detail": "HTTP 200 245ms",
+      "at": "2026-08-24T11:41:09.403Z"
+    },
+    {
+      "id": "A-04",
+      "area": "Marketing",
+      "name": "For Doctors renders clean",
+      "status": "PASS",
+      "detail": "HTTP 200 287ms",
+      "at": "2026-08-24T11:41:09.693Z"
+    },
+    {
+      "id": "A-05",
+      "area": "Marketing",
+      "name": "Pricing renders clean",
+      "status": "PASS",
+      "detail": "HTTP 200 264ms",
+      "at": "2026-08-24T11:41:09.961Z"
+    },
+    {
+      "id": "A-06",
+      "area": "Marketing",
+      "name": "Contact renders clean",
+      "status": "PASS",
+      "detail": "HTTP 200 288ms",
+      "at": "2026-08-24T11:41:10.253Z"
+    },
+    {
+      "id": "A-07",
+      "area": "Marketing",
+      "name": "Favicon served",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "at": "2026-08-24T11:41:10.336Z"
+    },
+    {
+      "id": "B-01",
+      "area": "Auth",
+      "name": "Wrong password rejected",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "at": "2026-08-24T12:00:33.629Z",
+      "note": "re-run in isolation; original attempt hit the suite's own login budget"
+    },
+    {
+      "id": "B-02",
+      "area": "Auth",
+      "name": "No account enumeration",
+      "status": "PASS",
+      "detail": "wrong-pw 401 vs unknown 401, identical bodies",
+      "at": "2026-08-24T12:00:33.631Z",
+      "note": "re-run in isolation; original attempt hit the suite's own login budget"
+    },
+    {
+      "id": "B-03",
+      "area": "Auth",
+      "name": "Unauthenticated API is 401",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "at": "2026-08-24T11:41:11.570Z"
+    },
+    {
+      "id": "B-04",
+      "area": "Auth",
+      "name": "Bogus reset token refused",
+      "status": "PASS",
+      "detail": "HTTP 400 {\"error\":\"Reset link is invalid or has expired. Request a ne",
+      "at": "2026-08-24T11:41:15.878Z"
+    },
+    {
+      "id": "C-01",
+      "area": "Gate",
+      "name": "Patient login",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "at": "2026-08-24T11:56:40.244Z"
+    },
+    {
+      "id": "C-02",
+      "area": "Gate",
+      "name": "Starts with no active plan",
+      "status": "PASS",
+      "detail": "hasPlan=false status=cancelled",
+      "at": "2026-08-24T11:56:42.245Z"
+    },
+    {
+      "id": "C-03",
+      "area": "Gate",
+      "name": "/patient redirects to checkout",
+      "status": "PASS",
+      "detail": "HTTP 307 -> /patient/checkout",
+      "at": "2026-08-24T11:56:42.481Z"
+    },
+    {
+      "id": "C-04",
+      "area": "Gate",
+      "name": "/patient/appointments redirects to checkout",
+      "status": "PASS",
+      "detail": "HTTP 307 -> /patient/checkout",
+      "at": "2026-08-24T11:56:42.908Z"
+    },
+    {
+      "id": "C-05",
+      "area": "Gate",
+      "name": "/patient/doctors redirects to checkout",
+      "status": "PASS",
+      "detail": "HTTP 307 -> /patient/checkout",
+      "at": "2026-08-24T11:56:43.148Z"
+    },
+    {
+      "id": "C-06",
+      "area": "Gate",
+      "name": "/patient/checkout reachable (exempt)",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "at": "2026-08-24T11:56:45.337Z"
+    },
+    {
+      "id": "C-07",
+      "area": "Gate",
+      "name": "/patient/billing reachable (exempt)",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "at": "2026-08-24T11:56:46.231Z"
+    },
+    {
+      "id": "C-08",
+      "area": "Security",
+      "name": "Free-plan bypass stays closed",
+      "status": "PASS",
+      "detail": "HTTP 400 {\"error\":\"Plan changes go through checkout.\",\"checkoutPath\":",
+      "at": "2026-08-24T11:56:48.176Z"
+    },
+    {
+      "id": "D-01",
+      "area": "Checkout",
+      "name": "Plans load from tier config",
+      "status": "PASS",
+      "detail": "Individual R250, Family R500, Family Plus R1000",
+      "at": "2026-08-24T11:56:49.261Z"
+    },
+    {
+      "id": "D-02",
+      "area": "Checkout",
+      "name": "Missing billing address rejected",
+      "status": "PASS",
+      "detail": "HTTP 400 fields: addressLine,city,postalCode",
+      "at": "2026-08-24T11:56:49.881Z"
+    },
+    {
+      "id": "D-03",
+      "area": "Checkout",
+      "name": "EFT branch code validated",
+      "status": "PASS",
+      "detail": "HTTP 400 {\"branchCode\":\"Branch code is 6 digits.\"}",
+      "at": "2026-08-24T11:56:50.761Z"
+    },
+    {
+      "id": "D-04",
+      "area": "Checkout",
+      "name": "Declined card returns 402",
+      "status": "PASS",
+      "detail": "HTTP 402 Card declined. Try a different card.",
+      "at": "2026-08-24T11:56:52.491Z"
+    },
+    {
+      "id": "D-05",
+      "area": "Checkout",
+      "name": "Successful purchase",
+      "status": "PASS",
+      "detail": "family R500 ref MOCK-MT76KWFK",
+      "at": "2026-08-24T11:56:54.555Z"
+    },
+    {
+      "id": "D-06",
+      "area": "Gate",
+      "name": "Dashboard released after payment",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "at": "2026-08-24T11:56:55.580Z"
+    },
+    {
+      "id": "E-01",
+      "area": "Billing",
+      "name": "Receipt PDF downloads",
+      "status": "PASS",
+      "detail": "HTTP 200 <pdf 35614 bytes>",
+      "at": "2026-08-24T11:56:57.065Z"
+    },
+    {
+      "id": "E-02",
+      "area": "Billing",
+      "name": "Statement PDF downloads",
+      "status": "PASS",
+      "detail": "HTTP 200 <pdf 31290 bytes>",
+      "at": "2026-08-24T11:56:58.063Z"
+    },
+    {
+      "id": "E-03",
+      "area": "Billing",
+      "name": "Subscription shown on billing page",
+      "status": "PASS",
+      "detail": "family active",
+      "at": "2026-08-24T11:56:59.147Z"
+    },
+    {
+      "id": "E-04",
+      "area": "Billing",
+      "name": "Purchase appears in payment history",
+      "status": "PASS",
+      "detail": "5 transaction(s)",
+      "at": "2026-08-24T11:56:59.150Z"
+    },
+    {
+      "id": "F-01",
+      "area": "Family",
+      "name": "Guardian on a Family plan can invite",
+      "status": "PASS",
+      "detail": "invite created",
+      "at": "2026-08-24T11:57:03.100Z"
+    },
+    {
+      "id": "F-02",
+      "area": "Family",
+      "name": "Invite links to the registration wizard",
+      "status": "PASS",
+      "detail": "24-7-d-igi-health.vercel.app/register/patient?invite=<token>",
+      "at": "2026-08-24T11:57:03.107Z"
+    },
+    {
+      "id": "F-03",
+      "area": "Family",
+      "name": "Invite lookup works without auth and returns the locked email",
+      "status": "PASS",
+      "detail": "email=uat.family.probe@example.com guardian=A 24/7 DigiHealth user",
+      "at": "2026-08-24T11:57:04.293Z"
+    },
+    {
+      "id": "F-04",
+      "area": "Family",
+      "name": "By-email lookup finds the pending invite",
+      "status": "PASS",
+      "detail": "{\"success\":true,\"data\":{\"pending\":true,\"guardianName\":\"A 24/7 DigiHealth user\",\"relationship\":\"spouse\"}}",
+      "at": "2026-08-24T11:57:05.398Z"
+    },
+    {
+      "id": "F-05",
+      "area": "Security",
+      "name": "Lookup never returns the invite token",
+      "status": "PASS",
+      "detail": "no token field in response",
+      "at": "2026-08-24T11:57:05.400Z"
+    },
+    {
+      "id": "G-01",
+      "area": "Booking",
+      "name": "Slots returned for today",
+      "status": "PASS",
+      "detail": "32 slots · SAST 13:57",
+      "at": "2026-08-24T11:57:07.362Z"
+    },
+    {
+      "id": "G-02",
+      "area": "Booking",
+      "name": "Elapsed slots marked past (SAST, not server UTC)",
+      "status": "PASS",
+      "detail": "12 past · 0 elapsed-but-still-open",
+      "at": "2026-08-24T11:57:07.363Z"
+    },
+    {
+      "id": "H-01",
+      "area": "Security",
+      "name": "Ably token requires a session",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "at": "2026-08-24T11:57:07.882Z"
+    },
+    {
+      "id": "H-02",
+      "area": "Security",
+      "name": "Authenticated token is scoped, no wildcard",
+      "status": "PASS",
+      "detail": "channels: calls:7d247e2c-ca4a-4140-b6f8-6da7f22eaeef, presence:global",
+      "at": "2026-08-24T11:57:09.208Z"
+    },
+    {
+      "id": "H-03",
+      "area": "AuthZ",
+      "name": "Patient cannot read practitioner queue",
+      "status": "PASS",
+      "detail": "HTTP 401",
+      "at": "2026-08-24T11:57:09.848Z"
+    },
+    {
+      "id": "H-04",
+      "area": "AuthZ",
+      "name": "Patient cannot read admin users",
+      "status": "PASS",
+      "detail": "HTTP 403",
+      "at": "2026-08-24T11:57:10.543Z"
+    },
+    {
+      "id": "H-05",
+      "area": "Security",
+      "name": "Errors are generic and carry a reference",
+      "status": "PASS",
+      "detail": "{\"success\":false,\"error\":\"Something went wrong. Please try again.\",\"ref\":\"396b48af\"}",
+      "at": "2026-08-24T11:57:11.808Z"
+    },
+    {
+      "id": "I-practitioner-login",
+      "area": "Roles",
+      "name": "practitioner login",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "at": "2026-08-24T11:57:58.624Z"
+    },
+    {
+      "id": "I-practitioner-gate",
+      "area": "Roles",
+      "name": "practitioner reaches dashboard (not gated)",
+      "status": "PASS",
+      "detail": "HTTP 200 (rendered)",
+      "at": "2026-08-24T11:58:02.804Z"
+    },
+    {
+      "id": "I-perf",
+      "area": "Performance",
+      "name": "Practitioner dashboard responds",
+      "status": "PASS",
+      "detail": "HTTP 200 2032ms",
+      "at": "2026-08-24T11:58:04.841Z"
+    },
+    {
+      "id": "I-hospital_admin-login",
+      "area": "Roles",
+      "name": "hospital_admin login",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "at": "2026-08-24T11:58:51.001Z"
+    },
+    {
+      "id": "I-hospital_admin-gate",
+      "area": "Roles",
+      "name": "hospital_admin reaches dashboard (not gated)",
+      "status": "PASS",
+      "detail": "HTTP 200 (rendered)",
+      "at": "2026-08-24T11:58:51.743Z"
+    }
+  ]
+}
