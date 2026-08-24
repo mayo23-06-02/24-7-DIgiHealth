@@ -24,6 +24,9 @@ const DUMMY_HASH =
  */
 const ACCOUNT_LOGIN_LIMIT = { windowMs: 900_000, maxRequests: 8 };
 
+/** See proxy.ts — same flag, so both halves switch together. */
+const AUTH_RATE_LIMIT_DISABLED = process.env.DISABLE_AUTH_RATE_LIMIT === "true";
+
 interface LoginUser {
   /**
    * Session identity used in the JWT. Prefers the Mongo `_id` when a row
@@ -213,7 +216,10 @@ export async function POST(request: Request) {
      * attacker spreads across.
      */
     const attemptKey = `login:account:${identifier.trim().toLowerCase()}`;
-    if (!(await checkSharedRateLimit(attemptKey, ACCOUNT_LOGIN_LIMIT))) {
+    if (
+      !AUTH_RATE_LIMIT_DISABLED &&
+      !(await checkSharedRateLimit(attemptKey, ACCOUNT_LOGIN_LIMIT))
+    ) {
       return NextResponse.json(
         {
           error:

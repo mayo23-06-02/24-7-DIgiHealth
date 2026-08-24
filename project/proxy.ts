@@ -68,6 +68,16 @@ function getRateLimitBucket(pathname: string): { key: string; config: { windowMs
  * misleading — an attacker spreading attempts across warm instances gets a
  * multiple of the documented allowance.
  */
+/**
+ * Auth rate limiting can be switched off for testing, where signing in and out
+ * repeatedly is the whole activity and the limiter is only in the way.
+ *
+ * It is OFF only when DISABLE_AUTH_RATE_LIMIT is exactly "true", so an unset or
+ * mistyped value leaves the protection ON. Turn it back on before real patients
+ * use this: without it, password guessing against an account is unbounded.
+ */
+const AUTH_RATE_LIMIT_DISABLED = process.env.DISABLE_AUTH_RATE_LIMIT === 'true';
+
 function needsSharedCounter(pathname: string): boolean {
   return pathname.startsWith('/api/auth');
 }
@@ -130,10 +140,17 @@ export default auth(async function middleware(request: NextRequest & { auth: any
   }
 
   // ---------- 1. Rate limiting for API routes ----------
+  // Auth buckets are skipped entirely while DISABLE_AUTH_RATE_LIMIT is on, so
+  // repeated sign-in / register / delete cycles during testing are not fought
+  // by the limiter. Chat keeps its throughput limit either way.
+  const skipAuthLimit =
+    AUTH_RATE_LIMIT_DISABLED && pathname.startsWith('/api/auth');
+
   if (
-    pathname.startsWith('/api/chat') ||
-    pathname.startsWith('/api/ably') ||
-    pathname.startsWith('/api/auth')
+    !skipAuthLimit &&
+    (pathname.startsWith('/api/chat') ||
+      pathname.startsWith('/api/ably') ||
+      pathname.startsWith('/api/auth'))
   ) {
     const { key, config } = getRateLimitBucket(pathname);
     // For auth routes, bucket by IP + specific endpoint to prevent brute force attacks.
