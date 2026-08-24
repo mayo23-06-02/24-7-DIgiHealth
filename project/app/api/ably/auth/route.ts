@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Ably from 'ably';
+import type { capabilityOp } from 'ably';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { connectToDatabase } from '@/lib/mongodb';
 import Conversation from '@/lib/models/Conversation';
@@ -52,7 +53,8 @@ async function handleAuth(_req: NextRequest) {
       .select('_id')
       .lean();
 
-    const capability: Record<string, string[]> = {
+    // Ably types the operations as a union, not plain strings.
+    const capability: Record<string, capabilityOp[]> = {
       // Presence is a platform-wide online indicator and carries no clinical
       // content, so it stays global — but subscribe/presence only, never publish.
       'presence:global': ['subscribe', 'presence'],
