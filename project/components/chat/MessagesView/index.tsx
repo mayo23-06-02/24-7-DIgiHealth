@@ -178,54 +178,16 @@ export default function MessagesView({
     activeChatId && !activeChatId.startsWith("new-"),
   );
 
-  // Auto-start video call when navigating from appointments with ?join=video
-  const joinParam = searchParams.get("join");
-  const hasAutoStartedRef = useRef(false);
-
-  useEffect(() => {
-    if (
-      joinParam !== "video" ||
-      !activeChatId ||
-      activeCall ||
-      hasAutoStartedRef.current
-    )
-      return;
-    hasAutoStartedRef.current = true;
-    const conv = conversations.find((c) => c.id === activeChatId);
-    fetch("/api/chat/call/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ conversationId: activeChatId, type: "video" }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.roomUrl) {
-          setActiveCall({
-            roomUrl: data.roomUrl,
-            roomName: data.roomName,
-            token: data.token,
-            callId: data.callId,
-            type: "video",
-            initiatedBy: data.initiatedBy,
-            participantName: conv?.contactName,
-            participantAvatar: conv?.avatar,
-          });
-          router.replace(`?chatId=${activeChatId}`, { scroll: false });
-        } else {
-          hasAutoStartedRef.current = false;
-        }
-      })
-      .catch(() => {
-        hasAutoStartedRef.current = false;
-      });
-  }, [
-    joinParam,
-    activeChatId,
-    activeCall,
-    conversations,
-    setActiveCall,
-    router,
-  ]);
+  /*
+   * `?join=video` used to auto-start a call here, because a scheduled
+   * appointment reached its room by way of this page. It no longer does — a
+   * consultation lives at /{role}/consult/{id}, which holds its token before
+   * the start time and never routes through the message list.
+   *
+   * Anyone arriving on a stale link still gets their conversation opened by the
+   * chatId handling above; they just have to press call, which is the correct
+   * behaviour for an ad-hoc call anyway.
+   */
 
   // Video call fills the main content area; voice call gets split-screen on large screens
   if (activeCall) {

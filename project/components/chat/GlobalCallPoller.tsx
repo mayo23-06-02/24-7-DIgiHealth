@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useCall } from "../context/CallContext";
 import { getAblyClient } from "@/lib/ablyClient";
@@ -28,8 +28,21 @@ const PUSHED_POLL_MS = 60000;
 /** Ceiling used when the server keeps failing, so a bad backend isn't hammered. */
 const MAX_BACKOFF_MS = 60000;
 
+/** Shape of one entry in /api/chat/call/active's response. */
+interface IncomingCallPayload {
+  callId: string;
+  roomUrl?: string;
+  roomName?: string;
+  type: "video" | "voice";
+  initiatedBy: string;
+  participantName?: string;
+  participantAvatar?: string;
+  conversationId?: string;
+  consultationId?: string;
+}
+
 export default function GlobalCallPoller() {
-  const { setIncomingCall, incomingCall, activeCall } = useCall();
+  const { setIncomingCall, incomingCall, activeCall, clearCall } = useCall();
   const { user } = useAuthContext();
   const pollInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
   const errorCountRef = useRef(0);
@@ -58,6 +71,33 @@ export default function GlobalCallPoller() {
     activeRef.current = activeCall;
   }, [activeCall]);
 
+  /**
+   * An invitation is only "incoming" if it is somewhere we are not already.
+   *
+   * Comparing call ids alone was not enough: two rows could describe the same
+   * room, and then each party got rung by the other's row while both were
+   * already talking. Room and conversation identity are what actually decide
+   * whether this is a new place to go.
+   */
+  const alreadyPresentFor = useCallback(
+    (candidate: { callId?: string; roomName?: string; conversationId?: string }) => {
+      const active = activeRef.current;
+      if (!active) return false;
+      if (active.callId && candidate.callId && active.callId === candidate.callId)
+        return true;
+      if (active.roomName && candidate.roomName && active.roomName === candidate.roomName)
+        return true;
+      if (
+        active.conversationId &&
+        candidate.conversationId &&
+        active.conversationId === candidate.conversationId
+      )
+        return true;
+      return false;
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!user) return;
 
@@ -67,10 +107,10 @@ export default function GlobalCallPoller() {
         if (!res.ok) return;
         const data = await res.json();
         // Expected: { calls: [{ callId, roomUrl, roomName, type, initiatedBy, participantName, participantAvatar, conversationId, consultationId }] }
-        const incoming = data.calls?.find(
-          (c: any) => c.initiatedBy !== user.id,
+        const incoming = (data.calls as IncomingCallPayload[] | undefined)?.find(
+          (c) => c.initiatedBy !== user.id && !alreadyPresentFor(c),
         );
-        if (incoming && activeRef.current?.callId !== incoming.callId) {
+        if (incoming) {
           // Only set if it's a new incoming call (different callId) and we're not already in it
           if (
             !incomingRef.current ||
@@ -153,8 +193,7 @@ export default function GlobalCallPoller() {
       document.removeEventListener("visibilitychange", onVisible);
     };
     // Intentionally excludes incomingCall/activeCall — see the refs above.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, setIncomingCall]);
+  }, [user, setIncomingCall, clearCall, alreadyPresentFor]);
 
   /**
    * Realtime ring channel. The server publishes an invitation here the moment a
@@ -178,9 +217,16 @@ export default function GlobalCallPoller() {
       const onIncoming = (msg: { data?: unknown }) => {
         const d = msg?.data as Record<string, unknown> | undefined;
         if (!d?.callId) return;
-        // Ignore a ring for a call we are already in, and re-rings of the same
+        // Ignore a ring for a room we are already in, and re-rings of the same
         // invitation, exactly as the poll path does.
-        if (activeRef.current?.callId === d.callId) return;
+        if (
+          alreadyPresentFor({
+            callId: String(d.callId),
+            roomName: d.roomName ? String(d.roomName) : undefined,
+            conversationId: d.conversationId ? String(d.conversationId) : undefined,
+          })
+        )
+          return;
         if (incomingRef.current?.callId === d.callId) return;
         setIncomingCall({
           callId: String(d.callId),
@@ -200,6 +246,11 @@ export default function GlobalCallPoller() {
         const d = msg?.data as Record<string, unknown> | undefined;
         if (!d?.callId) return;
         if (incomingRef.current?.callId === d.callId) setIncomingCall(null);
+        // The room is no longer torn down underneath a caller when the other
+        // side declines, so nothing else would pull them out of it. Ending the
+        // call locally is what closes the panel and stops them sitting alone in
+        // a room the other party has refused.
+        if (activeRef.current?.callId === d.callId) clearCall();
       };
 
       void channel.subscribe("incoming", onIncoming);
@@ -235,7 +286,7 @@ export default function GlobalCallPoller() {
         // ignore
       }
     };
-  }, [user, setIncomingCall]);
+  }, [user, setIncomingCall, clearCall, alreadyPresentFor]);
 
   return null;
 }

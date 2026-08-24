@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useAppointmentAlert } from "@/components/context/AppointmentAlertContext";
+import { serverNow, ensureClockSynced } from "@/lib/time/serverClock";
+import { GRACE_AFTER_END_MS } from "@/lib/consultations/window";
 import type { Appointment } from "@/lib/hooks/useAppointments";
 
 const THRESHOLDS = [10, 5, 1] as const;
@@ -15,17 +17,19 @@ export default function AppointmentAlertPoller() {
     useAppointmentAlert();
 
   /**
-   * Clear a reminder the moment its own link lands the user in the lobby.
+   * Clear a reminder the moment its own link lands the user in the session.
    *
    * New alerts were already suppressed while in the waiting area, but one
    * already on screen stayed there — so tapping "Join" left the reminder
-   * hovering over the lobby it had just taken you to, still inviting you to
+   * hovering over the room it had just taken you to, still inviting you to
    * join something you were already in.
    */
   useEffect(() => {
     const inWaitingArea =
       !!pathname &&
-      (pathname.includes("/lobby/") || pathname.includes("/messages"));
+      (pathname.includes("/consult/") ||
+        pathname.includes("/lobby/") ||
+        pathname.includes("/messages"));
     if (inWaitingArea && activeAlert) dismissAlert();
   }, [pathname, activeAlert, dismissAlert]);
   const appointmentsRef = useRef<Appointment[]>([]);
@@ -55,6 +59,7 @@ export default function AppointmentAlertPoller() {
       }
     };
 
+    void ensureClockSynced();
     poll();
     const interval = setInterval(poll, POLL_MS);
     return () => {
@@ -63,47 +68,78 @@ export default function AppointmentAlertPoller() {
     };
   }, [user, role]);
 
-  // Evaluate every second whether an appointment just crossed a reminder
-  // threshold (10 / 5 / 1 minutes before start).
+  /**
+   * Evaluate every second whether an appointment has crossed a reminder point.
+   *
+   * Time comes from `serverNow()`, not the device clock: two people whose
+   * laptops disagree by a few minutes would otherwise be reminded — and would
+   * arrive — at genuinely different moments.
+   */
   useEffect(() => {
     if (!user) return;
     const inWaitingArea =
       !!pathname &&
-      (pathname.includes("/lobby/") || pathname.includes("/messages"));
+      (pathname.includes("/consult/") ||
+        pathname.includes("/lobby/") ||
+        pathname.includes("/messages"));
 
     const evaluate = () => {
       if (inWaitingArea || activeAlert) return;
-      const now = new Date();
+      const now = serverNow();
 
       for (const appt of appointmentsRef.current) {
-        if (appt.status !== "scheduled") continue;
         const start = new Date(appt.scheduledStart);
         if (isNaN(start.getTime())) continue;
         const msLeft = start.getTime() - now.getTime();
-        if (msLeft <= 0) continue; // already started — not a "reminder" anymore
+
+        const contactId =
+          role === "patient" ? appt.practitionerId : appt.patientId;
+        if (!contactId) continue;
+
+        const contactName =
+          (role === "patient" ? appt.practitionerName : appt.patientName) ||
+          "Your appointment";
+        const contactAvatar =
+          role === "patient" ? appt.practitionerAvatar : appt.patientAvatar;
+
+        const fire = (threshold: 10 | 5 | 1 | 0) => {
+          markShown(appt.id, threshold);
+          showAlert({
+            appointmentId: appt.id,
+            contactId,
+            contactName,
+            contactAvatar,
+            scheduledStart: appt.scheduledStart,
+            threshold,
+          });
+        };
+
+        /*
+         * A consultation already under way, that this user has not joined.
+         *
+         * Nothing rings for a scheduled session any more, which closed one gap
+         * and opened another: someone who ignored the reminders had no way of
+         * learning that the other party was sitting in the room waiting. This
+         * is that nudge — it fires once, within the session's own window.
+         */
+        if (
+          appt.status === "in_progress" &&
+          msLeft <= 0 &&
+          now.getTime() - start.getTime() < GRACE_AFTER_END_MS &&
+          !hasShown(appt.id, 0)
+        ) {
+          fire(0);
+          return;
+        }
+
+        if (appt.status !== "scheduled") continue;
+        if (msLeft <= 0) continue; // past the start — handled above
 
         const minutesLeft = msLeft / 60000;
         for (const threshold of THRESHOLDS) {
           if (minutesLeft > threshold) continue;
           if (hasShown(appt.id, threshold)) continue;
-
-          const contactId =
-            role === "patient" ? appt.practitionerId : appt.patientId;
-          if (!contactId) continue;
-
-          markShown(appt.id, threshold);
-          showAlert({
-            appointmentId: appt.id,
-            contactId,
-            contactName:
-              (role === "patient"
-                ? appt.practitionerName
-                : appt.patientName) || "Your appointment",
-            contactAvatar:
-              role === "patient" ? appt.practitionerAvatar : appt.patientAvatar,
-            scheduledStart: appt.scheduledStart,
-            threshold,
-          });
+          fire(threshold);
           return; // one alert at a time
         }
       }

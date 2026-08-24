@@ -210,7 +210,7 @@ export default function FullQueuePage() {
       render: (item) => (
         <div className="flex items-center justify-end gap-1.5">
           <button
-            onClick={() => router.push(`/practitioner/lobby/${item.consultationId}`)}
+            onClick={() => router.push(`/practitioner/consult/${item.consultationId}`)}
             className={`p-2.5 rounded-lg text-white transition-all active:scale-95 ${
               item.type === "chat" ? "bg-supportive-teal hover:brightness-95" : "bg-trust-blue hover:brightness-95"
             }`}

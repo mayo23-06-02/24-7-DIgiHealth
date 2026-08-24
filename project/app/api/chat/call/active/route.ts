@@ -29,10 +29,19 @@ export async function GET() {
     }).select("_id").lean();
     const conversationIds = userConversations.map((c) => c._id);
 
-    // Find active calls in those conversations
+    /*
+     * Active ad-hoc calls only.
+     *
+     * A scheduled consultation is joined through
+     * POST /api/consultations/[id]/session, where both parties walk into a room
+     * that opens on a timetable — there is no caller, so there is nobody to
+     * ring. Leaving those rows in this response is what used to ring both
+     * participants for the call they were already sitting in.
+     */
     const activeCalls = await Call.find({
       conversationId: { $in: conversationIds },
       status: "active",
+      $or: [{ consultationId: { $exists: false } }, { consultationId: null }],
     }).lean();
 
     const calls = await Promise.all(

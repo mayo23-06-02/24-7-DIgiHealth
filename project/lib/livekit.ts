@@ -64,6 +64,25 @@ export async function createLiveKitParticipantToken({
   return token.toJwt();
 }
 
+/**
+ * Who is currently in a room, or `null` if that can't be determined.
+ *
+ * `null` is not "nobody" — it means LiveKit didn't answer, and callers must not
+ * treat it as an empty room. A room that no longer exists answers with an
+ * error, which is also `null`; that case is genuinely empty, but the caller has
+ * cheaper ways to know it than guessing from here.
+ */
+export async function listLiveKitParticipants(
+  roomName: string,
+): Promise<string[] | null> {
+  try {
+    const participants = await getLiveKitRoomService().listParticipants(roomName);
+    return participants.map((p) => p.identity);
+  } catch {
+    return null;
+  }
+}
+
 export async function ensureLiveKitRoom(roomName: string) {
   const roomService = getLiveKitRoomService();
 

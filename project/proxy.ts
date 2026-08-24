@@ -195,7 +195,12 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // Real slot availability (from actual consultations, no fabricated
     // data) for the same public doctor cards — reveals only free/busy
     // times for a given practitionerId+date, no PII.
-    pathname === '/api/bookings/slots'
+    pathname === '/api/bookings/slots' ||
+    // The reference clock. Discloses nothing but the current time, and every
+    // time-gated screen needs it before it can decide what to render — a
+    // consultation lobby that can't reach it falls back to the device clock,
+    // which is the disagreement it exists to prevent.
+    pathname === '/api/time'
   ) {
     return NextResponse.next();
   }

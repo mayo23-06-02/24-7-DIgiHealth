@@ -6,7 +6,6 @@ import { Call } from "@/lib/models/Call";
 import { Message } from "@/lib/models/Message";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
-import { getLiveKitRoomService } from "@/lib/livekit";
 
 import { publishCallSignalTo } from "@/lib/realtime/callSignals";
 function serializeMessage(message: any) {
@@ -84,19 +83,16 @@ export async function POST(req: Request) {
         }
     }
 
-    // End the call: tear down the LiveKit room now that the other participant has been notified.
-    if (call.livekitRoomName) {
-        try {
-            await getLiveKitRoomService().deleteRoom(call.livekitRoomName);
-            apiLogger.info(scope, "room_deleted", { callId, roomName: call.livekitRoomName });
-        } catch (error) {
-            apiLogger.warn(scope, "room_delete_failed", {
-                callId,
-                roomName: call.livekitRoomName,
-                error: error instanceof Error ? error.message : "Unknown error",
-            });
-        }
-    }
+    /*
+     * The room is deliberately left alone.
+     *
+     * Deleting it here used to disconnect whoever was inside — and because room
+     * names are derived rather than unique per call, "inside" could mean a
+     * different, perfectly healthy call between the same two people. The
+     * `declined` signal below is what closes the caller's panel; LiveKit reaps
+     * the room itself via the `emptyTimeout` set in ensureLiveKitRoom once
+     * nobody is left in it.
+     */
 
     // Clear the ring on both sides immediately. Without this the callee's
     // device keeps ringing until its next poll for a call that is already over.

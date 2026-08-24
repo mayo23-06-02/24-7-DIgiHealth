@@ -4,6 +4,12 @@ import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import { serverNow } from "@/lib/time/serverClock";
+import {
+  isJoinable as isSessionJoinable,
+  sessionStateAt,
+  sessionWindow,
+} from "@/lib/consultations/window";
 import {
   BiVideo,
   BiChat,
@@ -73,14 +79,24 @@ export default function AppointmentCard({
   const [showMenu, setShowMenu] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
-  const now = new Date();
-  const tenMinsBefore = new Date(start.getTime() - 10 * 60000);
   const isAccepted =
     appointment.status === "scheduled" ||
     appointment.status === "in_progress" ||
     appointment.status === "ongoing";
-  const isJoinable = isAccepted && now >= tenMinsBefore && now <= end;
-  const joinLabel = now < start ? "Enter Lobby" : "Join Room";
+
+  /*
+   * Offer the button exactly while the server would hand out a token.
+   *
+   * These used to be two independent opinions about when a consultation is
+   * reachable — the card's own ±10-minutes-to-scheduled-end, and the session
+   * window — so the button could appear before the room existed and vanish
+   * during the grace period while the consultation was still running. Sharing
+   * the window means the control and the destination cannot disagree.
+   */
+  const now = serverNow();
+  const sessionState = sessionStateAt(now, sessionWindow(start, end));
+  const isJoinable = isAccepted && isSessionJoinable(sessionState);
+  const joinLabel = sessionState === "live" ? "Join Room" : "Enter Lobby";
 
   const isRecipient = appointment.requestedTo
     ? (userType === "patient" && appointment.requestedTo === appointment.patientId) ||

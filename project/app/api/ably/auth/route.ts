@@ -4,7 +4,8 @@ import type { capabilityOp } from 'ably';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { connectToDatabase } from '@/lib/mongodb';
 import Conversation from '@/lib/models/Conversation';
-import { getUserCallChannel } from '@/config/ably-config';
+import Consultation from '@/lib/models/Consultation';
+import { getConsultationChannel, getUserCallChannel } from '@/config/ably-config';
 
 export async function GET(req: NextRequest) {
   return handleAuth(req);
@@ -69,6 +70,33 @@ async function handleAuth(_req: NextRequest) {
         'publish',
         'presence',
         'history',
+      ];
+    }
+
+    /*
+     * Presence channels for this user's consultations around today.
+     *
+     * Scoped to a day either side rather than granted wholesale: the capability
+     * is a list, and a practitioner with years of history would otherwise carry
+     * thousands of entries in every token. A day covers the lobby, the session
+     * and any rejoin, and the hourly re-issue picks up tomorrow's.
+     */
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const consultations = await Consultation.find({
+      $or: [{ patientId: user.userId }, { practitionerId: user.userId }],
+      scheduledStartTime: {
+        $gte: new Date(Date.now() - DAY_MS),
+        $lte: new Date(Date.now() + DAY_MS),
+      },
+    })
+      .select('_id')
+      .lean();
+
+    for (const c of consultations) {
+      // Presence only — no publish, no history. Nothing clinical travels here.
+      capability[getConsultationChannel(String((c as { _id: unknown })._id))] = [
+        'subscribe',
+        'presence',
       ];
     }
 

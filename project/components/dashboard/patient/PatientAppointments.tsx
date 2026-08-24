@@ -162,14 +162,11 @@ export default function PatientAppointments() {
   }, [appointments]);
 
   // Actions
-  const handleJoin = async (id: string) => {
+  const handleJoin = (id: string) => {
     const appt = appointments.find((a) => a.id === id);
-    if (!appt || !appt.practitionerId) return;
-    await goToAppointmentRoom({
+    if (!appt) return;
+    goToAppointmentRoom({
       appointmentId: id,
-      scheduledStart: appt.scheduledStart,
-      contactId: appt.practitionerId,
-      contactName: appt.practitionerName,
       contactAvatar: appt.practitionerAvatar,
       role: "patient",
       router,

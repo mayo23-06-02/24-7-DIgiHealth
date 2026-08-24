@@ -13,7 +13,9 @@ export default function CallNotification() {
    * ring is for someone who is somewhere else in the app and would otherwise
    * miss it.
    */
-  const inLobby = !!pathname && pathname.includes("/lobby/");
+  const inLobby =
+    !!pathname &&
+    (pathname.includes("/consult/") || pathname.includes("/lobby/"));
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [audioReady, setAudioReady] = useState(false);

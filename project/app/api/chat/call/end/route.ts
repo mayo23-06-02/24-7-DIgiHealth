@@ -1,116 +1,70 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import { Conversation } from "@/lib/models/Conversation";
 import { Call } from "@/lib/models/Call";
-import { Message } from "@/lib/models/Message";
-import Consultation from "@/lib/models/Consultation";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
-import { getLiveKitRoomService } from "@/lib/livekit";
+import { listLiveKitParticipants } from "@/lib/livekit";
+import { finalizeCall } from "@/lib/consultations/finalizeSession";
 
-import { publishCallSignalTo } from "@/lib/realtime/callSignals";
+/**
+ * One participant is leaving.
+ *
+ * The old behaviour was to end the call and delete the room the moment anybody
+ * hung up, which is why one person leaving dropped everyone. Leaving is now
+ * just leaving: the session is only closed out once the room is actually empty.
+ * That is what makes a mid-call reconnect possible — the other party's dropped
+ * connection no longer takes the consultation down with it.
+ */
 export async function POST(req: Request) {
   const scope = "api/chat/call/end";
   try {
+    const currentUser = await getRequestUser();
+    if (!currentUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     await connectToDatabase();
     const { callId } = await req.json();
-    apiLogger.info(scope, "request", { callId });
+    apiLogger.info(scope, "request", { callId, userId: currentUser.userId });
 
     const call = await Call.findById(callId);
     if (!call) {
       apiLogger.warn(scope, "call_not_found", { callId });
       return NextResponse.json({ error: "Call not found" }, { status: 404 });
     }
-    if (call.status === "ended" || call.status === "declined") {
+    if (call.status !== "active") {
       apiLogger.info(scope, "already_inactive", { callId, status: call.status });
       return NextResponse.json({ success: true, message: `Already ${call.status}` });
     }
 
-    const endedAt = new Date();
-    const durationSeconds = Math.floor(
-      (endedAt.getTime() - call.startedAt.getTime()) / 1000,
-    );
+    /*
+     * Is anyone left?
+     *
+     * The caller disconnects only after this request resolves, so they are
+     * still listed — discount their own identity. A null answer means LiveKit
+     * didn't respond, and an unknown room is not an empty one: err towards
+     * leaving the session open, since a wrongly-closed consultation is worse
+     * than one that lingers until its window expires.
+     */
+    const myIdentity = `${currentUser.role}:${currentUser.userId}`;
+    const identities = call.livekitRoomName
+      ? await listLiveKitParticipants(call.livekitRoomName)
+      : [];
+    const othersRemain =
+      identities === null
+        ? true
+        : identities.some((id) => id !== myIdentity);
 
-    call.endedAt = endedAt;
-    call.durationSeconds = durationSeconds;
-    call.status = "ended";
-    await call.save();
-    apiLogger.info(scope, "call_ended", {
-      callId,
-      durationSeconds,
-    });
-
-    const conversation = await Conversation.findById(call.conversationId);
-    if (conversation) {
-      const minutesToAdd = Math.ceil(durationSeconds / 60);
-      conversation.minutesUsed += minutesToAdd;
-      await conversation.save();
-      apiLogger.info(scope, "conversation_minutes_updated", {
+    if (othersRemain) {
+      apiLogger.info(scope, "participant_left_session_continues", {
         callId,
-        conversationId: conversation._id.toString(),
-        minutesAdded: minutesToAdd,
+        userId: currentUser.userId,
       });
-
-      // Create call log message
-      const receiverId = conversation.patientId.toString() === call.initiatedBy.toString() 
-        ? conversation.practitionerId 
-        : conversation.patientId;
-
-      let callStatusMsg = "";
-      if (durationSeconds < 2) {
-         callStatusMsg = "Call missed";
-      } else {
-         const m = Math.floor(durationSeconds / 60);
-         const s = durationSeconds % 60;
-         const durStr = m > 0 ? `${m}m ${s}s` : `${s}s`;
-         callStatusMsg = `${call.type === 'video' ? 'Video' : 'Voice'} call ended • ${durStr}`;
-      }
-
-      await Message.create({
-        conversationId: conversation._id,
-        senderId: call.initiatedBy,
-        receiverId,
-        type: "call_log",
-        content: callStatusMsg,
-      });
+      return NextResponse.json({ success: true, left: true, ended: false });
     }
 
-    if (call.consultationId) {
-      await Consultation.findByIdAndUpdate(call.consultationId, {
-        $inc: { callMinutesUsed: Math.ceil(durationSeconds / 60) },
-      });
-      apiLogger.info(scope, "consultation_minutes_updated", {
-        callId,
-        consultationId: call.consultationId.toString(),
-      });
-    }
-
-    if (call.livekitRoomName) {
-      try {
-        await getLiveKitRoomService().deleteRoom(call.livekitRoomName);
-        apiLogger.info(scope, "room_deleted", {
-          callId,
-          roomName: call.livekitRoomName,
-        });
-      } catch (error) {
-        apiLogger.warn(scope, "room_delete_failed", {
-          callId,
-          roomName: call.livekitRoomName,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
-    }
-
-    // Clear the ring on both sides immediately. Without this the callee's
-    // device keeps ringing until its next poll for a call that is already over.
-    await publishCallSignalTo(
-      [
-        conversation ? String(conversation.patientId) : null,
-        conversation ? String(conversation.practitionerId) : null,
-      ],
-      { kind: "ended", callId: String(callId) },
-    );
-
-    return NextResponse.json({ success: true });
+    const { finalized, durationSeconds } = await finalizeCall(scope, call, "hangup");
+    return NextResponse.json({ success: true, ended: finalized, durationSeconds });
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Failed to end call";

@@ -82,6 +82,17 @@ export function getUserCallChannel(userId: string): string {
 }
 
 /**
+ * Presence channel for one scheduled consultation.
+ *
+ * Carries no clinical content — only "somebody with this id is waiting" — which
+ * is what lets the lobby answer "has the other person arrived?" without either
+ * party having to join the room to find out.
+ */
+export function getConsultationChannel(consultationId: string): string {
+  return `consultation:${consultationId}`;
+}
+
+/**
  * Check if we should use Ably or fallback to Socket.IO
  */
 export function shouldUseAbly(): boolean {

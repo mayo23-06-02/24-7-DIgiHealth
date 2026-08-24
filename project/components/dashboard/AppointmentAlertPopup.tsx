@@ -36,15 +36,14 @@ export default function AppointmentAlertPopup() {
     hour: "2-digit",
     minute: "2-digit",
   });
+  /** Threshold 0 means the session is already running, not that it is imminent. */
+  const underway = activeAlert.threshold === 0;
 
-  const handleWaitInLobby = async () => {
+  const handleWaitInLobby = () => {
     const alert = activeAlert;
     dismissAlert();
-    await goToAppointmentRoom({
+    goToAppointmentRoom({
       appointmentId: alert.appointmentId,
-      scheduledStart: alert.scheduledStart,
-      contactId: alert.contactId,
-      contactName: alert.contactName,
       contactAvatar: alert.contactAvatar,
       role,
       router,
@@ -61,13 +60,13 @@ export default function AppointmentAlertPopup() {
         />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold tracking-wider text-primary uppercase">
-            Upcoming appointment
+            {underway ? "Consultation under way" : "Upcoming appointment"}
           </p>
           <p className="truncate text-sm font-semibold text-slate-800">
             {activeAlert.contactName}
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
-            Starts at {startTimeStr}
+            {underway ? `Started at ${startTimeStr}` : `Starts at ${startTimeStr}`}
           </p>
         </div>
         <button
@@ -81,7 +80,7 @@ export default function AppointmentAlertPopup() {
       <div className="mt-3 flex items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-lg py-2">
         <BiTime size={14} className="text-primary" />
         <span className="text-lg font-bold tabular-nums text-slate-800">
-          {formatCountdown(msLeft)}
+          {underway ? "Waiting for you" : formatCountdown(msLeft)}
         </span>
       </div>
 
@@ -96,7 +95,7 @@ export default function AppointmentAlertPopup() {
           onClick={handleWaitInLobby}
           className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
         >
-          Wait in Lobby
+          {underway ? "Join now" : "Wait in Lobby"}
         </button>
       </div>
     </div>

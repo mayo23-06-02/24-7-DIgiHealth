@@ -96,7 +96,7 @@ export async function sendDueAppointmentReminders(options?: {
             otherPartyName: `Dr. ${practitioner.firstName} ${practitioner.lastName}`,
             scheduledStartTime: start,
             consultationType: c.type,
-            joinUrl: `${APP_URL}/patient/lobby/${c._id}`,
+            joinUrl: `${APP_URL}/patient/consult/${c._id}`,
           }),
         });
         const practitionerEmail = sendEmail({
@@ -107,7 +107,7 @@ export async function sendDueAppointmentReminders(options?: {
             otherPartyName: `${patient.firstName} ${patient.lastName}`,
             scheduledStartTime: start,
             consultationType: c.type,
-            joinUrl: `${APP_URL}/practitioner/lobby/${c._id}`,
+            joinUrl: `${APP_URL}/practitioner/consult/${c._id}`,
           }),
         });
         await Promise.all([patientEmail, practitionerEmail]);
