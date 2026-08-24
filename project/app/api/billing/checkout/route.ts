@@ -14,6 +14,8 @@ import {
 import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { signSessionToken, setSessionCookie } from "@/lib/auth/sessionToken";
 import { apiError } from "@/lib/api/errors";
+import { sendEmail } from "@/lib/email/emailjs";
+import { paymentReceiptEmailHtml } from "@/lib/email/templates/paymentReceipt";
 
 /**
  * GET /api/billing/checkout — what the checkout page needs to render.
@@ -147,7 +149,7 @@ export async function POST(request: Request) {
     // Recorded so the purchase shows in billing history. The previous
     // upgrade path wrote no transaction at all, so a paid plan left no trace
     // on the billing page.
-    await PaymentTransaction.create({
+    const txn = await PaymentTransaction.create({
       patientKey: key,
       ...(isMongoObjectId(key) ? { patientId: key } : {}),
       amount: plan.price,
@@ -160,10 +162,41 @@ export async function POST(request: Request) {
       timestamp: now,
     });
 
+    // Receipt email. Deliberately not awaited into the failure path: the money
+    // has been taken and the plan is active, so a mail outage must not turn a
+    // successful payment into an error the user sees. Failures are logged and
+    // the receipt remains downloadable from Billing regardless.
+    if (user.email) {
+      const appUrl = (
+        process.env.NEXT_PUBLIC_APP_URL ||
+        "https://24-7-d-igi-health.vercel.app"
+      ).replace(/\/$/, "");
+      sendEmail({
+        to: user.email,
+        subject: `Your ${plan.label} plan is active — receipt ${payment.reference}`,
+        html: paymentReceiptEmailHtml({
+          recipientName: user.firstName,
+          planLabel: plan.label,
+          amount: plan.price,
+          reference: payment.reference,
+          paidOn: now,
+          nextBillingDate,
+          methodLabel:
+            method === "card"
+              ? `${payment.brand} ending ${payment.last4}`
+              : `Debit order — ${payment.brand} ending ${payment.last4}`,
+          billingUrl: `${appUrl}/patient/billing`,
+        }),
+      }).catch((err) =>
+        console.error("[checkout] receipt email failed", err),
+      );
+    }
+
     const response = NextResponse.json({
       success: true,
       data: {
         tier,
+        transactionId: String((txn as any)?._id ?? ""),
         price: plan.price,
         reference: payment.reference,
         last4: payment.last4,

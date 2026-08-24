@@ -17,20 +17,30 @@ import { pdfResponse } from "@/lib/pdf/createPdfDocument";
 import { resolveHospitalId } from "@/lib/hospital/resolveHospitalId";
 
 import { apiError } from "@/lib/api/errors";
+import { subscriptionFilter } from "@/lib/billing/entitlement";
+import { getRequestUser } from "@/lib/auth/getRequestUser";
 export const runtime = "nodejs";
 
+/**
+ * Resolve the caller.
+ *
+ * This used to look the session id up with `User.findById`, which returns null
+ * for a Postgres-native account — there is no Mongo user row to find. Every
+ * such patient therefore got 401 from this route and could not download a
+ * receipt or a statement at all. getRequestUser resolves both id shapes, and
+ * the returned object keeps the `_id`/`firstName`/… shape the rest of this
+ * file already reads.
+ */
 async function getAuthUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-  if (!token) return null;
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
-    await connectToDatabase();
-    return (await User.findById(payload.userId).lean()) as any;
-  } catch {
-    return null;
-  }
+  const requestUser = await getRequestUser();
+  if (!requestUser) return null;
+  return {
+    _id: requestUser.userId,
+    role: requestUser.role,
+    email: requestUser.email,
+    firstName: requestUser.firstName,
+    lastName: requestUser.lastName,
+  } as any;
 }
 
 function fmtZAR(n: number) {
@@ -85,7 +95,11 @@ export async function POST(req: NextRequest) {
 
       const role = user.role as string;
       const uid = user._id.toString();
-      const isOwner = txn.patientId?.toString() === uid;
+      // patientKey is checked too: transactions owned by Postgres-native
+      // accounts carry no ObjectId patientId, so matching on that alone gave
+      // those patients a 403 on their own receipt.
+      const isOwner =
+        txn.patientId?.toString() === uid || txn.patientKey === uid;
       const isPract = txn.practitionerId?.toString() === uid;
       const isPlatformAdmin = ["super_admin", "mega_admin", "inspector"].includes(
         role,
@@ -124,11 +138,11 @@ export async function POST(req: NextRequest) {
 
       if (role === "patient") {
         const [transactions, subscription] = await Promise.all([
-          PaymentTransaction.find({ patientId: user._id })
+          PaymentTransaction.find(subscriptionFilter(String(user._id)))
             .sort({ timestamp: -1 })
             .limit(200)
             .lean(),
-          Subscription.findOne({ patientId: user._id })
+          Subscription.findOne(subscriptionFilter(String(user._id)))
             .sort({ createdAt: -1 })
             .lean(),
         ]);

@@ -16,6 +16,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { TIER_COPY } from "@/lib/billing/tierCopy";
+import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 
 type Plan = {
   id: string;
@@ -76,7 +77,13 @@ export default function CheckoutFlow() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
-  const [done, setDone] = useState<{ label: string; last4: string } | null>(null);
+  const [done, setDone] = useState<{
+    label: string;
+    last4: string;
+    transactionId?: string;
+  } | null>(null);
+  const [receiptError, setReceiptError] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -128,12 +135,14 @@ export default function CheckoutFlow() {
       const json = await res.json();
 
       if (res.ok) {
-        setDone({ label: plan?.label ?? "", last4: json.data.last4 });
-        // Full navigation, not a router push: the session cookie was just
-        // re-issued with the plan claim and middleware must read the new one.
-        setTimeout(() => {
-          window.location.href = "/patient";
-        }, 1800);
+        setDone({
+          label: plan?.label ?? "",
+          last4: json.data.last4,
+          transactionId: json.data.transactionId,
+        });
+        // No auto-redirect: it used to bounce to the dashboard after 1.8s,
+        // which pulled the receipt out from under anyone reaching for it.
+        // They leave when they choose to.
         return;
       }
       if (json.fieldErrors) setFieldErrors(json.fieldErrors);
@@ -171,13 +180,44 @@ export default function CheckoutFlow() {
           </h1>
           <p className="text-body text-ink-600">
             {done.label} plan confirmed
-            {done.last4 ? ` — card ending ${done.last4}` : ""}. Taking you to
-            your dashboard…
+            {done.last4 ? ` — ending ${done.last4}` : ""}. We&apos;ve emailed
+            your receipt, and you can download it any time from Billing.
           </p>
-          <div className="mt-6">
+
+          {receiptError && (
+            <Alert status="error" title={receiptError} className="mt-4 text-left" />
+          )}
+
+          <div className="mt-6 space-y-3">
             <Button onClick={() => (window.location.href = "/patient")} fullWidth>
               Go to dashboard
             </Button>
+            {done.transactionId && (
+              <Button
+                variant="outline"
+                fullWidth
+                loading={downloading}
+                onClick={async () => {
+                  setReceiptError("");
+                  setDownloading(true);
+                  try {
+                    await downloadBillingPdf(
+                      { type: "receipt", transactionId: done.transactionId! },
+                      "receipt.pdf",
+                    );
+                  } catch (err) {
+                    setReceiptError(
+                      err instanceof Error
+                        ? err.message
+                        : "Could not download the receipt.",
+                    );
+                  }
+                  setDownloading(false);
+                }}
+              >
+                Download receipt
+              </Button>
+            )}
           </div>
         </Card>
       </div>
