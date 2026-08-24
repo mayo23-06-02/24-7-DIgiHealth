@@ -14,9 +14,9 @@
  * either, so both ids are resolved first and everything is matched against
  * both.
  *
- * Requires SUPABASE_URL + SUPABASE_SECRET_KEY and MONGODB_URI in the
- * environment (or a .env.local holding real values -- a scrubbed file with
- * placeholder values will not work).
+ * Credentials come from --supabase-url / --supabase-key / --mongo-uri, or the
+ * environment, or .env.local. Note that "vercel env pull" returns the two
+ * secrets as [SENSITIVE] placeholders, so the flags are usually the way in.
  */
 
 import fs from "fs";
@@ -42,9 +42,6 @@ function loadEnv() {
 }
 loadEnv();
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-const MONGODB_URI = process.env.MONGODB_URI;
 const MEDIA_BUCKET = process.env.MEDIA_BUCKET || "media";
 
 /* --------------------------------------------------------------- args --- */
@@ -53,9 +50,49 @@ const args = process.argv.slice(2);
 const email = args.find((a) => !a.startsWith("--"));
 const CONFIRM = args.includes("--confirm");
 
-if (!email || !email.includes("@")) {
-  console.error("Usage: node scripts/purge-user-data.mjs <email> [--confirm]");
-  process.exit(1);
+/** Read `--name value` or `--name=value`. */
+function flag(name) {
+  const eq = args.find((a) => a.startsWith(`--${name}=`));
+  if (eq) return eq.slice(name.length + 3);
+  const i = args.indexOf(`--${name}`);
+  return i >= 0 ? args[i + 1] : undefined;
+}
+
+/*
+ * Credentials may come from flags, the environment, or .env.local — in that
+ * order. Flags exist because `vercel env pull` returns the two values this
+ * needs as [SENSITIVE] placeholders, and setting environment variables inline
+ * is awkward on Windows, which is where this actually gets run.
+ */
+const SUPABASE_URL_ARG = flag("supabase-url");
+const SUPABASE_KEY_ARG = flag("supabase-key");
+const MONGO_URI_ARG = flag("mongo-uri");
+
+const USAGE = `
+Purge one account from both databases.
+
+  node scripts/purge-user-data.mjs <email> [options]
+
+Options
+  --confirm              actually delete (without this it is a dry run)
+  --supabase-url <url>   https://<project>.supabase.co
+  --supabase-key <key>   the service_role key (Supabase > Settings > API)
+  --mongo-uri <uri>      MongoDB connection string (Atlas > Connect > Drivers)
+
+Credentials are read from these flags first, then the environment, then
+.env.local. A dry run prints exactly what would be deleted and changes
+nothing; re-run the same command with --confirm to carry it out.
+
+Example (PowerShell, one line):
+  node scripts/purge-user-data.mjs someone@example.com \`
+    --supabase-url "https://abc.supabase.co" \`
+    --supabase-key "eyJ..." \`
+    --mongo-uri "mongodb+srv://..."
+`;
+
+if (!email || !email.includes("@") || args.includes("--help")) {
+  console.error(USAGE);
+  process.exit(email && email.includes("@") ? 0 : 1);
 }
 
 /**
@@ -66,6 +103,15 @@ if (email === "*" || email.startsWith("%")) {
   console.error("Refusing a wildcard. Pass one exact address.");
   process.exit(1);
 }
+
+/** A pulled env file yields this for anything Vercel marks sensitive. */
+const isPlaceholder = (v) => !v || v === "[SENSITIVE]" || v.length < 12;
+
+const SUPABASE_URL =
+  SUPABASE_URL_ARG || process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY =
+  SUPABASE_KEY_ARG || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+const MONGODB_URI = MONGO_URI_ARG || process.env.MONGODB_URI;
 
 const totals = { supabase: 0, mongo: 0, storage: 0 };
 const plan = [];
@@ -139,12 +185,25 @@ async function main() {
   console.log(CONFIRM ? "Mode:    DELETE (irreversible)" : "Mode:    dry run — nothing will be deleted");
   console.log("─".repeat(66));
 
-  if (!SUPABASE_URL || !SUPABASE_KEY || SUPABASE_URL.length < 12) {
+  const badUrl =
+    isPlaceholder(SUPABASE_URL) || !String(SUPABASE_URL).startsWith("http");
+  if (badUrl || isPlaceholder(SUPABASE_KEY)) {
     console.error(
-      "\nSupabase credentials missing or placeholder.\n" +
-        "Pull real values first:  vercel env pull .env.local",
+      "\nMissing Supabase credentials." +
+        "\n\n'vercel env pull' returns these as [SENSITIVE], so take them from the" +
+        "\nSupabase dashboard (Settings > API) and pass them as flags:" +
+        "\n\n  --supabase-url <url>  --supabase-key <service_role key>" +
+        "\n\nRun with --help for full usage.",
     );
     process.exit(1);
+  }
+  if (isPlaceholder(MONGODB_URI)) {
+    // Not fatal: a Postgres-only account can still be cleared. But say so
+    // plainly, because a silent skip would look like a complete purge.
+    console.warn(
+      "!  No usable MONGODB_URI — Mongo will be SKIPPED this run.\n" +
+        "   Pass --mongo-uri to clear both stores.\n",
+    );
   }
 
   /* ---- resolve identities ---- */
@@ -163,7 +222,7 @@ async function main() {
 
   // The Mongo user may exist without a Supabase row at all.
   let mongo = null;
-  if (MONGODB_URI) {
+  if (!isPlaceholder(MONGODB_URI)) {
     const { MongoClient } = await import("mongodb");
     mongo = new MongoClient(MONGODB_URI);
     await mongo.connect();
