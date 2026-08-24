@@ -79,19 +79,26 @@ const Button: React.FC<ButtonProps> = ({
           <Spinner size={18} />
         </span>
       )}
+      {/*
+        Buttons render their label only — icons are deliberately not drawn.
+
+        `icon` and `iconPosition` are still accepted so the ~237 existing call
+        sites keep compiling; they are simply ignored. Dropping the props from
+        every caller instead would be a large mechanical diff for no behavioural
+        gain, and leaving them accepted means a future decision to reinstate
+        icons is a change here rather than everywhere.
+
+        This also removes a real accessibility problem. The label used to carry
+        `hidden sm:inline` whenever an icon was present, so on any screen under
+        640px an icon-bearing button showed the icon alone — with no aria-label
+        anywhere in the codebase to name it. Those controls said nothing to a
+        sighted user or a screen reader. The label now always shows.
+      */}
       <span
         className="inline-flex items-center justify-center gap-2 transition-opacity duration-150"
         style={{ opacity: loading ? 0 : 1 }}
       >
-        {icon && iconPosition === "left" && (
-          <span className="inline-flex shrink-0 [&>svg]:w-[1em] [&>svg]:h-[1em]">{icon}</span>
-        )}
-        <span className={`tracking-wide ${icon ? "hidden sm:inline" : "inline"}`}>
-          {children}
-        </span>
-        {icon && iconPosition === "right" && (
-          <span className="inline-flex shrink-0 [&>svg]:w-[1em] [&>svg]:h-[1em]">{icon}</span>
-        )}
+        <span className="tracking-wide">{children}</span>
       </span>
     </button>
   );
