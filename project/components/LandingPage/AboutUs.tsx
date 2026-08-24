@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import { Heart, Shield, Clock, Users, Sparkles, Globe, User, Stethoscope, MapPin } from "lucide-react";
+import { Heart, Shield, Clock, Users, Globe, User, Stethoscope, MapPin } from "lucide-react";
 
-// Reuse the same counter component from Hero (or you can import it)
+// Reuse the same counter component from Hero (or you can import it).
+// Renders inline so the figure can sit inside a sentence rather than
+// standing alone as a display number.
 function CountUpValue({ value }: { value: string }) {
-  const ref = React.useRef<HTMLParagraphElement>(null);
+  const ref = React.useRef<HTMLSpanElement>(null);
   const hasAnimated = React.useRef(false);
   const match = value.match(/^(\d+(?:\.\d+)?)(.*)$/);
   const [display, setDisplay] = React.useState(match ? `0${match[2]}` : value);
@@ -45,19 +46,35 @@ function CountUpValue({ value }: { value: string }) {
   }, [value]);
 
   return (
-    <p
-      ref={ref}
-      className="text-2xl md:text-4xl lg:text-5xl font-light text-ink-900 font-grotesk tabular-nums"
-    >
+    <span ref={ref} className="tabular-nums">
       {display}
-    </p>
+    </span>
   );
 }
 
+/**
+ * Each figure reads as a claim, with the supporting line underneath — the
+ * number alone doesn't tell a visitor why it matters.
+ */
 const aboutStats = [
-  { icon: User, value: "135K+", label: "Patients Cared For" },
-  { icon: Stethoscope, value: "50+", label: "Verified Specialists" },
-  { icon: MapPin, value: "9", label: "Provinces Covered" },
+  {
+    icon: User,
+    value: "135K+",
+    claim: "patients cared for",
+    detail: "Same-day consultations, from anywhere in the country.",
+  },
+  {
+    icon: Stethoscope,
+    value: "50+",
+    claim: "verified specialists",
+    detail: "Every practitioner is HPCSA-checked before they see a patient.",
+  },
+  {
+    icon: MapPin,
+    value: "9",
+    claim: "provinces covered",
+    detail: "All nine, with multi-language support and upfront pricing.",
+  },
 ];
 
 const values = [
@@ -108,8 +125,23 @@ export default function AboutUs() {
           </p>
         </div>
 
-        {/* Stats Row – matches hero style with animated counters */}
-      
+        {/* Stats row — icon and figure inline on one line, supporting copy
+            beneath. Stacks on mobile so the three claims never crowd. */}
+        <div className="mb-16 grid grid-cols-1 gap-10 sm:gap-8 md:grid-cols-3">
+          {aboutStats.map(({ icon: Icon, value, claim, detail }) => (
+            <div key={claim} className="text-center px-2">
+              <p className="flex items-center justify-center gap-2 text-base md:text-lg font-semibold text-ink-900 font-grotesk">
+                <Icon className="w-[1.15em] h-[1.15em] shrink-0" strokeWidth={1.75} />
+                <span>
+                  <CountUpValue value={value} /> {claim}
+                </span>
+              </p>
+              <p className="mt-1.5 text-sm text-ink-600 leading-relaxed">
+                {detail}
+              </p>
+            </div>
+          ))}
+        </div>
 
         {/* Values Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -91,7 +91,7 @@ function CountUpValue({ value }: { value: string }) {
           if (!entry.isIntersecting || hasAnimated.current) return;
           hasAnimated.current = true;
 
-          const duration = 2500;
+          const duration = 4500;
           const start = performance.now();
           const tick = (now: number) => {
             const progress = Math.min((now - start) / duration, 1);
@@ -435,7 +435,7 @@ export default function Hero() {
 
           <h1 className="font-grotesk tracking-tight text-ink-900">
             {/* Fixed line — never changes, so it stays perfectly still. */}
-            <span className="block text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.05]">
+            <span className="block text-3xl md:text-5xl lg:text-6xl font-semibold leading-[1.05]">
               Choose DigiHealth
             </span>
 
