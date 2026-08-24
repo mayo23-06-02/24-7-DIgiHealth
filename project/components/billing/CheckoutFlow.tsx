@@ -540,7 +540,7 @@ export default function CheckoutFlow() {
 
               <div className="mt-5 space-y-3">
                 <Button type="submit" fullWidth loading={paying}>
-                  Pay R{plan?.price ?? 0} &amp; activate
+                  {`Pay R${plan?.price ?? 0} and activate`}
                 </Button>
                 <Button
                   type="button"
