@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { SignJWT } from "jose";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { normalizeEmail } from "@/lib/supabase/auth";
@@ -76,18 +75,10 @@ export async function POST(req: NextRequest) {
       otp_expires_at: null,
     });
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const token = await new SignJWT({
-      userId: user._id.toString(),
-      role: user.role,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("24h")
-      .sign(secret);
-
+    // Verifying an address confirms the mailbox; it is not an authentication.
+    // This used to mint a session and sign the user straight in, so anyone
+    // holding the emailed code got an authenticated session without ever
+    // presenting the password. They now go to the sign-in screen instead.
     const response = NextResponse.json({
       success: true,
       user: {
@@ -96,14 +87,6 @@ export async function POST(req: NextRequest) {
         email: user.email,
         firstName: user.firstName,
       },
-    });
-
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 86400,
     });
 
     return response;

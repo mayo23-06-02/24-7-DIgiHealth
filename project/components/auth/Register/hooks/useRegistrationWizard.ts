@@ -274,7 +274,10 @@ export function useRegistrationWizard(role: string) {
         .trim()
         .toLowerCase();
       // Account created — confirm email ownership with a 6-digit code next
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      // sent=1: registration has already issued a code. Without it the verify
+      // page sends a second one, which overwrites the first — two emails, and
+      // only the later code works.
+      router.push(`/verify-email?email=${encodeURIComponent(email)}&sent=1`);
     } catch (err: any) {
       setGlobalError(err.message ?? "Submission failed. Please try again.");
       setSubmitting(false);

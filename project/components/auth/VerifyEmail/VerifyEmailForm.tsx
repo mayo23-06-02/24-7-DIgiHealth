@@ -17,6 +17,8 @@ export default function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialEmail = (searchParams?.get("email") || "").trim().toLowerCase();
+  /** Registration sets this to say a code has already been issued. */
+  const alreadySent = searchParams?.get("sent") === "1";
 
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState("");
@@ -33,14 +35,34 @@ export default function VerifyEmailForm() {
     if (initialEmail) setEmail(initialEmail);
   }, [initialEmail]);
 
-  // Auto-send a code when arriving fresh from registration
+  /**
+   * Send a code on arrival — unless one was just issued.
+   *
+   * Registration already issues a code as part of creating the account, and
+   * issuing a new one overwrites the stored hash. Auto-sending here as well
+   * meant every new user received two emails and only the second worked, since
+   * the first had been invalidated the moment the second was written.
+   *
+   * Registration now arrives with ?sent=1 to say a code is already in flight.
+   * Other entry points (an unverified login attempt, a bookmarked link) carry
+   * no flag and still get one automatically.
+   */
   useEffect(() => {
     if (!initialEmail || !initialEmail.includes("@")) return;
     if (hasAutoSent.current) return;
     hasAutoSent.current = true;
+
+    if (alreadySent) {
+      setCodeSent(true);
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+      setInfo(
+        `We sent a 6-digit code to ${initialEmail}. Enter it below to activate your account.`,
+      );
+      return;
+    }
     void sendCode(initialEmail, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialEmail]);
+  }, [initialEmail, alreadySent]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -101,8 +123,13 @@ export default function VerifyEmailForm() {
         return;
       }
       if (!res.ok) throw new Error(data.error || "Verification failed");
-      // Verified + logged in (cookie set by the API) — go straight to their dashboard
-      router.push(`/${data.user.role}`);
+      // Verified, not signed in. Confirming an email proves the mailbox, not
+      // the password, so the account holder signs in themselves. The address
+      // is carried across so the login form arrives prefilled.
+      setInfo("Email verified. Sign in to continue.");
+      router.push(
+        `/login?verified=true&email=${encodeURIComponent(data.user?.email || email)}`,
+      );
     } catch (err: any) {
       setError(err?.message || "Verification failed");
     } finally {
