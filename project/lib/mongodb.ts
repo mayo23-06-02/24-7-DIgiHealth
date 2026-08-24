@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { after } from 'next/server';
 import { installObjectIdGuard } from '@/lib/db/objectIdGuard';
 import { runPendingMigrations } from '@/lib/migrations';
 
@@ -49,8 +50,20 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
    * be first through the door should not wait on it — or fail with it. The
    * runner swallows its own errors and claims its work in the database, so
    * this stays safe to fire from every instance that starts up.
+   *
+   * Handed to `after` rather than simply floated, because a floated promise on
+   * a serverless platform is only as alive as the invocation that started it:
+   * the instance may be frozen the moment the response is sent, suspending the
+   * migration mid-flight and leaving its claim row saying "running" until the
+   * lease expires. `after` keeps the invocation open until the work finishes.
+   * Outside a request — scripts, seeds, tests — it throws, and floating it is
+   * then exactly right.
    */
-  void runPendingMigrations();
+  try {
+    after(() => runPendingMigrations());
+  } catch {
+    void runPendingMigrations();
+  }
 
   return cached.conn;
 }
