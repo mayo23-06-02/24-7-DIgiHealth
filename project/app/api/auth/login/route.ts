@@ -5,8 +5,6 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 import { getEntitlement } from "@/lib/billing/entitlement";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
-import { updateUserByMongoId } from "@/lib/postgres/users";
 
 /**
  * A real bcrypt digest that no supplied password can match. Compared against
@@ -37,10 +35,48 @@ interface LoginUser {
 }
 
 /**
- * Migration note (Phase 3): reads from Postgres first, falling back to
- * Mongo for any account not yet synced there.
+ * Resolve the account to authenticate against.
+ *
+ * **Mongo is the single source of truth for credentials.** Every auth write —
+ * registration, password reset, OTP issue and verify — writes Mongo first and
+ * mirrors to Postgres afterwards on a best-effort basis. So Mongo is always at
+ * least as fresh, and reading it first means a mirror that failed to update
+ * cannot change the outcome of a login.
+ *
+ * This used to read Postgres first, which made the mirror authoritative for
+ * exactly the fields it was least reliable about. Two lockouts came from it:
+ * a stale password_hash rejected the correct password, and a stale
+ * email_verified sent a verified user to the verify-email page — where
+ * /api/auth/otp/send, which reads Mongo, refused to issue a code because the
+ * address was already verified. No way out of that loop from the UI.
+ *
+ * Postgres remains the fallback for accounts that exist only there (seeded by
+ * scripts/seed-supabase.ts), which have no Mongo row to find.
  */
 async function findLoginUser(identifier: string): Promise<LoginUser | null> {
+  await connectToDatabase();
+  const mongoUser = await User.findOne({
+    $or: [{ email: identifier }, { saId: identifier }],
+  });
+
+  if (mongoUser) {
+    return {
+      identityId: mongoUser._id.toString(),
+      email: mongoUser.email,
+      passwordHash: mongoUser.passwordHash,
+      role: mongoUser.role,
+      status: mongoUser.status,
+      firstName: mongoUser.firstName,
+      lastName: mongoUser.lastName,
+      emailVerified: mongoUser.emailVerified,
+    };
+  }
+
+  return findPostgresOnlyUser(identifier);
+}
+
+/** Accounts with no Mongo row at all — seeded straight into Postgres. */
+async function findPostgresOnlyUser(identifier: string): Promise<LoginUser | null> {
   // Two separate parameterized .eq() lookups rather than a single .or()
   // filter string — PostgREST's .or() syntax interpolates the raw string,
   // so passing user input straight into it (commas/periods/parens are
@@ -117,25 +153,12 @@ async function findLoginUser(identifier: string): Promise<LoginUser | null> {
     };
   }
   if (error) {
-    console.warn("[login] Postgres lookup failed, falling back to Mongo:", error.message);
+    console.warn("[login] Postgres lookup failed:", error.message);
   }
 
-  await connectToDatabase();
-  const user = await User.findOne({
-    $or: [{ email: identifier }, { saId: identifier }],
-  });
-  if (!user) return null;
-
-  return {
-    identityId: user._id.toString(),
-    email: user.email,
-    passwordHash: user.passwordHash,
-    role: user.role,
-    status: user.status,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    emailVerified: user.emailVerified,
-  };
+  // No Mongo retry here — the caller has already looked there, and this is
+  // only reached when that found nothing.
+  return null;
 }
 
 /**
@@ -169,55 +192,13 @@ export async function POST(request: Request) {
     // Always run a bcrypt compare, even with no user/hash, so the response time
     // doesn't leak existence either. DUMMY_HASH is a valid bcrypt digest of a
     // value nothing can match.
-    let isMatch = await bcrypt.compare(
+    const isMatch = await bcrypt.compare(
       password,
       usablePasswordHash ?? DUMMY_HASH,
     );
 
-    /*
-     * Second chance against Mongo, which is still the source of truth for
-     * credentials during the migration.
-     *
-     * The Postgres row can hold a stale hash: syncUser upserts on `mongo_id`,
-     * and when a row already existed for the address under a different link
-     * the write collided on the unique email and was swallowed as best-effort.
-     * Login reads Postgres first and never looked further, so those accounts
-     * were locked out with the correct password — and a reset could not repair
-     * them either, because that also keyed on the missing link.
-     *
-     * Only reached after the Postgres comparison has already failed, so a
-     * correct password is never rejected on a stale mirror. On success the
-     * mirror is repaired so this path is not needed again.
-     */
-    if (user && !isMatch && isMongoObjectId(user.identityId)) {
-      await connectToDatabase();
-      const mongoUser = await User.findById(user.identityId).select(
-        "passwordHash email",
-      );
-      const mongoHash = (mongoUser as any)?.passwordHash;
-      if (
-        mongoHash &&
-        mongoHash !== usablePasswordHash &&
-        !String(mongoHash).startsWith("otp_only:") &&
-        (await bcrypt.compare(password, mongoHash))
-      ) {
-        isMatch = true;
-        console.warn(
-          "[login] Postgres password hash was stale; repairing from Mongo",
-          { email: user.email },
-        );
-        await updateUserByMongoId(
-          user.identityId,
-          { password_hash: mongoHash },
-          user.email,
-        );
-      }
-    }
-
-    // Gated on isMatch alone: a Postgres row with no hash at all still has to
-    // be able to succeed via the Mongo fallback above. isMatch can only be
-    // true if a real stored hash verified — an absent hash compares against
-    // DUMMY_HASH and always fails.
+    // isMatch can only be true when a real stored hash verified — an absent or
+    // otp_only hash is compared against DUMMY_HASH, which nothing matches.
     if (!user || !isMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -231,6 +212,7 @@ export async function POST(request: Request) {
         { status: 403 },
       );
     }
+
 
     if (!user.emailVerified) {
       return NextResponse.json(
