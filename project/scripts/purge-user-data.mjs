@@ -204,6 +204,7 @@ async function main() {
   }
 
   const mongoHits = [];
+  const emailHits = [];
   if (mongo) {
     const db = mongo.db();
     const collections = await db.listCollections().toArray();
@@ -211,6 +212,11 @@ async function main() {
       "userId", "patientId", "practitionerId", "guardianId", "memberId",
       "uploadedBy", "createdBy", "senderId", "recipientId", "initiatedBy",
       "requestedBy", "requestedTo", "reviewedBy",
+      // Plain-string owner keys. Rows belonging to a Postgres-native account
+      // carry only these — the ObjectId-typed columns above are left unset for
+      // them, so an id-only sweep would walk straight past a subscription,
+      // its payment transactions, and any family link.
+      "patientKey", "guardianKey", "memberKey",
     ];
     const { ObjectId } = await import("mongodb");
     const candidates = [...ids].flatMap((id) =>
@@ -227,6 +233,24 @@ async function main() {
         }
       }
     }
+    /*
+     * Some rows reference a person by address rather than by id — a family
+     * invite sent before the invitee ever had an account is the common case.
+     * An id-only sweep leaves those behind, and the address then looks
+     * "already invited" on a fresh run.
+     */
+    const EMAIL_FIELDS = ["email", "inviteEmail", "recipientEmail", "to"];
+    for (const { name } of collections) {
+      if (name === "users") continue;
+      for (const field of EMAIL_FIELDS) {
+        const n = await db.collection(name).countDocuments({ [field]: email });
+        if (n) {
+          emailHits.push({ name, field, n });
+          note("mongo", `${name}.${field} (by address)`, n);
+        }
+      }
+    }
+
     const userDocs = await db.collection("users").countDocuments({ email });
     if (userDocs) note("mongo", "users (the account itself)", userDocs);
   }
@@ -282,6 +306,11 @@ async function main() {
       const r = await db.collection(name).deleteMany({ [field]: { $in: candidates } });
       console.log(`✓ mongo ${name}.${field} (${r.deletedCount})`);
     }
+    for (const { name, field } of emailHits) {
+      const r = await db.collection(name).deleteMany({ [field]: email });
+      console.log(`✓ mongo ${name}.${field} by address (${r.deletedCount})`);
+    }
+
     const r = await db.collection("users").deleteMany({ email });
     console.log(`✓ mongo users (${r.deletedCount})`);
   }
