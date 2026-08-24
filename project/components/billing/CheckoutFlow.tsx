@@ -37,7 +37,11 @@ export default function CheckoutFlow() {
         if (cancelled) return;
         if (json?.data?.plans) {
           setPlans(json.data.plans);
-          setSelected(json.data.plans[0]?.id ?? null);
+          // Billing's "Upgrade Plan" links here with ?tier=, so the plan the
+          // user picked there is already selected when they arrive.
+          const wanted = new URLSearchParams(window.location.search).get("tier");
+          const preselect = json.data.plans.find((p: Plan) => p.id === wanted);
+          setSelected(preselect?.id ?? json.data.plans[0]?.id ?? null);
         }
         // Someone who already holds a plan has no business on this page —
         // send them on rather than inviting a second payment.

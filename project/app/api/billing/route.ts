@@ -397,34 +397,31 @@ export async function PATCH(request: Request) {
     }
 
     // Upgrade subscription
+    //
+    // This used to activate the requested tier outright — no card, no charge.
+    // Harmless while nothing depended on holding a plan; a complete bypass of
+    // the paywall once access did. Verified against production: an account
+    // with no plan went to family_plus, status active, price 1000, by posting
+    // this action alone.
+    //
+    // Changing plan now goes through POST /api/billing/checkout, which is the
+    // only path that takes payment. Kept as an explicit refusal rather than
+    // deleted so any caller still using it gets told where to go instead of a
+    // bare "Unknown action".
     if (body.action === "upgrade_subscription") {
       const requestedTier: string = body.tier;
       if (!isValidTier(requestedTier)) {
         return NextResponse.json({ error: "Unknown subscription tier" }, { status: 400 });
       }
-      const price = TIER_CONFIG[requestedTier].price;
-      const sub = await Subscription.findOneAndUpdate(
-        subscriptionFilter(String(user._id)),
+      return NextResponse.json(
         {
-          patientKey: String(user._id),
-          ...(isMongoObjectId(user._id) ? { patientId: user._id } : {}),
-          tier: requestedTier,
-          status: "active",
-          price,
-          autoRenew: true,
-          nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          error: "Plan changes go through checkout.",
+          checkoutPath: "/patient/checkout",
         },
-        { new: true, upsert: true },
+        { status: 400 },
       );
-      await BillingAuditLog.create({
-        actorId: user._id,
-        actionType: "SUBSCRIPTION_UPGRADED",
-        targetId: sub._id,
-        targetModel: "Subscription",
-        details: { tier: body.tier, price },
-      });
-      return NextResponse.json({ success: true, subscription: sub });
     }
+
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (err: any) {

@@ -384,45 +384,12 @@ export default function BillingTab({
   };
 
   const handleUpgrade = async (tierId: string) => {
-    setActionLoading(true);
-    try {
-      const tier = TIERS.find((t) => t.id === tierId);
-      const res = await fetch("/api/billing", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "upgrade_subscription", tier: tierId }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setToast({
-          message: `Switched to ${tier?.label} plan successfully.`,
-          type: "success",
-        });
-        setBillingData((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                subscription: {
-                  ...prev.subscription,
-                  tier: tierId,
-                  price: tier?.price ?? 0,
-                  status: "active",
-                },
-              }
-            : prev,
-        );
-        setUpgradeModal(false);
-      } else {
-        setToast({
-          message: data.error || "Failed to change plan.",
-          type: "error",
-        });
-      }
-    } catch {
-      setToast({ message: "Network error.", type: "error" });
-    }
-    setActionLoading(false);
+    // Checkout is the only path that takes payment. This button used to PATCH
+    // the subscription straight to the chosen tier, which activated a plan
+    // without charging for it — free access to any tier, gate included.
+    window.location.href = `/patient/checkout?tier=${encodeURIComponent(tierId)}`;
   };
+
 
   return (
     <div className="space-y-8 animate-in slide-in-from-left-4 duration-500">
