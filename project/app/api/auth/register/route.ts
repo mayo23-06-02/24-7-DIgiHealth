@@ -139,10 +139,14 @@ export async function POST(request: Request) {
         userId: newUser._id,
         dateOfBirth: formData.dob ? new Date(formData.dob) : new Date(),
         gender: formData.gender?.toLowerCase() || "other",
+        // Left undefined rather than filled with "N/A". A placeholder string is
+        // truthy, so every downstream "is there a contact?" check passed and
+        // clinicians were shown an Emergency Line card reading N/A — which in a
+        // clinical sidebar looks like a number that could be called.
         emergencyContact: {
-          name: formData.emergencyName || "N/A",
-          phone: formData.emergencyPhone || "N/A",
-          relationship: "N/A",
+          name: formData.emergencyName || undefined,
+          phone: formData.emergencyPhone || undefined,
+          relationship: formData.emergencyRelationship || undefined,
         },
         popiaConsentDate: new Date(),
         subscriptionTier: "pro",

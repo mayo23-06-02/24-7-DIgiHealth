@@ -16,6 +16,7 @@ import {
   BiUser,
 } from "react-icons/bi";
 import type { PatientProfile } from "./types";
+import { hasEmergencyContact, isPlaceholderValue } from "./emergencyContact";
 
 interface PatientClinicalSidebarProps {
   patient: PatientProfile;
@@ -281,7 +282,8 @@ export default function PatientClinicalSidebar({
         )}
       </Card>
 
-      {(patient.ageRange || (patient.age && patient.age < 18)) && patient.emergencyContact?.name && (
+      {(patient.ageRange || (patient.age && patient.age < 18)) &&
+        hasEmergencyContact(patient.emergencyContact) && (
         <Card className="bg-blue-50/30 border-blue-100">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center">

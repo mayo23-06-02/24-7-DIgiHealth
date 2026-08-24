@@ -14,6 +14,7 @@ import {
   BiTrash,
 } from "react-icons/bi";
 import type { PatientProfile } from "./types";
+import { hasEmergencyContact, isPlaceholderValue } from "./emergencyContact";
 import Card from "@/components/ui/Card";
 
 interface PatientProfileHeaderProps {
@@ -38,6 +39,15 @@ export default function PatientProfileHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Same minor test the age badge above uses — `ageRange` is only set for
+   * accounts registered as a dependent, and the numeric age covers the rest.
+   */
+  const isMinor = !!patient.ageRange || (patient.age ?? age) < 18;
+
+  // Shared with the sidebar so one rule decides what counts as a real contact.
+  const hasGuardianName = hasEmergencyContact(patient.emergencyContact);
+
   useEffect(() => {
     if (!menuOpen) return;
     const onDoc = (e: MouseEvent) => {
@@ -61,7 +71,7 @@ export default function PatientProfileHeader({
                 {patient.fullName}
               </h1>
 
-              {(patient.ageRange || (patient.age ?? age) < 18) && (
+              {isMinor && (
                 <Badge
                   label="Child"
                   status="info"
@@ -111,10 +121,15 @@ export default function PatientProfileHeader({
                 </p>
               </div>
             </div>
-            {patient.emergencyContact && (
+            {/* Guardian only means something for a minor — showing it on an
+                adult's chart implies a legal relationship that isn't there.
+                Registration also defaults this contact to the literal string
+                "N/A", so a placeholder is treated as no guardian rather than
+                rendered as "Guardian: N/A (N/A)". */}
+            {isMinor && hasGuardianName && (
               <p className="text-xs text-slate-400 font-medium mt-0.5">
                 Guardian: {patient.emergencyContact.name}
-                {patient.emergencyContact.relationship && (
+                {!isPlaceholderValue(patient.emergencyContact?.relationship) && (
                   <> ({patient.emergencyContact.relationship})</>
                 )}
               </p>
