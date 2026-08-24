@@ -250,6 +250,7 @@ export function useRegistrationWizard(role: string) {
     updateData,
     restoreDraft,
     clearDraft,
+    stepScrollRef,
     goToNext,
     goToPrevious,
     skipStep,
