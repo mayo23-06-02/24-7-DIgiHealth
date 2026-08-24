@@ -13,9 +13,14 @@
  *   npx tsx scripts/fix-duplicate-active-calls.ts
  *   npx tsx scripts/fix-duplicate-active-calls.ts --dry-run
  */
-import "dotenv/config";
+import * as dotenv from "dotenv";
+import path from "path";
 import mongoose from "mongoose";
 import { Call } from "../lib/models/Call";
+
+// Same convention as the other scripts in here: read .env.local explicitly
+// rather than whatever happens to be in the ambient environment.
+dotenv.config({ path: path.join(__dirname, "../.env.local") });
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -49,7 +54,19 @@ async function collapse(groupField: "conversationId" | "consultationId") {
 
 async function main() {
   const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error("MONGODB_URI is not set");
+  if (!uri) {
+    throw new Error(
+      "MONGODB_URI is not set. Add it to .env.local, or run against the " +
+        "environment that holds the data you mean to clean up.",
+    );
+  }
+  if (!/^mongodb(\+srv)?:\/\//.test(uri)) {
+    throw new Error(
+      `MONGODB_URI does not look like a connection string (got "${uri.slice(0, 24)}…"). ` +
+        "A placeholder value here would silently point the cleanup at the wrong place, " +
+        "so this stops rather than guessing.",
+    );
+  }
   await mongoose.connect(uri);
   console.log(DRY_RUN ? "Dry run — nothing will be written.\n" : "Applying changes.\n");
 
