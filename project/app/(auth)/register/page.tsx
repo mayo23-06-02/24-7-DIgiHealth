@@ -8,34 +8,33 @@ export default function RegisterRoleSelection() {
   const { navigate, isPending, pendingHref } = useNavigate();
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
 
+  /**
+   * Patients only. The professional path was removed from this chooser because
+   * practitioners and facilities are onboarded through direct contact, not
+   * self-serve signup — so offering it here sent patients down a route that
+   * was never meant for them. The /register/professionals route still exists
+   * for anyone who is sent the link directly.
+   */
   const paths = [
     {
       id: "patient",
-      title: "Patient Registration",
-      badge: "01/02",
+      title: "Create your patient account",
       description:
-        "Get Started, access AI telemedicine, and manage your health records in South Africa.",
+        "Book same-day consultations and manage your health records in one place.",
       icon: "👩‍⚕️",
       image:
         "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=2070&auto=format&fit=crop",
       route: "/register/patient",
     },
-    {
-      id: "professionals",
-      title: "Professional Registration",
-      badge: "02/02",
-      description:
-        "For medical practitioners and healthcare facilities to join our network.",
-      icon: "🏥",
-      image:
-        "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=80&w=2070&auto=format&fit=crop",
-      route: "/register/professionals",
-    },
   ];
 
+  // The auth layout already centres this, so no height is set here. From lg up
+  // the card is capped at 85vh and scrolls inside itself if the content ever
+  // exceeds that; on phones it grows naturally and the page scrolls, so
+  // nothing is ever clipped.
   return (
-    <div className="w-full max-w-4xl xl:max-w-5xl mx-auto flex h-screen items-center justify-center">
-      <div className="group ring-1 ring-slate-200/5 custom-scrollbar bg-white border border-slate-200 p-6 md:p-12 pb-5 rounded-lg relative overflow-hidden">
+    <div className="w-full max-w-4xl xl:max-w-5xl mx-auto flex items-center justify-center">
+      <div className="group ring-1 ring-slate-200/5 custom-scrollbar bg-white border border-slate-200 p-6 md:p-8 pb-5 rounded-lg relative w-full lg:max-h-[85vh] lg:overflow-y-auto">
         <div className="flex max-w-5xl mx-auto items-center gap-3">
           <span className="text-secondary text-3xl">+</span>
           <span className="text-secondary tracking-normal text-sm">
@@ -53,15 +52,15 @@ export default function RegisterRoleSelection() {
               <span className="text-primary font-bold">Better Health</span>
             </h2>
             <p className="text-sm text-slate-500 max-w-lg">
-              We simplify modern healthcare by connecting you with top medical
-              professionals. Select your registration path below.
+              We simplify modern healthcare by connecting you with vetted South
+              African doctors. Create your account below to get started.
             </p>
           </div>
 
           <div className="bg-primary hidden md:block rounded-lg p-10 flex flex-col justify-between text-white transform hover:scale-[1.02] duration-500 group">
             <h3 className="font-normal mb-4 font-grotesk">
               We're committed to delivering the highest standard of medical
-              record privacy and triage accuracy.
+              record privacy and clinical care.
             </h3>
             <div className="flex flex-wrap gap-3">
               {["24/7 Connectivity"].map((pill) => (
@@ -88,15 +87,10 @@ export default function RegisterRoleSelection() {
               className={`group border-b border-slate-100 flex items-center pb-2 lg:pb-4 justify-between transition-all duration-500 cursor-pointer relative bg-transparent w-full text-left outline-none ${hoveredPath === path.id ? "px-6 md:px-10 bg-slate-50/50" : ""
                 }`}
             >
+              {/* The "01/02" step counter went with the second path — a
+                  counter reading 01/01 only raises the question of what the
+                  other option was. */}
               <div className="flex items-center gap-6 lg:gap-10">
-                <span
-                  className={`lg:text-base text-sm font-light transition-all duration-500 ${hoveredPath === path.id
-                      ? "text-primary scale-125"
-                      : "text-slate-400"
-                    }`}
-                >
-                  {path.badge}
-                </span>
                 <h3
                   className={`text-base md:text-lg transition-all duration-500 tracking-tight ${hoveredPath === path.id
                       ? "text-primary font-semibold translate-x-3"

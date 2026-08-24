@@ -15,7 +15,9 @@ export default function LoginForm() {
   const login = useLogin();
 
   return (
-    <div className="flex flex-col lg:flex-row lg:min-h-[70vh] w-full max-w-5xl mx-auto rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-700">
+    // Capped at 85vh from lg up to match the register card, so the two auth
+    // screens sit at the same size instead of one being noticeably taller.
+    <div className="flex flex-col lg:flex-row lg:min-h-[70vh] lg:max-h-[85vh] w-full max-w-5xl mx-auto rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-700">
       <div className="flex lg:hidden mb-6 items-center justify-center p-4">
         <LogoMain width={200} height={100} alt={true} />
       </div>
