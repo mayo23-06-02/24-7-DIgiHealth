@@ -84,7 +84,7 @@ export default function DoctorCard({
           {doctor.avatar ? (
             <img src={doctor.avatar} alt={doctor.name} className="w-full h-full object-cover" />
           ) : (
-            <Avatar name={doctor.name} size="md" />
+            <Avatar name={doctor.name} size="sm" />
           )}
         </Link>
         <div className="flex-1 flex flex-col items-start min-w-0">
@@ -126,8 +126,8 @@ export default function DoctorCard({
       </div>
 
       {bio && (
-        <div className="mb-3">
-          <p className="text-sm text-ink-600 bg-surface-soft rounded-lg px-3 py-2.5 line-clamp-3 cursor-default">
+        <div className="">
+          <p className="text-sm text-ink-600  line-clamp-3 cursor-default">
             "{bio}"
           </p>
         </div>
@@ -144,8 +144,9 @@ export default function DoctorCard({
           )}
           {showPrice && (
             <div className="text-right">
+              <p className="text-[11px] font-thin text-ink-400 leading-tight">Get access from*</p>
               <p className="text-sm font-bold text-primary leading-tight">R250/mo</p>
-              <p className="text-[11px] text-ink-400 leading-tight">Get access</p>
+              
             </div>
           )}
         </div>

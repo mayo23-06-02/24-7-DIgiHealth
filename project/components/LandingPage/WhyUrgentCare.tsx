@@ -57,6 +57,14 @@ const conditions = [
   "Urinary tract infections (UTIs)",
   "Minor back pain",
   "Prescription refills",
+  "Sore throat & tonsillitis",
+  "Ear infections & earache",
+  "Stomach bugs, nausea & diarrhoea",
+  "Headaches & migraines",
+  "Heartburn & acid reflux",
+  "Period pain & contraception advice",
+  "Sick notes & medical certificates",
+  "Mental health check-ins",
 ];
 
 const treatmentTypes = [
@@ -65,6 +73,11 @@ const treatmentTypes = [
   "Allergy & asthma medication, for respiratory issues and mild reactions",
   "Anti-inflammatories, for pain, inflammation, or fever",
   "Gastrointestinal medication, for nausea, vomiting, or diarrhoea",
+  "Antifungals, for thrush, ringworm, and skin infections",
+  "Topical creams, for rashes, eczema, and minor skin irritation",
+  "Eye & ear drops, for conjunctivitis and ear infections",
+  "Repeat chronic scripts, for blood pressure, cholesterol, and diabetes",
+  "Contraception & women's health, including the pill and period pain relief",
 ];
 
 const cannotTreat = [
@@ -72,6 +85,11 @@ const cannotTreat = [
   "Serious injuries needing X-rays, stitches, or hands-on treatment",
   "Conditions requiring in-person labs or imaging",
   "Anything requiring controlled substances, which can't be prescribed via telehealth",
+  "Severe allergic reactions or anaphylaxis — call 10177 immediately",
+  "Suspected fractures, dislocations, or deep wounds",
+  "Anything needing a physical examination to diagnose safely",
+  "Pregnancy complications or severe abdominal pain",
+  "Mental health crises or thoughts of self-harm — please call SADAG on 0800 567 567",
 ];
 
 export default function WhyUrgentCare() {
@@ -105,9 +123,13 @@ export default function WhyUrgentCare() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           <div className="bg-surface-soft rounded-2xl p-7">
-            <h3 className="text-lg font-bold text-ink-900 mb-4 font-grotesk">
+            <h3 className="text-lg font-bold text-ink-900 mb-1 font-grotesk">
               Conditions we can help with
             </h3>
+            <p className="text-sm text-ink-600 mb-4">
+              A doctor can diagnose and treat most everyday concerns in a single
+              consultation, including:
+            </p>
             <ul className="space-y-2.5">
               {conditions.map((c) => (
                 <li key={c} className="text-sm text-ink-600 flex items-start gap-2">
