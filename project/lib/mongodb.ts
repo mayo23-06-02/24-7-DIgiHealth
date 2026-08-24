@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { installObjectIdGuard } from '@/lib/db/objectIdGuard';
+import { runPendingMigrations } from '@/lib/migrations';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/digihealth';
 
@@ -40,5 +41,16 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
   }
 
   cached.conn = await cached.promise;
+
+  /*
+   * First database contact after a deploy is what triggers pending migrations.
+   *
+   * Not awaited: a migration is maintenance, and the request that happened to
+   * be first through the door should not wait on it — or fail with it. The
+   * runner swallows its own errors and claims its work in the database, so
+   * this stays safe to fire from every instance that starts up.
+   */
+  void runPendingMigrations();
+
   return cached.conn;
 }

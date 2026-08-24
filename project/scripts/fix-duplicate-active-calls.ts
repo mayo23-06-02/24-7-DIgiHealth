@@ -1,56 +1,25 @@
 /**
- * One-off cleanup: collapse duplicate "active" Call rows.
+ * Manual runner for the duplicate-active-call cleanup.
  *
- * Before the unique partial indexes existed, two clients whose appointment
- * countdowns fired together could each create an active Call for the same
- * conversation. Those rows have to go before MongoDB will accept the index —
- * and they are the rows responsible for phantom incoming calls.
+ * You should not normally need this. The same migration runs by itself on the
+ * first database connection after a deploy (see lib/migrations), guarded by a
+ * record in the Migration collection so it happens exactly once. This exists
+ * for the cases that guard cannot serve: previewing what would change before
+ * shipping, and re-running by hand if a migration was marked failed.
  *
- * Keeps the newest active call per conversation (and per consultation) and
- * ends the rest. Rooms are left alone: names are derived, so the duplicates
- * point at a room that the survivor is still legitimately using.
- *
- *   npx tsx scripts/fix-duplicate-active-calls.ts
- *   npx tsx scripts/fix-duplicate-active-calls.ts --dry-run
+ *   npm run fix:duplicate-calls -- --dry-run
+ *   npm run fix:duplicate-calls
  */
 import * as dotenv from "dotenv";
 import path from "path";
 import mongoose from "mongoose";
-import { Call } from "../lib/models/Call";
+import { collapseDuplicateActiveCalls } from "../lib/migrations/collapseDuplicateActiveCalls";
 
 // Same convention as the other scripts in here: read .env.local explicitly
 // rather than whatever happens to be in the ambient environment.
 dotenv.config({ path: path.join(__dirname, "../.env.local") });
 
 const DRY_RUN = process.argv.includes("--dry-run");
-
-async function collapse(groupField: "conversationId" | "consultationId") {
-  const groups = await Call.aggregate<{ _id: unknown; ids: unknown[] }>([
-    { $match: { status: "active", [groupField]: { $ne: null } } },
-    { $sort: { startedAt: -1 } },
-    { $group: { _id: `$${groupField}`, ids: { $push: "$_id" } } },
-    { $match: { "ids.1": { $exists: true } } },
-  ]);
-
-  let ended = 0;
-  for (const group of groups) {
-    // ids[0] is the newest because of the $sort above — that one survives.
-    const [survivor, ...duplicates] = group.ids;
-    console.log(
-      `${groupField} ${String(group._id)}: keeping ${String(survivor)}, ending ${duplicates.length} duplicate(s)`,
-    );
-    if (!DRY_RUN) {
-      const res = await Call.updateMany(
-        { _id: { $in: duplicates } },
-        { $set: { status: "ended", endedAt: new Date(), durationSeconds: 0 } },
-      );
-      ended += res.modifiedCount;
-    } else {
-      ended += duplicates.length;
-    }
-  }
-  return { groups: groups.length, ended };
-}
 
 async function main() {
   const uri = process.env.MONGODB_URI;
@@ -67,32 +36,29 @@ async function main() {
         "so this stops rather than guessing.",
     );
   }
+
   await mongoose.connect(uri);
-  console.log(DRY_RUN ? "Dry run — nothing will be written.\n" : "Applying changes.\n");
-
-  const byConversation = await collapse("conversationId");
-  const byConsultation = await collapse("consultationId");
-
   console.log(
-    `\nconversations with duplicates: ${byConversation.groups} (${byConversation.ended} rows ended)`,
-  );
-  console.log(
-    `consultations with duplicates: ${byConsultation.groups} (${byConsultation.ended} rows ended)`,
+    DRY_RUN ? "Dry run — nothing will be written.\n" : "Applying changes.\n",
   );
 
-  if (!DRY_RUN) {
-    // Build the new unique partial indexes now that the collisions are gone,
-    // rather than waiting for the first request to trigger autoIndex.
-    console.log("\nSyncing indexes…");
-    await Call.syncIndexes();
-    console.log("Indexes synced.");
-  }
+  const report = await collapseDuplicateActiveCalls({
+    dryRun: DRY_RUN,
+    log: (line) => console.log(line),
+  });
+
+  console.log(
+    `\nconversations with duplicates: ${report.conversationGroups}` +
+      `\nconsultations with duplicates: ${report.consultationGroups}` +
+      `\nrows ended: ${report.rowsEnded}` +
+      `\nindexes built: ${report.indexesBuilt ? "yes" : "no (dry run)"}`,
+  );
 
   await mongoose.disconnect();
 }
 
 main().catch(async (err) => {
-  console.error(err);
+  console.error(err instanceof Error ? err.message : err);
   await mongoose.disconnect().catch(() => {});
   process.exit(1);
 });
