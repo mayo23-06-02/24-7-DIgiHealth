@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { getEntitlement } from "@/lib/billing/entitlement";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import DashboardShell from "@/components/shared/DashboardShell";
 import CallWrapper from "@/components/providers/CallWrapper";
@@ -28,6 +29,21 @@ export default async function DashboardLayout({
   // impersonating a linked child (see app/api/patient/family/[memberId]/switch)
   // — the dashboard shell uses it to show the "managing X's account" banner.
   const isImpersonating = !!(await cookies()).get("guardian_token")?.value;
+
+  /*
+   * Where this account's cover comes from, resolved once per navigation so the
+   * sidebar can drop the Billing entry for someone whose bill a guardian pays.
+   *
+   * Only asked for patients — nobody else can be a dependant, and it is a
+   * database read on every dashboard render. It is presentation only: the
+   * billing page 404s and the API refuses on their own, so a stale answer here
+   * hides or shows a nav item, nothing more.
+   */
+  const coverage =
+    requestUser.role === "patient"
+      ? (await getEntitlement(requestUser.userId).catch(() => null))?.source
+      : undefined;
+
   const user = {
     id: requestUser.userId,
     firstName,
@@ -36,6 +52,7 @@ export default async function DashboardLayout({
     role: requestUser.role,
     avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}+${encodeURIComponent(lastName)}&background=4493b8&color=fff`,
     isImpersonating,
+    coverage,
   };
 
   return (

@@ -14,7 +14,7 @@ import { Facility } from "@/lib/models/Facility";
 
 import Consultation from "@/lib/models/Consultation";
 import { TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
-import { subscriptionFilter } from "@/lib/billing/entitlement";
+import { subscriptionFilter, getEntitlement } from "@/lib/billing/entitlement";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 
 import { apiError } from "@/lib/api/errors";
@@ -46,6 +46,22 @@ export async function GET(request: Request) {
 
     // ── Patient View ──────────────────────────────────────────────────────────
     if (role === "patient") {
+      /*
+       * A patient covered by somebody else's plan has no billing of their own.
+       *
+       * The page 404s for them, but that is presentation. This is the check
+       * that means it, because the endpoint is reachable directly and a
+       * hidden route is not access control — the billing surface would
+       * otherwise be one fetch away from anyone whose bill somebody else pays.
+       */
+      const coverage = await getEntitlement(String(user._id));
+      if (coverage.source === "family" || coverage.source === "family_inactive") {
+        return NextResponse.json(
+          { error: "This account has no billing of its own." },
+          { status: 404 },
+        );
+      }
+
       // Postgres-native accounts used to get an early return here that
       // fabricated an "active individual" subscription. That made this page
       // claim a plan the account did not hold — and now that access depends on

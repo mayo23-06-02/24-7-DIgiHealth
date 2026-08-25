@@ -280,10 +280,14 @@ export async function POST(request: Request) {
     // Patients are gated on holding a plan, and middleware cannot reach Mongo
     // to check — so the answer is resolved once here and carried on the token.
     // See lib/auth/sessionToken.ts for why this is a cache, not the truth.
-    const hasPlan =
-      user.role === "patient"
-        ? (await getEntitlement(user.identityId)).hasPlan
-        : true;
+    // A dependant on a guardian's family plan has no subscription of their own
+    // and would otherwise be sent to checkout to pay a second time for cover
+    // they already hold. getEntitlement resolves that, so the answer carried on
+    // the token is the same one every other surface reads.
+    const entitlement =
+      user.role === "patient" ? await getEntitlement(user.identityId) : null;
+    const hasPlan = entitlement ? entitlement.hasPlan : true;
+    const coverage = entitlement ? entitlement.source : "own";
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const token = await new SignJWT({
@@ -293,6 +297,7 @@ export async function POST(request: Request) {
       firstName: user.firstName,
       lastName: user.lastName,
       hasPlan,
+      coverage,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("24h")

@@ -264,6 +264,10 @@ export const MAIN_NAV: SidebarItem[] = [
     label: "Billing",
     href: "/[role]/billing",
     roles: ["patient", "practitioner", "inspector"],
+    // A patient on somebody else's family plan has no invoices, no payment
+    // method and no plan to change — the page 404s for them, so pointing at it
+    // would offer a dead end. Practitioners and inspectors are unaffected.
+    hidden: ({ coverage }) => coverage === "family" || coverage === "family_inactive",
   },
   {
     icon: User,
