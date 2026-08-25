@@ -16,7 +16,13 @@ export default function AuthLayout({
       <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-0"></div>
       <div className="fixed inset-0 bg-linear-to-tr from-slate-900/60 via-transparent to-primary/10 z-0"></div>
 
-      <div className="relative z-10 w-full max-w-350 mx-auto my-auto py-8">
+      {/*
+        No vertical padding from lg up. A child sized to 90vh plus 2rem top and
+        bottom exceeds the viewport, which is enough to raise a scrollbar on a
+        page that is meant to sit still. Below lg the padding stays, because
+        there the cards are content-height and can genuinely outgrow the screen.
+      */}
+      <div className="relative z-10 w-full max-w-350 mx-auto my-auto py-8 lg:py-0">
         {children}
       </div>
     </div>
