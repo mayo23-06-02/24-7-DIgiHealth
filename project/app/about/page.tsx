@@ -86,7 +86,7 @@ export default function AboutPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative pt-10 pb-20 lg:pt-44 md:pb-28 overflow-hidden">
+      <section className="relative pt-10 pb-20 lg:pt-20 md:pb-28 overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?q=80&w=1600&auto=format&fit=crop"
           alt=""

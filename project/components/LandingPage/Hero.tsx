@@ -77,7 +77,7 @@ export default function Hero() {
 
   return (
     <section id="home" className="w-full  relative">
-      <SiteHeader variant="transparent" />
+      <SiteHeader />
 
       {/* Hero Content — animated gradient ground, centred copy */}
       <div className="relative m-1 rounded-xl min-h-[640px] h-[88vh] max-h-[860px] overflow-hidden flex flex-col items-center justify-center hero-gradient">
