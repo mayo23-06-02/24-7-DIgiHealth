@@ -16,7 +16,6 @@ import Consultation from "@/lib/models/Consultation";
 import { TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
 import { subscriptionFilter } from "@/lib/billing/entitlement";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 import { apiError } from "@/lib/api/errors";
 async function getAuthUser() {
@@ -63,11 +62,11 @@ export async function GET(request: Request) {
         Subscription.findOne(ownerFilter)
           .sort({ createdAt: -1 })
           .lean(),
-        // Payment methods are still ObjectId-keyed only; a uuid filter would
-        // match nothing, which is the correct answer for those accounts.
-        isMongoObjectId(user._id)
-          ? PaymentMethod.find({ patientId: user._id }).lean()
-          : Promise.resolve([]),
+        // Same owner filter as the rest of billing. Payment methods used to be
+        // ObjectId-keyed only, so a Postgres-native account could never see one
+        // — and now that checkout actually saves them, that would have meant
+        // saving a card the owner could never be shown.
+        PaymentMethod.find(ownerFilter).sort({ isDefault: -1, updatedAt: -1 }).lean(),
       ]);
 
       // Count consultations completed since subscription started (or fallback last 30 days)
