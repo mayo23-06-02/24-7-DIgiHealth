@@ -18,7 +18,7 @@ export default function PricingPage() {
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative pt-10 pb-16 lg:pt-44 md:pb-20 overflow-hidden">
+      <section className="relative pt-10 pb-16 lg:pt-20 md:pb-20 overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1666214280391-8ff5bd3c0bf0?q=80&w=1600&auto=format&fit=crop"
           alt=""
