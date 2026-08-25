@@ -76,7 +76,7 @@ export default function Hero() {
   const line = rotatingLines[currentSlide];
 
   return (
-    <section id="home" className="w-full  relative">
+    <section id="home" className="w-full bg-white  relative">
       <SiteHeader />
 
       {/* Hero Content — animated gradient ground, centred copy */}
