@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { MedicalContext } from '@/lib/models/ClinicalData';
 import Patient from '@/lib/models/Patient';
-import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { requirePatientAccess } from '@/lib/auth/access';
 
 import { apiError } from "@/lib/api/errors";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -12,12 +12,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const body = await req.json();
     const { medicalHistory, allergies, currentMedications } = body;
 
-    // 1. Authorization Check (Matching GET route)
-    const userPayload = await getRequestUser();
-    if (!userPayload || (userPayload.role !== 'practitioner' && userPayload.role !== 'mega_admin')) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-    const practitionerId = userPayload.userId;
+    /*
+     * 1. Authorization.
+     *
+     * The check here stopped at the role, and the practitioner id it resolved
+     * was then never used for anything — so any practitioner account could
+     * overwrite any patient's chronic conditions, allergies and current
+     * medications, upserting the record into existence if it did not already
+     * exist. An allergy list is safety-critical and this left no trace of who
+     * changed it.
+     */
+    await requirePatientAccess(id);
 
     // 2. Update MedicalContext (Primary Detailed Record)
     // We use 'id' from params which is the patient's userId
