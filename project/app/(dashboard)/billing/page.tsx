@@ -362,35 +362,34 @@ function TransactionTable({
                     <StatusPill status={t.status} />
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                      <button
-                        type="button"
-                        title="Download receipt / invoice PDF"
-                        disabled={
-                          pdfLoadingId === String(t._id || t.id)
-                        }
-                        onClick={() =>
-                          void downloadTxnPdf(
-                            t,
-                            t.status === "completed" ? "receipt" : "invoice",
-                          )
-                        }
-                        className="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 flex items-center justify-center transition-all disabled:opacity-40"
-                      >
-                        <Download size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        title="Download invoice PDF"
-                        disabled={
-                          pdfLoadingId === String(t._id || t.id)
-                        }
-                        onClick={() => void downloadTxnPdf(t, "invoice")}
-                        className="hidden md:flex w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 items-center justify-center transition-all disabled:opacity-40"
-                      >
-                        <Receipt size={16} />
-                      </button>
-                    </div>
+                    {/*
+                      One button, always visible.
+                      
+                      There were two — receipt and invoice — and both were
+                      invisible until the row was hovered, which on a touch
+                      screen means never. A control you cannot discover is a
+                      control you do not have, and the second one duplicated
+                      the first for every completed row anyway.
+                    */}
+                    {(() => {
+                      const kind = t.status === "completed" ? "receipt" : "invoice";
+                      const label = kind === "receipt" ? "Download receipt" : "Download invoice";
+                      return (
+                        <button
+                          type="button"
+                          title={label}
+                          aria-label={label}
+                          disabled={pdfLoadingId === String(t._id || t.id)}
+                          onClick={() => void downloadTxnPdf(t, kind)}
+                          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/5 transition-all disabled:opacity-40"
+                        >
+                          <Download size={16} />
+                          <span className="hidden md:inline text-xs font-semibold">
+                            {kind === "receipt" ? "Receipt" : "Invoice"}
+                          </span>
+                        </button>
+                      );
+                    })()}
                   </td>
                 </tr>
               ))
