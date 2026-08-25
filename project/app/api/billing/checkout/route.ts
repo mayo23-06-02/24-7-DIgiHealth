@@ -12,6 +12,7 @@ import {
   validateBillingAddress,
 } from "@/lib/billing/mockGateway";
 import { isMongoObjectId } from "@/lib/utils/mongoId";
+import { rememberPaymentMethod } from "@/lib/billing/rememberPaymentMethod";
 import { signSessionToken, setSessionCookie } from "@/lib/auth/sessionToken";
 import { apiError } from "@/lib/api/errors";
 import { sendEmail } from "@/lib/email/emailjs";
@@ -145,6 +146,22 @@ export async function POST(request: Request) {
       },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
+
+    // Remember the instrument (brand, last four, expiry, holder, address) so
+    // Billing can show what was paid with. Awaited but self-swallowing: the
+    // charge has already succeeded, so this must not be able to fail the request.
+    await rememberPaymentMethod({
+      userId: key,
+      method,
+      details: (card || {}) as Record<string, unknown>,
+      billing: (billing || {}) as {
+        addressLine?: string;
+        city?: string;
+        postalCode?: string;
+      },
+      brand: payment.brand,
+      last4: payment.last4,
+    });
 
     // Recorded so the purchase shows in billing history. The previous
     // upgrade path wrote no transaction at all, so a paid plan left no trace

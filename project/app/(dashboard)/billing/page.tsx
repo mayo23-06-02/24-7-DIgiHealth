@@ -497,6 +497,28 @@ function PatientBillingView({
     subscription,
     paymentMethods = [],
   } = data;
+
+  /**
+   * The address to show, taken from the default method, or from whichever one
+   * has an address if none is marked default. One address is displayed rather
+   * than one per method: in practice a patient has a single billing address,
+   * and repeating it under every card would be noise.
+   */
+  type StoredBillingAddress = {
+    addressLine?: string;
+    city?: string;
+    postalCode?: string;
+  };
+  type StoredMethod = {
+    isDefault?: boolean;
+    billingAddress?: StoredBillingAddress;
+  };
+  const methodsWithAddress = paymentMethods as StoredMethod[];
+  const billingAddress: StoredBillingAddress | null =
+    (methodsWithAddress.find(
+      (pm) => pm.isDefault && pm.billingAddress?.addressLine,
+    ) || methodsWithAddress.find((pm) => pm.billingAddress?.addressLine))
+      ?.billingAddress ?? null;
   const [upgradeModal, setUpgradeModal] = useState(false);
   const [selectedTier, setSelectedTier] = useState(TIER_ORDER[0]);
   const [paymentMethodModal, setPaymentMethodModal] = useState(false);
@@ -695,9 +717,18 @@ function PatientBillingView({
                         <p className="text-xs font-bold text-slate-800">
                           {pm.cardBrand} •••• {pm.last4}
                         </p>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Expires {pm.expiryMonth}/{pm.expiryYear}
-                        </p>
+                        {pm.expiryMonth && pm.expiryYear ? (
+                          <p className="text-xs text-slate-500 font-medium">
+                            Expires {String(pm.expiryMonth).padStart(2, "0")}/
+                            {String(pm.expiryYear).slice(-2)}
+                          </p>
+                        ) : (
+                          pm.holderName && (
+                            <p className="text-xs text-slate-500 font-medium">
+                              {pm.holderName}
+                            </p>
+                          )
+                        )}
                       </>
                     )}
                     {pm.type === "medical_aid" && (
@@ -715,8 +746,14 @@ function PatientBillingView({
                         <p className="text-xs font-bold text-slate-800">
                           {pm.bankName}
                         </p>
+                        {/*
+                          last4 first: methods saved at checkout keep only the
+                          last four deliberately, so the full account number is
+                          absent by design rather than missing. Older rows that
+                          do carry one still render.
+                        */}
                         <p className="text-xs text-slate-500 font-medium">
-                          Acc: •••• {pm.accountNumber?.slice(-4)}
+                          Acc: •••• {pm.last4 || pm.accountNumber?.slice(-4)}
                         </p>
                       </>
                     )}
@@ -755,6 +792,39 @@ function PatientBillingView({
               ))
             )}
           </div>
+
+          {/*
+            The address given with the payment, shown where the payment is.
+            It is captured at checkout and validated there, so it exists for
+            anyone who has paid — it simply had nowhere to be seen until now.
+          */}
+          {billingAddress && (
+            <div className="mt-6 pt-6 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold text-slate-800">Billing Address</p>
+                <span className="text-[9px] font-bold text-slate-400 tracking-normal">
+                  FROM CHECKOUT
+                </span>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-xl shrink-0">
+                  📍
+                </div>
+                <div className="min-w-0 text-xs text-slate-500 font-medium leading-relaxed">
+                  {billingAddress.addressLine && (
+                    <p className="text-slate-800 font-bold">
+                      {billingAddress.addressLine}
+                    </p>
+                  )}
+                  <p>
+                    {[billingAddress.city, billingAddress.postalCode]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </Card>
       </div>
 

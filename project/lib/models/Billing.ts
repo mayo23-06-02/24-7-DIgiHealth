@@ -128,6 +128,20 @@ const PayoutRequestSchema = new Schema<IPayoutRequest>({
 // ─── Payment Method (saved cards / accounts) ──────────────────────────────────
 export interface IPaymentMethod extends Document {
   patientId: Types.ObjectId;
+  /**
+   * The owner as a plain string, so Postgres-native accounts (whose id is a
+   * uuid and can never be cast to an ObjectId) can own a payment method too —
+   * the same pairing Subscription and PaymentTransaction already use.
+   */
+  patientKey?: string;
+  /** Name on the card or bank account. Never the number itself. */
+  holderName?: string;
+  /** The address given with this instrument at checkout. */
+  billingAddress?: {
+    addressLine?: string;
+    city?: string;
+    postalCode?: string;
+  };
   type: 'card' | 'medical_aid' | 'eft';
   isDefault: boolean;
   // Card
@@ -149,7 +163,16 @@ export interface IPaymentMethod extends Document {
   createdAt?: Date;
 }
 const PaymentMethodSchema = new Schema<IPaymentMethod>({
-  patientId:          { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  // No longer required: an account whose id is a uuid has no ObjectId to put
+  // here, and patientKey is what identifies the owner in that case.
+  patientId:          { type: Schema.Types.ObjectId, ref: 'User' },
+  patientKey:         { type: String, index: true },
+  holderName:         String,
+  billingAddress: {
+    addressLine: String,
+    city:        String,
+    postalCode:  String,
+  },
   type:               { type: String, enum: ['card', 'medical_aid', 'eft'] },
   isDefault:          { type: Boolean, default: false },
   cardBrand:          String,
