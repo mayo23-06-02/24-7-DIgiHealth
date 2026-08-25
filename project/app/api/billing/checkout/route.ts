@@ -74,6 +74,30 @@ export async function POST(request: Request) {
       );
     }
 
+    /*
+     * A dependant cannot buy through this route, whether their guardian's plan
+     * is live or has lapsed.
+     *
+     * Hiding checkout in the UI is not what stops this — that only stops the
+     * honest path. `family` is refused so nobody pays twice for cover they
+     * hold; `family_inactive` is refused because the answer to a lapsed family
+     * plan is for the guardian to renew it, not for a dependant (who may be a
+     * child) to be charged. Someone who genuinely wants their own plan leaves
+     * the family first.
+     */
+    const current = await getEntitlement(user.userId);
+    if (current.source === "family" || current.source === "family_inactive") {
+      return NextResponse.json(
+        {
+          error:
+            current.source === "family"
+              ? `Your cover is paid for by ${current.coveredBy?.name ?? "your family plan holder"} — there is nothing to pay.`
+              : `Your family plan is no longer active. ${current.coveredBy?.name ?? "The plan holder"} needs to renew it.`,
+        },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const { tier, card, billing } = body as {
       tier?: string;
@@ -132,17 +156,25 @@ export async function POST(request: Request) {
     const sub = await Subscription.findOneAndUpdate(
       subscriptionFilter(key),
       {
-        // patientKey works for both id shapes; patientId is only set when the
-        // id can actually be cast to an ObjectId.
-        patientKey: key,
-        ...(isMongoObjectId(key) ? { patientId: key } : {}),
-        tier,
-        status: "active",
-        price: plan.price,
-        autoRenew: true,
-        startDate: now,
-        nextBillingDate,
-        paymentMethodId: payment.reference,
+        $set: {
+          // patientKey works for both id shapes; patientId is only set when the
+          // id can actually be cast to an ObjectId.
+          patientKey: key,
+          ...(isMongoObjectId(key) ? { patientId: key } : {}),
+          tier,
+          status: "active",
+          price: plan.price,
+          autoRenew: true,
+          startDate: now,
+          nextBillingDate,
+          paymentMethodId: payment.reference,
+        },
+        // Whoever used to pay for this account no longer does — they have just
+        // paid for it themselves. A stale payerId would make getEntitlement
+        // read their own plan as somebody else's cover and hand liveness back
+        // to a guardian who is no longer involved. Explicitly $unset rather
+        // than set to undefined, which Mongoose would silently drop.
+        $unset: { payerId: 1 },
       },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
@@ -230,6 +262,9 @@ export async function POST(request: Request) {
       firstName: user.firstName,
       lastName: user.lastName,
       hasPlan: true,
+      // They have just bought cover of their own, which outranks any family
+      // link — see the resolution order in getEntitlement.
+      coverage: "own",
     });
     return setSessionCookie(response, token);
   } catch (err) {

@@ -222,6 +222,11 @@ export async function POST(request: Request) {
 
           if (invite && notExpired) {
             invite.memberId = newUser._id;
+            // Plain-string copy beside the ObjectId, so the member side of the
+            // link resolves for either id shape — this is what makes the new
+            // account read as covered by the guardian's plan rather than being
+            // sent to checkout.
+            invite.memberKey = String(newUser._id);
             invite.status = "active";
             invite.acceptedAt = new Date();
             invite.inviteToken = undefined;

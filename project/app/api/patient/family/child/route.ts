@@ -116,7 +116,11 @@ export async function POST(req: NextRequest) {
 
     const link = await FamilyLink.create({
       guardianId: guardian.userId,
+      // Plain-string copies of both sides, so the link resolves for either id
+      // shape — the same reason patientKey sits beside patientId on billing.
+      guardianKey: String(guardian.userId),
       memberId: childUser._id,
+      memberKey: String(childUser._id),
       relationship,
       isMinor: true,
       status: 'active',

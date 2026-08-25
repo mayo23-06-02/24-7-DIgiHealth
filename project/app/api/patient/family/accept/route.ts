@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import FamilyLink from '@/lib/models/FamilyLink';
-import { Subscription } from '@/lib/models/Billing';
 import { normalizeEmail } from '@/lib/supabase/auth';
 import { isMongoObjectId } from '@/lib/utils/mongoId';
+import { getEntitlement } from '@/lib/billing/entitlement';
+import { signSessionToken, setSessionCookie } from '@/lib/auth/sessionToken';
 
 import { apiError } from "@/lib/api/errors";
 /** POST — the invited adult accepts, now that they're logged in. Only the
@@ -45,17 +46,44 @@ export async function POST(req: NextRequest) {
     }
 
     link.memberId = user.userId as any;
+    // Written alongside memberId for the same reason guardianKey is written
+    // alongside guardianId: it is the member's session id as a plain string, so
+    // it matches whichever id shape the account uses. memberFilter reads it.
+    link.memberKey = String(user.userId);
     link.status = 'active';
     link.acceptedAt = new Date();
     await link.save();
 
-    await Subscription.updateOne(
-      { patientId: user.userId },
-      { $set: { payerId: link.guardianId } },
-      { upsert: false },
-    );
+    /*
+     * The guardian's plan now covers this account.
+     *
+     * The token is re-issued here rather than left to expire because the plan
+     * gate reads coverage from the token: without this the member would accept
+     * the invite and still be redirected to checkout for up to 24 hours, which
+     * looks exactly like the bug this fixes.
+     *
+     * There used to be a Subscription.updateOne here stamping payerId with
+     * upsert:false. It was a no-op for precisely the accounts it targeted — a
+     * new dependant has no subscription row to update — and coverage is now
+     * derived from the FamilyLink itself, so there is one source of truth
+     * instead of two that could disagree.
+     */
+    const entitlement = await getEntitlement(user.userId);
 
-    return NextResponse.json({ success: true, data: { linkId: link._id.toString() } });
+    const response = NextResponse.json({
+      success: true,
+      data: { linkId: link._id.toString() },
+    });
+    const sessionToken = await signSessionToken({
+      userId: user.userId,
+      role: user.role,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      hasPlan: entitlement.hasPlan,
+      coverage: entitlement.source,
+    });
+    return setSessionCookie(response, sessionToken);
   } catch (err: any) {
     console.error('[POST /api/patient/family/accept]', err);
     return apiError(err);

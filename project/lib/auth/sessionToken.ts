@@ -23,6 +23,20 @@ export type SessionClaims = {
    * redirects them back out.
    */
   hasPlan?: boolean;
+  /**
+   * Where that plan comes from — see CoverageSource in lib/billing/entitlement.
+   *
+   * `hasPlan` alone cannot tell "never bought one" apart from "on a family plan
+   * that lapsed", and those two go to different places: one to checkout, the
+   * other to a notice naming the guardian. It also says whether to show this
+   * account a billing surface at all.
+   *
+   * Optional on purpose. Tokens issued before this existed live for 24 hours
+   * and carry `hasPlan` with no `coverage`, so every reader must fall back to
+   * the old boolean rather than treating an absent claim as "no cover" — that
+   * would send every signed-in patient to checkout the moment this deploys.
+   */
+  coverage?: "own" | "family" | "family_inactive" | "none";
 };
 
 function secret() {

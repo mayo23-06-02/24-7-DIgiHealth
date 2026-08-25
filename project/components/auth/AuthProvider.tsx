@@ -13,6 +13,13 @@ interface User {
   gender?: string;
   /** True when the current session is a guardian impersonating a linked child. */
   isImpersonating?: boolean;
+  /**
+   * Where this account's plan comes from — see CoverageSource in
+   * lib/billing/entitlement. Set for patients only; `family` and
+   * `family_inactive` mean somebody else pays, so this account has no billing
+   * surface of its own to show.
+   */
+  coverage?: "own" | "family" | "family_inactive" | "none";
 }
 
 interface AuthContextType {

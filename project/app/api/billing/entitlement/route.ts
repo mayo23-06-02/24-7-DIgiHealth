@@ -8,8 +8,9 @@ import { apiError } from "@/lib/api/errors";
  * GET /api/billing/entitlement — does the caller hold an active plan?
  *
  * Also re-issues the session token with the current answer, so a token whose
- * `hasPlan` claim has drifted (a subscription that lapsed, or one bought in
- * another session) is corrected the next time anything asks.
+ * claims have drifted (a subscription that lapsed, one bought in another
+ * session, or a guardian's family plan that stopped covering this account) is
+ * corrected the next time anything asks.
  */
 export async function GET() {
   try {
@@ -40,6 +41,12 @@ export async function GET() {
       firstName: user.firstName,
       lastName: user.lastName,
       hasPlan: entitlement.hasPlan,
+      // Carried too, not just hasPlan. This route exists to correct a drifted
+      // token, so omitting the claim would have it quietly undo itself —
+      // stripping `coverage` sends the reader back to the boolean fallback,
+      // and a dependant whose cover had lapsed would be routed to checkout
+      // instead of the notice.
+      coverage: entitlement.source,
     });
     return setSessionCookie(response, token);
   } catch (err) {

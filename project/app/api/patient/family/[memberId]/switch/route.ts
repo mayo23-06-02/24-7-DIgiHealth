@@ -58,12 +58,22 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
+    /*
+     * `coverage: 'family'` is stated rather than left out.
+     *
+     * This token carried no plan claim at all and cleared the gate only because
+     * the middleware read `undefined !== false` as "has a plan" — the child was
+     * getting in by accident. They are covered, and the reason they are covered
+     * is the guardian standing right here, so say so.
+     */
     const childToken = await new SignJWT({
       userId: (child as any)._id.toString(),
       role: (child as any).role,
       email: guardian.email || (child as any).email,
       firstName: (child as any).firstName,
       lastName: (child as any).lastName,
+      hasPlan: true,
+      coverage: 'family',
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('24h')

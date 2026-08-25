@@ -85,13 +85,17 @@ function needsSharedCounter(pathname: string): boolean {
 /* ------------------------------------------------------------------ */
 /*  Plan gate                                                          */
 /*                                                                     */
-/*  Patients must hold a plan before using the platform. The gate      */
-/*  reads the `hasPlan` claim on the session token because middleware  */
-/*  runs on the edge and cannot reach Mongo; the claim is refreshed at */
-/*  login and after checkout. Authoritative checks stay server-side in */
-/*  lib/billing/entitlement.ts.                                        */
+/*  Patients must be covered before using the platform — by a plan of   */
+/*  their own, or by the family plan of a guardian who pays for them.   */
+/*  The gate reads the `coverage` claim on the session token because    */
+/*  middleware runs on the edge and cannot reach Mongo; the claim is    */
+/*  refreshed at login, after checkout, and when a family invite is     */
+/*  accepted. Authoritative checks stay server-side in                  */
+/*  lib/billing/entitlement.ts.                                         */
 /* ------------------------------------------------------------------ */
 const PLAN_CHECKOUT_PATH = '/patient/checkout';
+/** Where a dependant goes when the plan covering them has stopped. */
+const COVERAGE_NOTICE_PATH = '/patient/coverage';
 
 /**
  * Routes a patient without a plan may still reach. Checkout itself obviously,
@@ -102,8 +106,48 @@ function isPlanExempt(pathname: string): boolean {
   return (
     pathname === PLAN_CHECKOUT_PATH ||
     pathname.startsWith(`${PLAN_CHECKOUT_PATH}/`) ||
+    pathname === COVERAGE_NOTICE_PATH ||
     pathname.startsWith('/patient/billing')
   );
+}
+
+type Coverage = 'own' | 'family' | 'family_inactive' | 'none';
+
+/**
+ * Where to send a patient, given where their cover comes from — or null to let
+ * them through.
+ *
+ * Billing is deliberately absent from this table. A covered dependant gets a
+ * 404 from the billing page itself rather than a redirect, because the page is
+ * meant not to exist for them; middleware bouncing them somewhere pleasant
+ * would say the opposite. Checkout IS handled here: leaving a covered
+ * dependant on a page whose only action is "pay" invites a second payment for
+ * cover they already hold, which is the exact trap this gate created.
+ */
+function planGateRedirect(
+  coverage: Coverage,
+  pathname: string,
+  isDashboardRoute: boolean,
+): string | null {
+  const isCheckout =
+    pathname === PLAN_CHECKOUT_PATH || pathname.startsWith(`${PLAN_CHECKOUT_PATH}/`);
+
+  switch (coverage) {
+    case 'own':
+      return null;
+
+    case 'family':
+      return isCheckout ? '/patient' : null;
+
+    // Cover has stopped, so nothing in the dashboard is available — including
+    // billing, which is why this case does not defer to the page's 404.
+    case 'family_inactive':
+      if (pathname === COVERAGE_NOTICE_PATH) return null;
+      return isDashboardRoute ? COVERAGE_NOTICE_PATH : null;
+
+    case 'none':
+      return isDashboardRoute && !isPlanExempt(pathname) ? PLAN_CHECKOUT_PATH : null;
+  }
 }
 
 function checkRateLimit(
@@ -275,25 +319,37 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     try {
       let role: string | undefined;
       let userId: string | undefined;
-      let hasPlan = true;
+      let coverage: Coverage = 'own';
 
       if (token) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
         role = payload.role as string;
         userId = payload.userId as string;
-        hasPlan = payload.hasPlan !== false;
+        /*
+         * Tokens issued before `coverage` existed live for 24 hours and carry
+         * only `hasPlan`, so an absent claim is read the old way rather than
+         * as "no cover" — otherwise every signed-in patient would be thrown at
+         * checkout the moment this deploys.
+         */
+        coverage =
+          (payload.coverage as Coverage | undefined) ??
+          (payload.hasPlan !== false ? 'own' : 'none');
       } else if (user) {
         role = user.role;
         userId = user.id;
       }
 
       // ---- Plan gate ----
-      // A patient without an active plan can only reach checkout. Applies to
-      // patients alone: gating a practitioner or an admin would lock staff out
-      // of a platform they never buy a plan for.
-      if (role === 'patient' && !hasPlan && isDashboardRoute && !isPlanExempt(pathname)) {
-        return NextResponse.redirect(new URL(PLAN_CHECKOUT_PATH, request.url));
+      // A patient without cover can only reach checkout, and a dependant whose
+      // cover has stopped only reaches the notice. Applies to patients alone:
+      // gating a practitioner or an admin would lock staff out of a platform
+      // they never buy a plan for.
+      if (role === 'patient') {
+        const destination = planGateRedirect(coverage, pathname, isDashboardRoute);
+        if (destination) {
+          return NextResponse.redirect(new URL(destination, request.url));
+        }
       }
 
       // Role mismatch protection

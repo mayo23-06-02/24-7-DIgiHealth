@@ -24,8 +24,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   if (!user) return null;
 
-  const filteredNav = MAIN_NAV.filter((item) =>
-    item.roles?.includes(user.role)
+  const filteredNav = MAIN_NAV.filter(
+    (item) =>
+      item.roles?.includes(user.role) &&
+      !item.hidden?.({ role: user.role, coverage: user.coverage }),
   );
 
   if (!isMounted) {
