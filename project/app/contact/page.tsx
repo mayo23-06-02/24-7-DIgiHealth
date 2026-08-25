@@ -153,6 +153,7 @@ export default function ContactPage() {
           </div>
 
           {/* Practitioner inquiry form */}
+          {SHOW_PRACTITIONER_INQUIRY && (
           <div className="max-w-xl mx-auto bg-white border border-border rounded-2xl p-8">
             <h2 className="text-xl font-bold text-ink-900 mb-1 font-grotesk">
               Practitioner Inquiry
@@ -227,6 +228,7 @@ export default function ContactPage() {
               </form>
             )}
           </div>
+          )}
         </div>
       </section>
 
