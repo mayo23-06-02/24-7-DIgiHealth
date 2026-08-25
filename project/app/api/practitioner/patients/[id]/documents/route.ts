@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import { requirePatientAccess } from "@/lib/auth/access";
+import { apiError } from "@/lib/api/errors";
 import { MedicalDocument as DigitalDocument } from "@/lib/models/ReviewsDocs";
-import { PractitionerProfile } from "@/lib/models/RoleProfiles";
-import { Consultation } from "@/lib/models/Consultation";
-import { getRequestUser } from "@/lib/auth/getRequestUser";
 import {
   durableUrl,
   isSupabaseConfigured,
-  MediaValidationError,
   uploadBuffer,
 } from "@/lib/supabase/media";
 import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
-import mongoose from "mongoose";
 
 // POST /api/practitioner/patients/[id]/documents
 // Practitioner attaches a document/image to a patient's record.
@@ -24,42 +21,13 @@ export async function POST(
 ) {
   try {
     await connectToDatabase();
-    const userPayload = await getRequestUser();
-    if (
-      !userPayload ||
-      (userPayload.role !== "practitioner" && userPayload.role !== "mega_admin")
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 },
-      );
-    }
 
     const { id: patientUserId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(patientUserId)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid patient ID" },
-        { status: 400 },
-      );
-    }
 
+    // Fourth and last private copy of the assigned-or-consulted rule; they are
+    // all one function now.
+    const userPayload = await requirePatientAccess(patientUserId);
     const practitionerId = userPayload.userId;
-    const practitionerProfile = await PractitionerProfile.findOne({
-      userId: practitionerId,
-    }).lean();
-    const assignedIds = (
-      (practitionerProfile as any)?.assignedPatientIds || []
-    ).map((pid: any) => pid.toString());
-    const hasConsultation = await Consultation.exists({
-      patientId: patientUserId,
-      practitionerId,
-    });
-    if (!assignedIds.includes(patientUserId) && !hasConsultation) {
-      return NextResponse.json(
-        { success: false, error: "Access denied: Patient not linked to your practice" },
-        { status: 403 },
-      );
-    }
 
     const contentType = req.headers.get("content-type") || "";
     let fileUrl: string | null = null;
@@ -154,12 +122,10 @@ export async function POST(
         uploadedByPractitioner: true,
       },
     });
-  } catch (err: any) {
-    const status = err instanceof MediaValidationError ? 400 : 500;
-    console.error("[POST /api/practitioner/patients/[id]/documents]", err);
-    return NextResponse.json(
-      { success: false, error: err.message || "Upload failed" },
-      { status },
-    );
+  } catch (err: unknown) {
+    // apiError already passes MediaValidationError and PublicError through
+    // with their own message and status, and replaces anything else with copy
+    // written for a person rather than the raw exception text.
+    return apiError(err, "The document could not be uploaded. Please try again.");
   }
 }

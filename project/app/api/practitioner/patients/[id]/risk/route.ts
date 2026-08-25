@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
-import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { requirePatientAccess } from "@/lib/auth/access";
 import RiskScore from "@/lib/models/RiskScore";
 import { Consultation } from "@/lib/models/Consultation";
 import {
@@ -20,14 +19,12 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
-    const user = await getRequestUser();
-    if (!user || (user.role !== "practitioner" && user.role !== "mega_admin")) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { id: patientId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(patientId)) {
-      return NextResponse.json({ success: false, error: "Invalid patient id" }, { status: 400 });
-    }
+    // Holding the practitioner role was the whole check here, so any
+    // practitioner account could read — and through PUT, overwrite — the
+    // clinical risk assessment of any patient in the system. This also
+    // validates the id shape and hands back the caller.
+    const user = await requirePatientAccess(patientId);
 
     const latest = await RiskScore.findOne({ patientId })
       .sort({ calculatedAt: -1 })
@@ -79,14 +76,12 @@ export async function PUT(
 ) {
   try {
     await connectToDatabase();
-    const user = await getRequestUser();
-    if (!user || (user.role !== "practitioner" && user.role !== "mega_admin")) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { id: patientId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(patientId)) {
-      return NextResponse.json({ success: false, error: "Invalid patient id" }, { status: 400 });
-    }
+    // Holding the practitioner role was the whole check here, so any
+    // practitioner account could read — and through PUT, overwrite — the
+    // clinical risk assessment of any patient in the system. This also
+    // validates the id shape and hands back the caller.
+    const user = await requirePatientAccess(patientId);
 
     const body = await req.json();
     const score = clampRiskScore(Number(body.score));

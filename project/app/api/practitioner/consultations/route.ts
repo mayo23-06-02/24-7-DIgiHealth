@@ -3,20 +3,26 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import Patient from '@/lib/models/Patient';
 import { riskBandFromScore } from '@/lib/riskScore';
-
-function getPractitionerId(req: NextRequest): string {
-  return (
-    req.headers.get('x-practitioner-id') ||
-    process.env.MOCK_PRACTITIONER_ID ||
-    '000000000000000000000000'
-  );
-}
+import { requireRole } from '@/lib/auth/access';
+import { apiError } from '@/lib/api/errors';
 
 export async function GET(req: NextRequest) {
   try {
+    /*
+     * Identity comes from the verified session, never from the request.
+     *
+     * This used to read an `x-practitioner-id` header with no JWT check at
+     * all, falling back to MOCK_PRACTITIONER_ID. The header is copied
+     * through by the proxy untouched — only `x-user-id` and `x-user-role`
+     * are overwritten — so any signed-in account could name any practitioner
+     * and receive their schedule: patient identities, chief complaints, risk
+     * scores and AI recommendations. Same fix as practitioner/queue.
+     */
+    const user = await requireRole('practitioner', 'mega_admin');
+    const practitionerId = user.userId;
+
     await connectToDatabase();
 
-    const practitionerId = getPractitionerId(req);
     const { searchParams } = new URL(req.url);
 
     // Default: current week Mon–Sun
@@ -66,10 +72,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: { events } });
   } catch (err) {
-    console.error('[GET /api/practitioner/consultations]', err);
-    return NextResponse.json(
-      { success: false, error: 'Failed to load consultations' },
-      { status: 500 },
-    );
+    return apiError(err, 'Consultations could not be loaded. Please try again.');
   }
 }

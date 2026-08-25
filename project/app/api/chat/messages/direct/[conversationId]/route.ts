@@ -1,19 +1,30 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import Message from '@/lib/models/Message';
+import { requireConversationParticipant } from '@/lib/auth/access';
+import { apiError } from '@/lib/api/errors';
 
+/**
+ * Message history for a direct (non-appointment) thread.
+ *
+ * The participant check is not incidental to this route — it is the only thing
+ * standing between a conversation id and somebody else's medical conversation.
+ * Without it this returned every message in any thread to any signed-in
+ * account, which is what the consultation-scoped sibling
+ * (chat/messages/[consultationId]) has always guarded against and this one did
+ * not.
+ */
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
-    await connectToDatabase();
     const { conversationId } = await params;
 
-    if (!conversationId || !mongoose.Types.ObjectId.isValid(conversationId)) {
-      return NextResponse.json({ error: 'Invalid conversation ID' }, { status: 400 });
-    }
+    // Establishes the caller, the conversation, and that the two belong
+    // together — or throws. It also connects to the database, so nothing below
+    // needs to.
+    await requireConversationParticipant(conversationId);
 
     const { searchParams } = new URL(req.url);
     const after = searchParams.get('after');
@@ -57,8 +68,6 @@ export async function GET(
 
     return NextResponse.json(payload);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch messages';
-    console.error('[messages/direct] GET error:', error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiError(error, 'Messages could not be loaded. Please try again.');
   }
 }

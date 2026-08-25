@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Anthropometric } from '@/lib/models/ClinicalData';
-import { getRequestUser } from '@/lib/auth/getRequestUser';
-import mongoose from 'mongoose';
+import { requirePatientAccess } from '@/lib/auth/access';
 
 import { apiError } from "@/lib/api/errors";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
-    
-    // Authorization Check
-    const userPayload = await getRequestUser();
-    if (!userPayload || (userPayload.role !== 'practitioner' && userPayload.role !== 'mega_admin')) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { id: patientUserId } = await params;
-    
-    if (!mongoose.Types.ObjectId.isValid(patientUserId)) {
-      return NextResponse.json({ success: false, error: 'Invalid patient ID' }, { status: 400 });
-    }
+
+    /*
+     * Being a practitioner is not the same as being THIS patient's
+     * practitioner. The check here used to stop at the role, so any
+     * practitioner account could write vitals onto any patient's record in the
+     * system by id — a silent, unattributed change to a clinical record.
+     *
+     * requirePatientAccess also validates the id shape and rejects a caller
+     * who is neither, so nothing below needs to re-check either.
+     */
+    await requirePatientAccess(patientUserId);
 
     const body = await req.json();
     const { heartRate, bloodPressure, bodyMass, glucose } = body;

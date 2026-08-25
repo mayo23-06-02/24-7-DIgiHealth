@@ -9,9 +9,7 @@ import {
 } from '@/lib/models/ClinicalData';
 import { Consultation } from '@/lib/models/Consultation';
 import { AITriageSession } from '@/lib/models/AIDecision';
-import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { PractitionerProfile } from '@/lib/models/RoleProfiles';
-import mongoose from 'mongoose';
+import { requirePatientAccess } from '@/lib/auth/access';
 
 import { apiError } from "@/lib/api/errors";
 export async function GET(
@@ -20,28 +18,14 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
-    const userPayload = await getRequestUser();
-    
-    if (!userPayload || (userPayload.role !== 'practitioner' && userPayload.role !== 'mega_admin')) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { id: patientId } = await params;
 
-    if (!mongoose.Types.ObjectId.isValid(patientId)) {
-      return NextResponse.json({ success: false, error: 'Invalid patient ID' }, { status: 400 });
-    }
-
-    // Authorization Check: Is this patient assigned to this practitioner OR has there been a consultation?
-    const practitionerId = userPayload.userId;
-    const practitionerProfile = await PractitionerProfile.findOne({ userId: practitionerId }).lean();
-    const assignedIds = (practitionerProfile?.assignedPatientIds || []).map(id => id.toString());
-    
-    const hasConsultation = await Consultation.exists({ patientId, practitionerId });
-
-    if (!assignedIds.includes(patientId) && !hasConsultation && userPayload.role !== 'mega_admin') {
-      return NextResponse.json({ success: false, error: 'Access denied: Patient not linked to your practice' }, { status: 403 });
-    }
+    // Assigned to this practitioner, or a consultation exists between them.
+    // That rule was written here first and has now moved to the shared guard,
+    // unchanged, so the routes beside this one that were missing it entirely
+    // get the same answer rather than a second opinion.
+    await requirePatientAccess(patientId);
 
     // Fetch all data types in parallel
     const [

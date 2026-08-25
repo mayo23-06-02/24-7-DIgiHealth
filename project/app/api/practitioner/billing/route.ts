@@ -2,23 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
+import { requireRole } from '@/lib/auth/access';
 
 import { apiError } from "@/lib/api/errors";
-async function getPractitionerId(req: NextRequest): Promise<string> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    if (token) {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-      const { payload } = await jwtVerify(token, secret);
-      const user = await User.findById(payload.userId as string).lean();
-      if (user && (user as any).role === 'practitioner') return (user as any)._id.toString();
-    }
-  } catch {}
-  return req.headers.get('x-practitioner-id') || process.env.MOCK_PRACTITIONER_ID || '000000000000000000000000';
+/**
+ * Identity comes from the verified session, never from the request.
+ *
+ * The previous version accepted a JWT only if the account held the
+ * practitioner role, then fell back to an `x-practitioner-id` header the
+ * client sets and the proxy does not overwrite — so any signed-in account
+ * could read any practitioner's earnings and transaction history. Failing the
+ * role check now denies instead of falling back.
+ */
+async function getPractitionerId(): Promise<string> {
+  const user = await requireRole('practitioner', 'mega_admin');
+  return user.userId;
 }
 
 // Billing schema (inline to avoid import issues)
@@ -39,7 +38,7 @@ const Billing = mongoose.models.Billing || mongoose.model('Billing', BillingSche
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
-    const practitionerId = await getPractitionerId(req);
+    const practitionerId = await getPractitionerId();
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
     const from = searchParams.get('from');

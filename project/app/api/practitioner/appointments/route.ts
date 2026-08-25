@@ -2,31 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import { riskBandFromScore } from '@/lib/riskScore';
 import { getBlockedAcceptorId } from '@/lib/booking/requester';
+import { requireRole } from '@/lib/auth/access';
 
 import { apiError } from "@/lib/api/errors";
-async function getPractitionerId(req: NextRequest): Promise<string> {
-  // 1. Try JWT token from cookie
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    if (token) {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
-      const { payload } = await jwtVerify(token, secret);
-      const user = await User.findById(payload.userId as string).lean();
-      if (user && (user as any).role === 'practitioner') return (user as any)._id.toString();
-    }
-  } catch {}
-
-  // 2. Header override (dev)
-  const header = req.headers.get('x-practitioner-id');
-  if (header) return header;
-
-  // 3. Env fallback
-  return process.env.MOCK_PRACTITIONER_ID || '000000000000000000000000';
+/**
+ * Identity comes from the verified session, never from the request.
+ *
+ * The previous version tried a JWT first but accepted it only if the account
+ * held the practitioner role — so a patient, holding a perfectly valid token,
+ * failed that test and fell through to an `x-practitioner-id` header the
+ * client sets and the proxy does not overwrite. Any signed-in account could
+ * therefore read any practitioner's appointment book, and an unattributed
+ * request was served as MOCK_PRACTITIONER_ID rather than rejected.
+ *
+ * Failing the role check now denies instead of falling back, which is the
+ * whole difference.
+ */
+async function getPractitionerId(): Promise<string> {
+  const user = await requireRole('practitioner', 'mega_admin');
+  return user.userId;
 }
 
 export async function GET(req: NextRequest) {
@@ -37,7 +33,7 @@ export async function GET(req: NextRequest) {
     // Email reminder for consultations starting in ~10 minutes (throttled, idempotent)
     const { sendDueAppointmentReminders } = await import('@/lib/email/reminders');
     void sendDueAppointmentReminders();
-    const practitionerId = await getPractitionerId(req);
+    const practitionerId = await getPractitionerId();
     const { searchParams } = new URL(req.url);
 
     const tab = searchParams.get('tab') || 'upcoming';
@@ -159,7 +155,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
     const body = await req.json();
-    const practitionerId = await getPractitionerId(req);
+    const practitionerId = await getPractitionerId();
     const { notifyBookingEvent } = await import('@/lib/booking/notifications');
 
     const start = new Date(body.scheduledStart);
