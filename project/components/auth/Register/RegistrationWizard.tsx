@@ -44,7 +44,15 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
   };
 
   return (
-    <div className="bg-white fixed inset-0 z-50 w-screen h-screen rounded-none px-4 flex flex-col overflow-hidden animate-in fade-in duration-700 lg:relative lg:inset-auto lg:w-full lg:h-full lg:max-w-4xl xl:max-w-5xl lg:mx-auto lg:min-h-[85vh] lg:max-h-[90vh] lg:rounded-lg lg:mt-[8vh] lg:px-10">
+    // Full screen on mobile; a fixed 90vh card on lg.
+    //
+    // Exactly 90vh rather than min-85/max-90 plus an 8vh top margin: that
+    // combination could total 98vh before the layout's own padding, which
+    // pushed the page over a viewport and put a scrollbar on a wizard that
+    // already scrolls internally (the step area below is `overflow-y-auto`).
+    // One fixed height means the card is centred by the layout and the only
+    // thing that ever scrolls is the step content.
+    <div className="bg-white fixed inset-0 z-50 w-screen h-screen rounded-none px-4 flex flex-col overflow-hidden animate-in fade-in duration-700 lg:relative lg:inset-auto lg:w-full lg:h-[90vh] lg:max-w-4xl xl:max-w-5xl lg:mx-auto lg:rounded-lg lg:px-10">
       {/* Offline banner */}
       {!isOnline && (
         <div className="bg-gray-500 text-white text-center text-xs font-bold tracking-normal py-3 px-6 flex-shrink-0">
