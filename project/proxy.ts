@@ -244,7 +244,12 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // time-gated screen needs it before it can decide what to render — a
     // consultation lobby that can't reach it falls back to the device clock,
     // which is the disagreement it exists to prevent.
-    pathname === '/api/time'
+    pathname === '/api/time' ||
+    // A practitioner asking to join is by definition not signed in yet — the
+    // whole point of the form is that they have no account. It reads nothing
+    // and writes nothing; it validates its own input and emails the clinical
+    // team. Gating it behind a session made it 401 for every real user of it.
+    pathname === '/api/contact/practitioner-inquiry'
   ) {
     return NextResponse.next();
   }

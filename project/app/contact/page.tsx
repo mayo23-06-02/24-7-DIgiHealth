@@ -18,19 +18,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-/**
- * The practitioner inquiry form is hidden for now.
- *
- * A flag rather than deleted or commented out: the form still typechecks and
- * still renders the moment this flips back, so bringing it back is one word
- * rather than a rebuild. Note that its submissions currently 401 — the route
- * itself does no auth, but proxy.ts does not list
- * /api/contact/practitioner-inquiry as public, so anonymous visitors are
- * turned away before reaching it. That needs fixing before this goes live
- * again.
- */
-const SHOW_PRACTITIONER_INQUIRY = false;
-
 export default function ContactPage() {
   const [form, setForm] = useState({
     name: "",
@@ -153,7 +140,6 @@ export default function ContactPage() {
           </div>
 
           {/* Practitioner inquiry form */}
-          {SHOW_PRACTITIONER_INQUIRY && (
           <div className="max-w-xl mx-auto bg-white border border-border rounded-2xl p-8">
             <h2 className="text-xl font-bold text-ink-900 mb-1 font-grotesk">
               Practitioner Inquiry
@@ -228,7 +214,6 @@ export default function ContactPage() {
               </form>
             )}
           </div>
-          )}
         </div>
       </section>
 
