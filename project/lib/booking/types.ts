@@ -4,7 +4,7 @@
 
 export type BookingRole = "patient" | "practitioner" | "hospital_admin";
 
-export type ConsultationMethod = "video" | "chat" | "in_person";
+export type ConsultationMethod = "video" | "voice" | "chat" | "in_person";
 
 export type BookingStatus =
   | "requested"

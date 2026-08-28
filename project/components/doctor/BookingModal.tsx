@@ -70,6 +70,13 @@ interface BookingModalProps {
   onSuccess?: () => void;
 }
 
+/**
+ * Consultations run 10, 15 or 20 minutes. 15 is the default because it is the
+ * middle option — and because it has to be one of the three: a default of 30
+ * would leave the Select showing a value that is no longer on its own list.
+ */
+const DEFAULT_DURATION_MINUTES = 15;
+
 export default function BookingModal({
   isOpen,
   onClose,
@@ -88,7 +95,7 @@ export default function BookingModal({
   const [selectedTime, setSelectedTime] = useState("");
   const [concern, setConcern] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [durationMinutes, setDurationMinutes] = useState(30);
+  const [durationMinutes, setDurationMinutes] = useState(DEFAULT_DURATION_MINUTES);
   const [consultType, setConsultType] = useState("video");
   const [daySlots, setDaySlots] = useState<BookingSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -146,8 +153,8 @@ export default function BookingModal({
       setSelectedDate(initialForm?.date || todayDateString());
       setSelectedTime(normaliseTime(initialForm?.time) || "");
       setConcern(initialForm?.reason || "");
-      // Keep reschedule duration aligned with standard 30-min slots unless set
-      setDurationMinutes(initialForm?.durationMinutes || 30);
+      // Keep reschedule duration aligned with the standard slot unless set
+      setDurationMinutes(initialForm?.durationMinutes || DEFAULT_DURATION_MINUTES);
       setConsultType(initialForm?.type || "video");
       setDoctorSearch("");
       setPatientSearch(patient?.name || "");
@@ -179,8 +186,8 @@ export default function BookingModal({
         const result = await fetchDaySlots({
           practitionerId: slotsPractitionerId,
           date: selectedDate,
-          // Use same 30-min grid as patient booking unless doctor chose another
-          durationMinutes: durationMinutes || 30,
+          // Same grid as patient booking unless the doctor chose another
+          durationMinutes: durationMinutes || DEFAULT_DURATION_MINUTES,
           excludeBookingId: editingApptId || null,
         });
         if (cancelled) return;
@@ -337,7 +344,7 @@ export default function BookingModal({
       date: selectedDate,
       time: selectedTime,
       reason: concern,
-      durationMinutes: isPractitionerMode ? durationMinutes : 30,
+      durationMinutes: isPractitionerMode ? durationMinutes : DEFAULT_DURATION_MINUTES,
       type: (isPractitionerMode ? consultType : "video") as ConsultationMethod,
       patientId: selectedPatientState?.id,
       practitionerId: selectedDoctorState?.id,
@@ -668,11 +675,9 @@ export default function BookingModal({
                     setSelectedTime("");
                   }}
                   options={[
+                    { value: "10", label: "10 min" },
                     { value: "15", label: "15 min" },
-                    { value: "30", label: "30 min" },
-                    { value: "45", label: "45 min" },
-                    { value: "60", label: "1 hour" },
-                    { value: "90", label: "1.5 hours" },
+                    { value: "20", label: "20 min" },
                   ]}
                 />
                 <Select
@@ -681,7 +686,7 @@ export default function BookingModal({
                   onChange={setConsultType}
                   options={[
                     { value: "video", label: "Video Call" },
-                    { value: "chat", label: "Chat" },
+                    { value: "voice", label: "Voice Call" },
                   ]}
                 />
               </div>
@@ -697,7 +702,7 @@ export default function BookingModal({
                 selectedTime={selectedTime}
                 onSelect={setSelectedTime}
                 loading={slotsLoading}
-                durationMinutes={isPractitionerMode ? durationMinutes : 30}
+                durationMinutes={isPractitionerMode ? durationMinutes : DEFAULT_DURATION_MINUTES}
                 emptyMessage={
                   slotsError
                     ? `Couldn't load available times: ${slotsError}`

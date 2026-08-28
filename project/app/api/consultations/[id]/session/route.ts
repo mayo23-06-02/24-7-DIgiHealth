@@ -94,7 +94,12 @@ export async function POST(
       closesAt: win.closesAt.toISOString(),
       consultationStatus: consultation.status,
       contact: { id: contactId, name: contactName },
-      type: consultation.type === "chat" ? ("voice" as const) : ("video" as const),
+      // A voice booking opens an audio call; chat keeps the same treatment it
+      // had before voice existed as a bookable type. Everything else is video.
+      type:
+        consultation.type === "voice" || consultation.type === "chat"
+          ? ("voice" as const)
+          : ("video" as const),
     };
 
     // Outside the window there is nothing to hand out. Returning 200 with the

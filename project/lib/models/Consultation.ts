@@ -4,7 +4,7 @@ export interface IConsultation extends Document {
   patientId: Types.ObjectId;
   practitionerId: Types.ObjectId;
   facilityId?: Types.ObjectId;
-  type: 'video' | 'chat' | 'in_person';
+  type: 'video' | 'voice' | 'chat' | 'in_person';
   status: 'requested' | 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'missed';
   scheduledStartTime: Date;
   scheduledEndTime: Date;
@@ -34,7 +34,10 @@ const ConsultationSchema = new Schema<IConsultation>({
   patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   facilityId: { type: Schema.Types.ObjectId, ref: 'Facility' },
-  type: { type: String, enum: ['video', 'chat', 'in_person'], required: true },
+  // 'voice' is a real consultation type, not a video call with the camera off:
+  // it is offered at booking, and the session opens as an audio call. Without
+  // it in this enum a voice booking fails validation at save.
+  type: { type: String, enum: ['video', 'voice', 'chat', 'in_person'], required: true },
   status: { type: String, enum: ['requested', 'pending', 'scheduled', 'in_progress', 'completed', 'cancelled', 'missed'], default: 'requested' },
   scheduledStartTime: { type: Date, required: true },
   scheduledEndTime: { type: Date, required: true },
