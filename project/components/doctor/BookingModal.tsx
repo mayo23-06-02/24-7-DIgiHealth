@@ -344,8 +344,8 @@ export default function BookingModal({
       date: selectedDate,
       time: selectedTime,
       reason: concern,
-      durationMinutes: isPractitionerMode ? durationMinutes : DEFAULT_DURATION_MINUTES,
-      type: (isPractitionerMode ? consultType : "video") as ConsultationMethod,
+      durationMinutes,
+      type: consultType as ConsultationMethod,
       patientId: selectedPatientState?.id,
       practitionerId: selectedDoctorState?.id,
     };
@@ -665,8 +665,12 @@ export default function BookingModal({
               </div>
             </div>
 
-            {isPractitionerMode && (
-              <div className="grid grid-cols-2 gap-3">
+            {/*
+              Shown to patients as well as practitioners. A patient was silently
+              given 30 minutes of video whatever they wanted — the choice
+              existed, it was just not offered to the person booking.
+            */}
+            <div className="grid grid-cols-2 gap-3">
                 <Select
                   label="Duration"
                   value={String(durationMinutes)}
@@ -689,8 +693,7 @@ export default function BookingModal({
                     { value: "voice", label: "Voice Call" },
                   ]}
                 />
-              </div>
-            )}
+            </div>
 
             {!slotsPractitionerId ? (
               <p className="text-sm text-slate-500 font-medium px-1">
@@ -702,7 +705,7 @@ export default function BookingModal({
                 selectedTime={selectedTime}
                 onSelect={setSelectedTime}
                 loading={slotsLoading}
-                durationMinutes={isPractitionerMode ? durationMinutes : DEFAULT_DURATION_MINUTES}
+                durationMinutes={durationMinutes}
                 emptyMessage={
                   slotsError
                     ? `Couldn't load available times: ${slotsError}`

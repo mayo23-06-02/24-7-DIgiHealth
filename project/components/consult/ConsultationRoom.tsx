@@ -272,6 +272,10 @@ export default function ConsultationRoom({
           // The room belongs to the appointment, not to whoever is in it. If
           // the other party drops, stay — they may be coming back.
           closeWhenAlone={false}
+          // Drives the closing-minutes countdown. This is the booked end, not
+          // the grace period: the warning is about the slot running out, and
+          // the room staying joinable afterwards is a separate courtesy.
+          endsAt={new Date(session.endsAt)}
         />
       </div>
     );

@@ -24,6 +24,7 @@ import {
 } from "react-icons/bi";
 import { FaCompress } from "react-icons/fa";
 import type { ActiveCallInfo } from "@/components/chat/CallButton";
+import { serverNow } from "@/lib/time/serverClock";
 
 /**
  * Capture ladder, lowest → highest.
@@ -77,13 +78,24 @@ function ladderIndexForQuality(q: ConnectionQuality): number | null {
   }
 }
 
+/** How long before the booked end the remaining-time chip appears. */
+const WARN_FROM_SECONDS = 5 * 60;
+
 export default function LiveKitCallPanel({
   callInfo,
   onEnded,
   closeWhenAlone = true,
+  endsAt = null,
 }: {
   callInfo: ActiveCallInfo;
   onEnded: () => void;
+  /**
+   * When the booked slot runs out, for a scheduled consultation.
+   *
+   * Optional because an ad-hoc call has no end — nobody agreed a length for it,
+   * so there is nothing to count down to and the chip stays hidden.
+   */
+  endsAt?: Date | null;
   /**
    * Whether being left alone in the room means the call is over.
    *
@@ -190,6 +202,37 @@ export default function LiveKitCallPanel({
   const [micOn, setMicOn] = useState(true);
   const [videoOn, setVideoOn] = useState(callInfo.type === "video");
   const [elapsed, setElapsed] = useState(0);
+
+  /**
+   * Seconds left of the booked slot, once it is worth saying.
+   *
+   * Null until the last five minutes, so the chip appears as a warning rather
+   * than sitting there ticking for the whole consultation — a clock counting
+   * down from the first second changes how people talk to their doctor. It
+   * keeps counting past zero into overrun, because the room stays open through
+   * the grace period and pretending otherwise would be a lie about what is
+   * happening.
+   */
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+
+  // Depend on the timestamp, not the Date object. Callers naturally write
+  // `endsAt={new Date(...)}`, which is a new object on every render — keying
+  // the effect on that would rebuild the interval once a second.
+  const endsAtMs = endsAt ? endsAt.getTime() : null;
+
+  useEffect(() => {
+    if (endsAtMs === null) {
+      setSecondsLeft(null);
+      return;
+    }
+    const tick = () => {
+      const left = Math.round((endsAtMs - serverNow().getTime()) / 1000);
+      setSecondsLeft(left <= WARN_FROM_SECONDS ? left : null);
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [endsAtMs]);
   const [remoteConnected, setRemoteConnected] = useState(false);
   /** They were here and went. Distinguishes "left" from "hasn't arrived yet". */
   const [remoteLeft, setRemoteLeft] = useState(false);
@@ -563,6 +606,31 @@ export default function LiveKitCallPanel({
             <div className="bg-white/10 px-3 py-2 rounded-full border border-white/10">
               <span className="text-white/80 text-xs font-semibold tabular-nums">
                 {captureLabel}
+              </span>
+            </div>
+          )}
+          {/*
+            Time remaining, only in the closing minutes. Amber while it runs
+            down, red once the slot is over and the consultation is into its
+            grace period.
+          */}
+          {secondsLeft !== null && (
+            <div
+              className={`px-3 py-2 rounded-full border ${
+                secondsLeft > 0
+                  ? "bg-amber-500/90 border-amber-300/30"
+                  : "bg-red-500/90 border-red-300/30 animate-pulse"
+              }`}
+              title={
+                secondsLeft > 0
+                  ? "Time remaining in this consultation"
+                  : "This consultation has run past its booked time"
+              }
+            >
+              <span className="text-white text-xs font-bold tabular-nums">
+                {secondsLeft > 0
+                  ? `${fmt(secondsLeft)} left`
+                  : `+${fmt(Math.abs(secondsLeft))} over`}
               </span>
             </div>
           )}
