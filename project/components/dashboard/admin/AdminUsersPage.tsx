@@ -254,10 +254,78 @@ export default function AdminUsersPage({
         ) : users.length === 0 ? (
           <EmptyState title="No users found" description="Try adjusting filters." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[800px]">
+          <>
+            {/*
+              Stacked cards below md, per design.md §3.5. Six columns behind a
+              horizontal scrollbar is the fallback that section rules out.
+            */}
+            <div className="md:hidden divide-y divide-border">
+              {users.map((u) => (
+                <div key={u.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-ink-900 truncate">{u.name}</p>
+                      <p className="text-xs text-ink-400 truncate">{u.email}</p>
+                    </div>
+                    <Badge
+                      label={u.status}
+                      status={u.status === "suspended" ? "error" : "success"}
+                      className="!text-[10px] !px-2 !py-1 shrink-0"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-ink-600">
+                    <span className="font-semibold">
+                      MFA {u.mfaEnabled ? "on" : "off"}
+                    </span>
+                    <span aria-hidden>·</span>
+                    <span>
+                      Joined{" "}
+                      {u.createdAt
+                        ? new Date(u.createdAt).toLocaleDateString("en-ZA")
+                        : "—"}
+                    </span>
+                  </div>
+                  <select
+                    value={u.role}
+                    disabled={busyId === u.id}
+                    onChange={(e) => void changeRole(u.id, e.target.value)}
+                    aria-label={`Role for ${u.name}`}
+                    className="w-full text-xs text-ink-900 border border-border rounded-md px-2 py-2 bg-surface"
+                  >
+                    {ROLES.filter(
+                      (r) => canAssignRole(actorRole, r) || r === u.role,
+                    ).map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    size="sm"
+                    variant={u.status === "suspended" ? "outline" : "danger"}
+                    fullWidth
+                    disabled={busyId === u.id}
+                    onClick={() =>
+                      u.status === "suspended"
+                        ? void suspend(u.id, "unsuspend")
+                        : setSuspendTarget({
+                            id: u.id,
+                            name: u.name,
+                            email: u.email,
+                          })
+                    }
+                    className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px]"
+                  >
+                    {u.status === "suspended" ? "Unsuspend" : "Suspend"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <tr className="bg-surface-soft border-b border-border text-[10px] font-bold uppercase tracking-wider text-ink-400">
                   <th className="px-4 py-3">User</th>
                   <th className="px-3 py-3">Role</th>
                   <th className="px-3 py-3">Status</th>
@@ -266,19 +334,20 @@ export default function AdminUsersPage({
                   <th className="px-3 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-border">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50/80">
+                  <tr key={u.id} className="hover:bg-surface-soft/60">
                     <td className="px-4 py-3">
-                      <p className="font-bold text-slate-800">{u.name}</p>
-                      <p className="text-xs text-slate-400">{u.email}</p>
+                      <p className="font-bold text-ink-900">{u.name}</p>
+                      <p className="text-xs text-ink-400">{u.email}</p>
                     </td>
                     <td className="px-3 py-3">
                       <select
                         value={u.role}
                         disabled={busyId === u.id}
                         onChange={(e) => void changeRole(u.id, e.target.value)}
-                        className="text-xs border border-slate-200 rounded-lg px-2 py-2 bg-white max-w-[140px]"
+                        aria-label={`Role for ${u.name}`}
+                        className="text-xs text-ink-900 border border-border rounded-md px-2 py-2 bg-surface max-w-[140px]"
                       >
                         {ROLES.filter((r) => canAssignRole(actorRole, r) || r === u.role).map(
                           (r) => (
@@ -296,10 +365,10 @@ export default function AdminUsersPage({
                         className="!text-[10px] !px-2 !py-1"
                       />
                     </td>
-                    <td className="px-3 py-3 text-xs font-semibold text-slate-600">
+                    <td className="px-3 py-3 text-xs font-semibold text-ink-600">
                       {u.mfaEnabled ? "On" : "Off"}
                     </td>
-                    <td className="px-3 py-3 text-xs text-slate-500 whitespace-nowrap">
+                    <td className="px-3 py-3 text-xs text-ink-600 whitespace-nowrap">
                       {u.createdAt
                         ? new Date(u.createdAt).toLocaleDateString("en-ZA")
                         : "—"}
@@ -353,11 +422,12 @@ export default function AdminUsersPage({
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
         {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50">
-            <span className="text-xs text-slate-500">{pagination.total} users</span>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-surface-soft">
+            <span className="text-xs text-ink-600">{pagination.total} users</span>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -367,7 +437,7 @@ export default function AdminUsersPage({
               >
                 ←
               </button>
-              <span className="text-sm text-slate-600 px-2">
+              <span className="text-sm text-ink-600 px-2">
                 {page} / {pagination.totalPages}
               </span>
               <button
