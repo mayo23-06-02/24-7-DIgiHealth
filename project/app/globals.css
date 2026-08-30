@@ -213,6 +213,16 @@ html[data-navigating="true"] * {
 
   select {
     font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+    /*
+     * Same explicit colour `input` above already gets.
+     *
+     * Without it a bare <select> inherits from wherever it sits, and inside a
+     * table that resolved to something near-invisible — the role dropdowns on
+     * the admin user list rendered as empty boxes. Twelve bare selects across
+     * the app were relying on that inheritance; fixing the element rule fixes
+     * all of them rather than the one that was noticed.
+     */
+    color: #0A0A2E;
   }
 
   a {

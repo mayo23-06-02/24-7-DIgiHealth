@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Loader2, Search, RefreshCw, UserX, UserCheck } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  RefreshCw,
+  UserX,
+  UserCheck,
+  TriangleAlert,
+  Copy,
+  Check,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -9,6 +18,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
+import Dialog from "@/components/ui/Dialog";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import { canAssignRole } from "@/lib/auth/adminRoles";
@@ -40,6 +50,40 @@ export default function AdminUsersPage({
   const [page, setPage] = useState(1);
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  /** The account awaiting a typed-name confirmation before it is suspended. */
+  const [suspendTarget, setSuspendTarget] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
+  const [confirmInput, setConfirmInput] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  // Fall back to the email when an account has no name, so there is always
+  // something specific to type — a blank prompt would confirm nothing.
+  const confirmName = suspendTarget
+    ? suspendTarget.name || suspendTarget.email || ""
+    : "";
+  const confirmMatches =
+    confirmName.length > 0 &&
+    confirmInput.trim().toLowerCase() === confirmName.trim().toLowerCase();
+
+  const closeSuspendDialog = () => {
+    setSuspendTarget(null);
+    setConfirmInput("");
+    setCopied(false);
+  };
+
+  const handleCopyConfirmName = async () => {
+    try {
+      await navigator.clipboard.writeText(confirmName);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Couldn't copy — type the name instead.");
+    }
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -69,11 +113,22 @@ export default function AdminUsersPage({
     return () => clearTimeout(t);
   }, [load]);
 
+  /**
+   * Suspending is confirmed by typing the account's name, the same way removing
+   * a family member is.
+   *
+   * A browser `confirm()` is dismissed by reflex, and every row's button looks
+   * identical — the only thing distinguishing "suspend the test account" from
+   * "suspend a real practitioner mid-consultation" was which row the pointer
+   * happened to be over. Typing the name makes you read which account it is.
+   *
+   * Reactivating keeps its simple confirm: it restores access rather than
+   * removing it, so getting it wrong is not the same kind of mistake.
+   */
   const suspend = async (id: string, action: "suspend" | "unsuspend") => {
-    const msg = action === "suspend"
-      ? "Are you sure you want to suspend this user? They will lose access to all services."
-      : "Are you sure you want to reactivate this user?";
-    if (!confirm(msg)) return;
+    if (action === "unsuspend") {
+      if (!confirm("Are you sure you want to reactivate this user?")) return;
+    }
 
     setBusyId(id);
     try {
@@ -85,6 +140,7 @@ export default function AdminUsersPage({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Action failed");
       toast.success(action === "suspend" ? "User suspended" : "User reactivated");
+      closeSuspendDialog();
       void load();
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -272,7 +328,13 @@ export default function AdminUsersPage({
                           size="sm"
                           variant="danger"
                           disabled={busyId === u.id}
-                          onClick={() => void suspend(u.id, "suspend")}
+                          onClick={() =>
+                            setSuspendTarget({
+                              id: u.id,
+                              name: u.name,
+                              email: u.email,
+                            })
+                          }
                           icon={
                             busyId === u.id ? (
                               <Loader2 className="animate-spin" size={14} />
@@ -320,6 +382,72 @@ export default function AdminUsersPage({
           </div>
         )}
       </Card>
+
+      <Dialog
+        isOpen={!!suspendTarget}
+        onClose={closeSuspendDialog}
+        title="Suspend user"
+        size="sm"
+      >
+        {suspendTarget && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 rounded-lg border border-danger-500/20 bg-danger-50 p-3">
+              <TriangleAlert
+                size={18}
+                className="text-danger-700 shrink-0 mt-0.5"
+              />
+              <p className="text-sm text-danger-700">
+                This suspends{" "}
+                <span className="font-bold">{confirmName}</span> — they lose
+                access to all services immediately, including any consultation
+                in progress. You can reactivate them afterwards.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-ink-600 mb-1.5">
+                Type their name to confirm
+              </p>
+              <div className="flex items-center gap-2 mb-3 rounded-lg bg-surface-soft border border-border px-3 py-2">
+                <span className="flex-1 text-sm font-mono text-ink-900 truncate">
+                  {confirmName}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyConfirmName}
+                  aria-label="Copy name"
+                  className="shrink-0 flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-600 transition-colors"
+                >
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+              <Input
+                value={confirmInput}
+                onChange={(e) => setConfirmInput(e.target.value)}
+                placeholder={confirmName}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <Button variant="ghost" fullWidth onClick={closeSuspendDialog}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                fullWidth
+                disabled={!confirmMatches || busyId === suspendTarget.id}
+                loading={busyId === suspendTarget.id}
+                icon={<UserX size={16} />}
+                iconPosition="left"
+                onClick={() => void suspend(suspendTarget.id, "suspend")}
+              >
+                Suspend
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 }
