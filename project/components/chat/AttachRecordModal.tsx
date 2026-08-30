@@ -161,7 +161,7 @@ export default function AttachRecordModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add any clinical notes regarding this attachment..."
-              className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:border-primary outline-none h-20 resize-none"
+              className="w-full rounded-md border border-border px-4 py-3 text-sm text-ink-900 focus:border-primary outline-none h-20 resize-none"
             />
           </div>
 

@@ -211,6 +211,17 @@ html[data-navigating="true"] * {
     font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
   }
 
+  /*
+   * `textarea` had no base rule at all — not even a font-family — so it fell
+   * back to the browser's serif default and inherited its colour from
+   * wherever it sat. Grouped with select here because they share exactly the
+   * fault that made the admin role dropdowns invisible.
+   */
+  textarea {
+    font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+    color: #0A0A2E;
+  }
+
   select {
     font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
     /*
