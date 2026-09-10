@@ -373,7 +373,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
 
     if (isLoading) {
       return (
-        <div className="w-full h-[700px] flex items-center justify-center bg-slate-50 rounded-lg">
+        <div className="w-full h-full min-h-[500px] flex items-center justify-center bg-slate-50 rounded-lg">
           <div className="flex flex-col items-center gap-3">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-slate-500">Loading 3D model...</p>
@@ -383,7 +383,7 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
     }
 
     return (
-      <div className="w-full h-[700px] flex flex-col">
+      <div className="w-full h-full min-h-[500px] flex flex-col">
         <div className="mb-4 p-4">
           <h1 className="text-lg font-bold text-slate-800">
             {readOnly ? "Clinical Anatomical Map" : "My Digital Twin"}
@@ -502,9 +502,9 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
           </Canvas>
 
           {(activePart || editingNote) && (
-            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-8 z-[100] animate-in fade-in duration-500">
-              <div className="bg-white rounded-lg border border-slate-200 p-6 w-full max-w-lg relative overflow-hidden">
-                <div className="relative z-10">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 z-[100] animate-in fade-in duration-500 overflow-y-auto">
+              <div className="bg-white rounded-lg border border-slate-200 w-full max-w-lg relative my-auto max-h-[85vh] flex flex-col overflow-hidden">
+                <div className="relative z-10 overflow-y-auto p-6 flex-1 min-h-0">
                   <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center gap-3 px-4 py-2 rounded-full">
                       <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -564,19 +564,19 @@ const MedicalManikin = forwardRef<MedicalManikinHandle, MedicalManikinProps>(
                       autoFocus
                     />
                   )}
-
-                  {!readOnly && (
-                    <div className="flex gap-2">
-                      <Button onClick={() => { setActivePart(null); setEditingNote(null); }} size="sm" variant="danger">
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSave} disabled={isSaving || !description.trim()} size="sm" variant="primary">
-                        {isSaving && <BiLoaderAlt size={16} className="animate-spin" />}
-                        {editingNote ? "Update" : "Save"}
-                      </Button>
-                    </div>
-                  )}
                 </div>
+
+                {!readOnly && (
+                  <div className="flex gap-2 p-6 pt-4 border-t border-slate-100 bg-white shrink-0">
+                    <Button onClick={() => { setActivePart(null); setEditingNote(null); }} size="sm" variant="danger">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSave} disabled={isSaving || !description.trim()} size="sm" variant="primary">
+                      {isSaving && <BiLoaderAlt size={16} className="animate-spin" />}
+                      {editingNote ? "Update" : "Save"}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           )}

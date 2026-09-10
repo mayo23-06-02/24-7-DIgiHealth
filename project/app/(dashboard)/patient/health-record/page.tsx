@@ -307,7 +307,7 @@ export default function HealthRecordPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: Records Content */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-8 min-w-0">
+        <div className="lg:col-span-6 xl:col-span-7 space-y-8 min-w-0">
           <div className="mt-2 text-slate-800">
             {loadingRecords ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -367,7 +367,7 @@ export default function HealthRecordPage() {
         </div>
 
         {/* RIGHT COLUMN: 3D Body Mapping (Fixed/Sticky) */}
-        <div className="lg:col-span-5 xl:col-span-4 sticky top-28 h-[calc(100vh-160px)] min-h-[600px] animate-in slide-in-from-right-10 duration-1000">
+        <div className="lg:col-span-6 xl:col-span-5 sticky top-28 h-[calc(100vh-120px)] min-h-[700px] animate-in slide-in-from-right-10 duration-1000">
           <Card className="h-full w-full bg-white border border-slate-100 rounded-lg overflow-hidden shadow-primary/5 relative">
             <MedicalManikin
               gender={
