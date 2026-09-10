@@ -14,6 +14,7 @@
     "seed:practitioner": "node --env-file=.env.local scripts/seedPractitioner.mjs",
     "seed:emt": "node --env-file=.env.local scripts/seedEMT.mjs",
     "seed:oliver": "node --env-file=.env.local scripts/seedOliver.mjs",
+    "seed:admins": "node --env-file=.env.local node_modules/.bin/tsx scripts/seed-platform-admins.ts",
     "fix:duplicate-calls": "tsx scripts/fix-duplicate-active-calls.ts"
   },
   "dependencies": {
