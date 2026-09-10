@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useLogin } from "./useLogin";
@@ -30,6 +31,16 @@ export default function LeftPanel({
     loading,
     error,
     handleLogin,
+    mfaRequired,
+    mfaEmail,
+    code,
+    setCode,
+    verifyingCode,
+    resending,
+    resendCooldown,
+    handleVerifyMfa,
+    handleResendCode,
+    handleBackToPassword,
   } = login;
 
   useEffect(() => {
@@ -43,6 +54,74 @@ export default function LeftPanel({
     Practitioner: "Email or HPCSA Number",
     Admin: "Email Address",
   }[role];
+
+  if (mfaRequired) {
+    return (
+      <div className="bg-white rounded-lg lg:rounded-r-none lg:px-8 py-12 w-full max-w-lg mx-auto lg:max-w-2/5 lg:w-1/2  p-4 md:p-8 flex flex-col justify-center">
+        <div className="mb-6 gap-3 flex flex-col items-center text-center">
+          <div className="w-14 h-14 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <Mail size={28} />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tighter font-grotesk">
+            Enter your code
+          </h2>
+          <p className="text-slate-500 text-sm max-w-sm">
+            We emailed a 6-digit code to{" "}
+            <span className="font-semibold text-slate-700">{mfaEmail}</span> —
+            it expires in 10 minutes.
+          </p>
+        </div>
+
+        <form onSubmit={handleVerifyMfa} className="space-y-5">
+          <Input
+            label="6-digit code"
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            placeholder="123456"
+            className="text-center text-2xl tracking-[0.5em] font-bold"
+            autoFocus
+          />
+
+          {error && (
+            <p className="text-red-500 text-sm font-bold text-center">{error}</p>
+          )}
+
+          <Button
+            type="submit"
+            fullWidth
+            disabled={verifyingCode || code.length !== 6}
+            loading={verifyingCode}
+          >
+            Verify & continue
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => void handleResendCode()}
+            disabled={resending || resendCooldown > 0}
+            className="w-full text-center text-sm font-semibold text-primary disabled:text-slate-300 disabled:cursor-not-allowed"
+          >
+            {resending
+              ? "Sending…"
+              : resendCooldown > 0
+                ? `Resend code in ${resendCooldown}s`
+                : "Resend code"}
+          </button>
+        </form>
+
+        <button
+          type="button"
+          onClick={handleBackToPassword}
+          className="mt-8 text-center text-sm text-slate-600 hover:text-primary"
+        >
+          &larr; Back to sign in
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg lg:rounded-r-none lg:px-8 py-12 w-full max-w-lg mx-auto lg:max-w-2/5 lg:w-1/2  p-4 md:p-8 flex flex-col justify-center">

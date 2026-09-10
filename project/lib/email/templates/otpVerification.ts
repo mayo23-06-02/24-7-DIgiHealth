@@ -1,14 +1,30 @@
 /**
- * Branded HTML for the "verify your email" OTP code message.
- * Inline styles only — email clients strip <style> blocks.
+ * Branded HTML for OTP code emails — used both for "verify your email"
+ * (registration) and "sign-in code" (login MFA). Inline styles only —
+ * email clients strip <style> blocks.
  */
 export function otpVerificationEmailHtml(params: {
   code: string;
   firstName?: string;
+  purpose?: "verify_email" | "login_mfa";
 }): string {
-  const { code, firstName } = params;
+  const { code, firstName, purpose = "verify_email" } = params;
   const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : "Hi there,";
   const digits = code.split("");
+
+  const copy =
+    purpose === "login_mfa"
+      ? {
+          headerTitle: "Your sign-in code",
+          bodyText: `${greeting} enter this code to finish signing in to your 24/7 DigiHealth account.`,
+          footerNote:
+            "If you didn't just try to sign in, someone may have your password — consider changing it.",
+        }
+      : {
+          headerTitle: "Verify your account",
+          bodyText: `${greeting} enter this code to confirm your email address and activate your 24/7 DigiHealth account.`,
+          footerNote: "If you didn't request this, you can safely ignore this email.",
+        };
 
   return `
 <!DOCTYPE html>
@@ -26,7 +42,7 @@ export function otpVerificationEmailHtml(params: {
                   🔐
                 </div>
                 <h1 style="margin:0; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.3px;">
-                  Verify your account
+                  ${copy.headerTitle}
                 </h1>
               </td>
             </tr>
@@ -35,8 +51,7 @@ export function otpVerificationEmailHtml(params: {
             <tr>
               <td style="padding:36px 32px 8px; text-align:center;">
                 <p style="margin:0 0 24px; color:#475569; font-size:15px; line-height:1.6;">
-                  ${greeting} enter this code to confirm your email address and activate
-                  your 24/7 DigiHealth account.
+                  ${copy.bodyText}
                 </p>
 
                 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
@@ -64,7 +79,7 @@ export function otpVerificationEmailHtml(params: {
             <tr>
               <td style="padding:24px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; text-align:center;">
                 <p style="margin:0; color:#94a3b8; font-size:12px;">
-                  If you didn't request this, you can safely ignore this email.
+                  ${copy.footerNote}
                 </p>
                 <p style="margin:8px 0 0; color:#cbd5e1; font-size:11px;">
                   24/7 DigiHealth · Connect for Care

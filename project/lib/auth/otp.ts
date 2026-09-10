@@ -15,6 +15,8 @@ export async function issueOtpCode(params: {
   userId: string;
   email: string;
   firstName?: string;
+  /** Controls the email copy only — the storage/verification mechanics are identical. */
+  purpose?: "verify_email" | "login_mfa";
 }): Promise<{ error: string | null }> {
   const code = generateOtpCode();
   const otpCodeHash = await bcrypt.hash(code, 10);
@@ -27,10 +29,14 @@ export async function issueOtpCode(params: {
     params.email,
   );
 
+  const purpose = params.purpose || "verify_email";
   const { error } = await sendEmail({
     to: params.email,
-    subject: "Your 24/7 DigiHealth verification code",
-    html: otpVerificationEmailHtml({ code, firstName: params.firstName }),
+    subject:
+      purpose === "login_mfa"
+        ? "Your 24/7 DigiHealth sign-in code"
+        : "Your 24/7 DigiHealth verification code",
+    html: otpVerificationEmailHtml({ code, firstName: params.firstName, purpose }),
   });
 
   return { error };

@@ -3,8 +3,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
-import { SignJWT } from "jose";
-import { getEntitlement } from "@/lib/billing/entitlement";
+import { issueOtpCode } from "@/lib/auth/otp";
 import { checkSharedRateLimit } from "@/lib/security/rateLimit";
 
 /**
@@ -192,6 +191,9 @@ async function findPostgresOnlyUser(
  * POST /api/auth/login
  * Password login. Blocked until the account's email is verified via
  * the 6-digit code sent at registration (see /api/auth/otp/*).
+ * On a correct password, a second 6-digit code is emailed for MFA — the
+ * session is only issued once that code is confirmed via
+ * /api/auth/mfa/verify.
  */
 export async function POST(request: Request) {
   try {
@@ -277,53 +279,39 @@ export async function POST(request: Request) {
       );
     }
 
-    // Patients are gated on holding a plan, and middleware cannot reach Mongo
-    // to check — so the answer is resolved once here and carried on the token.
-    // See lib/auth/sessionToken.ts for why this is a cache, not the truth.
-    // A dependant on a guardian's family plan has no subscription of their own
-    // and would otherwise be sent to checkout to pay a second time for cover
-    // they already hold. getEntitlement resolves that, so the answer carried on
-    // the token is the same one every other surface reads.
-    const entitlement =
-      user.role === "patient" ? await getEntitlement(user.identityId) : null;
-    const hasPlan = entitlement ? entitlement.hasPlan : true;
-    const coverage = entitlement ? entitlement.source : "own";
-
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const token = await new SignJWT({
+    // Patients are gated on holding a plan, but that no longer needs
+    // resolving here — it's carried on the session token, minted by
+    // /api/auth/mfa/verify once the code below is confirmed (see
+    // lib/auth/session.ts).
+    //
+    // The password has just been proven correct. Rather than sign the user in
+    // immediately, email a second 6-digit code and require it via
+    // /api/auth/mfa/verify — that route (not this one) issues the session.
+    const { error: otpError } = await issueOtpCode({
       userId: user.identityId,
-      role: user.role,
       email: user.email,
       firstName: user.firstName,
-      lastName: user.lastName,
-      hasPlan,
-      coverage,
-    })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("24h")
-      .sign(secret);
-
-    const response = NextResponse.json({
-      mfaRequired: false,
-      emailVerified: true,
-      userId: user.identityId,
-      user: {
-        id: user.identityId,
-        role: user.role,
-        email: user.email,
-        firstName: user.firstName,
-      },
+      purpose: "login_mfa",
     });
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 86400,
-    });
+    if (otpError) {
+      // Log the real provider error server-side only — see the analogous
+      // note in /api/auth/otp/send.
+      console.error("[POST /api/auth/login] Failed to send MFA code:", otpError);
+      return NextResponse.json(
+        {
+          error:
+            "We couldn't send your sign-in code right now. Please try again shortly.",
+        },
+        { status: 502 },
+      );
+    }
 
-    return response;
+    return NextResponse.json({
+      mfaRequired: true,
+      email: user.email,
+      message: "Enter the 6-digit code we emailed you to finish signing in.",
+    });
   } catch (error: any) {
     console.error("Login Error:", error);
     return NextResponse.json(
