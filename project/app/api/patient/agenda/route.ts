@@ -47,22 +47,54 @@ export async function GET() {
   const profiles = await PractitionerProfile.find({ userId: { $in: pracIds } });
   const specMap = new Map(profiles.map(p => [p.userId.toString(), p.specialisation]));
 
-  const mappedCons = cons.map(c => {
+  const mappedCons = cons.flatMap(c => {
     const isPast = new Date(c.scheduledStartTime) < new Date();
     const prac = c.practitionerId as any;
-    return {
+    const drName = prac ? `Dr. ${prac.firstName} ${prac.lastName}` : 'Unknown Doctor';
+    const field = prac ? specMap.get(prac._id.toString()) || 'General' : 'General';
+    const img = prac ? `https://ui-avatars.com/api/?name=${prac.firstName}+${prac.lastName}&background=4493b8&color=fff` : '';
+    const pending = (c as any).pendingReschedule;
+
+    const original = {
       id: c._id,
       type: 'doctor',
-      dr: prac ? `Dr. ${prac.firstName} ${prac.lastName}` : 'Unknown Doctor',
-      field: prac ? specMap.get(prac._id.toString()) || 'General' : 'General',
+      dr: drName,
+      field,
       date: new Date(c.scheduledStartTime).toDateString(),
       time: new Date(c.scheduledStartTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      img: prac ? `https://ui-avatars.com/api/?name=${prac.firstName}+${prac.lastName}&background=4493b8&color=fff` : '',
+      img,
       concern: c.chiefComplaint || 'Scheduled Consultation',
+      // Original slot is flagged separately (reschedulePending) rather than
+      // having its status overwritten, so its real appointment state (e.g.
+      // "confirmed") isn't lost while a proposal is outstanding.
       status: c.status === 'requested' ? 'requested' : c.status === 'scheduled' ? 'confirmed' : c.status,
       countdown: isPast ? 'Past' : 'Upcoming',
       consultationId: c._id,
+      reschedulePending: !!pending,
     };
+
+    if (!pending) return [original];
+
+    // A reschedule proposal is appointment activity in its own right — surface
+    // it as its own calendar entry at the proposed date/time so patients see
+    // it, rather than only the stale original slot.
+    const proposedStart = new Date(pending.proposedStart);
+    const proposed = {
+      id: `${c._id}-reschedule-proposed`,
+      type: 'doctor',
+      dr: drName,
+      field,
+      date: proposedStart.toDateString(),
+      time: proposedStart.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      img,
+      concern: c.chiefComplaint || 'Scheduled Consultation',
+      status: 'reschedule_proposed',
+      countdown: proposedStart.getTime() < Date.now() ? 'Past' : 'Proposed',
+      consultationId: c._id,
+      isProposedReschedule: true,
+    };
+
+    return [original, proposed];
   });
 
   // 2. Prescriptions (Refills)

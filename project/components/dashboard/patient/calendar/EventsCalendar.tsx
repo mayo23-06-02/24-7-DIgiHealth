@@ -109,6 +109,11 @@ interface AgendaItem {
   time: string; // e.g. "09:00 AM"
   concern?: string;
   status?: string;
+  countdown?: string;
+  /** True on the original slot when a reschedule proposal is outstanding for it. */
+  reschedulePending?: boolean;
+  /** True on the synthetic entry representing a proposed (not yet accepted) new time. */
+  isProposedReschedule?: boolean;
 }
 
 const EVENT_TYPES = [
@@ -184,6 +189,11 @@ export default function EventsCalendar() {
     () =>
       filtered.map((item) => {
         const start = new Date(`${item.date} ${item.time}`);
+        const computedStatus = item.isProposedReschedule
+          ? "reschedule_proposed"
+          : item.reschedulePending
+            ? "reschedule_pending"
+            : item.status || "upcoming";
         return {
           id: item.id,
           patientName: "",
@@ -193,7 +203,7 @@ export default function EventsCalendar() {
               : item.title || labelForType(item.type),
           scheduledStart: start.toISOString(),
           scheduledEnd: new Date(start.getTime() + 30 * 60000).toISOString(),
-          computedStatus: item.status || "upcoming",
+          computedStatus,
           status: item.status,
           notes: item.concern,
           specialisation: item.type === "doctor" ? item.field : item.type,
@@ -417,6 +427,13 @@ export default function EventsCalendar() {
       >
         {selectedEvent && (
           <div className="space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${getEventTag(selectedEvent).className}`}
+              >
+                {getEventTag(selectedEvent).label}
+              </span>
+            </div>
             <p className="text-sm text-ink-600">
               {new Date(
                 `${selectedEvent.date} ${selectedEvent.time}`,
@@ -668,4 +685,36 @@ function labelForType(type: string) {
     default:
       return "Event";
   }
+}
+
+/** Computes the small status tag shown next to an event once it's opened. */
+function getEventTag(item: AgendaItem): { label: string; className: string } {
+  if (item.isProposedReschedule) {
+    return { label: "Reschedule Proposed", className: "bg-purple-100 text-purple-800" };
+  }
+  if (item.reschedulePending) {
+    return { label: "Reschedule Pending", className: "bg-orange-100 text-orange-800" };
+  }
+  if (item.status === "cancelled") {
+    return { label: "Cancelled", className: "bg-red-100 text-red-700" };
+  }
+  if (item.status === "missed") {
+    return { label: "Missed", className: "bg-red-100 text-red-700" };
+  }
+  if (item.status === "requested" || item.status === "pending") {
+    return { label: "Requested", className: "bg-amber-100 text-amber-800" };
+  }
+
+  const eventTime = new Date(`${item.date} ${item.time}`).getTime();
+  const now = Date.now();
+  const startOfToday = new Date().setHours(0, 0, 0, 0);
+  const startOfEventDay = new Date(item.date).setHours(0, 0, 0, 0);
+
+  if (eventTime < now) {
+    return { label: "Past", className: "bg-slate-100 text-slate-600" };
+  }
+  if (startOfEventDay === startOfToday) {
+    return { label: "Today", className: "bg-success-50 text-success-700" };
+  }
+  return { label: "Upcoming", className: "bg-primary/10 text-primary" };
 }

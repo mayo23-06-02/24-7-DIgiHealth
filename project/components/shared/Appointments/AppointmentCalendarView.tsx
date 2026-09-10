@@ -24,6 +24,10 @@ function chipClasses(appt: Appointment) {
   switch (status) {
     case "requests":
       return "bg-amber-100 text-amber-800 hover:bg-amber-200";
+    case "reschedule_pending":
+      return "bg-orange-100 text-orange-800 hover:bg-orange-200";
+    case "reschedule_proposed":
+      return "bg-purple-100 text-purple-800 hover:bg-purple-200";
     case "ongoing":
       return "bg-blue-100 text-blue-700 hover:bg-blue-200";
     case "missed":
@@ -41,6 +45,10 @@ function dotClasses(appt: Appointment) {
   switch (status) {
     case "requests":
       return "bg-amber-500";
+    case "reschedule_pending":
+      return "bg-orange-500";
+    case "reschedule_proposed":
+      return "bg-purple-500";
     case "ongoing":
       return "bg-blue-500";
     case "missed":
