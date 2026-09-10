@@ -12,6 +12,7 @@ import {
 } from "@/lib/consultations/window";
 import {
   BiVideo,
+  BiPhone,
   BiChat,
   BiTime,
   BiCalendar,
@@ -165,6 +166,8 @@ export default function AppointmentCard({
               <span className="flex items-center gap-1">
                 {appointment.type === "video" ? (
                   <BiVideo size={14} />
+                ) : appointment.type === "voice" ? (
+                  <BiPhone size={14} />
                 ) : (
                   <BiChat size={14} />
                 )}

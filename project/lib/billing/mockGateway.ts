@@ -94,7 +94,7 @@ export async function chargeMockDebitOrder(
   if (amount <= 0) return { ok: false, error: "Invalid amount." };
   return {
     ok: true,
-    reference: `MOCK-EFT-${Date.now().toString(36).toUpperCase()}`,
+    reference: `EFT-${Date.now().toString(36).toUpperCase()}`,
     last4: digitsOf(acc.accountNumber).slice(-4),
     brand: acc.bankName || "Bank",
   };
@@ -158,7 +158,7 @@ export async function chargeMockCard(
 
   return {
     ok: true,
-    reference: `MOCK-${Date.now().toString(36).toUpperCase()}`,
+    reference: `PAY-${Date.now().toString(36).toUpperCase()}`,
     last4,
     brand: detectBrand(number),
   };

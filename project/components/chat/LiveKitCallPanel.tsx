@@ -329,26 +329,37 @@ export default function LiveKitCallPanel({
 
       const attachRemoteVideo = () => {
         if (!roomRef.current || roomRef.current.state !== "connected") return;
+        // The other party may already be in the room by the time we connect
+        // (they got here first) — reflect that immediately rather than
+        // waiting for a fresh track event that will never fire again.
+        if (room.remoteParticipants.size > 0) setRemoteConnected(true);
         const remoteVideo = Array.from(room.remoteParticipants.values())
           .flatMap((p) => Array.from(p.trackPublications.values()))
           .find((pub) => pub.kind === Track.Kind.Video && pub.isSubscribed && pub.track)
           ?.track;
         if (remoteVideo && remoteVideoRef.current) {
           remoteVideo.attach(remoteVideoRef.current);
-          setRemoteConnected(true);
         }
       };
 
       room
+        .on(RoomEvent.ParticipantConnected, () => {
+          // The other party is in the room. Don't wait on a track — a voice
+          // call publishes audio only, and waiting on video specifically
+          // left the "waiting for X" overlay showing forever even once both
+          // sides could hear each other fine.
+          setRemoteConnected(true);
+          setRemoteLeft(false);
+        })
         .on(RoomEvent.TrackSubscribed, (track) => {
           if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
             track.attach(remoteVideoRef.current);
-            setRemoteConnected(true);
-            // They came back — stop saying they left.
-            setRemoteLeft(false);
           } else if (track.kind === Track.Kind.Audio) {
             syncAudioPubs();
           }
+          // They came back — stop saying they left.
+          setRemoteConnected(true);
+          setRemoteLeft(false);
         })
         .on(RoomEvent.TrackUnsubscribed, (track) => {
           if (track.kind === Track.Kind.Video) {

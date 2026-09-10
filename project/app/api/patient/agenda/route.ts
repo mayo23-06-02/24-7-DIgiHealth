@@ -71,6 +71,10 @@ export async function GET() {
       countdown: isPast ? 'Past' : 'Upcoming',
       consultationId: c._id,
       reschedulePending: !!pending,
+      // The consultation's actual method — distinct from the 'doctor' agenda
+      // category above. Without this the calendar had no way to tell a voice
+      // booking from a video one and always drew the video icon/label.
+      callType: c.type,
     };
 
     if (!pending) return [original];
@@ -92,6 +96,7 @@ export async function GET() {
       countdown: proposedStart.getTime() < Date.now() ? 'Past' : 'Proposed',
       consultationId: c._id,
       isProposedReschedule: true,
+      callType: c.type,
     };
 
     return [original, proposed];
