@@ -368,6 +368,27 @@ export async function POST(request: Request) {
       console.warn("[register] verification code send skipped:", e);
     }
 
+    // Internal notification — lets the team see sign-ups as they happen.
+    // Non-fatal: a failed send here must never fail the registration itself.
+    try {
+      const { sendEmail } = await import("@/lib/email/resend");
+      const { newSignupNotificationEmailHtml } = await import(
+        "@/lib/email/templates/newSignupNotification"
+      );
+      await sendEmail({
+        to: "info@digi-health.co.za",
+        subject: `New ${modelRole} sign-up: ${newUser.firstName} ${newUser.lastName}`,
+        html: newSignupNotificationEmailHtml({
+          fullName: `${newUser.firstName} ${newUser.lastName}`,
+          email: formEmail,
+          phone: newUser.mobile,
+          role: modelRole,
+        }),
+      });
+    } catch (e) {
+      console.warn("[register] admin sign-up notification skipped:", e);
+    }
+
     return NextResponse.json({
       success: true,
       message: "Account created. Check your email for a verification code.",

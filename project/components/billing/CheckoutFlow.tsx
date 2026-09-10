@@ -271,12 +271,6 @@ export default function CheckoutFlow() {
         })}
       </ol>
 
-      <Alert status="warning" title="Demonstration checkout" className="mb-6">
-        No payment gateway is connected and no money moves. Any valid-looking
-        card is accepted; one ending <b>0000</b> is declined so the failure path
-        can be tested.
-      </Alert>
-
       {/* ---------------------------------------------- step 1: plans --- */}
       {step === 0 && (
         <>
