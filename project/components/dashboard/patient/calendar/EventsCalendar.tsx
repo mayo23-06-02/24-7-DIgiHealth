@@ -161,6 +161,30 @@ export default function EventsCalendar() {
     fetchAgenda();
   }, [fetchAgenda]);
 
+  // Newly booked or rescheduled appointments were invisible until a hard
+  // refresh — this page only ever fetched once, on mount, unlike the
+  // Appointments list (useAppointments), which already polls every 20s and
+  // listens for the "appointments:changed" fast-path event NotificationBell
+  // dispatches. Match that here: refetch on focus/visibility, on the same
+  // event, and on the same poll cadence, so the calendar can't drift out of
+  // sync with the list.
+  useEffect(() => {
+    const onFocus = () => fetchAgenda();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") fetchAgenda();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("appointments:changed", onFocus);
+    const interval = setInterval(fetchAgenda, 20000);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("appointments:changed", onFocus);
+      clearInterval(interval);
+    };
+  }, [fetchAgenda]);
+
   // Reset to a fresh, always-future date/time whenever the modal is (re)opened
   useEffect(() => {
     if (showAddModal) setAddForm(createDefaultAddForm());

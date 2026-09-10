@@ -13,6 +13,7 @@ export interface IPatientProfile extends Document {
   medicalAid?: { provider: string; planName: string; memberNumber: string };
   subscriptionTier: 'free' | 'pro';
   popiaConsentDate?: Date;
+  termsAcceptedAt?: Date;
   favoritePractitionerIds?: Types.ObjectId[];
   myDoctorIds?: Types.ObjectId[];
   profilePhoto?: string;
@@ -45,6 +46,7 @@ const PatientProfileSchema = new Schema<IPatientProfile>({
   },
   subscriptionTier: { type: String, enum: ['free', 'pro'], default: 'free' },
   popiaConsentDate: { type: Date },
+  termsAcceptedAt: { type: Date },
   favoritePractitionerIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   myDoctorIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   profilePhoto: { type: String },

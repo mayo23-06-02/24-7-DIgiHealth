@@ -14,7 +14,7 @@ import SkeletonLoader from "@/components/ui/SkeletonLoader";
 
 const FEATURE_KEYS = [
   { key: "telehealth", label: "Telehealth" },
-  { key: "aiDiagnizer", label: "AI Diagnizer" },
+  { key: "aiDiagnizer", label: "AI Diagnoser" },
   { key: "prescriptions", label: "Prescriptions" },
   { key: "registrations", label: "Open registrations" },
 ];

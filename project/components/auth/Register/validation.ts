@@ -85,6 +85,8 @@ export function validateStep(role: string, step: number, formData: any): Record<
   // POPIA consent validation – patient step 5
   if (role === "patient" && step === 5) {
     if (!formData.consent) err.consent = "POPIA consent is required.";
+    if (!formData.termsAccepted)
+      err.termsAccepted = "You must agree to the Terms and Conditions.";
   }
 
   // ─── Hospital validation ───

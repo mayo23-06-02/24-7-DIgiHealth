@@ -20,9 +20,9 @@ export default function RightPanel() {
         </p>
         <div className="flex items-center gap-6 mt-8 lg:mt-10 xl:mt-12 pt-6 lg:pt-8 border-t border-white/10">
           <div className="flex flex-col">
-            <span className="text-xl lg:text-2xl">9 Provinces</span>
+            <span className="text-xl lg:text-2xl">Nationwide</span>
             <span className="text-xs tracking-normal opacity-60">
-              Country Coverage
+              Access Across South Africa
             </span>
           </div>
         </div>

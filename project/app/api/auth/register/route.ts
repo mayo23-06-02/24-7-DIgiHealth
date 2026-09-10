@@ -149,6 +149,7 @@ export async function POST(request: Request) {
           relationship: formData.emergencyRelationship || undefined,
         },
         popiaConsentDate: new Date(),
+        termsAcceptedAt: new Date(),
         subscriptionTier: "pro",
         profilePhoto: formData.profilePhoto,
         medicalDocuments: Array.isArray(formData.medicalDocuments)

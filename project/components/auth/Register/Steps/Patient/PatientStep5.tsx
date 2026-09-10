@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 
 export default function PatientStep5({ formData, updateData, errors }: any) {
   return (
@@ -63,6 +64,40 @@ export default function PatientStep5({ formData, updateData, errors }: any) {
       </label>
       {errors?.consent && (
         <p className="text-xs text-red-500 font-medium">{errors.consent}</p>
+      )}
+
+      <label
+        htmlFor="terms-consent"
+        className={`flex items-start gap-5 p-8 rounded-md cursor-pointer transition-all duration-300 ${
+          formData.termsAccepted
+            ? "border-primary bg-primary/5"
+            : "border-slate-100 bg-slate-50 hover:border-primary/30"
+        }`}
+      >
+        <input
+          id="terms-consent"
+          type="checkbox"
+          checked={formData.termsAccepted || false}
+          onChange={(e) => updateData("termsAccepted", e.target.checked)}
+          className="mt-0.5 w-6 h-6 rounded text-primary focus:ring-primary border-slate-300 accent-primary shrink-0"
+        />
+        <span className="text-sm font-bold text-slate-700 leading-relaxed">
+          I have read and agree to the{" "}
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline decoration-2 underline-offset-4"
+          >
+            Terms and Conditions
+          </Link>
+          .
+        </span>
+      </label>
+      {errors?.termsAccepted && (
+        <p className="text-xs text-red-500 font-medium">
+          {errors.termsAccepted}
+        </p>
       )}
     </div>
   );

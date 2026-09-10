@@ -67,13 +67,13 @@ const values = [
   { icon: Shield, title: "Trust & Privacy", description: "Your data is yours. We follow POPIA and global security standards." },
   { icon: Clock, title: "24/7 Access", description: "Healthcare doesn't clock out – and neither do we." },
   { icon: Users, title: "Human Connection", description: "Technology enables care, but our doctors and nurses deliver it with empathy." },
-  { icon: Globe, title: "Inclusive Reach", description: "Serving all nine provinces, with multi-language support and fair pricing." },
+  { icon: Globe, title: "Inclusive Reach", description: "Serving patients across South Africa, with multi-language support and fair pricing." },
 ];
 
 const stats = [
   { icon: User, value: "135K+", label: "Patients Cared For" },
   { icon: Stethoscope, value: "50+", label: "Verified Specialists" },
-  { icon: MapPin, value: "9", label: "Provinces Covered" },
+  { icon: MapPin, value: "SA", label: "Nationwide Coverage" },
 ];
 
 const team = [
