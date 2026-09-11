@@ -10,6 +10,7 @@ import {
   TriangleAlert,
   Copy,
   Check,
+  UserPlus,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
@@ -31,6 +32,19 @@ const ROLES = [
   "super_admin",
   "mega_admin",
 ];
+
+/** Roles the invite flow actually supports end to end (see the invite API's
+ * own comment for why "inspector" isn't here — there's no registration
+ * wizard for it yet). */
+const INVITABLE_ROLES = [
+  "patient",
+  "practitioner",
+  "hospital_admin",
+  "super_admin",
+  "mega_admin",
+];
+
+const DIRECT_CREATE_ROLES = ["super_admin", "mega_admin"];
 
 export default function AdminUsersPage({
   rolePrefix,
@@ -58,6 +72,62 @@ export default function AdminUsersPage({
   } | null>(null);
   const [confirmInput, setConfirmInput] = useState("");
   const [copied, setCopied] = useState(false);
+
+  /** "Invite user" modal state. */
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteFirstName, setInviteFirstName] = useState("");
+  const [inviteLastName, setInviteLastName] = useState("");
+  const [inviteRole, setInviteRole] = useState("patient");
+  const [inviteSubmitting, setInviteSubmitting] = useState(false);
+
+  const assignableInviteRoles = INVITABLE_ROLES.filter((r) =>
+    canAssignRole(actorRole, r),
+  );
+
+  const closeInviteDialog = () => {
+    setInviteOpen(false);
+    setInviteEmail("");
+    setInviteFirstName("");
+    setInviteLastName("");
+    setInviteRole(assignableInviteRoles[0] || "patient");
+  };
+
+  const submitInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast.error("Enter an email address");
+      return;
+    }
+    setInviteSubmitting(true);
+    try {
+      const res = await fetch("/api/admin/users/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: inviteEmail.trim(),
+          role: inviteRole,
+          firstName: inviteFirstName.trim(),
+          lastName: inviteLastName.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to invite user");
+
+      if (DIRECT_CREATE_ROLES.includes(inviteRole)) {
+        toast.success(
+          `Account created — login details emailed to ${inviteEmail.trim()}`,
+        );
+      } else {
+        toast.success(`Invitation emailed to ${inviteEmail.trim()}`);
+      }
+      closeInviteDialog();
+      void load();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to invite user");
+    } finally {
+      setInviteSubmitting(false);
+    }
+  };
 
   // Fall back to the email when an account has no name, so there is always
   // something specific to type — a blank prompt would confirm nothing.
@@ -180,16 +250,27 @@ export default function AdminUsersPage({
         title="User management"
         subtitle="Search, filter, suspend, and manage platform roles"
         right={
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => void load()}
-            icon={<RefreshCw size={16} />}
-            iconPosition="left"
-            className="!rounded-lg !max-w-none normal-case !tracking-normal"
-          >
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void load()}
+              icon={<RefreshCw size={16} />}
+              iconPosition="left"
+              className="!rounded-lg !max-w-none normal-case !tracking-normal"
+            >
+              Refresh
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setInviteOpen(true)}
+              icon={<UserPlus size={16} />}
+              iconPosition="left"
+              className="!rounded-lg !max-w-none normal-case !tracking-normal"
+            >
+              Invite user
+            </Button>
+          </div>
         }
       />
 
@@ -517,6 +598,86 @@ export default function AdminUsersPage({
             </div>
           </div>
         )}
+      </Dialog>
+
+      <Dialog
+        isOpen={inviteOpen}
+        onClose={closeInviteDialog}
+        title="Invite user"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-semibold text-ink-600 mb-1.5">Role</p>
+            <select
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value)}
+              aria-label="Role to invite"
+              className="w-full text-sm text-ink-900 border border-border rounded-md px-3 py-2.5 bg-surface"
+            >
+              {assignableInviteRoles.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Input
+            label="Email"
+            type="email"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            placeholder="name@example.com"
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="First name"
+              value={inviteFirstName}
+              onChange={(e) => setInviteFirstName(e.target.value)}
+              placeholder="Optional"
+            />
+            <Input
+              label="Last name"
+              value={inviteLastName}
+              onChange={(e) => setInviteLastName(e.target.value)}
+              placeholder="Optional"
+            />
+          </div>
+
+          {DIRECT_CREATE_ROLES.includes(inviteRole) ? (
+            <p className="text-xs text-ink-500 bg-surface-soft border border-border rounded-lg p-3">
+              {inviteRole === "mega_admin" ? "Mega Admin" : "Super Admin"}{" "}
+              accounts don't go through registration — this creates the full
+              account immediately and emails them a generated password and a
+              login link.
+            </p>
+          ) : (
+            <p className="text-xs text-ink-500 bg-surface-soft border border-border rounded-lg p-3">
+              This emails a registration link so they can complete their own{" "}
+              {inviteRole.replace("_", " ")} profile.
+            </p>
+          )}
+
+          <div className="flex gap-3 pt-1">
+            <Button variant="ghost" fullWidth onClick={closeInviteDialog}>
+              Cancel
+            </Button>
+            <Button
+              fullWidth
+              disabled={inviteSubmitting}
+              loading={inviteSubmitting}
+              icon={<UserPlus size={16} />}
+              iconPosition="left"
+              onClick={() => void submitInvite()}
+            >
+              {DIRECT_CREATE_ROLES.includes(inviteRole)
+                ? "Create account"
+                : "Send invite"}
+            </Button>
+          </div>
+        </div>
       </Dialog>
     </div>
   );

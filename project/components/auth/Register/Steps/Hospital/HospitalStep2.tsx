@@ -77,6 +77,12 @@ export default function HospitalStep2({ formData, updateData, errors }: any) {
           error={errors?.adminEmail}
           onChange={(e) => updateData("adminEmail", e.target.value)}
           placeholder="admin@facility.co.za"
+          disabled={!!formData.adminInviteToken}
+          helperText={
+            formData.adminInviteToken
+              ? "Locked — this invite was sent to this address"
+              : undefined
+          }
         />
         <DocumentUpload
           label="Proof of Employment (PDF) *"

@@ -60,14 +60,19 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
         </div>
       )}
 
-      {/* Hospital invite banner */}
+      {/* Invite banner — either a hospital-staff invite (has facilityName)
+          or a platform-admin invite from User Management (has role only) */}
       {inviteInfo && (
         <div className="bg-primary/5 border-b-2 border-primary/10 px-8 py-4 flex-shrink-0">
           <p className="text-sm font-bold text-primary">
-            You've been invited to join {inviteInfo.facilityName} as a doctor.
+            {inviteInfo.facilityName
+              ? `You've been invited to join ${inviteInfo.facilityName} as a doctor.`
+              : "You've been invited to join 24/7 DigiHealth."}
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
-            Complete your registration below and you'll be added to their staff roster automatically.
+            {inviteInfo.facilityName
+              ? "Complete your registration below and you'll be added to their staff roster automatically."
+              : "Complete your registration below to activate your account."}
           </p>
         </div>
       )}
@@ -75,7 +80,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
         <div className="bg-amber-50 border-b-2 border-amber-200 px-8 py-4 flex-shrink-0">
           <p className="text-sm font-bold text-amber-800">{inviteError}</p>
           <p className="text-xs text-amber-700 mt-0.5">
-            You can still register normally — ask your hospital admin to resend the invite if needed.
+            You can still register normally — ask whoever invited you to resend the invite if needed.
           </p>
         </div>
       )}

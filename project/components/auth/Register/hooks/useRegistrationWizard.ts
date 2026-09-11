@@ -26,7 +26,7 @@ export function useRegistrationWizard(role: string) {
   // chance to click "Resume".
   const [draftCheckDone, setDraftCheckDone] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
-  const [inviteInfo, setInviteInfo] = useState<{ facilityName: string } | null>(null);
+  const [inviteInfo, setInviteInfo] = useState<{ facilityName?: string; role?: string } | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
   /** Set when arriving from a family invite link — locks the email field. */
   const [familyInvite, setFamilyInvite] = useState<{
@@ -112,6 +112,46 @@ export function useRegistrationWizard(role: string) {
     // Only re-run if the token itself changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, safeRole]);
+
+  // Platform-admin invite link (from User Management "Invite user"):
+  // /register/<role>?adminInvite=<token>. A different query param and
+  // endpoint from the hospital-staff invite above so the two can never
+  // race or clobber each other's state when both could apply to the same
+  // role. Applies to all three wizard roles — pre-fills + locks the email,
+  // and tags formData so /api/auth/register can mark the invite accepted.
+  useEffect(() => {
+    const token = searchParams.get("adminInvite");
+    if (!token) return;
+
+    let cancelled = false;
+    fetch(`/api/invites/admin/${token}`)
+      .then(async (res) => {
+        const json = await res.json();
+        if (cancelled) return;
+        if (!res.ok || !json.success) {
+          setInviteError(json.error || "This invite link is not valid.");
+          return;
+        }
+        setInviteInfo({ role: json.data.role });
+        setFormData((prev: any) => ({
+          ...prev,
+          email: json.data.email,
+          // HospitalStep2 reads the admin's email from `adminEmail`, not
+          // `email` — set both so whichever field this role's wizard
+          // actually renders shows (and locks) the right address.
+          adminEmail: json.data.email,
+          adminInviteToken: token,
+        }));
+      })
+      .catch(() => {
+        if (!cancelled) setInviteError("Could not verify this invite link.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Online status
   useEffect(() => {

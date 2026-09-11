@@ -134,6 +134,30 @@ export async function POST(request: Request) {
       console.warn("[register] media claim skipped:", e);
     }
 
+    // Platform-admin invite acceptance (User Management -> "Invite user"):
+    // works the same way regardless of role, unlike the practitioner-only
+    // StaffInvite acceptance below, since a platform invite doesn't attach
+    // the new account to anything else — it just confirms the invite was
+    // used. Never blocks account creation.
+    if (formData.adminInviteToken) {
+      try {
+        const { default: PlatformInvite } = await import(
+          "@/lib/models/PlatformInvite"
+        );
+        const invite = await PlatformInvite.findOne({
+          token: formData.adminInviteToken,
+          status: "pending",
+        });
+        if (invite && invite.expiresAt > new Date() && invite.email === formEmail) {
+          invite.status = "accepted";
+          invite.acceptedAt = new Date();
+          await invite.save();
+        }
+      } catch (e) {
+        console.warn("[register] platform invite acceptance skipped:", e);
+      }
+    }
+
     if (wizardRole === "patient") {
       const patientProfile = await PatientProfile.create({
         userId: newUser._id,

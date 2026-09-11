@@ -92,9 +92,10 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
           onChange={(e) => updateData("dob", e.target.value)}
         />
 
-        {/* Locked when arriving from a family invite: the invite was issued to
-            that specific mailbox, so an editable field would either break the
-            link or attach someone else's address to the family account. */}
+        {/* Locked when arriving from a family invite or a platform-admin
+            invite: the invite was issued to that specific mailbox, so an
+            editable field would either break the link or attach someone
+            else's address to the invited account. */}
         <Input
           label="Email Address *"
           type="email"
@@ -102,9 +103,9 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
           error={errors?.email}
           placeholder="your@email.co.za"
           onChange={(e) => updateData("email", e.target.value)}
-          disabled={!!formData.familyInviteToken}
+          disabled={!!formData.familyInviteToken || !!formData.adminInviteToken}
           helperText={
-            formData.familyInviteToken
+            formData.familyInviteToken || formData.adminInviteToken
               ? "This is the address your invite was sent to, so it can't be changed."
               : undefined
           }
