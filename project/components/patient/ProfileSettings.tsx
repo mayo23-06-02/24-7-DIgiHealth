@@ -122,10 +122,10 @@ export default function ProfileSettings({
           </div>
         </div>
 
-        {/* POPIA */}
+        {/* Privacy */}
         <div className="bg-emerald-50 rounded-lg p-6 border border-emerald-100">
           <h4 className="font-bold text-emerald-600 flex items-center gap-2 mb-2  tracking-wide text-xs font-grotesk">
-            <FiCheck /> POPIA Compliant
+            <FiCheck /> Data Privacy
           </h4>
           <p className="text-xs font-medium text-slate-600 leading-relaxed mb-4 italic opacity-80">
             "Your medical data is encrypted and secure. Consent provided on 14

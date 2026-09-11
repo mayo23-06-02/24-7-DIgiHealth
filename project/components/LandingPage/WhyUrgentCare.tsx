@@ -34,7 +34,7 @@ const benefits = [
     icon: Globe2,
     title: "24/7 care from anywhere",
     description:
-      "Available across all nine provinces — book from your phone, tablet, or computer, wherever you are.",
+      "Available country wide — book from your phone, tablet, or computer, wherever you are.",
     bg: "bg-success-50",
     iconColor: "text-success-700",
   },

@@ -535,7 +535,7 @@ function PatientBillingView({
   const BASELINE_FEATURES = [
     "Video, chat & voice consultations",
     "Digital prescriptions",
-    "Secure, POPIA-compliant health records",
+    "Secure health records",
   ];
 
   const tiers = TIER_ORDER.map((id, idx) => {

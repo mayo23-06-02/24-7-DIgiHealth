@@ -12,7 +12,7 @@ const steps = [
 
 const infoCards = [
   { icon: Clock, title: "24/7 Availability", desc: "Mon–Sun · Always open, always staffed" },
-  { icon: MapPin, title: "Nationwide, Virtually", desc: "All 9 provinces, one platform" },
+  { icon: MapPin, title: "Nationwide, Virtually", desc: "One platform, country wide" },
   { icon: CalendarCheck, title: "Book in Minutes", desc: "Same-day appointments, most specialties" },
 ];
 

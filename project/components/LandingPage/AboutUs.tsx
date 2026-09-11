@@ -86,7 +86,7 @@ const values = [
   {
     icon: Shield,
     title: "Trust & Privacy",
-    description: "Your data is yours. We follow POPIA and global security standards.",
+    description: "Your data is yours — protecting it is a priority, not an afterthought.",
   },
   {
     icon: Clock,
@@ -102,7 +102,7 @@ const values = [
   {
     icon: Globe,
     title: "Inclusive Reach",
-    description: "Serving all nine provinces, with multi‑language support and fair pricing.",
+    description: "Serving patients across South Africa, with multi‑language support and fair pricing.",
   },
 ];
 

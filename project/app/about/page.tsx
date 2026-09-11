@@ -64,7 +64,7 @@ function CountUpValue({ value }: { value: string }) {
 
 const values = [
   { icon: Heart, title: "Patient First", description: "Every decision we make starts with what's best for the patient." },
-  { icon: Shield, title: "Trust & Privacy", description: "Your data is yours. We follow POPIA and global security standards." },
+  { icon: Shield, title: "Trust & Privacy", description: "Your data is yours — protecting it is a priority, not an afterthought." },
   { icon: Clock, title: "24/7 Access", description: "Healthcare doesn't clock out – and neither do we." },
   { icon: Users, title: "Human Connection", description: "Technology enables care, but our doctors and nurses deliver it with empathy." },
   { icon: Globe, title: "Inclusive Reach", description: "Serving patients across South Africa, with multi-language support and fair pricing." },
@@ -125,7 +125,7 @@ export default function AboutPage() {
                 Access shouldn't be the hardest part of getting well
               </h2>
               <p className="text-ink-600 leading-relaxed text-lg">
-                Across all nine provinces, the same pattern repeats: long
+                Across the country, the same pattern repeats: long
                 queues at public clinics, private care priced out of reach,
                 and rural patients travelling hours for a five-minute
                 consultation. We asked what healthcare would look like if
