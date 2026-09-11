@@ -146,7 +146,10 @@ export async function POST(req: NextRequest) {
     const expiresAt = new Date(Date.now() + INVITE_TTL_DAYS * 24 * 60 * 60 * 1000);
     const invite = await PlatformInvite.create({
       email,
-      role,
+      // Narrowed by the WIZARD_ROLES.includes(role) check above, but that
+      // guard is on a readonly-string[]-cast array, so TS can't narrow
+      // `role: string` to the model's literal union from it automatically.
+      role: role as "patient" | "practitioner" | "hospital_admin",
       invitedBy: actor.userId,
       token,
       status: "pending",
