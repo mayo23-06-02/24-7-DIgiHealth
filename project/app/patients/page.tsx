@@ -191,6 +191,10 @@ export default function PatientsPage() {
       <section className="py-16 md:py-20 bg-white">
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 text-center">
+            <div>
+              <p className="text-sm text-ink-400 mt-1">Patients cared for</p>
+            </div>
+            <div className="hidden md:block w-px h-12 bg-border" />
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-1">
                 <span className="text-3xl font-bold text-ink-900 font-grotesk">4.9</span>
