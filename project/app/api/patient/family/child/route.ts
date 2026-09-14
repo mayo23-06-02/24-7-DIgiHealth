@@ -18,7 +18,7 @@ function deriveChildEmail(guardianEmail: string): string {
   return `${local}+family-${suffix}@${domain}`;
 }
 
-/** POST — guardian adds a child directly, no consent step. */
+/** POST — guardian adds a child, confirming guardianship/consent authority first. */
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     const idNumber = body.idNumber ? String(body.idNumber).trim() : undefined;
     const ageRange = ['0-2', '3-5', '5-12', '13-18'].includes(body.ageRange) ? body.ageRange : undefined;
     const relationship = ['child', 'spouse', 'parent', 'other'].includes(body.relationship) ? body.relationship : 'child';
+    const guardianConsent = body.guardianConsent === true;
 
     if (!firstName || !lastName) {
       return NextResponse.json({ success: false, error: 'First and last name are required' }, { status: 400 });
@@ -43,6 +44,14 @@ export async function POST(req: NextRequest) {
     }
     if (!['male', 'female', 'other'].includes(gender)) {
       return NextResponse.json({ success: false, error: 'Gender is required' }, { status: 400 });
+    }
+    // Checked client-side too, but the checkbox is what makes this consent
+    // legally meaningful — never trust that alone without a server check.
+    if (!guardianConsent) {
+      return NextResponse.json(
+        { success: false, error: 'You must confirm you are the parent/guardian and authorised to consent on this child\'s behalf.' },
+        { status: 400 },
+      );
     }
 
     // 16+ manages their own consent — send them a request email instead of
@@ -126,6 +135,7 @@ export async function POST(req: NextRequest) {
       status: 'active',
       linkedVia: 'guardian_created',
       acceptedAt: new Date(),
+      guardianConsentAt: new Date(),
     });
 
     return NextResponse.json({

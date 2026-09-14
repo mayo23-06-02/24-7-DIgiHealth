@@ -15,11 +15,14 @@ export interface IFamilyLink extends Document {
   /** Guardian-controlled toggle — the only thing that gates medical-history access. */
   isMinor: boolean;
   status: 'pending' | 'active' | 'revoked';
-  /** Which onboarding path created this link — child accounts skip consent, adults don't. */
+  /** Which onboarding path created this link. */
   linkedVia: 'guardian_created' | 'email_invite';
   inviteToken?: string;
   inviteExpiresAt?: Date;
   acceptedAt?: Date;
+  /** Guardian's confirmation, at child-creation time, that they're the
+   * parent/legal guardian and authorised to consent on the child's behalf. */
+  guardianConsentAt?: Date;
   revokedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -44,6 +47,7 @@ const FamilyLinkSchema = new Schema<IFamilyLink>(
     inviteToken: { type: String },
     inviteExpiresAt: { type: Date },
     acceptedAt: { type: Date },
+    guardianConsentAt: { type: Date },
     revokedAt: { type: Date },
   },
   { timestamps: true },

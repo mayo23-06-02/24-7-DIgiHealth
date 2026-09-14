@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
   Users,
   UserPlus,
@@ -76,6 +77,7 @@ export default function FamilyTab({
     gender: "male",
     idNumber: "",
     ageRange: "",
+    guardianConsent: false,
   });
   const [inviteForm, setInviteForm] = useState({
     firstName: "",
@@ -124,6 +126,14 @@ export default function FamilyTab({
       });
       return;
     }
+    if (!childForm.guardianConsent) {
+      setToast({
+        message:
+          "You must confirm you're the parent/guardian before adding a child.",
+        type: "error",
+      });
+      return;
+    }
     setIsSaving(true);
     try {
       const res = await fetch("/api/patient/family/child", {
@@ -142,6 +152,7 @@ export default function FamilyTab({
           gender: "male",
           idNumber: "",
           ageRange: "",
+          guardianConsent: false,
         });
         load();
       } else {
@@ -422,7 +433,49 @@ export default function FamilyTab({
                   16 or older? Use "Invite Family Member" instead — they'll
                   manage their own consent.
                 </p>
-                <Button onClick={handleAddChild} loading={isSaving} fullWidth>
+
+                <label
+                  className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
+                    childForm.guardianConsent
+                      ? "border-primary bg-primary/5"
+                      : "border-slate-200 bg-slate-50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={childForm.guardianConsent}
+                    onChange={(e) =>
+                      setChildForm((p) => ({
+                        ...p,
+                        guardianConsent: e.target.checked,
+                      }))
+                    }
+                    className="mt-0.5 w-5 h-5 accent-primary shrink-0"
+                  />
+                  <span className="text-xs font-medium text-ink-700 leading-relaxed">
+                    I confirm that I am the parent, guardian or legally
+                    authorised representative of the patient and that I have
+                    authority to provide consent for the processing of the
+                    patient's personal and health information, as described
+                    in the{" "}
+                    <Link
+                      href="/popia-consent-notice"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline decoration-2 underline-offset-4"
+                    >
+                      POPIA Consent Notice
+                    </Link>
+                    .
+                  </span>
+                </label>
+
+                <Button
+                  onClick={handleAddChild}
+                  loading={isSaving}
+                  disabled={!childForm.guardianConsent}
+                  fullWidth
+                >
                   Add child
                 </Button>
               </Card>
