@@ -2,8 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import SiteHeader from "@/components/LandingPage/SiteHeader";
-import Footer from "@/components/LandingPage/Footer";
 import type { LegalDoc, LegalBodyBlock } from "@/lib/legal/types";
 
 const LAST_UPDATED = "14 September 2026";
@@ -56,10 +54,8 @@ export default function LegalDocLayout({
   backLabel?: string;
 }) {
   return (
-    <>
-      <SiteHeader />
-      <main className="bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+    <main className="bg-white min-h-screen">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
           <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">
             Legal
           </p>
@@ -101,9 +97,7 @@ export default function LegalDocLayout({
               &larr; {backLabel}
             </Link>
           </div>
-        </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </main>
   );
 }
