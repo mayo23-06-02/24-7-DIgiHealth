@@ -1,20 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
-import { Star } from "lucide-react";
 import TickerBar from "./TickerBar";
 import SiteHeader from "./SiteHeader";
 
 const serviceTags = ["Tele-health Care", "E-Prescriptions", "Family Plans"];
-
-const ratingAvatars = [
-  "https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=100&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1622902046580-2b47f47f5471?q=80&w=100&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=100&auto=format&fit=crop",
-];
 
 /**
  * The headline's first line is fixed; only this second line rotates, sliding
@@ -28,14 +20,14 @@ const rotatingLines = [
       "Skip the waiting room. Connect with verified South African doctors over secure video, chat, or voice — day or night, wherever you are.",
   },
   {
-    phrase: "for care in minutes, not weeks",
+    phrase: "for immediate access to healthcare",
     description:
       "Most patients are seen the same day. Book a consultation and speak to a practitioner without leaving home.",
   },
   {
     phrase: "for prescriptions, digital and secure",
     description:
-      "Receive your prescription as a QR code — fast, discreet and paperless, redeemable at any partner pharmacy.",
+      "Your prescriptions are stored securely in your digital health record — view or download them anytime, no paper scripts to lose.",
   },
   {
     phrase: "for your whole health record, in one place",
@@ -153,48 +145,6 @@ export default function Hero() {
                 aria-label={`Show: ${rotatingLines[idx].phrase}`}
               />
             ))}
-          </div>
-        </div>
-
-        {/* ✨ UPGRADED RATING CARD ✨ */}
-        <div className="hidden md:block absolute bottom-0 inset-x-0 z-10 mx-auto w-full max-w-[1400px] px-5 md:px-10 pb-10">
-          <div className="flex items-center gap-4 md:gap-6 lg:gap-8 bg-white rounded-lg shadow-sm px-2 py-2 md:px-6 md:py-5 lg:px-4 lg:py-2 w-fit ml-auto">
-            <div className="flex items-center gap-1 md:gap-2">
-              <span className="text-lg md:text-2xl lg:text-2xl font-bold text-ink-900 font-grotesk">
-                4.9
-              </span>
-              <Star
-                size={20}
-                className="fill-yellow-400 text-yellow-400 md:w-6 md:h-6 lg:w-7 lg:h-7"
-              />
-            </div>
-            <div className="h-10 md:h-12 lg:h-14 w-px bg-slate-200" />
-            <div className="flex items-center">
-              {ratingAvatars.map((src, i) => (
-                <Image
-                  key={src}
-                  src={src}
-                  alt="Happy patient"
-                  width={40}
-                  height={40}
-                  className="w-8 h-8  rounded-full object-cover  shadow-sm"
-                  style={{ marginLeft: i === 0 ? 0 : -8 }}
-                />
-              ))}
-              <div
-                className="w-8 h-8  rounded-full bg-primary text-white flex items-center justify-center text-[10px] md:text-xs  shadow-sm"
-                style={{ marginLeft: -8 }}
-              >
-                +2K
-              </div>
-            </div>
-            <div>
-              <p className="text-sm  font-bold text-ink-900 leading-tight font-grotesk">
-                Happy
-                <br />
-                Customers
-              </p>
-            </div>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useNavigate } from "@/hooks/useNavigate";
 import { BiArrowToRight, BiLoaderAlt } from "react-icons/bi";
+import ContactGuidanceLink from "@/components/shared/ContactGuidanceLink";
 
 export default function RegisterRoleSelection() {
   const { navigate, isPending, pendingHref } = useNavigate();
@@ -146,9 +147,7 @@ export default function RegisterRoleSelection() {
         <div className="mt-20 flex max-w-5xl mx-auto flex-col border-t border-slate-100 md:flex-row items-center justify-between gap-10 py-5">
           <p className="text-slate-500 text-sm">
             Need support with your application?{" "}
-            <button className="text-primary font-bold hover:underline ml-2">
-              Contact Guidance Team
-            </button>
+            <ContactGuidanceLink />
           </p>
           <button
             onClick={() => navigate("/login")}

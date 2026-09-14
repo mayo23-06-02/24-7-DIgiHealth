@@ -1,4 +1,6 @@
 "use client";
+
+import ContactGuidanceLink from "@/components/shared/ContactGuidanceLink";
 import React, { useState } from "react";
 import { useNavigate } from "@/hooks/useNavigate";
 import { BiArrowToRight, BiLoaderAlt } from "react-icons/bi";
@@ -130,9 +132,7 @@ export default function RegisterRoleSelection() {
         <div className="flex max-w-5xl mx-auto flex-col text-center md:text-left md:flex-row items-center justify-between gap-10 py-5">
           <p className="text-slate-500 text-sm">
             Need support with your application?{" "}
-            <a href="tel:+27115551234" className="text-primary font-bold hover:underline ml-2">
-              Contact Guidance Team
-            </a>
+            <ContactGuidanceLink />
           </p>
           <button
             onClick={() => navigate("/login")}

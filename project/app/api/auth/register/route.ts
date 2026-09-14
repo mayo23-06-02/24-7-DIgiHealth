@@ -295,6 +295,15 @@ export async function POST(request: Request) {
         },
         languages: formData.languages || ["English"],
         isOnline: false,
+        // bgCheckConsent and practitionerConsent are collected together on
+        // the same step, so one timestamp covers both.
+        consentAcceptedAt:
+          formData.bgCheckConsent || formData.practitionerConsent
+            ? new Date()
+            : undefined,
+        termsAcceptedAt: formData.practitionerTermsAccepted
+          ? new Date()
+          : undefined,
       });
       await syncPractitionerProfile(newUser._id.toString(), practitionerProfile as any);
 

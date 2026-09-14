@@ -2,18 +2,9 @@
 import React from "react";
 import Input from "@/components/ui/Input";
 
-const countryCodes = [
-  { code: "+27", label: "(+27)", placeholder: "82 123 4567" },
-  { code: "+268", label: "(+268)", placeholder: "76 123 456" },
-];
-
 const genders = ["Male", "Female"];
 
 export default function PatientStep1({ formData, updateData, errors }: any) {
-  const countryCode = formData.countryCode || "+27";
-  const selectedCc =
-    countryCodes.find((c) => c.code === countryCode) || countryCodes[0];
-
   return (
     <div className="space-y-6 animate-in slide-in-from-right-6 duration-500">
       <div className="inline-flex items-center gap-2 rounded-full">
@@ -50,29 +41,21 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
           }
         />
 
-        {/* Phone with country code — ZA (+27) or Eswatini (+268) */}
+        {/* South Africa only for now — the +268 (Eswatini) option was
+            removed from patient registration; the country code is fixed
+            rather than offered as a choice of one. */}
         <div className="space-y-2">
           <label className="block text-sm font-bold text-slate-700">
             Mobile Number *
           </label>
           <div className="flex gap-2">
-            <div className="w-18 text-xs shrink-0">
-              <select
-                value={countryCode}
-                onChange={(e) => updateData("countryCode", e.target.value)}
-                className="w-full px-2 py-4   text-slate-900 outline-none transition-all duration-500 font-medium "
-              >
-                {countryCodes.map((cc) => (
-                  <option key={cc.code} value={cc.code}>
-                    {cc.label}
-                  </option>
-                ))}
-              </select>
+            <div className="w-14 shrink-0 flex items-center justify-center text-sm font-medium text-slate-500 border-r border-slate-200">
+              +27
             </div>
             <Input
               type="tel"
               value={formData.mobile || ""}
-              placeholder={selectedCc.placeholder}
+              placeholder="82 123 4567"
               error={errors?.mobile}
               onChange={(e) =>
                 updateData("mobile", e.target.value.replace(/\D/g, ""))

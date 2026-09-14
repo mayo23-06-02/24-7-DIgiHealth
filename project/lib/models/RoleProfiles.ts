@@ -84,6 +84,8 @@ export interface IPractitionerProfile extends Document {
     city: string;
     province: string;
   };
+  consentAcceptedAt?: Date;
+  termsAcceptedAt?: Date;
 }
 
 const PractitionerProfileSchema = new Schema<IPractitionerProfile>({
@@ -120,7 +122,9 @@ const PractitionerProfileSchema = new Schema<IPractitionerProfile>({
     street: String,
     city: String,
     province: String
-  }
+  },
+  consentAcceptedAt: { type: Date },
+  termsAcceptedAt: { type: Date }
 });
 
 export const PatientProfile: Model<IPatientProfile> = mongoose.models.PatientProfile || mongoose.model<IPatientProfile>('PatientProfile', PatientProfileSchema);

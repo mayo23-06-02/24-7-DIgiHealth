@@ -3,7 +3,7 @@
 import React from "react";
 
 const items = [
-  "Care Every Day",
+  "Every Day Care",
   "Where Medical Expertise Meets Compassion",
   "Your Health Comes First",
   "24/7 Access Across South Africa",

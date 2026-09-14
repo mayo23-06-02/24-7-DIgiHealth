@@ -177,6 +177,10 @@ if (role === "practitioner") {
   // Step 3: Documents
   if (step === 3) {
     if (!formData.bgCheckConsent) err.bgCheckConsent = "Background check consent is required.";
+    if (!formData.practitionerConsent)
+      err.practitionerConsent = "Consent to processing your information is required.";
+    if (!formData.practitionerTermsAccepted)
+      err.practitionerTermsAccepted = "You must agree to the Practitioner Terms and Conditions.";
     // profilePhoto and hpcsaCert are optional (you can make them required if needed)
   }
 

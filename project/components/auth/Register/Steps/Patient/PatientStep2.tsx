@@ -42,7 +42,6 @@ const defaultAllergies = [
   "Mold",
   "Strawberries",
   "Fragrance / Perfume",
-  "Cockroaches",
 ];
 const defaultConditions = [
   "Hypertension",

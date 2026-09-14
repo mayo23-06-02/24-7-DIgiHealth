@@ -54,12 +54,21 @@ export default function PatientStep5({ formData, updateData, errors }: any) {
           className="mt-0.5 w-6 h-6 rounded text-primary focus:ring-primary border-slate-300 accent-primary shrink-0"
         />
         <span className="text-sm font-bold text-slate-700 leading-relaxed">
-          I consent to 24/7 TeleHealth storing and processing my health data as
-          per POPIA. I understand I can{" "}
-          <span className="text-primary underline decoration-2 underline-offset-4">
-            withdraw this consent
-          </span>{" "}
-          at any time by contacting support@24-7telehealth.co.za.
+          I confirm that I have read and understood the 24/7 DigiMedCare{" "}
+          <Link
+            href="/popia-consent-notice"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline decoration-2 underline-offset-4"
+          >
+            POPIA Consent Notice
+          </Link>{" "}
+          and I voluntarily consent to the processing of my personal
+          information, health information and uploaded medical records for
+          purposes of account registration, identity verification,
+          appointment booking, virtual consultations, prescriptions, patient
+          record management, payments, support, platform administration and
+          legal compliance.
         </span>
       </label>
       {errors?.consent && (
@@ -89,7 +98,34 @@ export default function PatientStep5({ formData, updateData, errors }: any) {
             rel="noopener noreferrer"
             className="text-primary underline decoration-2 underline-offset-4"
           >
-            Terms and Conditions
+            Patient Terms and Conditions
+          </Link>
+          ,{" "}
+          <Link
+            href="/popia-consent-notice"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline decoration-2 underline-offset-4"
+          >
+            POPIA Consent Notice
+          </Link>
+          ,{" "}
+          <Link
+            href="/telehealth-consent"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline decoration-2 underline-offset-4"
+          >
+            Telehealth Informed Consent
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/prescription-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline decoration-2 underline-offset-4"
+          >
+            Prescription Policy
           </Link>
           .
         </span>
