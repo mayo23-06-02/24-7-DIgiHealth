@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Heart, Shield, Clock, Users, Globe, User, Stethoscope, MapPin } from "lucide-react";
+import { Heart, Shield, Clock, Users, Globe, MapPin } from "lucide-react";
 
 // Reuse the same counter component from Hero (or you can import it).
 // Renders inline so the figure can sit inside a sentence rather than
@@ -53,27 +53,20 @@ function CountUpValue({ value }: { value: string }) {
 }
 
 /**
- * Each figure reads as a claim, with the supporting line underneath — the
+ * The figure reads as a claim, with the supporting line underneath — the
  * number alone doesn't tell a visitor why it matters.
+ *
+ * Patient and specialist counts were removed rather than re-estimated —
+ * unlike coverage (which the business itself controls and can state
+ * plainly), volume figures need real usage data behind them, and none
+ * was available to verify.
  */
 const aboutStats = [
   {
-    icon: User,
-    value: "135K+",
-    claim: "patients cared for",
-    detail: "Same-day consultations, from anywhere in the country.",
-  },
-  {
-    icon: Stethoscope,
-    value: "50+",
-    claim: "verified specialists",
-    detail: "Every practitioner is HPCSA-checked before they see a patient.",
-  },
-  {
     icon: MapPin,
-    value: "9",
-    claim: "provinces covered",
-    detail: "All nine, with multi-language support and upfront pricing.",
+    value: "Nationwide",
+    claim: "coverage",
+    detail: "Available across South Africa, with multi-language support and upfront pricing.",
   },
 ];
 
@@ -125,11 +118,11 @@ export default function AboutUs() {
           </p>
         </div>
 
-        {/* Stats row — icon and figure inline on one line, supporting copy
-            beneath. Stacks on mobile so the three claims never crowd. */}
-        <div className="mb-16 grid grid-cols-1 gap-10 sm:gap-8 md:grid-cols-3">
+        {/* Stats row — a single coverage claim, centered now that the two
+            unverifiable volume figures have been removed. */}
+        <div className="mb-16 flex justify-center">
           {aboutStats.map(({ icon: Icon, value, claim, detail }) => (
-            <div key={claim} className="text-center px-2">
+            <div key={claim} className="text-center px-2 max-w-md">
               <p className="flex items-center justify-center gap-2 text-base md:text-lg font-semibold text-ink-900 font-grotesk">
                 <Icon className="w-[1.15em] h-[1.15em] shrink-0" strokeWidth={1.75} />
                 <span>

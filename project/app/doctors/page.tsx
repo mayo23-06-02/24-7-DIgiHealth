@@ -78,7 +78,7 @@ export default function DoctorsPage() {
               Every doctor here has been vetted twice — once by us, once by their record.
             </h1>
             <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl">
-              50+ verified specialists across South Africa, each one
+              Verified specialists across South Africa, each one
               HPCSA-registered, identity-checked, and reviewed by real
               patients after every consultation.
             </p>

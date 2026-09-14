@@ -12,8 +12,6 @@ import {
   Clock,
   Users,
   Globe,
-  User,
-  Stethoscope,
   MapPin,
   ArrowRight,
 } from "lucide-react";
@@ -70,10 +68,10 @@ const values = [
   { icon: Globe, title: "Inclusive Reach", description: "Serving patients across South Africa, with multi-language support and fair pricing." },
 ];
 
+// Patient and specialist counts were removed rather than re-estimated — see
+// the equivalent stats block in components/LandingPage/AboutUs.tsx for why.
 const stats = [
-  { icon: User, value: "135K+", label: "Patients Cared For" },
-  { icon: Stethoscope, value: "50+", label: "Verified Specialists" },
-  { icon: MapPin, value: "SA", label: "Nationwide Coverage" },
+  { icon: MapPin, value: "Nationwide", label: "Coverage Across South Africa" },
 ];
 
 const team = [
@@ -211,7 +209,7 @@ export default function AboutPage() {
           <h2 className="text-2xl md:text-3xl font-medium text-white text-center tracking-tight font-grotesk mb-12">
             The impact so far
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
+          <div className="flex justify-center max-w-3xl mx-auto text-center">
             {stats.map(({ icon: Icon, value, label }) => (
               <div key={label} className="flex flex-col items-center">
                 <Icon className="w-6 h-6 text-white/70 mb-3" />
