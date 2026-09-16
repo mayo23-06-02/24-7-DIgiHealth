@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
+import { getAppOrigin } from "@/lib/supabase/auth";
 import { Subscription, PaymentTransaction } from "@/lib/models/Billing";
 import { TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
 import { getEntitlement, subscriptionFilter } from "@/lib/billing/entitlement";
@@ -216,10 +217,7 @@ export async function POST(request: Request) {
     // successful payment into an error the user sees. Failures are logged and
     // the receipt remains downloadable from Billing regardless.
     if (user.email) {
-      const appUrl = (
-        process.env.NEXT_PUBLIC_APP_URL ||
-        "https://24-7-d-igi-health.vercel.app"
-      ).replace(/\/$/, "");
+      const appUrl = getAppOrigin(request.url);
       sendEmail({
         to: user.email,
         subject: `Your ${plan.label} plan is active — receipt ${payment.reference}`,

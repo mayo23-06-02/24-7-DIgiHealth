@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { sendEmail } from '@/lib/email/resend';
+import { getAppOrigin } from '@/lib/supabase/auth';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -62,15 +63,13 @@ export async function POST(req: NextRequest) {
     user.resetTokenExpiresAt = resetTokenExpiresAt;
     await user.save();
 
-    // Construct the reset link
-    // NEXT_PUBLIC_BASE_URL is not a variable this project sets — only
-    // NEXT_PUBLIC_APP_URL is — so this silently fell back to localhost and
-    // production reset emails carried a link nobody could open.
-    const appUrl = (
-      process.env.NEXT_PUBLIC_APP_URL ||
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      'https://24-7-d-igi-health.vercel.app'
-    ).replace(/\/$/, '');
+    // Construct the reset link from wherever this request actually came
+    // from — the same helper login/invite emails already use — rather than
+    // a hardcoded env var. That's what let this link keep pointing at a
+    // domain that's since been disabled: NEXT_PUBLIC_APP_URL doesn't
+    // update itself just because a different domain is now live, but the
+    // real incoming request origin always reflects reality.
+    const appUrl = getAppOrigin(req.url);
     const resetLink = `${appUrl}/forgot-password?token=${encodeURIComponent(resetToken)}`;
 
     // Send the reset email
