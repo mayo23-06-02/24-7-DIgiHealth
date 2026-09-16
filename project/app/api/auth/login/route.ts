@@ -4,7 +4,15 @@ import User from "@/lib/models/User";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import bcrypt from "bcryptjs";
 import { issueOtpCode } from "@/lib/auth/otp";
+import { createSessionResponse } from "@/lib/auth/session";
 import { checkSharedRateLimit } from "@/lib/security/rateLimit";
+
+/**
+ * Accounts that sign in with password only — no email OTP step. Requested
+ * as an explicit exception for this one mega_admin account; add sparingly,
+ * since it's a real reduction in that account's login security.
+ */
+const MFA_EXEMPT_EMAILS = ["mega@247digihealth.com"];
 
 /**
  * A real bcrypt digest that no supplied password can match. Compared against
@@ -287,6 +295,17 @@ export async function POST(request: Request) {
     // The password has just been proven correct. Rather than sign the user in
     // immediately, email a second 6-digit code and require it via
     // /api/auth/mfa/verify — that route (not this one) issues the session.
+    // Exception: MFA_EXEMPT_EMAILS skips straight to a session, no code sent.
+    if (MFA_EXEMPT_EMAILS.includes(user.email.toLowerCase())) {
+      return createSessionResponse({
+        identityId: user.identityId,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+    }
+
     const { error: otpError } = await issueOtpCode({
       userId: user.identityId,
       email: user.email,
