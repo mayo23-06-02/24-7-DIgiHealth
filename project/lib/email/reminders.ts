@@ -6,7 +6,9 @@ import { sendEmail, isPostmarkConfigured } from "@/lib/email/postmark";
 import { appointmentReminderEmailHtml } from "@/lib/email/templates/appointmentReminder";
 import { newMessageReminderEmailHtml } from "@/lib/email/templates/newMessageReminder";
 
-const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+import { getAppOrigin } from "@/lib/supabase/auth";
+
+const APP_URL = getAppOrigin();
 
 const APPOINTMENT_REMINDER_WINDOW_MS = 10 * 60 * 1000; // 10 minutes before start
 const MESSAGE_REMINDER_DELAY_MS = 5 * 60 * 60 * 1000; // 5 hours unread

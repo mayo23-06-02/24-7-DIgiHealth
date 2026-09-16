@@ -103,23 +103,14 @@ export function getAppOrigin(requestUrl?: string): string {
   const fromEnv =
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||
     process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const isLocalOrigin = (origin: string) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 
-  if (requestUrl) {
-    try {
-      const requestOrigin = new URL(requestUrl).origin;
-      // A real (non-local) request is the source of truth — don't let a
-      // stale/misconfigured localhost env var override it and leak
-      // localhost links into production emails.
-      if (!isLocalOrigin(requestOrigin) && (!fromEnv || isLocalOrigin(fromEnv))) {
-        return requestOrigin;
-      }
-    } catch {
-      /* fall through */
-    }
-  }
-
+  // NEXT_PUBLIC_APP_URL (or NEXT_PUBLIC_SITE_URL) is the single source of
+  // truth for every generated link — set it once in Vercel and every
+  // route/email uses exactly that domain, regardless of which domain
+  // actually served the request. Only falls through to the request's own
+  // origin, then a hardcoded default, when neither env var is set at all.
   if (fromEnv) return fromEnv.replace(/\/$/, "");
+
   if (requestUrl) {
     try {
       return new URL(requestUrl).origin;

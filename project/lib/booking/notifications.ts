@@ -7,9 +7,9 @@ import { sendEmail, isPostmarkConfigured } from "@/lib/email/postmark";
 import { resolveRecipientById } from "@/lib/email/recipients";
 import { appointmentRequestEmailHtml } from "@/lib/email/templates/appointmentRequest";
 
-const APP_URL = (
-  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-).replace(/\/$/, "");
+import { getAppOrigin } from "@/lib/supabase/auth";
+
+const APP_URL = getAppOrigin();
 
 /**
  * Email the person a booking is waiting on.
