@@ -4,11 +4,5 @@ import LegalDocLayout from "@/components/legal/LegalDocLayout";
 import practitionerTerms from "@/lib/legal/practitioner-terms";
 
 export default function PractitionerTermsPage() {
-  return (
-    <LegalDocLayout
-      doc={practitionerTerms}
-      backHref="/register/practitioner"
-      backLabel="Back to registration"
-    />
-  );
+  return <LegalDocLayout doc={practitionerTerms} />;
 }

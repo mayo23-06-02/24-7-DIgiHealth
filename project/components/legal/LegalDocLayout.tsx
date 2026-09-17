@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import type { LegalDoc, LegalBodyBlock } from "@/lib/legal/types";
 
 const LAST_UPDATED = "14 September 2026";
@@ -44,15 +43,7 @@ function BodyBlocks({ body }: { body: LegalBodyBlock[] }) {
   );
 }
 
-export default function LegalDocLayout({
-  doc,
-  backHref = "/register",
-  backLabel = "Back to registration",
-}: {
-  doc: LegalDoc;
-  backHref?: string;
-  backLabel?: string;
-}) {
+export default function LegalDocLayout({ doc }: { doc: LegalDoc }) {
   return (
     <main className="bg-white min-h-screen">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
@@ -88,15 +79,6 @@ export default function LegalDocLayout({
               </div>
             </section>
           ))}
-
-          <div className="pt-6 border-t border-slate-100">
-            <Link
-              href={backHref}
-              className="text-sm font-semibold text-primary underline decoration-2 underline-offset-4"
-            >
-              &larr; {backLabel}
-            </Link>
-          </div>
       </div>
     </main>
   );
