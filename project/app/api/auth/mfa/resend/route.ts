@@ -58,7 +58,6 @@ export async function POST(req: NextRequest) {
       userId: user._id.toString(),
       email: user.email,
       firstName: user.firstName,
-      phoneE164: user.phoneE164,
       purpose: "login_mfa",
     });
 

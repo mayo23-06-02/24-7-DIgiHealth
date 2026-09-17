@@ -397,7 +397,6 @@ export async function POST(request: Request) {
         userId: newUser._id.toString(),
         email: formEmail,
         firstName: newUser.firstName,
-        phoneE164: newUser.phoneE164,
       });
     } catch (e) {
       console.warn("[register] verification code send skipped:", e);
