@@ -51,6 +51,7 @@ interface LoginUser {
   firstName: string;
   lastName: string;
   emailVerified: boolean;
+  phoneE164?: string;
 }
 
 /**
@@ -100,6 +101,7 @@ async function findLoginUser(identifier: string): Promise<LoginUser | null> {
       firstName: mongoUser.firstName,
       lastName: mongoUser.lastName,
       emailVerified: mongoUser.emailVerified,
+      phoneE164: mongoUser.phoneE164,
     };
   }
 
@@ -310,6 +312,7 @@ export async function POST(request: Request) {
       userId: user.identityId,
       email: user.email,
       firstName: user.firstName,
+      phoneE164: user.phoneE164,
       purpose: "login_mfa",
     });
 
