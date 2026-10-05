@@ -1,5 +1,7 @@
 import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IRiskScore extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   patientId: string;
   practitionerId: string;
   consultationId?: string;

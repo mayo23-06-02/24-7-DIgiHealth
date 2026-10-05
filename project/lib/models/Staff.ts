@@ -1,5 +1,7 @@
 import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IStaff extends Document {
+  fileNumber?: string;
+  status?: 'pending' | 'active' | 'suspended' | 'left';
   userId?: string;
   facilityId: string;
   role: "doctor" | "nurse" | "admin" | "technician";

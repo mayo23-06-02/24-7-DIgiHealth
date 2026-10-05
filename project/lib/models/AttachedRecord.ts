@@ -1,5 +1,7 @@
 import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IAttachedRecord extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   consultationId?: string;      // which chat/consultation
   conversationId?: string;
   patientId: string;

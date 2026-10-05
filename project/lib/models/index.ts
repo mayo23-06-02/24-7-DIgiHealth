@@ -32,3 +32,5 @@ export * from "./PlatformInvite";
 export * from "./AuditLog";
 export * from "./Wellness";
 export * from "./PractitionerBilling";
+export * from "./FacilityPatient";
+export * from "./ProvisioningTokens";

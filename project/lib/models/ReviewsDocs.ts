@@ -10,6 +10,8 @@ export interface IReview extends Document {
 }
 
 export interface IMedicalDocument extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   userId: string;
   uploadedBy: string;
   type: string;

@@ -1,6 +1,8 @@
 import { defineModel, type Document, type ModelClass } from '@/lib/db';
 // ==== Anthropometric ====
 export interface IAnthropometric extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   patientId: string;
   dateRecorded: Date;
   heightCm?: number;
@@ -19,6 +21,8 @@ export interface IAnthropometric extends Document {
 
 // ==== MedicalContext ====
 export interface IMedicalContext extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   patientId: string;
   chronicConditions: string[];
   allergies: { allergen: string; severity: 'mild' | 'moderate' | 'severe'; reaction: string; source: 'patient' | 'clinician' }[];
@@ -42,6 +46,8 @@ export interface IMedicalContext extends Document {
 
 // ==== Prescription ====
 export interface IPrescription extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   patientId: string;
   practitionerId: string;
   medicationName: string;
@@ -61,6 +67,8 @@ export interface IPrescription extends Document {
 
 // ==== LabResult ====
 export interface ILabResult extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   patientId: string;
   orderedById?: string;
   testName: string;
@@ -70,6 +78,8 @@ export interface ILabResult extends Document {
 
 // ==== Immunization ====
 export interface IImmunization extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   patientId: string;
   vaccineName: string;
   dateAdministered: Date;

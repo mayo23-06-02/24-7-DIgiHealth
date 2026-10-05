@@ -17,6 +17,8 @@ export interface ISuggestedDiagnosis {
 }
 
 export interface IClinicalDecisionSupport extends Document {
+  /** Hospital that owns this record; unset = entered by the patient. */
+  facilityId?: string;
   practitionerId: string;
   patientId: string;
   consultationId?: string;

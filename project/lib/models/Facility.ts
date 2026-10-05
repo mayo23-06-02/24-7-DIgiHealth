@@ -1,5 +1,6 @@
 import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IFacility extends Document {
+  fileNumberPrefix?: string;
   name: string;
   facilityType: 'Public' | 'Private' | 'NGO';
   address: { street?: string; city: string; province: string; coordinates: [number, number] };

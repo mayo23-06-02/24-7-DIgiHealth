@@ -34,7 +34,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   heart_rate_bpm: "num",
   spo2: "num",
   temperature_celsius: "num",
-  created_at: "timestamptz"
+  created_at: "timestamptz",
+  facility_id: "uuid"
  },
  articles: {
   id: "uuid",
@@ -70,7 +71,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   uploaded_at: "timestamptz",
   is_read: "bool",
   created_at: "timestamptz",
-  updated_at: "timestamptz"
+  updated_at: "timestamptz",
+  facility_id: "uuid"
  },
  audit_logs: {
   id: "uuid",
@@ -153,7 +155,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   reviewed_at: "timestamptz",
   model_used: "text",
   updated_at: "timestamptz",
-  suggested_diagnoses: "json"
+  suggested_diagnoses: "json",
+  facility_id: "uuid"
  },
  consultations: {
   id: "uuid",
@@ -197,7 +200,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   started_at: "timestamptz",
   last_activity_at: "timestamptz",
   created_at: "timestamptz",
-  updated_at: "timestamptz"
+  updated_at: "timestamptz",
+  facility_id: "uuid"
  },
  facilities: {
   id: "uuid",
@@ -221,6 +225,33 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   logo: "text",
   wallpaper: "text",
   reg_certificate: "text",
+  created_at: "timestamptz",
+  updated_at: "timestamptz",
+  file_number_prefix: "text"
+ },
+ facility_patient_profiles: {
+  id: "uuid",
+  facility_patient_id: "uuid",
+  medical_aid_provider: "text",
+  medical_aid_plan_name: "text",
+  medical_aid_member_number: "text",
+  emergency_contact_name: "text",
+  emergency_contact_phone: "text",
+  emergency_contact_relationship: "text",
+  referring_doctor: "text",
+  notes: "text",
+  details: "json",
+  created_at: "timestamptz",
+  updated_at: "timestamptz"
+ },
+ facility_patients: {
+  id: "uuid",
+  facility_id: "uuid",
+  patient_id: "uuid",
+  file_number: "text",
+  status: "text",
+  verified_at: "timestamptz",
+  issued_by: "uuid",
   created_at: "timestamptz",
   updated_at: "timestamptz"
  },
@@ -318,7 +349,33 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   batch_number: "text",
   administered_by: "text",
   next_due_date: "timestamptz",
+  created_at: "timestamptz",
+  facility_id: "uuid"
+ },
+ import_job_rows: {
+  id: "uuid",
+  job_id: "uuid",
+  row_number: "num",
+  raw: "json",
+  status: "text",
+  error: "text",
+  user_id: "uuid",
+  file_number: "text",
   created_at: "timestamptz"
+ },
+ import_jobs: {
+  id: "uuid",
+  facility_id: "uuid",
+  kind: "text",
+  uploaded_by: "uuid",
+  file_name: "text",
+  total_rows: "num",
+  created_count: "num",
+  linked_count: "num",
+  skipped_count: "num",
+  failed_count: "num",
+  created_at: "timestamptz",
+  updated_at: "timestamptz"
  },
  lab_result_parameters: {
   id: "uuid",
@@ -336,7 +393,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   ordered_by: "uuid",
   test_name: "text",
   date_reported: "timestamptz",
-  created_at: "timestamptz"
+  created_at: "timestamptz",
+  facility_id: "uuid"
  },
  media_assets: {
   id: "uuid",
@@ -364,7 +422,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   created_at: "timestamptz",
   updated_at: "timestamptz",
   blood_type: "text",
-  activity_level: "text"
+  activity_level: "text",
+  facility_id: "uuid"
  },
  medical_documents: {
   id: "uuid",
@@ -379,7 +438,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   verified_at: "timestamptz",
   note: "text",
   created_at: "timestamptz",
-  updated_at: "timestamptz"
+  updated_at: "timestamptz",
+  facility_id: "uuid"
  },
  messages: {
   id: "uuid",
@@ -634,7 +694,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   conversation_id: "uuid",
   message_id: "uuid",
   created_at: "timestamptz",
-  updated_at: "timestamptz"
+  updated_at: "timestamptz",
+  facility_id: "uuid"
  },
  rate_limits: {
   key: "text",
@@ -665,7 +726,17 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   notes: "text",
   calculated_at: "timestamptz",
   created_at: "timestamptz",
-  updated_at: "timestamptz"
+  updated_at: "timestamptz",
+  facility_id: "uuid"
+ },
+ set_password_tokens: {
+  id: "uuid",
+  user_id: "uuid",
+  token_hash: "text",
+  purpose: "text",
+  expires_at: "timestamptz",
+  used_at: "timestamptz",
+  created_at: "timestamptz"
  },
  staff: {
   id: "uuid",
@@ -680,7 +751,9 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   hourly_rate: "num",
   qualifications: "text[]",
   created_at: "timestamptz",
-  updated_at: "timestamptz"
+  updated_at: "timestamptz",
+  file_number: "text",
+  status: "text"
  },
  staff_approval_requests: {
   id: "uuid",
@@ -760,7 +833,10 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   reset_token_hash: "text",
   reset_token_expires_at: "timestamptz",
   notification_prefs: "json",
-  trusted_devices: "json"
+  trusted_devices: "json",
+  provisioned_via: "text",
+  provisioned_by: "uuid",
+  profile_completed_at: "timestamptz"
  },
  wellness_checkins: {
   id: "uuid",

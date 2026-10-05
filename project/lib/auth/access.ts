@@ -4,6 +4,7 @@ import { Conversation } from "@/lib/models/Conversation";
 import Consultation from "@/lib/models/Consultation";
 import { PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { isValidId } from '@/lib/db';
+import { getPatientAccess } from '@/lib/auth/facilityAccess';
 
 /**
  * One place that answers "may this caller touch this record?".
@@ -100,43 +101,28 @@ export async function requireConsultationParticipant(consultationId: string) {
 }
 
 /**
- * The caller, if they are a practitioner this patient is actually under.
+ * The caller and which of the patient's hospital records they may see.
  *
- * The rule is lifted verbatim from the one route that already had it
- * (`practitioner/patients/[id]/health-record`) rather than invented here:
- * the patient is on the practitioner's assigned list, or the two have a
- * consultation between them. Widening or narrowing that is a product decision,
- * not a refactor, so this keeps the existing behaviour exactly.
- *
- * Unlike the two helpers above this answers with a 403 and says why. There is
- * no enumeration to protect against — a practitioner reaching this already has
- * the patient id in front of them — and "not linked to your practice" is the
- * difference between a bug and a boundary for whoever hits it.
+ * Practitioners need BOTH a hospital in common with the patient (the patient holds an
+ * active file at a hospital the practitioner works at) AND a link to them (assigned, or
+ * a consultation). Answers with a 403 and says why — the caller already has the patient
+ * id in front of them, so there is nothing to enumerate.
  */
-export async function requirePatientAccess(patientId: string): Promise<RequestUser> {
-  const user = await requireRole("practitioner", "mega_admin");
+export async function requirePatientAccessScoped(patientId: string) {
+  const user = await requireRole("practitioner", "mega_admin", "hospital_admin");
 
   if (!isValidId(patientId)) {
     throw new PublicError("Invalid patient ID", 400);
   }
 
-  // A platform admin is not practising, so no link exists or is expected.
-  if (user.role === "mega_admin") return user;
+  const access = await getPatientAccess(user, patientId);
+  if (!access.allowed) {
+    throw new PublicError("Access denied: Patient not registered at your hospital", 403);
+  }
+  return { user, scope: access.scope };
+}
 
-
-  const practitionerId = user.userId;
-  const profile = await PractitionerProfile.findOne({ userId: practitionerId })
-    .select("assignedPatientIds")
-    .lean<{ assignedPatientIds?: unknown[] } | null>();
-
-  const assigned = (profile?.assignedPatientIds || []).map((id) => String(id));
-  if (assigned.includes(patientId)) return user;
-
-  const hasConsultation = await Consultation.exists({ patientId, practitionerId });
-  if (hasConsultation) return user;
-
-  throw new PublicError(
-    "Access denied: Patient not linked to your practice",
-    403,
-  );
+/** Same check when the route only needs the caller. */
+export async function requirePatientAccess(patientId: string): Promise<RequestUser> {
+  return (await requirePatientAccessScoped(patientId)).user;
 }

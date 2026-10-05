@@ -1,5 +1,8 @@
 import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IUser extends Document {
+  provisionedVia?: 'self' | 'hospital_form' | 'hospital_import';
+  provisionedBy?: string;
+  profileCompletedAt?: Date;
   email: string;
   /** Optional — OTP-only accounts use a non-login placeholder */
   passwordHash?: string;
