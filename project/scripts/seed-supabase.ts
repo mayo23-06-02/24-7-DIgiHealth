@@ -192,7 +192,7 @@ const WIPE_ORDER = [
   "payment_transactions", "lab_result_parameters", "lab_results", "immunizations",
   "prescriptions", "patient_allergies", "medical_context", "anthropometrics",
   "consultations", "bed_occupancy", "hospital_appointments", "staff_invites",
-  "staff", "patient_practitioner_links", "practitioner_facilities",
+  "staff", "facility_patients", "patient_practitioner_links", "practitioner_facilities",
   "hospital_admin_profiles", "practitioner_profiles", "patient_profiles",
   "facilities", "audit_logs", "system_config", "users",
 ];
@@ -399,6 +399,38 @@ async function main() {
   const dedupedLinks = Array.from(new Map(links.map((l) => [`${l.patient_id}:${l.practitioner_id}:${l.link_type}`, l])).values());
   await insertBatch("patient_practitioner_links", dedupedLinks, "patient_id");
   console.log(`  ${patientUsers.length} patients created, ${dedupedLinks.length} relationship links.`);
+
+  // Hospital file numbers: doctors are staff at their hospitals, and every patient holds an
+  // active file at each hospital of the doctors they are linked to, so seeded patients can book.
+  console.log("  Issuing hospital file numbers...");
+  const facilitiesByDoctor = new Map<string, string[]>();
+  for (const l of practFacilityLinks) {
+    facilitiesByDoctor.set(l.practitioner_id, [...(facilitiesByDoctor.get(l.practitioner_id) ?? []), l.facility_id]);
+  }
+  const doctorStaff = practFacilityLinks.map((l, i) => ({
+    user_id: l.practitioner_id, facility_id: l.facility_id, role: "doctor", department: "General Medicine",
+    shift_start: "08:00", shift_end: "16:00", shift_days: [1, 2, 3, 4, 5], is_on_duty: true, hourly_rate: 450,
+    file_number: `DR-${String(i + 1).padStart(4, "0")}`, status: "active",
+  }));
+  await insertBatch("staff", doctorStaff, "id");
+  const fileKeys = new Set<string>();
+  const fileRows: any[] = [];
+  const perFacilityCount = new Map<string, number>();
+  for (const l of dedupedLinks) {
+    for (const facId of facilitiesByDoctor.get(l.practitioner_id) ?? []) {
+      const key = `${facId}:${l.patient_id}`;
+      if (fileKeys.has(key)) continue;
+      fileKeys.add(key);
+      const n = (perFacilityCount.get(facId) ?? 0) + 1;
+      perFacilityCount.set(facId, n);
+      fileRows.push({
+        facility_id: facId, patient_id: l.patient_id, file_number: `PF-${String(n).padStart(6, "0")}`,
+        status: "active", verified_at: new Date().toISOString(),
+      });
+    }
+  }
+  await insertBatch("facility_patients", fileRows, "id");
+  console.log(`  ${doctorStaff.length} doctor staff rows, ${fileRows.length} patient files created.`);
 
   // ============================================================
   // 5. HOSPITAL STAFF (8 per facility)
