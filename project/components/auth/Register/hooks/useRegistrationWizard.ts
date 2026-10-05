@@ -153,6 +153,49 @@ export function useRegistrationWizard(role: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  // Emailed setup link from the hospital: /register/<role>?setup=<token>. The link proves
+  // the mailbox, so the record is loaded, step 1 counts as verified and the wizard opens on
+  // step 2 with the hospital's details filled in and the email locked.
+  useEffect(() => {
+    const token = searchParams.get("setup");
+    if (!token) return;
+    let cancelled = false;
+    fetch(`/api/auth/set-password?token=${encodeURIComponent(token)}`)
+      .then(async (res) => {
+        const json = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok || !json.success) {
+          setInviteError(json.error || "This setup link is not valid.");
+          return;
+        }
+        const d = json.data;
+        if (d.role && d.role !== safeRole) {
+          router.replace(`/register/${d.role}?setup=${encodeURIComponent(token)}`);
+          return;
+        }
+        const prefill = { ...(d.prefill ?? {}) };
+        if (typeof prefill.gender === "string" && prefill.gender) {
+          prefill.gender = prefill.gender.charAt(0).toUpperCase() + prefill.gender.slice(1).toLowerCase();
+        }
+        setShowDraftBanner(false);
+        setFormData((prev: any) => ({
+          ...prefill,
+          ...prev,
+          email: d.email,
+          setupToken: token,
+          fileClaim: { verified: true, hospitalName: d.hospital?.name, fileNumber: d.fileNumber },
+        }));
+        setStep((s) => (s < 2 ? 2 : s));
+      })
+      .catch(() => {
+        if (!cancelled) setInviteError("Could not verify this setup link.");
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, safeRole]);
+
   // Online status
   useEffect(() => {
     setIsOnline(navigator.onLine);
@@ -171,7 +214,7 @@ export function useRegistrationWizard(role: string) {
     const loadDraft = async () => {
       try {
         const draft: any = await localforage.getItem(DRAFT_KEY);
-        if (draft?.formData && Object.keys(draft.formData).length > 0) {
+        if (draft?.formData && Object.keys(draft.formData).length > 0 && !searchParams.get("setup")) {
           setShowDraftBanner(true);
         }
       } catch {
@@ -304,6 +347,11 @@ export function useRegistrationWizard(role: string) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Registration failed");
       await clearDraft();
+      // Opened from the hospital's setup link: the email is already proven, so go to sign-in.
+      if (data.next) {
+        router.push(data.next);
+        return;
+      }
       const email = (
         formData.email ||
         formData.adminEmail ||

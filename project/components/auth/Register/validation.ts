@@ -1,7 +1,28 @@
 import { roleConfig } from "./constants";
 import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
 
+/**
+ * Patients and doctors start with "verify your hospital number" (step 1); their original
+ * steps follow, so they are validated with the step number shifted back by one.
+ */
 export function validateStep(role: string, step: number, formData: any): Record<string, string> {
+  if (role === "patient" || role === "practitioner") {
+    if (step === 1) {
+      return formData.fileClaim?.verified
+        ? {}
+        : {
+            fileClaim:
+              role === "patient"
+                ? "Find your hospital record first: choose your hospital, enter your file number and press Find my record."
+                : "Find your hospital record first: choose your hospital, enter your staff number and HPCSA number, then press Find my record.",
+          };
+    }
+    return validateWizardStep(role, step - 1, formData);
+  }
+  return validateWizardStep(role, step, formData);
+}
+
+function validateWizardStep(role: string, step: number, formData: any): Record<string, string> {
   const err: Record<string, string> = {};
 
   if (role === "patient") {

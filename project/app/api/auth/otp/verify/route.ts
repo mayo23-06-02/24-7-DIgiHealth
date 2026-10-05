@@ -64,6 +64,15 @@ export async function POST(req: NextRequest) {
     user.otpExpiresAt = undefined;
     await user.save();
 
+    // A hospital-loaded patient or doctor who registered with their file/staff number:
+    // proving the email is the last step, so their pending hospital records go live now.
+    try {
+      const { activateHospitalRecords } = await import("@/lib/provisioning/claimRegistration");
+      await activateHospitalRecords(user._id.toString());
+    } catch (e) {
+      console.warn("[otp/verify] hospital record activation skipped:", e);
+    }
+
 
     // Verifying an address confirms the mailbox; it is not an authentication.
     // This used to mint a session and sign the user straight in, so anyone

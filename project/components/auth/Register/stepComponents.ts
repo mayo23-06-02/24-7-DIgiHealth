@@ -16,12 +16,14 @@ import HospitalStep3 from "./Steps/Hospital/HospitalStep3";
 import HospitalStep4 from "./Steps/Hospital/HospitalStep4";
 
 import EmailOtpStep from "./Shared/EmailOtpStep";
+import VerifyFileStep from "./Shared/VerifyFileStep";
 import PreviewStep from "./PreviewStep";
 
 type StepComponent = React.ComponentType<any>;
 
 export const stepComponents: Record<string, StepComponent[]> = {
   patient: [
+    VerifyFileStep,
     PatientStep1,
     PatientStep2,
     PatientStep3,
@@ -30,6 +32,7 @@ export const stepComponents: Record<string, StepComponent[]> = {
     PreviewStep,
   ],
   practitioner: [
+    VerifyFileStep,
     PractitionerStep1,
     PractitionerStep2,
     PractitionerStep3,

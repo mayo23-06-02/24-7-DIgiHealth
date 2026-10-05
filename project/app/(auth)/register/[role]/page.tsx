@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { jwtVerify } from "jose";
 import RegistrationWizard from "@/components/auth/Register/RegistrationWizard";
-import FileNumberRegistration from "@/components/auth/Register/FileNumberRegistration";
-import DoctorNotice from "@/components/auth/Register/DoctorNotice";
 
 const validRoles = ["patient", "practitioner", "hospital"];
 
@@ -32,7 +30,5 @@ export default async function RegistrationPage({
   const safeRole = validRoles.includes(role?.toLowerCase())
     ? role.toLowerCase()
     : "patient";
-  if (safeRole === "patient") return <FileNumberRegistration />;
-  if (safeRole === "practitioner") return <DoctorNotice />;
   return <RegistrationWizard role={safeRole} />;
 }

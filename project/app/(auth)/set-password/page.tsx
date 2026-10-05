@@ -1,12 +1,22 @@
-import React, { Suspense } from "react";
-import SetPasswordForm from "@/components/auth/SetPassword/SetPasswordForm";
+import { redirect } from "next/navigation";
+import User from "@/lib/models/User";
+import { findLiveToken } from "@/lib/provisioning/setPassword";
+import { toId } from "@/lib/db";
 
-export const metadata = { title: "Set Password | 24/7 DigiHealth" };
+export const dynamic = "force-dynamic";
 
-export default function SetPasswordRoute() {
-  return (
-    <Suspense fallback={<div className="mx-auto min-h-[420px] w-full max-w-lg animate-pulse rounded-lg bg-white" />}>
-      <SetPasswordForm />
-    </Suspense>
-  );
+/**
+ * Old setup links (/set-password?token=...) now open the registration wizard, which collects
+ * the full health profile. The token decides which wizard.
+ */
+export default async function SetPasswordRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string }>;
+}) {
+  const { token = "" } = await searchParams;
+  const row = token ? await findLiveToken(token) : null;
+  const user = row ? await User.findById(String(toId(row.userId))).select("role").lean() : null;
+  const role = user?.role === "practitioner" ? "practitioner" : "patient";
+  redirect(token ? `/register/${role}?setup=${encodeURIComponent(token)}` : "/register/patient");
 }

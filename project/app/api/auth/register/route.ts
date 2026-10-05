@@ -12,6 +12,7 @@ import StaffInvite from "@/lib/models/StaffInvite";
 import bcrypt from "bcryptjs";
 import { normalizeEmail } from "@/lib/supabase/auth";
 import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
+import { ClaimError, claimRegistration } from "@/lib/provisioning/claimRegistration";
 
 /**
  * POST /api/auth/register
@@ -32,19 +33,50 @@ export async function POST(request: Request) {
       );
     }
 
-    // Patients and doctors are registered by their hospital (file number / staff number).
-    // Only a hospital can sign itself up here.
+    // Patients and doctors complete the record their hospital loaded (file number / staff
+    // number, or the emailed setup link). Only a hospital can create a new account here.
+    if (wizardRole === "patient" || wizardRole === "practitioner") {
+      try {
+        const done = await claimRegistration(wizardRole, formData);
+        try {
+          const regToken = formData.registrationMediaToken || formData.registrationToken;
+          if (regToken) {
+            const { claimRegistrationMedia } = await import("@/lib/supabase/media");
+            await claimRegistrationMedia(String(regToken), done.userId);
+          }
+        } catch (e) {
+          console.warn("[register] media claim skipped:", e);
+        }
+        if (done.emailProven) {
+          return NextResponse.json({
+            success: true,
+            message: "Your health profile is complete. You can now sign in.",
+            requiresVerification: false,
+            next: "/login?setup=done",
+            email: done.email,
+          });
+        }
+        try {
+          const { issueOtpCode } = await import("@/lib/auth/otp");
+          await issueOtpCode({ userId: done.userId, email: done.email, firstName: done.firstName });
+        } catch (e) {
+          console.warn("[register] verification code send skipped:", e);
+        }
+        return NextResponse.json({
+          success: true,
+          message: "Check your email for a verification code.",
+          requiresVerification: true,
+          email: done.email,
+        });
+      } catch (err) {
+        if (err instanceof ClaimError) {
+          return NextResponse.json({ error: err.message, code: err.code }, { status: err.status });
+        }
+        throw err;
+      }
+    }
     if (wizardRole !== "hospital") {
-      return NextResponse.json(
-        {
-          error:
-            wizardRole === "patient"
-              ? "Patients register with their hospital file number. Choose your hospital and enter your file number."
-              : "Doctors are registered by their hospital. Check your email for a set-password link, or contact your hospital.",
-          code: "FILE_NUMBER_REQUIRED",
-        },
-        { status: 403 },
-      );
+      return NextResponse.json({ error: "Unknown registration type" }, { status: 400 });
     }
 
     const formEmail = normalizeEmail(

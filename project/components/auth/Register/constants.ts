@@ -3,6 +3,7 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
     label: "Medical Cover",
     color: "#4493b8",
     steps: [
+      "Verify File Number",
       "Identity",
       "Health Profile",
       "Documents",
@@ -15,6 +16,7 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
     label: "Healthcare Professional",
     color: "#4493b8",
     steps: [
+      "Verify Staff Number", // step 1 — hospital staff number + HPCSA
       "Credentials",        // step 1
       "Identity & Contact", // step 2
       "Documents",          // step 3
@@ -38,5 +40,5 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
 };
 
 export const skippableSteps: Record<string, number[]> = {
-  patient: [2], // Health Profile — optional, can be completed later
+  patient: [3], // Health Profile — optional, can be completed later
 };

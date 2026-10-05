@@ -30,6 +30,7 @@ export default function StepRenderer({
       updateData={updateData}
       errors={errors}
       onSkip={onSkip}
+      role={role}
     />
   );
 }

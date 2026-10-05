@@ -15,10 +15,12 @@ const NO_MATCH = "We couldn't match those details. Check your hospital, file num
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const kind = body.kind === "doctor" ? "doctor" : "patient";
     const r = await lookupFile({
+      kind,
       facilityId: body.facilityId,
       fileNumber: body.fileNumber,
-      proof: { idNumber: body.idNumber, dateOfBirth: body.dateOfBirth },
+      proof: { idNumber: body.idNumber, dateOfBirth: body.dateOfBirth, hpcsaNumber: body.hpcsaNumber },
     });
     if (!r.ok) {
       if (r.reason === "rate_limited") {
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
     }
     const { match } = r;
 
-    if (match.user.hasPassword && match.user.emailVerified) {
+    if (match.user.hasPassword) {
       return NextResponse.json({ success: true, data: { state: "has_account" } });
     }
 
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
     const error = await resendOnboarding({
       user: { id: match.user.id, email: match.user.email, firstName: match.user.firstName },
       facilityName: match.facility.name,
-      kind: "patient",
+      kind,
       fileNumber: match.file.fileNumber,
       origin: getAppOrigin(request.url),
     });

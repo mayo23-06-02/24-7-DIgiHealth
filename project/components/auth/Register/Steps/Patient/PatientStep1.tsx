@@ -86,11 +86,15 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
           error={errors?.email}
           placeholder="your@email.co.za"
           onChange={(e) => updateData("email", e.target.value)}
-          disabled={!!formData.familyInviteToken || !!formData.adminInviteToken}
+          disabled={!!formData.familyInviteToken || !!formData.adminInviteToken || !!formData.setupToken}
           helperText={
-            formData.familyInviteToken || formData.adminInviteToken
-              ? "This is the address your invite was sent to, so it can't be changed."
-              : undefined
+            formData.setupToken
+              ? "Your hospital sent your setup link to this address."
+              : formData.familyInviteToken || formData.adminInviteToken
+                ? "This is the address your invite was sent to, so it can't be changed."
+                : formData.fileClaim?.maskedEmail
+                  ? `Use the email your hospital has on file (${formData.fileClaim.maskedEmail}).`
+                  : undefined
           }
           className="md:col-span-2"
         />

@@ -104,11 +104,15 @@ export default function PractitionerStep2({
           onChange={(e) => updateData("email", e.target.value)}
           placeholder="doctor@practice.co.za"
           className="md:col-span-2"
-          disabled={!!formData.inviteToken || !!formData.adminInviteToken}
+          disabled={!!formData.inviteToken || !!formData.adminInviteToken || !!formData.setupToken}
           helperText={
-            formData.inviteToken || formData.adminInviteToken
-              ? "Locked — this invite was sent to this address"
-              : undefined
+            formData.setupToken
+              ? "Your hospital sent your setup link to this address."
+              : formData.inviteToken || formData.adminInviteToken
+                ? "Locked — this invite was sent to this address"
+                : formData.fileClaim?.maskedEmail
+                  ? `Use the email your hospital has on file (${formData.fileClaim.maskedEmail}).`
+                  : undefined
           }
         />
         <Input

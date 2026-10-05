@@ -6,14 +6,15 @@ import { FacilityPatient } from "@/lib/models/FacilityPatient";
 import { PatientProfile, PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { findLiveToken } from "@/lib/provisioning/setPassword";
 import { validatePassword, validatePasswordConfirmation } from "@/lib/auth/passwordRules";
-import { maskE164 } from "@/lib/phone/normalizePhone";
+import { matchForUser, toWizardPrefill } from "@/lib/provisioning/fileLookup";
 import { toId } from "@/lib/db";
 
-const maskEmail = (e: string) => e.replace(/^(.).*(@.*)$/, "$1***$2");
 
 /**
  * GET /api/auth/set-password?token=...
- * Tells the page who the link is for (masked) and which details are still missing.
+ * Used by the registration wizard when opened from the emailed setup link
+ * (/register/<role>?setup=<token>). The link proves the mailbox, so the email is returned in
+ * full and locked in the wizard, together with the hospital's record in the wizard's field names.
  */
 export async function GET(request: Request) {
   const token = new URL(request.url).searchParams.get("token") ?? "";
@@ -21,34 +22,20 @@ export async function GET(request: Request) {
   if (!row) {
     return NextResponse.json({ error: "This link is invalid or has expired. Ask your hospital to send a new one." }, { status: 404 });
   }
-  const user = await User.findById(row.userId).lean();
-  if (!user) return NextResponse.json({ error: "This link is invalid." }, { status: 404 });
-
-  const files =
-    user.role === "patient"
-      ? await FacilityPatient.find({ patientId: String(user._id) }).populate("facilityId", "name").lean()
-      : [];
-  const staff = user.role === "practitioner" ? await Staff.find({ userId: String(user._id) }).populate("facilityId", "name").lean() : [];
-
-  const patientProfile = user.role === "patient" ? await PatientProfile.findOne({ userId: String(user._id) }).lean() : null;
-  const missing: string[] = [];
-  if (user.role === "patient") {
-    if (!patientProfile?.emergencyContact?.name) missing.push("emergencyContact");
-    if (!patientProfile?.emergencyContact?.phone) missing.push("emergencyContact");
+  const match = await matchForUser(String(toId(row.userId)));
+  if (!match) return NextResponse.json({ error: "This link is invalid." }, { status: 404 });
+  if (match.user.hasPassword) {
+    return NextResponse.json({ error: "This account is already set up. Please sign in.", code: "HAS_ACCOUNT" }, { status: 409 });
   }
 
   return NextResponse.json({
     success: true,
     data: {
-      role: user.role,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: maskEmail(user.email),
-      mobile: user.phoneE164 ? maskE164(user.phoneE164) : null,
-      hospitals: [...files, ...staff].map((f) => (f.facilityId as unknown as { name?: string })?.name).filter(Boolean),
-      emergencyContact: patientProfile?.emergencyContact ?? null,
-      medicalAid: patientProfile?.medicalAid ?? null,
-      needsEmergencyContact: missing.length > 0,
+      role: match.kind === "doctor" ? "practitioner" : "patient",
+      email: match.user.email,
+      hospital: match.facility,
+      fileNumber: match.file.fileNumber,
+      prefill: { ...toWizardPrefill(match), email: match.user.email },
     },
   });
 }
