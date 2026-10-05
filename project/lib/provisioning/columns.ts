@@ -52,6 +52,15 @@ export const DOCTOR_COLUMNS: ColumnSpec[] = [
 
 export type ImportKind = "patients" | "doctors";
 
+/**
+ * Columns in the downloadable template, kept short on purpose. The importer still accepts
+ * the other optional columns above if a hospital includes them.
+ */
+export const TEMPLATE_KEYS: Record<ImportKind, string[]> = {
+  patients: ["file_number", "first_name", "last_name", "email", "id_number", "date_of_birth", "gender", "mobile"],
+  doctors: ["staff_number", "first_name", "last_name", "email", "mobile", "hpcsa_number", "specialisation", "role"],
+};
+
 export const COLUMNS: Record<ImportKind, ColumnSpec[]> = {
   patients: PATIENT_COLUMNS,
   doctors: DOCTOR_COLUMNS,

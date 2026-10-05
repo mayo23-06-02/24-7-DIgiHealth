@@ -1,6 +1,9 @@
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
-import { COLUMNS, canonicalHeader, type ImportKind } from "./columns";
+import { COLUMNS, TEMPLATE_KEYS, canonicalHeader, type ImportKind } from "./columns";
+
+const templateSpec = (kind: ImportKind) =>
+  TEMPLATE_KEYS[kind].map((k) => COLUMNS[kind].find((c) => c.key === k)!).filter(Boolean);
 import type { RawRow } from "./rows";
 
 export const MAX_IMPORT_ROWS = 2000;
@@ -75,7 +78,7 @@ export async function parseImportFile(
 
 /** Template workbook with the standard headers, an example row and a notes sheet. */
 export async function buildTemplateXlsx(kind: ImportKind): Promise<Buffer> {
-  const spec = COLUMNS[kind];
+  const spec = templateSpec(kind);
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(kind === "patients" ? "Patients" : "Doctors");
   ws.addRow(spec.map((c) => c.key));
@@ -95,6 +98,6 @@ export async function buildTemplateXlsx(kind: ImportKind): Promise<Buffer> {
 }
 
 export function buildTemplateCsv(kind: ImportKind): string {
-  const spec = COLUMNS[kind];
+  const spec = templateSpec(kind);
   return Papa.unparse([spec.map((c) => c.key), spec.map((c) => c.example)]);
 }
