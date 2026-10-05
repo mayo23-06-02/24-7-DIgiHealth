@@ -191,11 +191,11 @@ export function useChat(id: string, isConversationId: boolean = false) {
   // so the header chat-badge drops by 1 for this chat only.
   useEffect(() => {
     if (loading) return;
-    const conversationObjectId =
+    const conversationIdForRead =
       (isConversationId ? id : null) ||
       conversation?._id?.toString?.() ||
       conversation?._id;
-    if (!conversationObjectId) return;
+    if (!conversationIdForRead) return;
 
     let cancelled = false;
     // Short delay so first paint isn't blocked; fire-and-forget
@@ -205,7 +205,7 @@ export function useChat(id: string, isConversationId: boolean = false) {
           const res = await fetch("/api/chat/messages/read", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ conversationId: conversationObjectId }),
+            body: JSON.stringify({ conversationId: conversationIdForRead }),
           });
           if (cancelled) return;
           if (res.ok) {
@@ -291,16 +291,16 @@ export function useChat(id: string, isConversationId: boolean = false) {
 
   /** Mark every unread message in this conversation as read (for the current user). */
   const markConversationRead = useCallback(async () => {
-    const conversationObjectId =
+    const conversationIdForRead =
       (isConversationId ? id : null) ||
       conversation?._id?.toString?.() ||
       conversation?._id;
-    if (!conversationObjectId) return;
+    if (!conversationIdForRead) return;
     try {
       await fetch("/api/chat/messages/read", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: conversationObjectId }),
+        body: JSON.stringify({ conversationId: conversationIdForRead }),
       });
       setMessages((prev) => prev.map((m) => ({ ...m, isRead: true })));
       notifyChatUnreadChanged();

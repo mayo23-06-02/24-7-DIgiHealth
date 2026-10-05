@@ -62,9 +62,7 @@ export async function GET(req: NextRequest) {
       200,
     );
 
-    // Postgres-native accounts have no Mongo identity (see
-    // lib/utils/mongoId.ts) — Consultation is still Mongo-only, so they
-    // genuinely have no bookings under their own id yet.
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
     if (auth.role === "patient" || auth.role === "practitioner") {
       if (!isValidId(auth.userId)) {
         return NextResponse.json({ success: true, data: [] });

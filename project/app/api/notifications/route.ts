@@ -4,7 +4,6 @@ import { toId, isValidId } from '@/lib/db';
 
 function userMatch(userId: string) {
   const oid = (toId(userId) as string);
-  // Match both ObjectId and legacy string storage
   return { $or: [{ userId: oid }, { userId }] };
 }
 
@@ -16,8 +15,7 @@ export async function GET(req: Request) {
 
     const userId = req.headers.get('x-user-id');
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // Postgres-native accounts have no Mongo identity — this collection is
-    // still Mongo-only, so there's nothing for them to have (see lib/utils/mongoId.ts).
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
     if (!isValidId(userId)) return NextResponse.json([]);
 
     const notifications = await Notification.find(userMatch(userId))

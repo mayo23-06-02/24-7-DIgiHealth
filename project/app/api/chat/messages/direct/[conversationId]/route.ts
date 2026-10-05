@@ -31,7 +31,6 @@ export async function GET(
     const before = searchParams.get('before');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10) || 50, 100);
 
-    // Always cast — raw string comparison against ObjectId fields returns 0 docs
     const query: Record<string, unknown> = {
       conversationId: (toId(conversationId) as string),
     };
@@ -56,7 +55,7 @@ export async function GET(
       .limit(limit)
       .lean();
 
-    // Serialize ObjectIds to strings for stable client comparisons
+    // Serialize ids to strings for stable client comparisons
     const payload = messages.reverse().map((m) => ({
       ...m,
       _id: m._id?.toString(),

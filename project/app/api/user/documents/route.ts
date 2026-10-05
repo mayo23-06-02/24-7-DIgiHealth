@@ -164,25 +164,7 @@ export async function POST(req: NextRequest) {
       mediaId = asset.id;
 
       if (isAvatar) {
-        // The Supabase asset (purpose: "avatar") is now the source of truth —
-        // see getUserAvatarUrl(). Nothing else needs to be written for the
-        // picture to take effect.
-        //
-        // The Mongo column is still mirrored, best-effort, purely so any
-        // remaining reader of `User.avatarUrl` stays consistent. It is skipped
-        // for Postgres-native accounts, whose uuid can never be a Mongo `_id` —
-        // attempting it is what used to make this whole endpoint 500.
-        if (isValidId(user.userId)) {
-          try {
-            await User.findByIdAndUpdate(user.userId, { avatarUrl: fileUrl });
-          } catch (mirrorErr) {
-            console.warn(
-              "[POST /api/user/documents] avatar mirror to Mongo failed:",
-              mirrorErr,
-            );
-          }
-        }
-
+        // The avatar is the newest avatar-purpose media asset (see getCurrentAvatar).
         return NextResponse.json({
           success: true,
           data: { url: fileUrl, mediaId: asset.id },

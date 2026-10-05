@@ -18,7 +18,7 @@ export interface RequestUser {
  * Resolve the signed-in account from the session cookie.
  *
  * The JWT's `userId` claim is the Postgres `users.id` (uuid). A token carrying
- * anything else (e.g. a pre-migration ObjectId) is treated as signed out.
+ * anything else is treated as signed out.
  */
 export async function getRequestUser(): Promise<RequestUser | null> {
   const cookieStore = await cookies();

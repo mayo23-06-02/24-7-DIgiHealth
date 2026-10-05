@@ -88,7 +88,7 @@ function needsSharedCounter(pathname: string): boolean {
 /*  Patients must be covered before using the platform — by a plan of   */
 /*  their own, or by the family plan of a guardian who pays for them.   */
 /*  The gate reads the `coverage` claim on the session token because    */
-/*  middleware runs on the edge and cannot reach Mongo; the claim is    */
+/*  middleware runs on the edge and cannot reach the database; the claim is    */
 /*  refreshed at login, after checkout, and when a family invite is     */
 /*  accepted. Authoritative checks stay server-side in                  */
 /*  lib/billing/entitlement.ts.                                         */

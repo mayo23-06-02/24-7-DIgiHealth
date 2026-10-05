@@ -16,9 +16,7 @@ export async function GET(req: NextRequest) {
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Postgres-native accounts have no Mongo `User`/profile row to seed or
-    // read (see lib/utils/mongoId.ts) — return sensible defaults instead of
-    // crashing on findById/auto-seed create().
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
     if (!isValidId(userId)) {
       const requestUser = await getRequestUser();
       if (!requestUser)

@@ -54,7 +54,7 @@ export function useLogin() {
 
       if (res.ok) {
         // Deliberately do NOT clear `loading` here. The dashboard layout does
-        // jwtVerify + a Mongo lookup, so the route takes a while; the button
+        // jwtVerify + an account lookup, so the route takes a while; the button
         // must keep spinning until it commits. This component unmounts on
         // navigation, so the state cannot leak.
         navigate(`/${data.user?.role}`);

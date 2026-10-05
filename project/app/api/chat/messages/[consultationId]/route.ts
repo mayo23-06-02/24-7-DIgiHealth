@@ -35,10 +35,10 @@ export async function GET(
     }
 
     // Verify the user is a participant in this conversation
-    const userMongoId = (toId(user.userId) as string);
+    const currentUserId = (toId(user.userId) as string);
     const isParticipant =
-      conversation.patientId?.toString() === userMongoId.toString() ||
-      conversation.practitionerId?.toString() === userMongoId.toString();
+      conversation.patientId?.toString() === currentUserId.toString() ||
+      conversation.practitionerId?.toString() === currentUserId.toString();
 
     if (!isParticipant) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

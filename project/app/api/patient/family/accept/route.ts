@@ -44,10 +44,6 @@ export async function POST(req: NextRequest) {
     }
 
     link.memberId = user.userId as any;
-    // Written alongside memberId for the same reason guardianKey is written
-    // alongside guardianId: it is the member's session id as a plain string, so
-    // it matches whichever id shape the account uses. memberFilter reads it.
-    link.memberKey = String(user.userId);
     link.status = 'active';
     link.acceptedAt = new Date();
     await link.save();

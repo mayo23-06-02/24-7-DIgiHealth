@@ -19,14 +19,9 @@ import { isValidId } from '@/lib/db';
  * written for a person. Every helper fails closed: anything it cannot prove is
  * a denial, never a pass.
  *
- * A note on identities. `RequestUser.userId` is a Mongo ObjectId for accounts
- * that originated in Mongo and a Postgres uuid for accounts that did not (see
- * lib/auth/getRequestUser.ts). Everything these helpers compare against —
- * Conversation.patientId, Consultation.practitionerId — is an ObjectId-typed
- * Mongo path, so a uuid identity can never match one. That is not a gap: a
- * Postgres-native account has no Mongo records to own, so "no match" is the
- * honest answer, and the global objectIdGuard already turns such a filter into
- * a match-nothing read rather than a CastError.
+ * A note on identities. `RequestUser.userId` is the Postgres `users.id` (uuid).
+ * A non-uuid id in a filter is compiled to a match-nothing read by lib/db, so
+ * "no match" is the answer rather than an error.
  */
 
 /** Deliberately identical for "no such record" and "not yours". */

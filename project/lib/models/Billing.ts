@@ -4,8 +4,6 @@ import { TIER_ORDER } from '@/lib/billing/tiers';
 // ─── Payment Transaction ──────────────────────────────────────────────────────
 export interface IPaymentTransaction extends Document {
   patientId: string;
-  /** Plain-string owner id — see ISubscription.patientKey. */
-  patientKey?: string;
   /** Set when a family guardian pays on this patient's behalf; unset = pays for self (default, unchanged behavior). */
   payerId?: string;
   practitionerId?: string;
@@ -28,16 +26,6 @@ export interface IPaymentTransaction extends Document {
 // ─── Subscription ─────────────────────────────────────────────────────────────
 export interface ISubscription extends Document {
   patientId: string;
-  /**
-   * The owner's session id as a plain string, for accounts whose id is a
-   * Postgres uuid and therefore cannot be stored in the ObjectId-typed
-   * `patientId` above.
-   *
-   * Every new subscription writes this regardless of id type, so lookups have
-   * one field that works for both. Without it, subscriptions were unreachable
-   * for exactly the accounts every new signup creates.
-   */
-  patientKey?: string;
   /** Set when a family guardian pays for this patient; unset = pays for self (default, unchanged behavior). */
   payerId?: string;
   tier: 'individual' | 'family' | 'family_plus';
@@ -75,12 +63,6 @@ export interface IPayoutRequest extends Document {
 // ─── Payment Method (saved cards / accounts) ──────────────────────────────────
 export interface IPaymentMethod extends Document {
   patientId: string;
-  /**
-   * The owner as a plain string, so Postgres-native accounts (whose id is a
-   * uuid and can never be cast to an ObjectId) can own a payment method too —
-   * the same pairing Subscription and PaymentTransaction already use.
-   */
-  patientKey?: string;
   /** Name on the card or bank account. Never the number itself. */
   holderName?: string;
   /** The address given with this instrument at checkout. */
@@ -146,12 +128,10 @@ export interface IBillingAuditLog extends Document {
 export const PaymentTransaction: ModelClass<IPaymentTransaction> = defineModel<IPaymentTransaction>({
   name: 'PaymentTransaction', table: 'payment_transactions',
   columns: { timestamp: 'occurred_at' },
-  aliases: { patientKey: 'patient_id' },
   refs: { patientId: 'User', payerId: 'User', practitionerId: 'User', facilityId: 'Facility', consultationId: 'Consultation' },
 });
 export const Subscription: ModelClass<ISubscription> = defineModel<ISubscription>({
   name: 'Subscription', table: 'subscriptions',
-  aliases: { patientKey: 'patient_id' },
   refs: { patientId: 'User', payerId: 'User' },
 });
 export const PayoutRequest: ModelClass<IPayoutRequest> = defineModel<IPayoutRequest>({
@@ -178,7 +158,6 @@ export const PaymentMethod: ModelClass<IPaymentMethod> = defineModel<IPaymentMet
     'billingAddress.city': 'billing_address_city',
     'billingAddress.postalCode': 'billing_address_postal_code',
   },
-  aliases: { patientKey: 'patient_id' },
   refs: { patientId: 'User' },
 });
 export const PlatformFeeConfig: ModelClass<IPlatformFeeConfig> = defineModel<IPlatformFeeConfig>({

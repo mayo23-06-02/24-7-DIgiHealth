@@ -29,14 +29,14 @@ export interface Doctor {
   specialisation?: string;
   location?: string;
   rating?: number;
-  _id?: string; // MongoDB ObjectId
+  _id?: string; // server id (uuid)
 }
 
 // Patient types
 export interface Patient {
   id: string;
   fullName: string;
-  _id?: string; // MongoDB ObjectId
+  _id?: string; // server id (uuid)
 }
 
 // Agenda/Consultation types
@@ -49,7 +49,7 @@ export interface AgendaItem {
   img?: string;
   scheduledStartTime?: string | Date;
   scheduledEndTime?: string | Date;
-  _id?: string; // MongoDB ObjectId
+  _id?: string; // server id (uuid)
 }
 
 // Conversation types

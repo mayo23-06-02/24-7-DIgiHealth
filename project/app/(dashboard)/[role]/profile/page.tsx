@@ -524,7 +524,7 @@ export default function ProfilePage() {
 
         console.log("[handleFilesUpload] Upload successful:", uploadedMedia);
 
-        // Save document metadata to MongoDB
+        // Save document metadata
         const docRes = await fetch("/api/user/documents", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

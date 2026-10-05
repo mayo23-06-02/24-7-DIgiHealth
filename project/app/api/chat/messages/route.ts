@@ -34,41 +34,41 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid conversation ID' }, { status: 400 });
     }
 
-    const convObjectId = (toId(conversationId) as string);
+    const conversationKey = (toId(conversationId) as string);
 
     // Verify the user is a participant in this conversation
-    const conversation = await Conversation.findById(convObjectId).lean();
+    const conversation = await Conversation.findById(conversationKey).lean();
     if (!conversation) {
       return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
     }
 
-    const userMongoId = (toId(user.userId) as string);
+    const currentUserId = (toId(user.userId) as string);
     const isParticipant =
-      conversation.patientId?.toString() === userMongoId.toString() ||
-      conversation.practitionerId?.toString() === userMongoId.toString();
+      conversation.patientId?.toString() === currentUserId.toString() ||
+      conversation.practitionerId?.toString() === currentUserId.toString();
 
     if (!isParticipant) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Use the authenticated user's ID as senderId (not client-supplied)
-    const senderObjectId = userMongoId;
-    const receiverObjectId =
-      conversation.patientId?.toString() === userMongoId.toString()
+    const senderId = currentUserId;
+    const receiverId =
+      conversation.patientId?.toString() === currentUserId.toString()
         ? conversation.practitionerId
         : conversation.patientId;
 
     // Idempotent message creation using clientId when provided
     const filter = clientId
-      ? { clientId, conversationId: convObjectId }
+      ? { clientId, conversationId: conversationKey }
       : { _id: newId() };
 
     const message = await Message.findOneAndUpdate(
       filter,
       {
-        conversationId: convObjectId,
-        senderId: senderObjectId,
-        receiverId: receiverObjectId,
+        conversationId: conversationKey,
+        senderId: senderId,
+        receiverId: receiverId,
         content,
         type: type || 'text',
         fileUrl,
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
     }
 
     // Update conversation lastActivityAt and lastMessage
-    await Conversation.findByIdAndUpdate(convObjectId, {
+    await Conversation.findByIdAndUpdate(conversationKey, {
       lastActivityAt: new Date(),
       lastMessage: {
         content: message.content,

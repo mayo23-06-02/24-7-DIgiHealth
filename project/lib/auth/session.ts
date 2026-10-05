@@ -17,7 +17,7 @@ export interface SessionUser {
  * so both end up with an identical session shape.
  */
 export async function createSessionResponse(user: SessionUser) {
-  // Patients are gated on holding a plan, and middleware cannot reach Mongo
+  // Patients are gated on holding a plan, and middleware cannot reach the database
   // to check — so the answer is resolved once here and carried on the token.
   // A dependant on a guardian's family plan has no subscription of their own
   // and would otherwise be sent to checkout to pay a second time for cover

@@ -1,5 +1,7 @@
 # 24/7 DigiHealth — Platform Feature Completion Q&A / Checklist
 
+> **Note:** this audit predates the move to Supabase Postgres as the only database. Statements below that mention MongoDB, Mongoose or dual writes describe the earlier state and no longer apply; the data layer is now `lib/db` over Supabase.
+
 **Purpose:** a ground-truth inventory of every feature across all six roles (Patient, Practitioner, Hospital, Hospital Admin, Mega Admin, Super Admin) plus shared systems (auth, messaging, billing, AI, marketing), with an honest completion status for each — verified by reading the actual implementation, not by trusting what the UI *looks* like it does.
 
 **Method:** five parallel code audits (one per role cluster + one cross-cutting), each instructed to find hard evidence — `TODO`/`FIXME`/`// mock` comments, `Math.random()` standing in for real data, hardcoded arrays, dead `onClick` handlers, silently-swallowed errors, frontend calls to API routes that don't exist, and DB queries that don't actually query anything. File:line citations are preserved so every claim below is checkable.

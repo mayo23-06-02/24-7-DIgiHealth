@@ -12,5 +12,5 @@ export { default as BookingModal } from "@/components/doctor/BookingModal";
 export { default as BookingTrigger } from "./BookingTrigger";
 export { default as TimeSlotPicker } from "./TimeSlotPicker";
 export { useBooking } from "@/hooks/useBooking";
-// Client-safe booking helpers only (no mongoose)
+// Client-safe booking helpers only
 export * from "@/lib/booking";

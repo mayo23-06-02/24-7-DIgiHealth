@@ -60,11 +60,7 @@ export async function POST(req: NextRequest) {
     const inviteExpiresAt = new Date(Date.now() + INVITE_TTL_MINUTES * 60 * 1000);
 
     const linkData: any = {
-      // guardianKey works for both id shapes; guardianId is only set when the
-      // id can actually be cast to an ObjectId. Writing the uuid into the
-      // ObjectId field would throw and fail the invite outright.
-      guardianKey: String(guardian.userId),
-      ...(isValidId(guardian.userId) ? { guardianId: guardian.userId } : {}),
+      guardianId: guardian.userId,
       inviteEmail: email,
       inviteName,
       relationship,

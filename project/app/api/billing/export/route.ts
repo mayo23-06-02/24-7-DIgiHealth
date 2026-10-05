@@ -23,12 +23,8 @@ export const runtime = "nodejs";
 /**
  * Resolve the caller.
  *
- * This used to look the session id up with `User.findById`, which returns null
- * for a Postgres-native account — there is no Mongo user row to find. Every
- * such patient therefore got 401 from this route and could not download a
- * receipt or a statement at all. getRequestUser resolves both id shapes, and
- * the returned object keeps the `_id`/`firstName`/… shape the rest of this
- * file already reads.
+ * getRequestUser resolves the session; the returned object keeps the
+ * `_id`/`firstName`/… shape the rest of this file reads.
  */
 async function getAuthUser() {
   const requestUser = await getRequestUser();
@@ -93,11 +89,8 @@ export async function POST(req: NextRequest) {
 
       const role = user.role as string;
       const uid = user._id.toString();
-      // patientKey is checked too: transactions owned by Postgres-native
-      // accounts carry no ObjectId patientId, so matching on that alone gave
-      // those patients a 403 on their own receipt.
       const isOwner =
-        txn.patientId?.toString() === uid || txn.patientKey === uid;
+        txn.patientId?.toString() === uid;
       const isPract = txn.practitionerId?.toString() === uid;
       const isPlatformAdmin = ["super_admin", "mega_admin", "inspector"].includes(
         role,

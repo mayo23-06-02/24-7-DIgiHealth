@@ -27,9 +27,7 @@ export async function GET() {
   const patientId = await getPatientId();
   if (!patientId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // Postgres-native accounts have no Mongo `User` row (see
-  // lib/utils/mongoId.ts) — every collection below is still Mongo-only, so
-  // they genuinely have an empty agenda rather than a lookup failure.
+  // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
   if (!isValidId(patientId)) return NextResponse.json([]);
 
   const patient = await User.findById(patientId);

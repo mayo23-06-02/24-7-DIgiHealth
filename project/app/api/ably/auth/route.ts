@@ -42,10 +42,6 @@ async function handleAuth(_req: NextRequest) {
 
   try {
 
-    // Conversations this user is a party to. The ObjectId guard installed at
-    // the connection chokepoint makes this match nothing (rather than throw)
-    // for Postgres-native ids, so those accounts simply get no conversation
-    // channels instead of a 500.
     const conversations = await Conversation.find({
       $or: [{ patientId: user.userId }, { practitionerId: user.userId }],
     })

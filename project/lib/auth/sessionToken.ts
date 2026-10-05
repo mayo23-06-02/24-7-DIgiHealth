@@ -14,7 +14,7 @@ export type SessionClaims = {
    *
    * Carried on the token so middleware can enforce the plan gate without a
    * database round trip on every request — the edge runtime cannot reach
-   * Mongo, and the gate has to run on every dashboard navigation.
+   * the database, and the gate has to run on every dashboard navigation.
    *
    * It is a cache, not the source of truth. `getEntitlement()` is, and every
    * API that grants something re-checks it there. The claim only decides

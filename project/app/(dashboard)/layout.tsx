@@ -12,8 +12,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Postgres-first with a Mongo fallback, and correctly handles both Mongo
-  // ObjectId and Postgres-uuid session identities — see lib/auth/getRequestUser.ts.
+  // Verifies the session cookie and loads the account (see lib/auth/getRequestUser.ts).
   const requestUser = await getRequestUser().catch((err) => {
     console.error("Layout Auth Error:", err);
     return null;

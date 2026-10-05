@@ -13,10 +13,8 @@ export async function GET() {
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
-    // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
-    // — FamilyLink/PatientProfile are still Mongo-only, so they genuinely have
-    // no family links / profile recorded rather than a lookup failure.
-    const hasMongoIdentity = isValidId(user.userId);
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
+    const hasValidId = isValidId(user.userId);
 
     let asGuardian: any[] = [];
     let asMember: any[] = [];
@@ -44,10 +42,7 @@ export async function GET() {
       getGuardianFamilySlots(user.userId),
     ]);
 
-    // The member side still resolves through ObjectId-typed memberId/guardianId
-    // and its populate, so it stays gated. A uuid account can invite family but
-    // will not yet see a family it has been invited into.
-    if (hasMongoIdentity) {
+    if (hasValidId) {
       [asMember, patientProfile] = await Promise.all([
         FamilyLink.find({ memberId: user.userId, status: 'active' })
           .populate('guardianId', 'firstName lastName email')

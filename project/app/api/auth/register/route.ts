@@ -106,11 +106,6 @@ export async function POST(request: Request) {
       mfaEnabled: false,
     } as any);
 
-    // Dual-write (Phase 2 of the Mongo -> Postgres migration): mirror into
-    // Postgres, non-fatal — Mongo remains the source of truth for reads.
-    // Awaited (not fire-and-forget) since serverless functions don't
-    // guarantee background work continues after the response is sent.
-
     try {
       const regToken =
         formData.registrationMediaToken ||
@@ -236,11 +231,6 @@ export async function POST(request: Request) {
 
           if (invite && notExpired) {
             invite.memberId = newUser._id;
-            // Plain-string copy beside the ObjectId, so the member side of the
-            // link resolves for either id shape — this is what makes the new
-            // account read as covered by the guardian's plan rather than being
-            // sent to checkout.
-            invite.memberKey = String(newUser._id);
             invite.status = "active";
             invite.acceptedAt = new Date();
             invite.inviteToken = undefined;

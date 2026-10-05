@@ -15,8 +15,8 @@ export async function POST(request: Request) {
 
     // Each field is range-checked *and* type-checked. Comparing a non-numeric
     // value with < / > yields false (NaN comparisons always do), so a string
-    // like "good" slipped past a range-only guard and then blew up as a
-    // Mongoose CastError — surfacing a 500 where the caller deserves a 400.
+    // like "good" slipped past a range-only guard and then blew up in the
+    // database layer — surfacing a 500 where the caller deserves a 400.
     if (typeof mood !== 'number' || !Number.isFinite(mood) || mood < 1 || mood > 5) {
       return NextResponse.json({ error: 'Invalid mood' }, { status: 400 });
     }

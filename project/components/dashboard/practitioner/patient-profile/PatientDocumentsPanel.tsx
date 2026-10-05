@@ -82,7 +82,7 @@ export default function PatientDocumentsPanel({
 
       console.log("[PatientDocumentsPanel] Upload successful:", uploadedMedia);
 
-      // Save document metadata to MongoDB
+      // Save document metadata
       const docRes = await fetch(`/api/practitioner/patients/${patientId}/documents`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

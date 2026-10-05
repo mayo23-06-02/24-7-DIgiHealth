@@ -20,9 +20,6 @@ import { apiError } from "@/lib/api/errors";
 async function getAuthUser() {
   const requestUser = await getRequestUser();
   if (!requestUser) return null;
-  // Postgres-native accounts have no Mongo `User` row (see
-  // lib/utils/mongoId.ts) — this shape is compatible with every `user._id`/
-  // `user.role` read below without touching Mongo for identity.
   return {
     _id: requestUser.userId,
     role: requestUser.role,
@@ -76,10 +73,6 @@ export async function GET(request: Request) {
         Subscription.findOne(ownerFilter)
           .sort({ createdAt: -1 })
           .lean(),
-        // Same owner filter as the rest of billing. Payment methods used to be
-        // ObjectId-keyed only, so a Postgres-native account could never see one
-        // — and now that checkout actually saves them, that would have meant
-        // saving a card the owner could never be shown.
         PaymentMethod.find(ownerFilter).sort({ isDefault: -1, updatedAt: -1 }).lean(),
       ]);
 

@@ -1,8 +1,6 @@
 import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IFamilyLink extends Document {
   guardianId?: string;
-  guardianKey?: string;
-  memberKey?: string;
   /** Unset until an email-invited adult actually accepts (they may not have
    * an account yet at invite time) — inviteEmail identifies them until then. */
   memberId?: string;
@@ -29,7 +27,6 @@ export interface IFamilyLink extends Document {
 
 export const FamilyLink: ModelClass<IFamilyLink> = defineModel<IFamilyLink>({
   name: 'FamilyLink', table: 'family_links',
-  aliases: { guardianKey: 'guardian_id', memberKey: 'member_id' },
   refs: { guardianId: 'User', memberId: 'User' },
 });
 export default FamilyLink;

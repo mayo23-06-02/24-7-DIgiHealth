@@ -1,6 +1,6 @@
 /**
  * Client-safe booking exports only.
- * Do NOT re-export server modules (notifications, expire) — they import mongoose
+ * Do NOT re-export server modules (notifications, expire) — they import the database layer
  * and will break the browser bundle with "Can't resolve 'async_hooks'".
  *
  * Server-only:

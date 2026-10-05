@@ -12,9 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
-    // — Prescription is still Mongo-only, so they genuinely have none rather
-    // than a lookup failure.
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
     if (!isValidId(user.userId)) {
       return NextResponse.json([]);
     }

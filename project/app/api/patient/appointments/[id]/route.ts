@@ -16,9 +16,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { payload } = await jwtVerify(token, SECRET);
     const userId = payload.userId as string;
-    // Postgres-native accounts have no Mongo identity (see
-    // lib/utils/mongoId.ts) — Consultation is still Mongo-only, so they
-    // genuinely can't own one.
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
     if (!isValidId(userId)) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }

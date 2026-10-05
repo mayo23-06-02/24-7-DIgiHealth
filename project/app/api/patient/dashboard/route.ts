@@ -13,13 +13,11 @@ export async function GET(req: NextRequest) {
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     const userId = user.userId;
 
-    // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
-    // — Anthropometric/MedicalContext are still Mongo-only, so they genuinely
-    // have no vitals/medical history recorded rather than a lookup failure.
-    const hasMongoIdentity = isValidId(userId);
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
+    const hasValidId = isValidId(userId);
 
     // Fetch two latest vitals for trend calculation
-    const vitalsHistory = hasMongoIdentity
+    const vitalsHistory = hasValidId
       ? await Anthropometric.find({ patientId: userId })
           .sort({ dateRecorded: -1 })
           .limit(2)
@@ -43,12 +41,12 @@ export async function GET(req: NextRequest) {
     };
 
     // Fetch patient profile for demographics
-    const profile = hasMongoIdentity
+    const profile = hasValidId
       ? await PatientProfile.findOne({ userId }).lean()
       : null;
 
     // Fetch medical history summary
-    const medicalCtx = hasMongoIdentity
+    const medicalCtx = hasValidId
       ? await MedicalContext.findOne({ patientId: userId }).lean()
       : null;
 

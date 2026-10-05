@@ -1,5 +1,5 @@
 /**
- * Server-only booking utilities (mongoose / Node APIs).
+ * Server-only booking utilities (database / Node APIs).
  * Import this only from API routes or Server Components — never from "use client" files.
  */
 

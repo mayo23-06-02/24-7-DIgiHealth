@@ -118,6 +118,11 @@ alter table public.billings enable row level security;
 -- ── system_config is a singleton row ────────────────────────────────────────
 create unique index if not exists system_config_singleton on public.system_config ((true));
 
+-- ── enums: values the app uses that 001-009 did not define ───────────────────
+alter type public.subscription_tier add value if not exists 'individual';
+alter type public.subscription_tier add value if not exists 'family_plus';
+alter type public.consultation_type add value if not exists 'voice';
+
 -- ── atomic numeric increment (replaces Mongo $inc) ───────────────────────────
 create or replace function public.dh_increment(
   p_table text, p_id uuid, p_column text, p_delta numeric

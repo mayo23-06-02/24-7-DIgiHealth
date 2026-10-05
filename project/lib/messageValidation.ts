@@ -1,3 +1,4 @@
+import { isValidId } from '@/lib/db';
 /**
  * Message validation utilities for chat system
  */
@@ -151,18 +152,14 @@ export function validateFileAttachment(file: File): { valid: boolean; errors: st
  * Validate conversation ID format
  */
 export function validateConversationId(conversationId: string): boolean {
-  // MongoDB ObjectId format (24 hex characters)
-  const objectIdPattern = /^[0-9a-fA-F]{24}$/;
-  return objectIdPattern.test(conversationId);
+  return isValidId(conversationId);
 }
 
 /**
  * Validate user ID format
  */
 export function validateUserId(userId: string): boolean {
-  // MongoDB ObjectId format (24 hex characters)
-  const objectIdPattern = /^[0-9a-fA-F]{24}$/;
-  return objectIdPattern.test(userId);
+  return isValidId(userId);
 }
 
 /**

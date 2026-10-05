@@ -9,9 +9,7 @@ import { isValidId } from '@/lib/db';
  * app/api/practitioner/patients/[id]/health-record/route.ts) rather than a
  * generic ACL system.
  *
- * FamilyLink is still Mongo-only, so a Postgres-native guardian or member
- * (uuid id, see lib/utils/mongoId.ts) can have no such link — short-circuit
- * before Mongoose casts a uuid into an ObjectId query and throws. */
+ * A non-uuid id cannot own a link, so it short-circuits to null. */
 export async function getActiveFamilyLink(
   guardianId: string,
   memberId: string,
@@ -37,17 +35,9 @@ export async function canViewMedicalHistory(guardianId: string, memberId: string
   return !!link && link.isMinor === true;
 }
 
-/**
- * Match a guardian's FamilyLink rows regardless of id shape.
- *
- * `guardianKey` is written for every new link; `guardianId` is only set when
- * the id can be cast to an ObjectId, and remains the only field on rows
- * created before this existed.
- */
+/** Match a guardian's FamilyLink rows. */
 export function guardianFilter(guardianId: string) {
-  const or: Record<string, unknown>[] = [{ guardianKey: String(guardianId) }];
-  if (isValidId(guardianId)) or.push({ guardianId });
-  return { $or: or };
+  return { guardianId: String(guardianId) };
 }
 
 export interface FamilySlots {
@@ -60,12 +50,7 @@ export interface FamilySlots {
 /**
  * How many more family members this guardian's plan allows them to add.
  *
- * Postgres-native guardians used to be short-circuited to zero slots on the
- * assumption they had no subscription row. Since checkout writes `patientKey`
- * they do — so a patient who had just paid for a Family plan was told their
- * "individual plan includes 0 family member(s)" and could never invite anyone.
- * The subscription is now resolved through the shared filter, which matches on
- * either id shape.
+ * The subscription is resolved through the shared `subscriptionFilter`.
  */
 export async function getGuardianFamilySlots(guardianId: string): Promise<FamilySlots> {
   const sub = await Subscription.findOne({

@@ -6,10 +6,7 @@ async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get('x-user-id') || null;
 }
 
-// Notification preferences are stored as a subdocument on User.
-// Since the field doesn't exist yet on the schema, we use $set with
-// the "notifications" key and let mongoose accept unknown keys via strict:false
-// OR we just store them on a generic map field.
+// Notification preferences are stored as JSON on the user row (users.notification_prefs).
 
 // GET /api/user/notifications
 export async function GET(req: NextRequest) {

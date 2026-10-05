@@ -48,9 +48,11 @@ Creates `media_assets` + private `media` bucket.
 
 ## 4. Auth model
 
-App auth is **MongoDB + JWT cookies**, not Supabase Auth.
+App auth is **custom JWT cookies** backed by the `public.users` table (bcrypt passwords, email OTP), not Supabase Auth.
 
-- `media_assets.user_id` = Mongo `User._id` (text)
+- `users.id` (uuid) is the session identity (`userId` claim) and the foreign key everywhere
+- `media_assets.user_id` = `users.id` (text)
+- All data access goes through the service-role client (`lib/supabase/server.ts`, wrapped by `lib/db`); RLS is enabled with no policies, so the publishable key can read nothing
 - All media CRUD goes through `/api/media/*` with JWT + service role
 
 ## 5. Legacy files
@@ -64,3 +66,18 @@ Existing Cloudinary / Firebase URLs are left as-is. Only **new** uploads use Sup
 - [ ] Bucket is private
 - [ ] Prescriptions always `is_public=false`
 - [ ] Run migration SQL once per project
+
+## 7. Migrations and environments
+
+Migrations live in `supabase/migrations/` (001 → 012) and are applied in order to **each** project:
+
+```bash
+supabase link --project-ref <ref>
+supabase db push
+```
+
+Two projects exist: **dev** (fake demo data, reseedable) and **production** (clean, never seeded).
+
+- Dev seed: `ALLOW_SEED=true npm run seed` (wipes and reseeds; refuses protected/production projects, see `PROTECTED_SUPABASE_REFS`).
+- Production bootstrap (only real admin accounts, no demo data): `npm run seed:admins`.
+- After changing the schema, regenerate column types with `DATABASE_URL=<dev postgres url> npm run db:schema` and commit `lib/db/schema.generated.ts`.

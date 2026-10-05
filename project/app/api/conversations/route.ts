@@ -16,8 +16,7 @@ export async function GET() {
   if (!userInfo) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { userId } = userInfo;
 
-  // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
-  // — Conversation is still Mongo-only, so they genuinely have none yet.
+  // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
   if (!isValidId(userId)) return NextResponse.json([]);
   const userOid = (toId(userId) as string);
 

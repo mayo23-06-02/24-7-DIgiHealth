@@ -16,9 +16,7 @@ export async function GET(req: NextRequest) {
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Postgres-native accounts (no Mongo `User` row — see lib/utils/mongoId.ts)
-    // can't be looked up with findById; fall back to the basics getRequestUser
-    // already resolved from Postgres rather than crashing.
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
     if (!isValidId(userId)) {
       const requestUser = await getRequestUser();
       if (!requestUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -35,10 +33,7 @@ export async function GET(req: NextRequest) {
           saId: '',
           role: requestUser.role,
           mfaEnabled: false,
-          // Resolved from the Supabase media asset rather than the Mongo
-          // column, which these accounts have no row in. This used to be a
-          // hardcoded null, so their picture never appeared even once the
-          // upload succeeded.
+          // Resolved from the newest avatar-purpose Supabase media asset.
           avatarUrl: await getUserAvatarUrl(requestUser.userId),
           status: 'active',
         },

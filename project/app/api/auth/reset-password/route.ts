@@ -40,8 +40,8 @@ export async function POST(request: Request) {
     // Every account with a live reset token is a candidate, and the supplied
     // token is checked against each in turn.
     //
-    // This used to be a findOne, which returned whichever single account Mongo
-    // happened to order first. With more than one reset in flight, a person
+    // This used to be a findOne, which returned whichever single account the
+    // database happened to order first. With more than one reset in flight, a person
     // holding a perfectly valid token was compared against a different
     // account's hash and told their link was invalid — the reset simply failed
     // for everyone but one arbitrary user until the tokens expired.

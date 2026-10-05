@@ -1,5 +1,4 @@
 import FamilyLink from "@/lib/models/FamilyLink";
-import { isValidId } from '@/lib/db';
 
 /**
  * Member-side family lookups.
@@ -12,18 +11,9 @@ import { isValidId } from '@/lib/db';
  * between the two.
  */
 
-/**
- * Match a member's FamilyLink rows regardless of id shape.
- *
- * The exact mirror of `guardianFilter` in lib/family/access.ts. `memberKey`
- * holds the member's session id as a plain string and so works for a Postgres
- * uuid as well as an ObjectId; `memberId` is ObjectId-typed and is the only
- * field on rows written before `memberKey` was populated, so both are matched.
- */
+/** Match a member's FamilyLink rows. The mirror of `guardianFilter` in lib/family/access.ts. */
 export function memberFilter(memberId: string) {
-  const or: Record<string, unknown>[] = [{ memberKey: String(memberId) }];
-  if (isValidId(memberId)) or.push({ memberId });
-  return { $or: or };
+  return { memberId: String(memberId) };
 }
 
 /**
@@ -33,9 +23,8 @@ export function memberFilter(memberId: string) {
  * asked and has not answered, and a revoked one is somebody who was removed —
  * neither is being paid for.
  *
- * Returns the guardian's id in whatever shape their session uses, because that
- * is what `subscriptionFilter` needs to find their subscription: `guardianKey`
- * when it was written, falling back to `guardianId` for older rows.
+ * Returns the guardian's user id, which is what `subscriptionFilter` needs to
+ * find their subscription.
  */
 export async function getCoveringGuardianId(
   memberId: string,
@@ -46,10 +35,10 @@ export async function getCoveringGuardianId(
     ...memberFilter(memberId),
     status: "active",
   })
-    .select("guardianKey guardianId")
+    .select("guardianId")
     .sort({ acceptedAt: -1 })
-    .lean<{ guardianKey?: string; guardianId?: unknown } | null>();
+    .lean<{ guardianId?: unknown } | null>();
 
   if (!link) return null;
-  return link.guardianKey || (link.guardianId ? String(link.guardianId) : null);
+  return link.guardianId ? String(link.guardianId) : null;
 }

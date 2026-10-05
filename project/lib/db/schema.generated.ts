@@ -11,7 +11,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  ai_triage_sessions: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   symptoms: "text",
   parsed_symptoms: "text[]",
@@ -24,7 +23,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  anthropometrics: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   date_recorded: "timestamptz",
   height_cm: "num",
@@ -40,7 +38,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  articles: {
   id: "uuid",
-  mongo_id: "text",
   title: "text",
   slug: "text",
   excerpt: "text",
@@ -59,7 +56,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  attached_records: {
   id: "uuid",
-  mongo_id: "text",
   consultation_id: "uuid",
   conversation_id: "uuid",
   patient_id: "uuid",
@@ -78,7 +74,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  audit_logs: {
   id: "uuid",
-  mongo_id: "text",
   actor_id: "uuid",
   actor_role: "text",
   actor_email: "text",
@@ -92,7 +87,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  bed_occupancy: {
   id: "uuid",
-  mongo_id: "text",
   facility_id: "uuid",
   total_beds: "num",
   occupied_beds: "num",
@@ -118,7 +112,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  body_annotations: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   description: "text",
   part: "text",
@@ -130,7 +123,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  calls: {
   id: "uuid",
-  mongo_id: "text",
   consultation_id: "uuid",
   conversation_id: "uuid",
   initiated_by: "uuid",
@@ -147,7 +139,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  clinical_decision_support: {
   id: "uuid",
-  mongo_id: "text",
   practitioner_id: "uuid",
   patient_id: "uuid",
   consultation_id: "uuid",
@@ -166,7 +157,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  consultations: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   practitioner_id: "uuid",
   facility_id: "uuid",
@@ -196,7 +186,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  conversations: {
   id: "uuid",
-  mongo_id: "text",
   consultation_id: "uuid",
   patient_id: "uuid",
   practitioner_id: "uuid",
@@ -212,7 +201,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  facilities: {
   id: "uuid",
-  mongo_id: "text",
   name: "text",
   facility_type: "text",
   address_street: "text",
@@ -256,7 +244,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  health_tips: {
   id: "uuid",
-  mongo_id: "text",
   title: "text",
   excerpt: "text",
   content: "text",
@@ -271,7 +258,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  hospital_admin_profiles: {
   id: "uuid",
-  mongo_id: "text",
   user_id: "uuid",
   facility_id: "uuid",
   department: "text",
@@ -281,7 +267,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  hospital_appointments: {
   id: "uuid",
-  mongo_id: "text",
   facility_id: "uuid",
   patient_id: "uuid",
   practitioner_id: "uuid",
@@ -295,7 +280,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  hospital_revenue: {
   id: "uuid",
-  mongo_id: "text",
   facility_id: "uuid",
   period: "text",
   revenue_date: "date",
@@ -327,7 +311,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  immunizations: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   vaccine_name: "text",
   date_administered: "timestamptz",
@@ -349,7 +332,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  lab_results: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   ordered_by: "uuid",
   test_name: "text",
@@ -375,7 +357,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  medical_context: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   chronic_conditions: "text[]",
   current_medications: "text[]",
@@ -402,7 +383,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  messages: {
   id: "uuid",
-  mongo_id: "text",
   conversation_id: "uuid",
   sender_id: "uuid",
   receiver_id: "uuid",
@@ -422,7 +402,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  notifications: {
   id: "uuid",
-  mongo_id: "text",
   user_id: "uuid",
   type: "text",
   title: "text",
@@ -435,7 +414,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  offline_action_queue: {
   id: "uuid",
-  mongo_id: "text",
   user_id: "uuid",
   action: "text",
   payload: "json",
@@ -455,7 +433,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  patient_events: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   title: "text",
   event_at: "timestamptz",
@@ -476,7 +453,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  patient_profiles: {
   id: "uuid",
-  mongo_id: "text",
   user_id: "uuid",
   date_of_birth: "date",
   gender: "text",
@@ -504,7 +480,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  payment_methods: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   type: "text",
   is_default: "bool",
@@ -529,7 +504,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  payment_transactions: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   practitioner_id: "uuid",
   facility_id: "uuid",
@@ -552,7 +526,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  payout_requests: {
   id: "uuid",
-  mongo_id: "text",
   practitioner_id: "uuid",
   facility_id: "uuid",
   amount: "num",
@@ -575,7 +548,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  platform_fee_config: {
   id: "uuid",
-  mongo_id: "text",
   platform_fee_percent: "num",
   subscription_fee_percent: "num",
   updated_by: "uuid",
@@ -601,7 +573,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  practitioner_profiles: {
   id: "uuid",
-  mongo_id: "text",
   user_id: "uuid",
   specialisation: "text",
   bio: "text",
@@ -638,7 +609,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  practitioner_schedules: {
   id: "uuid",
-  mongo_id: "text",
   practitioner_id: "uuid",
   schedule_date: "date",
   recurring_day_of_week: "num",
@@ -649,7 +619,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  prescriptions: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   practitioner_id: "uuid",
   medication_name: "text",
@@ -674,7 +643,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  reviews: {
   id: "uuid",
-  mongo_id: "text",
   consultation_id: "uuid",
   patient_id: "uuid",
   practitioner_id: "uuid",
@@ -687,7 +655,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  risk_scores: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   practitioner_id: "uuid",
   consultation_id: "uuid",
@@ -702,7 +669,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  staff: {
   id: "uuid",
-  mongo_id: "text",
   user_id: "uuid",
   facility_id: "uuid",
   role: "text",
@@ -734,7 +700,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  staff_invites: {
   id: "uuid",
-  mongo_id: "text",
   email: "text",
   facility_id: "uuid",
   invited_by: "uuid",
@@ -750,7 +715,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  subscriptions: {
   id: "uuid",
-  mongo_id: "text",
   patient_id: "uuid",
   tier: "text",
   status: "text",
@@ -776,7 +740,6 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
  },
  users: {
   id: "uuid",
-  mongo_id: "text",
   email: "text",
   password_hash: "text",
   role: "text",

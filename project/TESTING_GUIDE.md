@@ -1515,7 +1515,7 @@ Use Postman, Insomnia, or browser DevTools Network tab to verify each endpoint:
 
 **Test Instructions:**
 
-Check MongoDB/Postgres directly (via DB client or admin panel):
+Check Postgres directly (Supabase table editor or `psql`):
 
 1. **Users Collection:**
    - Passwords are bcrypt hashes (40+ character strings starting with `$2a$` or `$2b$`)

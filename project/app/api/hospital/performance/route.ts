@@ -24,14 +24,6 @@ export async function GET(req: NextRequest) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // Filter by facilityId.
-    //
-    // `facilityId` is an ObjectId in the schema but resolveHospitalId returns a
-    // string. Query helpers (countDocuments/find/distinct) run the filter
-    // through Mongoose's caster so the string matches, but `aggregate()` does
-    // NOT cast — it hands the pipeline to MongoDB verbatim. A raw string there
-    // matches nothing, so every aggregation below silently returned [] and the
-    // charts fell through to their hardcoded fallback arrays. Aggregations must
-    // use the ObjectId form.
     const baseFilter = { facilityId: hospitalId };
     const aggFilter = {
       facilityId: (toId(String(hospitalId)) as string),

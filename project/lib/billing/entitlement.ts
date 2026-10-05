@@ -47,18 +47,9 @@ const COVERING_TIERS = new Set<SubscriptionTier>(
     .map((t) => t.id),
 );
 
-/**
- * Build the filter that finds a user's subscription regardless of whether
- * their session id is a Postgres uuid or a Mongo ObjectId.
- *
- * `patientKey` is written by every new subscription; `patientId` is only
- * added for ObjectId accounts, since the field is ObjectId-typed and a uuid
- * cannot be cast into it.
- */
+/** Build the filter that finds a user's subscription. */
 export function subscriptionFilter(userId: string) {
-  const or: Record<string, unknown>[] = [{ patientKey: String(userId) }];
-  if (isValidId(userId)) or.push({ patientId: userId });
-  return { $or: or };
+  return { patientId: String(userId) };
 }
 
 type SubRow = {
@@ -70,7 +61,7 @@ type SubRow = {
   payerId?: unknown;
 } | null;
 
-/** The newest subscription row for an id, in either id shape. */
+/** The newest subscription row for a user id. */
 async function latestSubscription(userId: string): Promise<SubRow> {
   return Subscription.findOne(subscriptionFilter(userId))
     .sort({ updatedAt: -1 })

@@ -125,7 +125,7 @@ class Runtime implements FieldResolver {
     for (const [p, c] of Object.entries(cfg.columns ?? {})) explicit.set(c, p);
     const nests = Object.entries(cfg.nest ?? {}).sort((a, b) => b[1].length - a[1].length);
     for (const col of Object.keys(cols)) {
-      if (col === "mongo_id" || cfg.hidden?.includes(col)) continue;
+      if (cfg.hidden?.includes(col)) continue;
       if (col === "id") {
         this.colToPath.set(col, "id");
         continue;
@@ -168,7 +168,7 @@ class Runtime implements FieldResolver {
     }
     if (!found) {
       const cand = snake(path.replace(/\./g, "_"));
-      if (this.cols[cand] && cand !== "mongo_id" && !cfg.hidden?.includes(cand)) found = cand;
+      if (this.cols[cand] && !cfg.hidden?.includes(cand)) found = cand;
     }
     this.pathToCol.set(path, found ?? null);
     return found;
@@ -339,7 +339,7 @@ class Runtime implements FieldResolver {
         for (const r of data as AnyRec[]) {
           const sub: AnyRec = {};
           for (const [c, v] of Object.entries(r)) {
-            if (c === spec.fk || c === "mongo_id") continue;
+            if (c === spec.fk) continue;
             const dv = decode(kinds[c], v);
             if (dv === undefined) continue;
             sub[rev.get(c) ?? camel(c)] = dv;
@@ -1062,7 +1062,7 @@ async function applyUpdateToIds(rt: Runtime, ids: string[], ops: ParsedUpdate): 
   for (const [path, v] of Object.entries(ops.set)) {
     if (rt.isExtraPath(path)) for (const id of ids) await rt.writeExtras(id, { [path]: v }, "replace");
   }
-  let rows: AnyRec[] = [];
+  const rows: AnyRec[] = [];
   if (Object.keys(row).length) {
     for (const part of chunks(ids, BIG_IN)) {
       const { data, error } = await db.from(rt.table).update(row).in("id", part).select("*");
@@ -1115,7 +1115,9 @@ async function runUpdate(rt: Runtime, st: QueryState, cond: Cond): Promise<any> 
     for (const c of parts) {
       let b: any = getSupabaseAdmin().from(rt.table).update(row);
       b = applyCond(b, c);
-      const { data, error } = await b.select("id");
+      // select("*"), not a column subset: PostgREST 12.x applies `or=` filters to the
+      // RETURNING projection and fails with "column ... does not exist" for subsets.
+      const { data, error } = await b.select("*");
       if (error) throw toDbError(error, `${rt.modelName}.updateMany`);
       count += (data as AnyRec[]).length;
     }

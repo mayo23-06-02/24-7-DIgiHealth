@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 // Same resolver the sibling hospital routes use (dashboard, performance, sla).
-// The Postgres-only variant returns null for any admin whose facility link
-// still lives in Mongo, which 404'd this endpoint for every seeded account.
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 import { toId } from '@/lib/db';
 
@@ -24,8 +22,6 @@ export async function GET() {
       return NextResponse.json({ error: 'No facility linked' }, { status: 404 });
     }
 
-    // Query helpers cast a string facilityId to ObjectId for us; aggregate()
-    // does not, so pipelines need the ObjectId form or they match nothing.
     const baseFilter = { facilityId };
     const aggFilter = {
       facilityId: (toId(String(facilityId)) as string),

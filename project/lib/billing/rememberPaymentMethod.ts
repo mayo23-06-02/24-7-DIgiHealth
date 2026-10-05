@@ -50,8 +50,7 @@ export async function rememberPaymentMethod(input: {
         : String(details.accountHolder ?? "").trim();
 
     const common = {
-      patientKey: key,
-      ...(isValidId(key) ? { patientId: key } : {}),
+      patientId: key,
       type: method,
       last4,
       holderName: holderName || undefined,

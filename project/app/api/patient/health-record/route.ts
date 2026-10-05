@@ -41,9 +41,7 @@ export async function GET(req: NextRequest) {
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
-    // Postgres-native accounts have no Mongo identity (see
-    // lib/utils/mongoId.ts) — every collection below is still Mongo-only,
-    // so they genuinely have an empty record rather than a lookup failure.
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
     if (!isValidId(userId)) {
       return NextResponse.json({ success: true, data: EMPTY_HEALTH_RECORD });
     }

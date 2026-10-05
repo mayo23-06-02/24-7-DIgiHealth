@@ -1,17 +1,13 @@
 import { ChatMessage } from "./types";
 
-/** Stable string id for a message (mongo id, client id, or empty). */
+/** Stable string id for a message (server id, client id, or empty). */
 export function messageKey(msg: Pick<ChatMessage, "_id" | "id" | "clientId">): string {
   return String(msg._id ?? msg.id ?? msg.clientId ?? "");
 }
 
-function isMongoId(id: string): boolean {
-  return /^[a-f0-9]{24}$/i.test(id);
-}
-
 /**
  * Deduplicate messages.
- * - Same _id → keep one (prefer server/mongo form)
+ * - Same _id → keep one (prefer server form)
  * - Optimistic row (_id === clientId) dropped when a server row has that clientId
  */
 export function dedupeMessages<T extends ChatMessage>(messages: T[]): T[] {
@@ -22,7 +18,7 @@ export function dedupeMessages<T extends ChatMessage>(messages: T[]): T[] {
   for (const m of messages) {
     const key = messageKey(m);
     const cid = m.clientId ? String(m.clientId) : "";
-    if (cid && key && key !== cid && isMongoId(key)) {
+    if (cid && key && key !== cid) {
       serverByClientId.set(cid, key);
     }
   }
@@ -38,7 +34,7 @@ export function dedupeMessages<T extends ChatMessage>(messages: T[]): T[] {
     }
 
     // Skip optimistic placeholder if server version exists for this clientId
-    if (serverByClientId.has(key) && !isMongoId(key)) {
+    if (serverByClientId.has(key)) {
       continue;
     }
     if (

@@ -335,12 +335,8 @@ export async function listMedia(filter: ListMediaFilter): Promise<MediaAsset[]> 
 /**
  * The user's current profile picture, or null if they've never set one.
  *
- * Avatars used to be pointed at by `User.avatarUrl` in Mongo, which broke for
- * every Postgres-native account: the write threw a CastError (a uuid can't be a
- * Mongo `_id`) and the read returned a hardcoded null. Since media assets live
- * in Supabase and carry `user_id` as a plain string, the asset row itself is a
- * store-agnostic source of truth — it works identically whether the caller's id
- * is a uuid or an ObjectId, with no schema migration.
+ * The media asset row itself is the source of truth for avatars: there is no
+ * avatar column on `users`.
  *
  * "Current" is simply the newest avatar-purpose asset; uploading a new picture
  * supersedes the old one rather than mutating anything.

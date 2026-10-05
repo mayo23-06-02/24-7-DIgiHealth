@@ -15,16 +15,14 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const favoriteOnly = searchParams.get('favorite') === 'true';
 
-    // Patient/Consultation records are still Mongo-keyed; a Postgres-native
-    // user (uuid identity) has no possible Mongo counterpart, so skip these
-    // lookups rather than let Mongoose throw a CastError.
-    const hasMongoIdentity = isValidId(userId);
+    // A session id that is not a uuid cannot own any rows, so there is nothing to look up.
+    const hasValidId = isValidId(userId);
 
-    const consultedDoctorIds = hasMongoIdentity
+    const consultedDoctorIds = hasValidId
       ? (await Consultation.find({ patientId: userId }).select('practitionerId')).map(c => c.practitionerId.toString())
       : [];
 
-    const profile = hasMongoIdentity ? await PatientProfile.findOne({ userId }) : null;
+    const profile = hasValidId ? await PatientProfile.findOne({ userId }) : null;
     const favoriteDoctorIds = profile?.favoritePractitionerIds?.map(id => id.toString()) || [];
     const explicitlyAddedDoctorIds = profile?.myDoctorIds?.map(id => id.toString()) || [];
 

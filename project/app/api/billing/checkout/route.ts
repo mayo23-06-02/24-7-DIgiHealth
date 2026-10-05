@@ -156,10 +156,7 @@ export async function POST(request: Request) {
       subscriptionFilter(key),
       {
         $set: {
-          // patientKey works for both id shapes; patientId is only set when the
-          // id can actually be cast to an ObjectId.
-          patientKey: key,
-          ...(isValidId(key) ? { patientId: key } : {}),
+          patientId: key,
           tier,
           status: "active",
           price: plan.price,
@@ -172,7 +169,7 @@ export async function POST(request: Request) {
         // paid for it themselves. A stale payerId would make getEntitlement
         // read their own plan as somebody else's cover and hand liveness back
         // to a guardian who is no longer involved. Explicitly $unset rather
-        // than set to undefined, which Mongoose would silently drop.
+        // than set to undefined, which the update would skip.
         $unset: { payerId: 1 },
       },
       { new: true, upsert: true, setDefaultsOnInsert: true },
@@ -198,8 +195,7 @@ export async function POST(request: Request) {
     // upgrade path wrote no transaction at all, so a paid plan left no trace
     // on the billing page.
     const txn = await PaymentTransaction.create({
-      patientKey: key,
-      ...(isValidId(key) ? { patientId: key } : {}),
+      patientId: key,
       amount: plan.price,
       currency: "ZAR",
       provider: method === "card" ? "card" : "eft",
