@@ -209,6 +209,9 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/api/media/sign-upload-public') ||
     pathname.startsWith('/api/media/complete-public') ||
+    // A registration upload viewed with its own registration token (?rt=). The route
+    // checks the token against the file path and otherwise still requires a session.
+    (pathname.startsWith('/api/media/file/') && request.nextUrl.searchParams.has('rt')) ||
     // Vercel Cron invokes this with `Authorization: Bearer $CRON_SECRET`, not a
     // session cookie — the route itself verifies that header (see
     // app/api/cron/reminders/route.ts), so it must bypass the session gate below.

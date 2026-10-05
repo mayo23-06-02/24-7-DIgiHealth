@@ -4,6 +4,15 @@ import localforage from "localforage";
 import { roleConfig, skippableSteps } from "../constants";
 import { validateStep } from "../validation";
 
+const REG_TOKEN_KEY = "digihealth_registration_media_token";
+function readRegistrationMediaToken(): string | undefined {
+  try {
+    return sessionStorage.getItem(REG_TOKEN_KEY) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function useRegistrationWizard(role: string) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -342,11 +351,19 @@ export function useRegistrationWizard(role: string) {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: safeRole, formData }),
+        // Photos and documents are uploaded before the account exists, under a registration
+        // token kept in sessionStorage. Sending it lets the server hand them to the new account.
+        body: JSON.stringify({
+          role: safeRole,
+          formData: { ...formData, registrationMediaToken: readRegistrationMediaToken() },
+        }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Registration failed");
       await clearDraft();
+      try {
+        sessionStorage.removeItem(REG_TOKEN_KEY);
+      } catch {}
       // Opened from the hospital's setup link: the email is already proven, so go to sign-in.
       if (data.next) {
         router.push(data.next);

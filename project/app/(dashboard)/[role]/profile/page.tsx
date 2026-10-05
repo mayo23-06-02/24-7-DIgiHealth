@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMediaUpload } from "@/components/media/useMediaUpload";
 import {
   User,
@@ -150,6 +150,7 @@ export default function ProfilePage() {
     message: string;
     type: "success" | "error" | "info";
   } | null>(null);
+  const router = useRouter();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -434,6 +435,8 @@ export default function ProfilePage() {
       const previewUrl = data.url || URL.createObjectURL(file);
       setUser((prev) => (prev ? { ...prev, avatarUrl: previewUrl } : prev));
       setToast({ message: "Profile photo updated.", type: "success" });
+      // Re-run the dashboard layout so the header and sidebar pick up the new photo too.
+      router.refresh();
     } catch (err: unknown) {
       setToast({
         message: err instanceof Error ? err.message : "Photo upload failed.",

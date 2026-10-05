@@ -460,3 +460,22 @@ export function buildImageTransformUrl(
   const q = params.toString();
   return `${base}/storage/v1/render/image/public/${MEDIA_BUCKET}/${filePath}${q ? `?${q}` : ""}`;
 }
+
+/**
+ * Make an uploaded image the user's profile picture. Used after registration, where the photo
+ * is uploaded before the account exists (as a registration asset) and only claimed on submit.
+ * Accepts the app URL the wizard stored (/api/media/file/<id>). No-op for anything else.
+ */
+export async function promoteToAvatar(userId: string, url: unknown): Promise<boolean> {
+  const m = typeof url === "string" ? url.match(/\/api\/media\/file\/([0-9a-f-]{36})/i) : null;
+  if (!m || !userId) return false;
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("media_assets")
+    .update({ related_type: "avatar" })
+    .eq("id", m[1])
+    .eq("user_id", userId)
+    .like("mime_type", "image/%")
+    .select("id");
+  return !error && !!data?.length;
+}

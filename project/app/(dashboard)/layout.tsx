@@ -51,13 +51,18 @@ export default async function DashboardLayout({
       ? (await getEntitlement(requestUser.userId).catch(() => null))?.source
       : undefined;
 
+  // The uploaded profile photo when there is one; generated initials otherwise.
+  const uploadedAvatar = await import("@/lib/supabase/media")
+    .then((m) => m.getUserAvatarUrl(requestUser.userId))
+    .catch(() => null);
+
   const user = {
     id: requestUser.userId,
     firstName,
     lastName,
     name: lastName ? `${firstName} ${lastName}` : firstName,
     role: requestUser.role,
-    avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}+${encodeURIComponent(lastName)}&background=4493b8&color=fff`,
+    avatarUrl: uploadedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}+${encodeURIComponent(lastName)}&background=4493b8&color=fff`,
     isImpersonating,
     coverage,
   };

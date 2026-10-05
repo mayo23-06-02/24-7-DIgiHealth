@@ -14,12 +14,25 @@ import { apiError } from "@/lib/api/errors";
  * Legacy Cloudinary URLs are never rewritten to this path.
  */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: "Not configured" }, { status: 503 });
+    }
+
+    // During registration there is no session yet. Whoever holds the registration token may
+    // view the files uploaded under it (and only those), so a restored draft can still show
+    // its photo. The token is random, kept in the uploader's sessionStorage only.
+    const rt = req.nextUrl.searchParams.get("rt");
+    if (rt && /^[A-Za-z0-9_-]{16,128}$/.test(rt)) {
+      const { id: rid } = await params;
+      const pending = await getMediaById(rid);
+      if (pending && pending.filePath.startsWith(`registration/pending/${rt}/`)) {
+        const url = await getSignedDownloadUrl(pending.filePath);
+        return NextResponse.redirect(url, 307);
+      }
     }
 
     const user = await getRequestUser();

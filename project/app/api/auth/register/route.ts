@@ -40,10 +40,9 @@ export async function POST(request: Request) {
         const done = await claimRegistration(wizardRole, formData);
         try {
           const regToken = formData.registrationMediaToken || formData.registrationToken;
-          if (regToken) {
-            const { claimRegistrationMedia } = await import("@/lib/supabase/media");
-            await claimRegistrationMedia(String(regToken), done.userId);
-          }
+          const { claimRegistrationMedia, promoteToAvatar } = await import("@/lib/supabase/media");
+          if (regToken) await claimRegistrationMedia(String(regToken), done.userId);
+          await promoteToAvatar(done.userId, formData.profilePhoto);
         } catch (e) {
           console.warn("[register] media claim skipped:", e);
         }
@@ -158,10 +157,9 @@ export async function POST(request: Request) {
         formData.registrationMediaToken ||
         formData.registrationToken ||
         undefined;
-      if (regToken) {
-        const { claimRegistrationMedia } = await import("@/lib/supabase/media");
-        await claimRegistrationMedia(String(regToken), newUser._id.toString());
-      }
+      const { claimRegistrationMedia, promoteToAvatar } = await import("@/lib/supabase/media");
+      if (regToken) await claimRegistrationMedia(String(regToken), newUser._id.toString());
+      await promoteToAvatar(newUser._id.toString(), formData.profilePhoto);
     } catch (e) {
       console.warn("[register] media claim skipped:", e);
     }

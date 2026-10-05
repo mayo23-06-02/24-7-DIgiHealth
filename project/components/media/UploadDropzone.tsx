@@ -113,6 +113,13 @@ export default function UploadDropzone({
     ],
   );
 
+  // Before sign-up there is no session, so a stored /api/media/file/<id> URL (e.g. after a
+  // reloaded draft) is opened with the registration token that uploaded it.
+  const valueUrl =
+    value && publicRegistration && registrationToken && value.startsWith("/api/media/file/") && !value.includes("?")
+      ? `${value}?rt=${encodeURIComponent(registrationToken)}`
+      : value;
+
   const displayError = localError || error;
   const hasAttachment = value || fileName;
 
@@ -139,7 +146,7 @@ export default function UploadDropzone({
           uploading={uploading}
           progress={progress}
           etaSeconds={etaSeconds}
-          previewUrl={localPreviewUrl || value}
+          previewUrl={localPreviewUrl || valueUrl}
           onView={() => setPreviewOpen(true)}
           onCancel={abort}
           onRemove={onClear ? clear : undefined}
@@ -174,9 +181,9 @@ export default function UploadDropzone({
       {displayError && (
         <p className="text-xs text-red-600 font-medium">{displayError}</p>
       )}
-      {previewOpen && (localPreviewUrl || value) && (
+      {previewOpen && (localPreviewUrl || valueUrl) && (
         <MediaPreviewModal
-          url={(localPreviewUrl || value) as string}
+          url={(localPreviewUrl || valueUrl) as string}
           mimeType={fileMimeType}
           fileName={fileName}
           onClose={() => setPreviewOpen(false)}

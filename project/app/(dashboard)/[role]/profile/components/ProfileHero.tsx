@@ -104,7 +104,17 @@ export default function ProfileHero({
               <div className="relative group/avatar">
                 <div className="w-16 h-16 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-lg p-1 bg-white ring-4 ring-white">
                   <div className="w-full h-full rounded-[0.9rem] overflow-hidden bg-surface-soft flex items-center justify-center">
-                    <User size={24} />
+                    {user?.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={user.avatarUrl}
+                        src={user.avatarUrl}
+                        alt={fullName ? `${fullName}'s profile photo` : "Profile photo"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User size={24} />
+                    )}
                   </div>
                 </div>
                 <button

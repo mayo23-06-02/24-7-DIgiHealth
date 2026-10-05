@@ -148,7 +148,13 @@ await step("emailed setup link opens the wizard pre-filled and skips the OTP", a
   });
   const g = expectStatus(await anon.call("GET", `/api/auth/set-password?token=${token}`), 200);
   expect(g.json.data.role === "patient" && g.json.data.email === oneEmail && g.json.data.prefill.saId === oneId, "setup prefill");
-  const form = { setupToken: token, email: oneEmail, password: "Password123!", confirmPassword: "Password123!", consent: true, termsAccepted: true };
+  // A photo uploaded on the wizard's Documents step, before the account existed.
+  const rt = randomBytes(16).toString("hex");
+  const [photo] = await db("POST", "media_assets", "", {
+    user_id: `pending_${rt}`, file_name: "me.png", file_path: `registration/pending/${rt}/me.png`,
+    mime_type: "image/png", file_size: 70, file_type: "image", related_type: "registration",
+  });
+  const form = { setupToken: token, email: oneEmail, password: "Password123!", confirmPassword: "Password123!", consent: true, termsAccepted: true, registrationMediaToken: rt, profilePhoto: `/api/media/file/${photo.id}` };
   expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: { ...form, password: "weak" } }), 400);
   const r = expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: form }), 200);
   expect(r.json.next && r.json.requiresVerification === false, "goes straight to sign-in");
@@ -156,6 +162,11 @@ await step("emailed setup link opens the wizard pre-filled and skips the OTP", a
   expect(v.email_verified && v.status === "active" && v.password_hash, "active");
   const files = await db("GET", "facility_patients", `patient_id=eq.${u.id}&select=status`);
   expect(files.every((f) => f.status === "active"), "file active");
+  const [claimed] = await db("GET", "media_assets", `id=eq.${photo.id}&select=user_id,related_type`);
+  expect(claimed.user_id === u.id && claimed.related_type === "avatar", `registration photo handed over as avatar: ${JSON.stringify(claimed)}`);
+  const me = new Session(await tokenFor(await userByEmail(oneEmail)));
+  const prof = expectStatus(await me.call("GET", "/api/user/profile"), 200);
+  expect(prof.json.data.avatarUrl === `/api/media/file/${photo.id}`, `profile shows the photo: ${prof.json.data.avatarUrl}`);
   expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: form }), 404, 409);
   const old = await fetch(`${BASE}/set-password?token=${token}`, { redirect: "manual" });
   expect([307, 308].includes(old.status) || old.status === 200, "old link route still resolves");
