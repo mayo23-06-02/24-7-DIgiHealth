@@ -194,7 +194,7 @@ export function Modal({
   wide?: boolean;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-4" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-4" role="dialog" aria-modal="true">
       <div className={`flex max-h-[100dvh] w-full flex-col overflow-hidden bg-white shadow-xl sm:max-h-[90vh] sm:rounded-xl ${wide ? "sm:max-w-4xl" : "sm:max-w-2xl"}`}>
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div>

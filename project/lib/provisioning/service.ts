@@ -39,13 +39,18 @@ function translate(err: unknown, what: string): never {
   throw err;
 }
 
+/** Has this account finished onboarding (email proven, account active)? */
+function isOnboarded(u: { status?: string; emailVerified?: boolean } | null | undefined): boolean {
+  return !!u && u.status === "active" && !!u.emailVerified;
+}
+
 // ── patients ────────────────────────────────────────────────────────────────
 
 export async function provisionPatient(input: PatientInput, ctx: Ctx): Promise<ProvisionResult> {
   const found = await User.find({
     $or: [{ email: input.email }, { saId: input.saId }, { phoneE164: input.mobileE164 }],
   })
-    .select("email saId role")
+    .select("email saId role status emailVerified")
     .lean();
 
   if (found.length > 1) {
@@ -72,8 +77,9 @@ export async function provisionPatient(input: PatientInput, ctx: Ctx): Promise<P
         facilityId: ctx.facility.id,
         patientId: userId,
         fileNumber: input.fileNumber,
-        status: "active",
-        verifiedAt: new Date(),
+        // A person still finishing onboarding gets a pending file like everyone else; it goes
+        // live with their other files once they prove their email.
+        ...(isOnboarded(existing) ? { status: "active", verifiedAt: new Date() } : { status: "pending" }),
         issuedBy: ctx.actorId,
       });
     } catch (err) {
@@ -189,7 +195,7 @@ export async function provisionDoctor(input: DoctorInput, ctx: Ctx): Promise<Pro
 
   const hit = [...ids][0];
   if (hit) {
-    const user = await User.findById(hit).select("role").lean();
+    const user = await User.findById(hit).select("role status emailVerified").lean();
     if (!user || user.role !== "practitioner") throw new ProvisionError("this person already has a non-practitioner account");
     const here = await Staff.findOne({ facilityId: ctx.facility.id, userId: hit }).lean();
     if (here) {
@@ -199,7 +205,7 @@ export async function provisionDoctor(input: DoctorInput, ctx: Ctx): Promise<Pro
       throw new ProvisionError(`already on this hospital's staff under number ${here.fileNumber ?? "(none)"}`);
     }
     try {
-      await createStaff(hit, input, ctx, "active");
+      await createStaff(hit, input, ctx, isOnboarded(user) ? "active" : "pending");
     } catch (err) {
       translate(err, `staff number ${input.staffNumber}`);
     }

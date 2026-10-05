@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { Session, db, userByEmail, tokenFor, step, expect, expectStatus, done, BASE } from "./lib.mjs";
+import { Session, db, userByEmail, tokenFor, hash, step, expect, expectStatus, done, BASE } from "./lib.mjs";
 
 const stamp = Date.now();
 const mega = await Session.as("mega@247digihealth.com");
@@ -97,30 +97,68 @@ await step("lookup without proof / wrong proof gives no data", async () => {
   expectStatus(r, 404);
   expect(!r.text.includes(twoEmail), "must not leak email");
 });
-await step("lookup with proof returns masked prefill", async () => {
+await step("lookup with proof returns wizard prefill and a masked email", async () => {
   const r = await anon.call("POST", "/api/auth/file-number/lookup", { facilityId: A.id, fileNumber: `A-${stamp}-1`, idNumber: twoId });
   expectStatus(r, 200);
-  expect(r.json.data.state === "ready" && r.json.data.prefill.firstName === "Two", "prefill");
-  expect(!r.text.includes(twoEmail) && /\*/.test(r.json.data.prefill.email), "email masked");
+  const d = r.json.data;
+  expect(d.state === "ready" && d.prefill.firstName === "Two" && d.prefill.saId === twoId && d.prefill.dob === "1990-01-01", "prefill in wizard field names");
+  expect(!r.text.includes(twoEmail) && /\*/.test(d.maskedEmail), "email never returned unmasked");
 });
-await step("set-password completes onboarding", async () => {
+await step("doctor lookup needs the right HPCSA number", async () => {
+  const hp = `MP${String(stamp).slice(-7)}`;
+  expectStatus(await anon.call("POST", "/api/auth/file-number/lookup", { kind: "doctor", facilityId: A.id, fileNumber: `DR-${stamp}`, hpcsaNumber: "MP0000000" }), 404);
+  const r = expectStatus(await anon.call("POST", "/api/auth/file-number/lookup", { kind: "doctor", facilityId: A.id, fileNumber: `DR-${stamp}`, hpcsaNumber: hp.toLowerCase() }), 200);
+  expect(r.json.data.state === "ready" && r.json.data.prefill.hpcsaNumber === hp && r.json.data.prefill.fullName, "doctor prefill");
+});
+await step("wizard register with a file claim completes the hospital's record (no duplicate)", async () => {
+  const fileClaim = { facilityId: A.id, fileNumber: `A-${stamp}-1`, idNumber: twoId };
+  const form = { email: twoEmail, password: "Password123!", confirmPassword: "Password123!", firstName: "Two", lastName: `Tester${stamp}`, gender: "Female", dob: "1990-01-01", bloodType: "A+", allergies: ["Dust"], heightCm: "165", weightKg: "60", emergencyName: "Ma", emergencyPhone: "0820000000", emergencyRelationship: "Mother", consent: true, termsAccepted: true };
+  expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: { ...form } }), 403);
+  const wrongEmail = await anon.call("POST", "/api/auth/register", { role: "patient", formData: { ...form, fileClaim, email: `someone.${stamp}@example.com` } });
+  expectStatus(wrongEmail, 400);
+  expect(wrongEmail.json.code === "EMAIL_MISMATCH", "email must match the hospital record");
+  expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: { ...form, fileClaim: { ...fileClaim, idNumber: "0000000000000" } } }), 403);
+  const r = expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: { ...form, fileClaim } }), 200);
+  expect(r.json.requiresVerification === true, "OTP follows");
+  const users = await db("GET", "users", `email=eq.${encodeURIComponent(twoEmail)}&select=*`);
+  expect(users.length === 1 && users[0].password_hash && users[0].status === "pending_verification", "same user, password set, awaiting email check");
+  const own = await db("GET", "medical_context", `patient_id=eq.${users[0].id}&facility_id=is.null&select=blood_type`);
+  expect(own.length === 1 && own[0].blood_type === "A+", "patient-entered context stored separately");
+  const files = await db("GET", "facility_patients", `patient_id=eq.${users[0].id}&select=status`);
+  expect(files.every((f) => f.status === "pending"), `files wait for the email check: ${JSON.stringify(files)}`);
+  expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: { ...form, fileClaim } }), 409);
+});
+await step("email OTP activates the account and every pending hospital file", async () => {
   const u = await userByEmail(twoEmail);
+  await db("PATCH", "users", `id=eq.${u.id}`, { otp_code_hash: hash("246810"), otp_expires_at: new Date(Date.now() + 600000).toISOString() });
+  expectStatus(await anon.call("POST", "/api/auth/otp/verify", { email: twoEmail, code: "246810" }), 200);
+  const v = await userByEmail(twoEmail);
+  expect(v.email_verified && v.status === "active", "user active");
+  const files = await db("GET", "facility_patients", `patient_id=eq.${u.id}&select=status`);
+  expect(files.length === 2 && files.every((f) => f.status === "active"), "both hospital files active");
+  const again = await anon.call("POST", "/api/auth/file-number/lookup", { facilityId: A.id, fileNumber: `A-${stamp}-1`, idNumber: twoId });
+  expect(again.json.data.state === "has_account", "now has_account");
+});
+await step("emailed setup link opens the wizard pre-filled and skips the OTP", async () => {
+  const u = await userByEmail(oneEmail);
   const token = randomBytes(32).toString("hex");
   await db("POST", "set_password_tokens", "", {
     user_id: u.id, token_hash: createHash("sha256").update(token).digest("hex"),
     purpose: "set_password", expires_at: new Date(Date.now() + 86400e3).toISOString(),
   });
-  expectStatus(await anon.call("GET", `/api/auth/set-password?token=${token}`), 200);
-  expectStatus(await anon.call("POST", "/api/auth/set-password", { token, password: "weak", confirmPassword: "weak", acceptTerms: true }), 400);
-  const r = await anon.call("POST", "/api/auth/set-password", { token, password: "Password123!", confirmPassword: "Password123!", acceptTerms: true, emergencyContact: { name: "Ma", phone: "0820000000", relationship: "mother" } });
-  expectStatus(r, 200);
-  expectStatus(await anon.call("POST", "/api/auth/set-password", { token, password: "Password123!", confirmPassword: "Password123!", acceptTerms: true }), 404, 409);
-  const v = await userByEmail(twoEmail);
-  expect(v.password_hash && v.email_verified && v.status === "active", "user active");
+  const g = expectStatus(await anon.call("GET", `/api/auth/set-password?token=${token}`), 200);
+  expect(g.json.data.role === "patient" && g.json.data.email === oneEmail && g.json.data.prefill.saId === oneId, "setup prefill");
+  const form = { setupToken: token, email: oneEmail, password: "Password123!", confirmPassword: "Password123!", consent: true, termsAccepted: true };
+  expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: { ...form, password: "weak" } }), 400);
+  const r = expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: form }), 200);
+  expect(r.json.next && r.json.requiresVerification === false, "goes straight to sign-in");
+  const v = await userByEmail(oneEmail);
+  expect(v.email_verified && v.status === "active" && v.password_hash, "active");
   const files = await db("GET", "facility_patients", `patient_id=eq.${u.id}&select=status`);
-  expect(files.every((f) => f.status === "active"), "both files active");
-  const again = await anon.call("POST", "/api/auth/file-number/lookup", { facilityId: A.id, fileNumber: `A-${stamp}-1`, idNumber: twoId });
-  expect(again.json.data.state === "has_account", "now has_account");
+  expect(files.every((f) => f.status === "active"), "file active");
+  expectStatus(await anon.call("POST", "/api/auth/register", { role: "patient", formData: form }), 404, 409);
+  const old = await fetch(`${BASE}/set-password?token=${token}`, { redirect: "manual" });
+  expect([307, 308].includes(old.status) || old.status === 200, "old link route still resolves");
 });
 
 console.log("isolation and booking gate");

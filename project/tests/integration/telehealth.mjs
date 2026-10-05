@@ -11,7 +11,8 @@ let consultationId, conversationId, messageId;
 
 console.log("booking + consultation lifecycle");
 await step("patient requests booking", async () => {
-  const start = new Date(Date.now() + 3 * 86400e3); start.setUTCHours(7, 0, 0, 0);
+  // A different slot every run, so leftovers from earlier runs never conflict.
+  const start = new Date(Date.now() + (3 + Math.floor(Math.random() * 60)) * 86400e3); start.setUTCHours(6 + Math.floor(Math.random() * 10), 0, 0, 0);
   const end = new Date(start.getTime() + 3600e3);
   const r = await patient.call("POST", "/api/bookings", { practitionerId: dUser.id, scheduledStart: start.toISOString(), scheduledEnd: end.toISOString(), reason: "flow test", type: "video" });
   expectStatus(r, 200, 201);
