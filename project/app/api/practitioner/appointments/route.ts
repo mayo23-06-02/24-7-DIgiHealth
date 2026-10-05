@@ -5,6 +5,7 @@ import { riskBandFromScore } from '@/lib/riskScore';
 import { getBlockedAcceptorId } from '@/lib/booking/requester';
 import { requireRole } from '@/lib/auth/access';
 
+import { resolveBookingFacility } from '@/lib/booking/facilityGate';
 import { apiError } from "@/lib/api/errors";
 /**
  * Identity comes from the verified session, never from the request.
@@ -159,9 +160,14 @@ export async function POST(req: NextRequest) {
     const end = new Date(body.scheduledEnd);
     const reason = body.reason || body.chiefComplaint || '';
 
+    // Hospital file-number gate: the patient must hold an active file at a hospital this
+    // practitioner works at; the hospital is derived server-side.
+    const facilityId = await resolveBookingFacility(String(body.patientId ?? ''), practitionerId, body.facilityId);
+
     const consultation = await Consultation.create({
       practitionerId,
       patientId: body.patientId,
+      facilityId,
       type: body.type || 'video',
       status: body.status || 'pending',
       scheduledStartTime: start,

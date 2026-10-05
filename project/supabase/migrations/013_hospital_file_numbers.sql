@@ -139,7 +139,7 @@ do $$ begin
 exception when duplicate_object then null;
 end $$;
 do $$ begin
-  create type public.import_row_status as enum ('created', 'linked', 'skipped', 'failed');
+  create type public.import_row_status as enum ('pending', 'created', 'linked', 'skipped', 'failed');
 exception when duplicate_object then null;
 end $$;
 

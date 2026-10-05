@@ -42,6 +42,9 @@ const RATE_LIMIT_CONFIG: Record<string, { windowMs: number; maxRequests: number 
   '/api/auth/otp/verify': { windowMs: 300_000, maxRequests: 15 },
   '/api/auth/forgot-password': { windowMs: 900_000, maxRequests: 10 },
   '/api/auth/reset-password': { windowMs: 900_000, maxRequests: 10 },
+  '/api/auth/set-password': { windowMs: 900_000, maxRequests: 20 },
+  '/api/auth/file-number/lookup': { windowMs: 900_000, maxRequests: 20 },
+  '/api/auth/file-number/claim': { windowMs: 900_000, maxRequests: 10 },
   default:              { windowMs: 60_000, maxRequests: 100 },
 };
 
@@ -85,8 +88,8 @@ function needsSharedCounter(pathname: string): boolean {
 /* ------------------------------------------------------------------ */
 /*  Plan gate                                                          */
 /*                                                                     */
-/*  Patients must be covered before using the platform — by a plan of   */
-/*  their own, or by the family plan of a guardian who pays for them.   */
+/*  Access is free: no plan is required to use the platform. A patient */
+/*  covered by a guardian's family plan is only kept off checkout.      */
 /*  The gate reads the `coverage` claim on the session token because    */
 /*  middleware runs on the edge and cannot reach the database; the claim is    */
 /*  refreshed at login, after checkout, and when a family invite is     */
@@ -94,22 +97,6 @@ function needsSharedCounter(pathname: string): boolean {
 /*  lib/billing/entitlement.ts.                                         */
 /* ------------------------------------------------------------------ */
 const PLAN_CHECKOUT_PATH = '/patient/checkout';
-/** Where a dependant goes when the plan covering them has stopped. */
-const COVERAGE_NOTICE_PATH = '/patient/coverage';
-
-/**
- * Routes a patient without a plan may still reach. Checkout itself obviously,
- * plus billing — leaving those out would trap the user on a page that could
- * not load its own data or send them anywhere.
- */
-function isPlanExempt(pathname: string): boolean {
-  return (
-    pathname === PLAN_CHECKOUT_PATH ||
-    pathname.startsWith(`${PLAN_CHECKOUT_PATH}/`) ||
-    pathname === COVERAGE_NOTICE_PATH ||
-    pathname.startsWith('/patient/billing')
-  );
-}
 
 type Coverage = 'own' | 'family' | 'family_inactive' | 'none';
 
@@ -131,6 +118,7 @@ function planGateRedirect(
 ): string | null {
   const isCheckout =
     pathname === PLAN_CHECKOUT_PATH || pathname.startsWith(`${PLAN_CHECKOUT_PATH}/`);
+  void isDashboardRoute;
 
   switch (coverage) {
     case 'own':
@@ -141,12 +129,11 @@ function planGateRedirect(
 
     // Cover has stopped, so nothing in the dashboard is available — including
     // billing, which is why this case does not defer to the page's 404.
+    // Access is free. A lapsed or missing plan no longer blocks the dashboard; the billing
+    // page offers the upgrade instead.
     case 'family_inactive':
-      if (pathname === COVERAGE_NOTICE_PATH) return null;
-      return isDashboardRoute ? COVERAGE_NOTICE_PATH : null;
-
     case 'none':
-      return isDashboardRoute && !isPlanExempt(pathname) ? PLAN_CHECKOUT_PATH : null;
+      return null;
   }
 }
 
@@ -249,7 +236,9 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // whole point of the form is that they have no account. It reads nothing
     // and writes nothing; it validates its own input and emails the clinical
     // team. Gating it behind a session made it 401 for every real user of it.
-    pathname === '/api/contact/practitioner-inquiry'
+    pathname === '/api/contact/practitioner-inquiry' ||
+    // Hospital names for the registration wizard's first step (public: nobody is signed in yet).
+    pathname === '/api/facilities/public'
   ) {
     return NextResponse.next();
   }

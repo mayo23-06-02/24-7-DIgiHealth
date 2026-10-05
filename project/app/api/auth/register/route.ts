@@ -32,6 +32,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // Patients and doctors are registered by their hospital (file number / staff number).
+    // Only a hospital can sign itself up here.
+    if (wizardRole !== "hospital") {
+      return NextResponse.json(
+        {
+          error:
+            wizardRole === "patient"
+              ? "Patients register with their hospital file number. Choose your hospital and enter your file number."
+              : "Doctors are registered by their hospital. Check your email for a set-password link, or contact your hospital.",
+          code: "FILE_NUMBER_REQUIRED",
+        },
+        { status: 403 },
+      );
+    }
+
     const formEmail = normalizeEmail(
       formData.email || formData.adminEmail || "",
     );

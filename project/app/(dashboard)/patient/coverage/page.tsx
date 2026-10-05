@@ -26,7 +26,7 @@ export default async function CoveragePausedPage() {
   // Anyone whose cover is fine, or who never had family cover at all, has no
   // business here — the gate sends them to the right place instead.
   if (entitlement.source !== "family_inactive") {
-    redirect(entitlement.hasPlan ? "/patient" : "/patient/checkout");
+    redirect("/patient");
   }
 
   const holder = entitlement.coveredBy?.name ?? "your family plan holder";

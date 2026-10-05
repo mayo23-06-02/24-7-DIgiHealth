@@ -6,6 +6,9 @@ import { expireStaleBookingRequests } from "@/lib/booking/expire";
 import { notifyBookingEvent } from "@/lib/booking/notifications";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { isValidId, toId } from '@/lib/db';
+import { resolveBookingFacility } from "@/lib/booking/facilityGate";
+import { resolveHospitalId } from "@/lib/hospital/resolveHospitalId";
+import { PublicError, apiError } from "@/lib/api/errors";
 
 async function getAuthUser(): Promise<{
   userId: string;
@@ -76,13 +79,18 @@ export async function GET(req: NextRequest) {
       filter.patientId = (toId(auth.userId) as string);
     } else if (auth.role === "practitioner") {
       filter.practitionerId = (toId(auth.userId) as string);
+    } else if (auth.role === "hospital_admin") {
+      // A hospital sees only its own consultations.
+      const hospitalId = await resolveHospitalId(auth.userId);
+      if (!hospitalId) return NextResponse.json({ success: true, data: [] });
+      filter.facilityId = hospitalId;
     }
-    // hospital_admin / others: no forced party filter unless query provides one
 
-    if (patientId && isValidId(patientId)) {
+    // A caller may narrow by the other party, never widen past their own side.
+    if (patientId && isValidId(patientId) && auth.role !== "patient") {
       filter.patientId = (toId(patientId) as string);
     }
-    if (practitionerId && isValidId(practitionerId)) {
+    if (practitionerId && isValidId(practitionerId) && auth.role !== "practitioner") {
       filter.practitionerId = (toId(practitionerId) as string);
     }
 
@@ -184,13 +192,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: unknown) {
     console.error("[GET /api/bookings]", err);
-    return NextResponse.json(
-      {
-        success: false,
-        error: err instanceof Error ? err.message : "Failed to list bookings",
-      },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }
 
@@ -244,7 +246,7 @@ export async function POST(req: NextRequest) {
       status = status || "requested";
       source = source || "patient_self_serve";
     } else if (auth.role === "practitioner") {
-      practitionerId = practitionerId || auth.userId;
+      practitionerId = auth.userId; // a practitioner books only for themselves
       if (!patientId) {
         return NextResponse.json(
           { success: false, error: "patientId is required" },
@@ -302,10 +304,22 @@ export async function POST(req: NextRequest) {
       requestedTo = auth.role === "patient" ? practitionerId : patientId;
     }
 
+    // The hospital file-number gate: the practitioner must work at a hospital that holds an
+    // active file for the patient. The facility is derived here, never taken from the client.
+    let requestedFacility: string | undefined = body.facilityId || undefined;
+    if (auth.role === "hospital_admin") {
+      const own = await resolveHospitalId(auth.userId);
+      if (!own || (requestedFacility && requestedFacility !== own)) {
+        throw new PublicError("You can only book for your own hospital.", 403);
+      }
+      requestedFacility = own;
+    }
+    const facilityId = await resolveBookingFacility(patientId!, practitionerId!, requestedFacility);
+
     const consultation = await Consultation.create({
       patientId,
       practitionerId,
-      facilityId: body.facilityId || undefined,
+      facilityId,
       type: body.type || "video",
       status,
       scheduledStartTime: start,
@@ -359,12 +373,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err: unknown) {
     console.error("[POST /api/bookings]", err);
-    return NextResponse.json(
-      {
-        success: false,
-        error: err instanceof Error ? err.message : "Booking failed",
-      },
-      { status: 500 },
-    );
+    return apiError(err);
   }
 }

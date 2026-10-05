@@ -8,7 +8,8 @@ import {
 } from '@/lib/models/ClinicalData';
 import { Consultation } from '@/lib/models/Consultation';
 import { AITriageSession } from '@/lib/models/AIDecision';
-import { requirePatientAccess } from '@/lib/auth/access';
+import { requirePatientAccessScoped } from '@/lib/auth/access';
+import { rowVisibleInScope } from '@/lib/auth/facilityAccess';
 
 import { apiError } from "@/lib/api/errors";
 export async function GET(
@@ -23,26 +24,37 @@ export async function GET(
     // That rule was written here first and has now moved to the shared guard,
     // unchanged, so the routes beside this one that were missing it entirely
     // get the same answer rather than a second opinion.
-    await requirePatientAccess(patientId);
+    const { scope } = await requirePatientAccessScoped(patientId);
+    const visible = <T extends { facilityId?: unknown }>(rows: T[]) =>
+      rows.filter((r) => rowVisibleInScope(r, scope));
 
     // Fetch all data types in parallel
     const [
-      vitals,
-      medContext,
-      prescriptions,
-      labs,
-      immunizations,
+      vitalsAll,
+      medContexts,
+      prescriptionsAll,
+      labsAll,
+      immunizationsAll,
       consultations,
       triageSessions
     ] = await Promise.all([
       Anthropometric.find({ patientId }).sort({ dateRecorded: -1 }).lean(),
-      MedicalContext.findOne({ patientId }).lean(),
+      MedicalContext.find({ patientId }).lean(),
       Prescription.find({ patientId }).sort({ prescribedDate: -1 }).lean(),
       LabResult.find({ patientId }).sort({ dateReported: -1 }).lean(),
       Immunization.find({ patientId }).sort({ dateAdministered: -1 }).lean(),
       Consultation.find({ patientId }).sort({ scheduledStartTime: -1 }).populate('practitionerId', 'name').lean(),
       AITriageSession.find({ patientId }).sort({ createdAt: -1 }).lean()
     ]);
+
+    const vitals = visible(vitalsAll as any[]);
+    const prescriptions = visible(prescriptionsAll as any[]);
+    const labs = visible(labsAll as any[]);
+    const immunizations = visible(immunizationsAll as any[]);
+    const ctxVisible = visible(medContexts as any[]);
+    // Prefer the hospital-owned context the caller may see, else the patient's own.
+    const medContext =
+      ctxVisible.find((c: any) => c.facilityId) || ctxVisible[0] || null;
 
     // Build timeline events
     const timelineEvents: any[] = [];

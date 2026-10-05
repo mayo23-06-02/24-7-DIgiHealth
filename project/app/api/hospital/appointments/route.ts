@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { hasActiveFile, getPractitionerFacilityIds } from '@/lib/facility/membership';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
 import { apiError } from "@/lib/api/errors";
@@ -55,9 +56,25 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+
+    // Both people must belong to this hospital: the patient holds a file here, the doctor is on staff here.
+    if (!(await hasActiveFile(String(body.patientId ?? ''), hospitalId))) {
+      return NextResponse.json({ success: false, error: 'This patient does not hold an active file at your hospital.' }, { status: 403 });
+    }
+    const doctorFacilities = await getPractitionerFacilityIds(String(body.practitionerId ?? ''));
+    if (!doctorFacilities.includes(hospitalId)) {
+      return NextResponse.json({ success: false, error: 'This doctor is not on your hospital staff.' }, { status: 403 });
+    }
+
     const appointment = await HospitalAppointment.create({
-      ...body,
-      facilityId: hospitalId
+      patientId: body.patientId,
+      practitionerId: body.practitionerId,
+      type: body.type,
+      scheduledStart: body.scheduledStart,
+      scheduledEnd: body.scheduledEnd,
+      status: body.status,
+      room: body.room,
+      facilityId: hospitalId,
     });
 
     return NextResponse.json({ success: true, data: appointment });

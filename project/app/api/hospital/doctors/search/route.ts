@@ -3,6 +3,8 @@ import User from '@/lib/models/User';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { escapeRegex } from '@/lib/escapeRegex';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import Staff from '@/lib/models/Staff';
 
 import { apiError } from "@/lib/api/errors";
 // Staff management is doctor-only — search always targets practitioner accounts.
@@ -16,9 +18,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
 
+    // Only doctors on this hospital's own staff list are searchable.
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
+    if (!hospitalId) return NextResponse.json({ success: true, data: [] });
+    const staffRows = await Staff.find({ facilityId: hospitalId }).select('userId').lean();
+    const staffUserIds = staffRows.map((s: any) => s.userId).filter(Boolean);
+    if (staffUserIds.length === 0) return NextResponse.json({ success: true, data: [] });
+
     const searchRe = escapeRegex(search);
     const doctors = await User.find({
       role: 'practitioner',
+      _id: { $in: staffUserIds },
       $or: [
         { firstName: { $regex: searchRe, $options: 'i' } },
         { lastName: { $regex: searchRe, $options: 'i' } },

@@ -9,6 +9,8 @@ import { calcAge, riskBandFromScore, riskBandStyle } from '@/lib/riskScore';
 
 import { apiError } from "@/lib/api/errors";
 import { isValidId, toId } from '@/lib/db';
+import { getPractitionerFacilityIds } from '@/lib/facility/membership';
+import { FacilityPatient } from '@/lib/models/FacilityPatient';
 export async function GET(req: NextRequest) {
   try {
     const user = await getRequestUser();
@@ -27,7 +29,26 @@ export async function GET(req: NextRequest) {
     const consultedIds = await Consultation.find({ practitionerId }).distinct('patientId');
     const consultedIdStrings = consultedIds.map(id => id.toString());
 
-    const uniquePatientIds = [...new Set([...assignedIds, ...consultedIdStrings])];
+    let uniquePatientIds = [...new Set([...assignedIds, ...consultedIdStrings])];
+
+    // Hospital isolation: a practitioner only lists patients holding an active
+    // file at a hospital where they work.
+    let scopeFacilityIds: string[] | null = null;
+    if (user.role === 'practitioner') {
+      scopeFacilityIds = await getPractitionerFacilityIds(practitionerId);
+      if (scopeFacilityIds.length === 0 || uniquePatientIds.length === 0) {
+        return NextResponse.json({ success: true, data: [], total: 0 });
+      }
+      const files = await FacilityPatient.find({
+        patientId: { $in: uniquePatientIds.filter((id) => isValidId(id)) },
+        facilityId: { $in: scopeFacilityIds },
+        status: 'active',
+      })
+        .select('patientId')
+        .lean();
+      const allowed = new Set(files.map((f: any) => String(toId(f.patientId))));
+      uniquePatientIds = uniquePatientIds.filter((id) => allowed.has(id));
+    }
 
     if (uniquePatientIds.length === 0) {
       return NextResponse.json({ success: true, data: [], total: 0 });
@@ -54,7 +75,14 @@ export async function GET(req: NextRequest) {
 
     // Latest risk scores for these patients
     const latestRisks = await RiskScore.aggregate([
-      { $match: { patientId: { $in: oids } } },
+      {
+        $match: {
+          patientId: { $in: oids },
+          ...(scopeFacilityIds
+            ? { $or: [{ facilityId: { $in: scopeFacilityIds } }, { facilityId: null }] }
+            : {}),
+        },
+      },
       { $sort: { calculatedAt: -1 } },
       {
         $group: {
@@ -125,7 +153,12 @@ export async function GET(req: NextRequest) {
             .sort({ scheduledStartTime: 1 })
             .select('scheduledStartTime')
             .lean(),
-          MedicalContext.findOne({ patientId: p._id })
+          MedicalContext.findOne({
+            patientId: p._id,
+            ...(scopeFacilityIds
+              ? { $or: [{ facilityId: { $in: scopeFacilityIds } }, { facilityId: null }] }
+              : {}),
+          })
             .select('chronicConditions')
             .lean()
             .catch(() => null),

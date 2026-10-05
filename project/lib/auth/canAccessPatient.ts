@@ -1,6 +1,7 @@
 import { Consultation } from "@/lib/models/Consultation";
 import { PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { isValidId } from '@/lib/db';
+import { sharedFacilityIds } from "@/lib/facility/membership";
 
 /**
  * True if the practitioner (or mega_admin) may view this patient's clinical data/docs.
@@ -18,6 +19,11 @@ export async function canPractitionerAccessPatient(
     !isValidId(practitionerUserId) ||
     !isValidId(patientUserId)
   ) {
+    return false;
+  }
+
+  // Hospital isolation: must work at a hospital holding the patient's active file.
+  if ((await sharedFacilityIds(patientUserId, practitionerUserId)).length === 0) {
     return false;
   }
 

@@ -32,7 +32,7 @@ export interface IImportJobRow extends Document {
   jobId: string;
   rowNumber: number;
   raw: Record<string, unknown>;
-  status: 'created' | 'linked' | 'skipped' | 'failed';
+  status: 'pending' | 'created' | 'linked' | 'skipped' | 'failed';
   error?: string;
   userId?: string;
   fileNumber?: string;

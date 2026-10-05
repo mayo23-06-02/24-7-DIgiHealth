@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requirePatientAccess } from "@/lib/auth/access";
+import { requirePatientAccess, requirePatientAccessScoped } from "@/lib/auth/access";
+import { rowVisibleInScope } from "@/lib/auth/facilityAccess";
+import { sharedFacilityIds } from "@/lib/facility/membership";
 import RiskScore from "@/lib/models/RiskScore";
 import { Consultation } from "@/lib/models/Consultation";
 import {
@@ -22,11 +24,12 @@ export async function GET(
     // practitioner account could read — and through PUT, overwrite — the
     // clinical risk assessment of any patient in the system. This also
     // validates the id shape and hands back the caller.
-    const user = await requirePatientAccess(patientId);
+    const { scope } = await requirePatientAccessScoped(patientId);
 
-    const latest = await RiskScore.findOne({ patientId })
+    const rows = await RiskScore.find({ patientId })
       .sort({ calculatedAt: -1 })
       .lean();
+    const latest = (rows as any[]).find((r) => rowVisibleInScope(r, scope));
 
     if (latest) {
       return NextResponse.json({
@@ -86,8 +89,10 @@ export async function PUT(
     const factors = Array.isArray(body.factors) ? body.factors : [];
     const notes = typeof body.notes === "string" ? body.notes : undefined;
 
+    const facilityId = (await sharedFacilityIds(patientId, user.userId))[0] ?? undefined;
     const record = await RiskScore.create({
       patientId,
+      facilityId,
       practitionerId: user.userId,
       score,
       color: band,

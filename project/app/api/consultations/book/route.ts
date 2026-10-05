@@ -7,6 +7,7 @@ import { expireStaleBookingRequests } from '@/lib/booking/expire';
 
 import { apiError } from "@/lib/api/errors";
 import { isValidId } from '@/lib/db';
+import { resolveBookingFacility } from '@/lib/booking/facilityGate';
 /**
  * Legacy patient booking endpoint.
  * Prefer POST /api/bookings for new code (unified booking system).
@@ -57,9 +58,12 @@ export async function POST(req: NextRequest) {
     }
 
     const reason = body.reason || body.chiefComplaint || '';
+    // Hospital file-number gate (the hospital is derived, never taken from the client).
+    const facilityId = await resolveBookingFacility(userId, body.practitionerId, body.facilityId);
     const consultation = await Consultation.create({
       patientId: userId,
       practitionerId: body.practitionerId,
+      facilityId,
       type: body.type || 'video',
       status: body.status || 'requested',
       scheduledStartTime: start,

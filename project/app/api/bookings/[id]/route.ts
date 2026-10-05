@@ -11,6 +11,7 @@ import { expireStaleBookingRequests } from "@/lib/booking/expire";
 import { getRequesterId, getBlockedAcceptorId } from "@/lib/booking/requester";
 import { PatientProfile, PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { isValidId, toId } from '@/lib/db';
+import { resolveHospitalId } from "@/lib/hospital/resolveHospitalId";
 
 const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET,
@@ -37,6 +38,24 @@ async function getAuthUser(): Promise<{
 /**
  * GET /api/bookings/:id
  */
+/**
+ * May this caller see or change this consultation?
+ * Its two parties; a hospital admin only for their own hospital's consultations;
+ * platform admins.
+ */
+async function canTouchConsultation(
+  auth: { userId: string; role: string },
+  c: { patientId?: unknown; practitionerId?: unknown; facilityId?: unknown },
+): Promise<boolean> {
+  if (auth.userId === String(c.patientId ?? "") || auth.userId === String(c.practitionerId ?? "")) return true;
+  if (auth.role === "super_admin" || auth.role === "mega_admin") return true;
+  if (auth.role === "hospital_admin") {
+    const own = await resolveHospitalId(auth.userId);
+    return !!own && !!c.facilityId && String(c.facilityId) === own;
+  }
+  return false;
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -61,16 +80,7 @@ export async function GET(
     // Access control
     const pid = (c as any).patientId?.toString();
     const prid = (c as any).practitionerId?.toString();
-    if (
-      auth.role === "patient" &&
-      pid !== auth.userId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-    if (
-      auth.role === "practitioner" &&
-      prid !== auth.userId
-    ) {
+    if (!(await canTouchConsultation(auth, c as any))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -149,12 +159,7 @@ export async function PATCH(
 
     const pid = c.patientId.toString();
     const prid = c.practitionerId.toString();
-    const isParty =
-      auth.userId === pid ||
-      auth.userId === prid ||
-      auth.role === "hospital_admin" ||
-      auth.role === "super_admin" ||
-      auth.role === "mega_admin";
+    const isParty = await canTouchConsultation(auth, c);
 
     if (!isParty) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

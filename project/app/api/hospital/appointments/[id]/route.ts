@@ -17,21 +17,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     const { id } = await params;
     const body = await req.json();
+    // Only these fields may change; the people on an appointment cannot be swapped.
+    const $set: Record<string, unknown> = {};
+    for (const key of ['status', 'type', 'room', 'scheduledStart', 'scheduledEnd'] as const) {
+      if (body[key] !== undefined) $set[key] = body[key];
+    }
     const updated = await HospitalAppointment.findOneAndUpdate(
       { _id: id, facilityId: hospitalId },
-      body,
+      { $set },
       { new: true },
     );
     if (!updated) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
-
-    const pgUpdates: Record<string, unknown> = {};
-    if (typeof body.status === 'string') pgUpdates.status = body.status;
-    if (typeof body.type === 'string') pgUpdates.type = body.type;
-    if (typeof body.room === 'string') pgUpdates.room = body.room;
-    if (body.scheduledStart) pgUpdates.scheduled_start = body.scheduledStart;
-    if (body.scheduledEnd) pgUpdates.scheduled_end = body.scheduledEnd;
-    if (Object.keys(pgUpdates).length) {
-    }
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
