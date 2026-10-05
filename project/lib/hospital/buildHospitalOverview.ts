@@ -390,7 +390,7 @@ export async function buildHospitalOverview(
   // Latest risk scores
   const risks = patientOids.length
     ? await RiskScore.aggregate([
-        { $match: { patientId: { $in: patientOids } } },
+        { $match: { patientId: { $in: patientOids }, $or: [{ facilityId: facilityOid }, { facilityId: null }] } },
         { $sort: { calculatedAt: -1 } },
         { $group: { _id: "$patientId", score: { $first: "$score" } } },
       ])

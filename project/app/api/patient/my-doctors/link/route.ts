@@ -6,6 +6,7 @@ import { jwtVerify } from 'jose';
 
 import { apiError } from "@/lib/api/errors";
 import { isValidId } from '@/lib/db';
+import { sharedFacilityIds } from '@/lib/facility/membership';
 export async function POST(req: NextRequest) {
   try {
 
@@ -31,6 +32,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'link') {
+      if (!isValidId(practitionerId) || (await sharedFacilityIds(patientUserId, practitionerId)).length === 0) {
+        return NextResponse.json(
+          { error: 'You can only add doctors from a hospital where you hold a file number.' },
+          { status: 403 },
+        );
+      }
+
       // 1. Add doctor to patient's myDoctorIds
       await PatientProfile.updateOne(
         { userId: patientUserId },

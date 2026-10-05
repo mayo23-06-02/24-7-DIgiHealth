@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { discoverableScope } from '@/lib/facility/membership';
 import { escapeRegex } from '@/lib/escapeRegex';
 
 export async function GET(request: Request) {
   try {
+    const caller = await getRequestUser();
+    if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const scope = await discoverableScope(caller);
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
     const specialisation = searchParams.get('specialisation');
@@ -17,6 +22,7 @@ export async function GET(request: Request) {
 
 
     const query: any = {};
+    if (scope) query.userId = { $in: scope.practitionerIds };
     if (specialisation && specialisation !== 'All') {
       query.specialisation = { $regex: escapeRegex(specialisation), $options: 'i' };
     }

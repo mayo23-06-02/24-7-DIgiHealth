@@ -54,3 +54,26 @@ export async function sharedFacilityIds(patientId: string, practitionerId: strin
   const set = new Set(theirs);
   return mine.filter((f) => set.has(f));
 }
+
+/**
+ * Who a patient may discover and book: doctors on staff at a hospital where the
+ * patient holds an active file. Returns null for callers who may see everyone.
+ */
+export async function discoverableScope(
+  caller: { userId: string; role: string },
+): Promise<{ facilityIds: string[]; practitionerIds: string[] } | null> {
+  if (caller.role === "mega_admin" || caller.role === "super_admin") return null;
+  const facilityIds =
+    caller.role === "patient" ? await getPatientFacilityIds(caller.userId) : [];
+  if (facilityIds.length === 0) return { facilityIds: [], practitionerIds: [] };
+  const rows = await Staff.find({
+    facilityId: { $in: facilityIds },
+    status: { $in: ["active", null] },
+  })
+    .select("userId")
+    .lean();
+  const practitionerIds = [
+    ...new Set(rows.map((r) => toId(r.userId)).filter((x): x is string => !!x)),
+  ];
+  return { facilityIds, practitionerIds };
+}

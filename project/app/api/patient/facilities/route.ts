@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { discoverableScope } from '@/lib/facility/membership';
 import { Facility } from '@/lib/models/Facility';
 
 export async function GET() {
   try {
-    const facilities = await Facility.find();
+    const caller = await getRequestUser();
+    if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const scope = await discoverableScope(caller);
+    const facilities = await Facility.find(scope ? { _id: { $in: scope.facilityIds } } : {});
     
     const mapped = facilities.map(f => ({
       id: f._id.toString(),

@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
 import User from '@/lib/models/User';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
+import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { discoverableScope } from '@/lib/facility/membership';
 import { Facility } from '@/lib/models/Facility';
 
 export async function GET() {
   try {
-    
-    const users = await User.find({ role: 'practitioner' });
+    const caller = await getRequestUser();
+    if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const scope = await discoverableScope(caller);
+    const users = await User.find({
+      role: 'practitioner',
+      ...(scope ? { _id: { $in: scope.practitionerIds } } : {}),
+    });
     const profiles = await PractitionerProfile.find({ userId: { $in: users.map(u => u._id) } })
       .populate({ path: 'affiliatedFacilityIds', model: Facility, select: 'name' });
 
