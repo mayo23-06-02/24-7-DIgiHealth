@@ -100,11 +100,11 @@ export default function SetPasswordForm() {
   return (
     <form onSubmit={submit} className={`${shell} space-y-4`}>
       <h2 className="font-grotesk text-2xl font-bold tracking-tight text-slate-900">
-        Welcome, {info.firstName}
+        Complete your health profile
       </h2>
       <p className="text-sm text-slate-500">
         {info.hospitals.length ? `Registered by ${info.hospitals.join(", ")}. ` : ""}
-        Choose a password for {info.email}.
+        Welcome, {info.firstName}. Check your details, then choose a password for {info.email}.
       </p>
       {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
@@ -141,7 +141,7 @@ export default function SetPasswordForm() {
         <span>I accept the terms and consent to the processing of my information (POPIA).</span>
       </label>
       <button disabled={busy || !accept} className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white disabled:opacity-50">
-        {busy ? "Saving…" : "Set password"}
+        {busy ? "Saving…" : "Complete health profile"}
       </button>
     </form>
   );

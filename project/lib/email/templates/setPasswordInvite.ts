@@ -1,5 +1,5 @@
 /**
- * "Your hospital registered you on 24/7 DigiHealth — set your password" email.
+ * "Your hospital registered you on 24/7 DigiHealth — complete your health profile" email.
  * Inline styles only — email clients strip <style> blocks.
  */
 export function setPasswordInviteEmailHtml(params: {
@@ -21,7 +21,7 @@ export function setPasswordInviteEmailHtml(params: {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#ffffff; border-radius:16px; overflow:hidden;">
           <tr><td style="background:#4493b8; padding:32px; text-align:center;">
             <h1 style="margin:0; color:#ffffff; font-size:22px;">24/7 DigiHealth</h1>
-            <p style="margin:6px 0 0; color:rgba(255,255,255,0.85); font-size:13px; text-transform:uppercase;">Finish setting up your account</p>
+            <p style="margin:6px 0 0; color:rgba(255,255,255,0.85); font-size:13px; text-transform:uppercase;">Complete your health profile</p>
           </td></tr>
           <tr><td style="padding:32px 32px 8px;">
             <h2 style="margin:0 0 12px; color:#0f172a; font-size:20px;">Hi ${escapeHtml(firstName)},</h2>
@@ -30,12 +30,12 @@ export function setPasswordInviteEmailHtml(params: {
               Your file number there is <strong>${escapeHtml(fileNumber)}</strong>.
             </p>
             <p style="margin:0 0 20px; color:#475569; font-size:15px; line-height:1.6;">
-              Choose a password and check your details to start using your account.
+              Complete your health profile: check your details, add anything that is missing and create your password to start using your account.
             </p>
           </td></tr>
           <tr><td style="padding:8px 32px 32px; text-align:center;">
             <a href="${setPasswordUrl}" style="display:inline-block; background-color:#4493b8; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none; padding:14px 36px; border-radius:999px;">
-              Set your password
+              Complete your health profile
             </a>
           </td></tr>
           <tr><td style="padding:0 32px 32px;">

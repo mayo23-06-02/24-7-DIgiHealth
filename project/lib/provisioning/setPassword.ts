@@ -43,7 +43,7 @@ export async function sendOnboardingEmail(params: {
   const url = `${params.origin}/set-password?token=${params.token}`;
   const { error } = await sendEmail({
     to: params.to,
-    subject: `${params.facilityName} registered you on 24/7 DigiHealth`,
+    subject: `Complete your health profile: ${params.facilityName} registered you on 24/7 DigiHealth`,
     html: setPasswordInviteEmailHtml({
       firstName: params.firstName,
       facilityName: params.facilityName,
