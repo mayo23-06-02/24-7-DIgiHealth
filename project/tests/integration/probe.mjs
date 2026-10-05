@@ -1,6 +1,7 @@
 // Calls the remaining routes with realistic ids and minimal bodies; any 5xx is a failure
 // (4xx is expected for many of these with minimal input and is only printed for review).
-import { Session, db, userByEmail, step, expect, done } from "./lib.mjs";
+import { Session, db, userByEmail, step, expect, done, ensureShared } from "./lib.mjs";
+await ensureShared("john.dlamini@example.com", "mitchell@247digihealth.com");
 
 const patient = await Session.as("john.dlamini@example.com");
 const doc = await Session.as("mitchell@247digihealth.com");

@@ -70,3 +70,18 @@ export function done() {
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);
 }
+
+/** Make sure a patient holds an active hospital file where the doctor works (creates both rows if missing). */
+export async function ensureShared(patientEmail, doctorEmail) {
+  const p = await userByEmail(patientEmail);
+  const d = await userByEmail(doctorEmail);
+  let [s] = await db("GET", "staff", `user_id=eq.${d.id}&select=*`);
+  if (!s) {
+    const [f] = await db("GET", "facilities", "select=id&limit=1");
+    [s] = await db("POST", "staff", "", { user_id: d.id, facility_id: f.id, role: "doctor", department: "General", hourly_rate: 100, file_number: `DR-T${Date.now() % 100000}`, status: "active" });
+  }
+  const [have] = await db("GET", "facility_patients", `facility_id=eq.${s.facility_id}&patient_id=eq.${p.id}&select=id`);
+  if (have) await db("PATCH", "facility_patients", `id=eq.${have.id}`, { status: "active" });
+  else await db("POST", "facility_patients", "", { facility_id: s.facility_id, patient_id: p.id, file_number: `PT-${Date.now()}`, status: "active" });
+  return s.facility_id;
+}

@@ -5,26 +5,18 @@ const email = `flow.patient.${stamp}@example.com`;
 const anon = new Session(null);
 
 console.log("auth flows");
-await step("register patient", async () => {
-  const r = await anon.call("POST", "/api/auth/register", { role: "patient", formData: {
-    email, password: "Password123!", firstName: "Flow", lastName: "Patient", dob: "1990-05-05", gender: "female",
-    emergencyName: "Ma", emergencyPhone: "0821234567", emergencyRelationship: "mother",
-    heightCm: "170", weightKg: "65", bloodType: "O+", allergies: ["Penicillin"], chronicConditions: ["Asthma"],
-  }});
-  expectStatus(r, 200, 201);
-  const u = await userByEmail(email);
-  expect(u && u.status === "pending_verification" && u.email_verified === false, "user row not created as pending");
-  const [prof] = await db("GET", "patient_profiles", `user_id=eq.${u.id}&select=*`);
-  expect(prof && prof.gender === "female", "patient profile missing");
-  const [mc] = await db("GET", "medical_context", `patient_id=eq.${u.id}&select=*`);
-  expect(mc && mc.blood_type === "O+", "medical context missing");
-  const allergies = await db("GET", "patient_allergies", `medical_context_id=eq.${mc.id}&select=*`);
-  expect(allergies.length === 1 && allergies[0].allergen === "Penicillin", "allergy child row missing");
+await step("public patient register is closed (file number required)", async () => {
+  const r = await anon.call("POST", "/api/auth/register", { role: "patient", formData: { email, password: "Password123!", firstName: "Flow", lastName: "Patient" } });
+  expectStatus(r, 403);
+  expect(r.json?.code === "FILE_NUMBER_REQUIRED" || /file number/i.test(r.text), "expected FILE_NUMBER_REQUIRED");
+  const rp = await anon.call("POST", "/api/auth/register", { role: "practitioner", formData: { email, password: "Password123!", firstName: "Flow", lastName: "Doc" } });
+  expectStatus(rp, 403);
 });
 
-await step("duplicate register -> 409", async () => {
-  const r = await anon.call("POST", "/api/auth/register", { role: "patient", formData: { email, password: "Password123!", firstName: "x", lastName: "y" } });
-  expectStatus(r, 409);
+await step("hospital-provisioned patient row (pending verification)", async () => {
+  const [u] = await db("POST", "users", "", { email, password_hash: hash("Password123!"), role: "patient", first_name: "Flow", last_name: "Patient", status: "pending_verification", email_verified: false });
+  await db("POST", "patient_profiles", "", { user_id: u.id, gender: "female", date_of_birth: "1990-05-05" });
+  expect((await userByEmail(email)).status === "pending_verification", "user row not pending");
 });
 
 await step("login before verify -> 403 requiresVerification", async () => {

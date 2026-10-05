@@ -1,4 +1,5 @@
-import { Session, db, userByEmail, step, expect, expectStatus, done } from "./lib.mjs";
+import { Session, db, userByEmail, step, expect, expectStatus, done, ensureShared } from "./lib.mjs";
+await ensureShared("john.dlamini@example.com", "mitchell@247digihealth.com");
 
 const stamp = Date.now();
 const patient = await Session.as("john.dlamini@example.com");
