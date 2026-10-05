@@ -12,6 +12,8 @@ import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import FacilityRosterPanel from "./FacilityRosterPanel";
+import FacilityFormModal from "./FacilityFormModal";
+import { useAuthContext } from "@/components/auth/AuthProvider";
 
 interface FacilityRow {
   id: string;
@@ -42,6 +44,25 @@ export default function AdminFacilitiesPage() {
   const [sort, setSort] = useState("name:asc");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [roster, setRoster] = useState<FacilityRow | null>(null);
+  const [form, setForm] = useState<{ id: string | null } | null>(null);
+  const auth = useAuthContext() as { user?: { role?: string } | null } | null;
+  const isMega = auth?.user?.role === "mega_admin";
+
+  const remove = async (f: FacilityRow) => {
+    if (!window.confirm(`Delete "${f.name}"? This cannot be undone.`)) return;
+    setBusyId(f.id);
+    try {
+      const res = await fetch(`/api/admin/facilities/${f.id}`, { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || "Could not delete");
+      toast.success("Facility deleted");
+      void load();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -128,6 +149,14 @@ export default function AdminFacilitiesPage() {
         title="Facilities"
         subtitle="All hospitals and clinics on DigiHealth"
         right={
+          <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() => setForm({ id: null })}
+            className="!rounded-lg !max-w-none normal-case !tracking-normal"
+          >
+            Add New Facility
+          </Button>
           <Button
             size="sm"
             variant="outline"
@@ -138,6 +167,7 @@ export default function AdminFacilitiesPage() {
           >
             Refresh
           </Button>
+          </div>
         }
       />
 
@@ -237,6 +267,27 @@ export default function AdminFacilitiesPage() {
                     size="sm"
                     variant="outline"
                     fullWidth
+                    onClick={() => setForm({ id: f.id })}
+                    className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px]"
+                  >
+                    Edit facility
+                  </Button>
+                  {isMega && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      fullWidth
+                      disabled={busyId === f.id}
+                      onClick={() => void remove(f)}
+                      className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px] !text-red-600"
+                    >
+                      Delete facility
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    fullWidth
                     disabled={busyId === f.id}
                     onClick={() => void toggleOpen(f.id, f.isOpen)}
                     className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px]"
@@ -300,6 +351,25 @@ export default function AdminFacilitiesPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() => setForm({ id: f.id })}
+                          className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px] mr-2"
+                        >
+                          Edit
+                        </Button>
+                        {isMega && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busyId === f.id}
+                            onClick={() => void remove(f)}
+                            className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px] mr-2 !text-red-600"
+                          >
+                            Delete
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
                           disabled={busyId === f.id}
                           onClick={() => void toggleOpen(f.id, f.isOpen)}
                           className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px]"
@@ -315,6 +385,17 @@ export default function AdminFacilitiesPage() {
           </>
         )}
       </Card>
+      {form && (
+        <FacilityFormModal
+          facilityId={form.id}
+          canRename={isMega}
+          onClose={() => setForm(null)}
+          onSaved={() => {
+            setForm(null);
+            void load();
+          }}
+        />
+      )}
       {roster && (
         <FacilityRosterPanel
           facilityId={roster.id}

@@ -3,6 +3,8 @@ import Facility from "@/lib/models/Facility";
 import Staff from "@/lib/models/Staff";
 import HospitalAppointment from "@/lib/models/HospitalAppointment";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
+import { parseFacilityInput } from "@/lib/facility/input";
+import { logAdminAction } from "@/lib/admin/logAdminAction";
 
 import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
@@ -59,6 +61,50 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: rows });
   } catch (err: any) {
     console.error("[GET /api/admin/facilities]", err);
+    return apiError(err);
+  }
+}
+
+/** Create a facility. */
+export async function POST(req: NextRequest) {
+  try {
+    const gate = await requirePlatformAdmin();
+    if (gate.error) return gate.error;
+
+    const parsed = parseFacilityInput(await req.json(), "create");
+    if (!parsed.ok) return NextResponse.json({ success: false, errors: parsed.errors }, { status: 400 });
+    const v = parsed.value;
+
+    const dup = await Facility.findOne({ name: { $regex: `^${v.name!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" } })
+      .select("_id")
+      .lean();
+    if (dup) {
+      return NextResponse.json({ success: false, errors: ["A facility with this name already exists"] }, { status: 409 });
+    }
+
+    const total = v.bedCapacity?.total ?? 0;
+    const facility = await Facility.create({
+      ...v,
+      isOpen: v.isOpen ?? true,
+      emergencyServices: v.emergencyServices ?? false,
+      specialties: v.specialties ?? [],
+      bedCapacity: {
+        total,
+        generalAvailable: v.bedCapacity?.generalAvailable ?? total,
+        icuAvailable: v.bedCapacity?.icuAvailable ?? 0,
+      },
+      currentWaitTimeMins: 0,
+    });
+    await logAdminAction({
+      actor: gate.user,
+      action: "facility.create",
+      targetType: "facility",
+      targetId: String(facility._id),
+      metadata: { name: v.name },
+    });
+    return NextResponse.json({ success: true, data: { id: String(facility._id), name: v.name } }, { status: 201 });
+  } catch (err: any) {
+    console.error("[POST /api/admin/facilities]", err);
     return apiError(err);
   }
 }
