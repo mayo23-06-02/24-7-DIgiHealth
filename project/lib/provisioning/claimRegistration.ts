@@ -11,6 +11,7 @@ import { validatePassword } from "@/lib/auth/passwordRules";
 import { findLiveToken } from "./setPassword";
 import { lookupFile } from "./fileLookup";
 import { toId } from "@/lib/db";
+import AuditLog from "@/lib/models/AuditLog";
 
 export class ClaimError extends Error {
   constructor(message: string, public status = 400, public code?: string) {
@@ -76,6 +77,10 @@ export async function claimRegistration(
   const email = normalizeEmail(formData.email || "");
   if (!email || email !== normalizeEmail(user.email)) {
     throw new ClaimError("Use the email address your hospital has on file for you.", 400, "EMAIL_MISMATCH");
+  }
+
+  if (wizardRole === "practitioner" && formData.settlementTermsAccepted !== true) {
+    throw new ClaimError("Please confirm the Payments & Settlements terms to finish registering.", 400, "SETTLEMENT_TERMS_REQUIRED");
   }
 
   const pwError = validatePassword(String(formData.password ?? ""));
@@ -178,11 +183,6 @@ export async function claimRegistration(
     if (formData.experience) set.experienceYears = parseInt(formData.experience) || 0;
     if (formData.profilePhoto) set.profilePhoto = formData.profilePhoto;
     if (formData.hpcsaCert) set.hpcsaCertificate = formData.hpcsaCert;
-    if (formData.bankHolder || formData.bankName || formData.bankAccount) {
-      set["bankAccount.accountHolder"] = formData.bankHolder;
-      set["bankAccount.bankName"] = formData.bankName;
-      set["bankAccount.accountNumber"] = formData.bankAccount;
-    }
     if (formData.street) set["address.street"] = formData.street;
     if (formData.city) set["address.city"] = formData.city;
     if (formData.province) set["address.province"] = formData.province;
@@ -190,6 +190,17 @@ export async function claimRegistration(
     if (formData.bgCheckConsent || formData.practitionerConsent) set.consentAcceptedAt = now;
     if (formData.practitionerTermsAccepted) set.termsAcceptedAt = now;
     if (Object.keys(set).length) await PractitionerProfile.updateOne({ userId }, { $set: set });
+    // Record the settlement confirmation with the exact wording that was shown.
+    const { SETTLEMENT_CONFIRMATION_TEXT } = await import("@/components/auth/Register/Steps/Practitioner/settlementText");
+    await AuditLog.create({
+      actorId: userId,
+      actorRole: "practitioner",
+      actorEmail: email,
+      action: "practitioner.settlement_terms_accepted",
+      targetType: "user",
+      targetId: userId,
+      metadata: { acceptedAt: now.toISOString(), text: SETTLEMENT_CONFIRMATION_TEXT },
+    });
   }
 
   if (emailProven) await activateHospitalRecords(userId);

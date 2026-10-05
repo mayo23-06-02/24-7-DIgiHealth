@@ -13,7 +13,7 @@ await step("doctor completes wizard via staff-number claim", async () => {
     hpcsaNumber: hp, practiceNumber: "1234567", experience: "15", specialization: "Cardiologist",
     fullName: "Anele Zulu", saId: "", countryCode: "+27", mobile: "", email, street: "1 Main Rd", city: "Johannesburg", province: "Gauteng", languages: ["English"],
     bgCheckConsent: true, practitionerConsent: true, practitionerTermsAccepted: true, profilePhoto: "/api/media/file/00000000-0000-0000-0000-000000000000",
-    bankHolder: "Anele Zulu", bankName: "FNB", bankAccount: "62000000000", password: "Password123!", confirmPassword: "Password123!",
+    settlementTermsAccepted: true, password: "Password123!", confirmPassword: "Password123!",
   };
   const anon = new Session(null);
   // Another account already has this mobile number.
@@ -21,11 +21,15 @@ await step("doctor completes wizard via staff-number claim", async () => {
   const taken = await anon.call("POST", "/api/auth/register", { role: "practitioner", formData: { ...form, mobile: other.phone_e164.replace("+27", "") } });
   expectStatus(taken, 409);
   expect(taken.json.code === "MOBILE_TAKEN", "clear duplicate-mobile message");
+  const noTerms = await anon.call("POST", "/api/auth/register", { role: "practitioner", formData: { ...form, settlementTermsAccepted: false, mobile: `83${String(stamp).slice(-7)}` } });
+  expectStatus(noTerms, 400);
+  expect(noTerms.json.code === "SETTLEMENT_TERMS_REQUIRED", "settlement confirmation required");
   const r = await anon.call("POST", "/api/auth/register", { role: "practitioner", formData: { ...form, mobile: `83${String(stamp).slice(-7)}` } });
   expectStatus(r, 200);
   const [u] = await db("GET", "users", `email=eq.${encodeURIComponent(email)}&select=password_hash,phone_e164`);
   expect(u.password_hash && u.phone_e164 === `+2783${String(stamp).slice(-7)}`, "doctor completed");
-  const [pp] = await db("GET", "practitioner_profiles", `user_id=eq.${(await db("GET","users",`email=eq.${encodeURIComponent(email)}&select=id`))[0].id}&select=*`);
-  expect(pp.bank_account_number === "62000000000" || pp.bank_account_number == null, "profile updated without error");
+  const [uid] = await db("GET", "users", `email=eq.${encodeURIComponent(email)}&select=id`);
+  const logs = await db("GET", "audit_logs", `actor_id=eq.${uid.id}&action=eq.practitioner.settlement_terms_accepted&select=metadata`);
+  expect(logs.length === 1 && String(logs[0].metadata?.text).startsWith("I understand and confirm"), "settlement acceptance recorded with its wording");
 });
 done();

@@ -20,7 +20,7 @@ export const roleConfig: Record<string, { label: string; color: string; steps: s
       "Credentials",        // step 1
       "Identity & Contact", // step 2
       "Documents",          // step 3
-      "Banking & Tax",      // step 4
+      "Payments & Settlements",      // step 4
       "Security",           // step 5 — password + email OTP
       "Preview",            // step 6
     ],

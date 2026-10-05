@@ -205,12 +205,10 @@ if (role === "practitioner") {
     // profilePhoto and hpcsaCert are optional (you can make them required if needed)
   }
 
-  // Step 4: Banking
+  // Step 4: Payments & Settlements
   if (step === 4) {
-    if (!formData.bankHolder?.trim()) err.bankHolder = "Account holder name is required.";
-    if (!formData.bankName) err.bankName = "Please select a bank.";
-    if (!formData.bankAccount?.trim() || !/^\d+$/.test(formData.bankAccount)) {
-      err.bankAccount = "Valid account number required (digits only).";
+    if (!formData.settlementTermsAccepted) {
+      err.settlementTermsAccepted = "Please confirm how patient payments are settled to continue.";
     }
   }
 
