@@ -451,7 +451,7 @@ export function buildImageTransformUrl(
   filePath: string,
   opts: { width?: number; height?: number; quality?: number } = {},
 ): string | null {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const base = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!base) return null;
   const params = new URLSearchParams();
   if (opts.width) params.set("width", String(opts.width));

@@ -11,8 +11,10 @@
 
 export function getSupabaseUrl(): string | undefined {
   return (
-    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    // Server-side names win: the NEXT_PUBLIC_ copies are baked in at build time and
+    // can be stale after the project is switched.
     process.env.SUPABASE_URL?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
     undefined
   );
 }
@@ -20,8 +22,8 @@ export function getSupabaseUrl(): string | undefined {
 /** Browser / SSR public key (safe to expose) */
 export function getSupabasePublishableKey(): string | undefined {
   return (
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ||
     process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
     undefined
   );
