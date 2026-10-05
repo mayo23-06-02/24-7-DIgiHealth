@@ -7,6 +7,9 @@ import DashboardShell from "@/components/shared/DashboardShell";
 import CallWrapper from "@/components/providers/CallWrapper";
 import AppointmentAlertWrapper from "@/components/providers/AppointmentAlertWrapper";
 
+// Every dashboard page depends on the session cookie, so none can be prerendered.
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -14,6 +17,11 @@ export default async function DashboardLayout({
 }) {
   // Verifies the session cookie and loads the account (see lib/auth/getRequestUser.ts).
   const requestUser = await getRequestUser().catch((err) => {
+    // Next signals "this render is dynamic" by throwing; swallowing it breaks the build.
+    const digest = (err as { digest?: string } | null)?.digest;
+    if (digest === "DYNAMIC_SERVER_USAGE" || digest === "NEXT_PRERENDER_INTERRUPTED" || digest?.startsWith("NEXT_")) {
+      throw err;
+    }
     console.error("Layout Auth Error:", err);
     return null;
   });
