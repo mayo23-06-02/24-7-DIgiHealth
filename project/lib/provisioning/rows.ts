@@ -94,7 +94,7 @@ export function validPatientRow(raw: RawRow): Parsed<PatientInput> {
   if (!["male", "female", "other"].includes(gender)) errors.push("gender must be male, female or other");
 
   const phone = normalizePhoneZaSz(str(raw.mobile));
-  if (!phone) errors.push("mobile must be a South Africa (+27) or Eswatini (+268) number");
+  if (!phone) errors.push("mobile must be a South African mobile number (+27)");
 
   const blood = str(raw.blood_type).toUpperCase();
   if (blood && !BLOOD.includes(blood)) errors.push("blood_type must be one of " + BLOOD.join(", "));
@@ -130,7 +130,7 @@ export function validDoctorRow(raw: RawRow): Parsed<DoctorInput> {
   if (!email || !isValidEmail(email)) errors.push("email is missing or invalid");
 
   const phone = normalizePhoneZaSz(str(raw.mobile));
-  if (!phone) errors.push("mobile must be a South Africa (+27) or Eswatini (+268) number");
+  if (!phone) errors.push("mobile must be a South African mobile number (+27)");
 
   const hpcsaNumber = str(raw.hpcsa_number).toUpperCase().replace(/\s+/g, "");
   if (!hpcsaNumber) errors.push("hpcsa_number is required");

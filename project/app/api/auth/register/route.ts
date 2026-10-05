@@ -121,7 +121,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Invalid mobile number. Use a South Africa (+27) or Eswatini (+268) number.",
+            "Invalid mobile number. Use a South African mobile number (+27).",
         },
         { status: 400 },
       );
@@ -455,6 +455,12 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error("Registration Error:", error);
+    if (/phone_e164/.test(String(error?.message))) {
+      return NextResponse.json(
+        { error: "This mobile number is already used by another account.", code: "MOBILE_TAKEN" },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       {
         error: "Registration failed",

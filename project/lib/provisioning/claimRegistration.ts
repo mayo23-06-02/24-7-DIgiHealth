@@ -83,7 +83,20 @@ export async function claimRegistration(
 
   const phone = formData.mobile ? composeRegistrationPhone(formData.countryCode, formData.mobile) : null;
   if (formData.mobile && !phone) {
-    throw new ClaimError("Invalid mobile number. Use a South Africa (+27) or Eswatini (+268) number.", 400);
+    throw new ClaimError("Invalid mobile number. Use a South African mobile number (+27).", 400);
+  }
+
+  // Each mobile number belongs to one account. Say so plainly instead of failing on the
+  // database's unique index.
+  if (phone && phone.e164 !== user.phoneE164) {
+    const taken = await User.findOne({ phoneE164: phone.e164, _id: { $ne: userId } }).select("_id").lean();
+    if (taken) {
+      throw new ClaimError(
+        "This mobile number is already used by another account. Use your own mobile number, or the one your hospital has on file.",
+        409,
+        "MOBILE_TAKEN",
+      );
+    }
   }
 
   // Claim the setup link first so a double submit cannot use it twice.

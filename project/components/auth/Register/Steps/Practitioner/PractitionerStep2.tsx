@@ -66,15 +66,8 @@ export default function PractitionerStep2({
             Mobile Number *
           </label>
           <div className="flex gap-2">
-            <div className="w-36 shrink-0">
-              <select
-                value={formData.countryCode || "+27"}
-                onChange={(e) => updateData("countryCode", e.target.value)}
-                className="w-full px-3 py-4 bg-slate-50/80 border-none rounded-full focus:ring-4 focus:ring-primary/10 focus:bg-white text-slate-900 outline-none transition-all duration-500 font-medium text-sm"
-              >
-                <option value="+27">ZA (+27)</option>
-                <option value="+268">SZ (+268)</option>
-              </select>
+            <div className="w-14 shrink-0 flex items-center justify-center text-sm font-medium text-slate-500 border-r border-slate-200">
+              +27
             </div>
             <Input
               type="tel"
@@ -83,14 +76,12 @@ export default function PractitionerStep2({
               onChange={(e) =>
                 updateData("mobile", e.target.value.replace(/\D/g, ""))
               }
-              placeholder={
-                formData.countryCode === "+268" ? "76 123 456" : "82 123 4567"
-              }
+              placeholder="82 123 4567"
               className="flex-1"
             />
           </div>
           <p className="text-[11px] text-slate-400 px-1">
-            South Africa (+27) or Eswatini (+268)
+            South African mobile number
           </p>
           {errors?.mobile && (
             <p className="text-xs text-red-500 font-medium">{errors.mobile}</p>

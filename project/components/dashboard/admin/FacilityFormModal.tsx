@@ -48,17 +48,12 @@ const EMPTY = {
   phone: "",
   emergencyPhone: "",
   email: "",
-  bedTotal: "",
-  bedGeneral: "",
-  bedIcu: "",
   specialties: [] as string[],
   fileNumberPrefix: "",
   emergencyServices: false,
   isOpen: true,
 };
 type FormState = typeof EMPTY;
-
-const num = (s: string) => (s.trim() === "" ? null : Number(s));
 
 /** Client checks that mirror lib/facility/input.ts, so most mistakes show before saving. */
 function validate(f: FormState): Record<string, string> {
@@ -67,14 +62,6 @@ function validate(f: FormState): Record<string, string> {
   if (!f.city.trim()) e.city = "Enter the city.";
   if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) e.email = "Enter a valid email address.";
   if (f.fileNumberPrefix && !/^[A-Za-z0-9-]+$/.test(f.fileNumberPrefix)) e.fileNumberPrefix = "Letters, numbers and dashes only.";
-  const total = num(f.bedTotal);
-  const general = num(f.bedGeneral);
-  const icu = num(f.bedIcu);
-  for (const [k, v] of [["bedTotal", total], ["bedGeneral", general], ["bedIcu", icu]] as const) {
-    if (v !== null && (!Number.isInteger(v) || v < 0)) e[k] = "Whole number, 0 or more.";
-  }
-  if (total !== null && general !== null && general > total) e.bedGeneral = "Can't be more than total beds.";
-  if (total !== null && icu !== null && icu > total) e.bedIcu = "Can't be more than total beds.";
   return e;
 }
 
@@ -110,9 +97,6 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
           phone: x.contactInfo?.phone ?? "",
           emergencyPhone: x.contactInfo?.emergencyPhone ?? "",
           email: x.contactInfo?.email ?? "",
-          bedTotal: x.bedCapacity?.total != null ? String(x.bedCapacity.total) : "",
-          bedGeneral: x.bedCapacity?.generalAvailable != null ? String(x.bedCapacity.generalAvailable) : "",
-          bedIcu: x.bedCapacity?.icuAvailable != null ? String(x.bedCapacity.icuAvailable) : "",
           specialties: x.specialties ?? [],
           fileNumberPrefix: x.fileNumberPrefix ?? "",
           emergencyServices: !!x.emergencyServices,
@@ -141,7 +125,6 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
         facilityType: f.facilityType,
         address: { street: f.street, city: f.city, province: f.province },
         contactInfo: { phone: f.phone, emergencyPhone: f.emergencyPhone, email: f.email },
-        bedCapacity: { total: f.bedTotal, generalAvailable: f.bedGeneral, icuAvailable: f.bedIcu },
         specialties: f.specialties,
         fileNumberPrefix: f.fileNumberPrefix,
         emergencyServices: f.emergencyServices,
@@ -163,7 +146,6 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
           else if (/city/i.test(m)) byField.city = m;
           else if (/email/i.test(m)) byField.email = m;
           else if (/prefix/i.test(m)) byField.fileNumberPrefix = m;
-          else if (/bed/i.test(m)) byField.bedTotal = m;
           else rest.push(m);
         }
         setErrors(byField);
@@ -272,18 +254,6 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
             </Field>
             <Field label="Email" full error={errors.email}>
               <input type="email" className={inputClass} value={f.email} onChange={(e) => set("email", e.target.value)} placeholder="reception@hospital.co.za" />
-            </Field>
-          </Section>
-
-          <Section title="Capacity" hint="Leave blank if unknown. Available beds can't exceed the total.">
-            <Field label="Total beds" error={errors.bedTotal}>
-              <input type="number" min={0} inputMode="numeric" className={inputClass} value={f.bedTotal} onChange={(e) => set("bedTotal", e.target.value)} placeholder="0" />
-            </Field>
-            <Field label="General beds available" error={errors.bedGeneral} hint="Defaults to the total when left blank on a new facility.">
-              <input type="number" min={0} inputMode="numeric" className={inputClass} value={f.bedGeneral} onChange={(e) => set("bedGeneral", e.target.value)} placeholder="0" />
-            </Field>
-            <Field label="ICU beds available" error={errors.bedIcu}>
-              <input type="number" min={0} inputMode="numeric" className={inputClass} value={f.bedIcu} onChange={(e) => set("bedIcu", e.target.value)} placeholder="0" />
             </Field>
           </Section>
 

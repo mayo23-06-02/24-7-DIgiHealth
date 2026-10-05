@@ -48,7 +48,7 @@ interface UserProfile {
   lastName: string;
   email: string;
   mobile: string;
-  /** E.164 for Firebase phone MFA (+27 / +268) */
+  /** E.164 for phone MFA (+27, South Africa only) */
   phoneE164?: string;
   phoneMasked?: string;
   saId: string;

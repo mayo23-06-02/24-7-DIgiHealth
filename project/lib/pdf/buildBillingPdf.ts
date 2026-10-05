@@ -121,7 +121,7 @@ export async function buildInvoiceReceiptPdf(opts: {
   const billFrom = opts.billFrom || {
     name: "24/7 DigiHealth",
     email: "billing@247digihealth.com",
-    line2: "South Africa & Eswatini",
+    line2: "South Africa",
   };
 
   const doc = createPdfDocument();

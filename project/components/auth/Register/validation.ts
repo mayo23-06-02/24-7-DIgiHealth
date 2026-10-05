@@ -62,14 +62,14 @@ function validateWizardStep(role: string, step: number, formData: any): Record<s
         }
       }
 
-      // Phone: South Africa (+27) or Eswatini (+268)
+      // Phone: South African mobile (+27)
       const phone = composeRegistrationPhone(
         formData.countryCode,
         formData.mobile,
       );
       if (!phone) {
         err.mobile =
-          "Enter a valid South Africa (+27) or Eswatini (+268) mobile number.";
+          "Enter a valid South African mobile number (+27).";
       }
 
       if (!formData.email?.trim() || !formData.email.includes("@")) {
@@ -182,7 +182,7 @@ if (role === "practitioner") {
     );
     if (!phone) {
       err.mobile =
-        "Enter a valid South Africa (+27) or Eswatini (+268) mobile number.";
+        "Enter a valid South African mobile number (+27).";
     }
     if (!formData.email?.trim() || !formData.email.includes("@")) {
       err.email = "A valid email address is required.";

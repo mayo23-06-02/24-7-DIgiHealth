@@ -41,9 +41,7 @@ export default function PatientStep1({ formData, updateData, errors }: any) {
           }
         />
 
-        {/* South Africa only for now — the +268 (Eswatini) option was
-            removed from patient registration; the country code is fixed
-            rather than offered as a choice of one. */}
+        {/* South African mobile numbers only, so the country code is fixed. */}
         <div className="space-y-2">
           <label className="block text-sm font-bold text-slate-700">
             Mobile Number *

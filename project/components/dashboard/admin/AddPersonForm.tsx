@@ -10,7 +10,7 @@ import { ChipInput, Field, Section, Segmented, ghostBtn, inputClass, primaryBtn,
 const BLOOD = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const LIST_KEYS = ["allergies", "chronic_conditions", "current_medications", "qualifications", "languages"];
-const MOBILE_RE = /^\+?\d{9,12}$/;
+const MOBILE_RE = /^(\+?27|0)[6-8]\d{8}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Value = string | string[];
@@ -29,14 +29,14 @@ function validate(kind: ImportKind, s: State): Record<string, string> {
     if (c.required && !LIST_KEYS.includes(c.key) && !v(c.key)) e[c.key] = "Required.";
   }
   if (v("email") && !EMAIL_RE.test(v("email"))) e.email = "Enter a valid email address.";
-  if (v("mobile") && !MOBILE_RE.test(v("mobile").replace(/[\s-]/g, ""))) e.mobile = "Use a South Africa (+27) or Eswatini (+268) mobile number.";
+  if (v("mobile") && !MOBILE_RE.test(v("mobile").replace(/[\s-]/g, ""))) e.mobile = "Enter a South African mobile number (+27).";
   if (kind === "patients") {
     if (v("id_number") && !/^\d{13}$/.test(v("id_number"))) e.id_number = "Must be 13 digits.";
     else if (v("id_number") && !dobFromSaId(v("id_number"))) e.id_number = "This ID number doesn't contain a valid date of birth.";
     const idDob = dobFromSaId(v("id_number"));
     if (idDob && v("date_of_birth") && idDob.toISOString().slice(0, 10) !== v("date_of_birth")) e.date_of_birth = "Doesn't match the ID number.";
     if (v("emergency_contact_phone") && !MOBILE_RE.test(v("emergency_contact_phone").replace(/[\s-]/g, ""))) {
-      e.emergency_contact_phone = "Use a valid mobile number.";
+      e.emergency_contact_phone = "Enter a South African mobile number (+27).";
     }
   } else {
     if (v("years_experience") && !/^\d{1,2}$/.test(v("years_experience"))) e.years_experience = "Whole number.";
