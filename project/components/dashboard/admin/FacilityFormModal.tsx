@@ -2,6 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+import { SA_PROVINCES } from "@/lib/geo/provinces";
+import {
+  ChipInput,
+  Field,
+  Modal,
+  Section,
+  Segmented,
+  Toggle,
+  ghostBtn,
+  inputClass,
+  primaryBtn,
+} from "./formKit";
 
 interface Props {
   /** Facility id to edit, or null to create. */
@@ -11,22 +24,75 @@ interface Props {
   onSaved: () => void;
 }
 
-const field = "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900";
-const label = "block text-xs font-medium text-slate-700";
+type FacilityType = "Private" | "Public" | "NGO";
+
+const SPECIALTY_SUGGESTIONS = [
+  "General Medicine",
+  "Emergency",
+  "Paediatrics",
+  "Maternity",
+  "Cardiology",
+  "Orthopaedics",
+  "Radiology",
+  "Oncology",
+  "Psychiatry",
+  "Surgery",
+];
 
 const EMPTY = {
-  name: "", facilityType: "Private", street: "", city: "", province: "",
-  phone: "", emergencyPhone: "", email: "", bedTotal: "", bedGeneral: "", bedIcu: "",
-  specialties: "", fileNumberPrefix: "", emergencyServices: false, isOpen: true,
+  name: "",
+  facilityType: "Private" as FacilityType,
+  street: "",
+  city: "",
+  province: "",
+  phone: "",
+  emergencyPhone: "",
+  email: "",
+  bedTotal: "",
+  bedGeneral: "",
+  bedIcu: "",
+  specialties: [] as string[],
+  fileNumberPrefix: "",
+  emergencyServices: false,
+  isOpen: true,
 };
+type FormState = typeof EMPTY;
+
+const num = (s: string) => (s.trim() === "" ? null : Number(s));
+
+/** Client checks that mirror lib/facility/input.ts, so most mistakes show before saving. */
+function validate(f: FormState): Record<string, string> {
+  const e: Record<string, string> = {};
+  if (f.name.trim().length < 2) e.name = "Enter the facility name.";
+  if (!f.city.trim()) e.city = "Enter the city.";
+  if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) e.email = "Enter a valid email address.";
+  if (f.fileNumberPrefix && !/^[A-Za-z0-9-]+$/.test(f.fileNumberPrefix)) e.fileNumberPrefix = "Letters, numbers and dashes only.";
+  const total = num(f.bedTotal);
+  const general = num(f.bedGeneral);
+  const icu = num(f.bedIcu);
+  for (const [k, v] of [["bedTotal", total], ["bedGeneral", general], ["bedIcu", icu]] as const) {
+    if (v !== null && (!Number.isInteger(v) || v < 0)) e[k] = "Whole number, 0 or more.";
+  }
+  if (total !== null && general !== null && general > total) e.bedGeneral = "Can't be more than total beds.";
+  if (total !== null && icu !== null && icu > total) e.bedIcu = "Can't be more than total beds.";
+  return e;
+}
 
 /** Create or edit a facility (platform admins). */
 export default function FacilityFormModal({ facilityId, canRename, onClose, onSaved }: Props) {
-  const [f, setF] = useState({ ...EMPTY });
+  const [f, setF] = useState<FormState>({ ...EMPTY });
   const [loading, setLoading] = useState(!!facilityId);
   const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const set = (k: keyof typeof EMPTY, v: string | boolean) => setF((p) => ({ ...p, [k]: v }));
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [general, setGeneral] = useState<string[]>([]);
+  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => {
+    setF((p) => ({ ...p, [k]: v }));
+    setErrors((e) => {
+      const n = { ...e };
+      delete n[k as string];
+      return n;
+    });
+  };
 
   useEffect(() => {
     if (!facilityId) return;
@@ -36,22 +102,40 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
         const x = j?.data?.facility;
         if (!x) throw new Error(j?.error || "Could not load facility");
         setF({
-          name: x.name ?? "", facilityType: x.facilityType ?? "Private",
-          street: x.address?.street ?? "", city: x.address?.city ?? "", province: x.address?.province ?? "",
-          phone: x.contactInfo?.phone ?? "", emergencyPhone: x.contactInfo?.emergencyPhone ?? "", email: x.contactInfo?.email ?? "",
-          bedTotal: String(x.bedCapacity?.total ?? ""), bedGeneral: String(x.bedCapacity?.generalAvailable ?? ""), bedIcu: String(x.bedCapacity?.icuAvailable ?? ""),
-          specialties: (x.specialties ?? []).join(", "), fileNumberPrefix: x.fileNumberPrefix ?? "",
-          emergencyServices: !!x.emergencyServices, isOpen: x.isOpen !== false,
+          name: x.name ?? "",
+          facilityType: (x.facilityType as FacilityType) ?? "Private",
+          street: x.address?.street ?? "",
+          city: x.address?.city ?? "",
+          province: x.address?.province ?? "",
+          phone: x.contactInfo?.phone ?? "",
+          emergencyPhone: x.contactInfo?.emergencyPhone ?? "",
+          email: x.contactInfo?.email ?? "",
+          bedTotal: x.bedCapacity?.total != null ? String(x.bedCapacity.total) : "",
+          bedGeneral: x.bedCapacity?.generalAvailable != null ? String(x.bedCapacity.generalAvailable) : "",
+          bedIcu: x.bedCapacity?.icuAvailable != null ? String(x.bedCapacity.icuAvailable) : "",
+          specialties: x.specialties ?? [],
+          fileNumberPrefix: x.fileNumberPrefix ?? "",
+          emergencyServices: !!x.emergencyServices,
+          isOpen: x.isOpen !== false,
         });
       })
-      .catch((e) => toast.error(e.message))
+      .catch((e) => {
+        toast.error(e.message);
+        onClose();
+      })
       .finally(() => setLoading(false));
+    // Load once per facility; onClose is a fresh closure on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facilityId]);
 
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const save = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const clientErrors = validate(f);
+    setErrors(clientErrors);
+    setGeneral([]);
+    if (Object.keys(clientErrors).length) return;
+
     setBusy(true);
-    setErrors([]);
     try {
       const body: Record<string, unknown> = {
         facilityType: f.facilityType,
@@ -71,111 +155,148 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setErrors(json.errors ?? [json.error ?? "Could not save"]);
+        const list: string[] = json.errors ?? [json.error ?? "Could not save"];
+        const byField: Record<string, string> = {};
+        const rest: string[] = [];
+        for (const m of list) {
+          if (/name/i.test(m)) byField.name = m;
+          else if (/city/i.test(m)) byField.city = m;
+          else if (/email/i.test(m)) byField.email = m;
+          else if (/prefix/i.test(m)) byField.fileNumberPrefix = m;
+          else if (/bed/i.test(m)) byField.bedTotal = m;
+          else rest.push(m);
+        }
+        setErrors(byField);
+        setGeneral(rest);
         return;
       }
-      toast.success(facilityId ? "Facility updated" : "Facility created");
+      toast.success(facilityId ? "Facility updated" : `${f.name} created`);
       onSaved();
     } finally {
       setBusy(false);
     }
   };
 
+  const nameLocked = !!facilityId && !canRename;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
-      <form onSubmit={save} className="my-8 w-full max-w-2xl space-y-4 rounded-lg bg-white p-5 md:p-6">
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-bold text-slate-900">{facilityId ? "Edit facility" : "Add new facility"}</h3>
-          <button type="button" onClick={onClose} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-800">
-            Close
-          </button>
-        </div>
-
-        {errors.length > 0 && (
-          <ul role="alert" className="list-disc rounded-lg border border-red-200 bg-red-50 p-3 pl-7 text-sm text-red-700">
-            {errors.map((m, i) => <li key={i}>{m}</li>)}
-          </ul>
-        )}
-
-        {loading ? (
-          <div className="h-48 animate-pulse rounded-lg bg-slate-100" />
-        ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <label className={`${label} md:col-span-2`}>
-              Name *
-              <input className={field} value={f.name} onChange={(e) => set("name", e.target.value)} required disabled={!!facilityId && !canRename} />
-              {!!facilityId && !canRename && <span className="text-[11px] text-slate-500">Only a mega admin can rename a facility.</span>}
-            </label>
-            <label className={label}>
-              Type *
-              <select className={field} value={f.facilityType} onChange={(e) => set("facilityType", e.target.value)}>
-                <option>Private</option><option>Public</option><option>NGO</option>
-              </select>
-            </label>
-            <label className={label}>
-              File number prefix
-              <input className={field} value={f.fileNumberPrefix} onChange={(e) => set("fileNumberPrefix", e.target.value)} placeholder="e.g. MP" maxLength={12} />
-            </label>
-            <label className={`${label} md:col-span-2`}>
-              Street
-              <input className={field} value={f.street} onChange={(e) => set("street", e.target.value)} />
-            </label>
-            <label className={label}>
-              City *
-              <input className={field} value={f.city} onChange={(e) => set("city", e.target.value)} required />
-            </label>
-            <label className={label}>
-              Province
-              <input className={field} value={f.province} onChange={(e) => set("province", e.target.value)} />
-            </label>
-            <label className={label}>
-              Phone
-              <input className={field} value={f.phone} onChange={(e) => set("phone", e.target.value)} />
-            </label>
-            <label className={label}>
-              Emergency phone
-              <input className={field} value={f.emergencyPhone} onChange={(e) => set("emergencyPhone", e.target.value)} />
-            </label>
-            <label className={`${label} md:col-span-2`}>
-              Email
-              <input type="email" className={field} value={f.email} onChange={(e) => set("email", e.target.value)} />
-            </label>
-            <label className={label}>
-              Total beds
-              <input inputMode="numeric" className={field} value={f.bedTotal} onChange={(e) => set("bedTotal", e.target.value)} />
-            </label>
-            <label className={label}>
-              General beds available
-              <input inputMode="numeric" className={field} value={f.bedGeneral} onChange={(e) => set("bedGeneral", e.target.value)} />
-            </label>
-            <label className={label}>
-              ICU beds available
-              <input inputMode="numeric" className={field} value={f.bedIcu} onChange={(e) => set("bedIcu", e.target.value)} />
-            </label>
-            <label className={label}>
-              Specialties (comma separated)
-              <input className={field} value={f.specialties} onChange={(e) => set("specialties", e.target.value)} />
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" checked={f.emergencyServices} onChange={(e) => set("emergencyServices", e.target.checked)} />
-              Emergency services
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" checked={f.isOpen} onChange={(e) => set("isOpen", e.target.checked)} />
-              Open
-            </label>
-          </div>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-bold text-slate-800">
+    <Modal
+      title={facilityId ? "Edit facility" : "Add new facility"}
+      subtitle={facilityId ? f.name : "Add a hospital or clinic so you can load its patients and doctors."}
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" onClick={onClose} className={ghostBtn}>
             Cancel
           </button>
-          <button disabled={busy || loading} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
+          <button type="button" onClick={() => void save()} disabled={busy || loading} className={primaryBtn}>
+            {busy && <Loader2 size={16} className="animate-spin" />}
             {busy ? "Saving…" : facilityId ? "Save changes" : "Create facility"}
           </button>
+        </>
+      }
+    >
+      {loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-10 animate-pulse rounded-lg bg-slate-100" />
+          ))}
         </div>
-      </form>
-    </div>
+      ) : (
+        <form onSubmit={save} className="space-y-6" noValidate>
+          {general.length > 0 && (
+            <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {general.join(" ")}
+            </div>
+          )}
+
+          <Section title="Facility details">
+            <Field label="Name" required full error={errors.name} hint={nameLocked ? "Only a mega admin can rename a facility." : undefined}>
+              <input
+                className={inputClass}
+                value={f.name}
+                onChange={(e) => set("name", e.target.value)}
+                placeholder="e.g. Netcare Milpark Hospital"
+                disabled={nameLocked}
+                autoFocus={!facilityId}
+              />
+            </Field>
+            <Field label="Type" required>
+              <div>
+                <Segmented<FacilityType>
+                  value={f.facilityType}
+                  onChange={(v) => set("facilityType", v)}
+                  options={[
+                    { value: "Private", label: "Private" },
+                    { value: "Public", label: "Public" },
+                    { value: "NGO", label: "NGO" },
+                  ]}
+                />
+              </div>
+            </Field>
+            <Field label="File number prefix" error={errors.fileNumberPrefix} hint="Optional. Shown before generated file numbers, e.g. MP-000123.">
+              <input
+                className={inputClass}
+                value={f.fileNumberPrefix}
+                onChange={(e) => set("fileNumberPrefix", e.target.value.toUpperCase())}
+                placeholder="e.g. MP"
+                maxLength={12}
+              />
+            </Field>
+          </Section>
+
+          <Section title="Location">
+            <Field label="Street address" full>
+              <input className={inputClass} value={f.street} onChange={(e) => set("street", e.target.value)} placeholder="e.g. 9 Guild Road, Parktown West" />
+            </Field>
+            <Field label="City" required error={errors.city}>
+              <input className={inputClass} value={f.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Johannesburg" />
+            </Field>
+            <Field label="Province">
+              <select className={inputClass} value={f.province} onChange={(e) => set("province", e.target.value)}>
+                <option value="">Select province</option>
+                {SA_PROVINCES.map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
+                {f.province && !(SA_PROVINCES as readonly string[]).includes(f.province) && <option>{f.province}</option>}
+              </select>
+            </Field>
+          </Section>
+
+          <Section title="Contact">
+            <Field label="Phone">
+              <input type="tel" className={inputClass} value={f.phone} onChange={(e) => set("phone", e.target.value)} placeholder="e.g. 011 480 5600" />
+            </Field>
+            <Field label="Emergency phone">
+              <input type="tel" className={inputClass} value={f.emergencyPhone} onChange={(e) => set("emergencyPhone", e.target.value)} placeholder="24-hour line" />
+            </Field>
+            <Field label="Email" full error={errors.email}>
+              <input type="email" className={inputClass} value={f.email} onChange={(e) => set("email", e.target.value)} placeholder="reception@hospital.co.za" />
+            </Field>
+          </Section>
+
+          <Section title="Capacity" hint="Leave blank if unknown. Available beds can't exceed the total.">
+            <Field label="Total beds" error={errors.bedTotal}>
+              <input type="number" min={0} inputMode="numeric" className={inputClass} value={f.bedTotal} onChange={(e) => set("bedTotal", e.target.value)} placeholder="0" />
+            </Field>
+            <Field label="General beds available" error={errors.bedGeneral} hint="Defaults to the total when left blank on a new facility.">
+              <input type="number" min={0} inputMode="numeric" className={inputClass} value={f.bedGeneral} onChange={(e) => set("bedGeneral", e.target.value)} placeholder="0" />
+            </Field>
+            <Field label="ICU beds available" error={errors.bedIcu}>
+              <input type="number" min={0} inputMode="numeric" className={inputClass} value={f.bedIcu} onChange={(e) => set("bedIcu", e.target.value)} placeholder="0" />
+            </Field>
+          </Section>
+
+          <Section title="Services">
+            <Field label="Specialties" full hint="Type and press Enter, or pick a suggestion.">
+              <ChipInput value={f.specialties} onChange={(v) => set("specialties", v)} placeholder="e.g. Cardiology" suggestions={SPECIALTY_SUGGESTIONS} />
+            </Field>
+            <Toggle checked={f.emergencyServices} onChange={(v) => set("emergencyServices", v)} label="Emergency services" hint="Has a 24-hour emergency unit." />
+            <Toggle checked={f.isOpen} onChange={(v) => set("isOpen", v)} label="Open" hint="Closed facilities stay listed but can't take new bookings." />
+          </Section>
+          <button type="submit" className="hidden" aria-hidden />
+        </form>
+      )}
+    </Modal>
   );
 }

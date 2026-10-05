@@ -13,6 +13,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import FacilityRosterPanel from "./FacilityRosterPanel";
 import FacilityFormModal from "./FacilityFormModal";
+import { Modal, ghostBtn } from "./formKit";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 
 interface FacilityRow {
@@ -48,17 +49,27 @@ export default function AdminFacilitiesPage() {
   const auth = useAuthContext() as { user?: { role?: string } | null } | null;
   const isMega = auth?.user?.role === "mega_admin";
 
-  const remove = async (f: FacilityRow) => {
-    if (!window.confirm(`Delete "${f.name}"? This cannot be undone.`)) return;
+  const [confirmDelete, setConfirmDelete] = useState<FacilityRow | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const remove = (f: FacilityRow) => {
+    setDeleteError("");
+    setConfirmDelete(f);
+  };
+  const doDelete = async () => {
+    const f = confirmDelete;
+    if (!f) return;
     setBusyId(f.id);
+    setDeleteError("");
     try {
       const res = await fetch(`/api/admin/facilities/${f.id}`, { method: "DELETE" });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error || "Could not delete");
-      toast.success("Facility deleted");
+      if (!res.ok) {
+        setDeleteError(json.error || "Could not delete this facility.");
+        return;
+      }
+      toast.success(`${f.name} deleted`);
+      setConfirmDelete(null);
       void load();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed");
     } finally {
       setBusyId(null);
     }
@@ -385,6 +396,54 @@ export default function AdminFacilitiesPage() {
           </>
         )}
       </Card>
+      {confirmDelete && (
+        <Modal
+          title="Delete facility?"
+          subtitle={confirmDelete.name}
+          onClose={() => setConfirmDelete(null)}
+          footer={
+            <>
+              <button type="button" className={ghostBtn} onClick={() => setConfirmDelete(null)}>
+                Cancel
+              </button>
+              {deleteError ? (
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  disabled={busyId === confirmDelete.id}
+                  onClick={() => {
+                    const f = confirmDelete;
+                    setConfirmDelete(null);
+                    if (f.isOpen) void toggleOpen(f.id, true);
+                  }}
+                >
+                  {confirmDelete.isOpen ? "Close facility instead" : "OK"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  disabled={busyId === confirmDelete.id}
+                  onClick={() => void doDelete()}
+                >
+                  {busyId === confirmDelete.id ? "Deleting…" : "Delete permanently"}
+                </button>
+              )}
+            </>
+          }
+        >
+          {deleteError ? (
+            <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              {deleteError}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-600">
+              This permanently removes <strong>{confirmDelete.name}</strong>. A facility that still has patients,
+              staff or appointments can't be deleted; close it instead so its records are kept.
+            </p>
+          )}
+        </Modal>
+      )}
       {form && (
         <FacilityFormModal
           facilityId={form.id}
