@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Notification } from "@/lib/models/Communications";
 import User from "@/lib/models/User";
 import { PatientProfile } from "@/lib/models/RoleProfiles";
@@ -8,6 +7,7 @@ import { resolveRecipientById } from "@/lib/email/recipients";
 import { appointmentRequestEmailHtml } from "@/lib/email/templates/appointmentRequest";
 
 import { getAppOrigin } from "@/lib/supabase/auth";
+import { isValidId, toId } from '@/lib/db';
 
 const APP_URL = getAppOrigin();
 
@@ -24,7 +24,7 @@ const APP_URL = getAppOrigin();
  * has already been written by the time this runs.
  */
 async function emailActionRequired(input: {
-  recipientUserId: string | mongoose.Types.ObjectId;
+  recipientUserId: string | string;
   recipientRole: "patient" | "practitioner";
   requesterName: string;
   scheduledStart: Date | string;
@@ -77,13 +77,13 @@ export type BookingNotificationEvent =
   | "expired";
 
 export interface BookingNotifyContext {
-  consultationId: string | mongoose.Types.ObjectId;
-  patientId: string | mongoose.Types.ObjectId;
-  practitionerId: string | mongoose.Types.ObjectId;
+  consultationId: string | string;
+  patientId: string | string;
+  practitionerId: string | string;
   scheduledStart: Date | string;
   reason?: string;
   /** Who made the change — the *other* party is notified */
-  actorUserId?: string | mongoose.Types.ObjectId;
+  actorUserId?: string | string;
   type?: string;
   /** Optional extra detail for generic updates */
   changeSummary?: string;
@@ -102,24 +102,20 @@ function formatWhen(date: Date | string): string {
   }
 }
 
-function oid(id: string | mongoose.Types.ObjectId) {
-  if (id instanceof mongoose.Types.ObjectId) return id;
-  if (typeof id === "string" && mongoose.Types.ObjectId.isValid(id)) {
-    return new mongoose.Types.ObjectId(id);
-  }
-  return id;
+function oid(id: string) {
+  return toId(id) as string;
 }
 
 function sameId(
-  a?: string | mongoose.Types.ObjectId | null,
-  b?: string | mongoose.Types.ObjectId | null,
+  a?: string | string | null,
+  b?: string | string | null,
 ): boolean {
   if (a == null || b == null) return false;
   return String(a) === String(b);
 }
 
 async function createNotification(input: {
-  userId: string | mongoose.Types.ObjectId;
+  userId: string | string;
   type: string;
   title: string;
   body: string;
@@ -157,7 +153,7 @@ async function createNotification(input: {
  * Returns the guardian's user ID if the patient is a child with an active guardian link,
  * otherwise returns null.
  */
-async function getGuardianIdForChild(patientId: string | mongoose.Types.ObjectId): Promise<string | null> {
+async function getGuardianIdForChild(patientId: string | string): Promise<string | null> {
   try {
     const familyLink = await FamilyLink.findOne({
       memberId: oid(patientId),
@@ -200,12 +196,12 @@ export async function notifyBookingEvent(
 ): Promise<void> {
   try {
     const [patient, practitioner, patientProfile] = await Promise.all([
-      User.findById(ctx.patientId, "firstName lastName").lean() as Promise<any>,
+      User.findById(ctx.patientId, "firstName lastName").lean() as unknown as Promise<any>,
       User.findById(
         ctx.practitionerId,
         "firstName lastName",
-      ).lean() as Promise<any>,
-      PatientProfile.findOne({ userId: ctx.patientId }).lean() as Promise<any>,
+      ).lean() as unknown as Promise<any>,
+      PatientProfile.findOne({ userId: ctx.patientId }).lean() as unknown as Promise<any>,
     ]);
 
     let patientName = patient
@@ -485,9 +481,9 @@ export async function notifyAppointmentChange(opts: {
     type?: string;
   };
   after: {
-    _id: string | mongoose.Types.ObjectId;
-    patientId: string | mongoose.Types.ObjectId;
-    practitionerId: string | mongoose.Types.ObjectId;
+    _id: string | string;
+    patientId: string | string;
+    practitionerId: string | string;
     status: string;
     scheduledStartTime: Date | string;
     scheduledEndTime?: Date | string;

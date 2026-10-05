@@ -6,7 +6,6 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase/media";
 import Conversation from "@/lib/models/Conversation";
-import { connectToDatabase } from "@/lib/mongodb";
 
 import { apiError } from "@/lib/api/errors";
 export async function GET(
@@ -26,7 +25,6 @@ export async function GET(
 
     let allowed = asset.userId === user.userId || user.role === "mega_admin";
     if (!allowed && asset.conversationId) {
-      await connectToDatabase();
       const conv = await Conversation.findById(asset.conversationId).lean();
       if (conv) {
         const p = String((conv as any).patientId);

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 
 import { apiError } from "@/lib/api/errors";
@@ -13,7 +12,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectToDatabase();
     const { id } = await params;
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -25,7 +23,7 @@ export async function DELETE(
     const existing = (user as any).trustedDevices || [];
     const updated = existing.filter((d: any) => d.id !== deviceId);
 
-    await (User as any).collection.updateOne(
+    await User.updateOne(
       { _id: (user as any)._id },
       { $set: { trustedDevices: updated } }
     );

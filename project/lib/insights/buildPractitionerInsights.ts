@@ -2,7 +2,6 @@
  * Practitioner Clinical Insights — full roster analytics + teleclinic intelligence.
  * Shared by GET /api/practitioner/insights and PDF export.
  */
-import mongoose from "mongoose";
 import { Consultation } from "@/lib/models/Consultation";
 import RiskScore from "@/lib/models/RiskScore";
 import User from "@/lib/models/User";
@@ -19,6 +18,7 @@ import {
   riskBandStyle,
   type RiskBand,
 } from "@/lib/riskScore";
+import { isValidId, toId } from '@/lib/db';
 
 const BAND_ORDER: RiskBand[] = ["green", "gray", "orange", "red"];
 const BAND_SAMPLE: Record<RiskBand, number> = {
@@ -105,7 +105,7 @@ export interface PractitionerInsightsData {
   adherencePercent: number;
 }
 
-function practMatch(practitionerId: string, practitionerOid: mongoose.Types.ObjectId) {
+function practMatch(practitionerId: string, practitionerOid: string) {
   return {
     $or: [
       { practitionerId: practitionerOid },
@@ -116,14 +116,14 @@ function practMatch(practitionerId: string, practitionerOid: mongoose.Types.Obje
 
 async function getRosterPatientIds(
   practitionerId: string,
-  practitionerOid: mongoose.Types.ObjectId,
-): Promise<mongoose.Types.ObjectId[]> {
+  practitionerOid: string,
+): Promise<string[]> {
   const profile = await PractitionerProfile.findOne({
     userId: practitionerId,
   }).lean();
   const assignedIds = (profile?.assignedPatientIds || [])
     .map((id: any) => id?.toString?.() || String(id))
-    .filter((id: string) => mongoose.Types.ObjectId.isValid(id));
+    .filter((id: string) => isValidId(id));
 
   const consultedIds = await Consultation.find(
     practMatch(practitionerId, practitionerOid),
@@ -131,15 +131,15 @@ async function getRosterPatientIds(
 
   const unique = [
     ...new Set([...assignedIds, ...consultedIds.map((id) => id.toString())]),
-  ].filter((id) => mongoose.Types.ObjectId.isValid(id));
+  ].filter((id) => isValidId(id));
 
-  return unique.map((id) => new mongoose.Types.ObjectId(id));
+  return unique.map((id) => (toId(id) as string));
 }
 
 async function patientRiskScores(
   practitionerId: string,
-  practitionerOid: mongoose.Types.ObjectId,
-  patientIds: mongoose.Types.ObjectId[],
+  practitionerOid: string,
+  patientIds: string[],
 ): Promise<Map<string, number>> {
   const map = new Map<string, number>();
   if (!patientIds.length) return map;
@@ -394,7 +394,7 @@ export async function buildPractitionerInsights(
   practitionerId: string,
   days = 30,
 ): Promise<PractitionerInsightsData> {
-  const practitionerOid = new mongoose.Types.ObjectId(practitionerId);
+  const practitionerOid = (toId(practitionerId) as string);
   const match = practMatch(practitionerId, practitionerOid);
 
   const since = new Date();

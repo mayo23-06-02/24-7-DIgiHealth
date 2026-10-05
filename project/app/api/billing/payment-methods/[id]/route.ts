@@ -1,5 +1,4 @@
 import { NextResponse, NextRequest } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { PaymentMethod } from "@/lib/models/Billing";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 
@@ -30,7 +29,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    await connectToDatabase();
 
     const paymentMethod = await PaymentMethod.findById(id);
     if (!paymentMethod) {

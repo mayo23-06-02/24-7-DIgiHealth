@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Review } from '@/lib/models/ReviewsDocs';
 import Staff from '@/lib/models/Staff';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
@@ -22,7 +21,6 @@ async function assertReviewInFacility(reviewId: string, hospitalId: string) {
 /** PATCH — approve a review (marks it verified) */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -49,7 +47,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 /** DELETE — dismiss a review */
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

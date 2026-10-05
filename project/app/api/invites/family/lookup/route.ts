@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import FamilyLink from "@/lib/models/FamilyLink";
 import User from "@/lib/models/User";
 import { apiError } from "@/lib/api/errors";
@@ -28,7 +27,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, data: { pending: false } });
     }
 
-    await connectToDatabase();
 
     const invite = (await FamilyLink.findOne({
       inviteEmail: email,

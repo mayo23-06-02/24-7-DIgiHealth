@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
-import { syncHospitalAppointment } from '@/lib/postgres/facility';
 
 import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -47,7 +44,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -63,12 +59,6 @@ export async function POST(req: NextRequest) {
       ...body,
       facilityId: hospitalId
     });
-    await syncHospitalAppointment(
-      hospitalId,
-      appointment.patientId.toString(),
-      appointment.practitionerId.toString(),
-      appointment as any,
-    );
 
     return NextResponse.json({ success: true, data: appointment });
   } catch (error: any) {

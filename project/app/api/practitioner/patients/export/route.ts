@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import {
   buildPatientsListPdf,
@@ -34,7 +33,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectToDatabase();
     const doctor = await User.findById(user.userId)
       .select("firstName lastName")
       .lean();

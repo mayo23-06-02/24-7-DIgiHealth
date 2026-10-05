@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { StaffApprovalRequest } from '@/lib/models/StaffApprovalRequest';
 import User from '@/lib/models/User';
 import Facility from '@/lib/models/Facility';
@@ -8,7 +7,6 @@ import { apiError } from "@/lib/api/errors";
 /** GET — verify approval request by token */
 export async function GET(req: Request) {
   try {
-    await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token');
 

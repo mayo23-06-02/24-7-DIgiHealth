@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { buildHealthProfilePdf } from "@/lib/pdf/buildHealthProfilePdf";
 import { pdfResponse } from "@/lib/pdf/createPdfDocument";
-import { connectToDatabase } from "@/lib/mongodb";
 import { PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { Consultation } from "@/lib/models/Consultation";
+import { isValidId } from '@/lib/db';
 
 export const runtime = "nodejs";
 
@@ -26,18 +25,15 @@ export async function GET(
     }
 
     const { id } = await params;
-    if (!id || id === "undefined" || !mongoose.Types.ObjectId.isValid(id)) {
+    if (!id || id === "undefined" || !isValidId(id)) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
-    await connectToDatabase();
     let patientId = id;
 
     // Resolve conversation → patient if needed
     try {
-      const Conversation =
-        mongoose.models.Conversation ||
-        (await import("@/lib/models/Conversation")).default;
+      const Conversation = (await import("@/lib/models/Conversation")).default;
       const conversation = await Conversation.findById(id).lean();
       if (conversation && (conversation as any).patientId) {
         patientId = (conversation as any).patientId.toString();

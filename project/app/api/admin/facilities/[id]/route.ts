@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import Facility from "@/lib/models/Facility";
 import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
 import { buildHospitalOverview } from "@/lib/hospital/buildHospitalOverview";
@@ -15,7 +14,6 @@ export async function GET(
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const { id } = await params;
     const facility = await Facility.findById(id).lean();
     if (!facility) {
@@ -38,7 +36,6 @@ export async function PATCH(
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const { id } = await params;
     const body = await req.json();
     const facility = await Facility.findById(id);

@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
 import User from "@/lib/models/User";
 import { PatientProfile } from "@/lib/models/RoleProfiles";
-import mongoose from "mongoose";
 import { expireStaleBookingRequests } from "@/lib/booking/expire";
 import { notifyBookingEvent } from "@/lib/booking/notifications";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
+import { isValidId, toId } from '@/lib/db';
 
 async function getAuthUser(): Promise<{
   userId: string;
@@ -43,7 +41,6 @@ function toRecord(c: any, extras: Record<string, unknown> = {}) {
  */
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     // Expire unaccepted requests whose start time has passed
     await expireStaleBookingRequests();
 
@@ -69,7 +66,7 @@ export async function GET(req: NextRequest) {
     // lib/utils/mongoId.ts) — Consultation is still Mongo-only, so they
     // genuinely have no bookings under their own id yet.
     if (auth.role === "patient" || auth.role === "practitioner") {
-      if (!isMongoObjectId(auth.userId)) {
+      if (!isValidId(auth.userId)) {
         return NextResponse.json({ success: true, data: [] });
       }
     }
@@ -78,17 +75,17 @@ export async function GET(req: NextRequest) {
     const now = new Date();
 
     if (auth.role === "patient") {
-      filter.patientId = new mongoose.Types.ObjectId(auth.userId);
+      filter.patientId = (toId(auth.userId) as string);
     } else if (auth.role === "practitioner") {
-      filter.practitionerId = new mongoose.Types.ObjectId(auth.userId);
+      filter.practitionerId = (toId(auth.userId) as string);
     }
     // hospital_admin / others: no forced party filter unless query provides one
 
-    if (patientId && mongoose.Types.ObjectId.isValid(patientId)) {
-      filter.patientId = new mongoose.Types.ObjectId(patientId);
+    if (patientId && isValidId(patientId)) {
+      filter.patientId = (toId(patientId) as string);
     }
-    if (practitionerId && mongoose.Types.ObjectId.isValid(practitionerId)) {
-      filter.practitionerId = new mongoose.Types.ObjectId(practitionerId);
+    if (practitionerId && isValidId(practitionerId)) {
+      filter.practitionerId = (toId(practitionerId) as string);
     }
 
     if (status) {
@@ -205,7 +202,6 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const auth = await getAuthUser();
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -275,8 +271,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (
-      !mongoose.Types.ObjectId.isValid(patientId) ||
-      !mongoose.Types.ObjectId.isValid(practitionerId)
+      !isValidId(patientId) ||
+      !isValidId(practitionerId)
     ) {
       return NextResponse.json(
         { success: false, error: "Invalid participant id" },

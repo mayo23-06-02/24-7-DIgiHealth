@@ -18,8 +18,6 @@ const nextConfig: NextConfig = {
   // Avoid pulling server-only modules into client accidentally via wrong imports.
   // pdfkit MUST be external — bundling breaks AFM font paths (ENOENT C:\ROOT\...).
   serverExternalPackages: [
-    "mongoose",
-    "mongodb",
     "pdfkit",
     "fontkit",
     "linebreak",

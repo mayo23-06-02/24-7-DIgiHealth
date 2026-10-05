@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Anthropometric, MedicalContext } from '@/lib/models/ClinicalData';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
 
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     const userId = user.userId;
@@ -18,7 +16,7 @@ export async function GET(req: NextRequest) {
     // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
     // — Anthropometric/MedicalContext are still Mongo-only, so they genuinely
     // have no vitals/medical history recorded rather than a lookup failure.
-    const hasMongoIdentity = isMongoObjectId(userId);
+    const hasMongoIdentity = isValidId(userId);
 
     // Fetch two latest vitals for trend calculation
     const vitalsHistory = hasMongoIdentity

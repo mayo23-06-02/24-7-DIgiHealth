@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import Facility from '@/lib/models/Facility';
 import StaffInvite from '@/lib/models/StaffInvite';
@@ -9,7 +8,6 @@ import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 import { getAppOrigin, normalizeEmail, isValidEmail } from '@/lib/supabase/auth';
 import { sendEmail } from '@/lib/email/resend';
 import { staffInviteEmailHtml } from '@/lib/email/templates/staffInvite';
-import { syncStaffInvite, facilityIdFor } from '@/lib/postgres/facility';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
 
 import { apiError } from "@/lib/api/errors";
@@ -18,7 +16,6 @@ const INVITE_TTL_MINUTES = 15;
 /** GET — list this facility's pending invites */
 export async function GET() {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -42,7 +39,6 @@ export async function GET() {
 /** POST — invite a new (unregistered) doctor by email */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -81,20 +77,6 @@ export async function POST(req: NextRequest) {
       { email, facilityId: hospitalId, status: 'pending' },
       { status: 'cancelled' },
     );
-    try {
-      const pgFacilityId = await facilityIdFor(hospitalId);
-      if (pgFacilityId) {
-        await getSupabaseAdmin()
-          .from('staff_invites')
-          .update({ status: 'cancelled' })
-          .eq('email', email)
-          .eq('facility_id', pgFacilityId)
-          .eq('status', 'pending');
-      }
-    } catch (e) {
-      console.warn('[pg-sync] cancel prior invites skipped:', e);
-    }
-
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + INVITE_TTL_MINUTES * 60 * 1000);
 
@@ -109,7 +91,6 @@ export async function POST(req: NextRequest) {
       hourlyRate,
       expiresAt,
     });
-    await syncStaffInvite(hospitalId, user.userId, invite as any);
 
     const facility = await Facility.findById(hospitalId).select('name').lean();
     const facilityName = (facility as any)?.name || 'the facility';

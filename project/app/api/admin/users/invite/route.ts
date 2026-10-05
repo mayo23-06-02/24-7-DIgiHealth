@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import PlatformInvite from "@/lib/models/PlatformInvite";
 import { requirePlatformAdmin, canAssignRole } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
-import { syncUser } from "@/lib/postgres/users";
 import { getAppOrigin, normalizeEmail, isValidEmail } from "@/lib/supabase/auth";
 import { sendEmail } from "@/lib/email/resend";
 import { platformInviteEmailHtml } from "@/lib/email/templates/platformInvite";
@@ -49,7 +47,6 @@ export async function POST(req: NextRequest) {
     if (gate.error) return gate.error;
     const actor = gate.user;
 
-    await connectToDatabase();
     const body = await req.json();
     const email = normalizeEmail(body.email || "");
     const role = String(body.role || "");
@@ -97,7 +94,6 @@ export async function POST(req: NextRequest) {
         emailVerified: true,
         mfaEnabled: false,
       } as any);
-      await syncUser(newUser as any);
 
       const { error } = await sendEmail({
         to: email,

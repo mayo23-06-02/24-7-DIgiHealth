@@ -1,28 +1,26 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
-import { connectToDatabase } from "@/lib/mongodb";
 import Message from "@/lib/models/Message";
+import { isValidId, toId } from '@/lib/db';
 
 export async function PATCH(req: Request) {
   try {
-    await connectToDatabase();
     const userId = req.headers.get("x-user-id");
     const { messageId, conversationId } = await req.json();
 
     const userOid =
-      userId && mongoose.Types.ObjectId.isValid(userId)
-        ? new mongoose.Types.ObjectId(userId)
+      userId && isValidId(userId)
+        ? (toId(userId) as string)
         : null;
 
     let modified = 0;
 
     if (messageId) {
-      if (!mongoose.Types.ObjectId.isValid(messageId)) {
+      if (!isValidId(messageId)) {
         return NextResponse.json({ error: "Invalid message ID" }, { status: 400 });
       }
 
       const filter: Record<string, unknown> = {
-        _id: new mongoose.Types.ObjectId(messageId),
+        _id: (toId(messageId) as string),
         isRead: false,
       };
       if (userOid) {
@@ -34,14 +32,14 @@ export async function PATCH(req: Request) {
       });
       modified = result.modifiedCount;
     } else if (conversationId) {
-      if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      if (!isValidId(conversationId)) {
         return NextResponse.json(
           { error: "Invalid conversation ID" },
           { status: 400 },
         );
       }
 
-      const convOid = new mongoose.Types.ObjectId(conversationId);
+      const convOid = (toId(conversationId) as string);
 
       // $and so conversation + receiver $or clauses don't clobber each other
       const andClauses: Record<string, unknown>[] = [

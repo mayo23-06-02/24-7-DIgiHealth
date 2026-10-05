@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { guardianFilter } from '@/lib/family/access';
 import FamilyLink from '@/lib/models/FamilyLink';
@@ -13,7 +12,6 @@ import { apiError } from "@/lib/api/errors";
  * changes whether the guardian can see a member's clinical data. */
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ memberId: string }> }) {
   try {
-    await connectToDatabase();
     const guardian = await getRequestUser();
     if (!guardian) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
@@ -40,7 +38,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
  * leaving them silently unbilled. */
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ memberId: string }> }) {
   try {
-    await connectToDatabase();
     const guardian = await getRequestUser();
     if (!guardian) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 

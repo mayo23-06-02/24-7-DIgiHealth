@@ -1,10 +1,9 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IAttachedRecord extends Document {
-  consultationId?: Types.ObjectId;      // which chat/consultation
-  conversationId?: Types.ObjectId;
-  patientId: Types.ObjectId;
-  practitionerId?: Types.ObjectId;
+  consultationId?: string;      // which chat/consultation
+  conversationId?: string;
+  patientId: string;
+  practitionerId?: string;
   type: 'lab_result' | 'prescription' | 'imaging' | 'soap_note' | 'other';
   title: string;
   description?: string;
@@ -18,21 +17,8 @@ export interface IAttachedRecord extends Document {
   updatedAt: Date;
 }
 
-const AttachedRecordSchema = new Schema<IAttachedRecord>({
-  consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation' },
-  conversationId: { type: Schema.Types.ObjectId, ref: 'Conversation' },
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  practitionerId: { type: Schema.Types.ObjectId, ref: 'User' },
-  type: { type: String, enum: ['lab_result', 'prescription', 'imaging', 'soap_note', 'other'], required: true },
-  title: { type: String, required: true },
-  description: { type: String },
-  fileUrl: { type: String, required: true },
-  fileMime: { type: String, required: true },
-  fileSize: { type: Number, required: true },
-  mediaId: { type: String },
-  uploadedAt: { type: Date, default: Date.now },
-  isRead: { type: Boolean, default: false }
-}, { timestamps: true });
-
-export const AttachedRecord: Model<IAttachedRecord> = mongoose.models.AttachedRecord || mongoose.model<IAttachedRecord>('AttachedRecord', AttachedRecordSchema);
+export const AttachedRecord: ModelClass<IAttachedRecord> = defineModel<IAttachedRecord>({
+  name: 'AttachedRecord', table: 'attached_records',
+  refs: { patientId: 'User', practitionerId: 'User', consultationId: 'Consultation', conversationId: 'Conversation' },
+});
 export default AttachedRecord;

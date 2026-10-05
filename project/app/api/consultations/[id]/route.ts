@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
@@ -12,14 +11,13 @@ import { expireStaleBookingRequests } from '@/lib/booking/expire';
 import { apiError } from "@/lib/api/errors";
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     await expireStaleBookingRequests();
 
     const { id } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
     const body = await req.json();
@@ -73,12 +71,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const { id } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
 

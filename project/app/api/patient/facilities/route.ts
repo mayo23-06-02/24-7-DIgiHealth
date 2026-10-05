@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Facility } from '@/lib/models/Facility';
 
 export async function GET() {
   try {
-    await connectToDatabase();
     const facilities = await Facility.find();
     
     const mapped = facilities.map(f => ({

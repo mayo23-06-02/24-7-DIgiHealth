@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { MedicalDocument as DigitalDocument } from "@/lib/models/ReviewsDocs";
 import User from "@/lib/models/User";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
@@ -10,13 +9,12 @@ import {
   uploadBuffer,
 } from "@/lib/supabase/media";
 import { inferMimeFromFileName } from "@/lib/supabase/media-validation";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 // GET /api/user/documents – list all documents for the current user
 export async function GET(_req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -52,7 +50,6 @@ export async function GET(_req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -175,7 +172,7 @@ export async function POST(req: NextRequest) {
         // remaining reader of `User.avatarUrl` stays consistent. It is skipped
         // for Postgres-native accounts, whose uuid can never be a Mongo `_id` —
         // attempting it is what used to make this whole endpoint 500.
-        if (isMongoObjectId(user.userId)) {
+        if (isValidId(user.userId)) {
           try {
             await User.findByIdAndUpdate(user.userId, { avatarUrl: fileUrl });
           } catch (mirrorErr) {

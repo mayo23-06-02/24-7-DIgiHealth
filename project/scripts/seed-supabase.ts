@@ -9,7 +9,7 @@
  * DESTRUCTIVE: wipes every row in every app table before reseeding (Postgres
  * only — MongoDB is never touched by this script). Safe to re-run.
  *
- * Run: npx tsx scripts/seed-supabase.ts
+ * Run (dev databases only): ALLOW_SEED=true npx tsx scripts/seed-supabase.ts
  */
 import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
@@ -18,6 +18,28 @@ import path from "path";
 import { createClient } from "@supabase/supabase-js";
 
 dotenv.config({ path: path.join(__dirname, "../.env.local") });
+
+
+// ---- PRODUCTION GUARD ----
+// This script WIPES every app table and inserts fake people. It must never run
+// against a production project. Refuses unless explicitly allowed AND the target
+// is not a protected project.
+const PROTECTED_PROJECT_REFS = [
+  "cagmxeebwtjrbaemwdwj", // production
+  ...(process.env.PROTECTED_SUPABASE_REFS ?? "").split(",").map((r) => r.trim()).filter(Boolean),
+];
+function assertSafeToSeed() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  if (process.env.ALLOW_SEED !== "true") {
+    throw new Error("Refusing to seed: set ALLOW_SEED=true to confirm this is a dev database.");
+  }
+  if (process.env.APP_ENV === "production" || process.env.VERCEL_ENV === "production") {
+    throw new Error("Refusing to seed: APP_ENV/VERCEL_ENV is production.");
+  }
+  const hit = PROTECTED_PROJECT_REFS.find((ref) => url.includes(ref));
+  if (hit) throw new Error(`Refusing to seed: ${url} is a protected (production) Supabase project.`);
+}
+assertSafeToSeed();
 
 function getSupabase() {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;

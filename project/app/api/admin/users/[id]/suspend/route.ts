@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
-import { updateUserByMongoId } from "@/lib/postgres/users";
 
 import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
@@ -15,7 +13,6 @@ export async function POST(
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const { id } = await params;
     const body = await req.json().catch(() => ({}));
     const user = await User.findById(id);
@@ -35,7 +32,6 @@ export async function POST(
     const action = body.action === "unsuspend" ? "unsuspend" : "suspend";
     user.status = action === "unsuspend" ? "active" : "suspended";
     await user.save();
-    await updateUserByMongoId(id, { status: user.status });
 
     await logAdminAction({
       actor: gate.user,

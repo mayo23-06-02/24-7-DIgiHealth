@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
-import { updateHospitalAppointmentByMongoId } from '@/lib/postgres/facility';
 
 import { apiError } from "@/lib/api/errors";
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -34,7 +31,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (body.scheduledStart) pgUpdates.scheduled_start = body.scheduledStart;
     if (body.scheduledEnd) pgUpdates.scheduled_end = body.scheduledEnd;
     if (Object.keys(pgUpdates).length) {
-      await updateHospitalAppointmentByMongoId(id, pgUpdates);
     }
 
     return NextResponse.json({ success: true, data: updated });

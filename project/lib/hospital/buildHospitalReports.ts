@@ -1,7 +1,6 @@
 /**
  * Hospital facility reports — facility, doctors, patients, financial, intelligence.
  */
-import mongoose from "mongoose";
 import Staff from "@/lib/models/Staff";
 import HospitalAppointment from "@/lib/models/HospitalAppointment";
 import HospitalTransaction from "@/lib/models/HospitalTransaction";
@@ -11,6 +10,7 @@ import { PractitionerProfile } from "@/lib/models/RoleProfiles";
 import RiskScore from "@/lib/models/RiskScore";
 import { riskBandFromScore, riskBandStyle } from "@/lib/riskScore";
 import { buildHospitalOverview } from "./buildHospitalOverview";
+import { isValidId, toId } from '@/lib/db';
 
 export type ReportType =
   | "overview"
@@ -77,7 +77,7 @@ export async function buildHospitalReport(
   adminName: string,
   filters: ReportFilters,
 ) {
-  const facilityOid = new mongoose.Types.ObjectId(hospitalId);
+  const facilityOid = (toId(hospitalId) as string);
   const { start, end } = parseRange(filters.from, filters.to);
   const overview = await buildHospitalOverview(hospitalId, adminName);
   const facility = await Facility.findById(hospitalId).lean();
@@ -159,7 +159,7 @@ export async function buildHospitalReport(
   const profiles = doctorUserIds.length
     ? await PractitionerProfile.find({
         userId: {
-          $in: doctorUserIds.map((id) => new mongoose.Types.ObjectId(id)),
+          $in: doctorUserIds.map((id) => (toId(id) as string)),
         },
       }).lean()
     : [];
@@ -330,14 +330,14 @@ export async function buildHospitalReport(
   }
 
   const pids = [...patientMap.keys()].filter((id) =>
-    mongoose.Types.ObjectId.isValid(id),
+    isValidId(id),
   );
   if (pids.length) {
     const risks = await RiskScore.aggregate([
       {
         $match: {
           patientId: {
-            $in: pids.map((id) => new mongoose.Types.ObjectId(id)),
+            $in: pids.map((id) => (toId(id) as string)),
           },
         },
       },

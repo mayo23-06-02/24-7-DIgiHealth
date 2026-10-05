@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isValidId } from '@/lib/db';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id: practitionerId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(user.userId) || !mongoose.Types.ObjectId.isValid(practitionerId)) {
+    if (!isValidId(user.userId) || !isValidId(practitionerId)) {
       return NextResponse.json({ error: 'Unsupported account type for favorites' }, { status: 400 });
     }
 
@@ -30,12 +28,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id: practitionerId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(user.userId) || !mongoose.Types.ObjectId.isValid(practitionerId)) {
+    if (!isValidId(user.userId) || !isValidId(practitionerId)) {
       return NextResponse.json({ error: 'Unsupported account type for favorites' }, { status: 400 });
     }
 

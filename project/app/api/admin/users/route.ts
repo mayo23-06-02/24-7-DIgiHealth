@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 import { escapeRegex } from "@/lib/escapeRegex";
@@ -11,7 +10,6 @@ export async function GET(req: NextRequest) {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
 
     const sp = req.nextUrl.searchParams;
     const search = sp.get("search") || "";

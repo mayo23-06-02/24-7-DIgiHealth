@@ -1,41 +1,25 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 // ==== Anthropometric ====
 export interface IAnthropometric extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   dateRecorded: Date;
   heightCm?: number;
   weightKg?: number;
   bmi?: number;
   bloodType?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | 'Unknown';
   vitalSigns?: {
-    systolicBP: number;
-    diastolicBP: number;
-    heartRateBpm: number;
-    spO2: number;
-    temperatureCelsius: number;
-  }
+    systolicBP?: number;
+    diastolicBP?: number;
+    heartRateBpm?: number;
+    spO2?: number;
+    temperatureCelsius?: number;
+    [extra: string]: number | undefined;
+  };
 }
-const AnthropometricSchema = new Schema<IAnthropometric>({
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  dateRecorded: { type: Date, default: Date.now },
-  heightCm: Number,
-  weightKg: Number,
-  bmi: Number,
-  bloodType: { type: String, enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'] },
-  vitalSigns: {
-    systolicBP: Number,
-    diastolicBP: Number,
-    heartRateBpm: Number,
-    spO2: Number,
-    temperatureCelsius: Number
-  }
-});
-AnthropometricSchema.index({ patientId: 1, dateRecorded: -1 });
 
 // ==== MedicalContext ====
 export interface IMedicalContext extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   chronicConditions: string[];
   allergies: { allergen: string; severity: 'mild' | 'moderate' | 'severe'; reaction: string; source: 'patient' | 'clinician' }[];
   currentMedications: string[];
@@ -55,25 +39,11 @@ export interface IMedicalContext extends Document {
   bloodType?: string;
   activityLevel?: string;
 }
-const MedicalContextSchema = new Schema<IMedicalContext>({
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  chronicConditions: [{ type: String }],
-  allergies: [{
-    allergen: String,
-    severity: { type: String, enum: ['mild', 'moderate', 'severe'] },
-    reaction: String,
-    source: { type: String, enum: ['patient', 'clinician'] }
-  }],
-  currentMedications: [{ type: String }],
-  familyHistory: [{ type: String }],
-  bloodType: { type: String },
-  activityLevel: { type: String }
-});
 
 // ==== Prescription ====
 export interface IPrescription extends Document {
-  patientId: Types.ObjectId;
-  practitionerId: Types.ObjectId;
+  patientId: string;
+  practitionerId: string;
   medicationName: string;
   dosage: string;
   instructions: string;
@@ -85,53 +55,22 @@ export interface IPrescription extends Document {
   documentMime?: string;
   documentName?: string;
   mediaId?: string;
-  conversationId?: Types.ObjectId;
-  messageId?: Types.ObjectId;
+  conversationId?: string;
+  messageId?: string;
 }
-const PrescriptionSchema = new Schema<IPrescription>({
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  medicationName: { type: String, required: true },
-  dosage: String,
-  instructions: String,
-  status: { type: String, enum: ['active', 'completed', 'discontinued'], default: 'active' },
-  prescribedDate: { type: Date, default: Date.now },
-  refillsRemaining: { type: Number, default: 0 },
-  documentUrl: String,
-  documentMime: String,
-  documentName: String,
-  mediaId: String,
-  conversationId: { type: Schema.Types.ObjectId, ref: 'Conversation' },
-  messageId: { type: Schema.Types.ObjectId, ref: 'Message' },
-}, { timestamps: true });
-
-PrescriptionSchema.index({ patientId: 1, prescribedDate: -1 });
 
 // ==== LabResult ====
 export interface ILabResult extends Document {
-  patientId: Types.ObjectId;
-  orderedById?: Types.ObjectId;
+  patientId: string;
+  orderedById?: string;
   testName: string;
   dateReported: Date;
   parameters: { name: string; value: string; unit: string; referenceRange: string; status: 'normal' | 'high' | 'low' }[];
 }
-const LabResultSchema = new Schema<ILabResult>({
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  orderedById: { type: Schema.Types.ObjectId, ref: 'User' },
-  testName: { type: String, required: true },
-  dateReported: { type: Date, default: Date.now },
-  parameters: [{
-    name: String,
-    value: String,
-    unit: String,
-    referenceRange: String,
-    status: { type: String, enum: ['normal', 'high', 'low'] }
-  }]
-});
 
 // ==== Immunization ====
 export interface IImmunization extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   vaccineName: string;
   dateAdministered: Date;
   dosage: string;
@@ -139,18 +78,34 @@ export interface IImmunization extends Document {
   administeredBy?: string;
   nextDueDate?: Date;
 }
-const ImmunizationSchema = new Schema<IImmunization>({
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  vaccineName: { type: String, required: true },
-  dateAdministered: { type: Date, default: Date.now },
-  dosage: String,
-  batchNumber: String,
-  administeredBy: String,
-  nextDueDate: Date
-});
 
-export const Anthropometric = mongoose.models.Anthropometric || mongoose.model<IAnthropometric>('Anthropometric', AnthropometricSchema);
-export const MedicalContext = mongoose.models.MedicalContext || mongoose.model<IMedicalContext>('MedicalContext', MedicalContextSchema);
-export const Prescription = mongoose.models.Prescription || mongoose.model<IPrescription>('Prescription', PrescriptionSchema);
-export const LabResult = mongoose.models.LabResult || mongoose.model<ILabResult>('LabResult', LabResultSchema);
-export const Immunization = mongoose.models.Immunization || mongoose.model<IImmunization>('Immunization', ImmunizationSchema);
+export const Anthropometric: ModelClass<IAnthropometric> = defineModel<IAnthropometric>({
+  name: 'Anthropometric', table: 'anthropometrics',
+  columns: {
+    'vitalSigns.systolicBP': 'systolic_bp',
+    'vitalSigns.diastolicBP': 'diastolic_bp',
+    'vitalSigns.heartRateBpm': 'heart_rate_bpm',
+    'vitalSigns.spO2': 'spo2',
+    'vitalSigns.temperatureCelsius': 'temperature_celsius',
+  },
+  refs: { patientId: 'User' },
+});
+export const MedicalContext: ModelClass<IMedicalContext> = defineModel<IMedicalContext>({
+  name: 'MedicalContext', table: 'medical_context',
+  refs: { patientId: 'User' },
+  children: { allergies: { table: 'patient_allergies', fk: 'medical_context_id' } },
+});
+export const Prescription: ModelClass<IPrescription> = defineModel<IPrescription>({
+  name: 'Prescription', table: 'prescriptions',
+  refs: { patientId: 'User', practitionerId: 'User', conversationId: 'Conversation', messageId: 'Message' },
+});
+export const LabResult: ModelClass<ILabResult> = defineModel<ILabResult>({
+  name: 'LabResult', table: 'lab_results',
+  columns: { orderedById: 'ordered_by' },
+  refs: { patientId: 'User', orderedById: 'User' },
+  children: { parameters: { table: 'lab_result_parameters', fk: 'lab_result_id' } },
+});
+export const Immunization: ModelClass<IImmunization> = defineModel<IImmunization>({
+  name: 'Immunization', table: 'immunizations',
+  refs: { patientId: 'User' },
+});

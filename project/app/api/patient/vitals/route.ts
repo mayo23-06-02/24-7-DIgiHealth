@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Anthropometric } from '@/lib/models/ClinicalData';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
+import { isValidId } from '@/lib/db';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const DEFAULT_VITALS = {
   heartRate: 75,
@@ -18,7 +17,6 @@ const DEFAULT_VITALS = {
 
 export async function GET() {
   try {
-    await connectToDatabase();
 
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -33,7 +31,7 @@ export async function GET() {
     // Postgres-native accounts have no Mongo identity (see
     // lib/utils/mongoId.ts) — Anthropometric is still Mongo-only, so they
     // genuinely have no vitals recorded rather than a lookup failure.
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json(DEFAULT_VITALS);
     }
 
@@ -66,7 +64,6 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    await connectToDatabase();
     
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -75,7 +72,7 @@ export async function POST(req: Request) {
 
     const { payload } = await jwtVerify(token, SECRET);
     const userId = payload.userId as string;
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json(
         { error: 'Vitals tracking is not yet available for this account.' },
         { status: 400 },

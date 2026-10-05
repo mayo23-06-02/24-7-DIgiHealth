@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Conversation } from "@/lib/models/Conversation";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
@@ -27,7 +26,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await connectToDatabase();
     const { consultationId, conversationId, type } = await req.json();
     apiLogger.info(scope, "request", {
       consultationId,

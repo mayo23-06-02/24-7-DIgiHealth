@@ -1,38 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import mongoose from 'mongoose';
 import { notifyBookingEvent } from '@/lib/booking/notifications';
 import { expireStaleBookingRequests } from '@/lib/booking/expire';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 /**
  * Legacy patient booking endpoint.
  * Prefer POST /api/bookings for new code (unified booking system).
  */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     await expireStaleBookingRequests({ notify: true });
 
     const body = await req.json();
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json(
         { success: false, error: 'Booking is not yet available for this account.' },
         { status: 400 },
       );
     }
 
-    if (!body.practitionerId || !mongoose.Types.ObjectId.isValid(body.practitionerId)) {
+    if (!body.practitionerId || !isValidId(body.practitionerId)) {
       return NextResponse.json({ success: false, error: 'Invalid practitionerId' }, { status: 400 });
     }
 

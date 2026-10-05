@@ -1,5 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IHealthTip extends Document {
   title: string;
   excerpt: string;
@@ -14,19 +13,7 @@ export interface IHealthTip extends Document {
   updatedAt: Date;
 }
 
-const HealthTipSchema = new Schema<IHealthTip>(
-  {
-    title: { type: String, required: true },
-    excerpt: { type: String, required: true },
-    content: { type: String },
-    author: { type: String, required: true },
-    date: { type: String, required: true },
-    readTime: { type: String },
-    image: { type: String },
-    tag: { type: String },
-    category: { type: String, enum: ['tip', 'news', 'blog'], default: 'tip' },
-  },
-  { timestamps: true }
-);
-
-export const HealthTip = mongoose.models.HealthTip || mongoose.model<IHealthTip>('HealthTip', HealthTipSchema);
+export const HealthTip: ModelClass<IHealthTip> = defineModel<IHealthTip>({
+  name: 'HealthTip', table: 'health_tips',
+  columns: { date: 'published_date' },
+});

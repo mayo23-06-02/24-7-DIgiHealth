@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Message } from '@/lib/models/Message';
 import { Conversation } from '@/lib/models/Conversation';
 import Ably from 'ably';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId, toId, newId } from '@/lib/db';
 function serializeMessage(message: any, clientId?: string) {
   const obj = typeof message.toObject === 'function' ? message.toObject() : { ...message };
   return {
@@ -28,15 +27,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await connectToDatabase();
     const body = await req.json();
     const { conversationId, content, type, fileUrl, fileMime, clientId } = body;
 
-    if (!conversationId || !mongoose.Types.ObjectId.isValid(conversationId)) {
+    if (!conversationId || !isValidId(conversationId)) {
       return NextResponse.json({ error: 'Invalid conversation ID' }, { status: 400 });
     }
 
-    const convObjectId = new mongoose.Types.ObjectId(conversationId);
+    const convObjectId = (toId(conversationId) as string);
 
     // Verify the user is a participant in this conversation
     const conversation = await Conversation.findById(convObjectId).lean();
@@ -44,7 +42,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
     }
 
-    const userMongoId = new mongoose.Types.ObjectId(user.userId);
+    const userMongoId = (toId(user.userId) as string);
     const isParticipant =
       conversation.patientId?.toString() === userMongoId.toString() ||
       conversation.practitionerId?.toString() === userMongoId.toString();
@@ -63,7 +61,7 @@ export async function POST(req: Request) {
     // Idempotent message creation using clientId when provided
     const filter = clientId
       ? { clientId, conversationId: convObjectId }
-      : { _id: new mongoose.Types.ObjectId() };
+      : { _id: newId() };
 
     const message = await Message.findOneAndUpdate(
       filter,
@@ -80,6 +78,10 @@ export async function POST(req: Request) {
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+
+    if (!message) {
+      return NextResponse.json({ error: "Failed to save message" }, { status: 500 });
+    }
 
     // Update conversation lastActivityAt and lastMessage
     await Conversation.findByIdAndUpdate(convObjectId, {

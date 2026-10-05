@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 
 import { apiError } from "@/lib/api/errors";
@@ -15,7 +14,6 @@ async function getUserId(req: NextRequest): Promise<string | null> {
 // GET /api/user/notifications
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -38,7 +36,6 @@ export async function GET(req: NextRequest) {
 // PUT /api/user/notifications
 export async function PUT(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -46,8 +43,8 @@ export async function PUT(req: NextRequest) {
     const { email, push, sms } = body;
 
     // Use strict:false workaround: update on the raw collection
-    await (User as any).collection.updateOne(
-      { _id: require('mongoose').Types.ObjectId.createFromHexString(userId) },
+    await User.updateOne(
+      { _id: userId },
       { $set: { notificationPrefs: { email: !!email, push: !!push, sms: !!sms } } }
     );
 

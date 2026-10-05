@@ -149,7 +149,7 @@ export async function buildPlatformOverview(
       { $group: { _id: "$patientId", score: { $first: "$score" } } },
       { $limit: 5000 },
     ]),
-    SystemConfig.findById("singleton").lean().catch(() => null),
+    SystemConfig.findOne({}).lean().catch(() => null),
   ]);
 
   // Hospital revenue in period (optional boost)

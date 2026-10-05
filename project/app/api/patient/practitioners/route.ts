@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { Facility } from '@/lib/models/Facility';
 
 export async function GET() {
   try {
-    await connectToDatabase();
     
     const users = await User.find({ role: 'practitioner' });
     const profiles = await PractitionerProfile.find({ userId: { $in: users.map(u => u._id) } })

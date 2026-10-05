@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { normalizeEmail } from "@/lib/supabase/auth";
-import { updateUserByMongoId } from "@/lib/postgres/users";
 import { checkSharedRateLimit } from "@/lib/security/rateLimit";
 import { createSessionResponse } from "@/lib/auth/session";
 
@@ -51,7 +49,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectToDatabase();
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -90,10 +87,6 @@ export async function POST(req: NextRequest) {
     user.otpExpiresAt = undefined;
     await user.save();
 
-    await updateUserByMongoId(user._id.toString(), {
-      otp_code_hash: null,
-      otp_expires_at: null,
-    });
 
     return createSessionResponse({
       identityId: user._id.toString(),

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { MedicalDocument as DigitalDocument } from "@/lib/models/ReviewsDocs";
 import { PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { Consultation } from "@/lib/models/Consultation";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import mongoose from "mongoose";
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 async function assertAccess(practitionerId: string, patientUserId: string) {
   const practitionerProfile = await PractitionerProfile.findOne({
     userId: practitionerId,
@@ -27,7 +26,6 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string; docId: string }> },
 ) {
   try {
-    await connectToDatabase();
     const userPayload = await getRequestUser();
     if (
       !userPayload ||
@@ -41,8 +39,8 @@ export async function PATCH(
 
     const { id: patientUserId, docId } = await params;
     if (
-      !mongoose.Types.ObjectId.isValid(patientUserId) ||
-      !mongoose.Types.ObjectId.isValid(docId)
+      !isValidId(patientUserId) ||
+      !isValidId(docId)
     ) {
       return NextResponse.json(
         { success: false, error: "Invalid id" },

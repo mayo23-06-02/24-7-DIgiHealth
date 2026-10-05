@@ -1,7 +1,7 @@
 import { PaymentMethod } from "@/lib/models/Billing";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { subscriptionFilter } from "@/lib/billing/entitlement";
 import { apiLogger } from "@/lib/apiLogger";
+import { isValidId } from '@/lib/db';
 
 const scope = "billing/rememberPaymentMethod";
 
@@ -51,7 +51,7 @@ export async function rememberPaymentMethod(input: {
 
     const common = {
       patientKey: key,
-      ...(isMongoObjectId(key) ? { patientId: key } : {}),
+      ...(isValidId(key) ? { patientId: key } : {}),
       type: method,
       last4,
       holderName: holderName || undefined,

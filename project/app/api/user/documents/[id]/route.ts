@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { MedicalDocument as DigitalDocument } from "@/lib/models/ReviewsDocs";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { deleteMedia, isSupabaseConfigured } from "@/lib/supabase/media";
@@ -12,7 +11,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,7 +58,6 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

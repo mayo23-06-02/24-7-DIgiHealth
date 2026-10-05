@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import FamilyLink from '@/lib/models/FamilyLink';
 import User from '@/lib/models/User';
 
@@ -11,7 +10,6 @@ import { apiError } from "@/lib/api/errors";
  */
 export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
   try {
-    await connectToDatabase();
     const { token } = await params;
 
     const invite = await FamilyLink.findOne({ inviteToken: token }).lean();

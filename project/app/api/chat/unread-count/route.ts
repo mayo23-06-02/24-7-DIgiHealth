@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Message } from "@/lib/models/Message";
+import { isValidId, toId } from '@/lib/db';
 
 /**
  * Unread badge = number of **chats** (conversations) with at least one unread
@@ -11,13 +10,12 @@ import { Message } from "@/lib/models/Message";
  */
 export async function GET(req: Request) {
   try {
-    await connectToDatabase();
     const userId = req.headers.get("x-user-id");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json({
         unreadCount: 0,
         unreadChats: 0,
@@ -25,24 +23,15 @@ export async function GET(req: Request) {
       });
     }
 
-    const userOid = new mongoose.Types.ObjectId(userId);
+    const receiverMatch = { isRead: false, receiverId: userId };
 
-    // Match both ObjectId and legacy string receiverId values
-    const receiverMatch = {
-      isRead: false,
-      $or: [{ receiverId: userOid }, { receiverId: userId }],
-    };
-
-    const [agg, unreadMessages] = await Promise.all([
-      Message.aggregate<{ _id: mongoose.Types.ObjectId | string }>([
-        { $match: receiverMatch },
-        // One row per conversation that has unread mail for this user
-        { $group: { _id: "$conversationId" } },
-      ]),
+    // One entry per conversation that has unread mail for this user
+    const [unreadConversationIds, unreadMessages] = await Promise.all([
+      Message.find(receiverMatch).distinct("conversationId"),
       Message.countDocuments(receiverMatch),
     ]);
 
-    const unreadChats = agg.filter((row) => row._id != null).length;
+    const unreadChats = unreadConversationIds.length;
 
     return NextResponse.json({
       // Header badge uses this — chat-level count

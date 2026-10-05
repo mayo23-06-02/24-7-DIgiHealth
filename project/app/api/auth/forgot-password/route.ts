@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { sendEmail } from '@/lib/email/resend';
 import { getAppOrigin } from '@/lib/supabase/auth';
@@ -27,7 +26,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    await connectToDatabase();
     const trimmed = identifier.trim().toLowerCase();
 
     const user = await User.findOne({

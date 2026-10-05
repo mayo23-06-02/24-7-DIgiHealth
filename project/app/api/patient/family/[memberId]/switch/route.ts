@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import User from '@/lib/models/User';
 import { canViewMedicalHistory } from '@/lib/family/access';
 
 import { apiError } from "@/lib/api/errors";
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 const COOKIE_OPTS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -34,7 +33,6 @@ export async function POST(
   { params }: { params: Promise<{ memberId: string }> },
 ) {
   try {
-    await connectToDatabase();
     const guardian = await getRequestUser();
     if (!guardian) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

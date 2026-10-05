@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 
 import { apiError } from "@/lib/api/errors";
+import { toId } from '@/lib/db';
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -36,7 +34,7 @@ export async function GET(req: NextRequest) {
     // use the ObjectId form.
     const baseFilter = { facilityId: hospitalId };
     const aggFilter = {
-      facilityId: new mongoose.Types.ObjectId(String(hospitalId)),
+      facilityId: (toId(String(hospitalId)) as string),
     };
 
     // Total consultations this month

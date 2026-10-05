@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { AIChatLog } from '@/lib/models/AIChatLog';
 import { getChatResponse, type ChatMessage } from '@/lib/ai/anthropic';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 /** POST — general clinical chat, not tied to a specific patient. Appends to
  * (or creates) an AIChatLog for audit purposes. */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || (user.role !== 'practitioner' && user.role !== 'mega_admin')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -24,7 +22,7 @@ export async function POST(req: NextRequest) {
     const chatLogId = body.chatLogId as string | undefined;
 
     let log = null;
-    if (chatLogId && mongoose.Types.ObjectId.isValid(chatLogId)) {
+    if (chatLogId && isValidId(chatLogId)) {
       log = await AIChatLog.findOne({ _id: chatLogId, practitionerId: user.userId });
     }
 

@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import Consultation from "@/lib/models/Consultation";
 import { Conversation } from "@/lib/models/Conversation";
 import User from "@/lib/models/User";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { createLiveKitParticipantToken } from "@/lib/livekit";
 import { Call } from "@/lib/models/Call";
 import { ensureActiveCall, hasUsableLiveKitState } from "@/lib/calls/activeCall";
 import { finalizeCall } from "@/lib/consultations/finalizeSession";
 import { isJoinable, sessionStateAt, sessionWindow } from "@/lib/consultations/window";
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 
 /**
  * The one authority on a scheduled consultation's live session.
@@ -39,11 +38,10 @@ export async function POST(
     }
 
     const { id } = await params;
-    if (!isMongoObjectId(id)) {
+    if (!isValidId(id)) {
       return NextResponse.json({ error: "Consultation not found" }, { status: 404 });
     }
 
-    await connectToDatabase();
     const consultation = await Consultation.findById(id);
     if (!consultation) {
       apiLogger.warn(scope, "consultation_not_found", { consultationId: id });

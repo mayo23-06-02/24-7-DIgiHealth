@@ -1,24 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import User from '@/lib/models/User';
-import FamilyLink, { syncFamilyLinkIndexes } from '@/lib/models/FamilyLink';
+import FamilyLink from '@/lib/models/FamilyLink';
 import { getGuardianFamilySlots, guardianFilter } from '@/lib/family/access';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 import { getAppOrigin, normalizeEmail, isValidEmail } from '@/lib/supabase/auth';
 import { sendEmail } from '@/lib/email/postmark';
 import { familyInviteEmailHtml } from '@/lib/email/templates/familyInvite';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 const INVITE_TTL_MINUTES = 15;
 
 /** POST — guardian invites an adult (spouse/parent) by email. Requires their
  * acceptance (see /api/patient/family/accept) before any access is granted. */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
-    await syncFamilyLinkIndexes();
     const guardian = await getRequestUser();
     if (!guardian) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
@@ -67,7 +64,7 @@ export async function POST(req: NextRequest) {
       // id can actually be cast to an ObjectId. Writing the uuid into the
       // ObjectId field would throw and fail the invite outright.
       guardianKey: String(guardian.userId),
-      ...(isMongoObjectId(guardian.userId) ? { guardianId: guardian.userId } : {}),
+      ...(isValidId(guardian.userId) ? { guardianId: guardian.userId } : {}),
       inviteEmail: email,
       inviteName,
       relationship,

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import bcrypt from 'bcryptjs';
 
@@ -10,7 +9,6 @@ async function getUserId(req: NextRequest): Promise<string | null> {
 
 export async function PUT(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

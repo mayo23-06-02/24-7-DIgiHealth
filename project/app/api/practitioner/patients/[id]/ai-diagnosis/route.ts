@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { Consultation } from '@/lib/models/Consultation';
@@ -9,6 +7,7 @@ import { getPatientClinicalSummary, formatClinicalSummaryForPrompt } from '@/lib
 import { getDiagnosisSupport } from '@/lib/ai/anthropic';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 /** Shared with GET/PATCH — mirrors the ownership check already used in
  * app/api/practitioner/patients/[id]/health-record/route.ts: assigned to
  * this practitioner OR a consultation exists between them. */
@@ -24,14 +23,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || (user.role !== 'practitioner' && user.role !== 'mega_admin')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id: patientId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(patientId)) {
+    if (!isValidId(patientId)) {
       return NextResponse.json({ success: false, error: 'Invalid patient ID' }, { status: 400 });
     }
 
@@ -81,14 +79,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || (user.role !== 'practitioner' && user.role !== 'mega_admin')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id: patientId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(patientId)) {
+    if (!isValidId(patientId)) {
       return NextResponse.json({ success: false, error: 'Invalid patient ID' }, { status: 400 });
     }
 

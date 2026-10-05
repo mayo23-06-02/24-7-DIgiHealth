@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import {
   PaymentTransaction,
@@ -67,7 +66,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const type = String(body.type || "").toLowerCase();
 
-    await connectToDatabase();
 
     const party = {
       name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",

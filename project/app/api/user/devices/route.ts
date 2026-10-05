@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 
 import { apiError } from "@/lib/api/errors";
@@ -12,7 +11,6 @@ async function getUserId(req: NextRequest): Promise<string | null> {
 // Here we store them on the user document under "trustedDevices".
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -33,7 +31,7 @@ export async function GET(req: NextRequest) {
         { id: 'session-current', name: browserName, lastUsed: 'Active now', active: true },
       ];
 
-      await (User as any).collection.updateOne(
+      await User.updateOne(
         { _id: (user as any)._id },
         { $set: { trustedDevices: seeded } }
       );

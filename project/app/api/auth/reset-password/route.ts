@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import bcrypt from "bcryptjs";
 import {
   validatePassword,
   validatePasswordConfirmation,
 } from "@/lib/auth/passwordRules";
-import { updateUserByMongoId } from "@/lib/postgres/users";
 
 /**
  * POST /api/auth/reset-password
@@ -17,7 +15,6 @@ import { updateUserByMongoId } from "@/lib/postgres/users";
  */
 export async function POST(request: Request) {
   try {
-    await connectToDatabase();
     const { token, password, confirmPassword } = await request.json();
 
     if (!token || typeof token !== "string" || !token.trim()) {
@@ -106,11 +103,6 @@ export async function POST(request: Request) {
     await user.save();
 
     // Sync to Postgres
-    await updateUserByMongoId(
-      user._id.toString(),
-      { password_hash: user.passwordHash },
-      user.email,
-    );
 
     return NextResponse.json({
       success: true,

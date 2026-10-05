@@ -1,6 +1,5 @@
 import AuditLog from "@/lib/models/AuditLog";
 import type { RequestUser } from "@/lib/auth/getRequestUser";
-import { writeAuditLog } from "@/lib/postgres/users";
 
 export async function logAdminAction(input: {
   actor: RequestUser;
@@ -42,15 +41,4 @@ export async function logAdminAction(input: {
     );
   }
 
-  await writeAuditLog({
-    actorMongoId: input.actor.userId,
-    actorRole: input.actor.role,
-    actorEmail: input.actor.email,
-    action: input.action,
-    targetType: input.targetType,
-    targetId: input.targetId,
-    metadata: input.metadata,
-    ip: input.ip,
-    userAgent: input.userAgent,
-  });
 }

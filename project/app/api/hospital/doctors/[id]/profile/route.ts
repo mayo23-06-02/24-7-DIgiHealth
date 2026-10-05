@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
@@ -22,7 +21,6 @@ export async function GET(
       doctorId: id,
     });
 
-    await connectToDatabase();
 
     // Get the doctor user
     const doctorUser = await User.findById(id);

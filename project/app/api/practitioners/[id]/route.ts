@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
 import { Review } from '@/lib/models/ReviewsDocs';
@@ -11,7 +10,6 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    await connectToDatabase();
 
     // Fetch practitioner profile and populate user data
     const profile = await PractitionerProfile.findOne({ userId: id }).populate({

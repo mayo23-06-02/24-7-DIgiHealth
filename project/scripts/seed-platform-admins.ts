@@ -1,5 +1,8 @@
 /**
- * Bootstraps the two platform admin accounts (mega_admin, super_admin).
+ * Bootstraps the two platform admin accounts (mega_admin, super_admin) in Supabase Postgres.
+ *
+ * This is the ONLY script meant for production: it creates real admin accounts
+ * and no demo data. Safe to run against any project.
  *
  * There is no in-app way to create these roles — normal registration only
  * offers patient/practitioner/hospital, and the admin API only lists/suspends
@@ -20,7 +23,6 @@
  * Safe to re-run: an email that already exists is reported and skipped
  * rather than duplicated or overwritten.
  */
-import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import * as dotenv from "dotenv";
@@ -29,7 +31,6 @@ import path from "path";
 dotenv.config({ path: path.join(__dirname, "../.env.local") });
 
 import User from "../lib/models/User";
-import { syncUser } from "../lib/postgres/users";
 
 function generatePassword(): string {
   // 16 chars, mixed alphanumeric + symbols, cryptographically random.
@@ -57,17 +58,6 @@ const ACCOUNTS = [
 ];
 
 async function main() {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    console.error(
-      "MONGODB_URI not found in environment. Check your .env.local file.",
-    );
-    process.exit(1);
-  }
-
-  console.log("Connecting to MongoDB...");
-  await mongoose.connect(uri);
-
   const credentialsToShow: { email: string; role: string; password: string }[] =
     [];
 
@@ -95,7 +85,6 @@ async function main() {
       mfaEnabled: false,
     } as any);
 
-    await syncUser(newUser as any);
 
     credentialsToShow.push({
       email: account.email,
@@ -104,8 +93,6 @@ async function main() {
     });
     console.log(`Created ${account.email} (${account.role}).`);
   }
-
-  await mongoose.disconnect();
 
   if (credentialsToShow.length > 0) {
     console.log(

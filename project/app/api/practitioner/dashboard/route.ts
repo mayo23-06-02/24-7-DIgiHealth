@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
@@ -11,7 +10,6 @@ import { getBlockedAcceptorId } from '@/lib/booking/requester';
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     
     if (!user || (user.role !== 'practitioner' && user.role !== 'mega_admin' && user.role !== 'super_admin')) {

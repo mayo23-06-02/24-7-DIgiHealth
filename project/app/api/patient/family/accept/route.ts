@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import FamilyLink from '@/lib/models/FamilyLink';
 import { normalizeEmail } from '@/lib/supabase/auth';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 import { getEntitlement } from '@/lib/billing/entitlement';
 import { signSessionToken, setSessionCookie } from '@/lib/auth/sessionToken';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 /** POST — the invited adult accepts, now that they're logged in. Only the
  * actual invited email can consume the token — being logged in with the
  * link isn't enough on its own. */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
-    if (!isMongoObjectId(user.userId)) {
+    if (!isValidId(user.userId)) {
       return NextResponse.json(
         { success: false, error: 'Family accounts are not yet available for this account.' },
         { status: 400 },

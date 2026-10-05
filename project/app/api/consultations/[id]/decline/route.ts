@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
@@ -13,7 +12,6 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    await connectToDatabase();
 
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;

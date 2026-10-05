@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { SystemConfig } from "@/lib/models/System";
 import { requirePlatformAdmin, requireMegaAdmin } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
@@ -11,12 +10,10 @@ export async function GET() {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
 
-    let cfg = await SystemConfig.findById("singleton").lean();
+    let cfg = await SystemConfig.findOne({}).lean();
     if (!cfg) {
       await SystemConfig.create({
-        _id: "singleton",
         maintenanceMode: false,
         features: {
           telehealth: true,
@@ -29,7 +26,7 @@ export async function GET() {
         emergencyNumbers: ["112", "10177"],
         supportedLanguages: ["en", "af", "zu"],
       });
-      cfg = await SystemConfig.findById("singleton").lean();
+      cfg = await SystemConfig.findOne({}).lean();
     }
 
     return NextResponse.json({
@@ -46,7 +43,6 @@ export async function PUT(req: NextRequest) {
   try {
     const gate = await requireMegaAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
 
     const body = await req.json();
     const updates: any = {};
@@ -67,10 +63,10 @@ export async function PUT(req: NextRequest) {
       updates.supportedLanguages = body.supportedLanguages;
     }
 
-    const cfg = await SystemConfig.findByIdAndUpdate(
-      "singleton",
+    const cfg = await SystemConfig.findOneAndUpdate(
+      {},
       { $set: updates },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
+      { new: true, upsert: true },
     ).lean();
 
     await logAdminAction({

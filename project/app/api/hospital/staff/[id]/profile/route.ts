@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
-import { getStaffByIdAndFacility } from '@/lib/postgres/staff';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import Staff from '@/lib/models/Staff';
 
 import { apiError } from "@/lib/api/errors";
 export async function GET(
@@ -16,7 +15,7 @@ export async function GET(
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    const hospitalId = await resolvePostgresHospitalId(user.userId, user.email);
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
     if (!hospitalId) {
       return NextResponse.json({ success: false, error: 'No facility linked to this account' }, { status: 404 });
     }
@@ -29,7 +28,9 @@ export async function GET(
       hospitalId,
     });
 
-    const staffDoc = await getStaffByIdAndFacility(id, hospitalId);
+    const staffDoc = await Staff.findOne({ _id: id, facilityId: hospitalId })
+      .populate('userId', 'firstName lastName email')
+      .lean();
 
     if (!staffDoc) {
       console.log('[GET /api/hospital/staff/[id]/profile] Staff not found:', {
@@ -39,9 +40,8 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Staff not found' }, { status: 404 });
     }
 
-    await connectToDatabase();
     const staffAny = staffDoc as any;
-    const userId = staffAny.user_id;
+    const userId = staffAny.userId?._id ? String(staffAny.userId._id) : undefined;
 
     // ── Practitioner profile (optional - only doctors have one) ──────────
     let practProfile: any = null;
@@ -68,7 +68,7 @@ export async function GET(
     const uniquePatientIds = [...new Set(consultations.map((c: any) => c.patientId?._id?.toString()).filter(Boolean))];
 
     // ── Revenue ──────────────────────────────────────────────────────────
-    const revenuePerConsultation = staffAny.hourlyRate * 1; // 1 hour per consultation (default)
+    const revenuePerConsultation = (staffAny.hourlyRate ?? 0) * 1; // 1 hour per consultation (default)
     const totalRevenue = completedConsultations * revenuePerConsultation;
 
     // Monthly revenue for chart (last 6 months)
@@ -130,16 +130,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: {
-        staff: {
-          ...staffAny,
-          // Postgres rows key on `id`; only legacy Mongo documents have `_id`.
-          // Dereferencing `_id` unconditionally threw
-          // "Cannot read properties of undefined (reading 'toString')" and
-          // 500'd the whole profile page for every Postgres-native staff
-          // member — which is now all of them. `_id` is still emitted so the
-          // existing client keeps working.
-          _id: String(staffAny._id ?? staffAny.id),
-        },
+        staff: staffAny,
         practProfile,
         kpi: {
           totalConsultations,

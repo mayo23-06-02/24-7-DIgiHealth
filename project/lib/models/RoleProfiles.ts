@@ -1,8 +1,7 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 // ==== Patient Profile ====
 export interface IPatientProfile extends Document {
-  userId: Types.ObjectId;
+  userId: string;
   dateOfBirth: Date;
   gender: 'male' | 'female' | 'other';
   idNumber?: string;
@@ -14,48 +13,15 @@ export interface IPatientProfile extends Document {
   subscriptionTier: 'free' | 'pro';
   popiaConsentDate?: Date;
   termsAcceptedAt?: Date;
-  favoritePractitionerIds?: Types.ObjectId[];
-  myDoctorIds?: Types.ObjectId[];
+  favoritePractitionerIds?: string[];
+  myDoctorIds?: string[];
   profilePhoto?: string;
   medicalDocuments?: string[];
 }
 
-const PatientProfileSchema = new Schema<IPatientProfile>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  dateOfBirth: { type: Date, required: true },
-  gender: { type: String, enum: ['male', 'female', 'other'], required: true },
-  idNumber: { type: String },
-  ageRange: { type: String, enum: ['0-2', '3-5', '5-12', '13-18'] },
-  emergencyContact: {
-    name: String,
-    phone: String,
-    relationship: String
-  },
-  nextOfKin: {
-    type: [{ name: String, phone: String, relationship: String }],
-    validate: {
-      validator: (v: unknown[]) => v.length <= 3,
-      message: 'A patient can list at most 3 next of kin.',
-    },
-    default: [],
-  },
-  medicalAid: {
-    provider: String,
-    planName: String,
-    memberNumber: String
-  },
-  subscriptionTier: { type: String, enum: ['free', 'pro'], default: 'free' },
-  popiaConsentDate: { type: Date },
-  termsAcceptedAt: { type: Date },
-  favoritePractitionerIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  myDoctorIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  profilePhoto: { type: String },
-  medicalDocuments: [{ type: String }]
-});
-
 // ==== Practitioner Profile ====
 export interface IPractitionerProfile extends Document {
-  userId: Types.ObjectId;
+  userId: string;
   specialisation: string;
   hpcsaNumber: string;
   experienceYears: number;
@@ -67,8 +33,8 @@ export interface IPractitionerProfile extends Document {
   reviewCount: number;
   achievements: string[];
   reviews: { reviewer: string, rating: number, comment: string, date: Date }[];
-  affiliatedFacilityIds: Types.ObjectId[];
-  assignedPatientIds?: Types.ObjectId[];
+  affiliatedFacilityIds: string[];
+  assignedPatientIds?: string[];
   isOnline: boolean;
   profilePhoto?: string;
   hpcsaCertificate?: string;
@@ -88,61 +54,53 @@ export interface IPractitionerProfile extends Document {
   termsAcceptedAt?: Date;
 }
 
-const PractitionerProfileSchema = new Schema<IPractitionerProfile>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  specialisation: { type: String, required: true },
-  hpcsaNumber: { type: String, required: true, unique: true },
-  experienceYears: { type: Number },
-  // consultationFee removed - subscription-based model
-  bio: { type: String },
-  languages: [{ type: String }],
-  acceptedMedicalAids: [{ type: String }],
-  rating: { type: Number, default: 0 },
-  reviewCount: { type: Number, default: 0 },
-  achievements: [{ type: String }],
-  reviews: [{
-     reviewer: String,
-     rating: Number,
-     comment: String,
-     date: { type: Date, default: Date.now }
-  }],
-  affiliatedFacilityIds: [{ type: Schema.Types.ObjectId, ref: 'Facility' }],
-  assignedPatientIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  isOnline: { type: Boolean, default: false },
-  profilePhoto: { type: String },
-  hpcsaCertificate: { type: String },
-  bankAccount: {
-    accountHolder: String,
-    bankName: String,
-    accountNumber: String,
-    branchCode: String,
-    taxNumber: String
-  },
-  address: {
-    street: String,
-    city: String,
-    province: String
-  },
-  consentAcceptedAt: { type: Date },
-  termsAcceptedAt: { type: Date }
-});
-
-export const PatientProfile: Model<IPatientProfile> = mongoose.models.PatientProfile || mongoose.model<IPatientProfile>('PatientProfile', PatientProfileSchema);
-export const PractitionerProfile: Model<IPractitionerProfile> = mongoose.models.PractitionerProfile || mongoose.model<IPractitionerProfile>('PractitionerProfile', PractitionerProfileSchema);
-
 // ==== Hospital Admin Profile ====
 export interface IHospitalAdminProfile extends Document {
-  userId: Types.ObjectId;
-  hospitalId: Types.ObjectId;
+  userId: string;
+  hospitalId: string;
   department?: string;
   permissions?: string[];
 }
 
-const HospitalAdminProfileSchema = new Schema<IHospitalAdminProfile>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  hospitalId: { type: Schema.Types.ObjectId, ref: 'Facility', required: true },
-  department: { type: String },
-  permissions: [{ type: String }]
+export const PatientProfile: ModelClass<IPatientProfile> = defineModel<IPatientProfile>({
+  name: 'PatientProfile', table: 'patient_profiles',
+  nest: { emergencyContact: 'emergency_contact_', medicalAid: 'medical_aid_' },
+  refs: { userId: 'User', favoritePractitionerIds: 'User', myDoctorIds: 'User' },
+  lists: {
+    favoritePractitionerIds: {
+      table: 'patient_practitioner_links', ownerCol: 'patient_id', ownerKeyCol: 'user_id',
+      valueCol: 'practitioner_id', where: { link_type: 'favorite' },
+    },
+    myDoctorIds: {
+      table: 'patient_practitioner_links', ownerCol: 'patient_id', ownerKeyCol: 'user_id',
+      valueCol: 'practitioner_id', where: { link_type: 'my_doctor' },
+    },
+  },
 });
-
-export const HospitalAdminProfile: Model<IHospitalAdminProfile> = mongoose.models.HospitalAdminProfile || mongoose.model<IHospitalAdminProfile>('HospitalAdminProfile', HospitalAdminProfileSchema);
+export const PractitionerProfile: ModelClass<IPractitionerProfile> = defineModel<IPractitionerProfile>({
+  name: 'PractitionerProfile', table: 'practitioner_profiles',
+  columns: {
+    reviews: 'embedded_reviews',
+    'bankAccount.accountHolder': 'bank_account_holder',
+    'bankAccount.bankName': 'bank_name',
+    'bankAccount.accountNumber': 'bank_account_number',
+    'bankAccount.branchCode': 'bank_branch_code',
+    'bankAccount.taxNumber': 'tax_number',
+  },
+  nest: { address: 'address_' },
+  refs: { userId: 'User', affiliatedFacilityIds: 'Facility', assignedPatientIds: 'User' },
+  lists: {
+    affiliatedFacilityIds: {
+      table: 'practitioner_facilities', ownerCol: 'practitioner_id', ownerKeyCol: 'user_id', valueCol: 'facility_id',
+    },
+    assignedPatientIds: {
+      table: 'patient_practitioner_links', ownerCol: 'practitioner_id', ownerKeyCol: 'user_id',
+      valueCol: 'patient_id', where: { link_type: 'assigned' },
+    },
+  },
+});
+export const HospitalAdminProfile: ModelClass<IHospitalAdminProfile> = defineModel<IHospitalAdminProfile>({
+  name: 'HospitalAdminProfile', table: 'hospital_admin_profiles',
+  columns: { hospitalId: 'facility_id' },
+  refs: { userId: 'User', hospitalId: 'Facility' },
+});

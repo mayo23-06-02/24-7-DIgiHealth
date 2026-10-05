@@ -1,28 +1,17 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IReview extends Document {
-  consultationId: Types.ObjectId;
-  patientId: Types.ObjectId;
-  practitionerId: Types.ObjectId;
+  consultationId: string;
+  patientId: string;
+  practitionerId: string;
   rating: number;
   comment: string;
   categories: any;
   isVerified: boolean;
 }
 
-const ReviewSchema = new Schema<IReview>({
-  consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation' },
-  patientId: { type: Schema.Types.ObjectId, ref: 'User' },
-  practitionerId: { type: Schema.Types.ObjectId, ref: 'User' },
-  rating: Number,
-  comment: String,
-  categories: Schema.Types.Mixed,
-  isVerified: Boolean
-}, { timestamps: true });
-
 export interface IMedicalDocument extends Document {
-  userId: Types.ObjectId;
-  uploadedBy: Types.ObjectId;
+  userId: string;
+  uploadedBy: string;
   type: string;
   /** Durable media proxy URL or legacy CDN URL */
   cloudinaryUrl: string;
@@ -33,20 +22,16 @@ export interface IMedicalDocument extends Document {
   verifiedAt?: Date;
   /** Free-text note/caption attached by the patient or a practitioner */
   note?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const MedicalDocumentSchema = new Schema<IMedicalDocument>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User' },
-  uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-  type: String,
-  cloudinaryUrl: String,
-  publicId: String,
-  mediaId: String,
-  mimeType: String,
-  status: String,
-  verifiedAt: Date,
-  note: String
-}, { timestamps: true });
-
-export const Review = mongoose.models.Review || mongoose.model<IReview>('Review', ReviewSchema);
-export const MedicalDocument = mongoose.models.MedicalDocument || mongoose.model<IMedicalDocument>('MedicalDocument', MedicalDocumentSchema);
+export const Review: ModelClass<IReview> = defineModel<IReview>({
+  name: 'Review', table: 'reviews',
+  refs: { consultationId: 'Consultation', patientId: 'User', practitionerId: 'User' },
+});
+export const MedicalDocument: ModelClass<IMedicalDocument> = defineModel<IMedicalDocument>({
+  name: 'MedicalDocument', table: 'medical_documents',
+  columns: { cloudinaryUrl: 'file_url' },
+  refs: { userId: 'User', uploadedBy: 'User' },
+});

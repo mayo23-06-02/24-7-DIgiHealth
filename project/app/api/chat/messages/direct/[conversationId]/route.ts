@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 import Message from '@/lib/models/Message';
 import { requireConversationParticipant } from '@/lib/auth/access';
 import { apiError } from '@/lib/api/errors';
+import { toId } from '@/lib/db';
 
 /**
  * Message history for a direct (non-appointment) thread.
@@ -33,7 +33,7 @@ export async function GET(
 
     // Always cast — raw string comparison against ObjectId fields returns 0 docs
     const query: Record<string, unknown> = {
-      conversationId: new mongoose.Types.ObjectId(conversationId),
+      conversationId: (toId(conversationId) as string),
     };
 
     if (after || before) {

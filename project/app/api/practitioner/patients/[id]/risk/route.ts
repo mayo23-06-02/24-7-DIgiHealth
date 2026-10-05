@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { requirePatientAccess } from "@/lib/auth/access";
 import RiskScore from "@/lib/models/RiskScore";
 import { Consultation } from "@/lib/models/Consultation";
@@ -18,7 +17,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const { id: patientId } = await params;
     // Holding the practitioner role was the whole check here, so any
     // practitioner account could read — and through PUT, overwrite — the
@@ -75,7 +73,6 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const { id: patientId } = await params;
     // Holding the practitioner role was the whole check here, so any
     // practitioner account could read — and through PUT, overwrite — the

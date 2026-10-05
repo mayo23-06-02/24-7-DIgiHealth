@@ -2,7 +2,6 @@
  * DigiHealth branded patient health-profile PDF.
  * Outfit + Space Mono · primary #4493b8 · logo header · doctor signature.
  */
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import Patient from "@/lib/models/Patient";
 import { PatientProfile } from "@/lib/models/RoleProfiles";
@@ -224,7 +223,6 @@ export async function buildHealthProfilePdf(
   patientId: string,
   options: HealthProfilePdfOptions = {},
 ): Promise<{ buffer: Buffer; fullName: string }> {
-  await connectToDatabase();
 
   const [
     patientUser,

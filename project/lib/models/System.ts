@@ -1,5 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface ISystemConfig extends Omit<Document, '_id'> {
   _id: string;
   features: any;
@@ -9,32 +8,20 @@ export interface ISystemConfig extends Omit<Document, '_id'> {
   emergencyNumbers: string[];
   supportedLanguages: string[];
 }
-const SystemConfigSchema = new Schema<ISystemConfig>({
-  _id: { type: String, default: 'singleton' },
-  features: Schema.Types.Mixed,
-  maintenanceMode: Boolean,
-  popiaVersion: String,
-  consultationFeeDefault: Number,
-  emergencyNumbers: [String],
-  supportedLanguages: [String]
-});
 
 export interface IOfflineActionQueue extends Document {
-  userId: Types.ObjectId;
+  userId: string;
   action: string;
   payload: any;
   retryCount: number;
   lastAttempt: Date;
   syncedAt?: Date;
 }
-const OfflineActionQueueSchema = new Schema<IOfflineActionQueue>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User' },
-  action: String,
-  payload: Schema.Types.Mixed,
-  retryCount: Number,
-  lastAttempt: Date,
-  syncedAt: Date
-});
 
-export const SystemConfig = mongoose.models.SystemConfig || mongoose.model<ISystemConfig>('SystemConfig', SystemConfigSchema);
-export const OfflineActionQueue = mongoose.models.OfflineActionQueue || mongoose.model<IOfflineActionQueue>('OfflineActionQueue', OfflineActionQueueSchema);
+export const SystemConfig: ModelClass<ISystemConfig> = defineModel<ISystemConfig>({
+  name: 'SystemConfig', table: 'system_config',
+});
+export const OfflineActionQueue: ModelClass<IOfflineActionQueue> = defineModel<IOfflineActionQueue>({
+  name: 'OfflineActionQueue', table: 'offline_action_queue',
+  refs: { userId: 'User' },
+});

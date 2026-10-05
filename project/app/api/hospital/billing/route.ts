@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import HospitalTransaction from '@/lib/models/HospitalTransaction';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
-import mongoose from 'mongoose';
 
 import { apiError } from "@/lib/api/errors";
+import { toId } from '@/lib/db';
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -37,7 +35,7 @@ export async function GET(req: NextRequest) {
       .sort({ timestamp: -1 })
       .lean();
 
-    const hId = new mongoose.Types.ObjectId(hospitalId.toString());
+    const hId = (toId(hospitalId.toString()) as string);
 
     const totalRevenue = await HospitalTransaction.aggregate([
       { $match: { facilityId: hId, status: 'paid' } },

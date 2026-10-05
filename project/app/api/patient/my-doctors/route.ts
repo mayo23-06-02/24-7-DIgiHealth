@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PractitionerProfile, PatientProfile } from '@/lib/models/RoleProfiles';
 import Consultation from '@/lib/models/Consultation';
 import { Facility } from '@/lib/models/Facility';
 
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isValidId } from '@/lib/db';
 
 export async function GET(req: Request) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const userId = user.userId;
@@ -20,7 +18,7 @@ export async function GET(req: Request) {
     // Patient/Consultation records are still Mongo-keyed; a Postgres-native
     // user (uuid identity) has no possible Mongo counterpart, so skip these
     // lookups rather than let Mongoose throw a CastError.
-    const hasMongoIdentity = mongoose.Types.ObjectId.isValid(userId);
+    const hasMongoIdentity = isValidId(userId);
 
     const consultedDoctorIds = hasMongoIdentity
       ? (await Consultation.find({ patientId: userId }).select('practitionerId')).map(c => c.practitionerId.toString())

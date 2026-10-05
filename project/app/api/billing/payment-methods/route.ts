@@ -1,5 +1,4 @@
 import { NextResponse, NextRequest } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { PaymentMethod } from "@/lib/models/Billing";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 
@@ -32,7 +31,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    await connectToDatabase();
 
     // Check if this is the first payment method - if so, make it default
     const existingMethods = await PaymentMethod.find({ patientId: user._id });

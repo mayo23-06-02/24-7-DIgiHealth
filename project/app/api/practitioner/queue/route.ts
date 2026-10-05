@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import Consultation from '@/lib/models/Consultation';
 import Patient from '@/lib/models/Patient';
 import User from '@/lib/models/User';
@@ -8,7 +7,6 @@ import { riskBandFromScore } from '@/lib/riskScore';
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
 
     // Identity comes from the verified session, never from the request.
     //

@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Prescription } from "@/lib/models/ClinicalData";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 /** GET — patient's prescriptions (with downloadable script URL when available) */
 export async function GET() {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== "patient") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,7 +15,7 @@ export async function GET() {
     // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
     // — Prescription is still Mongo-only, so they genuinely have none rather
     // than a lookup failure.
-    if (!isMongoObjectId(user.userId)) {
+    if (!isValidId(user.userId)) {
       return NextResponse.json([]);
     }
 
@@ -49,13 +47,12 @@ export async function GET() {
 /** POST — request a prescription refill */
 export async function POST(request: Request) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== "patient") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!isMongoObjectId(user.userId)) {
+    if (!isValidId(user.userId)) {
       return NextResponse.json(
         { error: "Prescriptions are not yet available for this account." },
         { status: 400 },

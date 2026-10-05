@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
-import { getSupabaseAdmin } from '@/lib/supabase/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import Staff from '@/lib/models/Staff';
 import { Consultation } from '@/lib/models/Consultation';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 
@@ -14,7 +13,7 @@ export async function GET(_req: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const facilityId = await resolvePostgresHospitalId(user.userId, user.email);
+    const facilityId = await resolveHospitalId(user.userId, user.email);
     if (!facilityId) {
       return NextResponse.json({
         success: false,
@@ -22,24 +21,17 @@ export async function GET(_req: Request) {
       }, { status: 404 });
     }
 
-    // Fetch staff from PostgreSQL
-    const { data: staffList, error: staffError } = await getSupabaseAdmin()
-      .from('staff')
-      .select('*, users(first_name, last_name, email)')
-      .eq('facility_id', facilityId)
-      .order('created_at', { ascending: false });
-    
-    if (staffError) throw new Error(staffError.message);
+    const staffList = await Staff.find({ facilityId })
+      .populate('userId', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .lean();
 
     // Filter only doctors
     const doctors = (staffList || []).filter((s: any) => s.role === 'doctor');
 
-    // Get doctor user IDs for MongoDB queries
     const doctorUserIds = doctors
-      .map((s: any) => s.user_id)
+      .map((s: any) => s.userId?._id)
       .filter(Boolean);
-
-    await connectToDatabase();
 
     // Fetch practitioner profiles
     const profiles = doctorUserIds.length
@@ -65,17 +57,17 @@ export async function GET(_req: Request) {
 
     // Enrich doctor data
     const enrichedDoctors = doctors.map((s: any) => {
-      const userId = s.user_id;
+      const userId = s.userId?._id ? String(s.userId._id) : undefined;
       const prof = userId ? profileByUser.get(userId) : null;
-      
+
       const doctorConsultations = consultations.filter(
         (c: any) => c.practitionerId?.toString() === userId,
       );
-      
+
       const todayLoad = doctorConsultations.filter(
         (c: any) => new Date(c.scheduledStartTime) >= today,
       ).length;
-      
+
       const completedMonth = doctorConsultations.filter(
         (c: any) => {
           const cd = new Date(c.scheduledStartTime);
@@ -84,24 +76,8 @@ export async function GET(_req: Request) {
       ).length;
 
       return {
-        _id: s.id,
-        staffId: s.id,
-        userId: s.user_id
-          ? { 
-              _id: s.user_id, 
-              firstName: s.users?.first_name, 
-              lastName: s.users?.last_name, 
-              email: s.users?.email 
-            }
-          : null,
-        facilityId: s.facility_id,
-        role: s.role,
-        department: s.department,
-        shiftSchedule: { start: s.shift_start, end: s.shift_end, days: s.shift_days || [] },
-        isOnDuty: s.is_on_duty,
-        hourlyRate: s.hourly_rate,
-        qualifications: s.qualifications || [],
-        createdAt: s.created_at,
+        ...s,
+        staffId: s._id,
         // Enriched fields
         specialisation: prof?.specialisation || s.department,
         rating: prof?.rating || 0,

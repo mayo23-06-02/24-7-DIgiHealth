@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { resolvePostgresHospitalId } from '@/lib/postgres/resolveId';
-import { getSupabaseAdmin } from '@/lib/supabase/server';
+import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import Facility from '@/lib/models/Facility';
 import {
   durableUrl,
   isSupabaseConfigured,
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const hospitalId = await resolvePostgresHospitalId(user.userId, user.email);
+    const hospitalId = await resolveHospitalId(user.userId, user.email);
     if (!hospitalId) {
       return NextResponse.json({ success: false, error: 'No facility linked to this account.' }, { status: 404 });
     }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     });
 
     const url = durableUrl(asset);
-    await getSupabaseAdmin().from('facilities').update({ logo: url }).eq('id', hospitalId);
+    await Facility.updateOne({ _id: hospitalId }, { $set: { logo: url } });
 
     return NextResponse.json({ success: true, data: { url } });
   } catch (err: any) {

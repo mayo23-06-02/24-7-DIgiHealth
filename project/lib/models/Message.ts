@@ -1,15 +1,14 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IMessage extends Document {
-  conversationId: Types.ObjectId;
-  senderId: Types.ObjectId;
-  receiverId: Types.ObjectId;
+  conversationId: string;
+  senderId: string;
+  receiverId: string;
   content: string;
   type: 'text' | 'image' | 'file' | 'audio' | 'quick_phrase' | 'record_attachment' | 'call_log';
   fileUrl?: string;
   mediaId?: string;
   fileMime?: string;
-  recordId?: Types.ObjectId;
+  recordId?: string;
   clientId?: string; // For idempotent message operations with Ably
   isRead: boolean;
   readAt?: Date;
@@ -20,48 +19,8 @@ export interface IMessage extends Document {
   updatedAt: Date;
 }
 
-const MessageSchema = new Schema<IMessage>({
-  conversationId: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true, index: true },
-  senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  receiverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  content: { type: String },
-  type: {
-    type: String,
-    enum: ['text', 'image', 'file', 'audio', 'quick_phrase', 'record_attachment', 'call_log'],
-    default: 'text',
-  },
-  fileUrl: { type: String },
-  fileMime: { type: String },
-  mediaId: { type: String },
-  recordId: { type: Schema.Types.ObjectId, ref: 'AttachedRecord' },
-  clientId: { type: String, index: true, sparse: true },
-  isRead: { type: Boolean, default: false },
-  readAt: { type: Date },
-  deliveredAt: { type: Date, default: Date.now },
-  reminderEmailSentAt: { type: Date },
-}, { timestamps: true });
-
-// Compound index for idempotent operations
-MessageSchema.index({ clientId: 1, conversationId: 1 }, { unique: true, sparse: true });
-MessageSchema.index({ conversationId: 1, createdAt: -1 });
-MessageSchema.index({ receiverId: 1, isRead: 1, createdAt: 1, reminderEmailSentAt: 1 });
-
-/**
- * Guard against a legacy Message model (Communications.ts used to register one
- * without conversationId). If that schema is already cached, replace it.
- */
-function getMessageModel(): Model<IMessage> {
-  const existing = mongoose.models.Message as Model<IMessage> | undefined;
-  if (existing) {
-    const hasConversationId = !!existing.schema.path('conversationId');
-    if (hasConversationId) {
-      return existing;
-    }
-    // Wrong schema registered first (legacy Communications.ts) — drop and re-register
-    delete mongoose.models.Message;
-  }
-  return mongoose.model<IMessage>('Message', MessageSchema);
-}
-
-export const Message: Model<IMessage> = getMessageModel();
+export const Message: ModelClass<IMessage> = defineModel<IMessage>({
+  name: 'Message', table: 'messages',
+  refs: { conversationId: 'Conversation', senderId: 'User', receiverId: 'User', recordId: 'AttachedRecord' },
+});
 export default Message;

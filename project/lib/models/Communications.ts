@@ -1,5 +1,4 @@
-import mongoose, { Schema, Document, Types, Model } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 /**
  * Notification model only.
  *
@@ -14,7 +13,7 @@ import mongoose, { Schema, Document, Types, Model } from 'mongoose';
  */
 
 export interface INotification extends Document {
-  userId: Types.ObjectId;
+  userId: string;
   type: string;
   title: string;
   body: string;
@@ -23,16 +22,7 @@ export interface INotification extends Document {
   deliveredVia: string[];
 }
 
-const NotificationSchema = new Schema<INotification>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User' },
-  type: String,
-  title: String,
-  body: String,
-  data: Schema.Types.Mixed,
-  isRead: { type: Boolean, default: false },
-  deliveredVia: [{ type: String }],
-}, { timestamps: true });
-
-export const Notification: Model<INotification> =
-  mongoose.models.Notification ||
-  mongoose.model<INotification>('Notification', NotificationSchema);
+export const Notification: ModelClass<INotification> = defineModel<INotification>({
+  name: 'Notification', table: 'notifications',
+  refs: { userId: 'User' },
+});

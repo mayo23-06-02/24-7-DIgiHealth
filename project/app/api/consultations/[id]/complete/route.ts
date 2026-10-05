@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import Consultation from "@/lib/models/Consultation";
 import { Call } from "@/lib/models/Call";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { apiLogger } from "@/lib/apiLogger";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { finalizeCall } from "@/lib/consultations/finalizeSession";
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 
 /**
  * The practitioner declares the consultation finished.
@@ -33,11 +32,10 @@ export async function POST(
     }
 
     const { id } = await params;
-    if (!isMongoObjectId(id)) {
+    if (!isValidId(id)) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await connectToDatabase();
     const consultation = await Consultation.findById(id);
     if (!consultation) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -1,23 +1,13 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IAITriageSession extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   symptoms: string;
   parsedSymptoms: string[];
   aiResponse: any;
   recommendation: string;
   urgencyScore: number;
-  consultationId?: Types.ObjectId;
+  consultationId?: string;
 }
-const AITriageSessionSchema = new Schema<IAITriageSession>({
-  patientId: { type: Schema.Types.ObjectId, ref: 'User' },
-  symptoms: String,
-  parsedSymptoms: [String],
-  aiResponse: Schema.Types.Mixed,
-  recommendation: String,
-  urgencyScore: Number,
-  consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation' }
-}, { timestamps: true });
 
 export interface ISuggestedDiagnosis {
   condition: string;
@@ -27,9 +17,9 @@ export interface ISuggestedDiagnosis {
 }
 
 export interface IClinicalDecisionSupport extends Document {
-  practitionerId: Types.ObjectId;
-  patientId: Types.ObjectId;
-  consultationId?: Types.ObjectId;
+  practitionerId: string;
+  patientId: string;
+  consultationId?: string;
   symptoms: string;
   suggestedDiagnoses: ISuggestedDiagnosis[];
   recommendedTests: string[];
@@ -46,33 +36,11 @@ export interface IClinicalDecisionSupport extends Document {
   generatedAt: Date;
 }
 
-const SuggestedDiagnosisSchema = new Schema<ISuggestedDiagnosis>(
-  {
-    condition: { type: String, required: true },
-    confidence: { type: Number, required: true, min: 0, max: 100 },
-    reasoning: { type: String, required: true },
-    redFlag: { type: Boolean, default: false },
-  },
-  { _id: false },
-);
-
-const ClinicalDecisionSupportSchema = new Schema<IClinicalDecisionSupport>({
-  practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation' },
-  symptoms: { type: String, required: true },
-  suggestedDiagnoses: [SuggestedDiagnosisSchema],
-  recommendedTests: [String],
-  drugInteractions: [Schema.Types.Mixed],
-  riskScore: Number,
-  riskAssessment: String,
-  status: { type: String, enum: ['pending', 'accepted', 'dismissed'], default: 'pending' },
-  reviewedAt: Date,
-  modelUsed: { type: String, required: true },
-  generatedAt: { type: Date, default: Date.now },
+export const AITriageSession: ModelClass<IAITriageSession> = defineModel<IAITriageSession>({
+  name: 'AITriageSession', table: 'ai_triage_sessions',
+  refs: { patientId: 'User', consultationId: 'Consultation' },
 });
-
-ClinicalDecisionSupportSchema.index({ patientId: 1, generatedAt: -1 });
-
-export const AITriageSession = mongoose.models.AITriageSession || mongoose.model<IAITriageSession>('AITriageSession', AITriageSessionSchema);
-export const ClinicalDecisionSupport = mongoose.models.ClinicalDecisionSupport || mongoose.model<IClinicalDecisionSupport>('ClinicalDecisionSupport', ClinicalDecisionSupportSchema);
+export const ClinicalDecisionSupport: ModelClass<IClinicalDecisionSupport> = defineModel<IClinicalDecisionSupport>({
+  name: 'ClinicalDecisionSupport', table: 'clinical_decision_support',
+  refs: { practitionerId: 'User', patientId: 'User', consultationId: 'Consultation' },
+});

@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { notifyAppointmentChange } from '@/lib/booking/notifications';
 
 import { apiError } from "@/lib/api/errors";
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const { id } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Conversation } from '@/lib/models/Conversation';
 import User from '@/lib/models/User';
 import Consultation from '@/lib/models/Consultation';
@@ -7,7 +6,6 @@ import Consultation from '@/lib/models/Consultation';
 import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request, { params }: { params: Promise<{ conversationId: string }> }) {
   try {
-    await connectToDatabase();
     const { conversationId } = await params;
 
     const conversation = await Conversation.findById(conversationId)

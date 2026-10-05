@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+import { isValidId } from '@/lib/db';
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
     const { id } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -21,7 +19,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     // Postgres-native accounts have no Mongo identity (see
     // lib/utils/mongoId.ts) — Consultation is still Mongo-only, so they
     // genuinely can't own one.
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 

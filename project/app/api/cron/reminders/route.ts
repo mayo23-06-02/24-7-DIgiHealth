@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { sendDueAppointmentReminders, sendDueMessageReminders } from "@/lib/email/reminders";
 
 import { apiError } from "@/lib/api/errors";
@@ -25,7 +24,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    await connectToDatabase();
 
     const [appointments, messages] = await Promise.all([
       sendDueAppointmentReminders({ force: true }),

@@ -1,12 +1,11 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IFamilyLink extends Document {
-  guardianId?: Types.ObjectId;
+  guardianId?: string;
   guardianKey?: string;
   memberKey?: string;
   /** Unset until an email-invited adult actually accepts (they may not have
    * an account yet at invite time) — inviteEmail identifies them until then. */
-  memberId?: Types.ObjectId;
+  memberId?: string;
   inviteEmail?: string;
   /** Name the guardian gave when sending the invite — shown for a pending
    * invite before the invitee has an account to pull a name from. */
@@ -28,58 +27,9 @@ export interface IFamilyLink extends Document {
   updatedAt: Date;
 }
 
-const FamilyLinkSchema = new Schema<IFamilyLink>(
-  {
-    // Not required: a Postgres-native guardian has a uuid, which cannot be
-    // cast into an ObjectId field. Those rows carry guardianKey instead.
-    guardianId: { type: Schema.Types.ObjectId, ref: 'User' },
-    /** Guardian's session id as a plain string — works for uuid and ObjectId alike. */
-    guardianKey: { type: String, index: true },
-    /** Member's session id as a plain string, once the invite is accepted. */
-    memberKey: { type: String, index: true },
-    memberId: { type: Schema.Types.ObjectId, ref: 'User' },
-    inviteEmail: { type: String, lowercase: true, trim: true },
-    inviteName: { type: String, trim: true },
-    relationship: { type: String, enum: ['child', 'spouse', 'parent', 'other'], required: true },
-    isMinor: { type: Boolean, default: false },
-    status: { type: String, enum: ['pending', 'active', 'revoked'], default: 'pending' },
-    linkedVia: { type: String, enum: ['guardian_created', 'email_invite'], required: true },
-    inviteToken: { type: String },
-    inviteExpiresAt: { type: Date },
-    acceptedAt: { type: Date },
-    guardianConsentAt: { type: Date },
-    revokedAt: { type: Date },
-  },
-  { timestamps: true },
-);
-
-FamilyLinkSchema.index({ guardianId: 1, status: 1 });
-FamilyLinkSchema.index({ memberId: 1, status: 1 }, { sparse: true });
-FamilyLinkSchema.index(
-  { guardianId: 1, memberId: 1 },
-  { unique: true, partialFilterExpression: { memberId: { $exists: true, $ne: null } } },
-);
-FamilyLinkSchema.index({ guardianId: 1, inviteEmail: 1 }, { sparse: true });
-FamilyLinkSchema.index({ inviteToken: 1 }, { unique: true, sparse: true });
-
-export const FamilyLink: Model<IFamilyLink> =
-  mongoose.models.FamilyLink || mongoose.model<IFamilyLink>('FamilyLink', FamilyLinkSchema);
-
-let indexSynced = false;
-export async function syncFamilyLinkIndexes() {
-  if (indexSynced) return;
-  try {
-    const collection = FamilyLink.collection;
-    const indexes = await collection.indexes();
-    const badIndex = indexes.find((idx: any) => idx.name === 'guardianId_1_memberId_1');
-    if (badIndex && !badIndex.partialFilterExpression) {
-      await collection.dropIndex('guardianId_1_memberId_1');
-    }
-    await FamilyLink.syncIndexes();
-    indexSynced = true;
-  } catch {
-    indexSynced = true;
-  }
-}
-
+export const FamilyLink: ModelClass<IFamilyLink> = defineModel<IFamilyLink>({
+  name: 'FamilyLink', table: 'family_links',
+  aliases: { guardianKey: 'guardian_id', memberKey: 'member_id' },
+  refs: { guardianId: 'User', memberId: 'User' },
+});
 export default FamilyLink;

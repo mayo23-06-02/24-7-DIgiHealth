@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { MedicalContext } from '@/lib/models/ClinicalData';
@@ -7,12 +6,11 @@ import { PractitionerProfile, PatientProfile } from '@/lib/models/RoleProfiles';
 import RiskScore from '@/lib/models/RiskScore';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { calcAge, riskBandFromScore, riskBandStyle } from '@/lib/riskScore';
-import mongoose from 'mongoose';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId, toId } from '@/lib/db';
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || (user.role !== 'practitioner' && user.role !== 'mega_admin')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -36,8 +34,8 @@ export async function GET(req: NextRequest) {
     }
 
     const oids = uniquePatientIds
-      .filter((id) => mongoose.Types.ObjectId.isValid(id))
-      .map((id) => new mongoose.Types.ObjectId(id));
+      .filter((id) => isValidId(id))
+      .map((id) => (toId(id) as string));
 
     const patients = await User.find(
       { _id: { $in: oids }, role: 'patient' },

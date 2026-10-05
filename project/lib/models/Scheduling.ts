@@ -1,16 +1,15 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IPractitionerSchedule extends Document {
-  practitionerId: Types.ObjectId;
+  practitionerId: string;
   date: Date;
   slots: { startTime: string; endTime: string; status: string }[];
   recurring?: { dayOfWeek: number; startHour: number; endHour: number };
 }
-const PractitionerScheduleSchema = new Schema<IPractitionerSchedule>({
-  practitionerId: { type: Schema.Types.ObjectId, ref: 'User' },
-  date: Date,
-  slots: [{ startTime: String, endTime: String, status: String }],
-  recurring: { dayOfWeek: Number, startHour: Number, endHour: Number }
-}, { timestamps: true });
 
-export const PractitionerSchedule = mongoose.models.PractitionerSchedule || mongoose.model<IPractitionerSchedule>('PractitionerSchedule', PractitionerScheduleSchema);
+export const PractitionerSchedule: ModelClass<IPractitionerSchedule> = defineModel<IPractitionerSchedule>({
+  name: 'PractitionerSchedule', table: 'practitioner_schedules',
+  columns: { date: 'schedule_date' },
+  nest: { recurring: 'recurring_' },
+  refs: { practitionerId: 'User' },
+  children: { slots: { table: 'practitioner_schedule_slots', fk: 'schedule_id' } },
+});

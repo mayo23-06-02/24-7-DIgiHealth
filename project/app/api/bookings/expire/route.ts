@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { expireStaleBookingRequests } from "@/lib/booking/expire";
 
 /**
@@ -8,7 +7,6 @@ import { expireStaleBookingRequests } from "@/lib/booking/expire";
  */
 export async function POST() {
   try {
-    await connectToDatabase();
     const result = await expireStaleBookingRequests({ limit: 500, notify: true });
     return NextResponse.json({ success: true, ...result });
   } catch (err: unknown) {

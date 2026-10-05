@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Prescription, MedicalContext } from "@/lib/models/ClinicalData";
 import Conversation from "@/lib/models/Conversation";
 import Message from "@/lib/models/Message";
@@ -8,9 +7,9 @@ import { durableUrl, uploadBuffer } from "@/lib/supabase/media";
 import { Notification } from "@/lib/models/Communications";
 import User from "@/lib/models/User";
 import Ably from "ably";
-import mongoose from "mongoose";
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId, toId } from '@/lib/db';
 async function publishChatMessage(channelName: string, event: string, data: unknown) {
   try {
     if (!process.env.ABLY_API_KEY) return;
@@ -28,7 +27,6 @@ async function publishChatMessage(channelName: string, event: string, data: unkn
  */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
 
     if (!user || (user.role !== "practitioner" && user.role !== "mega_admin")) {
@@ -76,7 +74,7 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    if (!mongoose.Types.ObjectId.isValid(patientId)) {
+    if (!isValidId(patientId)) {
       return NextResponse.json(
         { success: false, error: "Invalid patient ID" },
         { status: 400 },
@@ -225,7 +223,7 @@ export async function POST(req: NextRequest) {
 
     try {
       await Notification.create({
-        userId: new mongoose.Types.ObjectId(patientId),
+        userId: (toId(patientId) as string),
         type: "prescription_issued",
         title: "New prescription issued",
         body: `${doctorName} issued a prescription for ${medicationName}. Open Messages or Health Records → Meds to view${documentUrl ? " and download the script" : ""}.`,
@@ -262,14 +260,13 @@ export async function POST(req: NextRequest) {
 /** GET — list prescriptions issued by this practitioner (optional patientId filter) */
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || (user.role !== "practitioner" && user.role !== "mega_admin")) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
     const patientId = new URL(req.url).searchParams.get("patientId");
     const filter: any = { practitionerId: user.userId };
-    if (patientId && mongoose.Types.ObjectId.isValid(patientId)) {
+    if (patientId && isValidId(patientId)) {
       filter.patientId = patientId;
     }
     const list = await Prescription.find(filter)

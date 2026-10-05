@@ -1,16 +1,16 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 import { TIER_ORDER } from '@/lib/billing/tiers';
 
 // ─── Payment Transaction ──────────────────────────────────────────────────────
 export interface IPaymentTransaction extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   /** Plain-string owner id — see ISubscription.patientKey. */
   patientKey?: string;
   /** Set when a family guardian pays on this patient's behalf; unset = pays for self (default, unchanged behavior). */
-  payerId?: Types.ObjectId;
-  practitionerId?: Types.ObjectId;
-  facilityId?: Types.ObjectId;
-  consultationId?: Types.ObjectId;
+  payerId?: string;
+  practitionerId?: string;
+  facilityId?: string;
+  consultationId?: string;
   amount: number;
   currency: string;
   provider: 'medical_aid' | 'card' | 'eft' | 'cash' | 'wallet';
@@ -24,30 +24,10 @@ export interface IPaymentTransaction extends Document {
   practitionerEarnings?: number;
   timestamp: Date;
 }
-const PaymentTransactionSchema = new Schema<IPaymentTransaction>({
-  patientId:              { type: Schema.Types.ObjectId, ref: 'User' },
-  patientKey:             { type: String, index: true },
-  payerId:                { type: Schema.Types.ObjectId, ref: 'User' },
-  practitionerId:         { type: Schema.Types.ObjectId, ref: 'User' },
-  facilityId:             { type: Schema.Types.ObjectId, ref: 'Facility' },
-  consultationId:         { type: Schema.Types.ObjectId, ref: 'Consultation' },
-  amount:                 Number,
-  currency:               { type: String, default: 'ZAR' },
-  provider:               { type: String, enum: ['medical_aid', 'card', 'eft', 'cash', 'wallet'] },
-  status:                 { type: String, enum: ['pending', 'completed', 'failed', 'refunded'], default: 'pending' },
-  description:            String,
-  category:               { type: String, enum: ['service_booking', 'subscription', 'procedure', 'pharmacy', 'lab'] },
-  providerTransactionId:  String,
-  receiptUrl:             String,
-  medicalAidClaimRef:     String,
-  platformFeeAmount:      Number,
-  practitionerEarnings:   Number,
-  timestamp:              { type: Date, default: Date.now },
-}, { timestamps: true });
 
 // ─── Subscription ─────────────────────────────────────────────────────────────
 export interface ISubscription extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   /**
    * The owner's session id as a plain string, for accounts whose id is a
    * Postgres uuid and therefore cannot be stored in the ObjectId-typed
@@ -59,7 +39,7 @@ export interface ISubscription extends Document {
    */
   patientKey?: string;
   /** Set when a family guardian pays for this patient; unset = pays for self (default, unchanged behavior). */
-  payerId?: Types.ObjectId;
+  payerId?: string;
   tier: 'individual' | 'family' | 'family_plus';
   status: 'active' | 'trial' | 'cancelled' | 'past_due';
   startDate: Date;
@@ -68,23 +48,11 @@ export interface ISubscription extends Document {
   autoRenew: boolean;
   price: number;
 }
-const SubscriptionSchema = new Schema<ISubscription>({
-  patientId:       { type: Schema.Types.ObjectId, ref: 'User' },
-  patientKey:      { type: String, index: true },
-  payerId:         { type: Schema.Types.ObjectId, ref: 'User' },
-  tier:            { type: String, enum: TIER_ORDER, default: 'individual' },
-  status:          { type: String, enum: ['active', 'trial', 'cancelled', 'past_due'] },
-  startDate:       Date,
-  nextBillingDate: Date,
-  paymentMethodId: String,
-  autoRenew:       { type: Boolean, default: true },
-  price:           { type: Number, default: 0 },
-}, { timestamps: true });
 
 // ─── Payout Request (Practitioner → Platform) ─────────────────────────────────
 export interface IPayoutRequest extends Document {
-  practitionerId: Types.ObjectId;
-  facilityId?: Types.ObjectId;
+  practitionerId: string;
+  facilityId?: string;
   amount: number;
   currency: string;
   status: 'pending' | 'approved' | 'paid' | 'rejected';
@@ -101,33 +69,12 @@ export interface IPayoutRequest extends Document {
   consultationCount: number;
   platformFeeDeducted: number;
   notes?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: string;
 }
-const PayoutRequestSchema = new Schema<IPayoutRequest>({
-  practitionerId:   { type: Schema.Types.ObjectId, ref: 'User' },
-  facilityId:       { type: Schema.Types.ObjectId, ref: 'Facility' },
-  amount:           Number,
-  currency:         { type: String, default: 'ZAR' },
-  status:           { type: String, enum: ['pending', 'approved', 'paid', 'rejected'], default: 'pending' },
-  requestedAt:      { type: Date, default: Date.now },
-  processedAt:      Date,
-  bankAccount:      {
-    accountHolder:  String,
-    bankName:       String,
-    accountNumber:  String,
-    branchCode:     String,
-  },
-  periodFrom:         Date,
-  periodTo:           Date,
-  consultationCount:  Number,
-  platformFeeDeducted: Number,
-  notes:              String,
-  approvedBy:         { type: Schema.Types.ObjectId, ref: 'User' },
-}, { timestamps: true });
 
 // ─── Payment Method (saved cards / accounts) ──────────────────────────────────
 export interface IPaymentMethod extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   /**
    * The owner as a plain string, so Postgres-native accounts (whose id is a
    * uuid and can never be cast to an ObjectId) can own a payment method too —
@@ -162,51 +109,19 @@ export interface IPaymentMethod extends Document {
   coverageType?: string;
   createdAt?: Date;
 }
-const PaymentMethodSchema = new Schema<IPaymentMethod>({
-  // No longer required: an account whose id is a uuid has no ObjectId to put
-  // here, and patientKey is what identifies the owner in that case.
-  patientId:          { type: Schema.Types.ObjectId, ref: 'User' },
-  patientKey:         { type: String, index: true },
-  holderName:         String,
-  billingAddress: {
-    addressLine: String,
-    city:        String,
-    postalCode:  String,
-  },
-  type:               { type: String, enum: ['card', 'medical_aid', 'eft'] },
-  isDefault:          { type: Boolean, default: false },
-  cardBrand:          String,
-  last4:              String,
-  expiryMonth:        Number,
-  expiryYear:         Number,
-  medicalAidProvider: String,
-  medicalAidNumber:   String,
-  bankName:           String,
-  accountNumber:      String,
-  branchCode:         String,
-  insuranceProvider:  String,
-  policyNumber:       String,
-  coverageType:       String,
-}, { timestamps: true });
 
 // ─── Platform Fee Configuration (Mega Admin) ──────────────────────────────────
 export interface IPlatformFeeConfig extends Document {
   platformFeePercent: number;
   subscriptionFeePercent: number;
-  updatedBy: Types.ObjectId;
+  updatedBy: string;
   updatedAt: Date;
   notes: string;
 }
-const PlatformFeeConfigSchema = new Schema<IPlatformFeeConfig>({
-  platformFeePercent:       { type: Number, default: 15 },
-  subscriptionFeePercent:   { type: Number, default: 10 },
-  updatedBy:                { type: Schema.Types.ObjectId, ref: 'User' },
-  notes:                    String,
-}, { timestamps: true });
 
 // ─── Hospital Revenue (Hospital Admin view) ────────────────────────────────────
 export interface IHospitalRevenue extends Document {
-  facilityId: Types.ObjectId;
+  facilityId: string;
   period: 'daily' | 'monthly' | 'yearly';
   date: Date;
   totalRevenue: number;
@@ -215,40 +130,71 @@ export interface IHospitalRevenue extends Document {
   completedPayouts: number;
   netRevenue: number;
 }
-const HospitalRevenueSchema = new Schema<IHospitalRevenue>({
-  facilityId:        { type: Schema.Types.ObjectId, ref: 'Facility' },
-  period:            { type: String, enum: ['daily', 'monthly', 'yearly'] },
-  date:              Date,
-  totalRevenue:      Number,
-  byDepartment:      [{ department: String, revenue: Number, transactionCount: Number }],
-  pendingPayouts:    Number,
-  completedPayouts:  Number,
-  netRevenue:        Number,
-}, { timestamps: true });
 
 // ─── Billing Audit Log ─────────────────────────────────────────────────────────
 export interface IBillingAuditLog extends Document {
-  actorId: Types.ObjectId;
+  actorId: string;
   actionType: string;
-  targetId?: Types.ObjectId;
+  targetId?: string;
   targetModel?: string;
   details: Record<string, any>;
   timestamp: Date;
 }
-const BillingAuditLogSchema = new Schema<IBillingAuditLog>({
-  actorId:     { type: Schema.Types.ObjectId, ref: 'User' },
-  actionType:  String,
-  targetId:    Schema.Types.ObjectId,
-  targetModel: String,
-  details:     Schema.Types.Mixed,
-  timestamp:   { type: Date, default: Date.now },
-}, { timestamps: true });
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
-export const PaymentTransaction  = mongoose.models.PaymentTransaction  || mongoose.model<IPaymentTransaction>('PaymentTransaction',  PaymentTransactionSchema);
-export const Subscription        = mongoose.models.Subscription        || mongoose.model<ISubscription>('Subscription',              SubscriptionSchema);
-export const PayoutRequest       = mongoose.models.PayoutRequest       || mongoose.model<IPayoutRequest>('PayoutRequest',            PayoutRequestSchema);
-export const PaymentMethod       = mongoose.models.PaymentMethod       || mongoose.model<IPaymentMethod>('PaymentMethod',            PaymentMethodSchema);
-export const PlatformFeeConfig   = mongoose.models.PlatformFeeConfig   || mongoose.model<IPlatformFeeConfig>('PlatformFeeConfig',    PlatformFeeConfigSchema);
-export const HospitalRevenue     = mongoose.models.HospitalRevenue     || mongoose.model<IHospitalRevenue>('HospitalRevenue',        HospitalRevenueSchema);
-export const BillingAuditLog     = mongoose.models.BillingAuditLog     || mongoose.model<IBillingAuditLog>('BillingAuditLog',        BillingAuditLogSchema);
+
+export const PaymentTransaction: ModelClass<IPaymentTransaction> = defineModel<IPaymentTransaction>({
+  name: 'PaymentTransaction', table: 'payment_transactions',
+  columns: { timestamp: 'occurred_at' },
+  aliases: { patientKey: 'patient_id' },
+  refs: { patientId: 'User', payerId: 'User', practitionerId: 'User', facilityId: 'Facility', consultationId: 'Consultation' },
+});
+export const Subscription: ModelClass<ISubscription> = defineModel<ISubscription>({
+  name: 'Subscription', table: 'subscriptions',
+  aliases: { patientKey: 'patient_id' },
+  refs: { patientId: 'User', payerId: 'User' },
+});
+export const PayoutRequest: ModelClass<IPayoutRequest> = defineModel<IPayoutRequest>({
+  name: 'PayoutRequest', table: 'payout_requests',
+  columns: {
+    'bankAccount.accountHolder': 'bank_account_holder',
+    'bankAccount.bankName': 'bank_name',
+    'bankAccount.accountNumber': 'bank_account_number',
+    'bankAccount.branchCode': 'bank_branch_code',
+  },
+  refs: { practitionerId: 'User', facilityId: 'Facility', approvedBy: 'User' },
+});
+export const PaymentMethod: ModelClass<IPaymentMethod> = defineModel<IPaymentMethod>({
+  name: 'PaymentMethod', table: 'payment_methods',
+  columns: {
+    last4: 'card_last4',
+    expiryMonth: 'card_expiry_month',
+    expiryYear: 'card_expiry_year',
+    accountNumber: 'bank_account_number',
+    branchCode: 'bank_branch_code',
+    policyNumber: 'insurance_policy_number',
+    coverageType: 'insurance_coverage_type',
+    'billingAddress.addressLine': 'billing_address_line',
+    'billingAddress.city': 'billing_address_city',
+    'billingAddress.postalCode': 'billing_address_postal_code',
+  },
+  aliases: { patientKey: 'patient_id' },
+  refs: { patientId: 'User' },
+});
+export const PlatformFeeConfig: ModelClass<IPlatformFeeConfig> = defineModel<IPlatformFeeConfig>({
+  name: 'PlatformFeeConfig', table: 'platform_fee_config',
+  refs: { updatedBy: 'User' },
+});
+export const HospitalRevenue: ModelClass<IHospitalRevenue> = defineModel<IHospitalRevenue>({
+  name: 'HospitalRevenue', table: 'hospital_revenue',
+  columns: { date: 'revenue_date' },
+  refs: { facilityId: 'Facility' },
+  children: {
+    byDepartment: { table: 'hospital_revenue_by_department', fk: 'hospital_revenue_id' },
+  },
+});
+export const BillingAuditLog: ModelClass<IBillingAuditLog> = defineModel<IBillingAuditLog>({
+  name: 'BillingAuditLog', table: 'audit_logs',
+  columns: { actionType: 'action', targetModel: 'target_type', details: 'metadata', timestamp: 'created_at' },
+  refs: { actorId: 'User' },
+});

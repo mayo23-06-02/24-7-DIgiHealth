@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { PaymentTransaction, PayoutRequest } from "@/lib/models/Billing";
 import HospitalTransaction from "@/lib/models/HospitalTransaction";
 import { requirePlatformAdmin, isMegaAdmin } from "@/lib/auth/admin";
@@ -12,7 +11,6 @@ export async function GET(req: NextRequest) {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
 
     const days = Math.min(
       90,
@@ -92,7 +90,6 @@ export async function PATCH(req: NextRequest) {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const body = await req.json();
     const { payoutId, status } = body;
     if (!payoutId || !["approved", "paid", "rejected", "pending"].includes(status)) {

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { issueOtpCode } from "@/lib/auth/otp";
 import { normalizeEmail, isValidEmail } from "@/lib/supabase/auth";
@@ -21,7 +20,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectToDatabase();
     const user = await User.findOne({ email });
 
     if (!user) {

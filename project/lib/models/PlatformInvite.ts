@@ -1,5 +1,4 @@
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 /**
  * An invite issued by a platform admin (mega_admin/super_admin) via User
  * Management, for a role that still completes its own profile through the
@@ -14,28 +13,15 @@ import mongoose, { Schema, Document, Model, Types } from "mongoose";
 export interface IPlatformInvite extends Document {
   email: string;
   role: "patient" | "practitioner" | "hospital_admin";
-  invitedBy: Types.ObjectId;
+  invitedBy: string;
   token: string;
   status: "pending" | "accepted" | "cancelled" | "expired";
   expiresAt: Date;
   acceptedAt?: Date;
 }
 
-const PlatformInviteSchema = new Schema<IPlatformInvite>(
-  {
-    email: { type: String, required: true, lowercase: true, trim: true, index: true },
-    role: { type: String, enum: ["patient", "practitioner", "hospital_admin"], required: true },
-    invitedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    token: { type: String, required: true, unique: true },
-    status: { type: String, enum: ["pending", "accepted", "cancelled", "expired"], default: "pending" },
-    expiresAt: { type: Date, required: true },
-    acceptedAt: { type: Date },
-  },
-  { timestamps: true },
-);
-
-const PlatformInvite: Model<IPlatformInvite> =
-  mongoose.models.PlatformInvite ||
-  mongoose.model<IPlatformInvite>("PlatformInvite", PlatformInviteSchema);
-
+export const PlatformInvite: ModelClass<IPlatformInvite> = defineModel<IPlatformInvite>({
+  name: 'PlatformInvite', table: 'platform_invites',
+  refs: { invitedBy: 'User' },
+});
 export default PlatformInvite;

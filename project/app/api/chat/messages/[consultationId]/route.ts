@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Message } from '@/lib/models/Message';
 import { Conversation } from '@/lib/models/Conversation';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isValidId, toId } from '@/lib/db';
 
 export async function GET(
   req: Request,
@@ -17,9 +16,8 @@ export async function GET(
     }
 
     const { consultationId } = await params;
-    await connectToDatabase();
 
-    if (!consultationId || !mongoose.Types.ObjectId.isValid(consultationId)) {
+    if (!consultationId || !isValidId(consultationId)) {
       return NextResponse.json({ error: 'Invalid consultation ID' }, { status: 400 });
     }
 
@@ -29,7 +27,7 @@ export async function GET(
     const after = url.searchParams.get('after');
 
     const conversation = await Conversation.findOne({
-      consultationId: new mongoose.Types.ObjectId(consultationId),
+      consultationId: (toId(consultationId) as string),
     }).lean();
 
     if (!conversation) {
@@ -37,7 +35,7 @@ export async function GET(
     }
 
     // Verify the user is a participant in this conversation
-    const userMongoId = new mongoose.Types.ObjectId(user.userId);
+    const userMongoId = (toId(user.userId) as string);
     const isParticipant =
       conversation.patientId?.toString() === userMongoId.toString() ||
       conversation.practitionerId?.toString() === userMongoId.toString();

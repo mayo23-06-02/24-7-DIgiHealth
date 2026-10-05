@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { PatientProfile, PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 async function getUserId(req: NextRequest): Promise<string | null> {
   return req.headers.get("x-user-id") || null;
 }
@@ -13,7 +12,6 @@ async function getUserId(req: NextRequest): Promise<string | null> {
 // GET /api/user/role-data – returns role-specific profile data
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +19,7 @@ export async function GET(req: NextRequest) {
     // Postgres-native accounts have no Mongo `User`/profile row to seed or
     // read (see lib/utils/mongoId.ts) — return sensible defaults instead of
     // crashing on findById/auto-seed create().
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       const requestUser = await getRequestUser();
       if (!requestUser)
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,7 +64,7 @@ export async function GET(req: NextRequest) {
     let roleData: Record<string, any> = {};
 
     if (user.role === "patient") {
-      let profile = await PatientProfile.findOne({ userId }).lean();
+      let profile: any = await PatientProfile.findOne({ userId }).lean();
 
       // Auto-seed if profile missing
       if (!profile) {
@@ -99,7 +97,7 @@ export async function GET(req: NextRequest) {
         popiaConsentDate: profile.popiaConsentDate,
       };
     } else if (user.role === "practitioner") {
-      let profile = await PractitionerProfile.findOne({ userId }).lean();
+      let profile: any = await PractitionerProfile.findOne({ userId }).lean();
 
       // Auto-seed if profile missing
       if (!profile) {
@@ -176,11 +174,10 @@ export async function GET(req: NextRequest) {
 // PUT /api/user/role-data – updates role-specific data
 export async function PUT(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json(
         { error: "Profile editing is not yet available for this account." },
         { status: 400 },

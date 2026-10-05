@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import mongoose from 'mongoose';
+import { WellnessScore } from '@/lib/models/Wellness';
 
 interface WellnessScore {
   patientId: string;
@@ -9,18 +8,8 @@ interface WellnessScore {
   score: number;
 }
 
-const wellnessScoreSchema = new mongoose.Schema({
-  patientId: { type: String, required: true, index: true },
-  date: { type: Date, required: true },
-  score: { type: Number, required: true, min: 0, max: 100 },
-}, { timestamps: true });
-
-const WellnessScore = mongoose.models.WellnessScore ||
-  mongoose.model('WellnessScore', wellnessScoreSchema);
-
 export async function GET() {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
 
     if (!user || user.role !== 'patient') {

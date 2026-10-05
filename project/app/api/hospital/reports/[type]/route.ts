@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import BedOccupancy from '@/lib/models/BedOccupancy';
 import HospitalTransaction from '@/lib/models/HospitalTransaction';
 import Staff from '@/lib/models/Staff';
@@ -9,7 +8,6 @@ import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
 import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request, { params }: { params: Promise<{ type: string }> }) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

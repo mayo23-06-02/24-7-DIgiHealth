@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { Anthropometric, MedicalContext, Prescription, LabResult, Immunization } from '@/lib/models/ClinicalData';
 import { canViewMedicalHistory } from '@/lib/family/access';
@@ -15,7 +14,6 @@ import { apiError } from "@/lib/api/errors";
  */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ memberId: string }> }) {
   try {
-    await connectToDatabase();
     const guardian = await getRequestUser();
     if (!guardian) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 

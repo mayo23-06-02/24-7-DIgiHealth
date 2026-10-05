@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
@@ -9,7 +8,6 @@ import { apiError } from "@/lib/api/errors";
 // Staff management is doctor-only — search always targets practitioner accounts.
 export async function GET(req: Request) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

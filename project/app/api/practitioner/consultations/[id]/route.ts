@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { cookies } from 'next/headers';
@@ -7,7 +6,7 @@ import { jwtVerify } from 'jose';
 import { notifyAppointmentChange } from '@/lib/booking/notifications';
 
 import { apiError } from "@/lib/api/errors";
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 async function getUserId(): Promise<string | null> {
   try {
@@ -30,7 +29,6 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const { id } = await params;
     const body = await req.json();
     const actorUserId = await getUserId();

@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 
 import { apiError } from "@/lib/api/errors";
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
 

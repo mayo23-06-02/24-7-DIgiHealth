@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { getAppOrigin } from "@/lib/supabase/auth";
 import { Subscription, PaymentTransaction } from "@/lib/models/Billing";
@@ -12,12 +11,12 @@ import {
   validateBankAccount,
   validateBillingAddress,
 } from "@/lib/billing/mockGateway";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { rememberPaymentMethod } from "@/lib/billing/rememberPaymentMethod";
 import { signSessionToken, setSessionCookie } from "@/lib/auth/sessionToken";
 import { apiError } from "@/lib/api/errors";
 import { sendEmail } from "@/lib/email/emailjs";
 import { paymentReceiptEmailHtml } from "@/lib/email/templates/paymentReceipt";
+import { isValidId } from '@/lib/db';
 
 /**
  * GET /api/billing/checkout — what the checkout page needs to render.
@@ -148,7 +147,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: payment.error }, { status: 402 });
     }
 
-    await connectToDatabase();
 
     const now = new Date();
     const nextBillingDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -161,7 +159,7 @@ export async function POST(request: Request) {
           // patientKey works for both id shapes; patientId is only set when the
           // id can actually be cast to an ObjectId.
           patientKey: key,
-          ...(isMongoObjectId(key) ? { patientId: key } : {}),
+          ...(isValidId(key) ? { patientId: key } : {}),
           tier,
           status: "active",
           price: plan.price,
@@ -201,7 +199,7 @@ export async function POST(request: Request) {
     // on the billing page.
     const txn = await PaymentTransaction.create({
       patientKey: key,
-      ...(isMongoObjectId(key) ? { patientId: key } : {}),
+      ...(isValidId(key) ? { patientId: key } : {}),
       amount: plan.price,
       currency: "ZAR",
       provider: method === "card" ? "card" : "eft",

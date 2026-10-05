@@ -1,7 +1,6 @@
 import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 import type { NextAuthConfig } from "next-auth";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 
 export default {
@@ -21,7 +20,6 @@ export default {
       if (!account || !user.email) return false;
 
       try {
-        await connectToDatabase();
 
         const existingUser = await User.findOne({ email: user.email.toLowerCase() });
 
@@ -44,7 +42,6 @@ export default {
       if (user?.id) {
         token.id = user.id;
         try {
-          await connectToDatabase();
           const dbUser = await User.findById(user.id);
           token.role = dbUser?.role || "patient";
         } catch {

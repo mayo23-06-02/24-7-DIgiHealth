@@ -1,5 +1,5 @@
 import FamilyLink from "@/lib/models/FamilyLink";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
+import { isValidId } from '@/lib/db';
 
 /**
  * Member-side family lookups.
@@ -22,7 +22,7 @@ import { isMongoObjectId } from "@/lib/utils/mongoId";
  */
 export function memberFilter(memberId: string) {
   const or: Record<string, unknown>[] = [{ memberKey: String(memberId) }];
-  if (isMongoObjectId(memberId)) or.push({ memberId });
+  if (isValidId(memberId)) or.push({ memberId });
   return { $or: or };
 }
 

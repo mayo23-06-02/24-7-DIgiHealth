@@ -1,8 +1,7 @@
-import type { Types } from "mongoose";
 import User from "@/lib/models/User";
 import FamilyLink from "@/lib/models/FamilyLink";
 
-type UserId = Types.ObjectId | string;
+type UserId = string | string;
 
 export interface EmailRecipient {
   email: string;

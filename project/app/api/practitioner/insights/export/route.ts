@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { buildPractitionerInsights } from "@/lib/insights/buildPractitionerInsights";
 import { buildInsightsPdf } from "@/lib/pdf/buildInsightsPdf";
@@ -14,7 +13,6 @@ export const runtime = "nodejs";
  */
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (
       !user ||

@@ -1,31 +1,9 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import mongoose from 'mongoose';
-
-const wellnessCheckInSchema = new mongoose.Schema({
-  patientId: { type: String, required: true, index: true },
-  mood: { type: Number, required: true, min: 1, max: 5 },
-  sleepHours: { type: Number, required: true, min: 0, max: 24 },
-  steps: { type: Number, required: true, min: 0 },
-  date: { type: Date, default: () => new Date() },
-}, { timestamps: true });
-
-const WellnessCheckIn = mongoose.models.WellnessCheckIn ||
-  mongoose.model('WellnessCheckIn', wellnessCheckInSchema);
-
-const wellnessScoreSchema = new mongoose.Schema({
-  patientId: { type: String, required: true, index: true },
-  date: { type: Date, required: true },
-  score: { type: Number, required: true, min: 0, max: 100 },
-}, { timestamps: true });
-
-const WellnessScore = mongoose.models.WellnessScore ||
-  mongoose.model('WellnessScore', wellnessScoreSchema);
+import { WellnessCheckIn, WellnessScore } from '@/lib/models/Wellness';
 
 export async function POST(request: Request) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
 
     if (!user || user.role !== 'patient') {

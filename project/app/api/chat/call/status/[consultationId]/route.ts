@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Call } from "@/lib/models/Call";
 import Consultation from "@/lib/models/Consultation";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 
 /**
  * Whether a scheduled consultation has a live call, for the two people in it.
@@ -27,11 +26,10 @@ export async function GET(
     }
 
     const { consultationId } = await params;
-    if (!isMongoObjectId(consultationId)) {
+    if (!isValidId(consultationId)) {
       return NextResponse.json({ active: false });
     }
 
-    await connectToDatabase();
 
     const consultation = await Consultation.findById(consultationId)
       .select("patientId practitionerId")

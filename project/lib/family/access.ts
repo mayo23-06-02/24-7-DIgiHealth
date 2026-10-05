@@ -1,8 +1,8 @@
 import FamilyLink, { IFamilyLink } from '@/lib/models/FamilyLink';
 import { Subscription } from '@/lib/models/Billing';
 import { TIER_CONFIG, isValidTier, SubscriptionTier } from '@/lib/billing/tiers';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 import { subscriptionFilter } from '@/lib/billing/entitlement';
+import { isValidId } from '@/lib/db';
 
 /** The one active link between a guardian and a member, or null. Mirrors the
  * bespoke-check style already used for practitioner→patient access (see
@@ -16,7 +16,7 @@ export async function getActiveFamilyLink(
   guardianId: string,
   memberId: string,
 ): Promise<IFamilyLink | null> {
-  if (!isMongoObjectId(guardianId) || !isMongoObjectId(memberId)) return null;
+  if (!isValidId(guardianId) || !isValidId(memberId)) return null;
   return FamilyLink.findOne({ guardianId, memberId, status: 'active' });
 }
 
@@ -46,7 +46,7 @@ export async function canViewMedicalHistory(guardianId: string, memberId: string
  */
 export function guardianFilter(guardianId: string) {
   const or: Record<string, unknown>[] = [{ guardianKey: String(guardianId) }];
-  if (isMongoObjectId(guardianId)) or.push({ guardianId });
+  if (isValidId(guardianId)) or.push({ guardianId });
   return { $or: or };
 }
 

@@ -1,7 +1,6 @@
 /**
  * Facility-level overview: staff, doctors, patients, appointments, intelligence.
  */
-import mongoose from "mongoose";
 import Staff from "@/lib/models/Staff";
 import HospitalAppointment from "@/lib/models/HospitalAppointment";
 import HospitalTransaction from "@/lib/models/HospitalTransaction";
@@ -11,6 +10,7 @@ import { PractitionerProfile } from "@/lib/models/RoleProfiles";
 import { Consultation } from "@/lib/models/Consultation";
 import RiskScore from "@/lib/models/RiskScore";
 import { riskBandFromScore } from "@/lib/riskScore";
+import { isValidId, toId } from '@/lib/db';
 
 export interface HospitalOverviewData {
   isNewUser: boolean;
@@ -146,7 +146,7 @@ export async function buildHospitalOverview(
 ): Promise<HospitalOverviewData> {
   if (!hospitalId) return emptyOverview(adminName);
 
-  const facilityOid = new mongoose.Types.ObjectId(hospitalId);
+  const facilityOid = (toId(hospitalId) as string);
   const now = new Date();
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
@@ -314,7 +314,7 @@ export async function buildHospitalOverview(
     ? await PractitionerProfile.find({
         userId: {
           $in: doctorUserIds.map(
-            (id) => new mongoose.Types.ObjectId(id),
+            (id) => (toId(id) as string),
           ),
         },
       }).lean()
@@ -375,8 +375,8 @@ export async function buildHospitalOverview(
 
   // Patients detail
   const patientOids = patientIds
-    .filter((id) => mongoose.Types.ObjectId.isValid(id))
-    .map((id) => new mongoose.Types.ObjectId(id));
+    .filter((id) => isValidId(id))
+    .map((id) => (toId(id) as string));
 
   const patientUsers = patientOids.length
     ? await User.find({ _id: { $in: patientOids } })

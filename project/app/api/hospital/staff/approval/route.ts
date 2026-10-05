@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import Facility from '@/lib/models/Facility';
 import { StaffApprovalRequest } from '@/lib/models/StaffApprovalRequest';
@@ -16,7 +15,6 @@ const APPROVAL_TTL_HOURS = 48;
 /** POST — send approval request to an existing doctor */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

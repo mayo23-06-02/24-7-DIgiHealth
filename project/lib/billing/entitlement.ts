@@ -1,9 +1,8 @@
-import { connectToDatabase } from "@/lib/mongodb";
 import { Subscription } from "@/lib/models/Billing";
 import User from "@/lib/models/User";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { getCoveringGuardianId } from "@/lib/family/coverage";
 import { TIER_CONFIG, isValidTier, type SubscriptionTier } from "./tiers";
+import { isValidId } from '@/lib/db';
 
 /**
  * Where an account's access comes from.
@@ -58,7 +57,7 @@ const COVERING_TIERS = new Set<SubscriptionTier>(
  */
 export function subscriptionFilter(userId: string) {
   const or: Record<string, unknown>[] = [{ patientKey: String(userId) }];
-  if (isMongoObjectId(userId)) or.push({ patientId: userId });
+  if (isValidId(userId)) or.push({ patientId: userId });
   return { $or: or };
 }
 
@@ -88,7 +87,7 @@ function activeTierOf(sub: SubRow): SubscriptionTier | null {
 
 /** Guardian's display name, for the "ask X to renew" copy. Never fatal. */
 async function guardianName(guardianId: string): Promise<string> {
-  if (!isMongoObjectId(guardianId)) return "your family plan holder";
+  if (!isValidId(guardianId)) return "your family plan holder";
   try {
     const row = await User.findById(guardianId)
       .select("firstName lastName")
@@ -118,7 +117,6 @@ export async function getEntitlement(userId: string): Promise<Entitlement> {
   if (!userId) return NONE;
 
   try {
-    await connectToDatabase();
 
     const own = await latestSubscription(userId);
 

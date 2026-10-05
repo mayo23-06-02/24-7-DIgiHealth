@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import Conversation from '@/lib/models/Conversation';
 import User from '@/lib/models/User';
 import Message from '@/lib/models/Message';
-import mongoose from 'mongoose';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
+import { toId, isValidId } from '@/lib/db';
 
 async function getUserInfo() {
   const requestUser = await getRequestUser();
@@ -20,10 +18,9 @@ export async function GET() {
 
   // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
   // — Conversation is still Mongo-only, so they genuinely have none yet.
-  if (!isMongoObjectId(userId)) return NextResponse.json([]);
-  const userOid = new mongoose.Types.ObjectId(userId);
+  if (!isValidId(userId)) return NextResponse.json([]);
+  const userOid = (toId(userId) as string);
 
-  await connectToDatabase();
 
   const convs = await Conversation.find({
     $and: [
@@ -130,7 +127,7 @@ export async function GET() {
       avatar: other
         ? `https://ui-avatars.com/api/?name=${encodeURIComponent(other.firstName || '')}+${encodeURIComponent(other.lastName || '')}&background=4493b8&color=fff`
         : '',
-      lastMessage: lastMsg?.content || 'No messages yet.',
+      lastMessage: (lastMsg as any)?.content || 'No messages yet.',
       timestamp: conv.lastActivityAt
         ? new Date(conv.lastActivityAt).toLocaleTimeString('en-ZA', {
             hour: '2-digit',
@@ -152,7 +149,6 @@ export async function POST(request: Request) {
   if (!userInfo) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { userId, role } = userInfo;
 
-  await connectToDatabase();
   const { practitionerId, patientId, consultationId, contactId } = await request.json();
 
   let targetPractitionerId = practitionerId;
@@ -179,7 +175,7 @@ export async function POST(request: Request) {
   if (!targetPractitionerId || !targetPatientId) {
     return NextResponse.json({ error: 'Missing required participant IDs' }, { status: 400 });
   }
-  if (!isMongoObjectId(targetPatientId) || !isMongoObjectId(targetPractitionerId)) {
+  if (!isValidId(targetPatientId) || !isValidId(targetPractitionerId)) {
     return NextResponse.json(
       { error: 'Messaging is not yet available for this account.' },
       { status: 400 },

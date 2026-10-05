@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { PatientEvent } from '@/lib/models/PatientEvent';
 import { Consultation } from '@/lib/models/Consultation';
 import { Prescription } from '@/lib/models/ClinicalData';
@@ -8,9 +7,9 @@ import User from '@/lib/models/User';
 import { Facility } from '@/lib/models/Facility';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
+import { isValidId } from '@/lib/db';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 async function getPatientId() {
   const cookieStore = await cookies();
@@ -31,9 +30,8 @@ export async function GET() {
   // Postgres-native accounts have no Mongo `User` row (see
   // lib/utils/mongoId.ts) — every collection below is still Mongo-only, so
   // they genuinely have an empty agenda rather than a lookup failure.
-  if (!isMongoObjectId(patientId)) return NextResponse.json([]);
+  if (!isValidId(patientId)) return NextResponse.json([]);
 
-  await connectToDatabase();
   const patient = await User.findById(patientId);
   if (!patient) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -43,7 +41,7 @@ export async function GET() {
     .populate({ path: 'facilityId', model: Facility, select: 'name' })
     .sort({ scheduledStartTime: 1 });
 
-  const pracIds = cons.map(c => c.practitionerId?._id);
+  const pracIds = cons.map(c => (c.practitionerId as any)?._id);
   const profiles = await PractitionerProfile.find({ userId: { $in: pracIds } });
   const specMap = new Map(profiles.map(p => [p.userId.toString(), p.specialisation]));
 
@@ -142,7 +140,6 @@ export async function POST(request: Request) {
   const patientId = await getPatientId();
   if (!patientId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  await connectToDatabase();
   const body = await request.json();
   const { title, date, time, type, notes, color } = body;
 

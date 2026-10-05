@@ -1,10 +1,9 @@
 import { getRequestUser, type RequestUser } from "@/lib/auth/getRequestUser";
 import { PublicError } from "@/lib/api/errors";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Conversation } from "@/lib/models/Conversation";
 import Consultation from "@/lib/models/Consultation";
 import { PractitionerProfile } from "@/lib/models/RoleProfiles";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
+import { isValidId } from '@/lib/db';
 
 /**
  * One place that answers "may this caller touch this record?".
@@ -81,9 +80,8 @@ function isParty(parties: ConversationParties, userId: string): boolean {
 export async function requireConversationParticipant(conversationId: string) {
   const user = await requireUser();
 
-  if (!isMongoObjectId(conversationId)) notFound("Conversation");
+  if (!isValidId(conversationId)) notFound("Conversation");
 
-  await connectToDatabase();
   const conversation = await Conversation.findById(conversationId);
   if (!conversation) notFound("Conversation");
 
@@ -96,9 +94,8 @@ export async function requireConversationParticipant(conversationId: string) {
 export async function requireConsultationParticipant(consultationId: string) {
   const user = await requireUser();
 
-  if (!isMongoObjectId(consultationId)) notFound("Consultation");
+  if (!isValidId(consultationId)) notFound("Consultation");
 
-  await connectToDatabase();
   const consultation = await Consultation.findById(consultationId);
   if (!consultation) notFound("Consultation");
 
@@ -124,14 +121,13 @@ export async function requireConsultationParticipant(consultationId: string) {
 export async function requirePatientAccess(patientId: string): Promise<RequestUser> {
   const user = await requireRole("practitioner", "mega_admin");
 
-  if (!isMongoObjectId(patientId)) {
+  if (!isValidId(patientId)) {
     throw new PublicError("Invalid patient ID", 400);
   }
 
   // A platform admin is not practising, so no link exists or is expected.
   if (user.role === "mega_admin") return user;
 
-  await connectToDatabase();
 
   const practitionerId = user.userId;
   const profile = await PractitionerProfile.findOne({ userId: practitionerId })

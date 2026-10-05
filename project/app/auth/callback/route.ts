@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import {
   applyAuthCookies,
@@ -68,7 +67,6 @@ export async function GET(req: NextRequest) {
       return fail("Could not read email from the verification link.");
     }
 
-    await connectToDatabase();
     const user = await User.findOne({ email });
     if (!user) {
       const dest = new URL("/register", origin);

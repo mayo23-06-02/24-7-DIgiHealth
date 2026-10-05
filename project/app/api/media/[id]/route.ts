@@ -10,7 +10,6 @@ import {
   type MediaPurpose,
 } from "@/lib/supabase/media";
 import Conversation from "@/lib/models/Conversation";
-import { connectToDatabase } from "@/lib/mongodb";
 
 import { apiError } from "@/lib/api/errors";
 async function canAccess(
@@ -20,7 +19,6 @@ async function canAccess(
 ): Promise<boolean> {
   if (asset.userId === userId || role === "mega_admin") return true;
   if (asset.conversationId) {
-    await connectToDatabase();
     const conv = await Conversation.findById(asset.conversationId).lean();
     if (!conv) return false;
     const p = String((conv as any).patientId);
@@ -33,7 +31,6 @@ async function canAccess(
     (asset.relatedType === "user_document" ||
       asset.filePath.includes("/documents/"))
   ) {
-    await connectToDatabase();
     const { canPractitionerAccessPatient } = await import(
       "@/lib/auth/canAccessPatient"
     );

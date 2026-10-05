@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { riskBandFromScore } from '@/lib/riskScore';
@@ -27,7 +26,6 @@ async function getPractitionerId(): Promise<string> {
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { expireStaleBookingRequests } = await import('@/lib/booking/expire');
     await expireStaleBookingRequests();
     // Email reminder for consultations starting in ~10 minutes (throttled, idempotent)
@@ -91,8 +89,8 @@ export async function GET(req: NextRequest) {
 
         if (search && !patientName.toLowerCase().includes(search.toLowerCase())) return null;
 
-        const start = new Date((c as any).scheduledStartTime || c.scheduledStart);
-        const end = new Date((c as any).scheduledEndTime || c.scheduledEnd);
+        const start = new Date((c as any).scheduledStartTime || (c as any).scheduledStart);
+        const end = new Date((c as any).scheduledEndTime || (c as any).scheduledEnd);
         const durationMinutes = Math.max(
           0,
           Math.round((end.getTime() - start.getTime()) / 60000) ||
@@ -153,7 +151,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const body = await req.json();
     const practitionerId = await getPractitionerId();
     const { notifyBookingEvent } = await import('@/lib/booking/notifications');

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
 import {
   buildScheduleSlots,
@@ -8,7 +7,7 @@ import {
   OPERATING_END_HOUR,
   OPERATING_START_HOUR,
 } from "@/lib/booking/slots";
-import mongoose from "mongoose";
+import { isValidId, toId } from '@/lib/db';
 
 /**
  * GET /api/bookings/slots
@@ -38,7 +37,7 @@ const MAX_BATCH = 25;
 async function handleBatch(ids: string[], date: string, durationMinutes: number) {
   const valid = ids
     .map((id) => id.trim())
-    .filter((id) => mongoose.Types.ObjectId.isValid(id))
+    .filter((id) => isValidId(id))
     .slice(0, MAX_BATCH);
 
   if (valid.length === 0) {
@@ -52,7 +51,7 @@ async function handleBatch(ids: string[], date: string, durationMinutes: number)
 
   // One query for every practitioner in the batch, instead of one each.
   const consultations = await Consultation.find({
-    practitionerId: { $in: valid.map((id) => new mongoose.Types.ObjectId(id)) },
+    practitionerId: { $in: valid.map((id) => (toId(id) as string)) },
     status: { $in: ["requested", "pending", "scheduled", "in_progress"] },
     scheduledStartTime: { $lt: rangeEnd },
     scheduledEndTime: { $gt: rangeStart },
@@ -85,7 +84,6 @@ async function handleBatch(ids: string[], date: string, durationMinutes: number)
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const practitionerId = searchParams.get("practitionerId");
     const practitionerIds = searchParams.get("practitionerIds");
@@ -114,7 +112,7 @@ export async function GET(req: NextRequest) {
         { status: 400 },
       );
     }
-    if (!mongoose.Types.ObjectId.isValid(practitionerId)) {
+    if (!isValidId(practitionerId)) {
       return NextResponse.json(
         { error: "Invalid practitionerId" },
         { status: 400 },
@@ -127,7 +125,7 @@ export async function GET(req: NextRequest) {
     const rangeEnd = new Date(dayEnd.getTime() + 14 * 60 * 60 * 1000);
 
     const consultations = await Consultation.find({
-      practitionerId: new mongoose.Types.ObjectId(practitionerId),
+      practitionerId: (toId(practitionerId) as string),
       status: { $in: ["requested", "pending", "scheduled", "in_progress"] },
       scheduledStartTime: { $lt: rangeEnd },
       scheduledEndTime: { $gt: rangeStart },

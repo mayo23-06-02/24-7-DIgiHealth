@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
-import mongoose from 'mongoose';
+import { PractitionerBilling as Billing } from '@/lib/models/PractitionerBilling';
 import { requireRole } from '@/lib/auth/access';
 
 import { apiError } from "@/lib/api/errors";
@@ -20,24 +19,8 @@ async function getPractitionerId(): Promise<string> {
   return user.userId;
 }
 
-// Billing schema (inline to avoid import issues)
-const BillingSchema = new mongoose.Schema({
-  patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  practitionerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  consultationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Consultation' },
-  amount: Number,
-  type: String,
-  status: String,
-  paymentMethod: String,
-  date: { type: Date, default: Date.now },
-  invoiceNumber: String,
-}, { timestamps: true });
-
-const Billing = mongoose.models.Billing || mongoose.model('Billing', BillingSchema);
-
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const practitionerId = await getPractitionerId();
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
@@ -52,7 +35,7 @@ export async function GET(req: NextRequest) {
       if (to) filter.date.$lte = new Date(to);
     }
 
-    let transactions = await Billing.find(filter).sort({ date: -1 }).lean();
+    let transactions: any[] = await Billing.find(filter).sort({ date: -1 }).lean();
 
     // If no billing records yet, derive from completed consultations
     if (transactions.length === 0) {

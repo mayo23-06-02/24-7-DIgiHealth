@@ -1,5 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IFacility extends Document {
   name: string;
   facilityType: 'Public' | 'Private' | 'NGO';
@@ -15,23 +14,23 @@ export interface IFacility extends Document {
   regCertificate?: string;
 }
 
-const FacilitySchema = new Schema<IFacility>({
-  name: { type: String, required: true },
-  facilityType: { type: String, enum: ['Public', 'Private', 'NGO'] },
-  address: {
-    street: String, city: String, province: String,
-    coordinates: { type: [Number], index: '2dsphere' }
+export const Facility: ModelClass<IFacility> = defineModel<IFacility>({
+  name: 'Facility', table: 'facilities',
+  nest: { address: 'address_', contactInfo: 'contact_', bedCapacity: 'bed_' },
+  virtualPaths: { 'address.coordinates': { cols: ['location_lat', 'location_lng'] } },
+  fromRow: (doc, row) => {
+    delete doc.locationLat;
+    delete doc.locationLng;
+    if (row.location_lng != null && row.location_lat != null) {
+      doc.address = { ...(doc.address ?? {}), coordinates: [row.location_lng, row.location_lat] };
+    }
   },
-  contactInfo: { phone: String, emergencyPhone: String, email: String },
-  bedCapacity: { total: Number, generalAvailable: Number, icuAvailable: Number },
-  currentWaitTimeMins: { type: Number, default: 0 },
-  isOpen: { type: Boolean, default: true },
-  specialties: [{ type: String }],
-  emergencyServices: { type: Boolean, default: false },
-  logo: { type: String },
-  wallpaper: { type: String },
-  regCertificate: { type: String }
+  toRow: (row, doc) => {
+    const c = doc.address?.coordinates;
+    if (Array.isArray(c) && c.length === 2) {
+      row.location_lng = c[0];
+      row.location_lat = c[1];
+    }
+  },
 });
-
-export const Facility = mongoose.models.Facility || mongoose.model<IFacility>('Facility', FacilitySchema);
 export default Facility;

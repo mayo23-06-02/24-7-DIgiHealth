@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { 
   Anthropometric, 
   MedicalContext, 
@@ -11,10 +10,10 @@ import { Consultation } from '@/lib/models/Consultation';
 import { AITriageSession } from '@/lib/models/AIDecision';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+import { isValidId } from '@/lib/db';
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 async function getUserId(req: NextRequest): Promise<string | null> {
   const cookieStore = await cookies();
@@ -39,14 +38,13 @@ const EMPTY_HEALTH_RECORD = {
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
     // Postgres-native accounts have no Mongo identity (see
     // lib/utils/mongoId.ts) — every collection below is still Mongo-only,
     // so they genuinely have an empty record rather than a lookup failure.
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json({ success: true, data: EMPTY_HEALTH_RECORD });
     }
 

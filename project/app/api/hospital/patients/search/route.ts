@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import { escapeRegex } from '@/lib/escapeRegex';
@@ -7,7 +6,6 @@ import { escapeRegex } from '@/lib/escapeRegex';
 import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request) {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

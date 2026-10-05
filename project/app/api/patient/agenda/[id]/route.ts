@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { PatientEvent } from '@/lib/models/PatientEvent';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 async function getPatientId() {
   const cookieStore = await cookies();
@@ -20,7 +19,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const patientId = await getPatientId();
   if (!patientId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  await connectToDatabase();
   const { id } = await params;
   await PatientEvent.findOneAndDelete({ _id: id, patientId });
   return NextResponse.json({ ok: true });

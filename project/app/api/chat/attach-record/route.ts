@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import AttachedRecord from "@/lib/models/AttachedRecord";
 import Conversation from "@/lib/models/Conversation";
 import Message from "@/lib/models/Message";
@@ -8,12 +7,10 @@ import { durableUrl, uploadBuffer } from "@/lib/supabase/media";
 import { Notification } from "@/lib/models/Communications";
 import User from "@/lib/models/User";
 import Ably from "ably";
-import mongoose from "mongoose";
 
 import { apiError } from "@/lib/api/errors";
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
 
     const formData = await req.formData();
     const conversationId = formData.get("conversationId") as string;

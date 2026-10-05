@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import Facility from "@/lib/models/Facility";
 import Staff from "@/lib/models/Staff";
 import HospitalAppointment from "@/lib/models/HospitalAppointment";
@@ -12,7 +11,6 @@ export async function GET(req: NextRequest) {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
 
     const search = req.nextUrl.searchParams.get("search") || "";
     const facilities = await Facility.find().lean();

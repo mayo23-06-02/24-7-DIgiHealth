@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
 import User from '@/lib/models/User';
 import { escapeRegex } from '@/lib/escapeRegex';
@@ -16,7 +15,6 @@ export async function GET(request: Request) {
     const rating = searchParams.get('rating');
     const sortBy = searchParams.get('sortBy');
 
-    await connectToDatabase();
 
     const query: any = {};
     if (specialisation && specialisation !== 'All') {

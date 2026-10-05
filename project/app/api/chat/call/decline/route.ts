@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import Ably from "ably";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Conversation } from "@/lib/models/Conversation";
 import { Call } from "@/lib/models/Call";
 import { Message } from "@/lib/models/Message";
@@ -25,7 +24,6 @@ export async function POST(req: Request) {
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await connectToDatabase();
     const { callId } = await req.json();
 
     const call = await Call.findById(callId);

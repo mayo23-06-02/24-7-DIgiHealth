@@ -1,8 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IStaff extends Document {
-  userId?: mongoose.Types.ObjectId;
-  facilityId: mongoose.Types.ObjectId;
+  userId?: string;
+  facilityId: string;
   role: "doctor" | "nurse" | "admin" | "technician";
   department: string;
   shiftSchedule: { start: string; end: string; days: number[] };
@@ -11,19 +10,13 @@ export interface IStaff extends Document {
   qualifications: string[];
 }
 
-const StaffSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User' },
-  facilityId: { type: Schema.Types.ObjectId, ref: 'Facility', required: true },
-  role: { type: String, enum: ["doctor", "nurse", "admin", "technician"], required: true },
-  department: { type: String, required: true },
-  shiftSchedule: {
-    start: { type: String, required: true },
-    end: { type: String, required: true },
-    days: [{ type: Number }]
+export const Staff: ModelClass<IStaff> = defineModel<IStaff>({
+  name: 'Staff', table: 'staff',
+  columns: {
+    'shiftSchedule.start': 'shift_start',
+    'shiftSchedule.end': 'shift_end',
+    'shiftSchedule.days': 'shift_days',
   },
-  isOnDuty: { type: Boolean, default: false },
-  hourlyRate: { type: Number, required: true },
-  qualifications: [{ type: String }]
-}, { timestamps: true });
-
-export default mongoose.models.Staff || mongoose.model<IStaff>('Staff', StaffSchema);
+  refs: { userId: 'User', facilityId: 'Facility' },
+});
+export default Staff;

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Consultation } from "@/lib/models/Consultation";
 import User from "@/lib/models/User";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-import mongoose from "mongoose";
 import {
   notifyAppointmentChange,
   notifyBookingEvent,
@@ -12,9 +10,10 @@ import {
 import { expireStaleBookingRequests } from "@/lib/booking/expire";
 import { getRequesterId, getBlockedAcceptorId } from "@/lib/booking/requester";
 import { PatientProfile, PractitionerProfile } from "@/lib/models/RoleProfiles";
+import { isValidId, toId } from '@/lib/db';
 
 const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "secret123!",
+  process.env.JWT_SECRET,
 );
 
 async function getAuthUser(): Promise<{
@@ -43,7 +42,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     await expireStaleBookingRequests();
     const auth = await getAuthUser();
     if (!auth) {
@@ -51,7 +49,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidId(id)) {
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
 
@@ -133,14 +131,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const auth = await getAuthUser();
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidId(id)) {
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
 
@@ -302,7 +299,7 @@ export async function PATCH(
       c.pendingReschedule = {
         proposedStart,
         proposedEnd,
-        proposedBy: new mongoose.Types.ObjectId(auth.userId),
+        proposedBy: (toId(auth.userId) as string),
         proposedAt: new Date(),
       };
       await c.save();

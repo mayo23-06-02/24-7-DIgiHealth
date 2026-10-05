@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 import {
   buildAdminReport,
@@ -14,7 +13,6 @@ export async function GET(req: NextRequest) {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
 
     const sp = req.nextUrl.searchParams;
     const type = (sp.get("type") || "overview") as AdminReportType;

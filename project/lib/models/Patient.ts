@@ -1,5 +1,4 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IEmergencyContact {
   name: string;
   phone: string;
@@ -7,7 +6,7 @@ export interface IEmergencyContact {
 }
 
 export interface IPatient extends Document {
-  userId: Types.ObjectId;
+  userId: string;
   dateOfBirth: Date;
   gender: 'male' | 'female' | 'other';
   mobileNumber: string;
@@ -20,31 +19,9 @@ export interface IPatient extends Document {
   updatedAt: Date;
 }
 
-const EmergencyContactSchema = new Schema<IEmergencyContact>(
-  {
-    name: { type: String, required: true },
-    phone: { type: String, required: true },
-    relationship: { type: String },
-  },
-  { _id: false },
-);
-
-const PatientSchema = new Schema<IPatient>(
-  {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    dateOfBirth: { type: Date, required: true },
-    gender: { type: String, enum: ['male', 'female', 'other'], required: true },
-    mobileNumber: { type: String, required: true },
-    medicalHistory: [{ type: String }],
-    allergies: [{ type: String }],
-    currentMedications: [{ type: String }],
-    bloodType: { type: String },
-    emergencyContact: { type: EmergencyContactSchema, required: true },
-  },
-  { timestamps: true },
-);
-
-PatientSchema.index({ userId: 1 }, { unique: true });
-
-const Patient: Model<IPatient> = mongoose.models.Patient || mongoose.model<IPatient>('Patient', PatientSchema);
+export const Patient: ModelClass<IPatient> = defineModel<IPatient>({
+  name: 'Patient', table: 'patient_profiles',
+  nest: { emergencyContact: 'emergency_contact_' },
+  refs: { userId: 'User' },
+});
 export default Patient;

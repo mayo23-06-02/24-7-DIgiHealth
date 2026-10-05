@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { connectToDatabase } from '@/lib/mongodb';
 import HospitalAppointment from '@/lib/models/HospitalAppointment';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 // Same resolver the sibling hospital routes use (dashboard, performance, sla).
 // The Postgres-only variant returns null for any admin whose facility link
 // still lives in Mongo, which 404'd this endpoint for every seeded account.
 import { resolveHospitalId } from '@/lib/hospital/resolveHospitalId';
+import { toId } from '@/lib/db';
 
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -15,7 +14,6 @@ const MONTHS = [
 
 export async function GET() {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user || user.role !== 'hospital_admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -30,7 +28,7 @@ export async function GET() {
     // does not, so pipelines need the ObjectId form or they match nothing.
     const baseFilter = { facilityId };
     const aggFilter = {
-      facilityId: new mongoose.Types.ObjectId(String(facilityId)),
+      facilityId: (toId(String(facilityId)) as string),
     };
 
     const twelveMonthsAgo = new Date();

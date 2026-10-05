@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 import { buildPlatformOverview } from "@/lib/admin/buildPlatformOverview";
 
@@ -11,7 +10,6 @@ export async function GET() {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const overview = await buildPlatformOverview(30);
 
     const alerts = overview.intelligence.map((i) => ({

@@ -1,9 +1,8 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IConsultation extends Document {
-  patientId: Types.ObjectId;
-  practitionerId: Types.ObjectId;
-  facilityId?: Types.ObjectId;
+  patientId: string;
+  practitionerId: string;
+  facilityId?: string;
   type: 'video' | 'voice' | 'chat' | 'in_person';
   status: 'requested' | 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'missed';
   scheduledStartTime: Date;
@@ -22,49 +21,23 @@ export interface IConsultation extends Document {
   pendingReschedule?: {
     proposedStart: Date;
     proposedEnd: Date;
-    proposedBy: Types.ObjectId;
+    proposedBy: string;
     proposedAt: Date;
   };
-  requestedTo?: Types.ObjectId;
+  requestedTo?: string;
   /** Set once the 10-minutes-before-start email reminder has gone out, so it never sends twice. */
   reminderEmailSentAt?: Date;
 }
 
-const ConsultationSchema = new Schema<IConsultation>({
-  patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  facilityId: { type: Schema.Types.ObjectId, ref: 'Facility' },
-  // 'voice' is a real consultation type, not a video call with the camera off:
-  // it is offered at booking, and the session opens as an audio call. Without
-  // it in this enum a voice booking fails validation at save.
-  type: { type: String, enum: ['video', 'voice', 'chat', 'in_person'], required: true },
-  status: { type: String, enum: ['requested', 'pending', 'scheduled', 'in_progress', 'completed', 'cancelled', 'missed'], default: 'requested' },
-  scheduledStartTime: { type: Date, required: true },
-  scheduledEndTime: { type: Date, required: true },
-  chiefComplaint: { type: String },
-  clinicalRisk: { score: Number, color: { type: String, enum: ['green', 'gray', 'red'] }, factors: [String] },
-  soapNotes: { subjective: String, objective: String, assessment: String, plan: String, signedAt: Date },
-  callMinutesUsed: { type: Number, default: 0 },
-  source: {
-    type: String,
-    enum: ['patient_self_serve', 'practitioner_schedule', 'hospital_desk', 'system'],
+export const Consultation: ModelClass<IConsultation> = defineModel<IConsultation>({
+  name: 'Consultation', table: 'consultations',
+  nest: { soapNotes: 'soap_', clinicalRisk: 'clinical_risk_' },
+  columns: {
+    'pendingReschedule.proposedStart': 'reschedule_proposed_start',
+    'pendingReschedule.proposedEnd': 'reschedule_proposed_end',
+    'pendingReschedule.proposedBy': 'reschedule_proposed_by',
+    'pendingReschedule.proposedAt': 'reschedule_proposed_at',
   },
-  requestedTo: { type: Schema.Types.ObjectId, ref: 'User' },
-  pendingReschedule: {
-    type: {
-      proposedStart: { type: Date, required: true },
-      proposedEnd: { type: Date, required: true },
-      proposedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-      proposedAt: { type: Date, required: true },
-    },
-    default: undefined,
-  },
-  reminderEmailSentAt: { type: Date },
-}, { timestamps: true });
-
-ConsultationSchema.index({ patientId: 1, scheduledStartTime: -1 });
-ConsultationSchema.index({ practitionerId: 1, scheduledStartTime: -1 });
-ConsultationSchema.index({ status: 1, scheduledStartTime: 1, reminderEmailSentAt: 1 });
-
-export const Consultation = mongoose.models.Consultation || mongoose.model<IConsultation>('Consultation', ConsultationSchema);
+  refs: { patientId: 'User', practitionerId: 'User', facilityId: 'Facility', requestedTo: 'User' },
+});
 export default Consultation;

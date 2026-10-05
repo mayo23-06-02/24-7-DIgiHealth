@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
 import { Consultation } from "@/lib/models/Consultation";
 import { PractitionerProfile } from "@/lib/models/RoleProfiles";
+import { isValidId } from '@/lib/db';
 
 /**
  * True if the practitioner (or mega_admin) may view this patient's clinical data/docs.
@@ -15,8 +15,8 @@ export async function canPractitionerAccessPatient(
   if (practitionerUserId === patientUserId) return true;
 
   if (
-    !mongoose.Types.ObjectId.isValid(practitionerUserId) ||
-    !mongoose.Types.ObjectId.isValid(patientUserId)
+    !isValidId(practitionerUserId) ||
+    !isValidId(patientUserId)
   ) {
     return false;
   }

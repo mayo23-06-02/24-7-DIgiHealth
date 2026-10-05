@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { MedicalContext } from '@/lib/models/ClinicalData';
 import { Consultation } from '@/lib/models/Consultation';
 import Patient from '@/lib/models/Patient';
-import mongoose from 'mongoose';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
+import { isValidId, toId } from '@/lib/db';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const userPayload = await getRequestUser();
     if (!userPayload || (userPayload.role !== 'practitioner' && userPayload.role !== 'mega_admin')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -23,7 +21,7 @@ export async function GET(
     const practitionerId = userPayload.userId;
     const { id: patientUserId } = await params;
 
-    if (!mongoose.Types.ObjectId.isValid(patientUserId)) {
+    if (!isValidId(patientUserId)) {
       return NextResponse.json({ success: false, error: 'Invalid patient ID' }, { status: 400 });
     }
 
@@ -179,7 +177,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
     const userPayload = await getRequestUser();
     if (!userPayload || (userPayload.role !== 'practitioner' && userPayload.role !== 'mega_admin')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -187,13 +184,13 @@ export async function DELETE(
     const practitionerId = userPayload.userId;
     const { id: patientUserId } = await params;
 
-    if (!mongoose.Types.ObjectId.isValid(patientUserId)) {
+    if (!isValidId(patientUserId)) {
       return NextResponse.json({ success: false, error: 'Invalid patient ID' }, { status: 400 });
     }
 
     const result = await PractitionerProfile.findOneAndUpdate(
       { userId: practitionerId },
-      { $pull: { assignedPatientIds: new mongoose.Types.ObjectId(patientUserId) } },
+      { $pull: { assignedPatientIds: (toId(patientUserId) as string) } },
       { new: true },
     );
 

@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { getBlockedAcceptorId } from '@/lib/booking/requester';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     // Auto-cancel unaccepted requests past their start time
     const { expireStaleBookingRequests } = await import('@/lib/booking/expire');
     await expireStaleBookingRequests();
@@ -21,13 +19,13 @@ export async function GET(req: NextRequest) {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     const userId = payload.userId as string;
 
     // Postgres-native accounts have no Mongo identity — Consultation is
     // still Mongo-only, so they can't have any (see lib/utils/mongoId.ts).
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json({ success: true, data: [] });
     }
 

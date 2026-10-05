@@ -1,7 +1,6 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IPatientEvent extends Document {
-  patientId: Types.ObjectId;
+  patientId: string;
   title: string;
   date: string;       // stored as "Mon Apr 14 2026" (toDateString)
   time: string;       // "09:00"
@@ -12,21 +11,9 @@ export interface IPatientEvent extends Document {
   updatedAt: Date;
 }
 
-const PatientEventSchema = new Schema<IPatientEvent>(
-  {
-    patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    title: { type: String, required: true },
-    date: { type: String, required: true },
-    time: { type: String, default: '09:00' },
-    type: { type: String, enum: ['note', 'reminder', 'appointment'], default: 'reminder' },
-    notes: { type: String },
-    color: { type: String, default: 'primary' },
-  },
-  { timestamps: true }
-);
-
-export const PatientEvent =
-  mongoose.models.PatientEvent ||
-  mongoose.model<IPatientEvent>('PatientEvent', PatientEventSchema);
-
+export const PatientEvent: ModelClass<IPatientEvent> = defineModel<IPatientEvent>({
+  name: 'PatientEvent', table: 'patient_events',
+  columns: { date: 'event_date', time: 'event_time' },
+  refs: { patientId: 'User' },
+});
 export default PatientEvent;

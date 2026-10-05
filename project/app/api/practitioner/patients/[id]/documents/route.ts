@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { requirePatientAccess } from "@/lib/auth/access";
 import { apiError } from "@/lib/api/errors";
 import { MedicalDocument as DigitalDocument } from "@/lib/models/ReviewsDocs";
@@ -20,7 +19,6 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectToDatabase();
 
     const { id: patientUserId } = await params;
 

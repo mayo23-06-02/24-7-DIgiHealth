@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Review } from '@/lib/models/ReviewsDocs';
 import { PractitionerProfile } from '@/lib/models/RoleProfiles';
-import mongoose from 'mongoose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,7 +15,7 @@ export async function POST(
     if (!userId) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json(
         { success: false, error: 'Reviews are not yet available for this account.' },
         { status: 400 },
@@ -30,7 +28,6 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Rating and comment are required' }, { status: 400 });
     }
 
-    await connectToDatabase();
 
     // Create the review
     const newReview = await Review.create({
@@ -74,7 +71,6 @@ export async function GET(
 ) {
   try {
     const { id: practitionerId } = await params;
-    await connectToDatabase();
 
     const reviews = await Review.find({ practitionerId: practitionerId })
       .sort({ createdAt: -1 })

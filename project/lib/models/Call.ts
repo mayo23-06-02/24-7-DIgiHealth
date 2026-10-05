@@ -1,9 +1,8 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface ICall extends Document {
-  consultationId?: Types.ObjectId;
-  conversationId: Types.ObjectId;
-  initiatedBy: Types.ObjectId;
+  consultationId?: string;
+  conversationId: string;
+  initiatedBy: string;
   startedAt: Date;
   endedAt?: Date;
   durationSeconds: number;
@@ -18,25 +17,10 @@ export interface ICall extends Document {
    * a session where one party sat alone and gave up is indistinguishable from
    * one where both attended — and both were being recorded as completed.
    */
-  participantUserIds: Types.ObjectId[];
+  participantUserIds: string[];
   /** Set when a practitioner explicitly declared the consultation finished. */
-  endedBy?: Types.ObjectId;
+  endedBy?: string;
 }
-
-const CallSchema = new Schema<ICall>({
-  consultationId: { type: Schema.Types.ObjectId, ref: 'Consultation', required: false },
-  conversationId: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
-  initiatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  startedAt: { type: Date, default: Date.now },
-  endedAt: { type: Date },
-  durationSeconds: { type: Number, default: 0 },
-  type: { type: String, enum: ['video', 'voice'], required: true },
-  status: { type: String, enum: ['requested', 'active', 'ended', 'missed', 'declined'], default: 'active' },
-  livekitRoomName: { type: String },
-  livekitRoomUrl: { type: String },
-  participantUserIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  endedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-});
 
 /**
  * At most one live call per conversation *per appointment*, enforced by the
@@ -61,26 +45,11 @@ const CallSchema = new Schema<ICall>({
  * null, so they still collapse to one live row per conversation — the original
  * guarantee, kept intact.
  */
-CallSchema.index(
-  { conversationId: 1, consultationId: 1 },
-  {
-    name: 'active_call_per_conversation_session',
-    unique: true,
-    partialFilterExpression: { status: 'active' },
-  },
-);
 
 /** Same guarantee keyed on the consultation, for scheduled-appointment sessions. */
-CallSchema.index(
-  { consultationId: 1 },
-  {
-    unique: true,
-    partialFilterExpression: {
-      status: 'active',
-      consultationId: { $exists: true },
-    },
-  },
-);
 
-export const Call: Model<ICall> = mongoose.models.Call || mongoose.model<ICall>('Call', CallSchema);
+export const Call: ModelClass<ICall> = defineModel<ICall>({
+  name: 'Call', table: 'calls',
+  refs: { consultationId: 'Consultation', conversationId: 'Conversation', initiatedBy: 'User', endedBy: 'User' },
+});
 export default Call;

@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import Consultation from "@/lib/models/Consultation";
 import { Call } from "@/lib/models/Call";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { listLiveKitParticipants } from "@/lib/livekit";
+import { isValidId } from '@/lib/db';
 
 /**
  * Who is actually in the consultation's room right now.
@@ -26,11 +25,10 @@ export async function GET(
     }
 
     const { id } = await params;
-    if (!isMongoObjectId(id)) {
+    if (!isValidId(id)) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await connectToDatabase();
     const consultation = await Consultation.findById(id)
       .select("patientId practitionerId")
       .lean<{ patientId: unknown; practitionerId: unknown } | null>();

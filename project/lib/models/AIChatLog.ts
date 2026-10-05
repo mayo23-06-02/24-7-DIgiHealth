@@ -1,5 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
-
+import { defineModel, type Document, type ModelClass } from '@/lib/db';
 export interface IAIChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -7,32 +6,14 @@ export interface IAIChatMessage {
 }
 
 export interface IAIChatLog extends Document {
-  practitionerId: Types.ObjectId;
+  practitionerId: string;
   messages: IAIChatMessage[];
   modelUsed: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const AIChatMessageSchema = new Schema<IAIChatMessage>(
-  {
-    role: { type: String, enum: ['user', 'assistant'], required: true },
-    content: { type: String, required: true },
-    at: { type: Date, default: Date.now },
-  },
-  { _id: false },
-);
-
-const AIChatLogSchema = new Schema<IAIChatLog>(
-  {
-    practitionerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    messages: [AIChatMessageSchema],
-    modelUsed: { type: String, required: true },
-  },
-  { timestamps: true },
-);
-
-AIChatLogSchema.index({ practitionerId: 1, createdAt: -1 });
-
-export const AIChatLog =
-  mongoose.models.AIChatLog || mongoose.model<IAIChatLog>('AIChatLog', AIChatLogSchema);
+export const AIChatLog: ModelClass<IAIChatLog> = defineModel<IAIChatLog>({
+  name: 'AIChatLog', table: 'ai_chat_logs',
+  refs: { practitionerId: 'User' },
+});

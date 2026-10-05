@@ -1,25 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { PatientProfile, PractitionerProfile } from '@/lib/models/RoleProfiles';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
 
     // Get current user (patient)
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     const patientUserId = payload.userId as string;
-    if (!isMongoObjectId(patientUserId)) {
+    if (!isValidId(patientUserId)) {
       return NextResponse.json(
         { error: 'Favorite doctors are not yet available for this account.' },
         { status: 400 },

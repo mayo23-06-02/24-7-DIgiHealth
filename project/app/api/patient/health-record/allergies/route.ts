@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { MedicalContext } from '@/lib/models/ClinicalData';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+import { isValidId } from '@/lib/db';
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 async function getUserId(req: NextRequest): Promise<string | null> {
   const cookieStore = await cookies();
@@ -23,11 +22,10 @@ async function getUserId(req: NextRequest): Promise<string | null> {
 // POST /api/patient/health-record/allergies – add a new allergy
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json(
         { success: false, error: 'Allergy tracking is not yet available for this account.' },
         { status: 400 },
@@ -62,11 +60,10 @@ export async function POST(req: NextRequest) {
 // DELETE /api/patient/health-record/allergies – remove an allergy by _id
 export async function DELETE(req: NextRequest) {
   try {
-    await connectToDatabase();
     const userId = await getUserId(req);
     if (!userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
-    if (!isMongoObjectId(userId)) {
+    if (!isValidId(userId)) {
       return NextResponse.json(
         { success: false, error: 'Allergy tracking is not yet available for this account.' },
         { status: 400 },

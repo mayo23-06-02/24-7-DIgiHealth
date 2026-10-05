@@ -1,4 +1,3 @@
-import type { Types } from "mongoose";
 import { Call } from "@/lib/models/Call";
 import { apiLogger } from "@/lib/apiLogger";
 import { ensureLiveKitRoom, getLiveKitServerUrl } from "@/lib/livekit";
@@ -76,7 +75,7 @@ export async function ensureActiveCall({
   type,
 }: {
   scope: string;
-  conversationId: Types.ObjectId | string;
+  conversationId: string | string;
   consultationId?: string | null;
   initiatedBy: string;
   type: "video" | "voice";

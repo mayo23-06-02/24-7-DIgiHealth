@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { requirePatientAccess } from "@/lib/auth/access";
 import { apiError } from "@/lib/api/errors";
 import { buildHealthProfilePdf } from "@/lib/pdf/buildHealthProfilePdf";
@@ -18,7 +17,6 @@ export const runtime = "nodejs";
  * at all. Sharing the helper is what makes the missing ones visible.
  */
 async function generate(patientId: string) {
-  await connectToDatabase();
   const user = await requirePatientAccess(patientId);
 
   const { buffer, fullName } = await buildHealthProfilePdf(patientId, {

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { requirePlatformAdmin } from "@/lib/auth/admin";
 import { buildPlatformOverview } from "@/lib/admin/buildPlatformOverview";
 
@@ -10,7 +9,6 @@ export async function GET(req: NextRequest) {
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const days = Math.min(
       90,
       Math.max(7, parseInt(req.nextUrl.searchParams.get("days") || "30", 10)),

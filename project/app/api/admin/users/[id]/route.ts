@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import {
   requirePlatformAdmin,
@@ -7,7 +6,6 @@ import {
   isMegaAdmin,
 } from "@/lib/auth/admin";
 import { logAdminAction } from "@/lib/admin/logAdminAction";
-import { updateUserByMongoId } from "@/lib/postgres/users";
 
 import { apiError } from "@/lib/api/errors";
 export const runtime = "nodejs";
@@ -19,7 +17,6 @@ export async function GET(
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const { id } = await params;
     const u = await User.findById(id)
       .select("firstName lastName email role status mfaEnabled createdAt mobile saId")
@@ -54,7 +51,6 @@ export async function PATCH(
   try {
     const gate = await requirePlatformAdmin();
     if (gate.error) return gate.error;
-    await connectToDatabase();
     const { id } = await params;
     const body = await req.json();
     const user = await User.findById(id);
@@ -95,7 +91,6 @@ export async function PATCH(
     if (updates.firstName) pgUpdates.first_name = updates.firstName;
     if (updates.lastName) pgUpdates.last_name = updates.lastName;
     if (Object.keys(pgUpdates).length) {
-      await updateUserByMongoId(id, pgUpdates);
     }
 
     await logAdminAction({

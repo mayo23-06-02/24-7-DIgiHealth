@@ -2,12 +2,12 @@ import bcrypt from "bcryptjs";
 import User from "@/lib/models/User";
 import { sendEmail } from "@/lib/email/resend";
 import { otpVerificationEmailHtml } from "@/lib/email/templates/otpVerification";
-import { updateUserByMongoId } from "@/lib/postgres/users";
+import { randomInt } from "node:crypto";
 
 const OTP_TTL_MINUTES = 10;
 
 function generateOtpCode(): string {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(randomInt(100000, 1000000));
 }
 
 /** Generates, stores (hashed), and emails a fresh 6-digit verification code. */
@@ -23,11 +23,6 @@ export async function issueOtpCode(params: {
   const otpExpiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
   await User.findByIdAndUpdate(params.userId, { otpCodeHash, otpExpiresAt });
-  await updateUserByMongoId(
-    params.userId,
-    { otp_code_hash: otpCodeHash, otp_expires_at: otpExpiresAt.toISOString() },
-    params.email,
-  );
 
   const purpose = params.purpose || "verify_email";
   const { error } = await sendEmail({

@@ -6,7 +6,6 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase/media";
 import Conversation from "@/lib/models/Conversation";
-import { connectToDatabase } from "@/lib/mongodb";
 
 import { apiError } from "@/lib/api/errors";
 /**
@@ -36,7 +35,6 @@ export async function GET(
 
     let allowed = asset.userId === user.userId || user.role === "mega_admin";
     if (!allowed && asset.conversationId) {
-      await connectToDatabase();
       const conv = await Conversation.findById(asset.conversationId).lean();
       if (conv) {
         const p = String((conv as any).patientId);
@@ -53,7 +51,6 @@ export async function GET(
         asset.filePath.includes("/avatars/") ||
         asset.filePath.startsWith(`users/${asset.userId}/`))
     ) {
-      await connectToDatabase();
       const { canPractitionerAccessPatient } = await import(
         "@/lib/auth/canAccessPatient"
       );
@@ -70,7 +67,6 @@ export async function GET(
       if (patientFromPath === user.userId) allowed = true;
       // Linked practitioners can view scripts they issued / patient scripts
       if (!allowed && (user.role === "practitioner" || user.role === "mega_admin")) {
-        await connectToDatabase();
         const { canPractitionerAccessPatient } = await import(
           "@/lib/auth/canAccessPatient"
         );
@@ -89,7 +85,6 @@ export async function GET(
         asset.filePath.includes("/documents/") ||
         asset.filePath.startsWith(`users/${asset.userId}/`))
     ) {
-      await connectToDatabase();
       const { canPractitionerAccessPatient } = await import(
         "@/lib/auth/canAccessPatient"
       );

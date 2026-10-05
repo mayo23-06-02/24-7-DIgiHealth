@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import {
   PatientProfile,
@@ -13,13 +12,6 @@ import StaffInvite from "@/lib/models/StaffInvite";
 import bcrypt from "bcryptjs";
 import { normalizeEmail } from "@/lib/supabase/auth";
 import { composeRegistrationPhone } from "@/lib/phone/normalizePhone";
-import {
-  syncUser,
-  syncPatientProfile,
-  syncPractitionerProfile,
-  syncHospitalAdminProfile,
-} from "@/lib/postgres/users";
-import { syncFacility, syncStaff, updateStaffInviteByMongoId } from "@/lib/postgres/facility";
 
 /**
  * POST /api/auth/register
@@ -31,7 +23,6 @@ import { syncFacility, syncStaff, updateStaffInviteByMongoId } from "@/lib/postg
  */
 export async function POST(request: Request) {
   try {
-    await connectToDatabase();
     const { role: wizardRole, formData } = await request.json();
 
     if (!wizardRole || !formData) {
@@ -119,7 +110,6 @@ export async function POST(request: Request) {
     // Postgres, non-fatal — Mongo remains the source of truth for reads.
     // Awaited (not fire-and-forget) since serverless functions don't
     // guarantee background work continues after the response is sent.
-    await syncUser(newUser as any);
 
     try {
       const regToken =
@@ -180,7 +170,6 @@ export async function POST(request: Request) {
           ? formData.medicalDocuments
           : [],
       });
-      await syncPatientProfile(newUser._id.toString(), patientProfile as any);
 
       if (formData.heightCm || formData.weightKg) {
         const height = parseFloat(formData.heightCm) || 0;
@@ -305,7 +294,6 @@ export async function POST(request: Request) {
           ? new Date()
           : undefined,
       });
-      await syncPractitionerProfile(newUser._id.toString(), practitionerProfile as any);
 
       // Hospital-admin invite acceptance: auto-attach to the inviting
       // facility's Staff roster when this registration came from a valid,
@@ -335,15 +323,10 @@ export async function POST(request: Request) {
               isOnDuty: false,
               hourlyRate: invite.hourlyRate,
             });
-            await syncStaff(invite.facilityId.toString(), newStaff as any);
 
             invite.status = "accepted";
             invite.acceptedAt = new Date();
             await invite.save();
-            await updateStaffInviteByMongoId(invite._id.toString(), {
-              status: "accepted",
-              accepted_at: invite.acceptedAt,
-            });
           }
         } catch (e) {
           console.warn("[register] staff invite acceptance skipped:", e);
@@ -377,7 +360,6 @@ export async function POST(request: Request) {
         wallpaper: formData.facilityWallpaper,
         regCertificate: formData.regCertificate,
       });
-      await syncFacility(newFacility as any);
 
       const adminProfile = await HospitalAdminProfile.create({
         userId: newUser._id,
@@ -385,7 +367,6 @@ export async function POST(request: Request) {
         department: "Administration",
         permissions: ["all"],
       });
-      await syncHospitalAdminProfile(newUser._id.toString(), adminProfile as any);
     }
 
     // Every new account must confirm ownership of their email via a 6-digit

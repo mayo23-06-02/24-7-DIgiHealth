@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import BodyAnnotation from '@/lib/models/BodyAnnotation';
 import User from '@/lib/models/User';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
+import { isValidId } from '@/lib/db';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'secret123!');
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 async function getUserInfo() {
   const cookieStore = await cookies();
@@ -41,11 +40,10 @@ export async function GET(request: Request) {
   // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
   // — BodyAnnotation is still Mongo-only, so they genuinely have none rather
   // than a lookup failure.
-  if (!isMongoObjectId(patientId)) {
+  if (!isValidId(patientId)) {
     return NextResponse.json([]);
   }
 
-  await connectToDatabase();
   const annotations = await BodyAnnotation.find({ patientId }).sort({ createdAt: -1 }).lean();
   return NextResponse.json(annotations);
 }
@@ -54,7 +52,6 @@ export async function POST(request: Request) {
   const userInfo = await getUserInfo();
   if (!userInfo) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  await connectToDatabase();
   const body = await request.json();
   const { description, point, part, patientId: bodyPatientId } = body;
 
@@ -68,7 +65,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Description is required' }, { status: 400 });
   }
 
-  if (!isMongoObjectId(patientId)) {
+  if (!isValidId(patientId)) {
     return NextResponse.json(
       { error: 'Body annotations are not yet available for this account.' },
       { status: 400 },

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Consultation } from '@/lib/models/Consultation';
 import Patient from '@/lib/models/Patient';
 import { riskBandFromScore } from '@/lib/riskScore';
@@ -21,7 +20,6 @@ export async function GET(req: NextRequest) {
     const user = await requireRole('practitioner', 'mega_admin');
     const practitionerId = user.userId;
 
-    await connectToDatabase();
 
     const { searchParams } = new URL(req.url);
 

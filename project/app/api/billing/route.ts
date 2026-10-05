@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import {
   PaymentTransaction,
@@ -40,7 +39,6 @@ export async function GET(request: Request) {
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await connectToDatabase();
 
     const role = user.role as string;
 
@@ -326,7 +324,6 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    await connectToDatabase();
 
     // Approve / Reject a payout
     if (body.action === "update_payout" && body.payoutId) {
@@ -367,7 +364,7 @@ export async function PATCH(request: Request) {
       await BillingAuditLog.create({
         actorId: user._id,
         actionType: "PLATFORM_FEE_UPDATED",
-        targetId: config._id,
+        targetId: config?._id,
         targetModel: "PlatformFeeConfig",
         details: body.config,
       });

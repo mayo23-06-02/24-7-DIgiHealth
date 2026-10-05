@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import PlatformInvite from "@/lib/models/PlatformInvite";
 
 import { apiError } from "@/lib/api/errors";
@@ -21,7 +20,6 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> },
 ) {
   try {
-    await connectToDatabase();
     const { token } = await params;
 
     const invite = await PlatformInvite.findOne({ token }).lean();

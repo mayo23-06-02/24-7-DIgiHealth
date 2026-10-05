@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { normalizeEmail } from "@/lib/supabase/auth";
 import { issueOtpCode } from "@/lib/auth/otp";
@@ -47,7 +46,6 @@ export async function POST(req: NextRequest) {
         message: "If an account exists for this email, a new code has been sent.",
       });
 
-    await connectToDatabase();
     const user = await User.findOne({ email });
 
     if (!user || user.status === "suspended") {

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { normalizeEmail } from "@/lib/supabase/auth";
-import { updateUserByMongoId } from "@/lib/postgres/users";
 
 /**
  * POST /api/auth/otp/verify
@@ -24,7 +22,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectToDatabase();
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -67,13 +64,6 @@ export async function POST(req: NextRequest) {
     user.otpExpiresAt = undefined;
     await user.save();
 
-    await updateUserByMongoId(user._id.toString(), {
-      email_verified: true,
-      email_verified_at: user.emailVerifiedAt,
-      status: "active",
-      otp_code_hash: null,
-      otp_expires_at: null,
-    });
 
     // Verifying an address confirms the mailbox; it is not an authentication.
     // This used to mint a session and sign the user straight in, so anyone

@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
 import { Call } from "@/lib/models/Call";
 import { Conversation } from "@/lib/models/Conversation";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
-import { isMongoObjectId } from "@/lib/utils/mongoId";
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 
 /**
  * Whether an ad-hoc call is live in a conversation, for the two people in it.
@@ -25,11 +24,10 @@ export async function GET(
     }
 
     const { conversationId } = await params;
-    if (!isMongoObjectId(conversationId)) {
+    if (!isValidId(conversationId)) {
       return NextResponse.json({ active: false });
     }
 
-    await connectToDatabase();
 
     const conversation = await Conversation.findById(conversationId)
       .select("patientId practitionerId")

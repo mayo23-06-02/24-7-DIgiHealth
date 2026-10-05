@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Conversation } from '@/lib/models/Conversation';
 import Consultation from '@/lib/models/Consultation';
 
@@ -7,7 +6,6 @@ import { apiError } from "@/lib/api/errors";
 export async function GET(req: Request, { params }: { params: Promise<{ consultationId: string }> }) {
   try {
     const { consultationId } = await params;
-    await connectToDatabase();
     
     // Auto-create conversation if it doesn't exist
     let conv = await Conversation.findOne({ consultationId })

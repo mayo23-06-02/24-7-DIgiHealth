@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import User from '@/lib/models/User';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
 import { Subscription } from '@/lib/models/Billing';
-import FamilyLink, { syncFamilyLinkIndexes } from '@/lib/models/FamilyLink';
+import FamilyLink from '@/lib/models/FamilyLink';
 import { getGuardianFamilySlots } from '@/lib/family/access';
 
 import { apiError } from "@/lib/api/errors";
@@ -21,8 +20,6 @@ function deriveChildEmail(guardianEmail: string): string {
 /** POST — guardian adds a child, confirming guardianship/consent authority first. */
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
-    await syncFamilyLinkIndexes();
     const guardian = await getRequestUser();
     if (!guardian) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 

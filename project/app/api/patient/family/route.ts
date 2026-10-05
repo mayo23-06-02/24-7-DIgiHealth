@@ -1,24 +1,22 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
 import FamilyLink from '@/lib/models/FamilyLink';
 import { getGuardianFamilySlots , guardianFilter } from '@/lib/family/access';
 import { PatientProfile } from '@/lib/models/RoleProfiles';
-import { isMongoObjectId } from '@/lib/utils/mongoId';
 
 import { apiError } from "@/lib/api/errors";
+import { isValidId } from '@/lib/db';
 /** GET — the caller's family links, both as guardian (members they manage)
  * and as member (guardians who manage them, for transparency). */
 export async function GET() {
   try {
-    await connectToDatabase();
     const user = await getRequestUser();
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
     // Postgres-native accounts have no Mongo identity (see lib/utils/mongoId.ts)
     // — FamilyLink/PatientProfile are still Mongo-only, so they genuinely have
     // no family links / profile recorded rather than a lookup failure.
-    const hasMongoIdentity = isMongoObjectId(user.userId);
+    const hasMongoIdentity = isValidId(user.userId);
 
     let asGuardian: any[] = [];
     let asMember: any[] = [];

@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { Conversation } from '@/lib/models/Conversation';
 
 import { apiError } from "@/lib/api/errors";
 export async function POST(req: Request, { params }: { params: Promise<{ consultationId: string }> }) {
   try {
-    await connectToDatabase();
     const { consultationId } = await params;
     const { minutes } = await req.json();
 

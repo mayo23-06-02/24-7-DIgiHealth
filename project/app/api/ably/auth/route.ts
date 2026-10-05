@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import Ably from 'ably';
 import type { capabilityOp } from 'ably';
 import { getRequestUser } from '@/lib/auth/getRequestUser';
-import { connectToDatabase } from '@/lib/mongodb';
 import Conversation from '@/lib/models/Conversation';
 import Consultation from '@/lib/models/Consultation';
 import { getConsultationChannel, getUserCallChannel } from '@/config/ably-config';
@@ -42,7 +41,6 @@ async function handleAuth(_req: NextRequest) {
   }
 
   try {
-    await connectToDatabase();
 
     // Conversations this user is a party to. The ObjectId guard installed at
     // the connection chokepoint makes this match nothing (rather than throw)
