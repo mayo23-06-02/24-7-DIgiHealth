@@ -274,6 +274,7 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     pathname === '/login' ||
     pathname.startsWith('/register') ||
     pathname.startsWith('/verify-email') ||
+    pathname.startsWith('/set-password') ||
     pathname.startsWith('/auth/')
   ) {
     if (token || user) {

@@ -11,6 +11,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
+import FacilityRosterPanel from "./FacilityRosterPanel";
 
 interface FacilityRow {
   id: string;
@@ -40,6 +41,7 @@ export default function AdminFacilitiesPage() {
   const [status, setStatus] = useState("");
   const [sort, setSort] = useState("name:asc");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [roster, setRoster] = useState<FacilityRow | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -226,6 +228,15 @@ export default function AdminFacilitiesPage() {
                     size="sm"
                     variant="outline"
                     fullWidth
+                    onClick={() => setRoster(f)}
+                    className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px]"
+                  >
+                    Patients and doctors
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    fullWidth
                     disabled={busyId === f.id}
                     onClick={() => void toggleOpen(f.id, f.isOpen)}
                     className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px]"
@@ -281,6 +292,14 @@ export default function AdminFacilitiesPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() => setRoster(f)}
+                          className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px] mr-2"
+                        >
+                          People
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
                           disabled={busyId === f.id}
                           onClick={() => void toggleOpen(f.id, f.isOpen)}
                           className="!rounded-lg !max-w-none normal-case !tracking-normal !text-[10px]"
@@ -296,6 +315,13 @@ export default function AdminFacilitiesPage() {
           </>
         )}
       </Card>
+      {roster && (
+        <FacilityRosterPanel
+          facilityId={roster.id}
+          facilityName={roster.name}
+          onClose={() => setRoster(null)}
+        />
+      )}
     </div>
   );
 }
