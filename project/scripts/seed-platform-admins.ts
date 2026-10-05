@@ -40,7 +40,20 @@ function generatePassword(): string {
   return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
 }
 
-const ACCOUNTS = [
+// Extra mega admins: EXTRA_MEGA_ADMIN_EMAILS="a@x.com,b@y.com" (they share MEGA_ADMIN_PASSWORD).
+const EXTRA_MEGA = (process.env.EXTRA_MEGA_ADMIN_EMAILS ?? "")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean)
+  .map((email) => ({
+    email,
+    role: "mega_admin" as const,
+    firstName: "Mega",
+    lastName: "Admin",
+    passwordEnvVar: "MEGA_ADMIN_PASSWORD",
+  }));
+
+const BASE_ACCOUNTS = [
   {
     email: "mega@digi-health.co.za",
     role: "mega_admin" as const,
@@ -56,6 +69,8 @@ const ACCOUNTS = [
     passwordEnvVar: "SUPER_ADMIN_PASSWORD",
   },
 ];
+
+const ACCOUNTS = process.env.ONLY_EXTRA_ADMINS === "true" ? EXTRA_MEGA : [...BASE_ACCOUNTS, ...EXTRA_MEGA];
 
 async function main() {
   const credentialsToShow: { email: string; role: string; password: string }[] =
