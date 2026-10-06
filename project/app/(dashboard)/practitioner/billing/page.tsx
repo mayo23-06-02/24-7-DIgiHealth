@@ -141,7 +141,7 @@ export default function PractitionerBillingPage() {
           color="slate"
         />
         <KPICard
-          label="Last Payout"
+          label="Payment Received"
           value={`R ${summary.lastPayoutAmount.toLocaleString()}`}
           icon={<BiDollarCircle size={24} />}
           color="emerald"

@@ -69,7 +69,6 @@ export default function StatsGrid({
         label="Appointments Today"
         value={upcomingCount.toString()}
         trend={upcomingTrend}
-        description="vs. Yesterday"
         icon={<BiCalendarEvent size={24} />}
         color="primary"
         onClick={() => navigate(appointmentsTodayHref)}
@@ -79,7 +78,7 @@ export default function StatsGrid({
         label="Total Visitors"
         value={totalVisitors.toString()}
         trend={visitorsTrend}
-        description="Total unique patients"
+        description="Total patients"
         icon={<BiUserPlus size={24} />}
         color="emerald"
         onClick={() => navigate(newPatientsHref)}
@@ -90,7 +89,7 @@ export default function StatsGrid({
       <KPICard
         label="High Risk Patients"
         value={riskAlerts.toString()}
-        trend={-4.0}
+        trend={0}
         description="This week"
         icon={<BiPulse size={24} />}
         color="red"
