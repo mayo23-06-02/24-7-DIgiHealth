@@ -4,6 +4,7 @@ import { useAuthContext } from "@/components/auth/AuthProvider";
 import AdminOverviewPage from "./AdminOverviewPage";
 import AdminUsersPage from "./AdminUsersPage";
 import AdminFacilitiesPage from "./AdminFacilitiesPage";
+import AdminArticlesPage from "./AdminArticlesPage";
 import AdminFinancePage from "./AdminFinancePage";
 import AdminAnalyticsPage from "./AdminAnalyticsPage";
 import AdminReportsPage from "./AdminReportsPage";
@@ -33,6 +34,10 @@ export function AdminUsers() {
 
 export function AdminFacilities() {
   return <AdminFacilitiesPage />;
+}
+
+export function AdminArticles() {
+  return <AdminArticlesPage />;
 }
 
 export function AdminFinance() {

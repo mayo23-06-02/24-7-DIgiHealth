@@ -1,6 +1,7 @@
 import { SidebarItem } from "./types";
 import {
   Home,
+  Newspaper,
   Calendar,
   CalendarDays,
   User,
@@ -214,6 +215,12 @@ export const MAIN_NAV: SidebarItem[] = [
     icon: Building2,
     label: "Facilities",
     href: "/[role]/facilities",
+    roles: ["super_admin", "mega_admin"],
+  },
+  {
+    icon: Newspaper,
+    label: "News & Articles",
+    href: "/[role]/articles",
     roles: ["super_admin", "mega_admin"],
   },
   {

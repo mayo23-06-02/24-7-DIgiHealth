@@ -479,3 +479,21 @@ export async function promoteToAvatar(userId: string, url: unknown): Promise<boo
     .select("id");
   return !error && !!data?.length;
 }
+
+/**
+ * Mark an uploaded image as an article cover so every signed-in reader can view it through
+ * the media proxy (see app/api/media/file/[id]). Only the uploader's own image qualifies.
+ */
+export async function markArticleCover(userId: string, url: unknown): Promise<boolean> {
+  const m = typeof url === "string" ? url.match(/\/api\/media\/file\/([0-9a-f-]{36})/i) : null;
+  if (!m || !userId) return false;
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("media_assets")
+    .update({ related_type: "article_cover" })
+    .eq("id", m[1])
+    .eq("user_id", userId)
+    .like("mime_type", "image/%")
+    .select("id");
+  return !error && !!data?.length;
+}

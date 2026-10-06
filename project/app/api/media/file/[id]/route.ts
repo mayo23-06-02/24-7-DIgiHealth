@@ -47,6 +47,8 @@ export async function GET(
     }
 
     let allowed = asset.userId === user.userId || user.role === "mega_admin";
+    // News & Articles cover images are for every signed-in reader.
+    if (!allowed && asset.relatedType === "article_cover") allowed = true;
     if (!allowed && asset.conversationId) {
       const conv = await Conversation.findById(asset.conversationId).lean();
       if (conv) {
