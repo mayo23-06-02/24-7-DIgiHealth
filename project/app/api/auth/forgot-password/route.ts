@@ -1,3 +1,4 @@
+import { escapeHtml, renderEmail } from "@/lib/email/layout";
 import { NextRequest, NextResponse } from 'next/server';
 import User from '@/lib/models/User';
 import { sendEmail } from '@/lib/email/resend';
@@ -74,23 +75,21 @@ export async function POST(req: NextRequest) {
     const emailResult = await sendEmail({
       to: user.email,
       subject: '24/7 DigiHealth — Reset your password',
-      html: `
-<!DOCTYPE html>
-<html>
-<body style="font-family: sans-serif; color: #333;">
-  <p>Dear ${user.firstName},</p>
-  <p>We received a request to reset the password for your 24/7 DigiHealth account. Please use the button below to choose a new password.</p>
-  <p>
-    <a href="${resetLink}" style="background-color: #4493b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-      Reset Password
-    </a>
-  </p>
-  <p>This link expires in 10 minutes.</p>
-  <p>If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
-  <p>Kind regards,<br />The 24/7 DigiHealth team</p>
-</body>
-</html>
-      `,
+      html: renderEmail({
+        preheader: "Use the link inside to choose a new password. It expires in 10 minutes.",
+        eyebrow: "Account security",
+        title: "Reset your password",
+        icon: "&#128273;",
+        greeting: `Dear ${escapeHtml(user.firstName)},`,
+        paragraphs: [
+          "We received a request to reset the password for your 24/7 DigiHealth account. Please use the button below to choose a new password.",
+        ],
+        cta: { label: "Reset password", url: resetLink },
+        notes: [
+          "This link expires in <strong>10 minutes</strong>.",
+          "If you did not request a password reset, you can safely ignore this email. Your password will not change.",
+        ],
+      }),
     });
 
     if (emailResult.error) {

@@ -1,7 +1,6 @@
-/**
- * "Your hospital registered you on 24/7 DigiHealth — complete your health profile" email.
- * Inline styles only — email clients strip <style> blocks.
- */
+import { escapeHtml, renderEmail } from "../layout";
+
+/** "Your hospital registered you on 24/7 DigiHealth" invitation with the profile setup link. */
 export function setPasswordInviteEmailHtml(params: {
   firstName: string;
   facilityName: string;
@@ -12,60 +11,22 @@ export function setPasswordInviteEmailHtml(params: {
 }): string {
   const { firstName, facilityName, kind, fileNumber, setPasswordUrl, expiresInDays } = params;
   const isDoctor = kind === "doctor";
-  const greeting = isDoctor ? `Dear Dr. ${escapeHtml(firstName)},` : `Dear ${escapeHtml(firstName)},`;
-  const role = isDoctor ? "a physician" : "a patient";
   const profile = isDoctor ? "professional profile" : "health profile";
-  return `
-<!DOCTYPE html>
-<html lang="en">
-  <body style="margin:0; padding:0; background-color:#eef4f7; font-family:'Segoe UI', Helvetica, Arial, sans-serif;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef4f7; padding:40px 16px;">
-      <tr><td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background-color:#ffffff; border-radius:16px; overflow:hidden;">
-          <tr><td style="background:#4493b8; padding:32px; text-align:center;">
-            <h1 style="margin:0; color:#ffffff; font-size:22px;">24/7 DigiHealth</h1>
-            <p style="margin:6px 0 0; color:rgba(255,255,255,0.85); font-size:13px; text-transform:uppercase;">Complete your ${profile}</p>
-          </td></tr>
-          <tr><td style="padding:32px 32px 8px;">
-            <h2 style="margin:0 0 12px; color:#0f172a; font-size:20px;">${greeting}</h2>
-            <p style="margin:0 0 16px; color:#475569; font-size:15px; line-height:1.6;">
-              <strong>${escapeHtml(facilityName)}</strong> has successfully registered you as ${role} on the 24/7 DigiHealth platform.
-              Your assigned file number is <strong>${escapeHtml(fileNumber)}</strong>.
-            </p>
-            <p style="margin:0 0 20px; color:#475569; font-size:15px; line-height:1.6;">
-              To activate your account, please use the button below to complete your ${profile}.
-              Kindly review your current information, update any missing details, and set up a secure password to begin using the platform.
-            </p>
-          </td></tr>
-          <tr><td style="padding:8px 32px 32px; text-align:center;">
-            <a href="${setPasswordUrl}" style="display:inline-block; background-color:#4493b8; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none; padding:14px 36px; border-radius:999px;">
-              Complete your ${profile}
-            </a>
-          </td></tr>
-          <tr><td style="padding:0 32px 32px;">
-            <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.6;">
-              If the button does not work, copy and paste this link into your browser:<br />
-              <a href="${setPasswordUrl}" style="color:#4493b8; word-break:break-all;">${setPasswordUrl}</a>
-            </p>
-          </td></tr>
-          <tr><td style="padding:24px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; text-align:center;">
-            <p style="margin:0; color:#94a3b8; font-size:12px;">
-              This link expires in ${expiresInDays} days. If you were not expecting this email, you can safely ignore it.
-            </p>
-          </td></tr>
-        </table>
-      </td></tr>
-    </table>
-  </body>
-</html>
-`.trim();
-}
-
-function escapeHtml(str: string): string {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return renderEmail({
+    preheader: `${facilityName} has registered you on 24/7 DigiHealth. Complete your ${profile} to get started.`,
+    eyebrow: isDoctor ? "Practitioner invitation" : "Patient invitation",
+    title: `Complete your ${profile}`,
+    icon: isDoctor ? "&#129658;" : "&#10084;&#65039;",
+    greeting: isDoctor ? `Dear Dr. ${escapeHtml(firstName)},` : `Dear ${escapeHtml(firstName)},`,
+    paragraphs: [
+      `<strong>${escapeHtml(facilityName)}</strong> has successfully registered you as ${isDoctor ? "a physician" : "a patient"} on the 24/7 DigiHealth platform.`,
+      `To activate your account, please use the button below to complete your ${profile}. Kindly review your current information, update any missing details, and set up a secure password to begin using the platform.`,
+    ],
+    details: [
+      ["Registered by", facilityName],
+      ["Your file number", fileNumber],
+    ],
+    cta: { label: `Complete your ${profile}`, url: setPasswordUrl },
+    notes: [`This link expires in ${expiresInDays} days. If you were not expecting this email, you can safely ignore it.`],
+  });
 }
