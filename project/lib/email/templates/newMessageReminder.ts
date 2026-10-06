@@ -38,7 +38,7 @@ export function newMessageReminderEmailHtml(params: {
               <td style="padding:36px 32px 8px; text-align:center;">
                 <p style="margin:0 0 24px; color:#475569; font-size:15px; line-height:1.6;">
                   ${greeting} you have ${unreadCount} unread ${plural} waiting on
-                  24/7 DigiHealth that you haven't seen yet.
+                  24/7 DigiHealth that you have not read yet.
                 </p>
 
                 <a href="${appUrl}/messages" style="display:inline-block; padding:12px 28px; background-color:#4493b8; color:#ffffff; text-decoration:none; font-weight:700; font-size:14px; border-radius:999px; margin-bottom:8px;">
@@ -51,7 +51,7 @@ export function newMessageReminderEmailHtml(params: {
             <tr>
               <td style="padding:24px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; text-align:center;">
                 <p style="margin:0; color:#94a3b8; font-size:12px;">
-                  You'll get one reminder per unread message — no repeat nudges.
+                  You will receive only one reminder per unread message.
                 </p>
                 <p style="margin:8px 0 0; color:#cbd5e1; font-size:11px;">
                   24/7 DigiHealth · Connect for Care

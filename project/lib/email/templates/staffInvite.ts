@@ -71,7 +71,7 @@ export function staffInviteEmailHtml(params: {
                   </tr>
                   <tr>
                     <td style="padding:4px 4px; color:#334155; font-size:13px; font-weight:600;">
-                      ✓&nbsp;&nbsp;Identity, contact &amp; banking details
+                      ✓&nbsp;&nbsp;Identity and contact details, and payment settlement terms
                     </td>
                   </tr>
                   <tr>
@@ -87,7 +87,7 @@ export function staffInviteEmailHtml(params: {
             <tr>
               <td style="padding:0 32px 32px;">
                 <p style="margin:0; color:#94a3b8; font-size:12px; line-height:1.6;">
-                  Button not working? Paste this link into your browser:<br />
+                  If the button does not work, copy and paste this link into your browser:<br />
                   <a href="${inviteUrl}" style="color:#4493b8; word-break:break-all;">${inviteUrl}</a>
                 </p>
               </td>
@@ -97,7 +97,7 @@ export function staffInviteEmailHtml(params: {
             <tr>
               <td style="padding:24px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; text-align:center;">
                 <p style="margin:0; color:#94a3b8; font-size:12px;">
-                  This invite expires in 15 minutes. If you weren't expecting this, you can safely ignore it.
+                  This invite expires in 15 minutes. If you were not expecting this email, you can safely ignore it.
                 </p>
                 <p style="margin:8px 0 0; color:#cbd5e1; font-size:11px;">
                   24/7 DigiHealth · Connect for Care

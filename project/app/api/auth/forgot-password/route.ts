@@ -78,16 +78,16 @@ export async function POST(req: NextRequest) {
 <!DOCTYPE html>
 <html>
 <body style="font-family: sans-serif; color: #333;">
-  <p>Hi ${user.firstName},</p>
-  <p>We received a request to reset your password. Click the link below to set a new one:</p>
+  <p>Dear ${user.firstName},</p>
+  <p>We received a request to reset the password for your 24/7 DigiHealth account. Please use the button below to choose a new password.</p>
   <p>
     <a href="${resetLink}" style="background-color: #4493b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
       Reset Password
     </a>
   </p>
   <p>This link expires in 10 minutes.</p>
-  <p>If you didn't request this, you can safely ignore this email.</p>
-  <p>24/7 DigiHealth</p>
+  <p>If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
+  <p>Kind regards,<br />The 24/7 DigiHealth team</p>
 </body>
 </html>
       `,

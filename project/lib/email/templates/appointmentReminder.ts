@@ -70,7 +70,7 @@ export function appointmentReminderEmailHtml(params: {
             <tr>
               <td style="padding:24px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; text-align:center;">
                 <p style="margin:0; color:#94a3b8; font-size:12px;">
-                  This is a one-time reminder — you won't get another for this booking.
+                  This is a one-time reminder. You will not receive another reminder for this booking.
                 </p>
                 <p style="margin:8px 0 0; color:#cbd5e1; font-size:11px;">
                   24/7 DigiHealth · Connect for Care

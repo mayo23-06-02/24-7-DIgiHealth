@@ -106,7 +106,7 @@ export function paymentReceiptEmailHtml(params: {
                   View or download your receipt
                 </a>
                 <p style="margin:16px 0 0; color:#94a3b8; font-size:13px; line-height:1.5;">
-                  You'll need to be signed in. From Billing you can download this
+                  You will need to sign in first. From Billing you can download this
                   receipt as a PDF — useful for a medical aid claim.
                 </p>
               </td>

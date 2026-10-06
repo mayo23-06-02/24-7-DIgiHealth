@@ -30,6 +30,24 @@ export function isEmailJSConfigured(): boolean {
   );
 }
 
+/**
+ * EmailJS HTML-escapes double-brace template variables, and the subject line is plain text,
+ * so characters like "/" arrive as "&#x2F;" ("24&#x2F;7 DigiHealth"). Swap the escaped
+ * characters for look-alikes that need no escaping, so every subject reads as written.
+ */
+export function emailSafeSubject(subject: string): string {
+  return String(subject)
+    .replace(/\//g, "\u2215") // division slash: 24∕7
+    .replace(/&/g, "and")
+    .replace(/'/g, "\u2019") // right single quote: You’re
+    .replace(/"([^"]*)"/g, "\u201C$1\u201D")
+    .replace(/"/g, "\u201D")
+    .replace(/</g, "\u2039")
+    .replace(/>/g, "\u203A")
+    .replace(/`/g, "\u2018")
+    .replace(/=/g, "\uA78A");
+}
+
 export async function sendEmail(params: {
   to: string;
   subject: string;
@@ -58,7 +76,7 @@ export async function sendEmail(params: {
         accessToken: privateKey,
         template_params: {
           email: params.to,
-          subject: params.subject,
+          subject: emailSafeSubject(params.subject),
           html: params.html,
         },
       }),

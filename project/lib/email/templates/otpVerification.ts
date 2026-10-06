@@ -18,12 +18,12 @@ export function otpVerificationEmailHtml(params: {
           headerTitle: "Your sign-in code",
           bodyText: `${greeting} enter this code to finish signing in to your 24/7 DigiHealth account.`,
           footerNote:
-            "If you didn't just try to sign in, someone may have your password — consider changing it.",
+            "If you did not try to sign in, someone may know your password. Please change it as soon as possible.",
         }
       : {
           headerTitle: "Verify your account",
           bodyText: `${greeting} enter this code to confirm your email address and activate your 24/7 DigiHealth account.`,
-          footerNote: "If you didn't request this, you can safely ignore this email.",
+          footerNote: "If you did not request this code, you can safely ignore this email.",
         };
 
   return `
