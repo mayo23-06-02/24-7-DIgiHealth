@@ -21,7 +21,7 @@ export function staffApprovalEmailHtml(params: {
     greeting: `Dear Dr. ${escapeHtml(doctorName)},`,
     paragraphs: [
       `A hospital administrator${by} from <strong>${f}</strong> would like to add you to their medical staff${department ? ` in the ${escapeHtml(department)} department` : ""}.`,
-      "Approving allows you to see patients and manage consultations through this facility on 24/7 DigiHealth.",
+      "Approving allows you to see patients and manage consultations through this facility on 24/7 Digi-Health.",
     ],
     details,
     cta: { label: "Review and approve", url: approvalUrl },

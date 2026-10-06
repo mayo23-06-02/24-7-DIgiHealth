@@ -32,7 +32,7 @@ export function isEmailJSConfigured(): boolean {
 
 /**
  * EmailJS HTML-escapes double-brace template variables, and the subject line is plain text,
- * so characters like "/" arrive as "&#x2F;" ("24&#x2F;7 DigiHealth"). Swap the escaped
+ * so characters like "/" arrive as "&#x2F;" ("24&#x2F;7 Digi-Health"). Swap the escaped
  * characters for look-alikes that need no escaping, so every subject reads as written.
  */
 export function emailSafeSubject(subject: string): string {

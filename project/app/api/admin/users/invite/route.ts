@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
       const { error } = await sendEmail({
         to: email,
-        subject: `Your 24/7 DigiHealth ${role === "mega_admin" ? "Mega Admin" : "Super Admin"} account`,
+        subject: `Your 24/7 Digi-Health ${role === "mega_admin" ? "Mega Admin" : "Super Admin"} account`,
         html: adminAccountCreatedEmailHtml({
           role,
           email,
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
     const inviteUrl = `${origin}/register/${WIZARD_ROUTE[role]}?adminInvite=${token}`;
     const { error } = await sendEmail({
       to: email,
-      subject: "You're invited to join 24/7 DigiHealth",
+      subject: "You're invited to join 24/7 Digi-Health",
       html: platformInviteEmailHtml({ role, inviteUrl, invitedByName }),
     });
     if (error) {

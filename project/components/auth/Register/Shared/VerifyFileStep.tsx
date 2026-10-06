@@ -140,7 +140,7 @@ export default function VerifyFileStep({ formData, updateData, errors, role }: a
       </div>
       <p className="text-sm text-slate-500 max-w-xl">
         {isDoctor
-          ? "Your hospital registered you on 24/7 DigiHealth. Enter the staff number they gave you and your HPCSA number to continue."
+          ? "Your hospital registered you on 24/7 Digi-Health. Enter the staff number they gave you and your HPCSA number to continue."
           : "You can join once your hospital has registered you. Enter the file number they gave you. We'll fill in what your hospital already has, so you only complete what's missing."}
       </p>
 

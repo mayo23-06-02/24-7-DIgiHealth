@@ -19,7 +19,7 @@ export async function resolveBookingFacility(
 
   if (shared.length === 0) {
     throw new PublicError(
-      "A hospital file number is required to book. Ask the hospital that treats you to register you on 24/7 DigiHealth.",
+      "A hospital file number is required to book. Ask the hospital that treats you to register you on 24/7 Digi-Health.",
       403,
     );
   }

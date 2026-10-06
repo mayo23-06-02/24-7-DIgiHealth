@@ -60,7 +60,7 @@ export default function SiteHeader({ showUtilityBar }: SiteHeaderProps) {
 
         <div className="w-full bg-white border-b border-slate-200 shadow-xs">
           <div className="container mx-auto max-w-[1400px] px-4 md:px-4 flex items-center justify-between py-2 md:py-2">
-            <Link href="/" className="shrink-0" aria-label="24/7 DigiHealth home">
+            <Link href="/" className="shrink-0" aria-label="24/7 Digi-Health home">
               <LogoMain width={160} height={34} alt={false} />
             </Link>
 

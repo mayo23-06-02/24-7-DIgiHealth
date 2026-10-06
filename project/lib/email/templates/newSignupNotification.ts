@@ -14,7 +14,7 @@ export function newSignupNotificationEmailHtml(params: { fullName: string; email
     eyebrow: "Internal notification",
     title: "New sign-up",
     icon: "&#127881;",
-    paragraphs: [`A new <strong>${escapeHtml(role)}</strong> account has just been created on 24/7 DigiHealth.`],
+    paragraphs: [`A new <strong>${escapeHtml(role)}</strong> account has just been created on 24/7 Digi-Health.`],
     details,
     signoff: false,
   });

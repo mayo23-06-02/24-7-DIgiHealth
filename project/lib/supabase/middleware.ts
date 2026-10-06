@@ -6,7 +6,7 @@ import { getSupabasePublishableKey, getSupabaseUrl } from "./env";
  * Supabase client for middleware / proxy (session refresh).
  * Returns { supabase, response } — always use the returned response so cookie updates apply.
  *
- * DigiHealth APIs still authorize via app JWT cookie `token` (issued after Email OTP).
+ * Digi-Health APIs still authorize via app JWT cookie `token` (issued after Email OTP).
  * Supabase cookies hold the Auth session for OTP / signOut.
  */
 export function createClient(request: NextRequest) {

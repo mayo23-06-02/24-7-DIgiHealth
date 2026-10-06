@@ -107,7 +107,7 @@ export default function AboutPage() {
               Healthcare shouldn't depend on your postal code.
             </h1>
             <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl">
-              24/7 DigiHealth started with a simple frustration: too many South
+              24/7 Digi-Health started with a simple frustration: too many South
               Africans wait weeks for a GP appointment, or drive hours to
               reach a specialist. We built the platform we wished existed.
             </p>

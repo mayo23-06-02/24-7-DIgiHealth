@@ -176,7 +176,7 @@ export default function DesignSystemPage() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white">
               <HeartPulse size={16} />
             </div>
-            <span className="font-grotesk font-bold text-ink-900">24/7 DigiHealth</span>
+            <span className="font-grotesk font-bold text-ink-900">24/7 Digi-Health</span>
             <span className="text-slate-300">/</span>
             <span className="text-sm text-slate-500">Component Library</span>
           </div>

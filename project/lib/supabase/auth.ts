@@ -2,7 +2,7 @@
  * Supabase Auth — magic / sign-in links for email verification
  * (no 6-digit OTP codes).
  *
- * After the user clicks the link, DigiHealth marks emailVerified and they
+ * After the user clicks the link, Digi-Health marks emailVerified and they
  * sign in with email + password (JWT cookie `token`).
  */
 import {
@@ -190,7 +190,7 @@ export interface DigiHealthJwtPayload {
   lastName?: string;
 }
 
-/** Issue DigiHealth app JWT (used by proxy + APIs) */
+/** Issue Digi-Health app JWT (used by proxy + APIs) */
 export async function issueDigiHealthToken(
   payload: DigiHealthJwtPayload,
 ): Promise<string> {

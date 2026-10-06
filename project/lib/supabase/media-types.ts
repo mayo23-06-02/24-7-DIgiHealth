@@ -1,4 +1,4 @@
-/** Unified media types for DigiHealth Supabase media system */
+/** Unified media types for Digi-Health Supabase media system */
 
 export type MediaFileType = "image" | "pdf" | "video" | "audio" | "document";
 

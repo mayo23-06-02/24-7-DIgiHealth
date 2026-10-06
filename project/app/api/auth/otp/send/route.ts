@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "No DigiHealth account found for this email. Please register first." },
+        { error: "No Digi-Health account found for this email. Please register first." },
         { status: 404 },
       );
     }

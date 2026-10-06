@@ -17,7 +17,7 @@ export function useOfflineRegistration(role: string, initialData: any) {
   // Initialize LocalForage
   useEffect(() => {
     localForage.config({
-      name: "24-7-DigiHealth",
+      name: "24-7-Digi-Health",
       storeName: "registration_drafts"
     });
   }, []);

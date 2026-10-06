@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
   try {
     const upstream = await fetch(decodedUrl, {
       headers: {
-        "User-Agent": "DigiHealth-Server/1.0",
+        "User-Agent": "Digi-Health-Server/1.0",
         // Forward cookies for same-origin media proxy redirects
         Cookie: req.headers.get("cookie") || "",
       },

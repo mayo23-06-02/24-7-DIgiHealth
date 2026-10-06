@@ -94,7 +94,7 @@ export default function DoctorsPage() {
               Our Vetting Process
             </span>
             <h2 className="text-3xl md:text-4xl font-medium text-ink-900 tracking-tight font-grotesk">
-              How a doctor gets onto 24/7 DigiHealth
+              How a doctor gets onto 24/7 Digi-Health
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -111,7 +111,7 @@ export default function AboutUs() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
-            About 24/7 DigiHealth
+            About 24/7 Digi-Health
           </span>
           <h2 className="text-3xl md:text-4xl font-medium text-ink-900 mb-6 tracking-tight font-grotesk">
             Our Mission: <span className="text-primary font-bold">Telehealth for Everyone</span>

@@ -426,7 +426,7 @@ export default function HealthRecordPage() {
 
           <Alert
             status="info"
-            title="No delivery or payment through DigiHealth"
+            title="No delivery or payment through Digi-Health"
           >
             Confirming here just marks a refill as used against your doctor's
             authorization. Download your prescription and take it to any

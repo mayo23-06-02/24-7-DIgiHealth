@@ -17,8 +17,8 @@ export function otpVerificationEmailHtml(params: {
     greeting,
     paragraphs: [
       mfa
-        ? "Use the code below to finish signing in to your 24/7 DigiHealth account."
-        : "Thank you for joining 24/7 DigiHealth. To confirm your email address and activate your account, enter the code below.",
+        ? "Use the code below to finish signing in to your 24/7 Digi-Health account."
+        : "Thank you for joining 24/7 Digi-Health. To confirm your email address and activate your account, enter the code below.",
     ],
     code,
     codeLabel: mfa ? "Your sign-in code" : "Your verification code",
@@ -26,7 +26,7 @@ export function otpVerificationEmailHtml(params: {
       "This code expires in <strong>10 minutes</strong>. Never share it with anyone, including our team.",
       mfa
         ? "If you did not try to sign in, someone may know your password. Please change it as soon as possible."
-        : "If you did not create a 24/7 DigiHealth account, you can safely ignore this email. No account will be activated without this code.",
+        : "If you did not create a 24/7 Digi-Health account, you can safely ignore this email. No account will be activated without this code.",
     ],
   });
 }

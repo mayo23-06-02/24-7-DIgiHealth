@@ -10,7 +10,7 @@ export function familyInviteEmailHtml(params: {
   const { guardianName, relationship, inviteUrl, inviteeName } = params;
   const g = escapeHtml(guardianName);
   return renderEmail({
-    preheader: `${guardianName} has invited you to join their family account on 24/7 DigiHealth.`,
+    preheader: `${guardianName} has invited you to join their family account on 24/7 Digi-Health.`,
     eyebrow: "Family account invitation",
     title: "You've been invited",
     icon: "&#128106;",

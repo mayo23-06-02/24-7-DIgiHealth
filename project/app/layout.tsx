@@ -16,7 +16,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "24/7 DigiHealth | Advanced Telehealth Ecosystem for South Africa",
+  title: "24/7 Digi-Health | Advanced Telehealth Ecosystem for South Africa",
   description:
     "Same-day virtual consultations with vetted South African doctors, for your whole family. Upfront pricing, e-prescriptions, and a digital health record that follows you.",
 };

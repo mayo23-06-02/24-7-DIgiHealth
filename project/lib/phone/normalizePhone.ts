@@ -1,5 +1,5 @@
 /**
- * Phone normalisation for DigiHealth. South African mobile numbers (+27) only.
+ * Phone normalisation for Digi-Health. South African mobile numbers (+27) only.
  */
 
 export type PhoneRegion = "ZA";

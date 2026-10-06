@@ -383,7 +383,7 @@ function buildIntelligence(input: {
       severity: "info",
       title: "Insights warming up",
       detail:
-        "As your teleclinic activity grows, DigiHealth will surface more targeted clinical and operational recommendations here.",
+        "As your teleclinic activity grows, Digi-Health will surface more targeted clinical and operational recommendations here.",
     });
   }
 

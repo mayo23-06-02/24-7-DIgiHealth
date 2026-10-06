@@ -88,7 +88,7 @@ export default function Hero() {
           <h1 className="font-grotesk tracking-tight text-ink-900">
             {/* Fixed line — never changes, so it stays perfectly still. */}
             <span className="block text-3xl md:text-5xl lg:text-6xl font-semibold leading-[1.05]">
-              Choose DigiHealth
+              Choose Digi-Health
             </span>
 
             {/*

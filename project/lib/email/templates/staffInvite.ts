@@ -6,13 +6,13 @@ export function staffInviteEmailHtml(params: { facilityName: string; inviteUrl: 
   const f = escapeHtml(facilityName);
   const by = adminName ? ` (${escapeHtml(adminName)})` : "";
   return renderEmail({
-    preheader: `${facilityName} has invited you to join its medical staff on 24/7 DigiHealth.`,
+    preheader: `${facilityName} has invited you to join its medical staff on 24/7 Digi-Health.`,
     eyebrow: "Practitioner invitation",
     title: `Join ${facilityName}`,
     icon: "&#129658;",
     greeting: "Dear Doctor,",
     paragraphs: [
-      `A hospital administrator${by} has invited you to join the medical staff of <strong>${f}</strong> on 24/7 DigiHealth.`,
+      `A hospital administrator${by} has invited you to join the medical staff of <strong>${f}</strong> on 24/7 Digi-Health.`,
       "Please complete your practitioner registration. You will be added to the facility's roster automatically once you finish.",
     ],
     highlights: [

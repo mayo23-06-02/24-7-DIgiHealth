@@ -188,7 +188,7 @@ export async function buildHospitalReportPdf(
     info: {
       Title: `Facility Report — ${report.meta.facilityName}`,
       Author: report.meta.adminName,
-      Subject: "DigiHealth hospital operational report",
+      Subject: "Digi-Health hospital operational report",
     },
   });
   const fonts = registerBrandFonts(doc);
@@ -477,7 +477,7 @@ export async function buildHospitalReportPdf(
     .fontSize(7)
     .fillColor(BRAND.muted)
     .text(
-      "Confidential — DigiHealth facility report. For authorised hospital administrators only.",
+      "Confidential — Digi-Health facility report. For authorised hospital administrators only.",
       left,
       doc.y,
       { width: contentW, align: "center" },

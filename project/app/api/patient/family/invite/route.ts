@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     const link = await FamilyLink.create(linkData);
 
-    const guardianName = [guardian.firstName, guardian.lastName].filter(Boolean).join(' ') || 'A 24/7 DigiHealth user';
+    const guardianName = [guardian.firstName, guardian.lastName].filter(Boolean).join(' ') || 'A 24/7 Digi-Health user';
     const origin = getAppOrigin(req.url);
     // New invitees land in the patient registration wizard, which prefills and
     // locks the invited address. The old link went straight to the in-app
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await sendEmail({
       to: email,
-      subject: `${guardianName} invited you to a family account on 24/7 DigiHealth`,
+      subject: `${guardianName} invited you to a family account on 24/7 Digi-Health`,
       html: familyInviteEmailHtml({ guardianName, relationship, inviteUrl, inviteeName: inviteName }),
     });
 

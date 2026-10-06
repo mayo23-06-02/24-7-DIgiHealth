@@ -29,8 +29,8 @@ export async function issueOtpCode(params: {
     to: params.email,
     subject:
       purpose === "login_mfa"
-        ? "Your 24/7 DigiHealth sign-in code"
-        : "Your 24/7 DigiHealth verification code",
+        ? "Your 24/7 Digi-Health sign-in code"
+        : "Your 24/7 Digi-Health verification code",
     html: otpVerificationEmailHtml({ code, firstName: params.firstName, purpose }),
   });
 

@@ -14,13 +14,13 @@ export function adminAccountCreatedEmailHtml(params: {
   const roleLabel = ROLE_LABEL[role] || "Admin";
   const by = invitedByName ? ` by ${escapeHtml(invitedByName)}` : "";
   return renderEmail({
-    preheader: `Your 24/7 DigiHealth ${roleLabel} account is ready.`,
+    preheader: `Your 24/7 Digi-Health ${roleLabel} account is ready.`,
     eyebrow: "Administrator access",
     title: `Your ${roleLabel} account is ready`,
     icon: "&#128737;&#65039;",
     greeting: "Hello,",
     paragraphs: [
-      `A platform administrator${by} has created a <strong>${escapeHtml(roleLabel)}</strong> account for you on 24/7 DigiHealth. Your account is already active, and you can sign in with the details below.`,
+      `A platform administrator${by} has created a <strong>${escapeHtml(roleLabel)}</strong> account for you on 24/7 Digi-Health. Your account is already active, and you can sign in with the details below.`,
     ],
     details: [
       ["Email", email],

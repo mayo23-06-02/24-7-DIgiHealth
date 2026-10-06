@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     // Send the reset email
     const emailResult = await sendEmail({
       to: user.email,
-      subject: '24/7 DigiHealth — Reset your password',
+      subject: '24/7 Digi-Health — Reset your password',
       html: renderEmail({
         preheader: "Use the link inside to choose a new password. It expires in 10 minutes.",
         eyebrow: "Account security",
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
         icon: "&#128273;",
         greeting: `Dear ${escapeHtml(user.firstName)},`,
         paragraphs: [
-          "We received a request to reset the password for your 24/7 DigiHealth account. Please use the button below to choose a new password.",
+          "We received a request to reset the password for your 24/7 Digi-Health account. Please use the button below to choose a new password.",
         ],
         cta: { label: "Reset password", url: resetLink },
         notes: [

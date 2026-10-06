@@ -1,5 +1,5 @@
 /**
- * The one branded layout every 24/7 DigiHealth email uses: a two-tone hero banner, a white
+ * The one branded layout every 24/7 Digi-Health email uses: a two-tone hero banner, a white
  * body with optional code box, details table, highlights, button and notes, a signature and
  * a legal footer.
  *
@@ -59,7 +59,7 @@ export interface EmailContent {
   cta?: { label: string; url: string };
   /** Small grey lines under the button, as trusted HTML. */
   notes?: string[];
-  /** Defaults to "Kind regards, The 24/7 DigiHealth Team". */
+  /** Defaults to "Kind regards, The 24/7 Digi-Health Team". */
   signoff?: string | false;
 }
 
@@ -142,7 +142,7 @@ export function renderEmail(c: EmailContent): string {
   const signoff =
     c.signoff === false
       ? ""
-      : `<tr><td style="padding:20px 40px 0;">${p(c.signoff ?? "Kind regards,<br />The 24/7 DigiHealth Team")}</td></tr>`;
+      : `<tr><td style="padding:20px 40px 0;">${p(c.signoff ?? "Kind regards,<br />The 24/7 Digi-Health Team")}</td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -164,7 +164,7 @@ export function renderEmail(c: EmailContent): string {
             <td style="background:${BRAND.deep}; background-image:linear-gradient(135deg, ${BRAND.deep} 0%, ${BRAND.primary} 100%); padding:30px 32px 34px; vertical-align:top;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="width:26px; height:26px; background:#ffffff; border-radius:7px; text-align:center; vertical-align:middle; color:${BRAND.primary}; font-size:16px; font-weight:700; line-height:26px;">&#10010;</td>
-                <td style="padding-left:9px; color:#ffffff; font-size:15px; font-weight:700; letter-spacing:0.2px;">24/7 DigiHealth</td>
+                <td style="padding-left:9px; color:#ffffff; font-size:15px; font-weight:700; letter-spacing:0.2px;">24/7 Digi-Health</td>
               </tr></table>
               ${c.eyebrow ? `<p style="margin:26px 0 6px; color:rgba(255,255,255,0.78); font-size:12px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase;">${escapeHtml(c.eyebrow)}</p>` : `<div style="height:26px; line-height:26px;">&nbsp;</div>`}
               <h1 style="margin:0; color:#ffffff; font-size:30px; line-height:1.2; font-weight:700; letter-spacing:-0.4px;">${escapeHtml(c.title)}</h1>
@@ -196,7 +196,7 @@ export function renderEmail(c: EmailContent): string {
             <a href="${origin}/contact" style="color:${BRAND.muted}; text-decoration:underline;">Contact us</a>
           </p>
           <p style="margin:0 0 4px; text-align:center; color:${BRAND.faint}; font-size:11px; line-height:1.6;">
-            24/7 DigiHealth &middot; Quality care, wherever you are.
+            24/7 Digi-Health &middot; Quality care, wherever you are.
           </p>
           <p style="margin:0 0 4px; text-align:center; color:${BRAND.faint}; font-size:11px; line-height:1.6;">
             Digital Vantage Solutions (Pty) Ltd, trading as 24/7 DigiMedCare &middot; South Africa &middot;

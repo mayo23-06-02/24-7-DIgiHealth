@@ -158,7 +158,7 @@ export default function AdminFacilitiesPage() {
     <div className="w-full pb-16 flex flex-col gap-6 max-w-350 mx-auto">
       <PageHeader
         title="Facilities"
-        subtitle="All hospitals and clinics on DigiHealth"
+        subtitle="All hospitals and clinics on Digi-Health"
         right={
           <div className="flex gap-2">
           <Button

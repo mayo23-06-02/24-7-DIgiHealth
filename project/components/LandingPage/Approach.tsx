@@ -7,7 +7,7 @@ import Link from "next/link";
 const features = [
   {
     title: "Verified Medical Specialists",
-    desc: "Every practitioner on 24/7 DigiHealth is HPCSA-registered and identity-verified before they can see a single patient.",
+    desc: "Every practitioner on 24/7 Digi-Health is HPCSA-registered and identity-verified before they can see a single patient.",
   },
   {
     title: "Same-Day Consultations",
@@ -35,7 +35,7 @@ export default function Approach() {
             <h2 className="text-3xl md:text-4xl font-medium text-ink-900 mb-6 tracking-tight font-grotesk">
               The{" "}
               <span className="text-primary font-bold">
-                24/7 DigiHealth Total Care™
+                24/7 Digi-Health Total Care™
               </span>{" "}
               Model
             </h2>

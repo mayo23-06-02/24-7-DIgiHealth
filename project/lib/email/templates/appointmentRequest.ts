@@ -37,6 +37,6 @@ export function appointmentRequestEmailHtml(params: {
     paragraphs: [lead, "Nothing is confirmed until you respond."],
     details,
     cta: { label: "Review request", url: reviewUrl },
-    notes: ["You are receiving this email because an appointment was requested with you on 24/7 DigiHealth."],
+    notes: ["You are receiving this email because an appointment was requested with you on 24/7 Digi-Health."],
   });
 }

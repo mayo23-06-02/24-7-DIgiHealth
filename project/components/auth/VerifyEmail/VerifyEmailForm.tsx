@@ -161,7 +161,7 @@ export default function VerifyEmailForm() {
             ? "Your account is ready. Sign in with your email and password."
             : codeSent
               ? "We emailed a 6-digit code — it expires in 10 minutes."
-              : "We'll email you a 6-digit code to confirm your DigiHealth account."}
+              : "We'll email you a 6-digit code to confirm your Digi-Health account."}
         </p>
       </div>
 

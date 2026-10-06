@@ -101,7 +101,7 @@ export default function WhyUrgentCare() {
             Urgent Care, Online
           </span>
           <h2 className="text-3xl md:text-4xl font-medium text-ink-900 tracking-tight font-grotesk mb-4">
-            Why book an urgent care visit with 24/7 DigiHealth?
+            Why book an urgent care visit with 24/7 Digi-Health?
           </h2>
           <p className="text-ink-600 leading-relaxed">
             Skip the ER for everyday urgent concerns — see a verified doctor

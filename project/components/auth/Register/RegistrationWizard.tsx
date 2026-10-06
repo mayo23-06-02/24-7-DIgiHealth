@@ -67,7 +67,7 @@ export default function RegistrationWizard({ role }: RegistrationWizardProps) {
           <p className="text-sm font-bold text-primary">
             {inviteInfo.facilityName
               ? `You've been invited to join ${inviteInfo.facilityName} as a doctor.`
-              : "You've been invited to join 24/7 DigiHealth."}
+              : "You've been invited to join 24/7 Digi-Health."}
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
             {inviteInfo.facilityName

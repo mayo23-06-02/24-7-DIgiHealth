@@ -88,7 +88,7 @@ function AcceptInviteContent() {
                 {invite.guardianName} wants to add you as their {invite.relationship}
               </h1>
               <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                Accepting lets them manage your appointments and billing on 24/7 DigiHealth.
+                Accepting lets them manage your appointments and billing on 24/7 Digi-Health.
               </p>
             </div>
             <div className="flex items-start gap-3 p-4 rounded-lg bg-success-50 border border-success-500/20 text-left">

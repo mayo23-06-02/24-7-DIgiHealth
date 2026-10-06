@@ -87,7 +87,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
         <div className="bg-info-50 border border-info-500/20 p-4 rounded-lg">
           <p className="text-xs font-medium text-info-700">
             This prescription has refills remaining. Download it from your
-            health record and take it to your pharmacy of choice — DigiHealth
+            health record and take it to your pharmacy of choice — Digi-Health
             doesn't process medication orders or payments.
           </p>
         </div>

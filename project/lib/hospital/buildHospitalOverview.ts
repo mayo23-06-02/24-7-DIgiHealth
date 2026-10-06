@@ -598,7 +598,7 @@ export async function buildHospitalOverview(
       severity: "info",
       title: "Insights warming up",
       detail:
-        "As appointments and staff activity grow, DigiHealth will surface more targeted operational recommendations.",
+        "As appointments and staff activity grow, Digi-Health will surface more targeted operational recommendations.",
     });
   }
 

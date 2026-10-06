@@ -42,7 +42,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     return NextResponse.json({
       success: true,
       data: {
-        guardianName: guardian ? `${(guardian as any).firstName} ${(guardian as any).lastName}` : 'A 24/7 DigiHealth user',
+        guardianName: guardian ? `${(guardian as any).firstName} ${(guardian as any).lastName}` : 'A 24/7 Digi-Health user',
         relationship: inv.relationship,
         inviteEmail: inv.inviteEmail,
         hasAccount: !!existing,

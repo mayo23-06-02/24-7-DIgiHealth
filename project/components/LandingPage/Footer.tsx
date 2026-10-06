@@ -14,7 +14,7 @@ export default function Footer() {
           {/* Brand mark. This column previously held a newsletter capture,
               removed at the client's request. */}
           <div className="lg:w-5/12 flex flex-col">
-            <Link href="/" className="inline-flex" aria-label="24/7 DigiHealth home">
+            <Link href="/" className="inline-flex" aria-label="24/7 Digi-Health home">
               <LogoMain width={220} height={48} alt />
             </Link>
             <p className="text-white/80 text-[1.05rem] leading-relaxed max-w-md mt-6">
@@ -66,7 +66,7 @@ export default function Footer() {
             <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
               <div className="w-3.5 h-3.5 rounded-lg bg-[#1a5b78]"></div>
             </div>
-            24/7 DigiHealth
+            24/7 Digi-Health
           </Link>
 
           {/* Social Icons */}
@@ -111,7 +111,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <div className="text-center md:text-right text-white/70 text-[0.9rem] flex flex-col gap-1">
-            <p>© 2026 24/7 DigiHealth. All rights reserved.</p>
+            <p>© 2026 24/7 Digi-Health. All rights reserved.</p>
             <p>Designed with care for healthier communities.</p>
           </div>
         </div>

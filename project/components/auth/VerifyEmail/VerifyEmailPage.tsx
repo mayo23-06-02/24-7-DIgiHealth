@@ -10,7 +10,7 @@ function RightPanel() {
         ALMOST THERE
       </p>
       <h3 className="text-3xl font-bold font-grotesk leading-tight mb-4">
-        Confirm your inbox to activate DigiHealth
+        Confirm your inbox to activate Digi-Health
       </h3>
       <p className="text-white/80 text-sm leading-relaxed max-w-md">
         We email a 6-digit code to confirm your address. Enter it here and

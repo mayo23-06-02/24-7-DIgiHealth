@@ -36,7 +36,7 @@ export default function WhyChooseUs() {
               >
                 <Image
                   src={src}
-                  alt="24/7 DigiHealth in use"
+                  alt="24/7 Digi-Health in use"
                   fill
                   sizes="(max-width: 640px) 100vw, 33vw"
                   className="object-cover"

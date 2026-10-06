@@ -297,8 +297,8 @@ export async function buildPatientsListPdf(
   const { patients, practitionerName, filters } = options;
   const doc = createPdfDocument({
     info: {
-      Title: "Patient List — 24/7 DigiHealth",
-      Author: practitionerName || "24/7 DigiHealth",
+      Title: "Patient List — 24/7 Digi-Health",
+      Author: practitionerName || "24/7 Digi-Health",
       Subject: "Practitioner patient roster export",
     },
   });

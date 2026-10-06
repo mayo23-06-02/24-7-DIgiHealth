@@ -13,8 +13,8 @@ export const runtime = "nodejs";
 /**
  * GET /auth/callback
  * Supabase magic-link / email confirmation landing page.
- * Exchanges code (or token_hash) for a session, marks DigiHealth emailVerified,
- * then redirects to login (password sign-in). Does not issue DigiHealth JWT.
+ * Exchanges code (or token_hash) for a session, marks Digi-Health emailVerified,
+ * then redirects to login (password sign-in). Does not issue Digi-Health JWT.
  */
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
       const dest = new URL("/register", origin);
       dest.searchParams.set(
         "error",
-        "No DigiHealth account for this email. Please register first.",
+        "No Digi-Health account for this email. Please register first.",
       );
       return NextResponse.redirect(dest);
     }
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
     }
     await user.save();
 
-    // Sign out of Supabase session — app auth is password + DigiHealth JWT
+    // Sign out of Supabase session — app auth is password + Digi-Health JWT
     try {
       await supabase.auth.signOut();
     } catch {

@@ -152,7 +152,7 @@ export default function AdminOverviewPage({ rolePrefix }: { rolePrefix: string }
 
       {data.intelligence?.length > 0 && (
         <Card className="!rounded-lg">
-          <SectionHeader compact icon={<Lightbulb />} title="Platform intelligence" subtitle="Operational signals across DigiHealth" className="mb-4" />
+          <SectionHeader compact icon={<Lightbulb />} title="Platform intelligence" subtitle="Operational signals across Digi-Health" className="mb-4" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {data.intelligence.map((item: any) => (
               <div key={item.id} className="rounded-lg border border-slate-100 bg-slate-50/80 p-3.5">

@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await sendEmail({
       to: email,
-      subject: `You're invited to join ${facilityName} on 24/7 DigiHealth`,
+      subject: `You're invited to join ${facilityName} on 24/7 Digi-Health`,
       html: staffInviteEmailHtml({ facilityName, inviteUrl, adminName }),
     });
 
