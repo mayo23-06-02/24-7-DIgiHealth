@@ -13,6 +13,9 @@ export interface Appointment {
   scheduledEnd: string;
   status: string;
   type: string;
+  /** In-person visits: the hospital and its address. */
+  facilityName?: string;
+  facilityAddress?: string;
   reason?: string;
   riskScore?: number;
   riskColor?: string;

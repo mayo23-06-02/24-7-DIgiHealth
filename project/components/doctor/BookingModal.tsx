@@ -13,6 +13,7 @@ import {
   X,
   Search,
   Stethoscope,
+  MapPin,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Card from "../ui/Card";
@@ -105,6 +106,12 @@ export default function BookingModal({
     null,
   );
 
+  /** Hospitals where this patient and doctor can meet (see /api/bookings/options). */
+  const [facilities, setFacilities] = useState<
+    { id: string; name: string; address: string; inPersonEnabled: boolean }[]
+  >([]);
+  const [facilityId, setFacilityId] = useState("");
+
   const dateOptions = useMemo(() => upcomingDateStrings(14), []);
 
   /** Practitioner whose calendar we check for free slots */
@@ -128,6 +135,48 @@ export default function BookingModal({
   const [patientResults, setPatientResults] = useState<Patient[]>([]);
   const [patientLoading, setPatientLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const optionsPatientId = isPractitionerMode ? selectedPatientState?.id || patient?.id || null : null;
+  useEffect(() => {
+    const qs = isPractitionerMode
+      ? optionsPatientId ? `patientId=${encodeURIComponent(optionsPatientId)}` : ""
+      : slotsPractitionerId ? `practitionerId=${encodeURIComponent(slotsPractitionerId)}` : "";
+    if (!isOpen || !qs) {
+      setFacilities([]);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/bookings/options?${qs}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (cancelled) return;
+        const list = j?.data?.facilities ?? [];
+        setFacilities(list);
+        setFacilityId((prev) => (list.some((f: { id: string }) => f.id === prev) ? prev : list[0]?.id ?? ""));
+      })
+      .catch(() => !cancelled && setFacilities([]));
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isPractitionerMode, slotsPractitionerId, optionsPatientId]);
+
+  const inPersonFacilities = facilities.filter((f) => f.inPersonEnabled);
+  const offersInPerson = inPersonFacilities.length > 0;
+  const selectedFacility = facilities.find((f) => f.id === facilityId) ?? null;
+
+  // In person is only possible at a hospital that offers it; move to one that does,
+  // and fall back to video if none of this doctor's hospitals offer it any more.
+  useEffect(() => {
+    if (consultType !== "in_person") return;
+    if (!offersInPerson) {
+      if (facilities.length) setConsultType("video");
+      return;
+    }
+    if (!selectedFacility?.inPersonEnabled) setFacilityId(inPersonFacilities[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consultType, offersInPerson, facilityId, facilities.length]);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const hasPreSelected = isPractitionerMode ? !!patient : !!doctor;
@@ -362,6 +411,7 @@ export default function BookingModal({
     const input = formToCreateInput(form, {
       mode: isPractitionerMode ? "practitioner" : "patient",
       bookingId: editingApptId,
+      facilityId: facilityId || undefined,
     });
 
     setIsSubmitting(true);
@@ -691,9 +741,33 @@ export default function BookingModal({
                   options={[
                     { value: "video", label: "Video Call" },
                     { value: "voice", label: "Voice Call" },
+                    ...(offersInPerson || consultType === "in_person"
+                      ? [{ value: "in_person", label: "In person" }]
+                      : []),
                   ]}
                 />
             </div>
+
+            {(consultType === "in_person" ? inPersonFacilities : facilities).length > 1 && (
+              <Select
+                label={consultType === "in_person" ? "Hospital for the visit" : "Hospital"}
+                value={facilityId}
+                onChange={setFacilityId}
+                options={(consultType === "in_person" ? inPersonFacilities : facilities).map((f) => ({
+                  value: f.id,
+                  label: f.name,
+                }))}
+              />
+            )}
+            {consultType === "in_person" && selectedFacility && (
+              <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm text-slate-700">
+                <MapPin size={16} className="mt-0.5 shrink-0 text-primary" />
+                <span>
+                  <span className="font-bold text-slate-900">In person at {selectedFacility.name}</span>
+                  {selectedFacility.address && <span className="block text-xs text-slate-500">{selectedFacility.address}</span>}
+                </span>
+              </div>
+            )}
 
             {!slotsPractitionerId ? (
               <p className="text-sm text-slate-500 font-medium px-1">
@@ -787,9 +861,16 @@ export default function BookingModal({
                       <p className="text-xs font-bold text-slate-400 tracking-wide">
                         Method
                       </p>
-                      <p className="font-bold text-slate-800 capitalize">
-                        {consultType}
+                      <p className="font-bold text-slate-800">
+                        {consultType === "in_person"
+                          ? `In person${selectedFacility ? ` at ${selectedFacility.name}` : ""}`
+                          : consultType === "voice"
+                            ? "Voice call"
+                            : "Video call"}
                       </p>
+                      {consultType === "in_person" && selectedFacility?.address && (
+                        <p className="text-xs text-slate-500">{selectedFacility.address}</p>
+                      )}
                     </div>
                   </>
                 )}

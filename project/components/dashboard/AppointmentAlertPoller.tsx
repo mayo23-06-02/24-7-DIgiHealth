@@ -88,6 +88,8 @@ export default function AppointmentAlertPoller() {
       const now = serverNow();
 
       for (const appt of appointmentsRef.current) {
+        // In-person visits have no lobby or call to join.
+        if (appt.type === "in_person") continue;
         const start = new Date(appt.scheduledStart);
         if (isNaN(start.getTime())) continue;
         const msLeft = start.getTime() - now.getTime();

@@ -210,3 +210,12 @@ export function renderEmail(c: EmailContent): string {
 </body>
 </html>`;
 }
+
+/** "video" | "voice" | "in_person" | "chat" as people read it. */
+export function consultationLabel(type: unknown): string {
+  const t = String(type ?? "").toLowerCase();
+  if (t === "in_person") return "in-person";
+  if (t === "voice" || t === "phone") return "voice";
+  if (t === "chat") return "chat";
+  return "video";
+}

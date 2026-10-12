@@ -1,4 +1,4 @@
-import { escapeHtml, renderEmail } from "../layout";
+import { consultationLabel, escapeHtml, renderEmail } from "../layout";
 
 /** Someone is waiting for an answer about an appointment (new request or proposed new time). */
 export function appointmentRequestEmailHtml(params: {
@@ -16,7 +16,7 @@ export function appointmentRequestEmailHtml(params: {
 }): string {
   const { recipientName, onBehalfOf, requesterName, scheduledStartTime, consultationType, isReschedule, reason, reviewUrl } = params;
   const who = `<strong>${escapeHtml(requesterName)}</strong>`;
-  const type = escapeHtml(consultationType);
+  const type = escapeHtml(consultationLabel(consultationType));
   const time = scheduledStartTime.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Johannesburg" });
   const date = scheduledStartTime.toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Johannesburg" });
   const lead = isReschedule
@@ -25,7 +25,7 @@ export function appointmentRequestEmailHtml(params: {
   const details: [string, string][] = [
     ["Time", time],
     ["Date", date],
-    ["Type", consultationType],
+    ["Type", consultationLabel(consultationType)],
   ];
   if (reason) details.push(["Reason given", reason]);
   return renderEmail({

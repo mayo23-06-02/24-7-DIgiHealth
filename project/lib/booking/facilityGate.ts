@@ -34,3 +34,26 @@ export async function resolveBookingFacility(
   }
   return shared[0];
 }
+
+/** Consultation methods a patient can book. Chat bookings stay supported for older flows. */
+export const BOOKABLE_METHODS = ["video", "voice", "in_person", "chat"] as const;
+export type BookableMethod = (typeof BOOKABLE_METHODS)[number];
+
+/**
+ * Checks the method against the hospital's settings: in-person visits are only bookable at
+ * a hospital that has switched them on. Returns the normalised method.
+ */
+export async function assertMethodAllowed(facilityId: string, rawType: unknown): Promise<BookableMethod> {
+  const type = (rawType ?? "video") as BookableMethod;
+  if (!BOOKABLE_METHODS.includes(type)) {
+    throw new PublicError("Choose video, voice or in-person for this appointment.", 400);
+  }
+  if (type === "in_person") {
+    const { default: Facility } = await import("@/lib/models/Facility");
+    const f = await Facility.findById(facilityId).select("inPersonEnabled name").lean();
+    if (!f?.inPersonEnabled) {
+      throw new PublicError(`${f?.name ?? "This hospital"} does not offer in-person appointments. Choose video or voice.`, 400);
+    }
+  }
+  return type;
+}

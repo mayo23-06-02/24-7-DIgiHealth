@@ -48,6 +48,14 @@ export async function POST(
       return NextResponse.json({ error: "Consultation not found" }, { status: 404 });
     }
 
+    // In-person visits happen at the hospital; there is no call to join.
+    if (consultation.type === "in_person") {
+      return NextResponse.json(
+        { error: "This is an in-person appointment at the hospital. There is no video or voice call to join.", code: "IN_PERSON" },
+        { status: 400 },
+      );
+    }
+
     const patientId = String(consultation.patientId);
     const practitionerId = String(consultation.practitionerId);
     const isParticipant =

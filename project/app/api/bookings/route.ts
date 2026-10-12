@@ -6,7 +6,7 @@ import { expireStaleBookingRequests } from "@/lib/booking/expire";
 import { notifyBookingEvent } from "@/lib/booking/notifications";
 import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { isValidId, toId } from '@/lib/db';
-import { resolveBookingFacility } from "@/lib/booking/facilityGate";
+import { resolveBookingFacility, assertMethodAllowed } from "@/lib/booking/facilityGate";
 import { resolveHospitalId } from "@/lib/hospital/resolveHospitalId";
 import { PublicError, apiError } from "@/lib/api/errors";
 
@@ -129,6 +129,22 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .lean();
 
+    // Where in-person visits take place, for the appointment cards.
+    const visitFacilityIds = [
+      ...new Set(consultations.filter((c: any) => c.type === "in_person" && c.facilityId).map((c: any) => String(c.facilityId))),
+    ];
+    const visitFacilities = new Map<string, { name: string; address: string }>();
+    if (visitFacilityIds.length) {
+      const { default: Facility } = await import("@/lib/models/Facility");
+      const rows = await Facility.find({ _id: { $in: visitFacilityIds } }).select("name address").lean();
+      for (const f of rows as any[]) {
+        visitFacilities.set(String(f._id), {
+          name: f.name,
+          address: [f.address?.street, f.address?.city].filter(Boolean).join(", "),
+        });
+      }
+    }
+
     const enriched = await Promise.all(
       consultations.map(async (c: any) => {
         const [patient, practitioner, patientProfile] = await Promise.all([
@@ -176,7 +192,9 @@ export async function GET(req: NextRequest) {
           return null;
         }
 
+        const visit = c.type === "in_person" && c.facilityId ? visitFacilities.get(String(c.facilityId)) : undefined;
         return toRecord(c, {
+          ...(visit ? { facilityName: visit.name, facilityAddress: visit.address } : {}),
           patientName,
           practitionerName,
           practitionerAvatar: practitioner?.avatarUrl,
@@ -315,12 +333,13 @@ export async function POST(req: NextRequest) {
       requestedFacility = own;
     }
     const facilityId = await resolveBookingFacility(patientId!, practitionerId!, requestedFacility);
+    const consultationType = await assertMethodAllowed(facilityId, body.type);
 
     const consultation = await Consultation.create({
       patientId,
       practitionerId,
       facilityId,
-      type: body.type || "video",
+      type: consultationType,
       status,
       scheduledStartTime: start,
       scheduledEndTime: end,
@@ -344,7 +363,7 @@ export async function POST(req: NextRequest) {
         practitionerId,
         scheduledStart: start,
         reason,
-        type: body.type || "video",
+        type: consultationType,
         actorUserId: auth.userId,
       });
     } else {
@@ -354,7 +373,7 @@ export async function POST(req: NextRequest) {
         practitionerId,
         scheduledStart: start,
         reason,
-        type: body.type || "video",
+        type: consultationType,
         actorUserId: auth.userId,
       });
     }

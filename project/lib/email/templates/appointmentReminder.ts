@@ -1,4 +1,4 @@
-import { escapeHtml, renderEmail } from "../layout";
+import { consultationLabel, escapeHtml, renderEmail } from "../layout";
 
 /** "Your consultation starts in 10 minutes" reminder. */
 export function appointmentReminderEmailHtml(params: {
@@ -21,12 +21,12 @@ export function appointmentReminderEmailHtml(params: {
     icon: "&#9200;",
     greeting: recipientName ? `Dear ${escapeHtml(recipientName)},` : "Hello,",
     paragraphs: [
-      `This is a reminder that ${whose} ${escapeHtml(consultationType)} consultation with <strong>${escapeHtml(otherPartyName)}</strong> starts in about 10 minutes.`,
+      `This is a reminder that ${whose} ${escapeHtml(consultationLabel(consultationType))} consultation with <strong>${escapeHtml(otherPartyName)}</strong> starts in about 10 minutes.`,
     ],
     details: [
       ["Time", time],
       ["Date", date],
-      ["Type", consultationType],
+      ["Type", consultationLabel(consultationType)],
     ],
     cta: joinUrl ? { label: "Join consultation", url: joinUrl } : undefined,
     notes: ["This is a one-time reminder. You will not receive another reminder for this booking."],

@@ -14,6 +14,7 @@ import {
   BiVideo,
   BiPhone,
   BiChat,
+  BiMap,
   BiTime,
   BiCalendar,
   BiDotsVerticalRounded,
@@ -96,7 +97,9 @@ export default function AppointmentCard({
    */
   const now = serverNow();
   const sessionState = sessionStateAt(now, sessionWindow(start, end));
-  const isJoinable = isAccepted && isSessionJoinable(sessionState);
+  // In-person visits happen at the hospital, so there is never a room to join.
+  const isInPerson = appointment.type === "in_person";
+  const isJoinable = !isInPerson && isAccepted && isSessionJoinable(sessionState);
   const joinLabel = sessionState === "live" ? "Join Room" : "Enter Lobby";
 
   const isRecipient = appointment.requestedTo
@@ -168,11 +171,18 @@ export default function AppointmentCard({
                   <BiVideo size={14} />
                 ) : appointment.type === "voice" ? (
                   <BiPhone size={14} />
+                ) : isInPerson ? (
+                  <BiMap size={14} />
                 ) : (
                   <BiChat size={14} />
                 )}
-                {appointment.type || "video"}
+                {isInPerson
+                  ? `In person${appointment.facilityName ? ` · ${appointment.facilityName}` : ""}`
+                  : appointment.type || "video"}
               </span>
+              {isInPerson && appointment.facilityAddress && (
+                <span className="flex items-center gap-1 text-slate-400">{appointment.facilityAddress}</span>
+              )}
               {appointment.isChild && appointment.guardianName && (
                 <span className="flex items-center gap-1">
                   Guardian: {appointment.guardianName}
