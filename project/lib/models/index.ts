@@ -34,3 +34,4 @@ export * from "./Wellness";
 export * from "./PractitionerBilling";
 export * from "./FacilityPatient";
 export * from "./ProvisioningTokens";
+export * from "./MedicalInvoice";

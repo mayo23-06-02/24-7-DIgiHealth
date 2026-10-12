@@ -227,7 +227,9 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   reg_certificate: "text",
   created_at: "timestamptz",
   updated_at: "timestamptz",
-  file_number_prefix: "text"
+  file_number_prefix: "text",
+  in_person_enabled: "bool",
+  medical_aid_billing_enabled: "bool"
  },
  facility_patient_profiles: {
   id: "uuid",
@@ -440,6 +442,45 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   created_at: "timestamptz",
   updated_at: "timestamptz",
   facility_id: "uuid"
+ },
+ medical_invoice_items: {
+  id: "uuid",
+  invoice_id: "uuid",
+  position: "num",
+  tariff_code: "text",
+  icd10_code: "text",
+  description: "text",
+  quantity: "num",
+  unit_price: "num",
+  amount: "num",
+  created_at: "timestamptz"
+ },
+ medical_invoices: {
+  id: "uuid",
+  invoice_number: "text",
+  facility_id: "uuid",
+  practitioner_id: "uuid",
+  patient_id: "uuid",
+  consultation_id: "uuid",
+  status: "text",
+  service_date: "date",
+  patient_name: "text",
+  patient_id_number: "text",
+  medical_aid_provider: "text",
+  medical_aid_plan: "text",
+  medical_aid_member_number: "text",
+  dependant_code: "text",
+  practitioner_name: "text",
+  hpcsa_number: "text",
+  practice_number: "text",
+  facility_name: "text",
+  notes: "text",
+  total: "num",
+  currency: "text",
+  issued_at: "timestamptz",
+  status_changed_at: "timestamptz",
+  created_at: "timestamptz",
+  updated_at: "timestamptz"
  },
  messages: {
   id: "uuid",
@@ -658,7 +699,8 @@ export const DB_SCHEMA: Record<string, Record<string, ColKind>> = {
   updated_at: "timestamptz",
   embedded_reviews: "json",
   consent_accepted_at: "timestamptz",
-  terms_accepted_at: "timestamptz"
+  terms_accepted_at: "timestamptz",
+  practice_number: "text"
  },
  practitioner_schedule_slots: {
   id: "uuid",

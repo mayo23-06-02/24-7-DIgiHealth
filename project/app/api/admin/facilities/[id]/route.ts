@@ -64,6 +64,8 @@ export async function PATCH(
     if (v.facilityType) facility.facilityType = v.facilityType;
     if (typeof v.isOpen === "boolean") facility.isOpen = v.isOpen;
     if (typeof v.emergencyServices === "boolean") facility.emergencyServices = v.emergencyServices;
+    if (typeof v.inPersonEnabled === "boolean") facility.inPersonEnabled = v.inPersonEnabled;
+    if (typeof v.medicalAidBillingEnabled === "boolean") facility.medicalAidBillingEnabled = v.medicalAidBillingEnabled;
     if (v.specialties) facility.specialties = v.specialties;
     if (v.fileNumberPrefix !== undefined) facility.fileNumberPrefix = v.fileNumberPrefix;
     if (v.address) facility.address = { ...(facility.address as any), ...stripUndefined(v.address) } as any;

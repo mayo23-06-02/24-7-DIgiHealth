@@ -10,6 +10,10 @@ export interface IFacility extends Document {
   isOpen: boolean;
   specialties: string[];
   emergencyServices: boolean;
+  /** Patients may book in-person visits at this facility. */
+  inPersonEnabled?: boolean;
+  /** Doctors here may issue medical-aid invoices. */
+  medicalAidBillingEnabled?: boolean;
   logo?: string;
   wallpaper?: string;
   regCertificate?: string;

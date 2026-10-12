@@ -180,6 +180,7 @@ export async function claimRegistration(
   } else {
     const set: Record<string, unknown> = {};
     if (formData.specialization) set.specialisation = formData.specialization;
+    if (typeof formData.practiceNumber === "string" && formData.practiceNumber.trim()) set.practiceNumber = formData.practiceNumber.trim().slice(0, 40);
     if (formData.experience) set.experienceYears = parseInt(formData.experience) || 0;
     if (formData.profilePhoto) set.profilePhoto = formData.profilePhoto;
     if (formData.hpcsaCert) set.hpcsaCertificate = formData.hpcsaCert;

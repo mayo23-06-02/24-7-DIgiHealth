@@ -30,6 +30,8 @@ export default function FacilitySettings() {
     icuAvailable: 0,
     isOpen: true,
     emergencyServices: false,
+    inPersonEnabled: false,
+    medicalAidBillingEnabled: false,
     specialties: "",
   });
 
@@ -53,6 +55,8 @@ export default function FacilitySettings() {
           icuAvailable: json.data.bedCapacity?.icuAvailable || 0,
           isOpen: json.data.isOpen !== false,
           emergencyServices: !!json.data.emergencyServices,
+          inPersonEnabled: !!json.data.inPersonEnabled,
+          medicalAidBillingEnabled: !!json.data.medicalAidBillingEnabled,
           specialties: (json.data.specialties || []).join(", "),
         });
       }
@@ -99,6 +103,8 @@ export default function FacilitySettings() {
         },
         isOpen: formData.isOpen,
         emergencyServices: formData.emergencyServices,
+        inPersonEnabled: formData.inPersonEnabled,
+        medicalAidBillingEnabled: formData.medicalAidBillingEnabled,
         specialties: formData.specialties
           .split(",")
           .map((s) => s.trim())
@@ -295,6 +301,32 @@ export default function FacilitySettings() {
               className="w-4 h-4 text-primary rounded border-slate-300"
             />
             <span className="text-sm text-slate-700">Emergency services</span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              name="inPersonEnabled"
+              checked={formData.inPersonEnabled}
+              onChange={handleChange}
+              className="mt-0.5 w-4 h-4 text-primary rounded border-slate-300"
+            />
+            <span className="text-sm text-slate-700">
+              In-person appointments
+              <span className="block text-xs text-slate-500">Patients can book a visit at this facility, as well as video or voice.</span>
+            </span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              name="medicalAidBillingEnabled"
+              checked={formData.medicalAidBillingEnabled}
+              onChange={handleChange}
+              className="mt-0.5 w-4 h-4 text-primary rounded border-slate-300"
+            />
+            <span className="text-sm text-slate-700">
+              Medical aid billing
+              <span className="block text-xs text-slate-500">Doctors here can issue medical aid invoices to their patients.</span>
+            </span>
           </label>
           <Input
             label="Specialties"

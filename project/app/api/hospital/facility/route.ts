@@ -62,6 +62,8 @@ export async function PUT(req: NextRequest) {
     }
     if (typeof body.isOpen === 'boolean') $set.isOpen = body.isOpen;
     if (typeof body.emergencyServices === 'boolean') $set.emergencyServices = body.emergencyServices;
+    if (typeof body.inPersonEnabled === 'boolean') $set.inPersonEnabled = body.inPersonEnabled;
+    if (typeof body.medicalAidBillingEnabled === 'boolean') $set.medicalAidBillingEnabled = body.medicalAidBillingEnabled;
     if (Array.isArray(body.specialties)) {
       $set.specialties = body.specialties.filter((s: unknown) => typeof s === 'string');
     }

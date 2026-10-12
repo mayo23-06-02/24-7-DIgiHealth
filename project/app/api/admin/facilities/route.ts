@@ -38,6 +38,8 @@ export async function GET(req: NextRequest) {
           province: f.address?.province || "",
           isOpen: f.isOpen !== false,
           emergencyServices: !!f.emergencyServices,
+          inPersonEnabled: !!f.inPersonEnabled,
+          medicalAidBillingEnabled: !!f.medicalAidBillingEnabled,
           beds: f.bedCapacity?.total || 0,
           staffCount,
           doctors,
@@ -87,6 +89,8 @@ export async function POST(req: NextRequest) {
       ...v,
       isOpen: v.isOpen ?? true,
       emergencyServices: v.emergencyServices ?? false,
+      inPersonEnabled: v.inPersonEnabled ?? false,
+      medicalAidBillingEnabled: v.medicalAidBillingEnabled ?? false,
       specialties: v.specialties ?? [],
       bedCapacity: {
         total,

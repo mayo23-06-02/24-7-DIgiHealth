@@ -10,6 +10,8 @@ export interface FacilityInput {
   bedCapacity?: { total?: number; generalAvailable?: number; icuAvailable?: number };
   specialties?: string[];
   emergencyServices?: boolean;
+  inPersonEnabled?: boolean;
+  medicalAidBillingEnabled?: boolean;
   isOpen?: boolean;
   fileNumberPrefix?: string;
 }
@@ -51,6 +53,8 @@ export function parseFacilityInput(
     v.specialties = list.map((s: unknown) => String(s).trim()).filter(Boolean).slice(0, 40);
   }
   if (typeof body.emergencyServices === "boolean") v.emergencyServices = body.emergencyServices;
+  if (typeof body.inPersonEnabled === "boolean") v.inPersonEnabled = body.inPersonEnabled;
+  if (typeof body.medicalAidBillingEnabled === "boolean") v.medicalAidBillingEnabled = body.medicalAidBillingEnabled;
   if (typeof body.isOpen === "boolean") v.isOpen = body.isOpen;
   if (has("fileNumberPrefix")) {
     const p = str(body.fileNumberPrefix, 12)?.toUpperCase() ?? "";

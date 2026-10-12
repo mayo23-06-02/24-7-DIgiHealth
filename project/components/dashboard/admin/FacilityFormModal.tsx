@@ -51,6 +51,8 @@ const EMPTY = {
   specialties: [] as string[],
   fileNumberPrefix: "",
   emergencyServices: false,
+  inPersonEnabled: false,
+  medicalAidBillingEnabled: false,
   isOpen: true,
 };
 type FormState = typeof EMPTY;
@@ -100,6 +102,8 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
           specialties: x.specialties ?? [],
           fileNumberPrefix: x.fileNumberPrefix ?? "",
           emergencyServices: !!x.emergencyServices,
+          inPersonEnabled: !!x.inPersonEnabled,
+          medicalAidBillingEnabled: !!x.medicalAidBillingEnabled,
           isOpen: x.isOpen !== false,
         });
       })
@@ -128,6 +132,8 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
         specialties: f.specialties,
         fileNumberPrefix: f.fileNumberPrefix,
         emergencyServices: f.emergencyServices,
+        inPersonEnabled: f.inPersonEnabled,
+        medicalAidBillingEnabled: f.medicalAidBillingEnabled,
         isOpen: f.isOpen,
       };
       if (!facilityId || canRename) body.name = f.name;
@@ -263,6 +269,21 @@ export default function FacilityFormModal({ facilityId, canRename, onClose, onSa
             </Field>
             <Toggle checked={f.emergencyServices} onChange={(v) => set("emergencyServices", v)} label="Emergency services" hint="Has a 24-hour emergency unit." />
             <Toggle checked={f.isOpen} onChange={(v) => set("isOpen", v)} label="Open" hint="Closed facilities stay listed but can't take new bookings." />
+          </Section>
+
+          <Section title="Appointments & billing" hint="Settings for how patients see and pay doctors at this facility.">
+            <Toggle
+              checked={f.inPersonEnabled}
+              onChange={(v) => set("inPersonEnabled", v)}
+              label="In-person appointments"
+              hint="Patients can choose a visit at this facility, as well as video or voice."
+            />
+            <Toggle
+              checked={f.medicalAidBillingEnabled}
+              onChange={(v) => set("medicalAidBillingEnabled", v)}
+              label="Medical aid billing"
+              hint="Doctors here can issue medical aid invoices to their patients."
+            />
           </Section>
           <button type="submit" className="hidden" aria-hidden />
         </form>

@@ -24,6 +24,8 @@ export interface IPractitionerProfile extends Document {
   userId: string;
   specialisation: string;
   hpcsaNumber: string;
+  /** BHF practice number, printed on medical-aid invoices. */
+  practiceNumber?: string;
   experienceYears: number;
   // consultationFee removed - subscription-based model
   bio: string;

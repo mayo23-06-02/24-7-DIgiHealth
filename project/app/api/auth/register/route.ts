@@ -391,6 +391,8 @@ export async function POST(request: Request) {
           icuAvailable: 0,
         },
         isOpen: true,
+        inPersonEnabled: formData.inPersonEnabled === true,
+        medicalAidBillingEnabled: formData.medicalAidBillingEnabled === true,
         logo: formData.facilityLogo,
         wallpaper: formData.facilityWallpaper,
         regCertificate: formData.regCertificate,
