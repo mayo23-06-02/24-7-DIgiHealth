@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import Card from "@/components/ui/Card";
+import MedicalInvoicesPanel from "@/components/billing/MedicalInvoicesPanel";
 import KPICard from "@/components/ui/KPICard";
 import Badge from "@/components/ui/Badge";
 import type { BadgeStatus } from "@/components/ui/Badge";
@@ -141,6 +142,8 @@ export default function BillingPage() {
           </div>
         }
       />
+
+      <MedicalInvoicesPanel mode="hospital" />
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

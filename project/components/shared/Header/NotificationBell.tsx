@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import Button from "@/components/ui/Button";
 import { Notification } from "./types";
+import { downloadMedicalInvoice } from "@/components/billing/MedicalInvoicesPanel";
 
 export default function NotificationBell({
   onNotificationClick,
@@ -458,6 +459,45 @@ export default function NotificationBell({
                           </Button>
                         </Link>
                       )}
+                    </>
+                  )}
+                  {selectedNotif.type === "medical_invoice" && (
+                    <>
+                      {typeof selectedNotif.data?.pdfUrl === "string" && (
+                        <Button
+                          className="py-2"
+                          fullWidth
+                          size="lg"
+                          onClick={async () => {
+                            try {
+                              await downloadMedicalInvoice(
+                                selectedNotif.data!.pdfUrl as string,
+                                `${String(selectedNotif.data?.invoiceNumber || "invoice")}.pdf`,
+                              );
+                            } catch (e) {
+                              toast.error((e as Error).message);
+                            }
+                          }}
+                        >
+                          Download invoice
+                        </Button>
+                      )}
+                      <Link
+                        href={
+                          typeof selectedNotif.data?.url === "string"
+                            ? selectedNotif.data.url
+                            : `/${user?.role}/billing`
+                        }
+                        className="w-full"
+                        onClick={() => {
+                          setIsDetailOpen(false);
+                          setIsOpen(false);
+                        }}
+                      >
+                        <Button variant="white" className="py-2" fullWidth size="lg">
+                          View in Billing
+                        </Button>
+                      </Link>
                     </>
                   )}
                   {selectedNotif.type?.includes("message") &&

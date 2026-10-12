@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import Card from "@/components/ui/Card";
+import MedicalInvoicesPanel from "@/components/billing/MedicalInvoicesPanel";
 import Button from "@/components/ui/Button";
 import Badge, { BadgeStatus } from "@/components/ui/Badge";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
@@ -448,6 +449,8 @@ export default function BillingTab({
           </div>
         </div>
       </Card>
+
+      {currentRole === "patient" && <MedicalInvoicesPanel mode="patient" />}
 
       {/* ── Plan & Payment Methods ──────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

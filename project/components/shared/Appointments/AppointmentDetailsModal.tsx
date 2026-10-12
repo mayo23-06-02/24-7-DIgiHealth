@@ -8,6 +8,7 @@ import DescriptionList, { DescriptionItem } from "@/components/ui/DescriptionLis
 import { User, UserPlus } from "lucide-react";
 import { Appointment } from "@/lib/hooks/useAppointments";
 import PendingRescheduleBanner from "./PendingRescheduleBanner";
+import { CreateInvoiceButton } from "@/components/dashboard/practitioner/CreateInvoiceModal";
 
 interface Props {
   isOpen: boolean;
@@ -276,6 +277,19 @@ export default function AppointmentDetailsModal({
               </Button>
             </>
           )}
+
+          {isDoctor &&
+            !isRequestStage &&
+            appointment.status !== "cancelled" &&
+            appointment.patientId && (
+              <CreateInvoiceButton
+                patientId={appointment.patientId}
+                patientName={appointment.patientName}
+                consultationId={appointment.consultationId || appointment.id}
+                serviceDate={appointment.scheduledStart}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-primary/40 px-4 py-2.5 text-sm font-bold text-primary hover:bg-primary/5"
+              />
+            )}
 
           {(appointment.status === "scheduled" ||
             appointment.computedStatus === "upcoming") && (

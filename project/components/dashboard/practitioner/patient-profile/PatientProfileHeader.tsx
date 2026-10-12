@@ -16,6 +16,7 @@ import {
 import type { PatientProfile } from "./types";
 import { hasEmergencyContact, isPlaceholderValue } from "./emergencyContact";
 import Card from "@/components/ui/Card";
+import { CreateInvoiceButton } from "@/components/dashboard/practitioner/CreateInvoiceModal";
 
 interface PatientProfileHeaderProps {
   patient: PatientProfile;
@@ -151,6 +152,12 @@ export default function PatientProfileHeader({
         >
           Save PDF Report
         </Button>
+
+        <CreateInvoiceButton
+          patientId={patient.id}
+          patientName={patient.fullName}
+          className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 px-4 py-1.5 text-sm font-bold text-primary hover:bg-primary/5"
+        />
 
         
       </div>

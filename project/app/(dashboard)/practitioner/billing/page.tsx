@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
+import MedicalInvoicesPanel from "@/components/billing/MedicalInvoicesPanel";
 import KPICard from "@/components/ui/KPICard";
 import {
   BiDollarCircle,
@@ -125,6 +126,8 @@ export default function PractitionerBillingPage() {
           </button>
         </div>
       </div>
+
+      <MedicalInvoicesPanel mode="practitioner" />
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -36,6 +36,7 @@ import Dialog from "@/components/ui/Dialog";
 import EmptyState from "@/components/ui/EmptyState";
 import { downloadBillingPdf } from "@/lib/billing/downloadPdf";
 import { TIER_ORDER, TIER_CONFIG, isValidTier } from "@/lib/billing/tiers";
+import MedicalInvoicesPanel from "@/components/billing/MedicalInvoicesPanel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BillingData {
@@ -613,6 +614,8 @@ function PatientBillingView({
         />
       </div>
 
+      <MedicalInvoicesPanel mode="patient" />
+
       {/* Subscription Card */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         <Card>
@@ -1150,6 +1153,8 @@ function PractitionerBillingView({
         />
       </div>
 
+      <MedicalInvoicesPanel mode="practitioner" />
+
       {/* Chart + Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -1411,6 +1416,8 @@ function HospitalAdminBillingView({
           accent="warning"
         />
       </div>
+
+      <MedicalInvoicesPanel mode="hospital" />
 
       {/* Revenue Chart + Department Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
