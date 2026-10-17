@@ -1,0 +1,5 @@
+- Be concise. Answer in as few words as possible; no preamble or recap.
+- Show only changed code, not whole files, unless asked.
+- Don't explain obvious code. Explain only non-obvious decisions.
+- Ask one question if a request is ambiguous; otherwise act.
+- Run tests after changes and report only failures.

@@ -207,23 +207,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-16 md:py-24 bg-linear-to-br from-primary to-primary-600">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-          <h2 className="text-2xl md:text-3xl font-medium text-white text-center tracking-tight font-grotesk mb-12">
-            The impact so far
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
-            {stats.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="flex flex-col items-center">
-                <Icon className="w-6 h-6 text-white/70 mb-3" />
-                {value && <CountUpValue value={value} />}
-                <p className="text-white/80 text-sm mt-2">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+   
 
       {/* Team */}
       <section className="py-16 md:py-24 bg-white">
