@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmail } from "@/lib/email/postmark";
+import { sendEmail } from "@/lib/email/emailjs";
 
 /**
  * POST — a practitioner reaching out via the /doctors page's "Contact Our
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const inbox = process.env.CLINICAL_TEAM_EMAIL || process.env.MAILJET_FROM_EMAIL || "hello@247digihealth.com";
+    const inbox = process.env.CLINICAL_TEAM_EMAIL?.trim() || "admin@digi-health.co.za";
 
     const { error } = await sendEmail({
       to: inbox,
