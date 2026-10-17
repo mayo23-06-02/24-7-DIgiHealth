@@ -211,23 +211,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Practical details */}
-      <section className="py-16 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
-           
-            <div>
-              <Mail className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="font-bold text-ink-900 text-sm">Email</p>
-              <p className="text-sm text-ink-600"> admin@digi-health.co.za</p>
-            </div>
-           
-          </div>
-          <p className="text-xs text-ink-400 text-center mt-8 max-w-md mx-auto">
-            The platform itself is available 24/7 for consultations.
-          </p>
-        </div>
-      </section>
+     
 
       <Footer />
     </div>
