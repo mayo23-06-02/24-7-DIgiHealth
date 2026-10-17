@@ -215,25 +215,16 @@ export default function ContactPage() {
       <section className="py-16 bg-surface-soft">
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
-            <div>
-              <Phone className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="font-bold text-ink-900 text-sm">Toll Free</p>
-              <p className="text-sm text-ink-600">0800 123 4567</p>
-            </div>
+           
             <div>
               <Mail className="w-5 h-5 text-primary mx-auto mb-2" />
               <p className="font-bold text-ink-900 text-sm">Email</p>
-              <p className="text-sm text-ink-600">support@247digihealth.com</p>
+              <p className="text-sm text-ink-600"> admin@digi-health.co.za</p>
             </div>
-            <div>
-              <Clock className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="font-bold text-ink-900 text-sm">Support Hours</p>
-              <p className="text-sm text-ink-600">Mon–Fri, 8am–6pm SAST</p>
-            </div>
+           
           </div>
           <p className="text-xs text-ink-400 text-center mt-8 max-w-md mx-auto">
-            The platform itself is available 24/7 for consultations — live
-            human support runs the hours above.
+            The platform itself is available 24/7 for consultations.
           </p>
         </div>
       </section>
