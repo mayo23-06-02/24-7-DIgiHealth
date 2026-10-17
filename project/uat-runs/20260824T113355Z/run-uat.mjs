@@ -45,7 +45,6 @@ async function marketing() {
     ["A-02", "/about", "About"],
     ["A-03", "/patients", "For Patients"],
     ["A-04", "/doctors", "For Doctors"],
-    ["A-05", "/pricing", "Pricing"],
     ["A-06", "/contact", "Contact"],
   ];
   for (const [id, p, name] of pages) {

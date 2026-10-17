@@ -96,9 +96,7 @@ export default function ContactPage() {
               <p className="text-sm text-ink-600 leading-relaxed mb-4">
                 Account, billing, or appointment issues.
               </p>
-              <a href="mailto:support@247digihealth.com" className="text-primary font-semibold text-sm hover:underline">
-                support@247digihealth.com
-              </a>
+             
             </div>
 
             <div className="bg-surface-soft rounded-2xl p-7">
@@ -120,9 +118,7 @@ export default function ContactPage() {
               <p className="text-sm text-ink-600 leading-relaxed mb-4">
                 Hospitals or clinics wanting to integrate with the platform.
               </p>
-              <a href="mailto:partnerships@247digihealth.com" className="text-primary font-semibold text-sm hover:underline">
-                partnerships@247digihealth.com
-              </a>
+            
             </div>
 
             <div className="bg-surface-soft rounded-2xl p-7">
@@ -133,9 +129,7 @@ export default function ContactPage() {
               <p className="text-sm text-ink-600 leading-relaxed mb-4">
                 Media inquiries and interview requests.
               </p>
-              <a href="mailto:press@247digihealth.com" className="text-primary font-semibold text-sm hover:underline">
-                press@247digihealth.com
-              </a>
+             
             </div>
           </div>
 
