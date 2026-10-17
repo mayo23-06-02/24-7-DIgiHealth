@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Heart, Shield, Clock, Users, Globe, User, Stethoscope, MapPin } from "lucide-react";
 
 // Reuse the same counter component from Hero (or you can import it).
@@ -165,7 +166,7 @@ export default function AboutUs() {
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-primary font-bold text-lg">AM</span>
+            <Image src={'/landing-page/hero-section/amanda.png'} height={100} width={100} alt={"Amanda Mazwi"} />
             </div>
             <div className="text-left">
               <p className="font-bold text-ink-900 text-sm">Amanda Mazwi</p>
