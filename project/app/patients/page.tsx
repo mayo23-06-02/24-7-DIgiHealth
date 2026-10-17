@@ -218,11 +218,9 @@ export default function PatientsPage() {
       <section className="py-10 bg-surface-soft border-y border-border">
         <div className="container mx-auto px-4 md:px-8 text-center">
           <p className="text-ink-600 font-medium">
-            From <span className="text-primary font-bold">R250/month</span> ·
-            Medical aid accepted · Cancel anytime ·{" "}
-            <Link href="/pricing" className="text-primary font-semibold hover:underline">
-              See all plans
-            </Link>
+            
+            Medical aid accepted.
+           
           </p>
         </div>
       </section>
