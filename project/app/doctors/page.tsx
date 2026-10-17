@@ -58,33 +58,7 @@ export default function DoctorsPage() {
     <div className="min-h-screen bg-white">
       <SiteHeader />
 
-      {/* Hero */}
-      <section className="relative pt-10 pb-20 lg:pt-20 md:pb-28 overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=1600&auto=format&fit=crop"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-ink-900/90 via-ink-900/70 to-ink-900/40" />
-        <div className="relative container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-          <div className="max-w-3xl">
-            <span className="text-secondary font-bold tracking-normal text-sm block mb-4">
-              For Doctors
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.1] tracking-tight font-grotesk mb-6">
-              Every doctor here has been vetted twice — once by us, once by their record.
-            </h1>
-            <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl">
-              Verified specialists across South Africa, each one
-              HPCSA-registered, identity-checked, and reviewed by real
-              patients after every consultation.
-            </p>
-          </div>
-        </div>
-      </section>
+    
 
       {/* Vetting process */}
       <section className="py-16 md:py-24 bg-white">

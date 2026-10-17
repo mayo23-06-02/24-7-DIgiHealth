@@ -235,10 +235,9 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // consultation lobby that can't reach it falls back to the device clock,
     // which is the disagreement it exists to prevent.
     pathname === '/api/time' ||
-    // A practitioner asking to join is by definition not signed in yet — the
-    // whole point of the form is that they have no account. It reads nothing
-    // and writes nothing; it validates its own input and emails the clinical
-    // team. Gating it behind a session made it 401 for every real user of it.
+    // The public contact form. Callers are not signed in. It reads nothing
+    // and writes nothing; it validates its own input and emails the admin
+    // inbox. Gating it behind a session made it 401 for every real user of it.
     pathname === '/api/contact/practitioner-inquiry' ||
     // Hospital names for the registration wizard's first step (public: nobody is signed in yet).
     pathname === '/api/facilities/public'

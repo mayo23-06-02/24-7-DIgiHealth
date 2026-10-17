@@ -22,8 +22,6 @@ export default function ContactPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    hpcsaNumber: "",
-    specialty: "",
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -42,7 +40,7 @@ export default function ContactPage() {
       const json = await res.json();
       if (res.ok && json.success) {
         setStatus("sent");
-        setForm({ name: "", email: "", hpcsaNumber: "", specialty: "", message: "" });
+        setForm({ name: "", email: "", message: "" });
       } else {
         setStatus("error");
         setErrorMessage(json.error || "Something went wrong. Please try again.");
@@ -77,8 +75,8 @@ export default function ContactPage() {
               Talk to a real person.
             </h1>
             <p className="text-lg text-white/80 leading-relaxed">
-              Whatever brought you here, there's a faster way to reach us
-              than one generic form.
+              Patients and practitioners can write to us below. We reply to
+              the email you give.
             </p>
           </div>
         </div>
@@ -94,7 +92,7 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-bold text-ink-900 mb-2 font-grotesk">Patient Support</h3>
               <p className="text-sm text-ink-600 leading-relaxed mb-4">
-                Account, billing, or appointment issues.
+                Account, billing, or appointment issues. Use the form below.
               </p>
              
             </div>
@@ -105,8 +103,7 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-bold text-ink-900 mb-2 font-grotesk">Practitioner Inquiries</h3>
               <p className="text-sm text-ink-600 leading-relaxed">
-                Interested in joining as a doctor? Use the form below — it
-                goes straight to our clinical onboarding team.
+                Interested in joining as a doctor? Use the form below.
               </p>
             </div>
 
@@ -133,15 +130,13 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Practitioner inquiry form */}
           <div className="max-w-xl mx-auto bg-white border border-border rounded-2xl p-8">
             <h2 className="text-xl font-bold text-ink-900 mb-1 font-grotesk">
-              Practitioner Inquiry
+              Send an enquiry
             </h2>
             <p className="text-sm text-ink-400 mb-6">
-              We grow our practitioner network directly, one conversation at
-              a time. Tell us a bit about yourself and our clinical team
-              will follow up.
+              For patients and practitioners. Tell us what you need and we
+              will follow up by email.
             </p>
 
             {status === "sent" ? (
@@ -149,7 +144,7 @@ export default function ContactPage() {
                 <CheckCircle2 className="w-12 h-12 text-success-500 mb-4" />
                 <p className="font-bold text-ink-900 font-grotesk mb-1">Inquiry sent</p>
                 <p className="text-sm text-ink-600">
-                  Our clinical team will be in touch soon.
+                  We will be in touch soon.
                 </p>
               </div>
             ) : (
@@ -168,29 +163,18 @@ export default function ContactPage() {
                     onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                     required
                   />
-                  <Input
-                    label="HPCSA number"
-                    value={form.hpcsaNumber}
-                    onChange={(e) => setForm((p) => ({ ...p, hpcsaNumber: e.target.value }))}
-                    required
-                  />
-                  <Input
-                    label="Specialty"
-                    value={form.specialty}
-                    onChange={(e) => setForm((p) => ({ ...p, specialty: e.target.value }))}
-                    required
-                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-ink-600 mb-1.5">
-                    Message (optional)
+                    Message
                   </label>
                   <textarea
                     value={form.message}
                     onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
                     rows={4}
+                    required
                     className="w-full rounded-lg border border-border px-4 py-2.5 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                    placeholder="Anything else we should know?"
+                    placeholder="How can we help?"
                   />
                 </div>
                 {status === "error" && (

@@ -2,24 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email/emailjs";
 
 /**
- * POST — a practitioner reaching out via the /doctors page's "Contact Our
- * Team" CTA. This is the one doctor-facing entry point on the whole
- * marketing site by design (see app/doctors/page.tsx) — practitioners
- * otherwise join through direct outreach, not self-serve signup, so this
- * just notifies the clinical team rather than creating an account.
+ * POST — a patient or practitioner enquiry from /contact. No account is
+ * created; the message is emailed to the admin inbox.
  */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const name = String(body.name || "").trim();
     const email = String(body.email || "").trim();
-    const hpcsaNumber = String(body.hpcsaNumber || "").trim();
-    const specialty = String(body.specialty || "").trim();
     const message = String(body.message || "").trim();
 
-    if (!name || !email || !hpcsaNumber || !specialty) {
+    if (!name || !email || !message) {
       return NextResponse.json(
-        { success: false, error: "Name, email, HPCSA number, and specialty are required." },
+        { success: false, error: "Name, email, and message are required." },
         { status: 400 },
       );
     }
@@ -28,14 +23,12 @@ export async function POST(req: NextRequest) {
 
     const { error } = await sendEmail({
       to: inbox,
-      subject: `Practitioner inquiry: ${name} (${specialty})`,
+      subject: `Enquiry: ${name}`,
       html: `
-        <h2>New practitioner inquiry</h2>
+        <h2>New enquiry</h2>
         <p><strong>Name:</strong> ${escapeHtml(name)}</p>
         <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>HPCSA number:</strong> ${escapeHtml(hpcsaNumber)}</p>
-        <p><strong>Specialty:</strong> ${escapeHtml(specialty)}</p>
-        <p><strong>Message:</strong><br/>${escapeHtml(message || "(none)")}</p>
+        <p><strong>Message:</strong><br/>${escapeHtml(message)}</p>
       `,
     });
 
