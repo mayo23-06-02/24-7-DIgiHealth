@@ -149,41 +149,6 @@ export default function Navbar() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="hover:opacity-80 transition"
-            >
-              <BiLink size={16} className="text-primary  " />
-            </a>
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Twitter"
-              className="hover:opacity-80 transition"
-            >
-              <BiChat size={16} className="text-primary" />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="hover:opacity-80 transition"
-            >
-              <BiHeart size={16} className="text-white" />
-            </a>
-            <div className="w-px h-4 bg-white/30" />
-            <a
-              href="tel:08001234567"
-              className="flex items-center gap-2 font-medium hover:opacity-80 transition"
-            >
-              <BiPhone size={14} className="text-white" />
-              <span>Toll Free: 0800 123 4567</span>
-            </a>
           </div>
         </div>
       </div>
