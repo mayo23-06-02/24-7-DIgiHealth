@@ -13,7 +13,7 @@ const telehealthConsent: LegalDoc = {
         },
         {
           "type": "p",
-          "text": "Platform: 24/7 DigiMedCare\nPlatform Operator: Digital Vantage Solutions (Pty) Ltd, trading as 24/7 DigiMedCare\nContact Email: info@digi-health.co.za"
+          "text": "Platform: 24/7 DigiMedCare\nPlatform Operator: Digital Vantage Solutions (Pty) Ltd, trading as 24/7 DigiMedCare\nContact Email: info@DigiMedCare.co.za"
         }
       ]
     },
@@ -473,7 +473,7 @@ const telehealthConsent: LegalDoc = {
         },
         {
           "type": "p",
-          "text": "24/7 DigiMedCare / Digital Vantage Solutions (Pty) Ltd\nEmail: info@digi-health.co.za"
+          "text": "24/7 DigiMedCare / Digital Vantage Solutions (Pty) Ltd\nEmail: info@DigiMedCare.co.za"
         }
       ]
     }

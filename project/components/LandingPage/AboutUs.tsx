@@ -97,7 +97,7 @@ const values = [
     title: "Human Connection",
     description: "Technology enables care, but our doctors and nurses deliver it with empathy.",
   },
- 
+
   {
     icon: Globe,
     title: "Inclusive Reach",
@@ -112,7 +112,7 @@ export default function AboutUs() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
-            About 24/7 Digi-Health
+            About 24/7 DigiMedCare
           </span>
           <h2 className="text-3xl md:text-4xl font-medium text-ink-900 mb-6 tracking-tight font-grotesk">
             Our Mission: <span className="text-primary font-bold">Telehealth for Everyone</span>
@@ -166,7 +166,7 @@ export default function AboutUs() {
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-            <Image src={'/landing-page/hero-section/amanda.png'} height={100} width={100} alt={"Amanda Mazwi"} />
+              <Image src={'/landing-page/hero-section/amanda.png'} height={100} width={100} alt={"Amanda Mazwi"} />
             </div>
             <div className="text-left">
               <p className="font-bold text-ink-900 text-sm">Amanda Mazwi</p>

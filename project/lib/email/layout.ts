@@ -1,5 +1,5 @@
 /**
- * The one branded layout every 24/7 Digi-Health email uses: a two-tone hero banner, a white
+ * The one branded layout every 24/7 DigiMedCare email uses: a two-tone hero banner, a white
  * body with optional code box, details table, highlights, button and notes, a signature and
  * a legal footer.
  *
@@ -33,7 +33,7 @@ export function escapeHtml(value: unknown): string {
 }
 
 export function appOrigin(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL || "https://www.digi-health.co.za").replace(/\/+$/, "");
+  return (process.env.NEXT_PUBLIC_APP_URL || "https://www.DigiMedCare.co.za").replace(/\/+$/, "");
 }
 
 export interface EmailContent {
@@ -59,7 +59,7 @@ export interface EmailContent {
   cta?: { label: string; url: string };
   /** Small grey lines under the button, as trusted HTML. */
   notes?: string[];
-  /** Defaults to "Kind regards, The 24/7 Digi-Health Team". */
+  /** Defaults to "Kind regards, The 24/7 DigiMedCare Team". */
   signoff?: string | false;
 }
 
@@ -142,7 +142,7 @@ export function renderEmail(c: EmailContent): string {
   const signoff =
     c.signoff === false
       ? ""
-      : `<tr><td style="padding:20px 40px 0;">${p(c.signoff ?? "Kind regards,<br />The 24/7 Digi-Health Team")}</td></tr>`;
+      : `<tr><td style="padding:20px 40px 0;">${p(c.signoff ?? "Kind regards,<br />The 24/7 DigiMedCare Team")}</td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -164,7 +164,7 @@ export function renderEmail(c: EmailContent): string {
             <td style="background:${BRAND.deep}; background-image:linear-gradient(135deg, ${BRAND.deep} 0%, ${BRAND.primary} 100%); padding:30px 32px 34px; vertical-align:top;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="width:26px; height:26px; background:#ffffff; border-radius:7px; text-align:center; vertical-align:middle; color:${BRAND.primary}; font-size:16px; font-weight:700; line-height:26px;">&#10010;</td>
-                <td style="padding-left:9px; color:#ffffff; font-size:15px; font-weight:700; letter-spacing:0.2px;">24/7 Digi-Health</td>
+                <td style="padding-left:9px; color:#ffffff; font-size:15px; font-weight:700; letter-spacing:0.2px;">24/7 DigiMedCare</td>
               </tr></table>
               ${c.eyebrow ? `<p style="margin:26px 0 6px; color:rgba(255,255,255,0.78); font-size:12px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase;">${escapeHtml(c.eyebrow)}</p>` : `<div style="height:26px; line-height:26px;">&nbsp;</div>`}
               <h1 style="margin:0; color:#ffffff; font-size:30px; line-height:1.2; font-weight:700; letter-spacing:-0.4px;">${escapeHtml(c.title)}</h1>
@@ -189,18 +189,18 @@ export function renderEmail(c: EmailContent): string {
         <tr><td style="padding:28px 40px 32px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid ${BRAND.line}; font-size:0; line-height:0;">&nbsp;</td></tr></table>
           <p style="margin:22px 0 8px; text-align:center; font-size:12px;">
-            <a href="${origin}" style="color:${BRAND.primary}; text-decoration:none; font-weight:600;">digi-health.co.za</a>
+            <a href="${origin}" style="color:${BRAND.primary}; text-decoration:none; font-weight:600;">DigiMedCare.co.za</a>
             <span style="color:${BRAND.line};">&nbsp;|&nbsp;</span>
             <a href="${origin}/terms" style="color:${BRAND.muted}; text-decoration:underline;">Terms of Service</a>
             <span style="color:${BRAND.line};">&nbsp;|&nbsp;</span>
             <a href="${origin}/contact" style="color:${BRAND.muted}; text-decoration:underline;">Contact us</a>
           </p>
           <p style="margin:0 0 4px; text-align:center; color:${BRAND.faint}; font-size:11px; line-height:1.6;">
-            24/7 Digi-Health &middot; Quality care, wherever you are.
+            24/7 DigiMedCare &middot; Quality care, wherever you are.
           </p>
           <p style="margin:0 0 4px; text-align:center; color:${BRAND.faint}; font-size:11px; line-height:1.6;">
             Digital Vantage Solutions (Pty) Ltd, trading as 24/7 DigiMedCare &middot; South Africa &middot;
-            <a href="mailto:info@digi-health.co.za" style="color:${BRAND.faint};">info@digi-health.co.za</a>
+            <a href="mailto:info@DigiMedCare.co.za" style="color:${BRAND.faint};">info@DigiMedCare.co.za</a>
           </p>
           <p style="margin:0; text-align:center; color:${BRAND.faint}; font-size:11px;">This is an automated message. Please do not reply to this email.</p>
         </td></tr>

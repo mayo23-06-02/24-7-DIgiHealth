@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         pending: true,
         guardianName: guardian
           ? `${guardian.firstName} ${guardian.lastName}`.trim()
-          : "A 24/7 Digi-Health user",
+          : "A 24/7 DigiMedCare user",
         relationship: invite.relationship || null,
       },
     });

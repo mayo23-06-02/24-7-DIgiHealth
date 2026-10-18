@@ -7,7 +7,7 @@ const RESPONSIBILITIES = [
   "ensuring that all banking and merchant account information remains current;",
   "complying with applicable tax, accounting and regulatory obligations;",
   "managing refunds, reversals or payment disputes;",
-  "notifying 24/7 Digi-Health promptly of any changes to authorised banking or merchant account details.",
+  "notifying 24/7 DigiMedCare promptly of any changes to authorised banking or merchant account details.",
 ];
 
 /** Practitioner registration: Payments & Settlements terms and confirmation. */
@@ -24,7 +24,7 @@ export default function PractitionerStep4({ formData, updateData, errors }: any)
       <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-5 md:p-6 text-sm leading-relaxed text-slate-700">
         <h3 className="font-grotesk text-base font-bold text-slate-900">Patient Payments and Settlement</h3>
         <p>
-          24/7 Digi-Health provides access to an integrated payment gateway to facilitate secure payments by patients
+          24/7 DigiMedCare provides access to an integrated payment gateway to facilitate secure payments by patients
           for consultations provided through the platform.
         </p>
         <p>
@@ -38,7 +38,7 @@ export default function PractitionerStep4({ formData, updateData, errors }: any)
           payments.
         </p>
         <p>
-          24/7 Digi-Health facilitates the digital payment process through its integrated payment gateway with Card Not
+          24/7 DigiMedCare facilitates the digital payment process through its integrated payment gateway with Card Not
           Present payment instruments and does not hold patient funds on behalf of the Practitioner or Medical Facility
           unless expressly stated otherwise in a separate written agreement.
         </p>

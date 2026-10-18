@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
           },
           transactions: transactions as any,
           notes:
-            "Official Digi-Health patient statement. Download individual receipts from Billing for medical aid claims.",
+            "Official DigiMedCare patient statement. Download individual receipts from Billing for medical aid claims.",
         });
         return pdfResponse(buffer, filename);
       }

@@ -8,43 +8,24 @@ import WhyUrgentCare from "@/components/LandingPage/WhyUrgentCare";
 import Footer from "@/components/LandingPage/Footer";
 import Button from "@/components/ui/Button";
 import {
-  MessageSquareText,
-  UserSearch,
+  Calendar,
   Video,
-  ClipboardCheck,
   Users,
   FileText,
   Pill,
+  CreditCard,
   Clock,
   Star,
   ArrowRight,
 } from "lucide-react";
 
 const steps = [
-  {
-    icon: MessageSquareText,
-    title: "Tell us what's wrong",
-    description:
-      "Answer a few quick questions about your symptoms so we can point you to the right kind of care.",
-  },
-  {
-    icon: UserSearch,
-    title: "Get matched",
-    description:
-      "We show you available GPs or specialists based on your symptoms, not just whoever's free.",
-  },
-  {
-    icon: Video,
-    title: "See them today",
-    description:
-      "Video, chat, or voice — pick what suits you. Most patients are seen within the hour.",
-  },
-  {
-    icon: ClipboardCheck,
-    title: "Walk away with a plan",
-    description:
-      "E-prescriptions go straight to any partner pharmacy; your notes save automatically to your health record.",
-  },
+  { icon: Calendar, title: "Books appointments" },
+  { icon: Video, title: "Consults with doctors" },
+  { icon: FileText, title: "Manages their health record" },
+  { icon: Pill, title: "Requests prescription refills" },
+  { icon: CreditCard, title: "Pays for their subscription" },
+  { icon: Users, title: "Manages family members on a linked account" },
 ];
 
 const features = [
@@ -123,15 +104,15 @@ export default function PatientsPage() {
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
-              How It Works
+            <span className="text-secondary font-bold tracking-[0.45em] text-sm block mb-3">
+              PATIENT
             </span>
             <h2 className="text-3xl md:text-4xl font-medium text-ink-900 tracking-tight font-grotesk">
-              Four steps, no queue
+              The person receiving care
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {steps.map(({ icon: Icon, title, description }, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {steps.map(({ icon: Icon, title }, i) => (
               <div key={title} className="relative bg-surface-soft rounded-2xl p-6">
                 <span className="text-xs font-bold text-primary/60 tracking-wide">
                   STEP {i + 1}
@@ -139,8 +120,7 @@ export default function PatientsPage() {
                 <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center my-4 text-primary shadow-xs">
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-ink-900 mb-2 font-grotesk">{title}</h3>
-                <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
+                <h3 className="text-base font-bold text-ink-900 font-grotesk">{title}</h3>
               </div>
             ))}
           </div>

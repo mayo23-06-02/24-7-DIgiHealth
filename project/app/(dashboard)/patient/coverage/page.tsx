@@ -5,7 +5,7 @@ import { getRequestUser } from "@/lib/auth/getRequestUser";
 import { getEntitlement } from "@/lib/billing/entitlement";
 
 export const metadata = {
-  title: "Cover Paused | 24/7 Digi-Health",
+  title: "Cover Paused | 24/7 DigiMedCare",
 };
 
 /**

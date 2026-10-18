@@ -112,8 +112,8 @@ export async function buildPlatformReportPdf(
 ): Promise<{ buffer: Buffer }> {
   const doc = createPdfDocument({
     info: {
-      Title: "Digi-Health Platform Report",
-      Author: "Digi-Health Admin",
+      Title: "DigiMedCare Platform Report",
+      Author: "DigiMedCare Admin",
       Subject: "Platform operational report",
     },
   });
@@ -148,7 +148,7 @@ export async function buildPlatformReportPdf(
     .font(fonts.bold)
     .fontSize(16)
     .fillColor(BRAND.text)
-    .text("24/7 Digi-Health — Platform Control Report", left, doc.y, {
+    .text("24/7 DigiMedCare — Platform Control Report", left, doc.y, {
       lineBreak: false,
     });
   doc.y += 18;
@@ -332,7 +332,7 @@ export async function buildPlatformReportPdf(
     .fontSize(7)
     .fillColor(BRAND.muted)
     .text(
-      "Confidential — Digi-Health platform administrators only.",
+      "Confidential — DigiMedCare platform administrators only.",
       left,
       doc.y + 8,
       { width: contentW, align: "center" },

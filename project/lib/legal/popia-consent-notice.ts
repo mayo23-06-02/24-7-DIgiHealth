@@ -6,7 +6,7 @@ const popiaConsentNotice: LegalDoc = {
     "Consent to Process Personal Information and Health Information",
     "Platform: 24/7 DigiMedCare",
     "Operator / Responsible Party: Digital Vantage Solutions (Pty) Ltd, trading as 24/7 DigiMedCare",
-    "Contact Email: info@digi-health.co.za"
+    "Contact Email: info@DigiMedCare.co.za"
   ],
   "sections": [
     {
@@ -404,7 +404,7 @@ const popiaConsentNotice: LegalDoc = {
         },
         {
           "type": "p",
-          "text": "Email: info@digi-health.co.za"
+          "text": "Email: info@DigiMedCare.co.za"
         }
       ]
     }

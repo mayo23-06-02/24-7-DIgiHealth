@@ -55,14 +55,14 @@ const EXTRA_MEGA = (process.env.EXTRA_MEGA_ADMIN_EMAILS ?? "")
 
 const BASE_ACCOUNTS = [
   {
-    email: "mega@digi-health.co.za",
+    email: "mega@DigiMedCare.co.za",
     role: "mega_admin" as const,
     firstName: "Mega",
     lastName: "Admin",
     passwordEnvVar: "MEGA_ADMIN_PASSWORD",
   },
   {
-    email: "super@digi-health.co.za",
+    email: "super@DigiMedCare.co.za",
     role: "super_admin" as const,
     firstName: "Super",
     lastName: "Admin",

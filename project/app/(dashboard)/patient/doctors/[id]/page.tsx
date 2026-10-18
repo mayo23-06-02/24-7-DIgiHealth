@@ -388,7 +388,7 @@ export default function DoctorProfilePage() {
             </div>
             <p className="text-xs text-ink-600 leading-relaxed">
               Consultations with {doc.name} are billed automatically under
-              your Digi-Health subscription            </p>
+              your DigiMedCare subscription            </p>
             <Button fullWidth size="sm" onClick={() => setShowBooking(true)}>
               Book Consultation
             </Button>

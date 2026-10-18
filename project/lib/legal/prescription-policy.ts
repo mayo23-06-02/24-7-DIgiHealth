@@ -13,7 +13,7 @@ const prescriptionPolicy: LegalDoc = {
         },
         {
           "type": "p",
-          "text": "Platform: 24/7 DigiMedCare\nPlatform Operator: Digital Vantage Solutions (Pty) Ltd, trading as 24/7 DigiMedCare\nContact Email: info@digi-health.co.za"
+          "text": "Platform: 24/7 DigiMedCare\nPlatform Operator: Digital Vantage Solutions (Pty) Ltd, trading as 24/7 DigiMedCare\nContact Email: info@DigiMedCare.co.za"
         }
       ]
     },
@@ -793,7 +793,7 @@ const prescriptionPolicy: LegalDoc = {
         },
         {
           "type": "p",
-          "text": "Digital Vantage Solutions (Pty) Ltd trading as 24/7 DigiMedCare \t\nEmail: info@digi-health.co.za"
+          "text": "Digital Vantage Solutions (Pty) Ltd trading as 24/7 DigiMedCare \t\nEmail: info@DigiMedCare.co.za"
         }
       ]
     }

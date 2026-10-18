@@ -15,7 +15,7 @@ const CATEGORIES = [
   { value: "subscription", label: "Subscription/billing" },
 ];
 
-const SUPPORT_EMAIL = "info@digi-health.co.za";
+const SUPPORT_EMAIL = "info@DigiMedCare.co.za";
 
 /**
  * "Contact Guidance Team" on the registration screens. Used to be a tel:

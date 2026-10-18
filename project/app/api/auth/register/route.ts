@@ -16,7 +16,7 @@ import { ClaimError, claimRegistration } from "@/lib/provisioning/claimRegistrat
 
 /**
  * POST /api/auth/register
- * Creates Digi-Health account (password). No email verification step —
+ * Creates DigiMedCare account (password). No email verification step —
  * the account is active immediately and can log in right away.
  *
  * Body: { role, formData }
@@ -428,7 +428,7 @@ export async function POST(request: Request) {
         "@/lib/email/templates/newSignupNotification"
       );
       await sendEmail({
-        to: "info@digi-health.co.za",
+        to: "info@DigiMedCare.co.za",
         subject: `New ${modelRole} sign-up: ${newUser.firstName} ${newUser.lastName}`,
         html: newSignupNotificationEmailHtml({
           fullName: `${newUser.firstName} ${newUser.lastName}`,

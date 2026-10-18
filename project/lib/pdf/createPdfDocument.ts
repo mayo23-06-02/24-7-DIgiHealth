@@ -1,5 +1,5 @@
 /**
- * Safe PDFKit factory for Next.js with Digi-Health brand fonts.
+ * Safe PDFKit factory for Next.js with DigiMedCare brand fonts.
  * Outfit (body/headings) + Space Mono (labels/meta).
  * Logo: public/Logo-Main.svg via svg-to-pdfkit.
  */

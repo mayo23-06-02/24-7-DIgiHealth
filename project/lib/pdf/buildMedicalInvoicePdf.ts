@@ -219,13 +219,13 @@ export async function buildMedicalInvoicePdf(inv: MedicalInvoicePdfInput): Promi
 
   ensureRoom(doc, 40);
   doc.font(fonts.body).fontSize(8).fillColor(BRAND.muted).text(
-    "Submit this account to your medical aid, or settle it with the practice directly. Payment is not taken through 24/7 Digi-Health. Contact the practice about any query on this account.",
+    "Submit this account to your medical aid, or settle it with the practice directly. Payment is not taken through 24/7 DigiMedCare. Contact the practice about any query on this account.",
     left,
     doc.y + 6,
     { width: contentW },
   );
   doc.font(fonts.mono).fontSize(7).fillColor(BRAND.muted).text(
-    `Generated ${new Date().toLocaleString("en-ZA")} · 24/7 Digi-Health`,
+    `Generated ${new Date().toLocaleString("en-ZA")} · 24/7 DigiMedCare`,
     left,
     doc.y + 10,
     { lineBreak: false },

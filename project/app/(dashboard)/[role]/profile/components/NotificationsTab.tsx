@@ -54,7 +54,7 @@ export default function NotificationsTab({
       <ProfileSection
         icon={<Bell size={22} />}
         title="Alert preferences"
-        description="Choose how Digi-Health keeps you informed"
+        description="Choose how DigiMedCare keeps you informed"
         color="amber"
       >
         <div className="space-y-3">

@@ -1,5 +1,5 @@
 /**
- * Digi-Health branded patient health-profile PDF.
+ * DigiMedCare branded patient health-profile PDF.
  * Outfit + Space Mono · primary #4493b8 · logo header · doctor signature.
  */
 import User from "@/lib/models/User";
@@ -294,7 +294,7 @@ export async function buildHealthProfilePdf(
     info: {
       Title: `Health Profile — ${fullName}`,
       Author: doctorName,
-      Subject: "Patient health profile — 24/7 Digi-Health",
+      Subject: "Patient health profile — 24/7 DigiMedCare",
     },
   });
 
@@ -648,7 +648,7 @@ export async function buildHealthProfilePdf(
       .fontSize(6.5)
       .fillColor(BRAND.muted)
       .text(
-        "Generated from the 24/7 Digi-Health EHR. Not a substitute for original signed prescriptions.",
+        "Generated from the 24/7 DigiMedCare EHR. Not a substitute for original signed prescriptions.",
         left,
         doc.y,
         { width: contentW, lineBreak: false },

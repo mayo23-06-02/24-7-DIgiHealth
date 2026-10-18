@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const inbox = process.env.CLINICAL_TEAM_EMAIL?.trim() || "admin@digi-health.co.za";
+    const inbox = process.env.CLINICAL_TEAM_EMAIL?.trim() || "admin@DigiMedCare.co.za";
 
     const { error } = await sendEmail({
       to: inbox,
