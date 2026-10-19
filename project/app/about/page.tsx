@@ -224,9 +224,7 @@ export default function AboutPage() {
             {team.map((member) => (
               <div key={member.name} className="text-center max-w-xs">
                 <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                     <Image src={'/landing-page/hero-section/amanda.png'} height={400} width={400} alt={"Amanda Mazwi"} className="rounded-full " />
-                  </div>
                 </div>
                 <p className="font-bold text-ink-900 font-grotesk">{member.name}</p>
                 <p className="text-sm text-ink-400">{member.role}</p>
