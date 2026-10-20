@@ -6,7 +6,6 @@ import Image from "next/image";
 import SiteHeader from "@/components/LandingPage/SiteHeader";
 import Footer from "@/components/LandingPage/Footer";
 import Button from "@/components/ui/Button";
-import PublicDoctorGrid from "@/components/doctor/PublicDoctorGrid";
 import {
   BadgeCheck,
   FileCheck2,
@@ -127,26 +126,6 @@ export default function DoctorsPage() {
                 {s}
               </span>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Meet a few doctors */}
-      <section className="py-16 md:py-24 bg-surface-soft">
-        <div className="container mx-auto px-4 md:px-8 xl:px-12 md:max-w-[1400px] xl:max-w-[1400px] 2xl:max-w-[1400px]">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-secondary font-bold tracking-normal text-sm block mb-3">
-              On The Platform
-            </span>
-            <h2 className="text-3xl md:text-4xl font-medium text-ink-900 tracking-tight font-grotesk">
-              Meet a few of our doctors
-            </h2>
-          </div>
-          <PublicDoctorGrid limit={8} />
-          <div className="text-center mt-8">
-            <Link href="/patients" className="text-primary font-semibold text-sm hover:underline">
-              See how patients book a consultation →
-            </Link>
           </div>
         </div>
       </section>
