@@ -165,9 +165,13 @@ export default function AboutUs() {
             access healthcare. Join us in making quality care a right, not a privilege.”
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <Image src={'/landing-page/hero-section/amanda.png'} height={100} width={100} alt={"Amanda Mazwi"} />
-            </div>
+            <Image
+              src="/about/amanda-mazwi.jpg"
+              height={96}
+              width={96}
+              alt="Amanda Mazwi"
+              className="w-12 h-12 rounded-full object-cover object-top"
+            />
             <div className="text-left">
               <p className="font-bold text-ink-900 text-sm">Amanda Mazwi</p>
               <p className="text-xs text-ink-400">Founder</p>

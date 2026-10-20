@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import SiteHeader from "@/components/LandingPage/SiteHeader";
 import Footer from "@/components/LandingPage/Footer";
+import FounderArticle from "@/components/about/FounderArticle";
 import {
   Heart,
   Shield,
@@ -75,9 +76,6 @@ const stats = [
   { icon: MapPin, value: "Nationwide", label: "Coverage Across South Africa" },
 ];
 
-const team = [
-  { name: "Amanda Mazwi", role: "Founder", initials: "AM" },
-];
 
 export default function AboutPage() {
   return (
@@ -217,17 +215,7 @@ export default function AboutPage() {
               Real people, building this for the long run
             </h2>
           </div>
-          <div className="flex justify-center">
-            {team.map((member) => (
-              <div key={member.name} className="text-center max-w-xs">
-                <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                    <Image src={'/landing-page/hero-section/amanda.png'} height={400} width={400} alt={"Amanda Mazwi"} className="rounded-full " />
-                </div>
-                <p className="font-bold text-ink-900 font-grotesk">{member.name}</p>
-                <p className="text-sm text-ink-400">{member.role}</p>
-              </div>
-            ))}
-          </div>
+          <FounderArticle />
           <blockquote className="mt-14 max-w-2xl mx-auto text-center text-lg md:text-xl text-ink-600 leading-relaxed italic">
             "We're not just building an app – we're reimagining how South
             Africans access healthcare. Join us in making quality care a
