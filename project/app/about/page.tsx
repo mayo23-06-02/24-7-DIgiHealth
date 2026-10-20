@@ -1,11 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
 import SiteHeader from "@/components/LandingPage/SiteHeader";
 import Footer from "@/components/LandingPage/Footer";
-import Button from "@/components/ui/Button";
 import {
   Heart,
   Shield,
@@ -15,7 +13,6 @@ import {
   User,
   Stethoscope,
   MapPin,
-  ArrowRight,
 } from "lucide-react";
 
 function CountUpValue({ value }: { value: string }) {
@@ -236,20 +233,6 @@ export default function AboutPage() {
             Africans access healthcare. Join us in making quality care a
             right, not a privilege."
           </blockquote>
-        </div>
-      </section>
-
-      {/* Closing CTA */}
-      <section className="py-16 md:py-20 bg-surface-soft text-center">
-        <div className="container mx-auto px-4 md:px-8">
-          <h2 className="text-2xl md:text-3xl font-medium text-ink-900 tracking-tight font-grotesk mb-6">
-            See the doctors making this possible
-          </h2>
-          <Link href="/doctors">
-            <Button variant="primary" icon={<ArrowRight size={16} />} iconPosition="right">
-              Meet the Doctors
-            </Button>
-          </Link>
         </div>
       </section>
 
