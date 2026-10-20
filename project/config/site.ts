@@ -1,9 +1,9 @@
 /**
- * Everything the public marketing chrome renders — nav, contact details,
- * social links, and the footer's link columns.
+ * Everything the public marketing chrome renders — nav, contact details
+ * and the footer's link columns.
  *
  * This is the single place to edit them. The header and footer both read from
- * here, so adding a page to the nav or changing the toll-free number is a
+ * here, so adding a page to the nav or changing the email address is a
  * one-line change rather than a hunt through components. Nothing in the
  * signed-in dashboard reads this file.
  */
@@ -19,9 +19,6 @@ export const NAV_LINKS: NavLink[] = [
 ];
 
 export const SITE_CONTACT = {
-  tollFree: "0800 123 4567",
-  /** Digits only — used for the tel: href. */
-  tollFreeHref: "tel:08001234567",
   email: "hello@247digihealth.com",
   /**
    * South African emergency numbers. Shown wherever we tell someone we can't
@@ -30,12 +27,6 @@ export const SITE_CONTACT = {
   emergency: "10177",
   mentalHealthLine: "SADAG 0800 567 567",
 };
-
-export const SOCIAL_LINKS = [
-  { name: "Facebook", href: "#" },
-  { name: "Twitter", href: "#" },
-  { name: "Instagram", href: "#" },
-] as const;
 
 /** Footer link columns. Add a column or a link here and the footer follows. */
 export const FOOTER_COLUMNS: { heading: string; links: NavLink[] }[] = [

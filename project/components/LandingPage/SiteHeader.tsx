@@ -5,14 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Button from "@/components/ui/Button";
 import LogoMain from "@/components/ui/LogoMain";
-import SocialIcons from "./SocialIcons";
-import { NAV_LINKS, SITE_CONTACT } from "@/config/site";
+import { NAV_LINKS } from "@/config/site";
 import { useLocalWeather } from "@/hooks/useLocalWeather";
 
 export type SiteHeaderProps = {
   /**
-   * The strip above the nav carrying weather, date, socials and the toll-free
-   * number.
+   * The strip above the nav carrying the weather and date.
    *
    * On everywhere by default. It used to be on for home only, which is what
    * made the header look like two different headers depending on which
@@ -182,24 +180,6 @@ function UtilityBar() {
         </span>
         <span className="hidden md:inline text-white/50">|</span>
         <span className="text-white/80 text-xs">{currentDate}</span>
-      </div>
-      <div className="flex items-center gap-4">
-        <SocialIcons />
-        <div className="w-px h-4 bg-white/30" />
-        <a
-          href={SITE_CONTACT.tollFreeHref}
-          className="flex items-center gap-2 font-medium hover:opacity-80 transition"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-            />
-          </svg>
-          <span>Toll Free: {SITE_CONTACT.tollFree}</span>
-        </a>
       </div>
     </div>
   );

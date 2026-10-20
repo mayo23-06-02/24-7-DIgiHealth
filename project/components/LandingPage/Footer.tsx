@@ -69,46 +69,6 @@ export default function Footer() {
             24/7 DigiMedCare
           </Link>
 
-          {/* Social Icons */}
-          <div className="flex items-center gap-4">
-            {/* X / Twitter */}
-            <a
-              href="#"
-              aria-label="Twitter/X"
-              className="w-[42px] h-[42px] rounded-lg border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors text-white/90 hover:text-white"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-[18px] h-[18px]"
-              >
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 24.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-              </svg>
-            </a>
-
-            {/* Facebook */}
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="w-[42px] h-[42px] rounded-lg border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors text-white/90 hover:text-white"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"></path>
-              </svg>
-            </a>
-
-            {/* YouTube */}
-            <a
-              href="#"
-              aria-label="YouTube"
-              className="w-[42px] h-[42px] rounded-lg border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors text-white/90 hover:text-white"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
-              </svg>
-            </a>
-          </div>
-
           {/* Copyright */}
           <div className="text-center md:text-right text-white/70 text-[0.9rem] flex flex-col gap-1">
             <p>© 2026 24/7 DigiMedCare. All rights reserved.</p>

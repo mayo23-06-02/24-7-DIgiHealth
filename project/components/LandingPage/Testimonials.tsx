@@ -219,26 +219,6 @@ export default function Testimonials() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex gap-2 relative z-10">
-                          <button
-                            aria-label="X"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 transition text-xs font-serif font-bold"
-                          >
-                            X
-                          </button>
-                          <button
-                            aria-label="Facebook"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 transition text-xs font-serif font-bold"
-                          >
-                            f
-                          </button>
-                          <button
-                            aria-label="Play"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 transition text-xs"
-                          >
-                            ▶
-                          </button>
-                        </div>
                       </div>
                     </div>
 
@@ -267,26 +247,6 @@ export default function Testimonials() {
                           <p className="text-white/80 text-sm font-medium">
                             {item.role}
                           </p>
-                        </div>
-                        <div className="flex gap-2 relative z-10">
-                          <button
-                            aria-label="X"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 transition text-xs font-serif font-bold"
-                          >
-                            X
-                          </button>
-                          <button
-                            aria-label="Facebook"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 transition text-xs font-serif font-bold"
-                          >
-                            f
-                          </button>
-                          <button
-                            aria-label="Play"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 transition text-xs"
-                          >
-                            ▶
-                          </button>
                         </div>
                       </div>
                     </div>
