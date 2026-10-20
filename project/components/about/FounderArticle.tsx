@@ -167,12 +167,12 @@ export default function FounderArticle() {
           </div>
         </article>
 
-        <figure className="order-1 lg:order-2">
+        <figure className="order-1 lg:order-2 lg:w-4/5 lg:ml-auto">
           <Image
             src="/about/amanda-mazwi.jpg"
             width={1086}
             height={1448}
-            sizes="(min-width: 1024px) 50vw, 100vw"
+            sizes="(min-width: 1024px) 40vw, 100vw"
             alt="Amanda Mazwi, founder of 24/7 DigiMedCare"
             className="w-full h-auto rounded-2xl shadow-sm"
             priority
