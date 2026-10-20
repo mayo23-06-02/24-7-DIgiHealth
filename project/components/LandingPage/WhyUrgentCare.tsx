@@ -9,8 +9,6 @@ import {
   Globe2,
   Star,
   ArrowRight,
-  TriangleAlert,
-  ClipboardList,
 } from "lucide-react";
 
 const benefits = [
@@ -48,50 +46,6 @@ const benefits = [
   },
 ];
 
-const conditions = [
-  "Colds, flu & COVID-19",
-  "Allergies & asthma",
-  "Sinus infections",
-  "Skin infections & rashes",
-  "Conjunctivitis (pink eye)",
-  "Urinary tract infections (UTIs)",
-  "Minor back pain",
-  "Prescription refills",
-  "Sore throat & tonsillitis",
-  "Ear infections & earache",
-  "Stomach bugs, nausea & diarrhoea",
-  "Headaches & migraines",
-  "Heartburn & acid reflux",
-  "Period pain & contraception advice",
-  "Sick notes & medical certificates",
-  "Mental health check-ins",
-];
-
-const treatmentTypes = [
-  "Antibiotics, for bacterial infections",
-  "Antivirals, for viral illnesses like the flu or cold sores",
-  "Allergy & asthma medication, for respiratory issues and mild reactions",
-  "Anti-inflammatories, for pain, inflammation, or fever",
-  "Gastrointestinal medication, for nausea, vomiting, or diarrhoea",
-  "Antifungals, for thrush, ringworm, and skin infections",
-  "Topical creams, for rashes, eczema, and minor skin irritation",
-  "Eye & ear drops, for conjunctivitis and ear infections",
-  "Repeat chronic scripts, for blood pressure, cholesterol, and diabetes",
-  "Contraception & women's health, including the pill and period pain relief",
-];
-
-const cannotTreat = [
-  "Emergency symptoms — chest pain, trouble breathing, severe bleeding, or signs of stroke",
-  "Serious injuries needing X-rays, stitches, or hands-on treatment",
-  "Conditions requiring in-person labs or imaging",
-  "Anything requiring controlled substances, which can't be prescribed via telehealth",
-  "Severe allergic reactions or anaphylaxis — call 10177 immediately",
-  "Suspected fractures, dislocations, or deep wounds",
-  "Anything needing a physical examination to diagnose safely",
-  "Pregnancy complications or severe abdominal pain",
-  "Mental health crises or thoughts of self-harm — please call SADAG on 0800 567 567",
-];
-
 export default function WhyUrgentCare() {
   return (
     <section className="bg-white py-16 md:py-24">
@@ -109,7 +63,7 @@ export default function WhyUrgentCare() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
           {benefits.map(({ icon: Icon, title, description, bg, iconColor }) => (
             <div key={title} className={`rounded-2xl p-6 ${bg}`}>
               <div className={`w-11 h-11 rounded-xl bg-white/70 flex items-center justify-center mb-4 ${iconColor}`}>
@@ -119,65 +73,6 @@ export default function WhyUrgentCare() {
               <p className="text-sm text-ink-600 leading-relaxed">{description}</p>
             </div>
           ))}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-          <div className="bg-surface-soft rounded-2xl p-7">
-            <h3 className="text-lg font-bold text-ink-900 mb-1 font-grotesk">
-              Conditions we can help with
-            </h3>
-            <p className="text-sm text-ink-600 mb-4">
-              A doctor can diagnose and treat most everyday concerns in a single
-              consultation, including:
-            </p>
-            <ul className="space-y-2.5">
-              {conditions.map((c) => (
-                <li key={c} className="text-sm text-ink-600 flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                  {c}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-secondary/10 rounded-2xl p-7">
-            <h3 className="text-lg font-bold text-ink-900 mb-1 font-grotesk flex items-center gap-2">
-              <ClipboardList size={18} className="text-secondary" />
-              Treatment we can prescribe
-            </h3>
-            <p className="text-sm text-ink-600 mb-4">
-              Many urgent concerns are treated with medication we can
-              prescribe directly during your consultation, including:
-            </p>
-            <ul className="space-y-2.5">
-              {treatmentTypes.map((c) => (
-                <li key={c} className="text-sm text-ink-600 flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0" />
-                  {c}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-danger-50 rounded-2xl p-7">
-            <h3 className="text-lg font-bold text-ink-900 mb-1 font-grotesk flex items-center gap-2">
-              <TriangleAlert size={18} className="text-danger-700" />
-              What we can't treat online
-            </h3>
-            <ul className="space-y-2.5 mt-4">
-              {cannotTreat.map((c) => (
-                <li key={c} className="text-sm text-ink-600 flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-danger-500 mt-1.5 shrink-0" />
-                  {c}
-                </li>
-              ))}
-            </ul>
-            <p className="text-xs text-danger-700 font-semibold mt-4">
-              If your symptoms are severe or life-threatening, call 10177
-              (ambulance) or 112 from a mobile phone, or go to your nearest
-              emergency room right away.
-            </p>
-          </div>
         </div>
 
         <div className="text-center">
