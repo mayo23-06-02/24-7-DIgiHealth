@@ -239,6 +239,9 @@ export default auth(async function middleware(request: NextRequest & { auth: any
     // and writes nothing; it validates its own input and emails the admin
     // inbox. Gating it behind a session made it 401 for every real user of it.
     pathname === '/api/contact/practitioner-inquiry' ||
+    // The practice enquiry form on /digitise-practice (Meta ad landing page). Same
+    // shape as the contact form: validates its own input and only sends an email.
+    pathname === '/api/contact/practice-enquiry' ||
     // Hospital names for the registration wizard's first step (public: nobody is signed in yet).
     pathname === '/api/facilities/public'
   ) {
