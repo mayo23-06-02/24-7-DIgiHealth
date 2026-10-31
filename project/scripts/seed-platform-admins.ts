@@ -1,123 +1,84 @@
 /**
- * Bootstraps the two platform admin accounts (mega_admin, super_admin) in Supabase Postgres.
+ * Seeds two PLATFORM (mega_admin) accounts. Additive and re-runnable: it creates
+ * the accounts if missing, or resets their role, status and password if they
+ * already exist. It never wipes or touches any other data.
  *
- * This is the ONLY script meant for production: it creates real admin accounts
- * and no demo data. Safe to run against any project.
+ * The password is read from an environment variable so it is not stored in the
+ * repo (set it in the same shell session you run the script from).
  *
- * There is no in-app way to create these roles — normal registration only
- * offers patient/practitioner/hospital, and the admin API only lists/suspends
- * existing users, by design (see lib/auth/adminRoles.ts: only an existing
- * mega_admin can assign super_admin/mega_admin, and there's no UI for it
- * yet). This script is the bootstrap path for the very first ones.
- *
- * Usage:
- *   node --env-file=.env.local node_modules/.bin/tsx scripts/seed-platform-admins.ts
- *   npm run seed:admins
- *
- * Passwords: pass MEGA_ADMIN_PASSWORD / SUPER_ADMIN_PASSWORD as env vars to
- * set them yourself; otherwise a strong random password is generated for
- * each and printed ONCE at the end. Nothing is written to disk or logged
- * anywhere else — copy them immediately, they cannot be recovered afterward
- * (only reset via a fresh password-reset flow).
- *
- * Safe to re-run: an email that already exists is reported and skipped
- * rather than duplicated or overwritten.
+ * Run (dev databases only):
+ *   PowerShell:  $env:ALLOW_SEED="true"; $env:PLATFORM_ADMIN_PASSWORD='D*g*Health@2026'; npx tsx scripts/seed-platform-admins.ts
+ *   bash:        ALLOW_SEED=true PLATFORM_ADMIN_PASSWORD='D*g*Health@2026' npx tsx scripts/seed-platform-admins.ts
  */
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import * as dotenv from "dotenv";
 import path from "path";
+import { createClient } from "@supabase/supabase-js";
 
+// Dev-only credentials first (dotenv never overrides values already set).
+dotenv.config({ path: path.join(__dirname, "../.env.seed.local") });
 dotenv.config({ path: path.join(__dirname, "../.env.local") });
 
-import User from "../lib/models/User";
+// ---- PRODUCTION GUARD ----
+const PROTECTED_PROJECT_REFS = [
+  "cagmxeebwtjrbaemwdwj", // production
+  ...(process.env.PROTECTED_SUPABASE_REFS ?? "").split(",").map((r) => r.trim()).filter(Boolean),
+];
+function assertSafeToSeed() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  if (process.env.ALLOW_SEED !== "true") {
+    throw new Error("Refusing to seed: set ALLOW_SEED=true to confirm this is a dev database.");
+  }
+  if (process.env.APP_ENV === "production" || process.env.VERCEL_ENV === "production") {
+    throw new Error("Refusing to seed: APP_ENV/VERCEL_ENV is production.");
+  }
+  const hit = PROTECTED_PROJECT_REFS.find((ref) => url.includes(ref));
+  if (hit) throw new Error(`Refusing to seed: ${url} is a protected (production) Supabase project.`);
+}
+assertSafeToSeed();
 
-function generatePassword(): string {
-  // 16 chars, mixed alphanumeric + symbols, cryptographically random.
-  const alphabet =
-    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*";
-  const bytes = crypto.randomBytes(16);
-  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !key) throw new Error("Missing SUPABASE_URL / SUPABASE_SECRET_KEY");
+const supabase = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+
+const password = process.env.PLATFORM_ADMIN_PASSWORD;
+if (!password || password.length < 8) {
+  throw new Error("Set PLATFORM_ADMIN_PASSWORD (at least 8 characters) in the shell before running.");
 }
 
-// Extra mega admins: EXTRA_MEGA_ADMIN_EMAILS="a@x.com,b@y.com" (they share MEGA_ADMIN_PASSWORD).
-const EXTRA_MEGA = (process.env.EXTRA_MEGA_ADMIN_EMAILS ?? "")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean)
-  .map((email) => ({
-    email,
-    role: "mega_admin" as const,
-    firstName: "Mega",
-    lastName: "Admin",
-    passwordEnvVar: "MEGA_ADMIN_PASSWORD",
-  }));
-
-const BASE_ACCOUNTS = [
-  {
-    email: "mega@DigiMedCare.co.za",
-    role: "mega_admin" as const,
-    firstName: "Mega",
-    lastName: "Admin",
-    passwordEnvVar: "MEGA_ADMIN_PASSWORD",
-  },
-  {
-    email: "super@DigiMedCare.co.za",
-    role: "super_admin" as const,
-    firstName: "Super",
-    lastName: "Admin",
-    passwordEnvVar: "SUPER_ADMIN_PASSWORD",
-  },
+const ADMINS = [
+  { email: "admin@digi-health.co.za", first_name: "Amanda", last_name: "Mazwi" },
+  { email: "mayo@razonetix.com", first_name: "Mayibongwe", last_name: "Mahlalela" },
 ];
 
-const ACCOUNTS = process.env.ONLY_EXTRA_ADMINS === "true" ? EXTRA_MEGA : [...BASE_ACCOUNTS, ...EXTRA_MEGA];
-
 async function main() {
-  const credentialsToShow: { email: string; role: string; password: string }[] =
-    [];
+  const password_hash = bcrypt.hashSync(password as string, 10);
+  const now = new Date().toISOString();
 
-  for (const account of ACCOUNTS) {
-    const existing = await User.findOne({ email: account.email });
-    if (existing) {
-      console.log(
-        `Skipped ${account.email} — a user with this email already exists (role: ${existing.role}).`,
-      );
-      continue;
-    }
+  const { data, error } = await supabase
+    .from("users")
+    .upsert(
+      ADMINS.map((a) => ({
+        email: a.email.toLowerCase(),
+        password_hash,
+        role: "mega_admin",
+        first_name: a.first_name,
+        last_name: a.last_name,
+        status: "active",
+        email_verified: true,
+        email_verified_at: now,
+      })),
+      { onConflict: "email" },
+    )
+    .select("id, email, role, status");
 
-    const password =
-      process.env[account.passwordEnvVar] || generatePassword();
-    const passwordHash = await bcrypt.hash(password, await bcrypt.genSalt(10));
+  if (error) throw new Error(`users upsert failed: ${error.message}`);
 
-    const newUser = await User.create({
-      email: account.email,
-      passwordHash,
-      role: account.role,
-      firstName: account.firstName,
-      lastName: account.lastName,
-      status: "active",
-      emailVerified: true,
-      mfaEnabled: false,
-    } as any);
-
-
-    credentialsToShow.push({
-      email: account.email,
-      role: account.role,
-      password,
-    });
-    console.log(`Created ${account.email} (${account.role}).`);
-  }
-
-  if (credentialsToShow.length > 0) {
-    console.log(
-      "\n=== SAVE THESE NOW — shown only once, not stored anywhere ===",
-    );
-    for (const c of credentialsToShow) {
-      console.log(`  ${c.role.padEnd(11)} ${c.email}  ${c.password}`);
-    }
-    console.log("===============================================\n");
-  }
+  console.log("\n====== PLATFORM ADMINS READY ======");
+  for (const u of data ?? []) console.log(`  ${u.email}  [${u.role}, ${u.status}]`);
+  console.log("Password: the value of PLATFORM_ADMIN_PASSWORD you set for this run.");
+  console.log("===================================\n");
 }
 
 main().catch((err) => {

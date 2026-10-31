@@ -32,6 +32,12 @@ const ACCOUNT_LOGIN_LIMIT = { windowMs: 900_000, maxRequests: 8 };
 /** See proxy.ts — same flag, so both halves switch together. */
 const AUTH_RATE_LIMIT_DISABLED = process.env.DISABLE_AUTH_RATE_LIMIT === "true";
 
+/** Disable MFA OTP requirement for login when set to true. */
+const DISABLE_MFA_OTP = process.env.DISABLE_MFA_OTP === "true";
+
+/** Disable email verification requirement for login when set to true. */
+const DISABLE_EMAIL_VERIFICATION = process.env.DISABLE_EMAIL_VERIFICATION === "true";
+
 interface LoginUser {
   /** Session identity used in the JWT: the Postgres users.id (uuid). */
   identityId: string;
@@ -152,7 +158,7 @@ export async function POST(request: Request) {
     }
 
 
-    if (!user.emailVerified) {
+    if (!user.emailVerified && !DISABLE_EMAIL_VERIFICATION) {
       return NextResponse.json(
         {
           error: "Please verify your email before signing in.",
@@ -172,7 +178,8 @@ export async function POST(request: Request) {
     // immediately, email a second 6-digit code and require it via
     // /api/auth/mfa/verify — that route (not this one) issues the session.
     // Exception: MFA_EXEMPT_EMAILS skips straight to a session, no code sent.
-    if (MFA_EXEMPT_EMAILS.includes(user.email.toLowerCase())) {
+    // Exception: DISABLE_MFA_OTP environment variable disables OTP for all accounts.
+    if (MFA_EXEMPT_EMAILS.includes(user.email.toLowerCase()) || DISABLE_MFA_OTP) {
       return createSessionResponse({
         identityId: user.identityId,
         email: user.email,
